@@ -1,0 +1,25 @@
+INPUT|
+_b_e_g_i_n
+   _i_n_t_e_g_e_r i, j;
+   _r_e_a_l x;
+
+   open(10);
+   writetext(10, _[Hello*World._[c_]_]);
+
+   open(20);
+
+L:   i := read(20);
+   write(10, format(_[-ndddddddddds_]), i);
+
+     x := read(20);
+   write(10, format(_[-d.dddddddddº+ndc_]), x);
+
+   _i_f  i = 0
+   _t_h_e_n
+      writetext(10, _[Farewell,*Cruel*World._[c_]_])
+   _e_l_s_e
+      _g_o_t_o L;
+
+   close(20);   close(10);
+_e_n_d
+||

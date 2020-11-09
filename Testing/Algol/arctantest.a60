@@ -1,0 +1,14 @@
+arctantest|
+_b_e_g_i_n
+
+
+
+open(30);
+
+   writetext(30, _[*arctan(1.0)=_]); write(30, format(_[+d.dddddddd_]), arctan(1.0));
+   writetext(30, _[_[c_]_]);
+
+close(30);
+
+_e_n_d
+|

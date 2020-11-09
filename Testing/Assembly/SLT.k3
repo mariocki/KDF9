@@ -1,0 +1,20 @@
+V2; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   V1 = Q 2/0/0;
+
+   V1; =Q1;
+
+*111; DUMMY; DUMMY; DUMMY;  DUMMY; DC1;
+     *J111C1NZS;
+
+   V1; =Q2;
+
+*222; DC2;
+     *DUMMY; DUMMY; DUMMY;  DUMMY; J222C2NZS;
+
+     *J222C2NZS; J222C2NZS; J222C2NZS;
+
+999;  ZERO; OUT;
+   FINISH;
+|

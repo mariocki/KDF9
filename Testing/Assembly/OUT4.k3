@@ -1,0 +1,57 @@
+V99; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   V1 = Q0/AV11/AV12;      (label data);
+   V2 = B6062515664455644; (PRINTEND);
+   V4 = Q0/AV11/AV13;      (label data);
+   V7 = Q0/AV21/AV23;
+
+   V2; SET4; OUT;
+   V1; =Q1; =C1; V7; =Q2; C1TOQ2;
+
+   PMDQ1; (rewind this MT - should be OK at BOT);
+   PIAQ1; (read label);
+
+   SET B7654; V12; V2; DUPD; NEV; J999NEZ;
+   ERASE; ERASE; ERASE;
+
+   PIEQ2; (backward read same label);
+
+   (now compare the two results);
+   SET B1123; V11; V23; DUPD; NEV; J999NEZ;
+   ERASE; ERASE; ERASE;
+   SET B1222; V12; V22; DUPD; NEV; J999NEZ;
+   ERASE; ERASE; ERASE;
+
+   (the two reads match);
+   PIAQ1; (read label);
+   POAQ1; (rewrite second copy of label);
+
+   Q1TOQ4; SET542; =M4;
+   POFQ4; (wipe gap after second copy of label);
+   PIEQ2; (backward read second copy of label, past long gap);
+
+   Q2TOQ4; ZERO; =M4;
+   PMEQ4; (backward skip up to 32768 blocks to BOT);
+
+   Q2TOQ4; SET1; =M4;
+   PMAQ4; (skip forward over label);
+   PMAQ4; (skip forward over second copy of label);
+
+   (now compare the two results);
+   SET B1123; V11; V23; DUPD; NEV; J999NEZ;
+   ERASE; ERASE; ERASE;
+   SET B1222; V12; V22; DUPD; NEV; J999NEZ;
+   ERASE; ERASE; ERASE;
+
+   C1; SET 6; OUT;
+   ZERO; OUT;
+
+999;
+   V4; =Q8; ZERO; =C8; POAQ8;
+   V7; =Q8; ZERO; =C8; POAQ8;
+   C1; SET 6; OUT;
+   ZERO; OUT;
+
+FINISH;
+|

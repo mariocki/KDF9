@@ -1,0 +1,36 @@
+sintest|
+_b_e_g_i_n
+
+_r_e_a_l q, x, y, pi;
+_i_n_t_e_g_e_r layout;
+
+layout := format(_[+d.ddddddddº+nd_]);
+pi := 3.141592653589793;
+
+open(30);
+
+   writetext(30, _[atn=*pi/4=_]);    write(30, layout, arctan(1));
+   writetext(30, _[_[c_]_]);
+   writetext(30, _[atn=3pi/4=_]);    write(30, layout, arctan(-1));
+   writetext(30, _[_[c_]_]);
+
+_f_o_r q := 0 _s_t_e_p 12 _u_n_t_i_l 180 _d_o
+_b_e_g_i_n
+   y := q / 180 × pi;
+   x :=  _i_f q < 91 _t_h_e_n y _e_l_s_e y-pi;
+   writetext(30, _[*deg=_]);  write(30, layout, q);
+   writetext(30, _[,*rad=_]); write(30, layout, x);
+   writetext(30, _[,*atn=_]); write(30, layout, arctan(sin(y)/cos(y)));
+   writetext(30, _[,*tan=_]); write(30, layout, sin(y)/cos(y));
+   writetext(30, _[,*sin=_]); write(30, layout, sin(y));
+   writetext(30, _[,*cos=_]); write(30, layout, cos(y));
+   writetext(30, _[_[c_]_]);
+_e_n_d module 7;
+
+
+close(30);
+
+FINISH:
+
+_e_n_d
+|

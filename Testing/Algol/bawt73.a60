@@ -1,0 +1,53 @@
+ALGOLT73|
+
+_b_e_g_i_n
+
+    _c_o_m_m_e_n_t  library 1;
+
+_p_r_o_c_e_d_u_r_e outreal(channel, re);
+    _v_a_l_u_e channel, re;
+    _i_n_t_e_g_e_r channel; _r_e_a_l re;
+    write(30, format(_[+d.dddddss_]), re);
+
+    _i_n_t_e_g_e_r
+        i,
+        j,
+        k,
+        k1;
+    _r_e_a_l
+        t1,
+        t2;
+    _i_n_t_e_g_e_r  _p_r_o_c_e_d_u_r_e  ackermann(m, n);
+        _v_a_l_u_e
+            m,
+            n;
+        _i_n_t_e_g_e_r
+            m,
+            n;
+        ackermann :=
+            _i_f  m = 0 _t_h_e_n
+                n + 1
+            _e_l_s_e  _i_f  n = 0 _t_h_e_n
+                ackermann(m - 1, 1)
+            _e_l_s_e
+                ackermann(m - 1, ackermann(m, n - 1));
+
+    k := 16;
+    k1 := 1;
+    _f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  6 _d_o
+        _b_e_g_i_n
+        j := ackermann(3, i);
+        _i_f  j ± k - 3 _t_h_e_n
+            _b_e_g_i_n
+            outreal(1, i);
+            outreal(1, j)
+            _e_n_d ;
+        outreal(1, 3 × (t2 - t1) / (512 × k1 - 15 × k + 9 × i + 37) );
+        k1 := 4 × k1;
+        k := 2 × k;
+        _e_n_d
+_e_n_d
+
+
+
+|

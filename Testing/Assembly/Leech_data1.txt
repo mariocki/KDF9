@@ -1,0 +1,19 @@
+AECDB
+|
+A
+B
+|
+BBB
+ABAB
+ECBD
+EDBDC
+CDCD
+ACACACACACAC
+||
+
+
+
+
+
+
+ 14335|

@@ -1,0 +1,16 @@
+AECDB
+|
+A
+|
+BBB
+ABAB
+ECBD
+EDBDC
+CDCD
+ACACACACAC
+||
+
+
+
+  3600|
+

@@ -1,0 +1,6 @@
+for V2.x
+
+Allowing per-file determination of character encoding.
+Do not use < and > for TR0 and TP0
+use stdin and stdout for interaction?
+replace the eof prompt with a list of attachable filenames in settings*

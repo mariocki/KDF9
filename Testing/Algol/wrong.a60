@@ -1,0 +1,11 @@
+wrong|
+_b_e_g_i_n
+_i_n_t_e_g_e_r i, j;
+   writ£$%^&etext(30, _[1234567890123456789012345678901234567890_[c_]_]);
+   writetext(30, _[Now*is*the*time_[c_]_]);
+   writetext(30, _[For*all*good*men_[c_]_]);
+   writetext(30, _[(sic)_[c_]_]);
+   writetext(30, _[To*come*to*the*aid_[c_]_]);
+   writetext(30, _[Of*KDF9._[c_]_]);
+_e_n_d
+|
