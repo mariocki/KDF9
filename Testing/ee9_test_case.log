@@ -1,0 +1,274 @@
++++++++++++++++++++ BEGIN  Test Case HIG +++++++++++++++++++
+The signature of this test should be #6442100001003204. It was as follows:
+Digital signature of traced orders = #6442100001003204.
+------------------- END OF Test Case HIG -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case ACK +++++++++++++++++++
+The signature of this test should be #6014542523645635. It was as follows:
+Digital signature of traced orders = #6014542523645635.
+------------------- END OF Test Case ACK -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case HLT +++++++++++++++++++
+
+TP0:
+===
+AECDB
+|
+A
+B
+|
+BBB
+ABAB
+ECBD
+EDBDC
+CDCD
+ACACACACAC
+|
+  1200|===
+The signature of this test should be #5751545277412347. It was as follows:
+Digital signature of traced orders = #5751545277412347.
+------------------- END OF Test Case HLT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case MOB +++++++++++++++++++
+
+
+TP0:
+===
+
+RAN/EL/000M01S/000M03S  SIZE     60
+===
+
+LP0:
+===
+
+   +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67 -138
+RAN/EL/000M46S/000M48S===
+
+The signature of this test should be #5543551060332736. It was as follows:
+Digital signature of traced orders = #0212021607314173.
+------------------- END OF Test Case MOB -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case GPS +++++++++++++++++++
+
+
+TP0:
+===
+
+LINE  62 REL LINE  36 POSITION IDENTIFIER GPSTEST2
+END COMMENT
+RAN/EL/000M02S/000M05S  SIZE    247
+===
+
+LP0:
+===
+
+GPS TEST CASE 1
+A*(I,J*) SHOULD BE (I+J)
++2.00000  +3.00000  +4.00000  
++3.00000  +4.00000  +5.00000  
++4.00000  +5.00000  +6.00000  
++5.00000  +6.00000  +7.00000  
++6.00000  +7.00000  +8.00000  
+
+
+GPS TEST CASE 2
+C*(I,J*) SHOULD BE 1.234J
++1.23400  +1.23400  +1.23400  +1.23400  +1.23400  
++2.46800  +2.46800  +2.46800  +2.46800  +2.46800  
++3.70200  +3.70200  +3.70200  +3.70200  +3.70200  
+
+RAN/EL/000M04S/000M06S===
+
+The signature of this test should be #1120516516377620. It was as follows:
+Digital signature of traced orders = #3374122405364435.
+------------------- END OF Test Case GPS -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case QRT +++++++++++++++++++
+
+
+TP0:
+===
+
+RAN/EL/000M05S/000M11S  SIZE    430
+===
+
+LP0:
+===
+
+ 1 +22.4068753079
+ 2  +7.5137241543
+ 3  +4.8489501204
+ 4  -1.0965951817
+ 5  +1.3270455995
+
+RAN/EL/000M05S/000M11S===
+
+The signature of this test should be #3153160472261612. It was as follows:
+Digital signature of traced orders = #7115561505333065.
+------------------- END OF Test Case QRT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case WBM +++++++++++++++++++
+
+
+TP0:
+===
+
+LINE  18 REL LINE   8 POSITION IDENTIFIER lab
+END COMMENT
+LINE  24 REL LINE   5 POSITION IDENTIFIER p0
+END COMMENT
+LINE  32 REL LINE   7 POSITION IDENTIFIER p3
+END COMMENT
+LINE  46 REL LINE  13 POSITION IDENTIFIER pout
+END COMMENT
+IDENTIFIER a NOT USED
+DECLARED ON LINE   2
+IDENTIFIER b NOT USED
+DECLARED ON LINE   2
+IDENTIFIER c NOT USED
+DECLARED ON LINE   2
+RAN/EL/000M05S/000M15S  SIZE    603
+===
+
+LP0:
+===
+
+N=   0 J=   0 K=   0 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N= 120 J= 140 K= 120 X1=-0.06834220 X2=-0.46263766 X3=-0.72971839 X4=-1.12397907
+N= 140 J= 120 K= 120 X1=-0.05533645 X2=-0.44743656 X3=-0.71097339 X4=-1.10309806
+N=3450 J=   1 K=   1 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N=2100 J=   1 K=   2 X1=+6.00000000 X2=+6.00000000 X3=-0.71097339 X4=-1.10309806
+N= 320 J=   1 K=   2 X1=+0.49040732 X2=+0.49040732 X3=+0.49039250 X4=+0.49039250
+N=8990 J=   1 K=   2 X1=+1.00000000 X2=+1.00000000 X3=+0.99993750 X4=+0.99993750
+N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
+N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
+
+RAN/EL/006M56S/006M58S===
+
+The signature of this test should be #6324561700445753. It was as follows:
+Digital signature of traced orders = #2513507532065104.
+------------------- END OF Test Case WBM -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case RLT +++++++++++++++++++
+The signature of this test should be #1341633223251244. It was as follows:
+Digital signature of traced orders = #1341633223251244.
+------------------- END OF Test Case RLT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case TRB +++++++++++++++++++
+The signature of this test should be #3666136115202052. It was as follows:
+Digital signature of traced orders = #3666136115202052.
+------------------- END OF Test Case TRB -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case TO4 +++++++++++++++++++
+The signature of this test should be #0170377556024614. It was as follows:
+Digital signature of traced orders = #0170377556024614.
+------------------- END OF Test Case TO4 -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case TOX +++++++++++++++++++
+The signature of this test should be #3600710030216145. It was as follows:
+Digital signature of traced orders = #3600710030216145.
+------------------- END OF Test Case TOX -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case MTW +++++++++++++++++++
+
+
+TP0:
+===
+
+LINE  18 REL LINE   8 POSITION IDENTIFIER lab
+END COMMENT
+LINE  24 REL LINE   5 POSITION IDENTIFIER p0
+END COMMENT
+LINE  32 REL LINE   7 POSITION IDENTIFIER p3
+END COMMENT
+LINE  46 REL LINE  13 POSITION IDENTIFIER pout
+END COMMENT
+IDENTIFIER a NOT USED
+DECLARED ON LINE   2
+IDENTIFIER b NOT USED
+DECLARED ON LINE   2
+IDENTIFIER c NOT USED
+DECLARED ON LINE   2
+RAN/EL/000M05S/000M15S  SIZE    613
+===
+
+LP0:
+===
+
+RAN/EL/006M56S/007M02S===
+
+The signature of this test should be #6265413557755246. It was as follows:
+Digital signature of traced orders = #2327610661052165.
+------------------- END OF Test Case MTW -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case INP +++++++++++++++++++
+
+
+TP0:
+===
+
+IDENTIFIER j NOT USED
+DECLARED ON LINE   2
+RAN/EL/000M01S/000M02S  SIZE     82
+
+Hello World.
+   111111111  1.111111111º +4
+  -222222222 -2.222222222º +3
+   333333333  3.333333333º +2
+   444444444  4.444444444º +1
+  -555555555 -5.555555555º +0
+   666666666  6.666666666º -1
+   123456789  1.234567890º +8
+   111111111  1.111111111º +1
+  -222222222 -2.222222222º -1
+   333333333  3.333333333º +1
+   444444444  4.444444444º+11
+  -555555555 -5.555555555º-11
+   666666666  6.666666666º+11
+  -987654321 -9.876543210º +8
+   111111111  1.000000000º +1
+  -222222222 -2.000000000º -1
+   333333333  3.000000000º +1
+   444444444  4.000000000º+11
+  -555555555 -5.000000000º-11
+   666666666  6.000000000º+11
+   987654321 -9.876543210º +8
+   111111111  1.000000000º +1
+  -222222222 -1.000000000º -2
+   333333333  1.000000000º +3
+   444444444  1.000000000º +4
+  -555555555 -1.000000000º -5
+   666666666  1.000000000º +6
+           0  0.000000000    
+Farewell, Cruel World.
+===
+
+LP0:
+===
+
+RAN/EL/000M03S/000M13S===
+
+The signature of this test should be #4656332070015232. It was as follows:
+Digital signature of traced orders = #5616507466765722.
+------------------- END OF Test Case INP -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case WAB +++++++++++++++++++
+The signature of this test should be #2227242756376336. It was as follows:
+Digital signature of traced orders = #2227242756376336.
+------------------- END OF Test Case WAB -------------------
+
+
