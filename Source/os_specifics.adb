@@ -20,38 +20,38 @@
 with Latin_1;
 with POSIX;
 
-use  Latin_1;
-use  POSIX;
+use Latin_1;
+use POSIX;
 
 package body OS_specifics is
 
    procedure make_transparent (fd : in Integer) is
-      pragma Unreferenced(fd);
+      pragma Unreferenced (fd);
    begin
       null;  -- Real POSIX systems are already transparent!
    end make_transparent;
 
-   function the_terminal_is_ANSI_compatible
-   return Boolean
-   renames True;
+   function the_terminal_is_ANSI_compatible return Boolean renames True;
 
    red_font_code   : constant String := ESC & "[1;31m";
    black_font_code : constant String := ESC & "[22m" & ESC & "[39m";
 
-   procedure set_text_colour_to_red (the_flexowriter_output : in out IO.stream) is
+   procedure set_text_colour_to_red (the_flexowriter_output : in out IO.stream)
+   is
    begin
-      put_bytes(red_font_code, the_flexowriter_output);
-      flush(the_flexowriter_output);
+      put_bytes (red_font_code, the_flexowriter_output);
+      flush (the_flexowriter_output);
    end set_text_colour_to_red;
 
-   procedure set_text_colour_to_black (the_flexowriter_output : in out IO.stream) is
+   procedure set_text_colour_to_black
+     (the_flexowriter_output : in out IO.stream)
+   is
    begin
-      put_bytes(black_font_code, the_flexowriter_output);
-      flush(the_flexowriter_output);
+      put_bytes (black_font_code, the_flexowriter_output);
+      flush (the_flexowriter_output);
    end set_text_colour_to_black;
 
-   function EOL
-   return String is
+   function EOL return String is
    begin
       return (1 => LF);
    end EOL;
@@ -60,10 +60,10 @@ package body OS_specifics is
       ui_in_name  : constant String := "/dev/tty";
       ui_out_name : constant String := "/dev/tty";
    begin
-      ui_in_fd := open(ui_in_name, read_mode);
-      verify(ui_in_fd, ui_in_name);
-      ui_out_fd := open(ui_out_name, write_mode);
-      verify(ui_out_fd, ui_out_name);
+      ui_in_fd := open (ui_in_name, read_mode);
+      verify (ui_in_fd, ui_in_name);
+      ui_out_fd := open (ui_out_name, write_mode);
+      verify (ui_out_fd, ui_out_name);
       ui_is_open := True;
    end open_ui;
 
