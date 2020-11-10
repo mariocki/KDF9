@@ -52,6 +52,8 @@ deploy)
 	> ${T}/ST0
 	> ${T}/TP0
 	> ${T}/TP1
+	> ${T}/TR0
+	> ${T}/TR1
 	> ${T}/GP0
 	> ${T}/ee9_test_case.log
 	> ${T}/trace.log

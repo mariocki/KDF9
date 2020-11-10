@@ -1,7 +1,32 @@
-bject file
+#Object file
 *.o
 
 # Ada Library Information
 *.ali
 
+Testing/CP0
+Testing/DR0
+Testing/FD0
+Testing/FW0_copy
+Testing/GP0
+Testing/KDF9.log
+Testing/LP0
+Testing/MT0
+Testing/MT1
+Testing/MT2
+Testing/MT3
+Testing/MT4
+Testing/MT5
+Testing/MT6
+Testing/MT7
+Testing/ST0
+Testing/TP0
+Testing/TP1
+Testing/TR0
+Testing/TR1
+Testing/ee9
+Testing/ee9_test_case.log
+Testing/settings_1.txt
+Testing/settings_2.txt
+Testing/trace.log
 
