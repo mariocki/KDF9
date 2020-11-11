@@ -1,5 +1,4 @@
 #!/bin/sh
-HERE=`pwd`
 
 program=`basename "$1" ".kdf9"`.kdf9
 if [ ! -f Binary/"$program" ]
@@ -7,7 +6,7 @@ then
    echo `basename "$0"`: there is no program named "$program" in the Binary folder!
    exit 1
 fi
-if /bin/sh ./lud.sh "$2" | grep "data file"
+if /bin/sh ./lud "$2" | grep "data file"
 then
    echo
    exit 2
@@ -19,15 +18,15 @@ mode=-d$3
 miscellany=-m$4
 if   [ "$mode" = -d ]
 then
-        $HERE/ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
+        ./ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
 elif [ "$3" = - ]
 then
-        $HERE/ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
+        ./ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
 elif [ "$mode" = -df ]
 then
-   time $HERE/ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
+   time ./ee9 -st -df "$miscellany" <Binary/"$program"  >TP0;
 else
-        $HERE/ee9 -st "$mode" "$miscellany"  <Binary/"$program"  >TP0;
+        ./ee9 -st "$mode" "$miscellany"  <Binary/"$program"  >TP0;
 fi
 
 if [ -s CP0 ]

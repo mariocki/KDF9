@@ -52,20 +52,20 @@ esac
 > TP0
 > TP1
 
-/bin/sh ./ee9_test_case.sh HIG $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh ACK $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh HLT $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh MOB $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh GPS $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh QRT $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh WBM $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh RLT $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh TRB $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh TO4 $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh TOX $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh MTW $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh INP $1 >> ee9_test_case.log; echo
-/bin/sh ./ee9_test_case.sh WAB gn >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case HIG $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case ACK $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case HLT $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case MOB $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case GPS $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case QRT $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case WBM $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case RLT $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case TRB $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case TO4 $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case TOX $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case MTW $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case INP $1 >> ee9_test_case.log; echo
+/bin/sh ./ee9_test_case WAB gn >> ee9_test_case.log; echo
 
 cp settings_1.bak settings_1.txt
 cp settings_2.bak settings_2.txt

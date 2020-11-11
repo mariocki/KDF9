@@ -15,6 +15,8 @@ deploy:
 	> ST0
 	> TP0
 	> TP1
+	> TR0
+	> TR1
 	> GP0
 	> ee9_test_case.log
 	> trace.log
@@ -36,7 +38,7 @@ clean:
 	$(RM) -f GP0
 	$(RM) -f LP0
 	$(RM) -f MT[01234567]
-	$(RM) -f ST0
+	$(RM) -f ST
 	$(RM) -f TP[01]
 	$(RM) -f TR[01]
 	$(RM) -f ee9_test_case.log
@@ -47,4 +49,4 @@ clean:
 
 .PHONY: test
 test:
-	./ee9_self_test.sh
+	./ee9_self_test
