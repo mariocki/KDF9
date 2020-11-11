@@ -1,15 +1,24 @@
-BUILD_TYPE=ee9
+BUILD_TYPE=max
 # ee9 : optimised and with runtime checking
 # unop : unoptimised and with no optional warnings
 # warn : unoptimised and with many optional warnings
 # max : optimised and with no optional warnings or checking
 # verbose : optimised and with extra warnings
 
-MAIN=src/ee9
-RUNTIME=runtime
+# Executable name
+EXE=ee9
 
-CC=gcc
-CFLAGS=-funwind-tables -march=znver2 -O3 -j15 -funroll-loops -fsched-interblock -fomit-frame-pointer -fno-stack-check -falign-loops=8
+# Folder locations
+SRC=src
+RUNTIME=runtime
+KDF9FLEX=KDF9Flex
+KAL3=kal3
+
+# Main target to build
+MAIN=${SRC}/${EXE}
+
+export CC=gcc
+export CFLAGS=-funwind-tables -march=znver2 -O3 -funroll-loops -fsched-interblock -fomit-frame-pointer -fno-stack-check -falign-loops=8
 GNAT_BASE_OPTIONS=-gnatfl05j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
@@ -29,7 +38,7 @@ $(MAIN) : objects ${LIB_DIR}
 
 .PHONY: objects
 objects: builddefs
-	gnatmake -c -i ${MAIN}.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatmake -j4 -c -i ${MAIN}.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
 
 .PHONY: builddefs
 builddefs:
@@ -38,16 +47,16 @@ builddefs:
 
 .PHONY: kal3
 kal3:
-	$(MAKE) -C kal3
+	$(MAKE) -e -C ${KAL3}
 
 .PHONY: flex
 flex: 
-	$(MAKE) -C KDF9Flex
+	$(MAKE) -e -C ${KDF9FLEX}
 
 .PHONY: clean
 clean:
-	$(MAKE) -C KDF9Flex clean
-	$(MAKE) -C Kal3 clean
+	$(MAKE) -C ${KDF9FLEX} clean
+	$(MAKE) -C ${KAL3} clean
 	$(MAKE) -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
@@ -57,27 +66,14 @@ clean:
 
 .PHONY: deploy
 deploy: $(MAIN) kal3 flex
-	$(MAKE) -C KDF9Flex deploy
-	$(MAKE) -C Kal3 deploy
+	$(MAKE) -C ${KDF9FLEX} deploy
+	$(MAKE) -C ${KAL3} deploy
+	$(MAKE) -C ${RUNTIME} deploy
 	cp -f ${MAIN} ${RUNTIME}
-	> ${RUNTIME}/CP0
-	> ${RUNTIME}/DR0
-	> ${RUNTIME}/FD0
-	> ${RUNTIME}/LP0
-	> ${RUNTIME}/MT0
-	> ${RUNTIME}/MT1
-	> ${RUNTIME}/MT2
-	> ${RUNTIME}/MT3
-	> ${RUNTIME}/MT4
-	> ${RUNTIME}/MT5
-	> ${RUNTIME}/MT6
-	> ${RUNTIME}/MT7
-	> ${RUNTIME}/ST0
-	> ${RUNTIME}/TP0
-	> ${RUNTIME}/TP1
-	> ${RUNTIME}/GP0
-	> ${RUNTIME}/ee9_test_case.log
-	> ${RUNTIME}/trace.log
-	> ${RUNTIME}/KDF9.log
-	> ${RUNTIME}/settings_1.txt
-	> ${RUNTIME}/settings_2.txt
+
+.PHONY: test
+test: deploy
+	$(MAKE) -C ${RUNTIME} test
+
+.PHONY: all
+all: $(MAIN) kal3 flex
