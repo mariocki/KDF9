@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 rm -f TR1
 program=`basename "$1" ".a60"`.a60
 if [ -f "Algol/$program" ]

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 case $1 in
 WAB) this_test="./nine.sh TR2GP wabbit_kdf9"
      signature=\#2227242756376336;;

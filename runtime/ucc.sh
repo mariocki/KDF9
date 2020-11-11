@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 name=`basename "$1" ".k3"`
 if [ -f "Assembly/$name.k3" ]
 then

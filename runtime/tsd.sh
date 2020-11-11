@@ -1,9 +1,5 @@
-#!/bin/bash
+#!/bin/sh
 HERE=`pwd`
-
-cp FW0 FW0_copy
-
-trap "cp FW0_copy FW0; exit 2" SIGQUIT SIGKILL SIGINT
 
 cp FW0_for_Director FW0
 
@@ -21,8 +17,6 @@ then
 else
         $HERE/ee9 -sb "$mode" "$miscellany" <Binary/KKT40E007UPU  >TP0;
 fi
-
-cp FW0_copy FW0
 
 if [ -s CP0 ]
 then

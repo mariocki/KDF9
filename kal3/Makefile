@@ -8,6 +8,10 @@ kal3: kal3.c kal3syntax.c
 
 .PHONY: clean
 clean:
-	rm -f kal3
-	rm -f kal3syntax.c
-	rm -f y.tab.h
+	$(RM) -f kal3
+	$(RM) -f kal3syntax.c
+	$(RM) -f y.tab.h
+
+.PHONY: deploy
+deploy: kal3
+	cp -f kal3 ../runtime/

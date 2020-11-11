@@ -1,14 +1,10 @@
-#!/bin/bash
-cp FW0 FW0_copy
-
-trap "cp FW0_copy FW0; exit 2" SIGQUIT SIGKILL SIGINT
+#!/bin/sh
 
 program="$1"
 if /bin/sh ./lap.sh "$program"
 then
    cp FW0_for_Whetstone FW0
    ./dow.sh $2 $3
-   cp FW0_copy FW0
    echo
 
    if [ -s CP0 ]

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 HERE=`pwd`
 mode=-d$1
 miscellany=-m$2

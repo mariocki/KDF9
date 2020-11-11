@@ -1,3 +1,4 @@
+#!/bin/sh
 > KDF9.log
 this_test="$2"
 echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"

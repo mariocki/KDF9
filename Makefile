@@ -56,7 +56,9 @@ clean:
 	$(RM) -f ${CSC_LIST}/gnat.adc
 
 .PHONY: deploy
-deploy:
+deploy: $(MAIN) kal3 flex
+	$(MAKE) -C KDF9Flex deploy
+	$(MAKE) -C Kal3 deploy
 	cp -f ${MAIN} ${RUNTIME}
 	> ${RUNTIME}/CP0
 	> ${RUNTIME}/DR0
@@ -74,8 +76,8 @@ deploy:
 	> ${RUNTIME}/TP0
 	> ${RUNTIME}/TP1
 	> ${RUNTIME}/GP0
-	> ${RUNTIME}/ee9_test_case_log.txt
-	> ${RUNTIME}/trace.txt
-	> ${RUNTIME}/KDF9_log.txt
+	> ${RUNTIME}/ee9_test_case.log
+	> ${RUNTIME}/trace.log
+	> ${RUNTIME}/KDF9.log
 	> ${RUNTIME}/settings_1.txt
 	> ${RUNTIME}/settings_2.txt

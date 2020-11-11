@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 rm -f  TR1
 if [ x"${1}"x = x-x -o x"${1}"x = xx ]
 then

@@ -1,8 +1,4 @@
-#!/bin/bash
-cp FW0 FW0_copy
-
-trap "cp FW0_copy FW0; exit 2" SIGQUIT SIGKILL SIGINT
-
+#!/bin/sh
 HERE=`pwd`
 
 program=`basename "$1" ".kdf9"`.kdf9
@@ -33,7 +29,6 @@ then
 else
         $HERE/ee9 -st "$mode" "$miscellany"  <Binary/"$program"  >TP0;
 fi
-cp FW0 FW0_copy
 
 if [ -s CP0 ]
 then
