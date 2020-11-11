@@ -48,7 +48,7 @@ flex:
 clean:
 	$(MAKE) -C KDF9Flex clean
 	$(MAKE) -C Kal3 clean
-	$(RM) -f ${RUNTIME}/ee9
+	$(MAKE) -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
 	$(RM) -f ${MAIN}
