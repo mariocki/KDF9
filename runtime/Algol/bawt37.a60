@@ -1,0 +1,92 @@
+ALGOLT37|
+
+_b_e_g_i_n
+ _i_n_t_e_g_e_r
+  a0,
+  a1,
+  a2,
+  a3,
+  a4,
+  a5,
+  a6,
+  a7,
+  a8,
+  a9,
+  a10,
+  a11;
+ _i_n_t_e_g_e_r
+  sum;
+
+ _c_o_m_m_e_n_t  library 1;
+_p_r_o_c_e_d_u_r_e outreal(channel, re);
+    _v_a_l_u_e channel, re;
+    _i_n_t_e_g_e_r channel; _r_e_a_l re;
+    write(30, format(_[+d.dddddss_]), re);
+
+
+ sum := 0;
+ _f_o_r  a0 := 1,
+  2 _d_o
+  _b_e_g_i_n
+  sum := sum + 1;
+  _f_o_r  a1 := 1,
+   2 _d_o
+   _b_e_g_i_n
+   sum := sum + 1;
+   _f_o_r  a2 := 1,
+    2 _d_o
+    _b_e_g_i_n
+    sum := sum + 1;
+    _f_o_r  a3 := 1,
+     2 _d_o
+     _b_e_g_i_n
+     sum := sum + 1;
+     _f_o_r  a4 := 1,
+      2 _d_o
+      _b_e_g_i_n
+      sum := sum + 1;
+      _f_o_r  a5 := 1,
+       2 _d_o
+       _b_e_g_i_n
+       sum := sum + 1;
+       _f_o_r  a6 := 1,
+        2 _d_o
+        _b_e_g_i_n
+        sum := sum + 1;
+        _f_o_r  a7 := 1,
+         2 _d_o
+         _b_e_g_i_n
+         sum := sum + 1;
+         _f_o_r  a8 := 1,
+          2 _d_o
+          _b_e_g_i_n
+          sum := sum + 1;
+          _f_o_r  a9 := 1,
+           2 _d_o
+           _b_e_g_i_n
+           sum := sum + 1;
+           _f_o_r  a10 := 1,
+            2 _d_o
+            _b_e_g_i_n
+            sum := sum + 1;
+            _f_o_r  a11 := 1,
+             2 _d_o
+             _b_e_g_i_n
+             sum := sum + 1;
+             _e_n_d
+            _e_n_d
+           _e_n_d
+          _e_n_d
+         _e_n_d
+        _e_n_d
+       _e_n_d
+      _e_n_d
+     _e_n_d
+    _e_n_d
+   _e_n_d
+  _e_n_d ;
+
+ outreal(1, sum);
+
+_e_n_d
+|

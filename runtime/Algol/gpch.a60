@@ -1,0 +1,47 @@
+gpch|
+_b_e_g_i_n
+_i_n_t_e_g_e_r layout, c, p, L, F, R, B, S, T;
+
+	layout := format(_[sndddc_]);
+	open(20);
+	open(17);
+	L := 44;
+	F := 38;
+	R := 50;
+	B := 34;
+	S := 51;
+	T := 52;
+
+loop:
+
+	c := charin(20);
+
+	_i_f	c = 61 _t_h_e_n
+		_g_o_t_o exit;
+
+	_i_f	c = L _t_h_e_n
+		p := 8
+	_e_l_s_e _i_f	c = F _t_h_e_n
+		p := 2
+	_e_l_s_e _i_f	c = R _t_h_e_n
+		p := 4
+	_e_l_s_e __i_f	c = B _t_h_e_n
+		p := 1
+	_e_l_s_e _i_f	c = S _t_h_e_n
+		p := 9
+	_e_l_s_e _i_f	c = T _t_h_e_n
+		p := 10
+	_e_l_s_e
+		_g_o_t_o loop;
+
+	charout(17, p);
+
+	_g_o_t_o loop;
+
+exit:
+	close(20);
+	close(17);
+_e_n_d|
+0
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+||

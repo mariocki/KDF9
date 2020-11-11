@@ -1,0 +1,23 @@
+xdtest|
+_b_e_g_i_n
+
+_i_n_t_e_g_e_r layout, i, j, k;
+
+layout := format(_[+nddddddddddd_]);
+
+open(30);
+
+
+_f_o_r i := -40000 _s_t_e_p 10000 _u_n_t_i_l +40000 _d_o
+_f_o_r j := -40000 _s_t_e_p 10000 _u_n_t_i_l +40000 _d_o
+_b_e_g_i_n
+   writetext(30, _[*i=_]);    write(30, layout, i);
+   writetext(30, _[,*j=_]);   write(30, layout, j);
+   writetext(30, _[*ij=_]);   write(30, layout, i × j);
+   writetext(30, _[_[c_]_]);
+_e_n_d;
+
+close(30);
+
+_e_n_d
+|

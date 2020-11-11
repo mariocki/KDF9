@@ -1,0 +1,26 @@
+V9; W0;
+RESTART; J999; J999;
+PROGRAM;
+   V1 = B20;        (plotter pen-down command);
+   V2 = Q0/AV1/AV1; (to plot data);
+   V3 = Q0/AV1/AV1; (to read data);
+   V4 = B02;        (TR device-type code);
+   V5 = B20;        (GP device-type code);
+
+   V4; SET 5; OUT;  (claim TR);
+   V3; =Q3; =C3;    (set up Q3 for TR input);
+   V5; SET 5; OUT;  (claim GP);
+   V2; =Q2; =C2;    (set up Q2 for GP output);
+
+   POCQ2;           (pen down);
+
+*1;
+   PICQ3;           (read one plotting command from TR);
+   PARQ3; J999TR;   (exit loop to 999 at EOF);
+   POCQ2;           (write one plotting command to GP);
+   J1;
+
+999;
+   ZERO; OUT;       (end run);
+FINISH;
+|

@@ -1,0 +1,559 @@
+-- ioc-shift_devices-fw.adb
+--
+-- Emulation of a FlexoWriter buffer: monitor typewriter functionality.
+--
+-- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2015, W. Findlay; all rights reserved.
+--
+-- The ee9 program is free software; you can redistribute it and/or
+-- modify it under terms of the GNU General Public License as published
+-- by the Free Software Foundation; either version 3, or (at your option)
+-- any later version. This program is distributed in the hope that it
+-- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+-- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details. You should have
+-- received a copy of the GNU General Public License distributed with
+-- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+--
+
+with Ada.Exceptions;
+with Ada.Text_IO;
+--
+with exceptions;
+with HCI; pragma Elaborate_All(HCI);
+with IO; pragma Elaborate_All(IO);
+with IOC; pragma Elaborate_All(IOC);
+with KDF9.store;
+with POSIX;
+with OS_specifics;
+with settings;
+
+pragma Unreferenced(IO);
+pragma Unreferenced(POSIX);
+
+use  Ada.Text_IO;
+--
+use  HCI;
+use  KDF9.store;
+use  OS_specifics;
+use  settings;
+
+package body IOC.two_shift.FW is
+
+   pragma Unsuppress(All_Checks);
+
+   use Latin_1;
+
+   function a_LF_was_just_read (the_FW : FW.device)
+   return Boolean is
+   begin
+      return the_FW.mode = the_flexowriter_is_reading and a_LF_was_just_read(the_FW.stream);
+   end a_LF_was_just_read;
+
+   overriding
+   procedure Finalize (the_FW : in out FW.device) is
+   begin
+      close(the_FW, "typed", the_FW.output.bytes_moved+the_FW.stream.bytes_moved, "character(s)");
+   end Finalize;
+
+   max_text_length : constant Positive := 120;
+
+   type interaction is
+      record
+         text           : String(1 .. max_text_length);
+         prompt_length,
+         total_length   : Positive range 1 .. max_text_length;
+      end record;
+
+    -- A '®' denotes LF, and a '©' denotes FF in an interaction text input.
+   LF_surrogate     : constant Character := '®';
+   FF_surrogate     : constant Character := '©';
+
+   max_interactions : constant Positive := 10;
+
+   interactions : array (1 .. max_interactions) of IOC.two_shift.FW.interaction;
+
+   next_interaction : Positive := 1;
+   last_interaction : Natural  := 0;
+
+   overriding
+   procedure Initialize (the_FW : in out FW.device) is
+      interaction_file : Ada.Text_IO.File_Type;
+   begin
+      ensure_ui_is_open;
+      the_FW.mode := the_flexowriter_is_writing;
+      the_FW.device_name := logical_device_name_of(the_FW);
+      if the_FW.device_name = "FW0" then
+         -- Attempt to open a command file for the console the_FW.
+         begin
+            Open(interaction_file, In_File, "FW0");
+         response_list_loop:
+            while not End_of_file(interaction_file) loop
+               if last_interaction = max_interactions then
+                  log_line("The file FW0 contains too many interactions!");
+                  raise Ada.Text_IO.Data_Error;
+               end if;
+               last_interaction := last_interaction + 1;
+               declare
+                  interaction       : String  := Get_Line(interaction_file);
+                  the_prompt_length : Natural := 0;
+               begin
+                  if interaction'Length > max_text_length then
+                     log_line("The file FW0 contains an overlong string: '"
+                            & interaction
+                            & "'!");
+                     raise Ada.Text_IO.Data_Error;
+                  end if;
+
+                  exit response_list_loop when interaction'Length = 0;
+
+                  for p in 1 .. interaction'Length loop
+                     if interaction(p) = ';' then
+                        the_prompt_length := p;
+                     elsif interaction(p) = LF_surrogate then
+                        -- Convert '®' to LF to allow for multi-line prompts.
+                        interaction(p) := LF;
+                     elsif interaction(p) = FF_surrogate then
+                        -- Convert '©' to FF to allow for multi-line prompts.
+                        interaction(p) := FF;
+                     end if;
+                  end loop;
+
+                  if the_prompt_length = 0 then
+                     log_line("The file FW0 contains a string: '"
+                            & interaction
+                            & "' without a semicolon!");
+                     raise Ada.Text_IO.Data_Error;
+                  end if;
+
+                  interactions(last_interaction).text(1 .. interaction'Length) := interaction;
+                  interactions(last_interaction).prompt_length := the_prompt_length;
+                  interactions(last_interaction).total_length := interaction'Length;
+               end;
+            end loop response_list_loop;
+         exception
+            when Name_Error =>
+               null;
+            when Use_Error =>
+               log_line("The file 'FW0' exists, but cannot be read!");
+            when error : others =>
+               log_line("Failure in ee9: "
+                      & Ada.Exceptions.Exception_Information(error)
+                      & " was raised for 'FW0' in 'Initialize'!");
+         end;
+      end if;
+      open(the_FW.stream, the_FW.device_name, read_mode, ui_in_fd);
+      open(the_FW.output, the_FW.device_name, write_mode, ui_out_fd);
+      IOC.device(the_FW).Initialize;
+      the_FW.current_case := KDF9.Case_Normal;
+   end Initialize;
+
+   -- If authentic timing, a delay of length the_pause is inserted between characters output
+   --    to a Flexowriter, with the aim of approximating the actual speed of its typing.
+   the_pause  : KDF9.microseconds := 0;
+
+   procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
+   begin
+      if authentic_timing_is_wanted then
+         the_pause := the_FW.quantum;
+      else
+         the_pause := 0;
+      end if;
+   end set_the_duration_of_the_pause;
+
+   call_for_manual_input    : constant String (1..2) := (others => BEL);
+   noninteractive_complaint : constant String := "ee9 cannot read from the Flexowriter";
+
+   procedure inject_a_response (the_FW     : in out FW.device;
+                                the_prompt : in String;
+                                the_size   : in out KDF9.word) is
+   begin
+      set_the_duration_of_the_pause(the_FW);
+      for t in next_interaction .. last_interaction loop
+         declare
+            a : interaction renames interactions(t);
+         begin
+            if a.prompt_length = a.total_length then
+               -- A null response, so terminate the program.
+               raise exceptions.quit_request with "at the prompt: '" & the_prompt & "'";
+            end if;
+            next_interaction := next_interaction + 1;
+            if a.text(1..a.prompt_length-1) = the_prompt and then
+                  a.text(a.prompt_length-0) = ';'            then
+               inject(a.text(a.prompt_length+1..a.total_length) & LF, the_FW.stream);
+               the_size := the_size + KDF9.word(a.total_length-a.prompt_length);
+               put_chars(a.text(a.prompt_length+1..a.total_length) & LF, the_FW.output);
+               -- Human operators type much more slowly than KDF9 buffers!
+               flush(the_FW.output, the_pause*5);
+               the_FW.mode := the_flexowriter_is_reading;
+               return;
+            end if;
+         end;
+      end loop;
+      -- No canned response is available, so control reverts to the terminal.
+      -- Output an audible signal to notify the operator.
+      if noninteractive_usage_is_enabled then
+         raise input_is_impossible with noninteractive_complaint;
+      end if;
+      put_bytes(call_for_manual_input, the_FW.output);
+      flush(the_FW.output, the_pause);
+      the_FW.mode := the_flexowriter_is_reading;
+   end inject_a_response;
+
+   -- TRQq
+   overriding
+   procedure PIA (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      if noninteractive_usage_is_enabled then
+         raise input_is_impossible with noninteractive_complaint;
+      end if;
+      put_bytes(call_for_manual_input, the_FW.output);
+      flush(the_FW.output);
+      the_FW.mode := the_flexowriter_is_reading;
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      read(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+   end PIA;
+
+   -- TREQq
+   overriding
+   procedure PIB (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      if noninteractive_usage_is_enabled then
+         raise input_is_impossible with noninteractive_complaint;
+      end if;
+      put_bytes(call_for_manual_input, the_FW.output);
+      flush(the_FW.output);
+      the_FW.mode := the_flexowriter_is_reading;
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      read_to_EM(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+   end PIB;
+
+   overriding
+   procedure PIC (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      if noninteractive_usage_is_enabled then
+         raise input_is_impossible with noninteractive_complaint;
+      end if;
+      put_bytes(call_for_manual_input, the_FW.output);
+      flush(the_FW.output);
+      the_FW.mode := the_flexowriter_is_reading;
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      words_read(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+   end PIC;
+
+   overriding
+   procedure PID (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      if noninteractive_usage_is_enabled then
+         raise input_is_impossible with noninteractive_complaint;
+      end if;
+      put_bytes(call_for_manual_input, the_FW.output);
+      flush(the_FW.output);
+      the_FW.mode := the_flexowriter_is_reading;
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      words_read_to_EM(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+   end PID;
+
+   overriding
+   procedure PIE (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      PIA(the_FW, Q_operand, set_offline);
+   end PIE;
+
+   overriding
+   procedure PIF (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      PIB(the_FW, Q_operand, set_offline);
+   end PIF;
+
+   overriding
+   procedure PIG (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      PIC(the_FW, Q_operand, set_offline);
+   end PIG;
+
+   overriding
+   procedure PIH (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      PID(the_FW, Q_operand, set_offline);
+   end PIH;
+
+   -- neat strips off any enclosing non-graphic characters from s.
+   function neat (s : String)
+   return String is
+      l : Positive := 1;
+      r : Natural  := 0;
+   begin
+      for i in s'Range loop
+         l := i;
+      exit when s(i) > ' ' and s(i) /= DEL;
+      end loop;
+      for i in reverse s'Range loop
+         r := i;
+      exit when s(i) > ' ' and s(i) /= DEL;
+      end loop;
+      return s(l..r);  -- s(1..0) yields a null string when s is a null string.
+   end neat;
+
+   overriding
+   procedure do_output_housekeeping (the_FW   : in out FW.device;
+                                    written,
+                                    fetched  : in KDF9.word) is
+   begin
+      flush(the_FW.stream);
+      add_in_the_IO_CPU_time(the_FW, fetched);
+      correct_transfer_time(the_FW, written);
+      the_FW.byte_count := the_FW.byte_count + fetched;
+   end do_output_housekeeping;
+
+   procedure put_symbols (the_FW         : in out FW.device;
+                          Q_operand      : in KDF9.Q_register;
+                          transfer_to_EM : in Boolean) is
+      start_address : constant KDF9.address := Q_operand.I;
+      end_address   : constant KDF9.address := Q_operand.M;
+      fill   : KDF9.word := 0;
+      size   : KDF9.word := 0;
+      symbol : KDF9.symbol;
+      char   : Character;
+   begin
+      validate_range_access(start_address, end_address);
+      set_the_duration_of_the_pause(the_FW);
+      -- Ensure that a prompt occupies the buffer alone.
+      flush(the_FW.output, the_pause);
+      the_FW.mode := the_flexowriter_is_writing;
+      set_text_colour_to_red(the_FW.output);
+   word_loop:
+      for w in start_address .. end_address loop
+         for c in KDF9.symbol_number'Range loop
+            case the_FW.mode is
+               when the_flexowriter_is_writing =>
+                  symbol := fetch_symbol(w, c);
+                  size := size + 1;
+                  if symbol = KDF9.Word_Filler then
+                     fill := fill + 1;
+                  elsif symbol = KDF9.Case_Shift then
+                     the_FW.current_case := KDF9.Case_Shift;
+                  elsif  symbol = KDF9.Case_Normal then
+                     the_FW.current_case := KDF9.Case_Normal;
+                  else
+                     if the_FW.current_case = KDF9.Case_Normal then
+                        char := TP_CN(symbol);
+                     else
+                        char := TP_CS(symbol);
+                     end if;
+                     if char = ';' then
+                        declare
+                           the_prompt : constant String := neat(contents(the_FW.output));
+                        begin
+                           flush(the_FW.output, the_pause);
+                           set_text_colour_to_black(the_FW.output);
+                           put_byte(';', the_FW.output);
+                           flush(the_FW.output, the_pause);
+                           inject_a_response(the_FW, the_prompt, size);
+                           the_FW.mode := the_flexowriter_is_reading;
+                        end;
+                     else
+                        put_char(char, the_FW.output);
+                     end if;
+                     exit word_loop when transfer_to_EM and symbol = KDF9.End_Message;
+                  end if;
+               when the_flexowriter_is_reading =>
+                  get_char(char, the_FW.stream);
+                  if case_of(char) /= both and case_of(char) /= the_FW.current_case then
+                     store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
+                     size := size + 1;
+                     the_FW.current_case := the_FW.current_case xor 1;
+                     back_off(the_FW.stream);
+                  else
+                     if the_FW.current_case = KDF9.Case_Normal then
+                        symbol := CN_TR(char);
+                     else
+                        symbol := CS_TR(char);
+                     end if;
+                     store_symbol(symbol, w, c);
+                     size := size + 1;
+                     if transfer_to_EM and symbol = KDF9.End_Message then
+                        for d in 1 .. 7-c loop
+                           store_symbol(KDF9.Blank_Space, w, c+d);
+                        end loop;
+                        exit word_loop;
+                     end if;
+                  end if;
+            end case;
+         end loop;
+      end loop word_loop;
+      flush(the_FW.output, the_pause);
+      set_text_colour_to_black(the_FW.output);
+      do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   exception
+      when end_of_stream =>
+         flush(the_FW.output, the_pause);
+         set_text_colour_to_black(the_FW.output);
+         do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   end put_symbols;
+
+   overriding
+   procedure write (the_FW    : in out FW.device;
+                    Q_operand : in KDF9.Q_register) is
+   begin
+      put_symbols(the_FW, Q_operand, transfer_to_EM => False);
+   end write;
+
+   overriding
+   procedure write_to_EM (the_FW    : in out FW.device;
+                          Q_operand : in KDF9.Q_register) is
+   begin
+      put_symbols(the_FW, Q_operand, transfer_to_EM => True);
+   end write_to_EM;
+
+   -- TWQq
+   overriding
+   procedure POA (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      write(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+      if Q_operand = (0, 8#27#, 8#27#) and the_CPU_state = Director_state then
+         -- Allow just one "FAILS" message from Director
+         raise Director_failure with "too many FAILS";
+      end if;
+   end POA;
+
+   -- TWEQq
+   overriding
+   procedure POB (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      write_to_EM(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+      reset(the_FW.stream);
+   end POB;
+
+   procedure put_words (the_FW         : in out FW.device;
+                        Q_operand      : in KDF9.Q_register;
+                        transfer_to_EM : in Boolean := False) is
+      start_address : constant KDF9.address := Q_operand.I;
+      end_address   : constant KDF9.address := Q_operand.M;
+      size : KDF9.word := 0;
+      word : KDF9.word;
+      char : Character;
+   begin
+      validate_range_access(start_address, end_address);
+      set_the_duration_of_the_pause(the_FW);
+      the_FW.mode := the_flexowriter_is_writing;
+      set_text_colour_to_red(the_FW.output);
+      for w in start_address .. end_address loop
+         case the_FW.mode is
+            when the_flexowriter_is_writing =>
+               word := fetch_word(w) and 8#377#;
+               size := size + 1;
+               char := Character'Val(word);
+               if (word and 8#77#) = KDF9.word(KDF9.Semi_Colon) then
+                  -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
+                  --    and change from writing to reading after the output of any word that has
+                  --       the KDF9 code for a semicolon in its least significant 6 bits.
+                  flush(the_FW.output, the_pause);
+                  set_text_colour_to_black(the_FW.output);
+                  put_byte(';', the_FW.output);
+                  flush(the_FW.output, the_pause);
+                  inject_a_response(the_FW, neat(contents(the_FW.output)), size);
+                  the_FW.mode := the_flexowriter_is_reading;
+               else
+                  put_char(char, the_FW.output);
+               end if;
+               exit when transfer_to_EM and (word and 8#77#) = KDF9.word(KDF9.End_Message);
+            when the_flexowriter_is_reading =>
+               get_char(char, the_FW.stream);
+               size := size + 1;
+               word := KDF9.word(Character'Pos(char));
+               store_word(word, w);
+               exit when transfer_to_EM and char = E_M;
+         end case;
+      end loop;
+      flush(the_FW.output, the_pause);
+      set_text_colour_to_black(the_FW.output);
+      do_output_housekeeping(the_FW, written => size, fetched => size);
+   exception
+      when end_of_stream =>
+         flush(the_FW.output, the_pause);
+         set_text_colour_to_black(the_FW.output);
+         do_output_housekeeping(the_FW, written => size, fetched => size);
+   end put_words;
+
+   overriding
+   procedure words_write (the_FW    : in out FW.device;
+                          Q_operand : in KDF9.Q_register) is
+   begin
+      put_words(the_FW, Q_operand, transfer_to_EM => False);
+   end words_write;
+
+   overriding
+   procedure words_write_to_EM (the_FW    : in out FW.device;
+                                Q_operand : in KDF9.Q_register) is
+   begin
+      put_words(the_FW, Q_operand, transfer_to_EM => True);
+   end words_write_to_EM;
+
+   -- TWCQq
+   overriding
+   procedure POC (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      words_write(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+   end POC;
+
+   -- TWECQq
+   overriding
+   procedure POD (the_FW      : in out FW.device;
+                  Q_operand   : in KDF9.Q_register;
+                  set_offline : in Boolean) is
+   begin
+      initialize_byte_mode_transfer(the_FW, Q_operand, set_offline);
+      words_write_to_EM(the_FW, Q_operand);
+      set_lockouts(Q_operand);
+   end POD;
+
+   FW_quantum : constant := 1E6 / 10;  -- 10 characters per second.
+
+   -- This is the monitor console Flexowriter.
+
+   FW0 : aliased FW.device (FW0_number,
+                            kind    => FW_kind,
+                            unit    => 0,
+                            quantum => FW_quantum,
+                            is_slow => True);
+   pragma Unreferenced(FW0);
+
+end IOC.two_shift.FW;

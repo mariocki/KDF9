@@ -1,0 +1,32 @@
+Welcome to ee9 V2.0r, the GNU Ada KDF9 emulator.
+
+The shared buffer has been switched from TP1 to GP0.
+
+Running a problem program in trace mode
+ ... with option(s): signature hash, noninteractive.
+________________________________________________________________________
+
+Digital signature of traced orders = #2227242756376336.
+
+________________________________________________________________________
+
+Final State:
+
+At #00032/1 (26/1); ICR = 1688326; the instruction was #200:220:000, i.e. OUT
+CIA:          #00032/1 (26/1)
+NIA:          #00032/4 (26/4)
+ORDERS:        1688326 executed (ICR)
+CPU TIME:     25465440 KDF9 us. (RAN)
+CLOCK TIME: 1732422678 KDF9 us. (EL)
+
+The SJNS is empty.
+
+Q store:
+ Q2: Q #000003/ #000011/ #000011  = Q      3/      9/      9
+ Q3: Q #000002/ #000011/ #000011  = Q      2/      9/      9
+
+The NEST is empty.
+________________________________________________________________________
+
+End of Run.
+________________________________________________________________________

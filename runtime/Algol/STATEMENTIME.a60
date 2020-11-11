@@ -1,0 +1,22 @@
+STATEMENTIME|
+_b_e_g_i_n
+
+_r_e_a_l x, y, z;
+_i_n_t_e_g_e_r _a_r_r_a_y e1[1:1], e2[1:1, 1:1], e3[1:1, 1:1, 1:1];
+_i_n_t_e_g_e_r i, j , k, l, m, n;
+
+ _p_r_o_c_e_d_u_r_e p0; ;
+
+  _p_r_o_c_e_d_u_r_e p1(x); _v_a_l_u_e x; _r_e_a_l x; ;
+
+  _p_r_o_c_e_d_u_r_e p2(x, y); _v_a_l_u_e x, y; _r_e_a_l x, y; ;
+
+  _p_r_o_c_e_d_u_r_e p3(x, y, z); _v_a_l_u_e x, y, z; _r_e_a_l x, y, z; ;
+
+y := 1; z := 2;
+
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l 10000 _d_o
+  x := sqrt(y)
+
+_e_n_d
+|
