@@ -9,32 +9,37 @@ BUILD_TYPE=max
 EXE=ee9
 
 # Folder locations
-SRC=src
-RUNTIME=runtime
-KDF9FLEX=KDF9Flex
-KAL3=kal3
+SRC=$(CURDIR)/src
+export RUNTIME=$(CURDIR)/runtime
+KDF9FLEX=$(CURDIR)/KDF9Flex
+KAL3=$(CURDIR)/kal3
 
 # Main target to build
 MAIN=${SRC}/${EXE}
 
 export CC=gcc
-export CFLAGS=-funwind-tables -march=znver2 -O3 -funroll-loops -fsched-interblock -fomit-frame-pointer -fno-stack-check -falign-loops=8
+export CFLAGS=-funwind-tables -march=znver2 -O3 -funroll-loops -fno-stack-check
 GNAT_BASE_OPTIONS=-gnatfl05j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
 
-CSC_LIST=src
+CSC_LIST=$(SRC)
 LIB_DIR=${foreach dir,${CSC_LIST},${dir}}
 
 ifeq ($(OS),Windows_NT)
 	OS_SPECIFIC = os_specifics_for_windows.adb
+	OPT_DEPENDS = get_O_BINARY.o
 else
 	OS_SPECIFIC = os_specifics_for_posix.adb
+	OPT_DEPENDS = 
 endif
 
-$(MAIN) : objects ${LIB_DIR} 
+$(MAIN) : objects ${LIB_DIR} ${OPT_DEPENDS}
 	gnatbind ${MAIN} ${CSC_LIST:%=-aO%/} -shared
-	gnatlink ${MAIN} -o ${MAIN}
+	gnatlink ${MAIN} ${OPT_DEPENDS} -o ${MAIN}
+
+get_O_BINARY.o:
+	$(CC) ${CFLAGS} -c ${CSC_LIST}/get_O_BINARY.c -o ${CSC_LIST}/get_O_BINARY.o
 
 .PHONY: objects
 objects: builddefs
@@ -55,9 +60,9 @@ flex:
 
 .PHONY: clean
 clean:
-	$(MAKE) -C ${KDF9FLEX} clean
-	$(MAKE) -C ${KAL3} clean
-	$(MAKE) -C ${RUNTIME} clean
+	$(MAKE) -e -C ${KDF9FLEX} clean
+	$(MAKE) -e -C ${KAL3} clean
+	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
 	$(RM) -f ${MAIN}
@@ -66,9 +71,9 @@ clean:
 
 .PHONY: deploy
 deploy: $(MAIN) kal3 flex
-	$(MAKE) -C ${KDF9FLEX} deploy
-	$(MAKE) -C ${KAL3} deploy
-	$(MAKE) -C ${RUNTIME} deploy
+	$(MAKE) -e -C ${KDF9FLEX} deploy
+	$(MAKE) -e -C ${KAL3} deploy
+	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${MAIN} ${RUNTIME}
 
 .PHONY: test

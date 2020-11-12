@@ -2,6 +2,7 @@ CC=gcc
 YACC=yacc
 CFLAGS=-I. -fPIE -fPIC
 YFLAGS=-d --debug
+RUNTIME=../runtime
 
 kal3: kal3.c kal3syntax.c
 	$(CC) -o kal3 kal3.c kal3syntax.c $(CFLAGS)
@@ -14,4 +15,4 @@ clean:
 
 .PHONY: deploy
 deploy: kal3
-	cp -f kal3 ../runtime/
+	cp -f kal3 $(RUNTIME)

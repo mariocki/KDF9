@@ -5,8 +5,8 @@ cp settings_2.txt settings_2.bak
 trap "cp settings_1.bak settings_1.txt; \
       cp settings_2.bak settings_2.txt; \
       rm -f settings_?.bak;             \
-      exit 999"                         \
-      SIGTERM SIGQUIT SIGKILL SIGINT SIGHUP
+exit 999"                         \
+SIGTERM SIGQUIT SIGKILL SIGINT SIGHUP
 
 echo
 echo This runs a variety of tests, designed to verify that ee9 is working.
@@ -26,9 +26,9 @@ echo -n "Press RETURN to start the tests, or q to quit: "
 
 read reply
 case ${reply:zzz} in
-q|Q) exit 0
-     ;;
-zzz) ;;
+    q|Q) exit 0
+    ;;
+    zzz) ;;
 esac
 
 > settings_1.txt
@@ -85,21 +85,21 @@ read reply
 
 if [ ! \( -s differences.log \) ]
 then
-   echo
-   echo "Done: ee9 is working as expected."
-   echo
-   echo "To see the plotted graph, open GP0 with a program that supports"
-   echo "Encapsulated PostScript (EPS); e.g. Preview in OS X."
-   echo
+    echo
+    echo "Done: ee9 is working as expected."
+    echo
+    echo "To see the plotted graph, open GP0 with a program that supports"
+    echo "Encapsulated PostScript (EPS); e.g. Preview in OS X."
+    echo
 else
-   echo
-   echo The test has shown incorrect results, held in \"ee9_test_case.log\".
-   echo The following lists the differences from the qualification test log.
-   printf "\\a\\a\\a"
-   echo Press RETURN to see the discrepancies:
-   read reply
-   echo
-   less -E differences.log
+    echo
+    echo The test has shown incorrect results, held in \"ee9_test_case.log\".
+    echo The following lists the differences from the qualification test log.
+    printf "\\a\\a\\a"
+    echo Press RETURN to see the discrepancies:
+    read reply
+    echo
+    less -E differences.log
 fi
 
 rm -f differences.log

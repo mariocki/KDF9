@@ -10,7 +10,7 @@ then
    if   [ "$mode" = -d ]
    then
          ./ee9  <Binary/KMW0201--UPU  >TP0;
-   elif [ "$1" = - ]
+   elif [ "$mode" = -d- ]
    then
          ./ee9 -sp -df "$miscellany" <Binary/KMW0201--UPU  >TP0;
    elif [ "$mode" = -df ]
