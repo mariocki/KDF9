@@ -1,4 +1,5 @@
-s/_/*/g
+s/*/�/g 
+s/_/*/g 
 s/'and'/_a_n_d/g
 s/'array'/_a_r_r_a_y/g
 s/'begin'/_b_e_g_i_n/g
@@ -28,14 +29,11 @@ s/'value'/_v_a_l_u_e/g
 s/'while'/_w_h_i_l_e/g
 s/'true'/_t_r_u_e/g
 s/'false'/_f_a_l_s_e/g
-s/\*/\xd7/g
 s/{/_[/g
 s/}/_]/g
-s/!=/#/g
+s/!=/\#/g
 s/>=/_>/g
 s/<=/_</g
-s/|/º/g
-s/\$/º/g
-s/~/º/g
-s/%/÷/g
-s/@/|/g
+s/~/�/g
+s/\\/\xf7/g
+

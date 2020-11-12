@@ -1,4 +1,4 @@
-INPUT@
+andyp1@
 'begin'
     'real' a, y, z;
 
@@ -7,11 +7,17 @@ INPUT@
     y := read(20);
     close(20);
 
-    z := (a ^ 2 + 3) * (a * y) + (a +1)/3;
-    open(10);
-    output(10, z);
-    close(10);
+    z := (a + y);
+    z := (a - y);
+    z := (a / y);
+    z := (a % y);
+    z := (a * y);
+    z := (a ~ y);
+
+    'comment' open(30);
+    writetext(30, {{z}number_of_primes_below_2^12:_});
+    'comment' close(30);
 'end'
 @
-6; 12;
+6; 12.3;
 @

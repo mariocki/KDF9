@@ -20,36 +20,7 @@ then
          ./ee9 -sp "$mode" "$miscellany" <Binary/KMW0201--UPU  >TP0;
    fi
 
-   echo
-
-   if [ -s CP0 ]
-   then
-      echo
-      echo CP0:
-      echo ===
-      more CP0
-      echo ===
-   fi
-
-   if [ -s TP0 ]
-   then
-      echo
-      echo TP0:
-      echo ===
-      more TP0
-      echo ===
-   fi
-
-   if [ -s LP0 ]
-   then
-      echo
-      echo LP0:
-      echo ===
-      more LP0
-      echo ===
-   fi
-   echo
+   /bin/sh ./printoutput
 else
-   echo
    exit 1
 fi

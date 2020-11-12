@@ -1,0 +1,38 @@
+sintest|
+'begin'
+
+'real' q, x, y, pi;
+'integer' layout;
+
+layout := format({+d.dddddddd~+nd});
+pi := 3.141592653589793;
+
+open(30);
+
+   writetext(30, {atn=*pi/4=});    write(30, layout, arctan(1));
+   writetext(30, {{c}});
+   writetext(30, {atn=3pi/4=});    write(30, layout, arctan(-1));
+   writetext(30, {{c}});
+
+'for' q := 0 'step' 12 'until' 180 'do'
+'begin'
+   y := q / 180 * pi;
+   x :=  'if' q < 91 'then' y 'else' y-pi;
+   writetext(30, {*deg=});  write(30, layout, q);
+   writetext(30, {,*rad=}); write(30, layout, x);
+   writetext(30, {,*atn=}); write(30, layout, arctan(sin(y)/cos(y)));
+   writetext(30, {,*tan=}); write(30, layout, sin(y)/cos(y));
+   writetext(30, {,*sin=}); write(30, layout, sin(y));
+   writetext(30, {,*cos=}); write(30, layout, cos(y));
+   writetext(30, {{c}});
+'end' module 7;
+
+
+close(30);
+
+FINISH:
+
+'end'
+|
+;;;;@|@|
+||||

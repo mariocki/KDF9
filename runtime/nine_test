@@ -29,30 +29,5 @@ else
     ./ee9 -st "$mode" "$miscellany"  <Binary/"$program"  >TP0;
 fi
 
-if [ -s CP0 ]
-then
-    echo
-    echo CP0:
-    echo ===
-    more CP0
-    echo ===
-fi
-
-if [ -s TP0 ]
-then
-    echo
-    echo TP0:
-    echo ===
-    more TP0
-    echo ===
-fi
-
-if [ -s LP0 ]
-then
-    echo
-    echo LP0:
-    echo ===
-    more LP0
-    echo ===
-fi
+   /bin/sh ./printoutput
 exit 0
