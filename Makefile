@@ -11,7 +11,6 @@ EXE=ee9
 # Folder locations
 SRC=$(CURDIR)/src
 export RUNTIME=$(CURDIR)/runtime
-KDF9FLEX=$(CURDIR)/KDF9Flex
 KAL3=$(CURDIR)/kal3
 
 # Main target to build
@@ -54,13 +53,8 @@ builddefs:
 kal3:
 	$(MAKE) -e -C ${KAL3}
 
-.PHONY: flex
-flex: 
-	$(MAKE) -e -C ${KDF9FLEX}
-
 .PHONY: clean
 clean:
-	$(MAKE) -e -C ${KDF9FLEX} clean
 	$(MAKE) -e -C ${KAL3} clean
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
@@ -70,8 +64,7 @@ clean:
 	$(RM) -f ${CSC_LIST}/gnat.adc
 
 .PHONY: deploy
-deploy: $(MAIN) kal3 flex
-	$(MAKE) -e -C ${KDF9FLEX} deploy
+deploy: $(MAIN) kal3
 	$(MAKE) -e -C ${KAL3} deploy
 	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${MAIN} ${RUNTIME}
@@ -81,4 +74,4 @@ test: deploy
 	$(MAKE) -C ${RUNTIME} test
 
 .PHONY: all
-all: $(MAIN) kal3 flex
+all: $(MAIN) kal3 

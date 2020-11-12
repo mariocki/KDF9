@@ -1,5 +1,0 @@
-EAHZZZZ00APU@
-'begin'
-    writetext(30, {Hello {s} World!});
-'end'
-@
