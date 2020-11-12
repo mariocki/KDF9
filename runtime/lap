@@ -13,6 +13,6 @@ then
     cp "Algol/$a60Program" TR1
     exit 0
 else
-    echo `basename "$0"`: there is no such file as "$program" in the Algol folder!
+    echo `basename "$0"`: there is no such file as "$a60Program" in the Algol folder!
     exit 1
 fi

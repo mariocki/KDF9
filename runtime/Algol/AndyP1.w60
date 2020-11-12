@@ -1,0 +1,17 @@
+INPUT@
+'begin'
+    'real' a, y, z;
+
+    open(20);
+    a := read(20);
+    y := read(20);
+    close(20);
+
+    z := (a ^ 2 + 3) * (a * y) + (a +1)/3;
+    open(10);
+    output(10, z);
+    close(10);
+'end'
+@
+6; 12;
+@
