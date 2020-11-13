@@ -1,5 +1,5 @@
 # KDF9 emulator `ee9`
-This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) and all thanks go to him for his hard work.
+This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
 
 ## How to run the `ee9` the KDF9 emulator
 1. You will need to build everything first, see below for instructions.
@@ -25,10 +25,10 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
 - `Documents` Various KDF9 and Whetstone related PDFs/HTML pages.
 
 ## What has not been changed
-- The ADA code is unchanged :)
+- The ADA code is unchanged :smiley:
 - I don't include pre-build binaries.
-- The test scripts are unchanged (but slightly broken ... caveat emptor).
-- The License, it's still GPLv3.
+- The test scripts are unchanged (but slightly broken ... caveat emptor :fire:).
+- The License, it's still GPLv3 :thumbsup:
 
 ## How to build `ee9` (the KDF9 emulator)
 - `make ee9`
