@@ -1,0 +1,80 @@
+#!/bin/bash
+DATA=${KDF9_DATA:-Data}
+
+trap "rm -f si_test_log.txt si_test_diffs.txt; >settings_1.txt" 0 1 2 3
+
+opt=${1:-aenz}
+data=${DATA}/SI0_data.txt
+
+cat  > $data <<++++
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+++++
+
+cat >settings_1.txt <<++++
+K 15 SI 14 SI
+++++
+
+>si_test_log.txt
+>SI0
+>SI1
+
+echo; echo TEST PIB/POB from SI0 to TP:; echo TEST PIB/POB from SI0 to TP: >>si_test_log.txt
+cp $data SI0
+ucc SI2TP; nine SI2TP - t $opt
+cat TP0 >>si_test_log.txt
+
+echo; echo TEST PIC/POC from SI0 to TP:; echo TEST PIC/POC from SI0 to TP: >>si_test_log.txt
+cp $data SI0
+ucc SI2TPC; nine SI2TPC - t $opt
+cat TP0 >>si_test_log.txt
+
+echo; echo TEST PIB/POB from TR to SI0:; echo TEST PIB/POB from TR to SI0: >>si_test_log.txt
+>SI0
+ucc TR2SI; nine TR2SI SI0_data t $opt
+cat SI0 >>si_test_log.txt
+
+echo; echo TEST PIC/POC from TR to SI0:; echo TEST PIC/POC from TR to SI0: >>si_test_log.txt
+>SI0
+ucc TR2SIC; nine TR2SIC SI0_data t $opt
+cat SI0 >>si_test_log.txt
+
+echo; echo TEST PIC/POC from TR to SI1:; echo TEST PIC/POC from TR to SI1: >>si_test_log.txt
+>SI1
+ucc TR2SI1C; nine TR2SI1C SI0_data t $opt
+cat SI1 >>si_test_log.txt
+
+echo; echo TEST PIC/POC from SI1 to TP:; echo TEST PIC/POC from SI1 to TP: >>si_test_log.txt
+cp $data SI1
+ucc SI12TPC; nine SI12TPC - t $opt
+cat TP0 >>si_test_log.txt
+
+echo
+diff si_test_log.txt si_good_test_log.txt >si_test_diffs.txt
+if [ -s si_test_diffs.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more si_test_diffs.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi

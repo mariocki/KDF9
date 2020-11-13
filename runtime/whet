@@ -1,26 +1,42 @@
 #!/bin/bash
 
-program="$1"
-if /bin/sh ./lap "$program"
+BINARY=${KDF9_BINARY:-Binary}
+SOURCE=${WHETSTONE:-Whetstone}
+
+if [ x"$1"x = xx ]
 then
-   cp FW0_for_Whetstone FW0
-
-   mode=-d$2
-   miscellany=-m$3
-   if   [ "$mode" = -d ]
-   then
-         ./ee9  <Binary/KMW0201--UPU  >TP0;
-   elif [ "$mode" = -d- ]
-   then
-         ./ee9 -sp -df "$miscellany" <Binary/KMW0201--UPU  >TP0;
-   elif [ "$mode" = -df ]
-   then
-      time ./ee9 -sp -df "$miscellany" <Binary/KMW0201--UPU  >TP0;
-   else
-         ./ee9 -sp "$mode" "$miscellany" <Binary/KMW0201--UPU  >TP0;
-   fi
-
-   /bin/sh ./printoutput
-else
-   exit 1
+    echo You have not named a Whetstone Algol program to be run.
+    echo
+    exit 1
 fi
+
+program=`basename "$1" ".a60"`.a60
+program=${SOURCE}/"$program"
+if [ -r "$program" ]
+then
+    cp "$program" TR1
+else
+    echo The source file "$program" is absent or unreadable.
+    echo
+    exit 2
+fi
+
+cp FW0_for_Whetstone FW0
+
+mode=-d$2
+miscellany=-m$3
+
+if   [ "$mode" = -d ]
+then
+    ./ee9 +${BINARY}/KMW0201--UPU;
+elif [ "$mode" = -d- ]
+then
+    ./ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+elif [ "$mode" = -df ]
+then
+    time ./ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+else
+    ./ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
+fi
+
+/bin/sh ./printoutput

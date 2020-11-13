@@ -1,0 +1,22 @@
+-- adc-max.adc
+--
+-- Ada 2005 global configuration pragmas for a maximally optimized build
+--
+-- For ee9 (V2.0), (C) 2012, W. Findlay.
+-- Released under the terms of the GNU General Public License.
+--
+
+pragma Assertion_Policy(Ignore);
+
+pragma Suppress(All_Checks);
+pragma Validity_Checks(Off);
+pragma Warnings(Off);
+
+pragma Optimize_Alignment(Time);
+
+pragma Restrictions(Max_Asynchronous_Select_Nesting => 0);
+pragma Restrictions(Max_Tasks => 0);
+pragma Restrictions(No_Abort_Statements);
+
+--pragma Restrictions(No_Implementation_Attributes); -- to allow 'Img for now
+--pragma Restrictions(No_Obsolescent_Features);      -- to avoid GNAT bug with -gnatN

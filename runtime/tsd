@@ -1,46 +1,23 @@
 #!/bin/sh
 
-cp FW0_for_Director FW0
+TSD=${DIRECTOR:-Binary/KKT40E007UPU}
+
+cp -f FW0_for_Director FW0
 
 mode=-d$1
 miscellany=-m$2
+
 if [ "$mode" = "-d" ]
 then
-    ./ee9 -sb -df  <Binary/KKT40E007UPU  >TP0;
-elif [ -d$mode = -df ]
+    ./ee9 -sb -df -TRkk -TPll  +${TSD};
+elif [ $mode = -df ]
 then
-    time ./ee9 -sb -df  <Binary/KKT40E007UPU  >TP0;
+    time ./ee9 -sb -df -TRkk -TPll  +${TSD};
 elif [ $miscellany = -m ]
 then
-    ./ee9 -sb "$mode"               <Binary/KKT40E007UPU  >TP0;
+    ./ee9 -sb "$mode" -TRkk -TPll  +${TSD};
 else
-    ./ee9 -sb "$mode" "$miscellany" <Binary/KKT40E007UPU  >TP0;
+    ./ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
 fi
 
-if [ -s CP0 ]
-then
-    echo
-    echo CP0:
-    echo ===
-    more CP0
-    echo ===
-fi
-
-if [ -s TP0 ]
-then
-    echo
-    echo TP0:
-    echo ===
-    more TP0
-    echo ===
-fi
-
-if [ -s LP0 ]
-then
-    echo
-    echo LP0:
-    echo ===
-    more LP0
-    echo ===
-fi
-echo
+/bin/sh ./printoutput

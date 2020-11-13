@@ -3,11 +3,16 @@ YS26000;
 RESTART; J999; J999;
 PROGRAM;                   (main program);
 
+      ZERO; NOT; SET+16; DIVI;  ERASE; ERASE;
+      ZERO; NOT; SET-16; DIVI;  ERASE; ERASE;
+      SET +1;    SET+16; DIVI;  ERASE; ERASE;
+      SET +1;    SET-16; DIVI;  ERASE; ERASE;
+
       ZERO; NOT; SET+12; DIVI;  ERASE; ERASE;
       ZERO; NOT; SET-12; DIVI;  ERASE; ERASE;
       SET +1;    SET+12; DIVI;  ERASE; ERASE;
       SET +1;    SET-12; DIVI;  ERASE; ERASE;
-      
+
 
 999;  ZERO; OUT;           (terminate run);
 FINISH;

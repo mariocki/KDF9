@@ -1,3 +1,4 @@
+ST 32; TL 9;
 V2; W0;
 RESTART; J999; J999;
 PROGRAM;                   (main program);

@@ -1,14 +1,16 @@
+P
+ABCSJL26.016
+Coset enumeration|
 ST   ; TL99999;
 V    1; W    0;
-YA28671; YB    10; YC  999;
+YA24000; YB    10; YC  1280;
 RESTART; J41; J19;
 
 PROGRAM;
 
-(P
- ABCSJL26.016
- Coset enumeration six cols fourth version.
- Original program by John Leech, 1965.);
+(Coset enumeration six cols fourth version.
+ Original program by John Leech, 1965,
+ had YA12287; YC999);
 
 V0 = B1212121212121212; V1 = B0702/11;
 

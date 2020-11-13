@@ -1,33 +1,77 @@
 #!/bin/sh
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
 
-program=`basename "$1" ".kdf9"`.kdf9
-if [ ! -f Binary/"$program" ]
+prog=$1
+data=$2
+
+if [ x"${prog}"x = xx ]
 then
-    echo `basename "$0"`: there is no program named "$program" in the Binary folder!
+    echo You have not named a binary program to be run.
+    echo
     exit 1
 fi
-if /bin/sh ./lud "$2" | grep "data file"
+
+program=`basename "${prog}"`
+program=${BINARY}/"$program"
+if [ ! -r "$program" ]
 then
+    echo The object code file "$program" is absent or unreadable.
     echo
     exit 2
 fi
 
-> FW0
-
-mode=-d$3
-miscellany=-m$4
-if   [ "$mode" = -d ]
+if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
-    ./ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
-elif [ "$3" = - ]
-then
-    ./ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
-elif [ "$mode" = -df ]
-then
-    time ./ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
+    >TR0
 else
-    ./ee9 -sp "$mode" "$miscellany"  <Binary/"$program"  >TP0;
+    datatxt=${DATA}/`basename "${data}" ".txt"`.txt
+    if [ -r "$datatxt" ]
+    then
+        cp "$datatxt" TR1
+    else
+        echo The file "$datatxt" is absent or unreadable.
+        exit 3
+    fi
 fi
 
-   /bin/sh ./printoutput
-exit 0
+if [ x"$3"x = xx -o x"$3"x = x-x ]
+then
+    mode=""
+else
+    mode="-d$3"
+fi
+if [ x"$4"x = xx -o x"$4"x = x-x ]
+then
+    miscellany=""
+else
+    miscellany="-m$4"
+fi
+if [ x"$5"x = xx -o x"$5"x = x-x ]
+then
+    TRmode="-TRll"
+else
+    TRmode="-TR$5"
+fi
+if [ x"$6"x = xx -o x"$6"x = x-x ]
+then
+    TPmode="-TPll"
+else
+    TPmode="-TP$6"
+fi
+if [ x"$7"x = xx -o x"$7"x = x-x ]
+then
+    state=""
+else
+    state="-s$7"
+fi
+
+if [ "$mode" = -df ]
+then
+    time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+else
+    ./ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+fi
+
+/bin/sh ./printoutput
+

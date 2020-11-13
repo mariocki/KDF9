@@ -1,12 +1,14 @@
-V6; W0;
+ST30000 ; TL 5000 ;
+V9; W0;
 YS26000;
 RESTART; J999; J999;
 PROGRAM;                   (main program);
    V1 = B1212121212121212; (radix 10 for FRB);
    V2 = B2020202020202020; (high bits for decimal digits);
-   V3 = B0741062107230637; ("A[3,"  in Flexowriter code);
-   V4 = B0730062200250007; ("8] = " in Flexowriter code);
-   V5 = B7777777777777777;
+   V3 = B0202777777777777; (newline);
+   V4 = B0741062107230637; ("A[3,"  in Flexowriter code);
+   V5 = B0730062200250007; ("8] = " in Flexowriter code);
+   V6 = B7777777777777777;
 
       ZERO; NOT; =M1;      (Q1 := 0/0/-1);
       SETAYS0; =M2; I2=2;  (Q2 := 0/2/AYS0: M2 is the stack pointer);
@@ -15,11 +17,14 @@ PROGRAM;                   (main program);
    JSP1;                   (call Ackermann function);
       V1; REV; FRB;        (convert result to base 10);
       V2; OR;              (convert decimal digits to characters);
-      V5; REV;
-      SHLD+24; =V5; ERASE; (eliminate leading zeros);
-      SETAV5; =RM9;
+      V6; REV;
+      SHLD+24; REV; ERASE; (eliminate leading zeros);
+      SHL-12; SHL+12;
+      SETB0202; OR; =V6;   (or-in 2 newlines);
+
+      SETAV6; =RM9;
       SETAV3; =I9;
-      POAQ9;               (write result to Flexowriter);
+      TWQ9;                (write result to Flexowriter);
 
 999;  ZERO; OUT;           (terminate run);
 

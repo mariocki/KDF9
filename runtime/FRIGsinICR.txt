@@ -1,0 +1,22 @@
+// This converts the sin function to return the contents of ICR from OUT 99
+// Copy this into a settings-?.txt file.
+P #2523S0 #304
+P #2523S1 #000
+P #2523S2 #143
+
+P #2523S3 #200
+P #2523S4 #220
+P #2523S5 #000
+
+P #2524S0 #304
+P #2524S1 #000
+P #2524S2 #057
+
+P #2524S3 #024
+P #2524S4 #065
+P #2524S5 #075
+
+P #2525S0 #200
+P #2525S1 #360
+P #2525S2 #000
+

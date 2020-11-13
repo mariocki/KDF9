@@ -1,0 +1,34 @@
+V3; W1;
+YA1; YB1; YC1;
+RESTART; J999; J999;
+PROGRAM;
+V1=F2.0;
+V2=F-1.0;
+V1; =YA0; V2; =YC0;
+ZERO; =YB0;
+*YA0; DUP; +F; =Q1;
+YB0; NEGF; DUP; =Q2;
+DUP; ×F;
+YC0; Q1; ×F; DUP; +F; -F;
+
+JSP40;
+
+DUP; NEGF;
+Q2; +F; Q1; /F; REV;
+Q2; +F; Q1; /F;
+
+999; ZERO; OUT;
+
+P40V0;
+        V0=0.46429/2;
+        DUP; J1<=Z; FIX; DUP; SHLD-1; =M15;
+        J2<Z; SHL-1;
+2;      SHA-3; DUP; SHA+1; V0; +; (X0,M);
+        DUPD; ÷; +; (X1,M);
+        DUPD; ÷; REV; SHA-2; +; (X2,M);
+        DUP; PERM; ÷; +; (X3);
+        M15; NOT; NEG; FLOAT;
+3;      EXIT1;
+1;      DUP; J3=Z; MRWDQ0;
+FINISH;
+|

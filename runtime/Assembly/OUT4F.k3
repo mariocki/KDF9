@@ -1,0 +1,183 @@
+V256; W0; YA1024; YB1024; YC1024; YD1024; YE1024; YF1024;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(tests  MWQq, MBRQq, MWEQq, MFREQq and MBREQq);
+(should terminate normally);
+
+   V0  = Q0/AV5/AV5;          (for TP0 trace o/p);
+   V1  = -1;
+   V2  = PEFPBEAAG;           (tape label);
+   V4  = Q0/AV64/AV70;        (to write test data block);
+   V5  = 0;                   (TP0 trace o/p word);
+   V6  = Q0/AYC0/AYC1023;
+   V7  = Q0/AYB0/AYB1023;
+   V9  = Q0/AYA0/AYA1023;
+   V10 = Q0/AYD0/AYD1023;
+   V11 = Q0/AYE0/AYE1023;
+   V12 = Q0/AYF0/AYF1023;
+
+   (test data block source);
+   V64 = PFIRST;
+   V65 = PSECOND;
+   V66 = PTHIRD;
+   V67 = B4142754344754546;  (AB|CD|EF);
+   V68 = P.ANTEPEN;
+   V69 = P.PENULT;
+   V70 = PULTIMATE;
+   (the following are what we get of V67 when transferring to EM);
+   V71 = B4142750000000000;  (AB|     ); (MFRE);
+   V72 = B0000000000754546;  (     |EF); (MBRE);
+   V73 = B0000750000000000;  (  |     ); (result of writing V67 by MWE and then reading it by MBRE);
+
+   (TP0 trace source);
+   V128 = B6445636400460277;  (TEST F);
+   V129 = B4663536000575302;  (FSKP OK);
+   V130 = B5567027777777777;  (MW);
+   V131 = B5542620000575302;  (MBR  OK);
+   V132 = B5546624500575302;  (MFRE OK);
+   V133 = B5542624500575302;  (MBRE OK);
+   V134 = B5567450277777777;  (MWE);
+   V135 = B4651565163500277;  (FINISH);
+   V136 = PFAILS;
+
+   (claim the MT);
+   V2; SET4; OUT; =RC1;
+   (claim TP0);
+   SET 1; SET 5; OUT; V0; =Q10; =C10;
+   V128; =V5; POAQ10;
+
+   V6; =Q6; C1 TO Q6;
+
+   (skip over the label);
+   Q1 TO Q7; SET 1; =M7;
+   MFSKQ7;
+   V129; =V5; POAQ10;
+
+   (write out the test data block);
+   V4; =Q4; C1 TO Q4;
+   MWQ4;
+   V130; =V5; POAQ10;
+
+   (read the test data backwards);
+   V9; =Q9; C1 TO Q9;
+   V1; =YA7;
+   MBRQ9;
+   V70; YA0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V64; YA6; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YA1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YA7; V1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V131; =V5; POAQ10;
+
+   (read the test data forwards to end message);
+   V7; =Q7; C1 TO Q7;
+   V1; =YB4;
+   MFREQ7;
+   V64; YB0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   ZERO; YB6; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YB1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YB3; V71; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V132; =V5; POAQ10;
+
+   (read the test data backwards to end message);
+   V6; =Q6; C1 TO Q6;
+   V1; =YC4;
+   MBREQ6;
+   V70; YC0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V69; YC1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   ZERO; YC6; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YC1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YC3; V72; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V133; =V5; POAQ10;
+
+
+   (skip over the first test data block);
+   Q1 TO Q7; SET 1; =M7;
+   MFSKQ7;
+   V129; =V5; POAQ10;
+
+   (write out a second test data block to EM - writes only V64-V66 and part of V67);
+   V4; =Q4; C1 TO Q4;
+   MWEQ4;
+   V134; =V5; POAQ10;
+
+   (read the test data backwards);
+   V10; =Q9; C1 TO Q9;
+   V1; =YD7;
+   MBRQ9;
+   V64; YD3; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V65; YD2; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V66; YD1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V71; YD0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YD1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YD7; V1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V131; =V5; POAQ10;
+
+   (read the test data forwards to EM);
+   V11; =Q7; C1 TO Q7;
+   V1; =YE4;
+   MFREQ7;
+   V1; YE4; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V64; YE0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V65; YE1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V66; YE2; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V71; YE3; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   ZERO; YE6; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YE1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V132; =V5; POAQ10;
+
+   (read the test data backwards to EM);
+   V12; =Q6; C1 TO Q6;
+   V1; =YF1;
+   MBREQ6;
+   V73; YF0; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V1; YF1; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   ZERO; YF2; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   YF1023; ZERO; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V133; =V5; POAQ10;
+
+   (release MT);
+   C1; SET 7; OUT;
+
+   (FINISH message);
+   V135; =V5; POAQ10;
+   C10; SET 6; OUT;
+
+   ZERO; OUT;
+
+777;
+   V136; =V5; POAQ10;
+   MRWDQ0; (deliberately fail);
+
+FINISH;
+|

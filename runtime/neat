@@ -1,0 +1,107 @@
+#!/bin/bash
+USERCODE=${KDF9_USERCODE:-Assembly}
+
+trap "rm -f neat.commands neat_tmp_[0123456789]" 0 1 2 3
+
+if [ ! -r ${USERCODE}/$1.k3 ]
+then echo Could not find $1.k3 in ${USERCODE}; exit 1
+fi
+
+tr  "\\r\\t" "\\n " < ${USERCODE}/$1.k3  > neat_tmp_0
+tr -s "\\n" < neat_tmp_0 > neat_tmp_1
+
+cat >neat.commands <<++++
+/^ +$/d
+/^ +/s//   /
+10,\$s/([0123456789]) +([0123456789])/\1\2/g
+10,\$s/ +;/;/g
+10,\$s/; +/;/g
+10,\$s/= +/=/g
+10,\$s/;V +/;V/g
+10,\$s/;Y +/;Y/g
+10,\$s/;Y(.+) +/;Y\1/g
+10,\$s/;J *S */;JS/g
+10,\$s/;J *P */;JP/g
+10,\$s/;J *S *P */;JSP/g
+10,\$s/;S *H *A */;SHA/g
+10,\$s/;Z *E *R *O *;/;ZERO;/g
+10,\$s/;R *E *V *;/;REV;/g
+10,\$s/;S *E *T */;SET/g
+++++
+sed -E -f neat.commands neat_tmp_1 > neat_tmp_2
+
+cat >neat.commands <<++++
+10,\$s/;J([^;]+);(.*)/;\\
+J\\1;\\
+   \\2/g
+
+++++
+sed -E -f neat.commands neat_tmp_2 > neat_tmp_3
+
+ex neat_tmp_3  <<++++
+/^|/
+.+1,\$d
+s/^|.*/|/
+w! neat_tmp_4
+q!
+++++
+
+cat >neat.commands <<++++
+10,\$s/^ *(\**[0123456789]+);(.+)/\1;\\
+   \2/
+10,\$s/;J([0123456789]+)(.);/;\\
+J\\1\2;\\
+\\
+   /g
+10,\$s/;J([0123456789]+)(.)Z;/;\\
+J\\1\2Z;\\
+\\
+   /g
+10,\$s/;J([0123456789]+)(..)Z;/;\\
+J\\1\2Z;\\
+\\
+   /g
+10,\$s/;(\**[0123456789]+);/;\\
+\1;\\
+   /
+10,\$s/;J([0123456789]+);/;\\
+J\\1;\\
+\\
+   /g
+10,\$s/;J([0123456789]*)P([0123456789]+);/;\\
+J\\1P\\2;\\
+   /g
+10,\$s/^ +J([0123456789]+);/\\
+\\
+J\\1;\\
+   /g
+10,\$s/^ +J([0123456789]*)P([0123456789]+);/\\
+J\\1P\\2;\\
+   /g
+10,\$s/^ +J([^;]*);/\\
+J\\1;\\
+   /g
+10,\$s/^ *([0123456789]+);/\\
+\1;\\
+/
+10,\$s/^ *P([0123456789]+)([^;]+);/\\
+   \\
+\\
+P\\1\\2;/
+10,\$s/=Y([^;]+);([^=][^;]+)/=Y\1;\\
+   \2/g
+10,\$s/     //g
+10,\$s/    //g
+10,\$s/;([^ ])/; \1/g
+10,\$s/=Z0;( +)(.+)/=Z0;\\
+   \2/g
+10,\$s/JSP234;/;/g
+10,\$s/JSP235;/;/g
+++++
+sed -E -f neat.commands neat_tmp_4 > neat_tmp_5
+
+> ${USERCODE}/$1-NEAT.k3
+tr -s "\\n" < neat_tmp_5 > neat_tmp_6
+tr "§" "\\n" < neat_tmp_6 > ${USERCODE}/$1-NEAT.k3
+./sttl $1-NEAT $2 $3
+mv ${USERCODE}/$1-NEAT.k3 ${USERCODE}/$1.k3

@@ -1,0 +1,21 @@
+// This converts the exp function to return the KDF9 run time from OUT 3
+// Copy this into a settings-?.txt file.
+P #2440S0 #304
+P #2440S1 #000
+P #2440S2 #003
+
+P #2440S3 #200
+P #2440S4 #220
+P #2440S5 #000
+
+P #2441S0 #304
+P #2441S1 #000
+P #2441S2 #027
+
+P #2441S3 #024
+P #2441S4 #065
+P #2441S5 #075
+
+P #2442S0 #200
+P #2442S1 #360
+P #2442S2 #000

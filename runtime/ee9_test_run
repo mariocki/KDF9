@@ -1,18 +1,25 @@
-#!/bin/sh
+#!/bin/bash
 > KDF9.log
 this_test="$2"
 echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"
 if /bin/sh $this_test
 then
-   echo The signature of this test should be "$3". It was as follows:
-   grep "Digital signature of traced orders" KDF9.log
-   exit_code=0
+   case x$3x in
+   xx)  exit_code=0
+        ;;
+   x*x) echo The signature of this test should be "$3". It was as follows:
+        fgrep "Digital signature of traced orders = " KDF9.log
+        echo "------------------- END OF Test Case $1 -------------------"
+        exit_code=0
+        ;;
+   esac
 else
    echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    echo Test Case "$1": $this_test FAILED!
+   echo "------------------- END OF Test Case $1 -------------------"
    exit_code=1
 fi
-echo "------------------- END OF Test Case $1 -------------------"
 echo
 echo
 exit $exit_code
+

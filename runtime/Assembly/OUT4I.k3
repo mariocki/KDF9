@@ -1,0 +1,38 @@
+V9; W0;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(test for MBR at BOT - should LIV);
+
+   V0 = Q0/AV1/AV1;        (for TP0 tracing output);
+   V1 = 0;                 (TP0 output word);
+   V2 = PEFPBEAAG;         (tape label);
+   V3 = B6445636400510277; (TEST I);
+   V4 = B5542620057530277; (MBR OK);
+   V5 = B4651565163500277; (FINISH);
+   V6 = Q0/AV7/AV7;        (for backward read attempt);
+
+   (claim tape);
+   V2; SET4; OUT; =RC1;
+
+   (claim TP0);
+   SET 1; SET 5; OUT; V0; =Q10; =C10;
+   V3; =V1; POAQ10;
+
+   (rewind at BTW should be OK);
+   MRWDQ1;
+
+   (FINISH message - this should be the last output);
+   V5; =V1; POAQ10;
+
+   (attempt a backward read - should LIV at BTW);
+   V6; =Q6; C1 to Q6;
+   MBRQ6;
+
+   (MBR OK message - this output should NOT happen);
+   V4; =V1; POAQ10;
+
+   ZERO; OUT;
+
+FINISH;
+|

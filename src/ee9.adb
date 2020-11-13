@@ -43,7 +43,7 @@ procedure ee9 is
 
    package CLI renames Ada.Command_Line;
 
-   the_log_file_name : constant String := "KDF9_log.txt";
+   the_log_file_name : constant String := "KDF9.log";
 
    a_command_line_error_is_detected : exception;
 

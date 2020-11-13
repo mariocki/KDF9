@@ -86,6 +86,7 @@ deploy: $(MAIN) kidopt kalgol mtp
 	cp -f ${MAIN} ${RUNTIME}
 	cp -f ${SRC}/kidopt ${RUNTIME}
 	cp -f ${SRC}/mtp ${RUNTIME}
+	cp -f ${KALGOL}/a2b ${RUNTIME}
 
 .PHONY: test
 test: deploy

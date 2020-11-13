@@ -1,0 +1,15 @@
+#!/bin/bash
+USERCODE=${KDF9_USERCODE:-Assembly}
+
+trap "rm -f STTL.commands STTL_tmp"   \
+      0 1 2 3
+
+cat >STTL.commands <<++++
+/^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
+++++
+if sed -E -f STTL.commands ${USERCODE}/$1.k3 > STTL_tmp
+then
+   mv STTL_tmp ${USERCODE}/$1.k3
+else
+   echo \*\*\*\* FAILURE when correcting ST and TL in ${USERCODE}/$1.k3
+fi

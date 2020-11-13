@@ -1,0 +1,146 @@
+#!/bin/bash
+
+DATA=${KDF9_DATA:-Data}
+
+trap "rm -f ${DATA}/crtest_data.txt CR_test.log cr_test.diff" 0 1 2 3
+opt=${1:-ae}
+
+data=${DATA}/crtest_data.txt
+
+cat  > $data <<++++
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@abcdefg
+HIJKLMNOhijklmno
+PQRSTUVWpqrstuvw
+XYZ{}|\Øxyz{}|\Ø
+        .
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@abcdefg
+HIJKLMNOhijklmno
+PQRSTUVWpqrstuvw
+XYZ{}|\Øxyz{}|\Ø
+        .
+++++
+
+echo The following tests use this data:
+echo ====
+cat $data
+echo ====
+
+cat <<++++
+
+The output to CP0 should look like this:
+=====
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}|\ØXYZ{}|\Ø
+        .
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}|
+        .
+=====
+the penultimate input line:
+XYZ{}|\Øxyz{}|\Ø
+should be punched out like this:
+XYZ{}|
+because the second set of 8 lines is read/punched to EM.
+An alphanumeric read/write omits everything after "COLUMN80".
+___________________________________________________________
+
+
+++++
+
+> CR_test.log
+
+echo TEST PIA PIB - POA 160-column binary write:
+./ucc CRTAB; ./crnine CRTAB crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST PIC PID - POC 160-column character binary write:
+./ucc CRTCD; ./crnine CRTCD crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST PIE PIF - POG 80-column alphanumeric write:
+./ucc CRTEF; ./crnine CRTEF crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST PIG PIH - POL 80-column alphanumeric character-per-word write:
+./ucc CRTGH; ./crnine CRTGH crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST POA POB - PIA 160-column binary read:
+./ucc CPTAB; ./crnine CPTAB crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST POC POD - PIC 160-column character binary read:
+./ucc CPTCD; ./crnine CPTCD crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST POG POH - PIE 80-column alphanumeric read:
+./ucc CPTGH; ./crnine CPTGH crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo TEST POL POK \(sic\) - PIG 80-column alphanumeric character-per-word read:
+./ucc CPTKL; ./crnine CPTKL crtest_data t $opt >> CR_test.log
+case $opt in
+z)
+   echo ====; cat CP0; echo ====; echo;;
+*) ;;
+esac
+
+echo
+diff CR_test.log CR_good_test.log >cr_test.diff
+if [ -s cr_test.diff ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more cr_test.diff
+   echo ===
+else
+   echo These tests ran as expected.
+fi
