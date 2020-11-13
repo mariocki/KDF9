@@ -25,20 +25,9 @@ GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
 CSC_LIST=$(SRC)
 LIB_DIR=${foreach dir,${CSC_LIST},${dir}}
 
-ifeq ($(OS),Windows_NT)
-	OS_SPECIFIC = os_specifics_for_windows.adb
-	OPT_DEPENDS = get_O_BINARY.o
-else
-	OS_SPECIFIC = os_specifics_for_posix.adb
-	OPT_DEPENDS = 
-endif
-
 $(MAIN) : objects ${LIB_DIR} ${OPT_DEPENDS}
 	gnatbind ${MAIN} ${CSC_LIST:%=-aO%/} -shared
-	gnatlink ${MAIN} ${OPT_DEPENDS} -o ${MAIN}
-
-get_O_BINARY.o:
-	$(CC) ${CFLAGS} -c ${CSC_LIST}/get_O_BINARY.c -o ${CSC_LIST}/get_O_BINARY.o
+	gnatlink ${MAIN} -o ${MAIN}
 
 .PHONY: objects
 objects: builddefs
@@ -46,7 +35,6 @@ objects: builddefs
 
 .PHONY: builddefs
 builddefs:
-	cp -f builddefs/${OS_SPECIFIC} ${CSC_LIST}/os_specifics.adb
 	cp -f builddefs/adc-${BUILD_TYPE}.adc ${CSC_LIST}/gnat.adc
 
 .PHONY: kal3
@@ -60,7 +48,6 @@ clean:
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
 	$(RM) -f ${MAIN}
-	$(RM) -f ${CSC_LIST}/os_specifics.adb
 	$(RM) -f ${CSC_LIST}/gnat.adc
 
 .PHONY: deploy

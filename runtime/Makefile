@@ -27,8 +27,7 @@ deploy:
 .PHONY: clean
 clean:
 	$(RM) -f ee9
-	$(RM) -f kal3 absconvf.txt
-	$(RM) -f KDF9Flex
+	$(RM) -f kal3
 	$(RM) -f mt.out
 	$(RM) -f a.out
 	$(RM) -f Assembly/*-listing.txt
