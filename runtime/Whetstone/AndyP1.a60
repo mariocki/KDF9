@@ -1,0 +1,34 @@
+andyp1|
+_b_e_g_i_n
+    _c_o_m_m_e_n_t 
+        This file does not do anything useful, it is simply used by myself to 
+        test the character conversion in the sed script;
+
+    _r_e_a_l a, y, z;
+    _i_n_t_e_g_e_r layout;
+
+    layout := format(_[+d.ddddddddº+nd_]);
+
+    open(20);
+    a := read(20);
+    y := read(20);
+    close(20);
+
+    z := (a + y);
+    z := (a - y);
+    z := (a / y);
+    z := (a ÷ y);
+    _c_o_m_m_e_n_t z := (a × y);
+    _c_o_m_m_e_n_t z := (a º y);
+
+    open(30);
+    writetext(30, _[Hello_]);
+    writetext(30, _[_[c_]_]); _c_o_m_m_e_n_t carriage return :) ;
+    write(30, layout, z);
+    writetext(30, _[*number*of*primes*below*2^12:*_]);
+    writetext(30, _[_[c_]_]);
+    close(30);
+_e_n_d
+|
+6; 12.3;
+|

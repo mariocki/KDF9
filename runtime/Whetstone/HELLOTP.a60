@@ -1,0 +1,7 @@
+helloTP|
+_b_e_g_i_n
+open(10);
+writetext(10, _[_[c_]Hello*world_[c_]_]);
+close(10);
+_e_n_d
+|

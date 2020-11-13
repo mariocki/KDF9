@@ -1,0 +1,221 @@
+STATEMENTIMS|
+_b_e_g_i_n
+
+_r_e_a_l x, y, z, t;
+_r_e_a_l c, d, layout;
+
+_i_n_t_e_g_e_r _a_r_r_a_y E1[1:1], E2[1:1, 1:1], E3[1:1, 1:1, 1:1];
+_i_n_t_e_g_e_r i, j , k, l, m, n;
+
+ _p_r_o_c_e_d_u_r_e p0; ;
+
+  _p_r_o_c_e_d_u_r_e p1(x); _v_a_l_u_e x; _r_e_a_l x; ;
+
+  _p_r_o_c_e_d_u_r_e p2(x, y); _v_a_l_u_e x, y; _r_e_a_l x, y; ;
+
+  _p_r_o_c_e_d_u_r_e p3(x, y, z); _v_a_l_u_e x, y, z; _r_e_a_l x, y, z; ;
+
+x := y := z := 1.0;
+l := k := m := 1;
+layout := format(_[ndddd.dddc_]);
+
+_c_o_m_m_e_n_t the exp(x) function returns (the cumulative CPU time - x), in floating point seconds;
+
+writetext(30, _[null*statement*timing*overhead*in*milliseconds_[ss_]_]);
+t := exp(0.0); ; t := exp(t); c := t ×  1.0º3; write(30, layout, c);
+
+writetext(30, _[_[c_]all*following*times*are*in*milliseconds_[c_]_]);
+
+writetext(30, _[_[c_]x := 1.0_[ss_]_]); t := exp(0.0);
+   x := 1.0;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := 1_[ss_]_]); t := exp(0.0);
+   x := 1;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y_[ss_]_]); t := exp(0.0);
+   x := y;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y + z_[ss_]_]); t := exp(0.0);
+   x := y + z;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y × z_[ss_]_]); t := exp(0.0);
+   x := y × z;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y / z_[ss_]_]); t := exp(0.0);
+   x := y / z;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := 1_[ss_]_]); t := exp(0.0);
+   k := 1;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := 1.0_[ss_]_]); t := exp(0.0);
+   k := 1.0;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := l + m_[ss_]_]); t := exp(0.0);
+   k := l + m;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := l × m_[ss_]_]); t := exp(0.0);
+   k := l × m;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := l ÷ m_[ss_]_]); t := exp(0.0);
+   k := l ÷ m;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]k := l_[ss_]_]); t := exp(0.0);
+   k := l;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := l_[ss_]_]); t := exp(0.0);
+   x := l;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]l := y_[ss_]_]); t := exp(0.0);
+   l := y;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y^2_[ss_]_]); t := exp(0.0);
+   x := y^2;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y^3_[ss_]_]); t := exp(0.0);
+   x := y^3;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]x := y^z_[ss_]_]); t := exp(0.0);
+   x := y^z;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]E1 [ 1 ] := 1_[ss_]_]); t := exp(0.0);
+   E1 [ 1 ] := 1;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]E2 [1,1 ] := 1_[ss_]_]); t := exp(0.0);
+   E2 [1,1 ] := 1;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]E3 [1,1,1] := 1_[ss_]_]); t := exp(0.0);
+   E3 [1,1,1] := 1;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]declare*a_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _r_e_a_l x; _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]declare*x[1:1]_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _a_r_r_a_y x[1:1]; _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]declare*x[1:1, 1:1]_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _a_r_r_a_y x[1:1, 1:1]; _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]declare*x[1:1, 1:1,1:1]_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _a_r_r_a_y x[1:1, 1:1,1:1]; _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]_f_o_r*loop*zero*iterations*overhead_[ss_]_]); t := exp(0.0);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l 0 _d_o;
+z := exp(t); write(30, layout, z ×  1.0º3 - c);
+
+n := 1000;
+writetext(30, _[_[c_]_f_o_r*i*:=*1*_s_t_e_p*1*_u_n_t_i_l*n*_d_o*STEP_[ss_]_]); t := exp(0.0);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n _d_o;
+t := exp(t); write(30, layout, (t - z)/n ×  1.0º3);
+
+writetext(30, _[_[c_]_f_o_r*i*:=*1*_s_t_e_p*1*_u_n_t_i_l*1*_d_o*TOTAL_[ss_]_]); t := exp(0.0);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l 1 _d_o;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+i := n;
+writetext(30, _[_[c_]_w_h_i_l_e*loop*zero*iterations*overhead_[ss_]_]); t := exp(0.0);
+   _f_o_r i := i + 1 _w_h_i_l_e i < n _d_o;
+z := exp(t); write(30, layout, z ×  1.0º3 - c);
+
+i := n-2;
+writetext(30, _[_[c_]_f_o_r*i*:=*i*+*1*_w_h_i_l_e*i*<*n*_d_o*STEP_[ss_]_]); t := exp(0.0);
+   _f_o_r i := i + 1 _w_h_i_l_e i < n _d_o;
+t := exp(t); write(30, layout, (t - z) ×  1.0º3);
+
+i := -1;
+writetext(30, _[_[c_]_f_o_r*i*:=*i*+*1*_w_h_i_l_e*i*<*n*_d_o*TOTAL_[ss_]_]); t := exp(0.0);
+   _f_o_r i := i + 1 _w_h_i_l_e i < n _d_o;
+t := exp(t); write(30, layout, (t - z)/n ×  1.0º3);
+
+writetext(30, _[_[c_]goto*abcd_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _g_o_t_o abcd; abcd: _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]switch_[ss_]_]); t := exp(0.0);
+   _b_e_g_i_n _s_w_i_t_c_h ss := pq; _g_o_t_o ss[1]; pq: _e_n_d;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]if*true_[ss_]_]); t := exp(0.0);
+   _i_f _t_r_u_e _t_h_e_n;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]if*y*>*x_[ss_]_]); t := exp(0.0);
+   _i_f  y > x _t_h_e_n;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]p0_[ss_]_]); t := exp(0.0);
+   p0;
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]p1_[ss_]_]); t := exp(0.0);
+   p1(x);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]p2_[ss_]_]); t := exp(0.0);
+   p2(x,y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]p3_[ss_]_]); t := exp(0.0);
+   p3(x,y,z);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]abs_[ss_]_]); t := exp(0.0);
+   x := abs(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]arctan_[ss_]_]); t := exp(0.0);
+    x := arctan(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]entier_[ss_]_]); t := exp(0.0);
+    x := entier(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]sin_[ss_]_]); t := exp(0.0);
+    x := sin(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]cos_[ss_]_]); t := exp(0.0);
+    x := cos(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]ln_[ss_]_]); t := exp(0.0);
+    x := ln(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]sign_[ss_]_]); t := exp(0.0);
+    x := sign(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]exp*value*is*hors*de*combat_[ss_]_]); t := exp(0.0);
+    x := exp(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c);
+
+writetext(30, _[_[c_]sqrt_[ss_]_]); t := exp(0.0);
+    x := sqrt(y);
+t := exp(t); write(30, layout, t ×  1.0º3 - c); t := exp(0.0);
+_e_n_d
+|

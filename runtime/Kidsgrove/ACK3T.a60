@@ -1,0 +1,71 @@
+!begin
+!library A1, A4, A5, A15;
+
+ !integer j, n, calls;
+
+ !real !procedure ICR;
+   !KDF9 2/0/0/0;
+   SET 99; OUT; SET 47; FLOAT; !EXIT;
+   !ALGOL;
+
+ !real !procedure Time;
+   !KDF9 2/0/0/0;
+   SET 17; OUT; SET 23; FLOAT; !EXIT;
+   !ALGOL;
+
+   !real t1, t2, i1, i2;
+
+   !integer !procedure Ackermann(m, n); !value   m, n; !integer m, n;
+      !begin
+      HEAD:
+         calls := calls + 1;
+         !if m = 0 !then
+            Ackermann := n + 1
+         !else !if n = 0 !then
+            !begin
+               m := m - 1;
+               n := 1;
+               !goto HEAD
+            !end
+         !else
+            !begin
+               n := Ackermann(m, n - 1);
+               m := m - 1;
+               !goto HEAD
+            !end
+      !end Ackermann;
+
+open(20);
+n := read(20);
+
+calls := 128*4^n;
+calls := calls - 120*2^n;
+calls := calls + 9*n + 37;
+calls := calls/3;
+writetext(30, {{c}calls __ =});
+write(30, format({nddddddc}), calls);
+
+calls := 0;
+t1 := Time; i1 := ICR;
+j := Ackermann(3, n);
+i2 := ICR - i1; t2 := Time - t1;
+
+writetext(30, {{c}A(3,});
+write(30, format({d}), n);
+writetext(30, {) _ = _});
+write(30, format({ndddc}), j);
+
+writetext(30, {{c}calls __ =});
+write(30, format({nddddddc}), calls);
+
+writetext(30, {{c}microseconds_per_call _ _ _ _ _ _ _ _ _ =});
+write(30, format({nddd}), t2/calls*1 000 000);
+
+writetext(30, {{c}instructions_per_call _ _ _ _ _ _ _ _ _=});
+write(30, format({nndd}), i2/calls);
+
+writetext(30, {{c}microseconds_per_instruction _ _ =});
+write(30, format({ssnd.ddc}), t2/i2*1 000 000);
+
+!end
+****

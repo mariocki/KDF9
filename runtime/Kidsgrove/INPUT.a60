@@ -1,0 +1,27 @@
+!begin !library A1, A4, A5, A15;
+   !integer i, j;
+   !real x;
+
+   open(10);
+   writetext(10, {Hello _ World.{c}});
+
+   open(20);
+
+L:
+   i := read(20);
+   write(10, format({-ndddddddddds}), i);
+
+   x := read(20);
+   write(10, format({-d.dddddddddº+ndc}), x);
+
+   !if  i = 0
+   !then
+      writetext(10, {Farewell, _ Cruel _ World.{c}})
+   !else
+      !goto L;
+
+   close(20);
+   close(10);
+!end
+****
+|

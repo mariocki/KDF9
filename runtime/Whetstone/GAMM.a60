@@ -1,0 +1,129 @@
+GAMM|
+_b_e_g_i_n
+
+
+
+_c_o_m_m_e_n_t GAMM IN FORTRAN - SINGLE PRECISION VERSION, MARK 3;
+_c_o_m_m_e_n_t NATIONAL PHYSICAL LABORATORY BENCHMARK GAMM F;
+_c_o_m_m_e_n_t THIS PROGRAM HAS A SINGLE PARAMETER N;
+_c_o_m_m_e_n_t OUTPUT IS BY ONE WRITE STATEMENT TO STREAM 30;
+_c_o_m_m_e_n_t SET N := 10000 FOR ABOUT ONE MINUTE ON MACHINE LIKE 360/65;
+_i_n_t_e_g_e_r FIVE, I, J, N, REP, TEN, THIRTY;
+_r_e_a_l ACC, ACC1, DIVN, RN, ROOT, X, Y;
+_r_e_a_l _a_r_r_a_y A[1:30], B[1:30], C[1:30];
+N := 10000;
+FIVE := 5;
+TEN := 10;
+THIRTY := 30;
+RN := N;
+DIVN := 1.0 / RN;
+X := 0.1;
+ACC := 0.0;
+_c_o_m_m_e_n_t INITIALISE A AND B;
+Y := 1.0;
+_f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 30 _d_o
+_b_e_g_i_n
+  A[I] := I;
+  B[I] := - Y;
+  Y := - Y;
+_e_n_d;
+_c_o_m_m_e_n_t ONE PASS OF THIS LOOP CORRESPONDS TO 300 GAMM UNITS;
+_f_o_r REP := 1 _s_t_e_p 1 _u_n_t_i_l N _d_o
+     _b_e_g_i_n
+_c_o_m_m_e_n_t FIRST ADDITION/SUBTRACTION LOOP;
+   I := 30;
+   _f_o_r J := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     C[I] := A[I] + B[I];
+     I := I - 1;
+     _e_n_d;
+_c_o_m_m_e_n_t FIRST POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + C[I]) × X;
+     _e_n_d;
+   ACC1 := TEN × DIVN; _c_o_m_m_e_n_t not I, which is undefined in Algol;
+_c_o_m_m_e_n_t FIRST MAXIMUM ELEMENT LOOP;
+   Y := C[11];
+   _f_o_r I := 12 _s_t_e_p 1 _u_n_t_i_l 20 _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t FIRST SOUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 5 _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t SECOND ADDITION/SUBTRACTION LOOP;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     A[I] := C[I] - B[I];
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + A[I]) × X;
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l FIVE _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t FIRST MULTIPLICATION LOOP;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     C[I] := C[I] × B[I];
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND MAXIMUM ELEMENT LOOP;
+   Y := C[20];
+   _f_o_r I := 21 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t THIRD SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 5 _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t THIRD POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + C[I]) × X;
+     _e_n_d;
+   ACC1 := ACC1 + Y × DIVN;
+_c_o_m_m_e_n_t THIRD MAXIMUM ELEMENT LOOP;
+   Y := C[1];
+   _f_o_r I := 2 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t FOURTH SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l FIVE _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+
+     ACC1 := ACC1 + ROOT × DIVN;
+     ACC := ACC + ACC1;
+_e_n_d;
+
+open(30);
+output(30, N);
+output(30, ACC);
+output(30, ACC1);
+_c_o_m_m_e_n_t SHOULD PRINT N THEN 16.73343 22410 90064 71684 80142;
+_c_o_m_m_e_n_t                        13037 73134 63994;
+_c_o_m_m_e_n_t AND THEN 16.73 ... / N;
+_e_n_d
+|
+

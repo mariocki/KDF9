@@ -1,0 +1,34 @@
+andyp1|
+'begin'
+    'comment' 
+        This file does not do anything useful, it is simply used by myself to 
+        test the character conversion in the sed script;
+
+    'real' a, y, z;
+    'integer' layout;
+
+    layout := format({+d.dddddddd~+nd});
+
+    open(20);
+    a := read(20);
+    y := read(20);
+    close(20);
+
+    z := (a + y);
+    z := (a - y);
+    z := (a / y);
+    z := (a \ y);
+    'comment' z := (a * y);
+    'comment' z := (a ~ y);
+
+    open(30);
+    writetext(30, {Hello});
+    writetext(30, {{c}}); 'comment' carriage return :) ;
+    write(30, layout, z);
+    writetext(30, {_number_of_primes_below_2^12:_});
+    writetext(30, {{c}});
+    close(30);
+'end'
+|
+6; 12.3;
+|

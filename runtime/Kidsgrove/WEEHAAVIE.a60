@@ -1,0 +1,133 @@
+!begin  !library A0, A1, A5, A15;
+
+   !comment  HAVIE INTEGRATOR. ALGORITHM 257, Robert N. Kubik, CACM 8 (1965) 381;
+
+!real  a,b,eps,mask,y,answer; !integer m max, count;
+
+!real  !procedure  havieintegrator(y,a,b,eps,integrand,m);
+!value  a,b,eps,m;
+!integer  m;
+!real  integrand,y,a,b,eps;
+   !comment  This algorithm performs numerical integration of definite
+   integrals using an equidistant sampling of the function and repeated halving of
+   the sampling interval. Each halving allows the calculation of a trapezium and a
+   tangent formula on a finer grid, but also the calculation of several higher
+   order formulas which are defined implicitly. The two families of approximate
+   solutions will normally bracket the value of the integral and from these
+   convergence is tested on each of the several orders of approximation. The
+   algorithm is based on a private communication from F. Haavie of the Institutt
+   for Atom-energi Kjeller Research Establishment, Norway. A Fortran version is in
+   use on the Philco-2000. ...;
+!begin
+!real  h,endpts,sumt,sumu,d;
+!integer  i,j,k,n;
+!real  !array  t,u,tprev,uprev[1:m];
+   count := 0;
+   y := a; endpts := integrand;
+   y := b; endpts := 0.5 × (integrand + endpts);
+   sumt := 0.0; i := n := 1; h := b - a;
+estimate:
+   count := count + 1;
+   t[1] := h × (endpts + sumt); sumu := 0.0;
+      !comment  t[1] = h×(0.5×f[0]+f[1]+f[2]+...+0.5×f[2 !up (i-1)]);
+   y := a - h/2.0;
+   !for  j := 1 !step  1 !until  n !do
+      !begin
+      y := y + h; sumu := sumu + integrand;
+      !end ;
+   u[1] := h × sumu; k := 1;
+      !comment  u[1] = h×(f[1/2]+f[3/2]+...f[(2 !up i-1)/2],
+      k corresponds to approximate solution with truncation
+      error term of order 2k;
+test:
+   !if  abs(t[k]-u[k])  <=  eps !then
+      !begin
+      havieintegrator := 0.5 × (t[k] + u[k]);
+      !goto  exit
+      !end ;
+   !if  k  !=  i !then
+      !begin
+      d := 2  !up  (2×k);
+      t[k+1] := (d × t[k] - tprev[k]) / (d - 1.0);
+      tprev[k] := t[k];
+      u[k+1] := (d × u[k] - uprev[k]) / (d - 1.0);
+      uprev[k] := u[k];
+         !comment  This implicit formulation of the higher-order
+            integration formulas is given in [ROMBERG, W. ...];
+      k := k + 1;
+      !if  k = m !then
+         !begin
+          havieintegrator := 0.5 × (t[k] + u[k]);
+         !goto  exit
+         !end ;
+      !goto  test
+      !end ;
+   h := h / 2.0; sumt := sumt + sumu;
+   tprev[k] := t[k]; uprev[k] := u[k];
+   i := i + 1; n := 2 × n;
+   !goto  estimate;
+exit:
+!end  havieintegrator;
+
+
+eps  := 1.0º-10;
+writetext(30, {epsilon _ = _ });
+write(30, format({d.ddddddddddd~-ddc}), eps);
+
+m max  := 20;
+writetext(30, {m max _ = _ });
+write(30, format({nddc}), m max);
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,1.0/(1.0+y×y),m max);
+writetext(30, {count _ = _ });
+write(30, format({nddddddddc}), count);
+write(30, format({+d.ddddddddddd~-dd}), answer);
+writetext(30, { _ approximates _ +7.85398163397º_-1});
+writetext(30, {, _ relative _ error _ });
+write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.785398163397448)/0.785398163397448);
+
+a := eps; b := 1;
+answer := havieintegrator(y,eps,b,eps,(y !up (-y)),m max);
+writetext(30, {count _ = _ });
+write(30, format({nddddddddc}), count);
+write(30, format({+d.ddddddddddd~-dd}), answer);
+writetext(30, { _ approximates _ });
+write(30, format({+d.ddddddddddd~-dd}), 1.29128599706266);
+writetext(30, {, _ relative _ error _ });
+write(30, format({+d.ddddddddddd~-ddc}), (answer - 1.29128599706266)/1.29128599706266);
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,ln(1.0+y)/(1.0 + y^2),m max);
+writetext(30, {count _ = _ });
+write(30, format({nddddddddc}), count);
+write(30, format({+d.ddddddddddd~-dd}), answer);
+writetext(30, { _ approximates _ +2.72198261288º_-1});
+writetext(30, {, _ relative _ error _ });
+write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.27219826128795)/0.27219826128795);
+
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,(y+y)/(1.0+y×y),m max);
+writetext(30, {count _ = _ });
+write(30, format({nddddddddc}), count);
+write(30, format({+d.ddddddddddd~-dd}), answer);
+writetext(30, { _ approximates _ +6.93147180560º_-1});
+writetext(30, {, _ relative _ error _ });
+write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.6931471805599453)/0.6931471805599453);
+
+
+a:= 0.0; b:= 4.3;
+answer := havieintegrator(y, a, b, eps, exp(-y×y), m max);
+writetext(30, {count _ = _ });
+write(30, format({nddddddddc}), count);
+write(30, format({+d.ddddddddddd~-dd}), answer);
+writetext(30, { _ approximates _ +8.86226924395º_-1});
+writetext(30, {, _ relative _ error _ });
+write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.8862269243951)/0.8862269243951);
+
+FINISH:
+
+!end
+|
+

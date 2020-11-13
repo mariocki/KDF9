@@ -1,0 +1,20 @@
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |

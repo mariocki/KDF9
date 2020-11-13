@@ -1,0 +1,11 @@
+CDAB
+|
+AA
+CB
+|
+AAAAAAAA
+BBBBBBB
+ABAB
+CBCBCB
+||
+   448|

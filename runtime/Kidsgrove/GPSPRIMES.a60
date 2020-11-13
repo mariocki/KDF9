@@ -1,0 +1,57 @@
+ !begin
+ !library A1, A4, A5, A15;
+
+ !comment after Knuth and Merner, CACM June 1961;
+
+ !integer  !procedure GPS(j, n, z, v);  !integer j, n, z, v;
+    !begin
+    !for j := 1  !step 1  !until n  !do z := v;
+    GPS := 1
+    !end;
+
+ !integer  !procedure rem(n, d);  !value n, d;  !integer n, d;
+    rem := n - d * (n ÷ d);
+
+ !boolean  !procedure is special(n, r);  !value n, r;  !integer n, r;
+    is special := rem(n, 10) = r  !and n ÷ 10  !ne 1;
+
+ !integer j, a, m, p, z;
+
+open(30);
+
+ !for m := 1  !step 1  !until 30 *
+   GPS
+      (
+       j,
+        !if j = 0  !then -1  !else j,
+       p,
+        !if j = 1  !then  1
+                   !else
+                       !if GPS
+                              (
+                               a,
+                               j,
+                               z,
+                                !if a = 1  !then 1
+                                           !else ( !if rem(j, a) = 0  !and a < j  !then 0  !else z)
+                              ) = z
+                       !then  ( !if p < m  !then p + 1  !else j * GPS(a, 1, j, -1))
+                       !else  p
+      )
+ !do
+    !begin
+   writetext(30, {The {s}});
+   write(30, format({nddd}), m);
+    !if is special(m) in having units digit:(1)  !then writetext(30, {st _ })  !else
+    !if is special(m) in having units digit:(2)  !then writetext(30, {nd _ })  !else
+    !if is special(m) in having units digit:(3)  !then writetext(30, {rd _ })  !else
+                                                       writetext(30, {th _ });
+   writetext(30, {prime _ is _ });
+   write(30, format({ndddc}), p);
+    !end;
+
+close(30)
+
+!end
+****
+|

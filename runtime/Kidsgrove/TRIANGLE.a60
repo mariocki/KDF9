@@ -1,0 +1,96 @@
+!begin
+!library A0, A6;
+
+   !comment program to integrate f(x,y) over triangle (0,0), (1,0), (1,1);
+   !comment extra parameter to intint makes it work;
+
+   !real !procedure f(x, y);
+   !value x,y;  !real x,y;
+      f:= x + x + y + y;
+
+   !real !procedure int(a, b, f);
+   !comment integrates f(x) over range a to b;
+   !value a, b; !real a, b;  !real !procedure f;
+   !begin   !comment adding extra parameter makes it work;
+      !real !procedure intint(a, b, fa, fb, d);
+      !value a, b, fa, fb, d;  !real a, b, fa, fb;
+      !integer d;
+      !begin
+         !real c, fc, ff;
+         c := (a + b) * 0.5;
+         fc := f(c);
+         ff := (fa + 4.0*fc + fb);
+         !comment answer is good enough if simrule no better than trapezoidal;
+         !if  abs( (fa + fb)*3.0 - ff ) < 0.001
+         !then
+            intint := ff * (b - a)  * 0.16666666667
+         !else
+            intint := intint(a, c, fa, fc, d-1) + intint(c, b, fc, fb, d-1);
+      !end!;
+      int := intint(a, b, f(a), f(b), 5);
+   !end!;
+
+   !real !procedure intfy(x);
+   !comment integral 0 to x of ff(x,y) dy;
+   !value x;  !real x;
+   !begin
+      !real !procedure fx(y);
+      !value y;  !real y;
+         fx := f(x,y);
+      intfy := int(0, x, fx);
+   !end!;
+
+   !real !procedure minitest(x);
+   !value x;  !real x;
+   !begin
+      minitest := x*x*x;
+   !end!;
+
+   !real answer, pi;
+   !integer ii;
+
+   writetext(30, {minitest_0_to_2_x^3 _ = _ });
+   answer := int(0, 2, minitest);
+   output(30, answer);
+   writetext(30, {Now _ for _ the _ square _ root });
+   output(30, sqrt(answer));
+   pi := answer*arctan(1.0);
+   writetext(30, {This _ is _ the _ value _ of _ pi _ calculated _ using _ arctan _ });
+   output(30, pi);
+   answer := sin(pi/6.0);
+   writetext(30, {sin _ pi/6 _ which _ should _ be _ a _ half _ });
+   output(30, answer);
+   answer := cos(pi/6.0);
+   writetext(30, {cos _ pi/6 _ which _ should _ be _ a _ the _ same _ as _ the _ next _ result _ });
+   output(30, answer);
+   writetext(30, {should _ be _ same _ as _ the _ previous _ });
+   answer := sqrt(3.0)/2.0;
+   output(30, answer);
+
+   writetext(30, {Now _ square _ it _ to _ get _ 3/4 _ });
+   output(30, answer^2);
+
+   ii := 3;
+   writetext(30, {3^3 _ = _  });
+   output(30, ii^ii);
+   writetext(30, {Integer _ divide _ 3 _ squared _ by _ 2 _ });
+   output(30, ii^2 % 2);
+
+   writetext(30, {Calculate _ e _ using _ exp _ });
+   answer := exp(1.0);
+   output(30, answer);
+   writetext(30, {... _ and _ take _ its _ log _ });
+   output(30, ln(answer));
+
+   writetext(30, {{c}fulltest_0_to_1_triangle_ = _});
+   answer := int(0, 1, intfy);
+   output(30, answer);
+
+   writetext(30, {Testing _ exponentiation: _ 2 ^ 4 _ = _});
+   answer := 4.0;
+   output(30, 2^answer);
+   writetext(30, {Testing _ exponentiation: _ 2 ^ 4.0 _ = _});
+   output(30, 2.0^answer);
+
+!end
+****

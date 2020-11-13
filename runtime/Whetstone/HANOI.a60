@@ -1,0 +1,56 @@
+HANOI|
+_b_e_g_i_n
+
+
+_p_r_o_c_e_d_u_r_e disc (d);
+      _v_a_l_u_e d; _i_n_t_e_g_e_r d;
+   _b_e_g_i_n
+   _i_f d = 1 _t_h_e_n writetext(30, _[A_]) _e_l_s_e
+   _i_f d = 2 _t_h_e_n writetext(30, _[B_]) _e_l_s_e
+   _i_f d = 3 _t_h_e_n writetext(30, _[C_]) _e_l_s_e
+                   writetext(30, _[ERROR_])
+   _e_n_d disc;
+
+_p_r_o_c_e_d_u_r_e print move (from, to);
+      _i_n_t_e_g_e_r from, to;
+   _b_e_g_i_n
+    writetext(30, _[Move*a*disc*from*_]);
+    disc(from);
+    writetext(30, _[*to*_]);
+    disc(to);
+    writetext(30, _[_[c_]_]);
+   _e_n_d print move;
+
+_p_r_o_c_e_d_u_r_e solve (number,  source,  target,  spare);
+      _v_a_l_u_e   number,  source, target,  spare;
+      _i_n_t_e_g_e_r number,  source, target,  spare;
+   _b_e_g_i_n
+   _i_f number > 1 _t_h_e_n
+      _b_e_g_i_n
+      solve(number-1, source, spare, target);
+      print move (source, target);
+      solve(number-1,  spare,  target,  source);
+      _e_n_d
+   _e_l_s_e
+      print move (source, target);
+   _e_n_d solve;
+
+_i_n_t_e_g_e_r disc count;
+
+open(30);
+open(20);
+
+disc count := read(20);
+
+writetext(30, _[The*Towers*of*Hanoi._[c_]Move_]);
+write(30, format(_[nds_]), disc count);
+writetext(30, _[discs*from*tower*A*to*tower*C*via*tower*B_[c_]_]);
+solve(disc count, 1, 3, 2);
+
+close(20);
+close(30)
+_e_n_d
+|
+3;
+|
+|
