@@ -45,14 +45,16 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
     Removes all intermediate and transient files. Only really needs to be used if you have really messed up your runtime.
 
 ## Building from source
-Building on source should be the same on any modern Linux or MacOS installation.
+Building from source should be the same on any modern Linux or MacOS installation.
+
+Simply `cd` to the root folder and type `make deploy`.
 
 ### Ubuntu and other Debian derived distributions.
 Packages required:
     `build-essentials`
     `yacc`
     `gnatmake`
-    * let me know if I have missed aything *
+    *let me know if I have missed aything*
 
 ### Windows
 Only Windows10 + WSL2 is supported.
@@ -64,3 +66,6 @@ Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 Choose a distribution of your choice and follow the instructions for Linux abovegiven above.
 
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal)
+
+### ToDo
+- [ ] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
