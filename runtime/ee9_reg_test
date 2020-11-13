@@ -109,9 +109,9 @@ read reply
 
 tr -d "\\r" > POSIX-ee9_test_case.log < ee9_test_case.log
 
-more POSIX-ee9_test_case.log
+#more POSIX-ee9_test_case.log
 
-diff POSIX-ee9_test_case.log ee9_good_test_case.log  > differences.txt
+diff -B (grep -vE '*======*' POSIX-ee9_test_case.log) (grep -vE '*======' ee9_good_test_case.log)  > differences.txt
 
 printf "\\a\\a\\a"
 echo Press RETURN to complete the procedure:
