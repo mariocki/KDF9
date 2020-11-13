@@ -2,8 +2,8 @@
 --
 -- Elementary Encapsulated PostScript (EPS) line drawing.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,61 +16,25 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with formatting;
+with KDF9;
+
+use  formatting;
+use  KDF9;
+
 package body postscript is
 
-   pragma Unsuppress(All_Checks);
+   use host_IO;
 
-   use IO;
+   function image (p : postscript.point)
+   return String
+   is ("<" & trimmed(p.x'Image) & ", " & trimmed(p.y'Image) & ">");
 
-   the_PostScript_stream_access : access IO.stream;
-
-   procedure ensure_separation is
-   begin
-      if column(the_PostScript_stream_access.all) > 0 then
-         put_byte(' ', the_PostScript_stream_access.all);
-      end if;
-   end ensure_separation;
-
-   procedure put_fragment (PS_fragment : String) is
-   begin
-      put_bytes(PS_fragment, the_PostScript_stream_access.all);
-   end put_fragment;
-
-   procedure put_separate_fragment (PS_fragment : String) is
-   begin
-      ensure_separation;
-      put_fragment(PS_fragment);
-   end put_separate_fragment;
-
-   procedure put_fragment_and_a_new_line (PS_fragment : String) is
-   begin
-      put_fragment(PS_fragment);
-      put_EOL(the_PostScript_stream_access.all);
-   end put_fragment_and_a_new_line;
-
-   procedure put_separate_fragment_and_a_new_line (PS_fragment : String) is
-   begin
-      ensure_separation;
-      put_fragment(PS_fragment);
-      put_EOL(the_PostScript_stream_access.all);
-   end put_separate_fragment_and_a_new_line;
-
-   procedure put_integer_fragment (i : Integer) is
-      image  : constant String := Integer'Image(i);
-   begin
-      ensure_separation;
-      if image(image'First) /= ' ' then
-         put_fragment(image);
-      else  -- Suppress the nuisance blank character.
-         put_fragment(image(image'First+1..image'Last));
-      end if;
-   end put_integer_fragment;
 
    -- A path is a series of vectors v1, v2, ..., vn such that the last point
    --    of vi is the same as the first point of v(i+1),
    --       and v1, ..., vn are all drawn in the same colour.
-   -- The vectors in a path are accumulated, and drawn only when the path is terminated
-   --    by a jump to a non-contiguous point or by a change of pen colour.
+   -- A new path is started by a jump to a non-contiguous point or by a change of pen colour.
 
    there_is_an_open_path      : Boolean := False;
    the_last_point_in_the_path : postscript.point := (0, 0);
@@ -78,27 +42,68 @@ package body postscript is
    -- The bounding box limits are set from the value of maximum_offset at the end of the plot.
    maximum_offset             : postscript.point := (0, 0);
 
-   procedure terminate_any_open_path is
+   procedure ensure_separation (stream : in out host_IO.stream) is
+   begin
+      if column(stream) > 0 then
+         put_byte(' ', stream);
+      end if;
+   end ensure_separation;
+
+   procedure put (stream : in out host_IO.stream; PS_text : String) is
+   begin
+      put_bytes(PS_text, stream);
+   end put;
+
+   procedure put_unit (stream : in out host_IO.stream; PS_text : String) is
+   begin
+      ensure_separation(stream);
+      put(stream, PS_text);
+   end put_unit;
+
+   procedure put_line (stream : in out host_IO.stream; PS_text : String) is
+   begin
+      put(stream, PS_text);
+      put_EOL(stream);
+   end put_line;
+
+   procedure put_unit_line (stream : in out host_IO.stream; PS_text : String) is
+   begin
+      put_unit(stream, PS_text);
+      put_EOL(stream);
+   end put_unit_line;
+
+   procedure put_integer (stream : in out host_IO.stream; i : Integer) is
+      image  : constant String := i'Image;
+   begin
+      ensure_separation(stream);
+      if image(image'First) /= ' ' then
+         put(stream, image);
+      else  -- Suppress the nuisance blank character.
+         put(stream, image(image'First+1..image'Last));
+      end if;
+   end put_integer;
+
+   procedure terminate_any_open_path (stream : in out host_IO.stream) is
    begin
       if there_is_an_open_path then
          -- Draw the accumulated strokes.
-         put_separate_fragment_and_a_new_line("s");
+         put_unit_line(stream, "s");
       end if;
       there_is_an_open_path := False;
    end terminate_any_open_path;
 
-   procedure draw_a_PostScript_vector (initial, final : in postscript.point) is
+   procedure draw_a_PS_vector (stream : in out host_IO.stream;
+                               initial,
+                               final  : in postscript.point) is
 
-      function largest_of (a, b, c : Natural) return Natural is
-      begin
-         return Natural'Max(a, Natural'Max(b, c));
-      end largest_of;
-      pragma Inline(largest_of);
+      function largest_of (a, b, c : Natural)
+      return Natural
+      is (Natural'Max(a, Natural'Max(b, c)));
 
-   begin
+   begin -- draw_a_PS_vector
       if initial /= the_last_point_in_the_path then
          -- This vector is not contiguous with the previous one.
-         terminate_any_open_path;
+         terminate_any_open_path(stream);
       end if;
       if initial = final then
          -- This vector is of length 0.
@@ -108,20 +113,24 @@ package body postscript is
       maximum_offset.y := largest_of(maximum_offset.y, initial.y, final.y);
       if there_is_an_open_path then
          -- Draw a line to the final point, extending the current path.
-         put_integer_fragment(final.x);
-         put_integer_fragment(final.y);
-         put_separate_fragment_and_a_new_line("l");
+         put_integer(stream, final.x);
+         put_integer(stream, final.y);
+         put_unit_line(stream, "l");
       else
          -- Move to the initial point, opening a fresh path, and draw a line to the final point.
-         put_integer_fragment(final.x);
-         put_integer_fragment(final.y);
-         put_integer_fragment(initial.x);
-         put_integer_fragment(initial.y);
-         put_separate_fragment_and_a_new_line("n");
+         put_integer(stream, final.x);
+         put_integer(stream, final.y);
+         put_integer(stream, initial.x);
+         put_integer(stream, initial.y);
+         put_unit_line(stream, "n");
          there_is_an_open_path := True;
       end if;
       the_last_point_in_the_path := final;
-   end draw_a_PostScript_vector;
+   exception
+      when others =>
+         close(stream);
+         raise;
+   end draw_a_PS_vector;
 
    subtype RGB is String(1..11);
    gamut : constant array (pen_colour) of RGB
@@ -144,128 +153,116 @@ package body postscript is
                Yellow         => "1.0 1.0 .00"
             );
 
-   the_colour  : pen_colour   := the_default_colour;
-   the_pen_tip : pen_tip_size := the_default_pen_tip;
+   subtype tip_breadth is String(1..4);
+   breadth : constant array (pen_tip_size) of tip_breadth
+           := (
+               Extra_Extra_Fine => "1.00",
+               Extra_Fine       => "2.00",
+               Fine             => "4.00",
+               Medium           => "6.00",
+               Medium_Broad     => "8.00",
+               Broad            => "10.0",
+               Extra_Broad      => "12.0"
+              );
 
-   procedure put_the_pen_settings is
-   begin
-      terminate_any_open_path;
-      case the_pen_tip is
-         when Extra_Extra_Fine =>
-            put_separate_fragment("1.0");
-         when Extra_Fine =>
-            put_separate_fragment("2.0");
-         when Fine =>
-            put_separate_fragment("4.0");
-         when Medium =>
-            put_separate_fragment("6.0");
-         when Medium_Broad =>
-            put_separate_fragment("8.0");
-         when Broad =>
-            put_separate_fragment("10.0");
-         when Extra_Broad =>
-            put_separate_fragment("12.0");
-      end case;
-      put_separate_fragment_and_a_new_line("setlinewidth");
-      put_separate_fragment(gamut(the_colour));
-      put_separate_fragment_and_a_new_line("setrgbcolor");
+   the_colour   : pen_colour   := the_default_colour;
+   the_pen_size : pen_tip_size := the_default_tip_size;
+
+   procedure put_the_pen_settings (stream : in out host_IO.Stream) is
+   begin -- put_the_pen_settings
+      terminate_any_open_path(stream);
+      put_unit(stream, gamut(the_colour));
+      put_unit_line(stream, "setrgbcolor");
+      put_unit(stream, breadth(the_pen_size));
+      put_unit_line(stream, "setlinewidth");
    end put_the_pen_settings;
 
-   procedure set_the_pen_properties (this_colour  : in pen_colour   := the_default_colour;
-                                     this_pen_tip : in pen_tip_size := the_default_pen_tip) is
-   begin
-      the_colour  := this_colour;
-      the_pen_tip := this_pen_tip;
-      if the_PostScript_stream_access /= null     and then
-            is_open(the_PostScript_stream_access.all) then
-         put_the_pen_settings;
-      end if;
+   procedure set_the_pen_properties (this_colour   : in pen_colour   := the_default_colour;
+                                     this_pen_size : in pen_tip_size := the_default_tip_size) is
+   begin -- set_the_pen_properties
+      the_colour := this_colour;
+      the_pen_size := this_pen_size;
    end set_the_pen_properties;
 
    -- We eventually seek back to the bounding box parametsrs using this, their file offset.
    the_position_of_the_placeholders : Natural;
 
-   procedure initialize_PostScript_output (the_GP_stream : in out IO.Stream) is
-   begin
-      if the_PostScript_stream_access /= null then
-         finalize_PostScript_output;
-         raise postscript_error with "PostScript was already initialized";
-      end if;
-      the_PostScript_stream_access := the_GP_stream'Unchecked_Access;
+   procedure initialize_PS_output (stream : in out host_IO.Stream) is
 
-      put_fragment_and_a_new_line("%!PS-Adobe-3.0 EPSF-1.0");
-      put_separate_fragment("%%BoundingBox: ");
+   begin -- initialize_PS_output
+      put_line(stream, "%!PS-Adobe-3.0 EPSF-1.0");
+      put_unit(stream, "%%BoundingBox: ");
 
       -- Note the file offset of the bounding box placeholders.
-      get_position(the_position_of_the_placeholders, the_PostScript_stream_access.all);
+      get_position(the_position_of_the_placeholders, stream);
 
       -- Write the 10-column placeholders.
-      put_fragment_and_a_new_line("xxxxxxxxxx|yyyyyyyyyy");
+      put_line(stream, "xxxxxxxxxx|yyyyyyyyyy");
 
-      put_separate_fragment_and_a_new_line("% This graph was plotted by ee9, the GNU Ada KDF9 emulator.");
-      put_separate_fragment_and_a_new_line("% For more information, see <http://www.findlayw.plus.com/KDF9>.");
-      put_separate_fragment_and_a_new_line("save");
+      put_line(stream, "% This graph was plotted by ee9, the GNU Ada KDF9 emulator.");
+      put_line(stream, "% For more information, see <http://www.findlayw.plus.com/KDF9>.");
+      put_line(stream, "save");
 
-      put_separate_fragment_and_a_new_line("1 setlinecap");
-      put_separate_fragment_and_a_new_line("1 setlinejoin");
+      put_line(stream, "1 setlinecap");
+      put_line(stream, "1 setlinejoin");
 
-      put_the_pen_settings;
+      put_the_pen_settings(stream);
 
-      put_separate_fragment_and_a_new_line("0 792 translate");  -- Assumes a page of length 11"!
+      put_line(stream, "0 792 translate");  -- Assumes a page of length 11"!
 
       -- The plotter step was 0.005", which is the same as 0.36 PostScript points.
       -- The scaling factor is set here to make the wabbit example fit an A4 page.
-      put_separate_fragment_and_a_new_line("0.12 -0.12 scale");
+      put_line(stream, "0.12 -0.12 scale");
 
-      put_separate_fragment_and_a_new_line("/l { lineto } bind def");
-      put_separate_fragment_and_a_new_line("/n { newpath moveto lineto } bind def");
-      put_separate_fragment_and_a_new_line("/s { stroke } bind def");
+      put_line(stream, "/l { lineto } bind def");
+      put_line(stream, "/n { newpath moveto lineto } bind def");
+      put_line(stream, "/s { stroke } bind def");
 
-      put_separate_fragment_and_a_new_line("save");
-   end initialize_PostScript_output;
+      put_line(stream, "save");
+   exception
+      when others =>
+         close(stream);
+         raise;
+   end initialize_PS_output;
 
-   procedure finalize_PostScript_output is
+   procedure finalize_PS_output (stream : in out host_IO.Stream) is
 
       subtype bound_string is String(1..10);
 
       function bound_image (n : in Natural)
       return bound_string is
-         n_image : constant String := Natural'Image(n);
+         n_image : constant String := n'Image;
          b : bound_string := (others => ' ');
       begin
          if n_image'Length > bound_string'Length then
-            raise postscript_error with "infeasible bounding box size";
+            trap_invalid_operand("infeasible PostScript bounding box size");
          else
             b(b'Last-n_image'Length+b'First .. b'Last) := n_image;
             return b;
          end if;
       end bound_image;
 
-   begin
-      if the_PostScript_stream_access = null then
-         raise postscript_error with "PostScript was already finalized";
-      end if;
-      terminate_any_open_path;
-      put_separate_fragment_and_a_new_line("showpage");
-      put_separate_fragment_and_a_new_line("restore");
-      put_separate_fragment_and_a_new_line("restore");
-      put_separate_fragment_and_a_new_line("% End of plot");
+   begin -- finalize_PS_output
+      terminate_any_open_path(stream);
+      put_line(stream, "showpage");
+      put_line(stream, "restore");
+      put_line(stream, "restore");
+      put_line(stream, "% End of plot");
 
       -- Go back to the bounding box placeholders in the output file.
-      set_position(the_position_of_the_placeholders, the_PostScript_stream_access.all);
+      set_position(the_position_of_the_placeholders, stream);
 
       -- Overwrite them with the actual x and y co-ordinate bounds.
-      put_fragment(bound_image(maximum_offset.x));
-      put_fragment(" ");
-      put_fragment(bound_image(maximum_offset.y));
+      put(stream, bound_image(maximum_offset.x));
+      put(stream, " ");
+      put(stream, bound_image(maximum_offset.y));
 
-      close(the_PostScript_stream_access.all);
-      the_PostScript_stream_access := null;
+      close(stream);
    exception
       when others =>
-         close(the_PostScript_stream_access.all);
-         the_PostScript_stream_access := null;
+         close(stream);
          raise;
-   end finalize_PostScript_output;
+   end finalize_PS_output;
 
 end postscript;
+

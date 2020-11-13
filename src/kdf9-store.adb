@@ -2,8 +2,8 @@
 --
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,184 +16,228 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with Ada.Unchecked_Conversion;
+--
+with formatting;
 with KDF9.CPU;
 
+use formatting;
 use  KDF9.CPU;
 
 package body KDF9.store is
 
-   function group (EA : KDF9.Q_part)
-   return KDF9.Q_part is
-   begin
-      return EA / group_size;
-   end group;
+   -- diagnose_invalid_address avoids secondary stack usage in the address validation procedures.
+   procedure diagnose_invalid_address (message : in String; address : in KDF9.word)
+      with Inline => False;
 
-   procedure validate_address (EA : in KDF9.address) is
+   procedure diagnose_invalid_address (message : in String; address : in KDF9.word) is
+   begin
+      trap_invalid_instruction(message & " =" & address'Image);
+   end diagnose_invalid_address;
+
+   -- Check that EA, EA+BA are valid; LIV if invalid.
+   procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part)
+      with Inline;
+
+   procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part) is
+      PA : constant KDF9.word := (KDF9.word(EA) + KDF9.word(BA)) and Q_part_mask;
+   begin
+      if EA > NOL and then the_CPU_state = program_state then
+         diagnose_invalid_address("NOL < virtual address", KDF9.word(EA));
+      end if;
+      if PA > max_address and then the_CPU_state = program_state then
+         diagnose_invalid_address("32K-1 < physical address", PA);
+      end if;
+   end validate_virtual_and_real_addresses;
+
+   procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
+                                    address_2 : KDF9.Q_part := 0;
+                                    solo      : Boolean     := True) is
+   begin
+      LOV_if_user_mode(
+                       if solo
+                       then "at #" & oct_of(address_1) & " (E" & dec_of(address_1) & ")"
+                       else "in #" & oct_of(address_1) & "/#" & oct_of(address_2)
+                      );
+   end if_user_mode_then_LOV;
+
+   function group (PA : KDF9.Q_part)
+   return KDF9.Q_part
+   is (PA / group_size);
+
+   procedure check_address_and_lockout (EA : in KDF9.Q_part) is
       PA : constant KDF9.Q_part := EA + BA;
    begin
-      if EA > NOL then
-         trap_invalid_instruction("virtual address > NOL");
-      end if;
-      if PA > max_address then
-         trap_invalid_instruction("physical address > 32K-1");
-      end if;
-   end validate_address;
-
-   procedure validate_access (EA : in KDF9.address) is
-      PA : constant KDF9.Q_part := EA + BA;
-   begin
-      validate_address(EA);
+      validate_virtual_and_real_addresses(EA);
       if locked_out(group(PA)) then
          the_locked_out_address := PA;
          if the_CPU_state /= Director_state then
-            raise LOV_trap;
+            if_user_mode_then_LOV(PA);
          end if;
       end if;
-   end validate_access;
+   end check_address_and_lockout;
 
-   procedure validate_address_range (EA1, EA2 : in KDF9.address) is
+   procedure validate_address_range (EA1, EA2 : in KDF9.Q_part) is
    begin
-      validate_address(EA1);
-      validate_address(EA2);
+      validate_virtual_and_real_addresses(EA1);
+      validate_virtual_and_real_addresses(EA2);
       if EA1 > EA2 then
-         trap_invalid_instruction("initial address > final address");
+         diagnose_invalid_address("initial address > final address", KDF9.word(EA2));
       end if;
    end validate_address_range;
 
-   procedure validate_range_access (EA1, EA2 : in KDF9.address) is
-      PA1 : constant KDF9.Q_part := EA1 + BA;
-      PA2 : constant KDF9.Q_part := EA2 + BA;
+   procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part) is
+       PA1 : constant KDF9.Q_part := EA1 + BA;
+       PA2 : constant KDF9.Q_part := EA2 + BA;
    begin
       validate_address_range (EA1, EA2);
-      if test_lockouts(KDF9.Q_register'(0, PA1, PA2)) /= 0 then
+      if there_are_locks_in_physical_addresses(KDF9.Q_register'(C => 0, I => PA1, M => PA2)) then
          if the_CPU_state /= Director_state then
-            raise LOV_trap;
+            if_user_mode_then_LOV(PA1, PA2, solo => False);
          end if;
       end if;
-   end validate_range_access;
+   end check_addresses_and_lockouts;
 
-   -- Check that A1+A2 is valid; LIV if it is invalid.
-   function validated_sum (A1, A2 : in KDF9.Q_part)
+   -- Check that A1+A2 is valid; trap if it is invalid.
+   function valid_word_address (A1, A2 : in KDF9.Q_part)
    return KDF9.address is
-      W : constant KDF9.word := (KDF9.word(A1) + KDF9.word(A2)) and Q_part_mask;
+      V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(A2)) and Q_part_mask;
    begin
-      if W > max_address then
-         trap_invalid_instruction("virtual address > 32K-1");
+      if V > max_address then
+         diagnose_invalid_address("32K-1 < virtual address", V);
       end if;
-      return KDF9.address(W);
-   end validated_sum;
+      return KDF9.address(V);
+   end valid_word_address;
 
-   function fetch_symbol (EA : KDF9.Q_part; sn : KDF9.symbol_number)
-   return KDF9.symbol is
-      place   : constant Natural     := 42 - 6*Natural(sn);
-      address : constant KDF9.Q_part := EA + BA;
+   function signed is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
+   function design is new Ada.Unchecked_Conversion (CPU.signed_Q_part, KDF9.Q_part);
+
+   -- Check that A1+A2/2 is valid; trap if it is invalid.  A2 must be treated as a signed number.
+   function valid_halfword_address (A1, A2 : in KDF9.Q_part)
+   return KDF9.address is
+      V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(design(signed(A2)/2))) and Q_part_mask;
    begin
-      return KDF9.symbol(shift_word_right(core(address), place) and 8#77#);
-   end fetch_symbol;
+      if V > max_address then
+         diagnose_invalid_address("32K-1 < virtual address", V);
+      end if;
+      return KDF9.address(V);
+   end valid_halfword_address;
 
-   procedure store_symbol (value : in KDF9.symbol;
-                           EA    : in KDF9.Q_part;
-                           sn    : in KDF9.symbol_number) is
-      place  : constant Natural   := 42 - 6*Natural(sn);
+   function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
+   return KDF9_char_sets.symbol
+   is (KDF9_char_sets.symbol(shift_word_right(core(EA+BA), 42 - 6*Natural(index)) and 8#77#));
+
+   procedure store_symbol (value : in KDF9_char_sets.symbol;
+                           EA    : in KDF9.address;
+                           index : in KDF9_char_sets.symbol_index) is
+      place  : constant Natural   := 42 - 6*Natural(index);
       mask   : constant KDF9.word := not shift_word_left(8#77#, place);
       symbol : constant KDF9.word := shift_word_left(KDF9.word(value), place);
    begin
       core(EA+BA) := (core(EA+BA) and mask) or symbol;
    end store_symbol;
 
-   function fetch_syllable (EA : KDF9.code_point)
+   function fetch_octet (EA : KDF9.address; index : KDF9_char_sets.octet_index)
+   return KDF9_char_sets.octet is
+      place : constant Natural := 40 - 8*Natural(index);
+   begin
+      return KDF9_char_sets.octet(shift_word_right(core(EA+BA), place) and 8#377#);
+   end fetch_octet;
+
+   procedure store_octet  (value : in KDF9_char_sets.octet;
+                           EA    : in KDF9.address;
+                           index : in KDF9_char_sets.octet_index) is
+      place : constant Natural   := 40 - 8*Natural(index);
+      octet : constant KDF9.word := shift_word_left(KDF9.word(value), place);
+      mask  : constant KDF9.word := not shift_word_left(8#377#, place);
+   begin
+      core(EA+BA) := (core(EA+BA) and mask) or octet;
+   end store_octet;
+
+   function fetch_syllable (EA : KDF9.syllable_address)
    return KDF9.syllable is
-      place   : constant Natural     := 40 - 8*Natural(EA.syllable_number);
-      address : constant KDF9.Q_part := KDF9.Q_part(EA.word_number) + BA;
+      address : constant KDF9.address := Q_part(EA.order_word_number) + BA;
+      place   : constant Natural      := 40 - 8*Natural(EA.syllable_index);
    begin
       return KDF9.syllable(shift_word_right(core(address), place) and 8#377#);
    end fetch_syllable;
 
-   procedure store_syllable (value : in KDF9.syllable; EA : in KDF9.code_point) is
-      place    : constant Natural      := 40 - 8*Natural(EA.syllable_number);
-      address  : constant KDF9.Q_part  := KDF9.Q_part(EA.word_number) + BA;
+   procedure store_syllable (value : in KDF9.syllable;
+                             EA    : in KDF9.address;
+                             index : in KDF9.syllable_index) is
+      place    : constant Natural   := 40 - 8*Natural(index);
       syllable : constant KDF9.word := shift_word_left(KDF9.word(value), place);
       mask     : constant KDF9.word := not shift_word_left(8#377#, place);
    begin
-      core(address) := (core(address) and mask) or syllable;
+      core(EA+BA) := (core(EA+BA) and mask) or syllable;
    end store_syllable;
 
-   function fetch_halfword (EA : KDF9.Q_part; hn : KDF9.halfword_number)
-   return KDF9.word is
-      place   : constant Natural      := 24 - 24*Natural(hn);
-      address : constant KDF9.Q_part  := EA + BA;
-   begin
-      return shift_word_left(shift_word_right(core(address), place), 24);
-   end fetch_halfword;
+   function fetch_halfword (EA : KDF9.address; index : KDF9.halfword_number)
+   return KDF9.word
+   is (shift_word_left(shift_word_right(core(EA+BA), 24 - 24*Natural(index)), 24));
 
    procedure store_halfword (value : in KDF9.word;
-                             EA    : in KDF9.Q_part;
-                             hn    : in KDF9.halfword_number) is
-      place   : constant Natural      := 24 - 24*Natural(hn);
-      address : constant KDF9.Q_part  := EA + BA;
+                             EA    : in KDF9.address;
+                             index : in KDF9.halfword_number) is
+      place   : constant Natural   := 24 - 24*Natural(index);
       half    : constant KDF9.word := shift_word_left(shift_word_right(value, 24), place);
       mask    : constant KDF9.word := not shift_word_left(halfword_mask, place);
    begin
-      core(address) := (core(address) and mask) or half;
+      core(EA+BA) := (core(EA+BA) and mask) or half;
    end store_halfword;
 
-   function fetch_word (EA : KDF9.Q_part)
-   return KDF9.word is
-   begin
-      return core(EA+BA);
-   end fetch_word;
+   function fetch_word (EA : KDF9.address)
+   return KDF9.word
+   is (core(EA+BA));
 
-   procedure store_word (value : in KDF9.word; EA : in KDF9.Q_part) is
+   procedure store_word (value : in KDF9.word; EA : in KDF9.address) is
    begin
       core(EA+BA) := value;
    end store_word;
 
-   function test_lockouts (Q : in KDF9.Q_register)
-   return KDF9.word is
-      a : KDF9.address;
+   function there_are_locks_in_relative_addresses (Q : KDF9.Q_register)
+   return Boolean is
    begin
       validate_address_range (Q.I, Q.M);
-      a := Q.I;
-      loop
-         if locked_out(group(a)) then
-            the_locked_out_address := a;
-            return 1;
-         end if;
-      exit when group_size > Q.M - a;
-         a := a + group_size;
-      end loop;
-      return 0;
-   end test_lockouts;
+      return there_are_locks_in_physical_addresses((0, Q.I+BA, Q.M+BA));
+   end there_are_locks_in_relative_addresses;
 
-   procedure set_lockouts (Q : in KDF9.Q_register) is
+   function there_are_locks_in_physical_addresses (Q : KDF9.Q_register)
+   return Boolean is
+   begin
+      for g in group(Q.I) .. group(Q.M) loop
+         if locked_out(g) then
+            the_locked_out_address := g * group_size;
+            return True;
+         end if;
+      end loop;
+      return False;
+   end there_are_locks_in_physical_addresses;
+
+   function is_unlocked (G : KDF9.store.group_address)
+   return Boolean is
+   begin
+      return not locked_out(KDF9.Q_part(G));
+   end is_unlocked;
+
+   procedure lock_out_relative_addresses (Q : in KDF9.Q_register) is
    begin
       validate_address_range (Q.I, Q.M);
+      lock_out_absolute_addresses((0, Q.I+BA, Q.M+BA));
+   end lock_out_relative_addresses;
+
+   procedure lock_out_absolute_addresses (Q : in KDF9.Q_register) is
+   begin
       for g in group(Q.I) .. group(Q.M) loop
          locked_out(g) := True;
       end loop;
-   end set_lockouts;
+   end lock_out_absolute_addresses;
 
-   procedure clear_lockouts (Q : in KDF9.Q_register) is
+   procedure unlock_absolute_addresses (Q : in KDF9.Q_register) is
    begin
-      validate_address_range (Q.I, Q.M);
       for g in group(Q.I) .. group(Q.M) loop
          locked_out(g) := False;
       end loop;
-   end clear_lockouts;
-
-   procedure mirror (start_address, end_address : in KDF9.address) is
-      lower_address : KDF9.address := start_address;
-      upper_address : KDF9.address := end_address;
-      lo_word, hi_word : KDF9.word;
-   begin
-      while lower_address < upper_address loop
-         lo_word := fetch_word(lower_address);
-         hi_word := fetch_word(upper_address);
-         store_word(hi_word, lower_address);
-         store_word(lo_word, upper_address);
-         lower_address := lower_address + 1;
-         upper_address := upper_address - 1;
-      end loop;
-   end mirror;
+   end unlock_absolute_addresses;
 
 end KDF9.store;

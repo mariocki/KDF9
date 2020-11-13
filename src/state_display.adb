@@ -2,8 +2,8 @@
 --
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,78 +16,95 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with Ada.Characters.Latin_1;
 with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 --
 with disassembly;
 with dumping;
 with exceptions;
-with FD_layout;
 with formatting;
-with generic_sets; pragma Elaborate_All(generic_sets);
+with generic_sets;
 with HCI;
 with IOC;
-with KDF9.compressed_opcodes;
+with KDF9_char_sets;
 with KDF9.CPU;
+with KDF9.decoding;
 with KDF9.PHU_store;
 with KDF9.store;
-with Latin_1;
 with logging.file;
-with logging.panel;
 with settings;
 with tracing;
 
 
+use  Ada.Characters.Latin_1;
 use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 --
 use  disassembly;
 use  dumping;
 use  exceptions;
-use  FD_layout;
 use  formatting;
 use  HCI;
 use  IOC;
-use  KDF9.compressed_opcodes;
+use  KDF9_char_sets;
 use  KDF9.CPU;
+use  KDF9.decoding;
 use  KDF9.PHU_store;
 use  KDF9.store;
-use  Latin_1;
 use  logging.file;
-use  logging.panel;
 use  settings;
 use  tracing;
 
 package body state_display is
 
-   pragma Unsuppress(All_Checks);
+   procedure show_IM_parts (the_Q_register : in KDF9.Q_register;
+                            width          : in Positive := 8) is
+   begin
+      log(
+          "/"
+        & just_right("#" & oct_of(the_Q_register.I, width-2), width)
+        & "/"
+        & just_right("#" & oct_of(the_Q_register.M, width-2), width)
+         );
+   end show_IM_parts;
 
-   procedure show_Q_register (the_Q_register : in KDF9.Q_register;
-                              width          : in Positive := 8;
-                              with_FD_C_part : in Boolean  := False) is
-      the_buffer : constant KDF9.Q_part := the_Q_register.C mod 2**4;
+   procedure show_IO_register (the_Q_register : in KDF9.Q_register;
+                               width          : in Positive := 8;
+                               for_DR,
+                               for_FD,
+                               for_FH,
+                               for_seek       : in Boolean  := False) is
    begin
       log('Q');
-      if with_FD_C_part and the_buffer = FD0_number then
-         log(justified(formatted_as_FD_command(the_Q_register), width));
+      if for_FD then
+         log(just_right(as_FD_command(the_Q_register, for_seek, for_FH), width));
+      elsif for_DR then
+         log(just_right(as_DR_command(the_Q_register), width));
       else
-         log(justified("#" & oct_of(the_Q_register.C, width-2), width));
+         log(just_right("#" & oct_of(the_Q_register.C, width-2), width));
       end if;
-      log("/");
-      log(justified("#" & oct_of(the_Q_register.I, width-2), width));
-      log("/");
-      log(justified("#" & oct_of(the_Q_register.M, width-2), width));
+      show_IM_parts(the_Q_register, width);
+   end show_IO_register;
+
+   procedure show_Q_register (the_Q_register : in KDF9.Q_register;
+                              width          : in Positive := 8) is
+   begin
+      log('Q' & just_right("#" & oct_of(the_Q_register.C, width-2), width));
+      show_IM_parts(the_Q_register, width);
    end show_Q_register;
 
    procedure show_Q_in_decimal (the_Q_register : in KDF9.Q_register;
                                 width          : in Positive := 7) is
    begin
-      log('Q');
-      log(justified(CPU.signed_Q_part'Image(resign(the_Q_register.C)), width));
-      log("/");
-      log(justified(CPU.signed_Q_part'Image(resign(the_Q_register.I)), width));
-      log("/");
-      log(justified(CPU.signed_Q_part'Image(resign(the_Q_register.M)), width));
+      log(
+          'Q'
+        & just_right(CPU.signed_Q_part'Image(resign(the_Q_register.C)), width)
+        & "/"
+        & just_right(CPU.signed_Q_part'Image(resign(the_Q_register.I)), width)
+        & "/"
+        & just_right(CPU.signed_Q_part'Image(resign(the_Q_register.M)), width)
+         );
    end show_Q_in_decimal;
 
    procedure show_in_syllables_form (the_word : in KDF9.word) is
@@ -97,49 +114,30 @@ package body state_display is
       for b in 0 .. 5 loop
          word := rotate_word_left(word, 8);
          syllable := KDF9.syllable(word and 8#377#);
-         log("#");
-         log(justified(oct_of(syllable), 3));
-         log(" ");
+         log("#" & just_right(oct_of(syllable), 3) & " ");
       end loop;
    end show_in_syllables_form;
 
-   function glyph_for (char : Character)
-   return Character is
-   begin
-      if char = LF then
-         return '®';
-      elsif char = FF then
-         return '©';
-      elsif char = HT then
-         return '¬';
-      elsif char = SUB then
-         return KDF9.W_F;
-      else
-         return char;
-      end if;
-   end glyph_for;
-
-   procedure show_in_LP_form (the_word : in KDF9.word) is
+   procedure show_as_characters (the_word : in KDF9.word) is
       word : KDF9.word := the_word;
       data : String(1 .. 8);
    begin
-      for b in reverse data'Range loop
-         data(b) := glyph_for(to_LP(KDF9.symbol(word and 8#77#)));
+      for b of reverse data loop
+         b := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
          word := shift_logical(word, -6);
       end loop;
       log(data);
-   end show_in_LP_form;
+   end show_as_characters;
 
   procedure show_in_various_formats (the_word : in KDF9.word;
-                                      column   : in Positive := 5) is
-      image : String(1 .. 18);
+                                     column   : in Positive := 5) is
+      image : String(1 .. 21);
    begin
       log_octal(the_word);
-      log(" = ");
-      log(justified(trimmed(CPU.signed'Image(resign(the_word))), 16));
-      log(" = ");
-      Put(image, host_float(CPU.float(the_word)), Aft => 11, Exp => 2);
-      log(trimmed(image));
+      log(" = " & just_right(trimmed(CPU.signed'Image(resign(the_word))), 16) & " = ");
+      Put(image, host_float(CPU.f48(the_word)), Aft => 12, Exp => 2);
+      log(trimmed(image) & " = ");
+      log(as_fraction(the_word)'Image);
       log_new_line;
       tab_log_to(column);
       log(" = ");
@@ -151,94 +149,101 @@ package body state_display is
       log(" = ");
       show_in_syllables_form(the_word);
       log("= """);
-      show_in_LP_form(the_word);
+      show_as_characters(the_word);
       log("""");
    end show_in_various_formats;
 
    procedure show_progress is
+
+      function readable (t : KDF9.us)
+      return String is
+         t_plus_5E2 : constant KDF9.us := (t + 5E2)/ 1E3;
+         t_plus_5E5 : constant KDF9.us := (t + 5E5)/ 1E6;
+      begin
+         return (if t < 1E3 then
+                    ""
+              elsif t < 1E6 then
+                    " about" & t_plus_5E2'Image & " ms"
+              else  " about" & t_plus_5E5'Image & " sec" );
+      end readable;
+
+      CPU : constant String := " KDF9 us. (RAN)" & readable(the_CPU_time);
+      EL  : constant String := " KDF9 us. (EL) " & readable(the_clock_time);
+
    begin
-      log("ORDERS:     ");
-      log(justified(KDF9.order_counter'Image(ICR), 10));
-      log_line(" executed (ICR)");
-      log("CPU TIME:   ");
-      log(justified(KDF9.microseconds'Image(the_CPU_time), 10));
-      log_line(" KDF9 us. (RAN)");
-      log("CLOCK TIME: ");
-      log(justified(KDF9.microseconds'Image(the_clock_time), 10));
-      log_line(" KDF9 us. (EL)");
+      log_line("ORDERS:     " & just_right(ICR'Image, 10) & " executed (ICR)");
+      log_line("CPU TIME:   " & just_right(the_CPU_time'Image, 10) & CPU);
+      log_line("CLOCK TIME: " & just_right(KDF9.us'Image(the_clock_time), 10) & EL);
    end show_progress;
 
+   slot_name : constant array (KDF9.context) of String(1..1)  := ("P", "Q", "R", "S");
+
    procedure show_Director_registers is
+      interval : constant KDF9.us := the_clock_time - the_last_K4_time;
    begin
-      log("The CPU is in ");
-      log_line(KDF9.CPU_state'Image(the_CPU_state));
-      log("CONTEXT:  ");
-      log_line(justified(KDF9.context'Image(the_context), 1));
-      log("PRIORITY: ");
-      log_line(justified(KDF9.priority'Image(CPL), 1));
-      log("BA:       ");
-      log_line(justified("#" & oct_of(BA), 6));
-      log("NOL:      ");
-      log_line(justified("#" & oct_of(NOL), 6));
+      log_line("The CPU is in " & the_CPU_state'Image);
+      log_line("CONTEXT:  " & slot_name(the_context));
+      log_line("PRIORITY: " & just_right(CPL'Image, 1));
+      log_line("BA:       " & just_right("#" & oct_of(BA), 6));
+      log_line("NOL:      " & just_right("#" & oct_of(NOL), 6));
       log("CPDAR:    ");
       for i in KDF9.buffer_number loop
-         if the_CPDAR(i) = 1 then log("A"); else log("U"); end if;
+         log(if the_CPDAR(i) then device_name_of(buffer(i).all) & " " else "");
       end loop;
+      log_new_line;
       log_new_line;
       log_line("PHU stores:");
       for p in KDF9.priority loop
-         log("CPL" & KDF9.priority'Image(p) & " is ");
+         log("PHU" & p'Image & " is ");
          if PHU(p).is_held_up then
             if PHU(p).blockage.reason = buffer_busy then
-               log("waiting for ");
-               log(logical_device_name_of(IOC.device_number(PHU(p).blockage.buffer_nr)));
-               log(" on buffer #");
-               log(oct_of(PHU(p).blockage.buffer_nr, 2));
-               if PHU(p).blockage.INTQq_wait = 1 then
+               log("waiting for " & device_name_of(IOC.device_number(PHU(p).blockage.buffer_nr)));
+               log(" on buffer #" & oct_of(PHU(p).blockage.buffer_nr, 2));
+               if PHU(p).blockage.by_INTQq then
                   log(", because of INTQq");
                end if;
             else
-               log("locked out at");
-               log(KDF9.PHU_store.group_address'Image(PHU(p).blockage.group_nr));
+               log("locked out of group" & KDF9.store.group_address'Image(PHU(p).blockage.group_nr));
             end if;
          else
             log("idle");
          end if;
          log_new_line;
       end loop;
+      log_new_line;
       log_line("RFIR (Interrupt Flags):");
-      log("PR:       ");
-      log_line(Boolean'Image(the_RFIR(PR_flag)));
-      log("FLEX:     ");
-      log_line(Boolean'Image(the_RFIR(FLEX_flag)));
-      log("LIV:      ");
-      log_line( Boolean'Image(the_RFIR(LIV_flag)));
-      log("NOUV:     ");
-      log_line( Boolean'Image(the_RFIR(NOUV_flag)));
-      log("EDT:      ");
-      log_line(Boolean'Image(the_RFIR(EDT_flag)));
-      log("OUT:      ");
-      log_line( Boolean'Image(the_RFIR(OUT_flag)));
-      log("LOV:      ");
-      log_line( Boolean'Image(the_RFIR(LOV_flag)));
-      log("RESET:    ");
-      log_line(Boolean'Image(the_RFIR(RESET_flag)));
+      log_line(
+               "CLOCK:    "
+             & Boolean'Image(interval >= 2**20)
+             & "; time since last CLOCK interrupt ="
+             & KDF9.us'Image(interval)
+             & " KDF9 us."
+              );
+      log_line("PR:       " & Boolean'Image(the_RFIR(PR_interrupt)));
+      log_line("FLEX:     " & Boolean'Image(the_RFIR(FLEX_interrupt)));
+      log_line("LIV:      " & Boolean'Image(the_RFIR(LIV_interrupt)));
+      log_line("NOUV:     " & Boolean'Image(the_RFIR(NOUV_interrupt)));
+      log_line("EDT:      " & Boolean'Image(the_RFIR(EDT_interrupt)));
+      log_line("OUT:      " & Boolean'Image(the_RFIR(OUT_interrupt)));
+      log_line("LOV:      " & Boolean'Image(the_RFIR(LOV_interrupt)));
+      log_line("RESET:    " & Boolean'Image(the_RFIR(RESET_interrupt)));
    end show_Director_registers;
 
    procedure show_V_and_T is
    begin
-      if the_V_bit/= 0 or the_T_bit /= 0 then
+      if the_V_bit_is_set or the_T_bit_is_set then
          log_new_line;
-         if the_V_bit /= 0 then
+         if the_V_bit_is_set then
             log("V is set. ");
          else
             log("V is clear. ");
          end if;
-         if the_T_bit /= 0 then
+         if the_T_bit_is_set then
             log("T is set. ");
          else
             log("T is clear. ");
          end if;
+         log_new_line;
       end if;
    end show_V_and_T;
 
@@ -250,7 +255,7 @@ package body state_display is
          log_line("NEST:");
          for i in reverse KDF9.nest_depth loop
             if i < the_nest_depth then
-               log(justified("N" & trimmed(KDF9.nest_depth'Image(the_nest_depth-i)), 3) & ": ");
+               log(just_right("N" & trimmed(KDF9.nest_depth'Image(the_nest_depth-i)), 3) & ": ");
                log_new_line;
                show_in_various_formats(the_nest(i));
                log_new_line;
@@ -268,8 +273,8 @@ package body state_display is
       end if;
       for i in reverse KDF9.sjns_depth loop
          if i < the_sjns_depth then
-            log(justified("S" & trimmed(KDF9.sjns_depth'Image(the_sjns_depth-i)), 3) & ": ");
-            log_line(oct_of(the_sjns(i)) & " (" & dec_of(KDF9.code_point(the_sjns(i))) & ")");
+            log(just_right("S" & trimmed(KDF9.sjns_depth'Image(the_sjns_depth-i)), 3) & ": ");
+            log_line(oct_of(the_sjns(i)) & " (" & dec_of(KDF9.syllable_address(the_sjns(i))) & ")");
          end if;
       end loop;
    end show_sjns;
@@ -277,21 +282,21 @@ package body state_display is
    procedure show_Q_store is
       Q_bits  : KDF9.word := 0;
    begin
-      for i in KDF9.Q_store'Range loop
-         Q_bits := Q_bits or as_word(the_Q_store(i));
+      for Qq of the_Q_store loop
+         Q_bits := Q_bits or as_word(Qq);
       end loop;
       if Q_bits = 0 then
-         log_line("Q store: all zero");
+         log_line("Q store: all zero.");
          return;
       else
          log_line("Q store:");
       end if;
-      for i in KDF9.Q_store'Range loop
-         if as_word(the_Q_store(i)) /= KDF9.word'(0) then
-            log(justified("Q" & trimmed(KDF9.Q_number'Image(i)), 3) & ": ");
-            show_Q_register(the_Q_store(i));
+      for q in KDF9.Q_store'Range loop
+         if as_word(the_Q_store(q)) /= KDF9.word'(0) then
+            log(just_right("Q" & trimmed(q'Image), 3) & ": ");
+            show_Q_register(the_Q_store(q));
             log("  = ");
-            show_Q_in_decimal(the_Q_store(i));
+            show_Q_in_decimal(the_Q_store(q));
             log_new_line;
          end if;
       end loop;
@@ -301,7 +306,7 @@ package body state_display is
    begin
       show_progress;
       log_new_line;
-      if the_CPU_state = Director_state then
+      if the_execution_mode = boot_mode then
          show_Director_registers;
          log_new_line;
       end if;
@@ -315,21 +320,21 @@ package body state_display is
 
    procedure show_order is
    begin
-      log(machine_code(INS));
-      log(", i.e. ");
-      log(the_name_of(INS));
+      log(the_code_and_name_of_INS);
    end show_order;
 
    procedure show_execution_context is
    begin
-      log("At ");
-      log(oct_of(CIA));
-      log(" (");
-      log(dec_of(CIA));
-      log(")");
-      log("; ICR =");
-      log(KDF9.order_counter'Image(ICR));
-      log("; the instruction was ");
+      log("At "
+        & oct_of(CIA)
+        & " ("
+        & dec_of(CIA)
+        & ")"
+        & "; ICR ="
+        & ICR'Image
+        & "; EL ="
+        & the_clock_time'Image
+        & "; the instruction was ");
       show_order;
       log_new_line;
    end show_execution_context;
@@ -338,46 +343,39 @@ package body state_display is
    begin
       log(the_external_trace_file, oct_of(CIA));
       tab_log_to(the_external_trace_file, 10);
-      log(the_external_trace_file, KDF9.order_counter'Image(ICR));
+      log(the_external_trace_file, ICR'Image);
       tab_log_to(the_external_trace_file, 20);
       if only_signature_tracing then
-         log(the_external_trace_file, "#");
-         log(the_external_trace_file, oct_of(the_digital_signature));
-         if the_V_bit /= 0 then
-            log(the_external_trace_file, "V");
-         else
-            log(the_external_trace_file, " ");
-         end if;
-         if the_nest_depth > 0 then
-            log(the_external_trace_file, "#");
-            log(the_external_trace_file, oct_of(read_top));
-         end if;
-      else
-         log(the_external_trace_file, KDF9.microseconds'Image(the_CPU_time));
+         log(
+             the_external_trace_file,
+             "#"
+           & oct_of(the_digital_signature)
+           & (if the_V_bit_is_set then "V" else " ")
+           & (if the_T_bit_is_set then "T" else " ")
+            );
          tab_log_to(the_external_trace_file, 40);
-         log(the_external_trace_file, KDF9.nest_depth'Image(the_nest_depth));
+         if the_nest_depth > 0 then
+            log(the_external_trace_file, "#" & oct_of(read_top));
+         end if;
+         tab_log_to(the_external_trace_file, 58);
+      else
+         log(the_external_trace_file, the_CPU_time'Image);
+         tab_log_to(the_external_trace_file, 40);
+         log(the_external_trace_file, the_nest_depth'Image);
          tab_log_to(the_external_trace_file, 43);
-         log(the_external_trace_file, KDF9.sjns_depth'Image(the_sjns_depth));
+         log(the_external_trace_file, the_sjns_depth'Image);
          tab_log_to(the_external_trace_file, 46);
-         if the_V_bit /= 0 then
-            log(the_external_trace_file, "V");
-         else
-            log(the_external_trace_file, " ");
-         end if;
-         if the_T_bit /= 0 then
-            log(the_external_trace_file, "T ");
-         else
-            log(the_external_trace_file, "  ");
-         end if;
+         log(the_external_trace_file, (if the_V_bit_is_set then "V" else " "));
+         log(the_external_trace_file, (if the_T_bit_is_set then "T" else " "));
          tab_log_to(the_external_trace_file, 50);
          if the_nest_depth > 0 then
-            log(the_external_trace_file, "#");
-            log(the_external_trace_file, oct_of(read_top));
+            log(the_external_trace_file, "#" & oct_of(read_top));
          end if;
          tab_log_to(the_external_trace_file, 68);
       end if;
-      log(the_external_trace_file, " |");
-      log(the_external_trace_file, the_name_of(INS));
+      log(the_external_trace_file, " |" & the_full_name_of(INS));
+      tab_log_to(the_external_trace_file, 90);
+      log(the_external_trace_file, KDF9.us'Image(the_clock_time));
       log_new_line(the_external_trace_file);
    end log_to_external_trace;
 
@@ -389,6 +387,9 @@ package body state_display is
       tab_log_to(the_external_trace_file, 20);
       if only_signature_tracing then
          log(the_external_trace_file, "DIGITAL SIGNATURE");
+         tab_log_to(the_external_trace_file, 40);
+         log(the_external_trace_file, "[N1]");
+         tab_log_to(the_external_trace_file, 58);
       else
          log(the_external_trace_file, " CPU");
          tab_log_to(the_external_trace_file, 40);
@@ -407,46 +408,193 @@ package body state_display is
 
    procedure show_CIA_and_NIA is
    begin
-      log("CIA:        ");
-      log_line(justified(oct_of(CIA), 10) & " (" & justified(dec_of(CIA) & ")"));
-      log("NIA:        ");
-      log_line(justified(oct_of(NIA), 10) & " (" & justified(dec_of(NIA) & ")"));
+      log_line("CIA:        " & just_right(oct_of(CIA), 10) & " (" & just_right(dec_of(CIA) & ")"));
+      log_line("NIA:        " & just_right(oct_of(NIA), 10) & " (" & just_right(dec_of(NIA) & ")"));
    end show_CIA_and_NIA;
 
    procedure long_witness is
    begin
       log_new_line;
-      show_execution_context;
-      show_CIA_and_NIA;
+      log("At " & oct_of(CIA) & " (" & dec_of(CIA) & ") the instruction was ");
+      show_order;
+      log_new_line;
       show_registers;
    end long_witness;
 
    procedure short_witness is
-   begin
+
+      type register_usage is array (KDF9.compressed_opcode) of Boolean
+         with Size => 64, Component_Size => 1;
+
+      it_uses_JB : constant register_usage
+                 := (
+                      LINK
+                    | TO_LINK
+                    | OS_OUT
+                    | JrNEJ
+                    | JSr
+                    | EXIT_n
+                    | JrEJ
+                    | EXITD     => True,
+                      others    => False
+                    );
+
+      it_uses_Qq : constant register_usage
+                 := (
+                      MkMq
+                    | MkMqQ
+                    | MkMqH
+                    | MkMqQH
+                    | MkMqN
+                    | MkMqQN
+                    | MkMqHN
+                    | MkMqQHN
+                    | TO_MkMq
+                    | TO_MkMqQ
+                    | TO_MkMqH
+                    | TO_MkMqQH
+                    | TO_MkMqN
+                    | TO_MkMqQN
+                    | TO_MkMqHN
+                    | TO_MkMqQHN
+                    | MqTOQk
+                    | IqTOQk
+                    | IMqTOQk
+                    | CqTOQk
+                    | CMqTOQk
+                    | CIqTOQk
+                    | QqTOQk
+                    | M_PLUS_Iq
+                    | M_MINUS_Iq
+                    | NCq
+                    | DCq
+                    | POS1_TO_Iq
+                    | NEG1_TO_Iq
+                    | POS2_TO_Iq
+                    | NEG2_TO_Iq
+                    | SHA
+                    | SHAD
+                    | MACC
+                    | SHL
+                    | SHLD
+                    | SHC
+                    | TO_RCIMq
+                    | QCIMq
+                    | ADD_TO_QCIMq
+                    | JCqNZS
+                    | PAR_Qq
+                    | PIA_PIC_CLO_TLO_Qq
+                    | PIB_PID_Qq
+                    | PIE_PIG_Qq
+                    | PIF_PIH_Qq
+                    | PMA_PMK_INT_Qq
+                    | CT_PMB_PMC_BUSY_Qq
+                    | PMD_PME_PML_Qq
+                    | PMF_PMG_Qq
+                    | POA_POC_POE_POF_PMH_Qq
+                    | POB_POD_Qq
+                    | POG_POL_Qq
+                    | POH_POK_Qq
+                    | JrCqNZ    => True,
+                      others    => False
+                    );
+
+      is_modified : constant register_usage
+                  := (
+                       EaMq
+                     | TO_EaMq
+                     | EaMqQ
+                     | TO_EaMqQ  => True,
+                       others    => False
+                     );
+
+      it_uses_Qk : constant register_usage
+                 := (
+                      MkMq
+                    | MkMqQ
+                    | MkMqH
+                    | MkMqQH
+                    | MkMqN
+                    | MkMqQN
+                    | MkMqHN
+                    | MkMqQHN
+                    | TO_MkMq
+                    | TO_MkMqQ
+                    | TO_MkMqH
+                    | TO_MkMqQH
+                    | TO_MkMqN
+                    | TO_MkMqQN
+                    | TO_MkMqHN
+                    | TO_MkMqQHN
+                    | MqTOQk
+                    | IqTOQk
+                    | IMqTOQk
+                    | CqTOQk
+                    | CMqTOQk
+                    | CIqTOQk
+                    | QqTOQk    => True,
+                      others    => False
+                    );
+
+      function INS_uses_Qq
+      return Boolean is
+         (
+          -- A compressed_opcode may be ambiguous: to know which opcode it represents,
+          --   further attributes of the order may need to be considered.
+          case INS.kind is
+             when two_syllable_order =>
+                it_uses_Qq(INS.compressed_opcode)
+                  and
+                -- If a shift, exclude fixed-amount shifts.
+                ((INS.order.syllable_1 and 1) = 0 or else INS.compressed_opcode not in SHA..SHC),
+             when normal_jump_order =>
+                INS.compressed_opcode in JrCqZ | JrCqNZ,
+             when data_access_order =>
+                is_modified(INS.compressed_opcode),
+             when others =>
+                False
+         );
+
+   begin  -- short_witness
       log_new_line;
       show_execution_context;
-      if the_sjns_depth > 0 then
-         log(" S1: ");
-         log(oct_of(the_sjns(the_sjns_depth-1)));
-         log("; SJNS depth: ");
-         log(justified(KDF9.sjns_depth'Image(the_sjns_depth), 3));
-         log_new_line;
+      if the_CPU_state = Director_state then
+         show_Director_registers;
       end if;
-      if INS.Qq /= 0 then
-         log(justified("Q" & trimmed(KDF9.Q_number'Image(INS.Qq)), 3) & ": ");
+      if it_uses_JB(INS.compressed_opcode)                     and then
+            INS.kind in two_syllable_order | normal_jump_order and then
+               the_sjns_depth > 0                                  then
+         log_line(
+                  " JB: "
+                & oct_of(the_sjns(the_sjns_depth-1))
+                & "; SJNS depth: " & just_right(the_sjns_depth'Image, 3)
+                 );
+      end if;
+      if INS.Qq /= 0 and then
+            INS_uses_Qq  then
+         log(just_right("Q" & trimmed(INS.Qq'Image), 3) & ": ");
          show_Q_register(the_Q_store(INS.Qq));
+         log("  = ");
+         show_Q_in_decimal(the_Q_store(INS.Qq));
          log_new_line;
       end if;
-      if this_op_uses_2_Q_stores(INS.syndrome) and (INS.Qq /= INS.Qk) and (INS.Qk /= 0) then
-         log(justified("Q" & trimmed(KDF9.Q_number'Image(INS.Qk)), 3) & ": ");
+      if INS.Qk /= 0                       and then
+            INS.kind in two_syllable_order and then
+               it_uses_Qk(INS.compressed_opcode)    and then
+                  INS.Qq /= INS.Qk             then
+         log(just_right("Q" & trimmed(INS.Qk'Image), 3) & ": ");
          show_Q_register(the_Q_store(INS.Qk));
+         log("  = ");
+         show_Q_in_decimal(the_Q_store(INS.Qk));
+         log_new_line;
          log_new_line;
       end if;
       show_V_and_T;
       show_nest;
+      log_rule;
    end short_witness;
 
-   procedure show_histogram is
+   procedure show_frequency_plots is
 
       function summed_counts (from, to : KDF9.syllable)
       return KDF9.order_counter is
@@ -458,67 +606,126 @@ package body state_display is
          return sum;
       end summed_counts;
 
-      total : KDF9.order_counter;
-
-      procedure log_bin (bin    : in KDF9.syllable;
-                         sum    : in KDF9.order_counter;
-                         bound  : in Long_Float := 0.0;
-                         barred : in Boolean := True) is
+      procedure log_opcode_bin (bin    : in KDF9.syllable;
+                                sum    : in KDF9.order_counter;
+                                bound  : in Long_Float) is
          percent : Long_Float;
          image   : String(1 .. 6);
       begin
          if sum /= 0 then
-            percent := Long_Float(sum)/Long_Float(total)*100.0;
+            percent := Long_Float(sum)/Long_Float(ICR)*100.0;
             if percent < bound then
                return;
             end if;
-            log(oct_of(bin) & ": ");
-            log(the_skeleton_order(bin));
-            tab_log_to(30);
-            log(KDF9.order_counter'Image(sum));
-            tab_log_to(40);
+            log(oct_of(bin) & ": " & the_short_name_of(bin));
+            tab_log_to(32);
+            log(sum'Image);
+            tab_log_to(42);
             Put(image, percent, Aft => 2, Exp => 0);
-            log(image & "%");
-            if barred then
-               log(" |");
-               for i in 1 .. Integer(percent) loop
-                  log("#");
-               end loop;
-            end if;
+            log(image & "% :");
+            for i in 1 .. Integer(percent) loop
+               log("|");
+            end loop;
             log_new_line;
          end if;
-      end log_bin;
+      end log_opcode_bin;
 
-      procedure log_histogram (bound          : in Long_Float;
-                               with_bar_chart : in Boolean) is
+      procedure log_opcode_usage (bound : in Long_Float) is
       begin
          for i in KDF9.syllable'(0) .. 8#167# loop
-            log_bin(i, the_histogram(i), bound, barred => with_bar_chart);
+            log_opcode_bin(i, the_histogram(i), bound);
          end loop;
          for i in KDF9.syllable'(8#170#) .. 8#237# loop
-            log_bin(i, the_histogram(i), bound, barred => with_bar_chart);
+            log_opcode_bin(i, the_histogram(i), bound);
          end loop;
-         log_bin(8#240#, summed_counts(from => 8#240#, to => 8#257#), bound, with_bar_chart);
-         log_bin(8#260#, summed_counts(from => 8#240#, to => 8#277#), bound, with_bar_chart);
+         log_opcode_bin(8#240#, summed_counts(from => 8#240#, to => 8#257#), bound);
+         log_opcode_bin(8#260#, summed_counts(from => 8#240#, to => 8#277#), bound);
          for i in KDF9.syllable'(8#300#) .. 8#377# loop
-            log_bin(i, the_histogram(i), bound, with_bar_chart);
+            log_opcode_bin(i, the_histogram(i), bound);
          end loop;
-      end log_histogram;
+      end log_opcode_usage;
 
-   begin
-      total := summed_counts(from => the_histogram'First, to => the_histogram'Last);
-      if total = 0 then
-         log_title("The histogram of executed instructions is empty.");
-         return;
+      accounted_for : Long_Float;
+      cutoff_image  : String(1 .. 7) := "      %";
+      percent_image : String(1 .. 7) := "      %";
+
+      procedure log_order_word_bin (bin    : in KDF9.order_word_number;
+                                    sum    : in KDF9.order_counter;
+                                    bound  : in Long_Float) is
+         percent : Long_Float;
+      begin
+         if sum /= 0 then
+            percent := Long_Float(sum)/Long_Float(ICR)*100.0;
+            if percent < bound then
+               return;
+            end if;
+            accounted_for := accounted_for + percent;
+            log("#" & oct_of(bin) & ": ");
+            tab_log_to(32);
+            log(sum'Image);
+            tab_log_to(42);
+            Put(percent_image, percent, Aft => 2, Exp => 0);
+            percent_image(7) := '%';
+            log(percent_image);
+            log(" :");
+            for i in 1 .. Integer(percent) loop
+               log("|");
+            end loop;
+            log_new_line;
+         end if;
+      end log_order_word_bin;
+
+      procedure log_profile (bound : in Long_Float) is
+      begin
+         accounted_for := 0.0;
+         for w in KDF9.order_word_number loop
+            if the_profile(w) /= 0 then
+               log_order_word_bin(w, the_profile(w), bound);
+            end if;
+         end loop;
+      end log_profile;
+
+      procedure sum_logged_frequencies (bound  : in Long_Float) is
+         percent : Long_Float;
+      begin
+         accounted_for := 0.0;
+         for w in KDF9.order_word_number loop
+            percent := Long_Float(the_profile(w))/Long_Float(ICR)*100.0;
+            if percent >= bound then
+               accounted_for := accounted_for + percent;
+            end if;
+         end loop;
+      end sum_logged_frequencies;
+
+   begin -- show_frequency_plots
+      Put(cutoff_image(1..6), histogram_cutoff, Aft => 2, Exp => 0);
+      cutoff_image(7) := '%';
+      if the_INS_plot_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
+         -- Print the instruction execution-frequency histogram.
+         log_title(
+                   "Histogram of the opcodes of"
+                 & ICR'Image
+                 & " executed instructions with frequency >="
+                 & cutoff_image
+                  );
+         log_opcode_usage(bound => histogram_cutoff);
+         log_new_line;
       end if;
-      -- Print the instruction execution-frequency histogram.
-      log_title("Histogram of"
-              & KDF9.order_counter'Image(total)
-              & " executed instructions.");
-      log_histogram(bound => 0.0, with_bar_chart => True);
-      log_new_line;
+      if the_profile_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
+         log_title(
+                   "Histogram of the loci of"
+                 & ICR'Image
+                 & " executed instructions with frequency >="
+                 & cutoff_image
+                  );
+         log_profile(bound => histogram_cutoff);
+         log_new_line;
+      end if;
+      sum_logged_frequencies(bound => histogram_cutoff);
+      Put(percent_image(1..6), accounted_for, Aft =>1, Exp => 0);
+      log_line("Executions accounted for in the profile:" & percent_image);
       log_rule;
-   end show_histogram;
+   end show_frequency_plots;
 
    function as_RFIR (K4_word : KDF9.word)
    return KDF9.RFIR is
@@ -534,18 +741,43 @@ package body state_display is
       return RFIR;
    end as_RFIR;
 
+   function for_FH_disc (compressed_opcode : KDF9.compressed_opcode; Pxy_bits : KDF9.Q_number)
+   return Boolean
+   is (case compressed_opcode is
+          when PIA_PIC_CLO_TLO_Qq     => Pxy_bits = PIC_bits,
+          when PIB_PID_Qq             => Pxy_bits = PID_bits,
+          when PIE_PIG_Qq             => Pxy_bits = PIG_bits,
+          when PIF_PIH_Qq             => Pxy_bits = PIH_bits,
+          when POA_POC_POE_POF_PMH_Qq => Pxy_bits = POC_bits,
+          when POB_POD_Qq             => Pxy_bits = POD_bits,
+          when POG_POL_Qq             => Pxy_bits = POL_bits,
+          when POH_POK_Qq             => Pxy_bits = POK_bits,
+          when others                 => False
+      );
+
+
+   first_col   : constant := 17;
+   device_col  : constant := first_col + 20;
+   operand_col : constant := device_col;
+   event_col   : constant := operand_col + 4;
+   is_D_col    : constant := event_col + 29;
+   depth_col   : constant := operand_col + 29;
+   time_col    : constant := depth_col + 11;
+   ICR_col     : constant := time_col + 13;
+
    procedure show_retro_FIFO is
+
       RFIR_id : constant array (KDF9.interrupt_number) of Character
               := ('P', 'F', 'I', 'N', 'E', 'S', 'O', 'R', 'Y', 'Z');
-      image   : String(1 .. 18);
+      image   : String(1 .. 21);
       RFIR    : KDF9.RFIR;
    begin
       if retro_FIFO_count = 0 then
          return;
       end if;
       log_title("Retrospective trace of all instructions.");
-      tab_log_to(60);
-      log_line(" ND SD VT  CPU TIME    ICR");
+      tab_log_to(depth_col);
+      log_line("ND SD VTD   CPU TIME     ICR");
       for i in 1 .. retro_FIFO_count loop
          if i = 1 then
             log("Ended ");
@@ -553,25 +785,26 @@ package body state_display is
             log("After ");
          end if;
          declare
-            this    : tracing.retro_FIFO_entry renames retro_FIFO(retro_FIFO_index);
-            decoded : KDF9.decoded_order;
+            this      : tracing.retro_FIFO_entry renames retro_FIFO(retro_FIFO_index);
+            Q         : constant KDF9.Q_register := as_Q(this.parameter);
+            decoded   : KDF9.decoded_order;
          begin
             log(oct_of(this.location) & ":");
-            tab_log_to(17);
-            flush;
+            tab_log_to(first_col);
             decoded.order := this.order;
             decode(decoded);
-            log(the_name_of(decoded));
-            tab_log_to(33);
+            log(the_full_name_of(decoded,
+                                 octal_option => decoded.kind = normal_jump_order,
+                                 both_bases   => False));
+            tab_log_to(operand_col);
             case decoded.kind is
                when one_syllable_order =>
                   if this.nested > 0 then
-                     case decoded.syndrome is
+                     case decoded.compressed_opcode is
                         when DIV
-                           | DIVR
                            | DIVD
                            | X_frac =>
-                           log(CPU.fraction'Image(fractional(this.parameter)));
+                           log(CPU.fraction'Image(as_fraction(this.parameter)));
                         when DIVI =>
                            log(CPU.signed'Image(resign(this.parameter)));
                         when STAND
@@ -592,8 +825,7 @@ package body state_display is
                            | XF
                            | XPLUSF
                            | MAXF =>
-                           Put(image,
-                               host_float(CPU.float(this.parameter)), Aft => 11, Exp => 2);
+                           Put(image, host_float(CPU.f48(this.parameter)), Aft => 12, Exp => 2);
                            log(trimmed(image));
                         when others =>
                            if this.nested > 0 then
@@ -602,21 +834,33 @@ package body state_display is
                      end case;
                   end if;
                when two_syllable_order =>
-                  case decoded.syndrome is
-                     when PARQq
-                        | PIAQq_PICQq_CLOQq_TLOQq
-                        | PIBQq_PIDQq
-                        | PIEQq_PIGQq
-                        | PIFQq_PIHQq
-                        | PMAQq_PMKQq_INTQq
-                        | CTQq_PMBQq_PMCQq_BUSYQq
-                        | PMDQq_PMEQq_PMLQq
-                        | PMFQq
-                        | POAQq_POCQq_POEQq_POFQq
-                        | POBQq_PODQq
-                        | POGQq_POLQq
-                        | POHQq_POKQq =>
-                        show_Q_register(as_Q(this.parameter), with_FD_C_part => True);
+                  case decoded.compressed_opcode is
+                     when PAR_Qq =>
+                        show_IO_register(Q, for_DR => False, for_FD => False);
+                     when CT_PMB_PMC_BUSY_Qq
+                        | PMA_PMK_INT_Qq
+                        | PMD_PME_PML_Qq
+                        | PMF_PMG_Qq =>
+                        show_IO_register(
+                                         Q,
+                                         for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+                                         for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+                                         for_seek => decoded.Qk = PMA_bits
+                                        );
+                     when PIA_PIC_CLO_TLO_Qq
+                        | PIB_PID_Qq
+                        | PIE_PIG_Qq
+                        | PIF_PIH_Qq
+                        | POA_POC_POE_POF_PMH_Qq
+                        | POB_POD_Qq
+                        | POG_POL_Qq
+                        | POH_POK_Qq =>
+                        show_IO_register(
+                                         Q,
+                                         for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+                                         for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+                                         for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk)
+                                        );
                      when M_PLUS_Iq
                         | M_MINUS_Iq
                         | NCq
@@ -635,13 +879,13 @@ package body state_display is
                         | TO_RCIMq
                         | ADD_TO_QCIMq
                         | JCqNZS =>
-                        show_Q_register(as_Q(this.parameter));
+                        show_Q_register(Q);
                      when Kk =>
                         case decoded.Qk is
                            when K4 =>
-                              log(KDF9.word'Image(32*KDF9.word(as_Q(this.parameter).C)));
+                              log(KDF9.word'Image(32*KDF9.word(Q.C)));
                               log("us");
-                              if as_Q(this.parameter).I /= 0 then
+                              if Q.I /= 0 then
                                  log("; RFIR: ");
                                  RFIR := as_RFIR(this.parameter);
                                  for r in KDF9.interrupt_number loop
@@ -656,7 +900,8 @@ package body state_display is
                            when K5 | K7 =>
                               log_octal(this.parameter);
                            when others =>
-                              trap_invalid_instruction;
+                              raise emulation_failure
+                                 with "invalid K-group order in show_retro_FIFO";
                         end case;
                      when TO_LINK =>
                         log(oct_of(as_link(this.parameter)));
@@ -677,32 +922,36 @@ package body state_display is
                         end if;
                   end case;
                when normal_jump_order =>
-                  case decoded.syndrome is
+                  case decoded.compressed_opcode is
                      when Jr
                         | JSr =>
                         log(oct_of(as_link(this.parameter)));
-                     when EXIT_9 =>
+                     when EXIT_n =>
                         if this.parameter < 8 then
-                           log(KDF9.word'Image(this.parameter));
+                           log(this.parameter'Image);
                         else
                            log(oct_of(as_link(this.parameter)));
                         end if;
+                     when EXITD =>
+                        log(oct_of(as_link(this.parameter)));
                      when JrCqZ
                         | JrCqNZ =>
-                        show_Q_register(as_Q(this.parameter));
-                     when OUT_9 =>
-                        if this.parameter < 64 then
-                           log(KDF9.word'Image(this.parameter));
+                        show_Q_register(Q);
+                     when OS_OUT =>
+                        if this.parameter < 16 then
+                           log_octal(this.parameter);
+                        elsif this.parameter < 64 then
+                           log(this.parameter'Image);
                         elsif this.parameter > 2**47 then
                            log_octal(this.parameter);
                         else
-                           show_Q_register(as_Q(this.parameter));
+                           show_Q_register(Q);
                         end if;
                      when JrEJ
                         | JrNEJ
                         | JrEN
                         | JrNEN =>
-                           log(KDF9.word'Image(this.parameter));
+                           log(this.parameter'Image);
                      when JrTR
                         | JrV =>
                            log(Boolean'Image(Boolean'Val(this.parameter)));
@@ -719,20 +968,18 @@ package body state_display is
                      log_octal(this.parameter);
                   end if;
             end case;
-            tab_log_to(60);
-            log(justified(KDF9.nest_depth'Image(this.nested),3));
-            log(justified(KDF9.sjns_depth'Image(this.called),3));
+            tab_log_to(depth_col);
+            log(just_right(this.nested'Image,2));
             log(" ");
-            if this.V /= 0 then
-               log("V");
-            end if;
-            if this.T /= 0 then
-               log("T");
-            end if;
-            tab_log_to(70);
-            log(KDF9.microseconds'Image(this.CPU_time));
-            tab_log_to(82);
-            log(KDF9.order_counter'Image(this.ICR_value));
+            log(just_right(this.called'Image,2));
+            log(" ");
+            log(if this.V then "V" else " ");
+            log(if this.T then "T" else " ");
+            log(if this.D then "D" else " ");
+            tab_log_to(time_col);
+            log(this.CPU_time'Image);
+            tab_log_to(ICR_col);
+            log(this.ICR_value'Image);
             log_new_line;
          end;
          retro_FIFO_index := retro_FIFO_index - 1;
@@ -746,89 +993,142 @@ package body state_display is
       log_rule;
    end show_retro_FIFO;
 
+   the_final_ICR : KDF9.order_counter := 0;
+
+   procedure notify_termination is
+   begin
+      the_final_ICR := ICR;
+   end notify_termination;
+
    procedure show_IOC_FIFO is
    begin
       if IOC_FIFO_count = 0 then return; end if;
       log_title("Retrospective trace of peripheral I/O events.");
-      tab_log_to(64);
-      log_line(" CPL     EL. TIME    ICR");
+      tab_log_to(is_D_col);
+      log_line("CPL T   EL. TIME     ICR");
       for i in 1 .. IOC_FIFO_count loop
          if i = 1 then
             log("Ended ");
          else
             log("After ");
          end if;
+
          declare
-            this : tracing.IOC_FIFO_entry renames IOC_FIFO(IOC_FIFO_index);
+            this    : tracing.IOC_FIFO_entry renames IOC_FIFO(IOC_FIFO_index);
+            decoded : constant KDF9.decoded_order := this.decoded_order;
+
+            procedure show_transfer (Q : in KDF9.Q_register) is
+            begin
+               case decoded.compressed_opcode is
+                  when PAR_Qq =>
+                     show_IO_register(Q, for_DR => False, for_FD => False);
+                  when CT_PMB_PMC_BUSY_Qq
+                     | PMA_PMK_INT_Qq
+                     | PMD_PME_PML_Qq
+                     | PMF_PMG_Qq =>
+                     show_IO_register(
+                                      Q,
+                                      for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+                                      for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+                                      for_seek => decoded.Qk = PMA_bits
+                                     );
+                  when PIA_PIC_CLO_TLO_Qq
+                     | PIB_PID_Qq
+                     | PIE_PIG_Qq
+                     | PIF_PIH_Qq
+                     | POA_POC_POE_POF_PMH_Qq
+                     | POB_POD_Qq
+                     | POG_POL_Qq
+                     | POH_POK_Qq =>
+                     show_IO_register(
+                                      Q,
+                                      for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+                                      for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+                                      for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk)
+                                     );
+                  when OS_OUT =>
+                     show_IO_register(Q, for_DR => False, for_FD => False);
+                  when others =>
+                     raise emulation_failure with "in show_IOC_FIFO.show_transfer";
+               end case;
+            end show_transfer;
+
          begin
             log(oct_of(this.order_address) & ":");
-            tab_log_to(17);
-            if the_name_of(this.decoded_order) ="OUT" then
-               log(the_name_of(this.decoded_order)&"8");
+            tab_log_to(first_col);
+            if the_full_name_of(this.decoded_order) = "OUT" then
+                if this.device_name(1..2) in "MT" | "ST" and then
+                      this.ICR_value >= the_final_ICR        then
+                  log("final rewind");
+               elsif this.device_name(1..2) in "MT" | "ST" then
+                  log("OUT 6/7 rewind");
+               elsif this.device_name(1..2) in "FW" | "LP" | "TP" then
+                  log("OUT 8");
+               else
+                  log("OUT ?");
+               end if;
             else
-               log(the_name_of(this.decoded_order));
+               log(mnemonic(the_full_name_of(this.decoded_order), this.device_name));
             end if;
-            tab_log_to(30);
+            tab_log_to(device_col);
             log(this.device_name);
             case this.kind is
                when store_lockout =>
-                  tab_log_to(34);
-                  log("Store Lockout at #");
+                  tab_log_to(event_col);
+                  log("lockout at #");
                   log(oct_of(this.data_address));
-                  tab_log_to(70);
-                  log(" @"
-                    & KDF9.microseconds'Image(this.initiation_time));
-                  tab_log_to(84);
-                  log(KDF9.order_counter'Image(this.ICR_value));
+                  log(" = E");
+                  log(dec_of(this.data_address));
+                  tab_log_to(is_D_col);
+                  log(if this.is_for_Director then "D" else slot_name(this.context));
+                  log(this.priority_level'Image);
+                  tab_log_to(time_col);
+                  log(this.initiation_time'Image);
+                  tab_log_to(ICR_col);
+                  log(this.ICR_value'Image);
                 when buffer_lockout =>
-                  tab_log_to(34);
-                  log("Buffer Lockout");
-                  tab_log_to(70);
-                  log(" @"
-                    & KDF9.microseconds'Image(this.initiation_time));
-                  tab_log_to(84);
-                  log(KDF9.order_counter'Image(this.ICR_value));
+                  tab_log_to(event_col);
+                  log("buffer lockout");
+                  tab_log_to(is_D_col);
+                  log(if this.is_for_Director then "D" else slot_name(this.context));
+                  log(this.priority_level'Image);
+                  tab_log_to(time_col);
+                  log(this.initiation_time'Image);
+                  tab_log_to(ICR_col);
+                  log(this.ICR_value'Image);
                when start_transfer =>
-                  tab_log_to(34);
-                  show_Q_register(this.control_word, with_FD_C_part => True);
-                  tab_log_to(62);
-                  if this.is_for_Director then
-                     log(" D");
-                  else
-                     log(" P");
-                  end if;
-                  log(KDF9.priority'Image(this.priority_level));
-                  tab_log_to(70);
+                  tab_log_to(event_col);
+                  show_transfer(this.control_word);
+                  tab_log_to(is_D_col);
+                  log(if this.is_for_Director then "D" else slot_name(this.context));
+                  log(this.priority_level'Image);
+                  tab_log_to(time_col-2);
                   log(" S"
-                    & KDF9.microseconds'Image(this.initiation_time));
-                  tab_log_to(84);
-                  log(KDF9.order_counter'Image(this.ICR_value));
+                    & this.initiation_time'Image);
+                  tab_log_to(ICR_col);
+                  log(this.ICR_value'Image);
                when finis_transfer =>
-                  tab_log_to(34);
-                  show_Q_register(this.control_word, with_FD_C_part => True);
-                  tab_log_to(62);
-                  if this.is_for_Director then
-                     log(" D");
-                  else
-                     log(" P");
-                  end if;
-                  log(KDF9.priority'Image(this.priority_level));
-                  tab_log_to(70);
+                  tab_log_to(event_col);
+                  show_transfer(this.control_word);
+                  tab_log_to(is_D_col);
+                  log(if this.is_for_Director then "D" else slot_name(this.context));
+                  log(this.priority_level'Image);
+                  tab_log_to(time_col-2);
                   log(" E"
-                    & KDF9.microseconds'Image(this.completion_time));
-                  tab_log_to(84);
-                  log(KDF9.order_counter'Image(this.ICR_value));
-               when test_buffer_status =>
-                  tab_log_to(34);
-                  show_Q_register(this.Q_register, with_FD_C_part => True);
-                  tab_log_to(62);
-                  log(" = ");
-                  log(Boolean'Image(this.status /= 0));
-                  tab_log_to(70);
-                  log(" @"
-                    & KDF9.microseconds'Image(this.initiation_time));
-                  tab_log_to(84);
-                  log(KDF9.order_counter'Image(this.ICR_value));
+                    & this.completion_time'Image);
+                  tab_log_to(ICR_col);
+                  log(this.ICR_value'Image);
+               when buffer_status =>
+                  tab_log_to(event_col);
+                  show_Q_register(this.Q_register);
+                  tab_log_to(is_D_col);
+                  log(if this.is_for_Director then "D" else slot_name(this.context));
+                  log(this.priority_level'Image);
+                  log(if this.status then " Y" else " N");
+                  tab_log_to(time_col);
+                  log(this.initiation_time'Image);
+                  tab_log_to(ICR_col);
+                  log(this.ICR_value'Image);
             end case;
             log_new_line;
          end;
@@ -840,7 +1140,7 @@ package body state_display is
          log_line("After the start of traced execution.");
       end if;
       log_line("Total time waiting for unoverlapped I/O to finish ="
-             & KDF9.microseconds'Image((the_clock_time-the_CPU_time+500) / 1000)
+             & KDF9.us'Image((the_clock_time-the_CPU_time+500) / 1000)
              & "ms.");
       log_rule;
    end show_IOC_FIFO;
@@ -849,68 +1149,54 @@ package body state_display is
    begin
       if interrupt_FIFO_count = 0 then return; end if;
       log_title("Retrospective trace of interrupt requests.");
-      tab_log_to(54);
-      log_line(" CPL     EL. TIME    ICR");
+      tab_log_to(is_D_col);
+      log_line("CPL     EL. TIME     ICR");
       for i in 1 .. interrupt_FIFO_count loop
-         if i = 1 then
-            log("Ended ");
-         else
-            log("After ");
-         end if;
+         log(if i = 1 then "Ended " else "After ");
          declare
             this : tracing.interrupt_FIFO_entry renames interrupt_FIFO(interrupt_FIFO_index);
          begin
             log(oct_of(this.order_address) & ": ");
-            case this.interrupt_code is
-               when PR_flag =>
-                  log("PR ");
-               when FLEX_flag =>
-                  log("FLEX ");
-               when LIV_flag =>
-                  log("LIV ");
-               when NOUV_flag =>
-                  log("NOUV ");
-               when EDT_flag =>
-                  log("EDT ");
-               when OUT_flag =>
-                  log("OUT ");
-               when LOV_flag =>
-                  log("LOV ");
-               when RESET_flag =>
-                  log("RESET");
-               when others =>
-                  log("?? ");
-                  log(KDF9.interrupt_number'Image(this.interrupt_code));
-            end case;
-            tab_log_to(52);
-            if this.in_Director then
-               log(" D");
-            else
-               log(" P");
-            end if;
-            log(KDF9.priority'Image(this.priority_level));
-            tab_log_to(60);
-            log(" @"
-              & KDF9.microseconds'Image(this.busy_time));
-            tab_log_to(74);
-            log(KDF9.order_counter'Image(this.ICR_value));
+            tab_log_to(first_col);
+            log(case this.interrupt_code is
+                   when PR_interrupt     => "PR   ",
+                   when FLEX_interrupt   => "FLEX ",
+                   when LIV_interrupt    => "LIV  ",
+                   when NOUV_interrupt   => "NOUV ",
+                   when EDT_interrupt    => "EDT  ",
+                   when OUT_interrupt    => "OUT  ",
+                   when LOV_interrupt    => "LOV  ",
+                   when RESET_interrupt  => "RESET",
+                   when CLOCK_interrupt  => "CLOCK",
+                   when EXITD_flag       => "EXITD"
+               );
+            tab_log_to(event_col-4);
+            log(trimmed(this.message));
+            tab_log_to(is_D_col);
+            log(slot_name(this.context));
+            log(this.priority_level'Image);
+            tab_log_to(time_col);
+            log(this.busy_time'Image);
+            tab_log_to(ICR_col);
+            log(this.ICR_value'Image);
             log_new_line;
          end;
          interrupt_FIFO_index := interrupt_FIFO_index - 1;
       end loop;
-      if interrupt_FIFO_count = FIFO_size then
-         log("After earlier interrupts, whose tracing is now lost.");
-      else
-         log("After the start of traced execution.");
-      end if;
+      log(
+          if interrupt_FIFO_count = FIFO_size then
+             "After earlier interrupts, whose tracing is now lost."
+          else
+            "After the start of traced execution."
+         );
       log_new_line;
       log_new_line;
    end show_interrupt_FIFO;
 
    procedure show_retrospective_traces is
    begin
-      if the_histogram_is_enabled  then
-         show_histogram;
+      if the_peripheral_trace_is_enabled then
+         pragma Debug(IOC.diagnosis);
       end if;
       if the_interrupt_trace_is_enabled then
          show_interrupt_FIFO;
@@ -921,14 +1207,6 @@ package body state_display is
       if the_retrospective_trace_is_enabled then
          show_retro_FIFO;
       end if;
-   exception
-      when error : others =>
-         log_new_line;
-         log_rule;
-         log_error_message("Failure in ee9: unexpected exception "
-                         & Exception_Information(error)
-                         & " was raised in 'show_retrospective_traces'!");
-         raise emulation_failure;
    end show_retrospective_traces;
 
    procedure show_current_state is
@@ -939,30 +1217,51 @@ package body state_display is
       log_rule;
    end show_current_state;
 
-   procedure show_final_state is
+   procedure show_final_state (because : in String) is
    begin
-      if the_signature_is_enabled then
-         log_title("Digital signature of traced orders = #"
-                 & oct_of(the_digital_signature)
-                 & ".");
-      end if;
-      if the_log_is_wanted and the_final_state_is_wanted then
-         log_new_line;
-         log_rule;
-         log_title("Final State:");
-         long_witness;
-         log_rule;
-         if ICR = 0 then
+      if the_final_state_is_wanted then
+         if loading_was_successful then
+            -- make sure there is at least one NL after any FW output.
+            if the_log_is_wanted then
+               log_new_line;
+               log_rule;
+            else
+               log_new_line;
+            end if;
+            log_line("Final State: " & because & ".");
+            if not the_log_is_wanted then return; end if;
+            long_witness;
+            log_rule;
+
+            if nr_of_post_dumping_areas /= 0 then
+               log_title("Post-run Dump:");
+               print_postrun_dump_areas;
+            end if;
+
+            if the_INS_plot_is_wanted or the_profile_is_wanted then
+               if the_histogram_is_enabled then
+                  show_frequency_plots;
+               end if;
+            end if;
+
+            if the_peripheral_trace_is_enabled       or else
+                  the_interrupt_trace_is_enabled     or else
+                     the_retrospective_trace_is_enabled then
+               log_title("Traces:");
+            end if;
+
+            show_retrospective_traces;
+
+            if the_signature_is_enabled then
+               log_title("Digital signature of traced orders = #"
+                       & oct_of(the_digital_signature)
+                       & ".");
+            end if;
+         else
+            log_line("ee9 cannot run: " & because & ".");
+            show_all_prerun_dump_areas;
             return;
          end if;
-         if nr_of_post_dumping_areas /= 0 then
-            log_title("Post-run Dump:");
-            print_postrun_dump_areas;
-         end if;
-         show_retrospective_traces;
-      end if;
-      if the_log_is_wanted then
-         log_title("End of Run.");
       end if;
    end show_final_state;
 
@@ -973,14 +1272,6 @@ package body state_display is
          print_prerun_dump_areas;
          remove_prerun_dump_areas;
       end if;
-   exception
-      when error : others =>
-         log_new_line;
-         log_rule;
-         log_error_message("Failure in ee9: unexpected exception "
-                         & Exception_Information(error)
-                         & " was raised in 'show_all_prerun_dump_areas'!");
-         raise emulation_failure;
    end show_all_prerun_dump_areas;
 
    quantum     : constant := 8;
@@ -1000,29 +1291,31 @@ package body state_display is
 
    subtype converted_word is String(1..8);
 
-   type convertor is not null access function (address : KDF9.address) return converted_word;
+   type convertor is
+      not null access function (address : KDF9.address) return converted_word;
 
    procedure show_core (first, last : in KDF9.address;
                         head, side  : in String;
-                        conversion  : in convertor) is
+                        converted   : in convertor) is
 
       procedure show_group (first : in KDF9.address) is
          address : KDF9.address := first;
       begin
          while address <= first+quantum-1 loop
-            log(conversion(address));
+            log(converted(address));
             address := address + 1;
             exit when address < first;
          end loop;
       end show_group;
 
-      address, last_address : KDF9.address := first;
+      address : KDF9.address := first;
 
    begin
       if (last-first+1) < 1 then
          return;
       end if;
-      log_title("Core store interpreted as " & head & ":");
+      BA := 0; -- Ensure that physical store is examined when running in boot mode.
+      log_title("Core store [#" & oct_of(first) & " .. #" & oct_of(last) & "] interpreted as " & head & ":");
       while address <= last loop
          if is_non_blank(address) then
             log_octal(KDF9.field_of_16_bits(address));
@@ -1033,10 +1326,9 @@ package body state_display is
             show_group(address);
             log("""");
             log_new_line;
-         elsif is_non_blank(last_address) then
-            log_line("======  blank  ======");
+         else
+            log_line("========  blank  ========");
          end if;
-         last_address := address;
       exit when address >= KDF9.address'Last - quantum;
          address := address + quantum;
       end loop;
@@ -1047,31 +1339,31 @@ package body state_display is
    return converted_word is
       result : converted_word;
    begin
-      for b in KDF9.symbol_number loop
+      for b in KDF9_char_sets.symbol_index loop
          result(Natural(b)+1) := glyph_for(code_table(fetch_symbol(address, b)));
       end loop;
       return result;
    end encoding_of;
 
-   current_case : KDF9.symbol := KDF9.Case_Normal;
+   current_case : KDF9_char_sets.symbol := KDF9_char_sets.Case_Normal;
 
    function interpretation_of (address : KDF9.address)
    return converted_word is
       result : converted_word;
-      symbol : KDF9.symbol;
+      symbol : KDF9_char_sets.symbol;
       char   : Character;
    begin
-      for b in KDF9.symbol_number loop
+      for b in KDF9_char_sets.symbol_index loop
          symbol := fetch_symbol(address, b);
-         if current_case = KDF9.Case_Normal then
+         if current_case = KDF9_char_sets.Case_Normal then
             char := TP_CN(symbol);
          else
             char := TP_CS(symbol);
          end if;
-         if symbol = KDF9.Case_Normal then
-            current_case := KDF9.Case_Normal;
-         elsif symbol = KDF9.Case_Shift then
-            current_case := KDF9.Case_Shift;
+         if symbol = KDF9_char_sets.Case_Normal then
+            current_case := KDF9_char_sets.Case_Normal;
+         elsif symbol = KDF9_char_sets.Case_Shift then
+            current_case := KDF9_char_sets.Case_Shift;
          end if;
          result(Natural(b)+1) := glyph_for(char);
       end loop;
@@ -1079,48 +1371,36 @@ package body state_display is
    end interpretation_of;
 
    function case_visible (address : KDF9.address)
-   return converted_word is
-   begin
-      return interpretation_of(address);
-   end case_visible;
+   return converted_word
+   is (interpretation_of(address));
 
    function case_normal (address : KDF9.address)
-   return converted_word is
-   begin
-      return encoding_of(address, code_table => TP_CN);
-   end case_normal;
+   return converted_word
+   is (encoding_of(address, code_table => TP_CN));
 
    function case_shift (address : KDF9.address)
-   return converted_word is
-   begin
-      return encoding_of(address, code_table => TP_CS);
-   end case_shift;
+   return converted_word
+   is (encoding_of(address, code_table => TP_CS));
 
    function printer_code (address : KDF9.address)
-   return converted_word is
-   begin
-      return encoding_of(address, code_table => to_LP);
-   end printer_code;
+   return converted_word
+   is (encoding_of(address, code_table => to_LP));
 
    function card_code (address : KDF9.address)
-   return converted_word is
-   begin
-      return encoding_of(address, code_table => to_CP);
-   end card_code;
+   return converted_word
+   is (encoding_of(address, code_table => to_CP));
 
    function Latin_1_code (address : KDF9.address)
-   return converted_word is
-   begin
-      return converted_word'(1..7 => Space,
-                                8 => glyph_for(Character'Val(fetch_word(address) and 8#377#)));
-   end Latin_1_code;
+   return converted_word
+   is (converted_word'(1..7 => Space,
+                       8    => glyph_for(Character'Val(fetch_word(address) and 8#377#))));
 
    procedure show_core_in_case_visible (first, last : in KDF9.address) is
    begin
       show_core(first, last,
                 head => "characters in TR/TP code with case shifting",
                 side => "  ",
-                conversion => case_visible'Access);
+                converted => case_visible'Access);
    end show_core_in_case_visible;
 
    procedure show_core_in_case_normal (first, last : in KDF9.address) is
@@ -1128,7 +1408,7 @@ package body state_display is
       show_core(first, last,
                 head => "characters in TR/TP Normal Case code",
                 side => "NC",
-                conversion => case_normal'Access);
+                converted => case_normal'Access);
    end show_core_in_case_normal;
 
    procedure show_core_in_case_shift (first, last : in KDF9.address) is
@@ -1136,7 +1416,7 @@ package body state_display is
       show_core(first, last,
                 head => "characters in TR/TP Shift Case code",
                 side => "SC",
-                conversion => case_shift'Access);
+                converted => case_shift'Access);
    end show_core_in_case_shift;
 
    procedure show_core_in_print_code (first, last : in KDF9.address) is
@@ -1144,22 +1424,22 @@ package body state_display is
       show_core(first, last,
                 head => "characters in LP code",
                 side => "LP",
-                conversion => printer_code'Access);
+                converted => printer_code'Access);
    end show_core_in_print_code;
 
    procedure show_core_in_card_code (first, last : in KDF9.address) is
    begin
       show_core(first, last,head => "characters in CR/CP code",
                 side => "CP",
-                conversion => card_code'Access);
+                converted => card_code'Access);
    end show_core_in_card_code;
 
    procedure show_core_in_Latin_1 (first, last : in KDF9.address) is
    begin
       show_core(first, last,
-                head => "words with bits 40-47 of each in Latin_1 code",
+                head => "words with bits 40-47 of each in Latin-1 code",
                 side => "L1",
-                conversion => Latin_1_code'Access);
+                converted => Latin_1_code'Access);
    end show_core_in_Latin_1;
 
    procedure show_core_in_tape_code (first, last : in KDF9.address) is
@@ -1177,20 +1457,23 @@ package body state_display is
          tab_log_to(jump_tab);
          show_in_various_formats(word, column => jump_tab);
          log_new_line;
-         log_new_line;
       end show_word;
 
       procedure show_word_group (first, last  : KDF9.address) is
          last_address : KDF9.address := first;
          this_word, last_word : KDF9.word;
       begin
+         if last = first or last = 0 then
+            show_word(last);
+            return;
+         end if;
          this_word := fetch_word(first);
          last_word := this_word;
          show_word(first);
          for address in first+1 .. last-1 loop
             this_word := fetch_word(address);
             if this_word = last_word and address = last_address+1 then
-               log_line("========  ditto  ========");
+               log_line("==========  ditto  ========");
             elsif this_word /= last_word then
                show_word(address);
                last_word := this_word;
@@ -1206,6 +1489,7 @@ package body state_display is
       if first > last then
          return;
       end if;
+      BA := 0; -- Ensure that physical store is examined when running in boot mode.
       log_title("Core store interpreted as 48-bit words:");
       show_word_group(first, last);
       log_new_line;
@@ -1213,186 +1497,143 @@ package body state_display is
 
    -- Each word of code space is described by a set of flags.
    -- Flags 0 .. 5 are set iff a jump order has that syllable as target.
-   -- Flag 6 is set if the word is though to be code, but not a target.
-   -- Flag 7 is set if the word is though to be addressed as data.
+   -- Flag 6 is set if the word is thought to be code, but not a target.
+   -- Flag 7 is set if the word is thought to be addressed as data.
 
-   is_a_code_word : constant KDF9.syllable_code := 6;
-   is_a_data_word : constant KDF9.syllable_code := 7;
+   is_a_code_word : constant KDF9.syllable_index := 6;
+   is_a_data_word : constant KDF9.syllable_index := 7;
 
-   package word_flags is new generic_sets(member => KDF9.syllable_code);
+   package word_flags is new generic_sets(member => KDF9.syllable_index);
    use word_flags;
 
    all_jump_targets : constant word_flags.set := (0 .. 5 => True, 6|7 => False);
 
-   code_space_word : array (KDF9.code_location) of word_flags.set;
+   analysis_flags : array (KDF9.order_word_number) of word_flags.set;
 
-   procedure show_code_space_marks_for (the_operand : in KDF9.code_location) is
+   function "/" (word : KDF9.order_word_number; flag : KDF9.syllable_index)
+   return Boolean
+   is (analysis_flags(word)(flag));
+
+   function is_a_jump_target (the_point : in KDF9.syllable_address)
+   return Boolean
+   is (analysis_flags(the_point.order_word_number)(the_point.syllable_index));
+
+   function is_a_jump_target (the_operand : in KDF9.order_word_number)
+   return Boolean
+   is ((analysis_flags(the_operand) and all_jump_targets) /= empty_set);
+
+   procedure clear_all_analysis_flags is
    begin
-      log(oct_of(KDF9.code_point'(0, the_operand)));
-      for s in KDF9.syllable_code range 0 .. 5 loop
-         if code_space_word(the_operand)(s) then
-            log("" & Character'Val(Character'Pos('0')+Natural(s)));
-         else
-            log(" ");
-         end if;
-      end loop;
-      if code_space_word(the_operand)(is_a_code_word) then
-         log("CODE");
-      else
-         log("    ");
-      end if;
-      if code_space_word(the_operand)(is_a_data_word) then
-         log(" DATA");
-      else
-         log("     ");
-      end if;
-      log_new_line;
-   end show_code_space_marks_for;
-   pragma Unreferenced(show_code_space_marks_for);
+      analysis_flags := (others => empty_set);
+   end clear_all_analysis_flags;
 
-   -- This is the entry point to the program, designated by the jump in E0.
-   P0_start_point : KDF9.code_point;
-   P0_start_word  : KDF9.code_location; -- = P0_start_point.word_number
-
-   function "/" (word : KDF9.code_location; flag : KDF9.syllable_code)
-   return Boolean is
+   procedure unmark_as_a_data_word (the_operand : in KDF9.order_word_number) is
    begin
-      return code_space_word(word)(flag);
-   end "/";
-
-   function is_a_jump_target (the_point : in KDF9.code_point)
-   return Boolean;
-   pragma Inline(is_a_jump_target);
-
-   function is_a_jump_target (the_operand : in KDF9.code_location)
-   return Boolean;
-
-   pragma Inline(is_a_jump_target);
-
-   function is_a_jump_target (the_point : in KDF9.code_point)
-   return Boolean is
-   begin
-      return the_point.word_number >= P0_start_word and then
-             code_space_word(the_point.word_number)(the_point.syllable_number);
-   end is_a_jump_target;
-
-   function is_a_jump_target (the_operand : in KDF9.code_location)
-   return Boolean is
-   begin
-      return the_operand >= P0_start_word and then
-             (code_space_word(the_operand) and all_jump_targets) /= empty_set;
-   end is_a_jump_target;
-
-   procedure clear_all_code_space_words is
-   begin
-      code_space_word := (others => empty_set);
-   end clear_all_code_space_words;
-
-   procedure unmark_as_a_data_word (the_operand : in KDF9.code_location) is
-   begin
-      code_space_word(the_operand)(is_a_data_word) := False;
+      analysis_flags(the_operand)(is_a_data_word) := False;
    end unmark_as_a_data_word;
 
-   procedure unmark_as_a_code_word (the_operand : in KDF9.code_location) is
+   procedure unmark_as_a_code_word (the_operand : in KDF9.order_word_number) is
    begin
-      code_space_word(the_operand)(is_a_code_word) := False;
+      analysis_flags(the_operand)(is_a_code_word) := False;
    end unmark_as_a_code_word;
 
-   procedure mark_as_a_code_word (the_operand : in KDF9.code_location) is
+   procedure mark_as_a_code_word (the_operand : in KDF9.order_word_number) is
    begin
-      code_space_word(the_operand)(is_a_code_word) := True;
+      analysis_flags(the_operand)(is_a_code_word) := True;
       unmark_as_a_data_word(the_operand);
    end mark_as_a_code_word;
 
-   procedure mark_as_a_jump_target (the_point : in KDF9.code_point) is
+   procedure mark_as_a_jump_target (the_point : in KDF9.syllable_address) is
    begin
-      code_space_word(the_point.word_number)(the_point.syllable_number) := True;
-      mark_as_a_code_word(the_point.word_number);
+      analysis_flags(the_point.order_word_number)(the_point.syllable_index) := True;
+      mark_as_a_code_word(the_point.order_word_number);
    end mark_as_a_jump_target;
 
-   procedure mark_as_a_data_word (the_operand : in KDF9.code_location) is
+   procedure mark_as_a_data_word (the_operand : in KDF9.order_word_number) is
    begin
-      code_space_word(the_operand)(is_a_data_word) := True;
+      analysis_flags(the_operand)(is_a_data_word) := True;
       unmark_as_a_code_word(the_operand);
    end mark_as_a_data_word;
 
    procedure mark_all_code_blocks_and_data_blocks is
 
-      procedure mark_all_code_blocks (the_beginning : in KDF9.code_point) is
-         address : KDF9.code_point := the_beginning;
+      procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
+         address : KDF9.syllable_address := the_beginning;
       begin
-         if address.syllable_number > 5 then
+         if address.syllable_index > 5 then
             return;  -- We have blundered into non-code words.
          end if;
          -- Mark the first syllable of the block.
          mark_as_a_jump_target(the_beginning);
          -- Mark the destinations of all jumps in the block as code.
          loop
+         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+         exit when address.order_word_number = 8191;
             set_NIA_to(address);
             decode_the_next_order;
-            if is_an_invalid_order(INS)                                             or else
-                  (address.word_number/is_a_data_word and address.syllable_number = 0) then
+            if is_an_invalid_order(INS)                                                  or else
+                  (address.order_word_number/is_a_data_word and address.syllable_index = 0) then
                return;
             else
                -- Assuming a valid code word, act on it.
-               mark_as_a_code_word(address.word_number);
+               mark_as_a_code_word(address.order_word_number);
                case INS.kind is
                   when normal_jump_order =>
-                     if not is_a_jump_target((INS.target.syllable_number, INS.target.word_number))
-                            and INS.target.word_number >= P0_start_word then
+                     if not is_a_jump_target((INS.target.order_word_number, INS.target.syllable_index)) then
                         -- Mark the jump's destination recursively.
                         -- N.B. EXIT is actioned only if it is of EXIT ARr type.
-                        mark_all_code_blocks((INS.target.syllable_number, INS.target.word_number));
+                        mark_all_code_blocks((INS.target.order_word_number, INS.target.syllable_index));
                      end if;
                      increment_by_3(address);
-                     if INS.syndrome = JSr  then
+                     if INS.compressed_opcode = JSr  then
                         -- Mark its return point.
                         mark_as_a_jump_target(address);
                      end if;
                   when one_syllable_order =>
                      increment_by_1(address);
                   when two_syllable_order =>
-                     if INS.syndrome = JCqNZS then
+                     if INS.compressed_opcode = JCqNZS then
                         -- Mark the preceding word.
-                        mark_as_a_jump_target((0, address.word_number-1));
+                        mark_as_a_jump_target((address.order_word_number-1, 0));
                      end if;
                      increment_by_2(address);
                   when data_access_order =>
                      increment_by_3(address);
                end case;
             end if;
-            exit when address.word_number = KDF9.code_location'Last;
          end loop;
       end mark_all_code_blocks;
 
-      procedure mark_all_data_blocks (the_beginning : in KDF9.code_point) is
-         address : KDF9.code_point := the_beginning;
+      procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
+         address : KDF9.syllable_address := the_beginning;
       begin
-         if address.syllable_number > 5 then
+         if address.syllable_index > 5 then
             return;  -- We have blundered into non-code words.
          end if;
          the_code_block_handler: loop
+         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+         exit when address.order_word_number = 8191;
             -- Process orders, starting at an established code word.
-            set_NIA_to(address);
+            set_NIA_to(address); -- **
             decode_the_next_order;
-            if (is_an_invalid_order(INS)                   or else
-                  address.word_number/is_a_data_word)     and then
-                     not (address.word_number/is_a_code_word) then
+            if (is_an_invalid_order(INS)                         or else
+                  address.order_word_number/is_a_data_word)     and then
+                     not (address.order_word_number/is_a_code_word) then
                -- This word is data: make sure it is not designated as code;
                --    and find the start of the next code block.
-               for a in address.word_number .. KDF9.code_location'Last loop
-                  address := (0, a);
+               for a in address.order_word_number .. 8190 loop
+                  address := (a, 0);
                   exit when is_a_jump_target(a);
                   unmark_as_a_code_word(a);
                   mark_as_a_data_word(a);
                end loop;
 
                exit the_code_block_handler
-                  when address.word_number = KDF9.code_location'Last;
+                  when address.order_word_number = 8190;
 
                -- Find the syllable at which the block starts.
-               for s in KDF9.syllable_code'(0) .. 5 loop
-                  address.syllable_number := s;
+               for s in KDF9.syllable_index'(0) .. 5 loop
+                  address.syllable_index := s;
                   exit when is_a_jump_target(address);
                end loop;
 
@@ -1403,11 +1644,11 @@ package body state_display is
                   when data_access_order =>
                      if INS.operand < 8192 then
                         declare
-                           operand : constant KDF9.code_location
-                                   := KDF9.code_location(INS.operand);
+                           operand : constant KDF9.order_word_number
+                                   := KDF9.order_word_number(INS.operand);
                         begin
-                           if INS.syndrome /= KDF9.compressed_opcodes.SET and then
-                                 not is_a_jump_target(operand)                then
+                           if INS.compressed_opcode /= KDF9.decoding.SET and then
+                                 not is_a_jump_target(operand)               then
                               mark_as_a_data_word(operand);
                            end if;
                         end;
@@ -1423,48 +1664,48 @@ package body state_display is
             end if;
 
             exit the_code_block_handler
-               when address.word_number = KDF9.code_location'Last;
+               when address.order_word_number = KDF9.order_word_number'Last;
 
          end loop the_code_block_handler;
       end mark_all_data_blocks;
 
-      procedure reset_wrong_data_marks (the_beginning : in KDF9.code_point) is
-         address : KDF9.code_point := the_beginning;
-         locus   : KDF9.code_location;
+      procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
+         address : KDF9.syllable_address := the_beginning;
+         locus   : KDF9.order_word_number;
       begin
-         if address.syllable_number > 5 then
+         if address.syllable_index > 5 then
             return;  -- We have blundered into non-code words.
          end if;
          -- Unmark the first instruction of the block.
-         unmark_as_a_data_word(address.word_number);
+         unmark_as_a_data_word(address.order_word_number);
 
          -- Unmark data marks on destinations of jumps.
          loop
+         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+         exit when address.order_word_number = 8191;
             set_NIA_to(address);
             decode_the_next_order;
-            if is_an_invalid_order(INS)                    or else
-                  address.word_number/is_a_data_word       or else
-                     not (address.word_number/is_a_code_word) then
+            if is_an_invalid_order(INS)                          or else
+                  address.order_word_number/is_a_data_word       or else
+                     not (address.order_word_number/is_a_code_word) then
                -- We have reached the end of the code block.
                return;
             else
                -- Assuming a valid code word, act on it.
                case INS.kind is
                   when normal_jump_order =>
-                     locus := address.word_number;
+                     locus := address.order_word_number;
                      increment_by_3(address);
-                     if INS.target.word_number >= P0_start_word and then
-                           INS.target.word_number/is_a_data_word    then
+                     if INS.target.order_word_number/is_a_data_word    then
                         -- UNmark the jump's destination recursively.
-                        reset_wrong_data_marks((INS.target.syllable_number, INS.target.word_number));
+                        reset_wrong_data_marks((INS.target.order_word_number, INS.target.syllable_index));
                      end if;
-                     if INS.syndrome /= Jr                           and then
-                           (INS.syndrome /= EXIT_9 or
-                            INS.target.word_number >= P0_start_word) and then
-                              locus /= address.word_number               then
+                     if INS.compressed_opcode /= Jr          and then
+                           INS.compressed_opcode /= EXIT_n   and then
+                              locus /= address.order_word_number then
                         -- It flows on, so the next word cannot be data.
-                        unmark_as_a_data_word(address.word_number);
-                     elsif not (address.word_number/is_a_data_word) then
+                        unmark_as_a_data_word(address.order_word_number);
+                     elsif not (address.order_word_number/is_a_data_word) then
                         -- The next syllable starts a block, iff it is not the end of a block.
                         set_NIA_to(address);
                         decode_the_next_order;
@@ -1480,112 +1721,204 @@ package body state_display is
                      increment_by_3(address);
                end case;
             end if;
-            exit when address.word_number = KDF9.code_location'Last;
+            exit when address.order_word_number = KDF9.order_word_number'Last;
          end loop;
       end reset_wrong_data_marks;
 
-   begin
-      if the_code_space_has_been_marked then
+      procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
+         start_point : KDF9.syllable_address;
+      begin
+         mark_as_a_jump_target(address);
+         set_NIA_to(address);
+         decode_the_next_order;
+         if INS.kind =normal_jump_order then
+         start_point := (INS.target.order_word_number, INS.target.syllable_index);
+         mark_all_code_blocks(start_point);
+         mark_all_data_blocks(start_point);
+         reset_wrong_data_marks(start_point);
+         end if;
+      end mark_the_words_reachable_from;
+
+      procedure markup_a_problem_program is
+      begin
+         if the_initial_jump_was_corrupted then
+            -- We cannot sensibly locate the order words using E0  ...
+            log_new_line;
+            log_line("The initial jump, in E0U, has been corrupted!");
+            log_new_line;
+            show_core_as_syllables((0, 0), (5, 0));
+            --  ... so restore it to the value it had on loading.
+            restore_the_initial_jump;
+            log_line("E0U has been restored to the value it had on loading.");
+            log_new_line;
+         end if;
+
+         -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
+
+         mark_the_words_reachable_from((0, 0));
+         mark_the_words_reachable_from((0, 4));
+         mark_the_words_reachable_from((1, 4));
+
+         -- Mark the words between E0 and P0 as data, skipping E4.
+         mark_as_a_data_word(1);
+         mark_as_a_data_word(2);
+         mark_as_a_data_word(3);
+         set_NIA_to((0, 0));
+         decode_the_next_order;
+         for d in 5 .. INS.target.order_word_number-1 loop
+            mark_as_a_data_word(d);
+         end loop;
+
+         the_program_has_been_analysed := True;
+      end markup_a_problem_program;
+
+      -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
+      procedure markup_a_Director is
+
+      begin
+         BA := 0;  -- Director starts at physical word 0.
+
+         mark_as_a_code_word(0);
+         mark_as_a_code_word(1);
+         mark_as_a_code_word(2);
+         mark_as_a_data_word(3);
+         mark_as_a_code_word(4);
+
+         for a in nominated_address .. 3200 loop  -- 3200 was the size of the Eldon 2 Director.
+            -- mark_as_a_code_word(a);
+            -- mark_as_a_jump_target((a, 0));
+            set_NIA_to((a, 0));
+            decode_the_next_order;
+            if INS.kind = normal_jump_order then
+               mark_the_words_reachable_from((a, 0));
+            elsif INS.kind = data_access_order then
+               if INS.operand < 8192 then
+                  declare
+                     operand : constant KDF9.order_word_number
+                             := KDF9.order_word_number(INS.operand);
+                  begin
+                     if INS.compressed_opcode /= KDF9.decoding.SET and then
+                           not is_a_jump_target(operand)               then
+                        mark_as_a_data_word(operand);
+                     end if;
+                  end;
+               end if;
+             else
+                mark_as_a_jump_target((a, 0));
+            end if;
+            set_NIA_to((a, 3));
+            decode_the_next_order;
+            if INS.kind = normal_jump_order then
+               mark_the_words_reachable_from((a, 3));
+            elsif INS.kind = data_access_order then
+               if INS.operand < 8192 then
+                  declare
+                     operand : constant KDF9.order_word_number
+                             := KDF9.order_word_number(INS.operand);
+                  begin
+                     if INS.compressed_opcode /= KDF9.decoding.SET and then
+                           not is_a_jump_target(operand)               then
+                        mark_as_a_data_word(operand);
+                     end if;
+                  end;
+               end if;
+             else
+                mark_as_a_jump_target((a, 3));
+            end if;
+         end loop;
+
+         -- Mark all orders reachable from the initial jump(s).
+
+         set_NIA_to((order_word_number => 2, syllable_index => 0));
+         decode_the_next_order;
+         if INS.kind /= normal_jump_order then
+            log_line("An initial jump, in E2U, has not been found!");
+         else
+            mark_the_words_reachable_from((0, 2));
+            -- Mark the words between E4 and P0 as data.
+            set_NIA_to((0, 2));
+            decode_the_next_order;
+            for d in 5 .. INS.target.order_word_number-1 loop
+               mark_as_a_data_word(d);
+            end loop;
+            the_program_has_been_analysed := True;
+         end if;
+
+         set_NIA_to((0, 4));
+         decode_the_next_order;
+         if INS.kind /= normal_jump_order then
+            log_line("An expected jump, in E4U, has not been found!");
+            return;
+         else
+            mark_the_words_reachable_from((0, 4));
+            the_program_has_been_analysed := True;
+         end if;
+
+         set_NIA_to((1, 4));
+         decode_the_next_order;
+         if INS.kind /= normal_jump_order then
+            log_line("An expected jump, in E4L, has not been found!");
+            return;
+         else
+            mark_the_words_reachable_from((1, 4));
+            the_program_has_been_analysed := True;
+         end if;
+      end markup_a_Director;
+
+   begin -- mark_all_code_blocks_and_data_blocks
+      if the_program_has_been_analysed then
          return;
       end if;
-      clear_all_code_space_words;
 
-      if the_execution_mode /= boot_mode and the_initial_jump_was_corrupted then
-         -- We cannot sensibly locate the order words using E0  ...
-         log_new_line;
-         log_line("The initial jump, in E0U, was corrupted by the program!");
-         log_new_line;
-         show_core_as_syllables((0, 0), (5, 0));
-         --  ... so restore it to the value it had on loading.
-         restore_the_initial_jump;
-         log_line("E0U has been restored to the value it had on loading.");
-         log_new_line;
+      clear_all_analysis_flags;
+
+      if the_execution_mode = boot_mode  then
+         markup_a_Director;
+      else
+         markup_a_problem_program;
       end if;
 
-      -- Ensure the right output format for the initial jump  ...
-      mark_as_a_jump_target((0, 0));
-      set_NIA_to((0, 0));
-      loop
-         decode_the_next_order;
-         mark_as_a_code_word(CIA.word_number);
-         exit when INS.kind = normal_jump_order;
-      end loop;
+      if nominated_address < invalid_address then
+         mark_the_words_reachable_from((nominated_address, 0));
+      end if;
 
-      --  ... and for subsequent words.
-      for d in CIA.word_number+1 .. INS.target.word_number-1 loop
-         mark_as_a_data_word(d);
-      end loop;
-
-      -- Mark all code blocks reachable from the initial jump.
-      set_NIA_to((0, 0));
-      decode_the_next_order;
-      P0_start_word  := INS.target.word_number;
-      P0_start_point := (INS.target.syllable_number, INS.target.word_number);
-      mark_all_code_blocks(P0_start_point);
-
-      -- Mark all words clearly referenced by data fetch/store orders.
-      mark_all_data_blocks(P0_start_point);
-
-      -- Correct over-zealous marking of code as data or vice versa.
-
-      -- Unmark any order that was accidentally marked as data.
-      reset_wrong_data_marks(P0_start_point);
-
-      -- Ensure right format for the initial jump  ...
-      mark_as_a_jump_target((0, 0));
-      set_NIA_to((0, 0));
-      loop
-         decode_the_next_order;
-         mark_as_a_code_word(CIA.word_number);
-         exit when INS.kind = normal_jump_order;
-      end loop;
-
-      --  ... and for subsequent words.
-      for d in CIA.word_number+1 .. INS.target.word_number-1 loop
-         mark_as_a_data_word(d);
-      end loop;
-
-      the_code_space_has_been_marked := True;
    end mark_all_code_blocks_and_data_blocks;
 
-   procedure show_core_as_Usercode (first, last  : in KDF9.code_point;
+   procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
                                     octal_option : in Boolean) is
 
       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
-      saved_CIA   : constant KDF9.code_point := CIA;
+      saved_CIA   : constant KDF9.syllable_address := CIA;
       last_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
       comparator  : KDF9.word := last_word;
       this_word   : KDF9.word;
-      address     : KDF9.code_point;
+      address     : KDF9.syllable_address;
 
       procedure show_a_block_of_orders is
 
          function is_a_store_order (decoded : KDF9.decoded_order)
-         return Boolean is
-         begin
-            if decoded.kind = one_syllable_order then
-               return False;
-            elsif decoded.kind = two_syllable_order then
-               case decoded.syndrome is
-                  when TO_MkMq   | TO_MkMqQ
-                     | TO_MkMqH  | TO_MkMqQH
-                     | TO_MkMqN  | TO_MkMqQN
-                     | TO_MkMqHN | TO_MkMqQHN =>
-                     return True;
-                  when others =>
-                     return False;
-               end case;
-            elsif decoded.kind = data_access_order then
-               case decoded.syndrome is
-                  when TO_EaMq | TO_EaMqQ =>
-                     return True;
-                  when others =>
-                     return False;
-               end case;
-            else
-               return False;
-            end if;
-         end is_a_store_order;
+         return Boolean
+         is (
+             if decoded.kind = one_syllable_order then
+                False
+             elsif decoded.kind = two_syllable_order then
+                (
+                 case decoded.compressed_opcode is
+                   when TO_MkMq   | TO_MkMqQ
+                      | TO_MkMqH  | TO_MkMqQH
+                      | TO_MkMqN  | TO_MkMqQN
+                      | TO_MkMqHN | TO_MkMqQHN => True,
+                   when others                 => False
+                )
+             elsif decoded.kind = data_access_order then
+                (
+                 case decoded.compressed_opcode is
+                    when TO_EaMq | TO_EaMqQ => True,
+                    when others             => False
+                )
+             else
+                False
+            );
 
          procedure set_line_at_minimum (tab : in Natural) is
          begin
@@ -1611,32 +1944,41 @@ package body state_display is
             end if;
          end set_at_new_line;
 
+      last_nz_location : KDF9.syllable_address;
+
       begin -- show_a_block_of_orders
-         this_word := fetch_word(KDF9.address(address.word_number));
+         this_word := fetch_word(KDF9.address(address.order_word_number));
 
          if this_word+1 < 2 or this_word = six_DUMMIES then
             -- The word is not worth logging.
-            address := (0, address.word_number+1);
+            address := (address.order_word_number+1, 0);
             return;
          end if;
 
          -- Log useful information about data words.
-         if address.word_number/is_a_data_word then
+         if address.order_word_number/is_a_data_word then
             set_at_new_line;
          end if;
          loop
-            if address.word_number/is_a_data_word then
+            if address.order_word_number/is_a_data_word then
+               last_nz_location := address;
                -- Display a line of data.
-               log_new_line;
                log(oct_or_dec_of(address, octal_option) & ": ");
                set_line_at(jump_tab);
-               show_in_various_formats(fetch_word(KDF9.address(address.word_number)),
+               show_in_various_formats(fetch_word(KDF9.address(address.order_word_number)),
                                        column => jump_tab);
                log_new_line;
-               if address.word_number = last.word_number then
-                  return;
+               loop
+                  if address.order_word_number = last.order_word_number then
+                     return;
+                  end if;
+                  address := (address.order_word_number+1, 0);
+               exit when fetch_word(KDF9.address(address.order_word_number)) /= 0;
+               end loop;
+               if address.order_word_number > last_nz_location.order_word_number+1 then
+                  log("========  zeros  ========");
+                  log_new_line;
                end if;
-               address := (0, address.word_number+1);
             else
                log_new_line;
                exit;
@@ -1644,11 +1986,12 @@ package body state_display is
          end loop;
 
          loop
-
-            this_word := fetch_word(KDF9.address(address.word_number));
+         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+         exit when address.order_word_number = 8191;
+            this_word := fetch_word(KDF9.address(address.order_word_number));
             if this_word = comparator and this_word = last_word then
                -- The word is not worth logging.
-               address := (0, address.word_number+1);
+               address := (address.order_word_number+1, 0);
                return;
             end if;
 
@@ -1660,7 +2003,7 @@ package body state_display is
             decode_the_next_order;
             if is_an_invalid_order(INS) then
                -- The word is not worth logging.
-               address := (0, address.word_number+1);
+               address := (address.order_word_number+1, 0);
                return;
             end if;
 
@@ -1671,30 +2014,29 @@ package body state_display is
                log_new_line;
             end if;
 
-
             -- Set the tab position appropriately for the order type.
             case INS.kind is
                when one_syllable_order | data_access_order =>
                   set_line_at_minimum(first_tab);
                when two_syllable_order =>
-                  case INS.syndrome is
+                  case INS.compressed_opcode is
                      when JCqNZS =>
                         set_line_at(jump_tab);
-                     when  CTQq_PMBQq_PMCQq_BUSYQq
-                        |  PARQq
-                        |  PMFQq
-                        |  PIAQq_PICQq_CLOQq_TLOQq
-                        |  PIBQq_PIDQq
-                        |  PIEQq_PIGQq
-                        |  PIFQq_PIHQq
-                        |  POAQq_POCQq_POEQq_POFQq
-                        |  POBQq_PODQq
-                        |  POGQq_POLQq
-                        |  POHQq_POKQq
-                        |  PMAQq_PMKQq_INTQq
-                        |  PMAQq_PMKQq_INTQq+1
-                        |  PMDQq_PMEQq_PMLQq
-                        |  PMDQq_PMEQq_PMLQq+1 =>
+                     when  CT_PMB_PMC_BUSY_Qq
+                        |  PAR_Qq
+                        |  PMF_PMG_Qq
+                        |  PIA_PIC_CLO_TLO_Qq
+                        |  PIB_PID_Qq
+                        |  PIE_PIG_Qq
+                        |  PIF_PIH_Qq
+                        |  POA_POC_POE_POF_PMH_Qq
+                        |  POB_POD_Qq
+                        |  POG_POL_Qq
+                        |  POH_POK_Qq
+                        |  PMA_PMK_INT_Qq
+                        |  PMA_PMK_INT_Qq+1
+                        |  PMD_PME_PML_Qq
+                        |  PMD_PME_PML_Qq+1 =>
                         set_line_at(first_tab);
                      when others =>
                         if panel_logger.column < first_tab then
@@ -1706,7 +2048,7 @@ package body state_display is
             end case;
 
             -- Show the order in pseudo-Usercode format.
-            log(the_name_of(INS, octal_option) &  "; ");
+            log(the_full_name_of(INS, octal_option) &  "; ");
 
             case INS.kind is
                when one_syllable_order =>
@@ -1717,29 +2059,29 @@ package body state_display is
                   increment_by_3(address);
             end case;
 
-            if address.word_number = last.word_number then
+            if address.order_word_number = last.order_word_number then
                log_new_line;
                return;
             end if;
 
-            if (address.word_number+1)/is_a_data_word or
-                  address.word_number > last.word_number then
+            if (address.order_word_number+1)/is_a_data_word or
+                  address.order_word_number > last.order_word_number then
                return;
             end if;
 
             if is_a_store_order(INS)                   or else
-                  INS.syndrome = JCqNZS                or else
+                  INS.compressed_opcode = JCqNZS                or else
                      INS.kind = normal_jump_order      or else
                         panel_logger.column > last_column then
                log_new_line;
             elsif this_word = comparator and this_word /= last_word then
                log_new_line;
-               log_line("========  #"
-                        & oct_of(KDF9.syllable(this_word and 255))
-                        & "  ========");
-               address := (0, address.word_number+1);
-               if address.word_number > last.word_number or
-                     address.word_number/is_a_data_word then
+               log_line("==========  #"
+                      & oct_of(KDF9.syllable(this_word and 255))
+                      & "  ==========");
+               address := (address.order_word_number+1, 0);
+               if address.order_word_number > last.order_word_number or
+                     address.order_word_number/is_a_data_word then
                   return;
                end if;
             end if;
@@ -1751,12 +2093,13 @@ package body state_display is
       end show_a_block_of_orders;
 
    begin
-      if the_code_space_has_been_marked then
+      if the_program_has_been_analysed then
          log_line("Core store interpreted as instructions.");
+         BA := 0; -- Ensure that physical store is examined when running in boot mode.
          address := first;
          loop
             show_a_block_of_orders;
-            exit when address.word_number >= last.word_number;
+            exit when address.order_word_number >= last.order_word_number;
          end loop;
          log_new_line;
          log_rule;
@@ -1768,9 +2111,9 @@ package body state_display is
       end if;
    end show_core_as_Usercode;
 
-   procedure show_core_as_syllables (first, last  : KDF9.code_point) is
+   procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
 
-      address     :   KDF9.code_point;
+      address     :   KDF9.syllable_address;
 
       procedure show_a_block is
 
@@ -1786,27 +2129,55 @@ package body state_display is
 
       begin  -- show_a_block
          loop
-            if address.syllable_number = 0 then
+            if address.syllable_index = 0 then
                log_new_line;
                log(oct_of(address) & ": ");
                set_line_at(jump_tab);
             end if;
             log(oct_of(fetch_syllable(address)) &  "; ");
             increment_by_1(address);
-         exit when address.word_number > last.word_number;
+         exit when address.order_word_number > last.order_word_number;
          end loop;
          log_new_line;
       end show_a_block;
 
     begin  -- show_core_as_syllables
+       BA := 0; -- Ensure that physical store is examined when running in boot mode.
       log_line("Core store interpreted as order syllables.");
       address := first;
       loop
          show_a_block;
-         exit when address.word_number > last.word_number;
+         exit when address.order_word_number > last.order_word_number;
       end loop;
       log_new_line;
       log_rule;
    end show_core_as_syllables;
+
+   procedure poke (address    : in KDF9.address;
+                   sub_word   : in Character;
+                   position   : in KDF9.address;
+                   value      : in KDF9.word) is
+   begin
+      case sub_word is
+         when 'W' | 'w' =>
+            store_word(value, address);
+         when 'U' | 'u' =>
+            store_halfword(value*2**24, address, 0);
+         when 'L' | 'l' =>
+            store_halfword(value*2**24, address, 1);
+         when 'S' | 's' =>
+            store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
+         when 'C' | 'c' =>
+            store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
+         when others =>
+            raise emulation_failure
+               with "invalid poke position " & sub_word & ".";
+      end case;
+   exception
+      when error : others =>
+         raise emulation_failure
+            with "invalid poke operation: "
+               & Ada.Exceptions.Exception_Information(error);
+   end poke;
 
 end state_display;

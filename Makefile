@@ -12,13 +12,15 @@ EXE=ee9
 SRC=$(CURDIR)/src
 export RUNTIME=$(CURDIR)/runtime
 KAL3=$(CURDIR)/kal3
+MKCHAN=$(CURDIR)/mkchan
+KALGOL=$(CURDIR)/kalgol
 
 # Main target to build
 MAIN=${SRC}/${EXE}
 
 export CC=gcc
 export CFLAGS=-funwind-tables -march=znver2 -O3 -funroll-loops -fno-stack-check
-GNAT_BASE_OPTIONS=-gnatfl05j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
+GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
 
@@ -37,28 +39,57 @@ objects: builddefs
 builddefs:
 	cp -f builddefs/adc-${BUILD_TYPE}.adc ${CSC_LIST}/gnat.adc
 
+.PHONY: kalgol
+kalgol: 
+	gnatmake -j4 -c -i ${SRC}/a2b.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/a2b ${CSC_LIST:%=-aO%/} -shared
+	gnatlink ${SRC}/a2b -o ${KALGOL}/a2b
+	${KALGOL}/a2b -r2p < ${KALGOL}/mksys2.bin >${RUNTIME}/Binary/MKSYS2
+	${KALGOL}/a2b -r2p < ${KALGOL}/KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
+
+.PHONY: kidopt
+kidopt:
+	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/kidopt ${CSC_LIST:%=-aO%/} -shared
+	gnatlink ${SRC}/kidopt -o ${SRC}/kidopt	
+
+.PHONY: mtp
+mtp:
+	gnatmake -j4 -c -i ${SRC}/mtp.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/mtp ${CSC_LIST:%=-aO%/} -shared
+	gnatlink ${SRC}/mtp -o ${SRC}/mtp
+
 .PHONY: kal3
 kal3:
 	$(MAKE) -e -C ${KAL3}
 
+.PHONY: mkchan
+mkchan:
+	$(MAKE) -e -C ${MKCHAN}
+
 .PHONY: clean
 clean:
 	$(MAKE) -e -C ${KAL3} clean
+	$(MAKE) -e -C ${MKCHAN}	clean
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
 	$(RM) -f ${MAIN}
 	$(RM) -f ${CSC_LIST}/gnat.adc
+	$(RM) -f ${KALGOL}/a2b
 
-.PHONY: deploy
-deploy: $(MAIN) kal3
+.PHONY: deploy 
+deploy: $(MAIN) kidopt kalgol mtp
 	$(MAKE) -e -C ${KAL3} deploy
+	$(MAKE) -e -C ${MKCHAN}	deploy
 	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${MAIN} ${RUNTIME}
+	cp -f ${SRC}/kidopt ${RUNTIME}
+	cp -f ${SRC}/mtp ${RUNTIME}
 
 .PHONY: test
 test: deploy
 	$(MAKE) -C ${RUNTIME} test
 
 .PHONY: all
-all: $(MAIN) kal3 
+all: $(MAIN) kal3 mkchan kalgol

@@ -2,8 +2,8 @@
 --
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,14 +16,14 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with generic_sets;
+with IOC;
 with KDF9;
-with generic_sets; pragma Elaborate_All(generic_sets);
+with settings;
 
-use  KDF9;
+use  settings;
 
 package tracing is
-
-   pragma Unsuppress(All_Checks);
 
    -- Support for significant-operand evaluation and tracing.
 
@@ -48,13 +48,11 @@ package tracing is
 
    -- Support for breakpoints.
 
-   package order_flags is new generic_sets(member => KDF9.code_location);
+   package order_flags is new generic_sets(member => KDF9.order_word_number);
 
-   is_a_breakpoint : order_flags.set := order_flags.empty_set;
+   breakpoints : order_flags.set := order_flags.empty_set;
 
-   procedure clear_all_breakpoints;
-
-   procedure set_breakpoints (first, last : in KDF9.code_location);
+   procedure set_breakpoints (first, last : in KDF9.order_word_number);
 
    procedure handle_breakpoint;
 
@@ -62,8 +60,8 @@ package tracing is
 
    package watch_flags is new generic_sets(member => KDF9.address);
 
-   is_a_fetch_point : watch_flags.set := watch_flags.empty_set;
-   is_a_store_point : watch_flags.set := watch_flags.empty_set;
+   fetchpoints : watch_flags.set := watch_flags.empty_set;
+   storepoints : watch_flags.set := watch_flags.empty_set;
 
    procedure clear_all_watchpoints;
 
@@ -71,11 +69,11 @@ package tracing is
 
    procedure set_store_points (first, last : in KDF9.address);
 
-   -- These two procedures must NOT be called in fast_mode.
+   procedure act_on_any_two_syllable_order_watchpoints
+      with Pre => the_diagnostic_mode /= fast_mode;
 
-   procedure act_on_any_two_syllable_order_watchpoints;
-
-   procedure act_on_any_data_access_order_watchpoints;
+   procedure act_on_any_data_access_order_watchpoints
+      with Pre => the_diagnostic_mode /= fast_mode;
 
 
    --
@@ -90,14 +88,15 @@ package tracing is
 
    type retro_FIFO_entry is
       record
-         location  : KDF9.code_point := (0, 0);
-         order     : KDF9.syllable_group := (0, 0, 0);
-         parameter : KDF9.word := 0;
-         ICR_value : KDF9.order_counter := 0;
-         CPU_time  : KDF9.microseconds := 0;
-         nested    : KDF9.nest_depth := 0;
-         called    : KDF9.sjns_depth := 0;
-         V, T      : KDF9.word := 0;
+         location  : KDF9.syllable_address;
+         order     : KDF9.syllable_group;
+         parameter : KDF9.word;
+         ICR_value : KDF9.order_counter;
+         CPU_time  : KDF9.us;
+         nested    : KDF9.nest_depth;
+         called    : KDF9.sjns_depth;
+         V, T, D   : Boolean;
+         level     : KDF9.priority;
       end record;
 
    retro_FIFO  : array (tracing.FIFO_index) of tracing.retro_FIFO_entry;
@@ -112,30 +111,33 @@ package tracing is
 
    -- Support for retrospective peripheral I/O tracing.
 
-   type IOC_event_kind is (start_transfer, finis_transfer,
-                           store_lockout, buffer_lockout,
-                           test_buffer_status);
+   type IOC_event_kind is (start_transfer,
+                           finis_transfer,
+                           store_lockout,
+                           buffer_lockout,
+                           buffer_status);
 
    type IOC_FIFO_entry (kind : IOC_event_kind := start_transfer) is
       record
-         ICR_value       : KDF9.order_counter := 0;
-         order_address   : KDF9.code_point := (0, 0);
+         ICR_value       : KDF9.order_counter;
+         order_address   : KDF9.syllable_address;
          decoded_order   : KDF9.decoded_order;
-         initiation_time : KDF9.microseconds := 0;
-         device_name     : KDF9.logical_device_name;
+         initiation_time : KDF9.us;
+         device_name     : IOC.device_name;
+         is_for_Director : Boolean;
+         priority_level  : KDF9.priority;
+         context         : KDF9.context;
          case kind is
             when start_transfer | finis_transfer =>
-               completion_time : KDF9.microseconds := 0;
-               is_for_Director : Boolean := False;
-               priority_level  : KDF9.priority := 0;
-               control_word    : KDF9.Q_register := (0, 0, 0);
+               completion_time : KDF9.us;
+               control_word    : KDF9.Q_register;
             when store_lockout =>
-               data_address : KDF9.Q_part := 0;
+               data_address : KDF9.Q_part;
             when buffer_lockout =>
                null;
-            when test_buffer_status =>
-               Q_register : KDF9.Q_register := (0, 0, 0);
-               status : KDF9.word := 0;
+            when buffer_status =>
+               Q_register : KDF9.Q_register;
+               status     : Boolean;
          end case;
       end record;
 
@@ -147,35 +149,47 @@ package tracing is
 
    procedure clear_IOC_FIFO;
 
-   procedure take_note_of (
-                           kind            : in IOC_event_kind;
-                           ICR_value       : in KDF9.order_counter;
-                           order_address   : in KDF9.code_point;
-                           decoded_order   : in KDF9.decoded_order;
-                           initiation_time : in KDF9.microseconds;
-                           device_name     : in KDF9.logical_device_name;
-                           completion_time : in KDF9.microseconds := 0;
-                           is_for_Director : in Boolean := False;
-                           priority_level  : in KDF9.priority := 0;
-                           control_word    : in KDF9.Q_register := (0, 0, 0)
-                          );
+   procedure take_note_of_IO_start (
+                                    device_name     : in IOC.device_name;
+                                    completion_time : in KDF9.us;
+                                    control_word    : in KDF9.Q_register
+                                   );
 
-   procedure take_note_of (
-                           Q_register      : in KDF9.Q_register;
-                           device_name     : in KDF9.logical_device_name := "   ";
-                           status          : in KDF9.word := KDF9.word'Last
-                          );
+   procedure take_note_of_IO_finis (
+                                    ICR_value       : in KDF9.order_counter;
+                                    order_address   : in KDF9.syllable_address;
+                                    decoded_order   : in KDF9.decoded_order;
+                                    initiation_time : in KDF9.us;
+                                    device_name     : in IOC.device_name;
+                                    is_for_Director : Boolean;
+                                    priority_level  : in KDF9.priority;
+                                    completion_time : in KDF9.us;
+                                    control_word    : in KDF9.Q_register
+                                   );
+
+   procedure take_note_of_store_lockout  (device_name : in IOC.device_name);
+
+   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name);
+
+   procedure take_note_of_test (
+                                device_name : in IOC.device_name;
+                                Q_register  : in KDF9.Q_register;
+                                status      : in Boolean
+                                );
+
 
    -- Support for retrospective interrupt-request tracing.
 
+   max_interrupt_message_length : constant := 100;
    type interrupt_FIFO_entry is
       record
-         interrupt_code  : KDF9.interrupt_number := RESET_flag;
-         ICR_value       : KDF9.order_counter := 0;
-         order_address   : KDF9.code_point := (0, 0);
-         busy_time       : KDF9.microseconds := 0;
-         in_Director     : Boolean := False;
-         priority_level  : KDF9.priority := 0;
+         interrupt_code : KDF9.interrupt_number;
+         ICR_value      : KDF9.order_counter;
+         order_address  : KDF9.syllable_address;
+         busy_time      : KDF9.us;
+         priority_level : KDF9.priority;
+         context        : KDF9.context;
+         message        : String (1..max_interrupt_message_length);
       end record;
 
    interrupt_FIFO  : array (tracing.FIFO_index) of tracing.interrupt_FIFO_entry;
@@ -186,23 +200,23 @@ package tracing is
 
    procedure clear_interrupt_FIFO;
 
-   procedure take_note_of (
-                           interrupt_code  : in KDF9.interrupt_number;
-                           ICR_value       : in KDF9.order_counter;
-                           order_address   : in KDF9.code_point;
-                           busy_time       : in KDF9.microseconds;
-                           in_Director     : in Boolean := False;
-                           priority_level  : in KDF9.priority
-                          );
+   procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String);
 
-   -- Support for the instruction-type frequency histogram.
 
-   type histogram is array (KDF9.syllable) of KDF9.order_counter;
+   -- Support for the instruction-type and instruction-word frequency histograms.
 
-   nul_histogram : constant histogram := (others => 0);
+   the_histogram : array (KDF9.syllable) of KDF9.order_counter;
 
-   the_histogram : histogram := nul_histogram;
+   procedure clear_the_histogram;
 
-   procedure add_INS_to_the_histogram;
+   procedure add_INS_to_the_histogram
+      with Inline;
+
+   the_profile   : array (KDF9.order_word_number) of KDF9.order_counter;
+
+   procedure clear_the_profile;
+
+   procedure add_CIA_to_the_profile
+      with Inline;
 
 end tracing;

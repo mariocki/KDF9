@@ -1,10 +1,19 @@
+// Author David Holdsworth <ecldh@leeds.ac.uk>
+// yacc grammar for KDF9 Usercode
+// The most recent version of this program is on-line at:
+//        http://sw.ccs.bcs.org/KDF9/kal3.y
+// KAL3 is an attempt to accept KDF9 Usercode both the original
+// paper tape version and EGDON's UCA3 which was normally input on cards.
+// Listings copy-typed from lineprinter POST listings should also be
+// OK, except that pound must be replaced by dollar (or asterisk), and *DIV
+// will be seen as a separate asterisk.  DIV is valid UCA3 for integer divide.
 %{
 #include <ctype.h>
 /* KDF9 assembler for USERCODE */
 #include <stdio.h>
 
-extern yylex();
-extern yyerror(char *s);
+extern int yylex();
+extern void yyerror(char *s);
 extern int tree;
 
 extern void endBblock();
@@ -41,8 +50,14 @@ extern void setlabel(int labno);
 extern int codeloc(int pno, int labno);
 /* evaluate location in the code -- result is syllable address */
 
+extern int wordform(int loc);
+/* convert a syllable address to word address in SJNS format */
+
 extern void store3syl(int instr, int addr);
-/* takes the output from data loc and embeds in the instruction */
+/* takes the output from dataloc and embeds in a SET or EXIT instruction */
+
+extern void storememinstr(int instr, int addr, int mod);
+/* takes the output from data loc and embeds in a emmory accessing instruction */
 
 extern int dataloc(int pno, int vno);
 /* get data location as word address for a V-store */
@@ -52,7 +67,7 @@ extern int ystoreloc(int yset, int yno);
    yset will be the letter for YA YB etc
  */
 
-extern newproutine(int pno, int v);
+extern void newproutine(int pno, int v);
 /* entering a new P-routine */
 
 extern int keepMarker();
@@ -86,8 +101,9 @@ extern int negatevstore();
 /* negates the vstore value deposited by vfraction, etc */
 /* returns 0 if V-store vale was zero -- used for F-0.0 */
 
-extern void setvstore(int vno);
+void setvstore(int vno, int lo, int hi);
 /* sets give V-store from value constructed in vstoreval */
+/* for a full word lo = 0 and hi = 6, for top halp lo = 0 and hi = 3, for bottom half lo = 3 and hi = 6 */
 
 extern void setprinterconst(int v1, int v2);
 /* sets a printer constant in a range of V-stores -- involves lexical cheating */
@@ -97,6 +113,9 @@ extern void startnewword();
 
 extern void fixY0(int zero, int zero2, int loc);
 /* locates Y0 at specified absolute address, e.g. Y0=E 4896 */
+
+extern int progstart;     // location at which code is to commence -- reset by START directive
+extern int ptform;        // set to 8 if using the rounding rules found in the PT Usercode compiler
 
 %}
 
@@ -109,20 +128,33 @@ extern void fixY0(int zero, int zero2, int loc);
 program       :   p0head  code          { printf("Reached end of file\n"); }
               ;
 
-p0head        :   'R' 'E' 'S' 'T' 'A' 'R' 'T' ';' code 'P' 'R' 'O' 'G' 'R' 'A' 'M' ';'   { endBblock(); }
-              |   'P' 'R' 'O' 'G' 'R' 'A' 'M' ';'                                  { endBblock(); }
+p0head        :   'R' 'E' 'S' 'T' 'A' 'R' 'T' ';' code 'P' 'R' 'O' 'G' 'R' 'A' 'M' ';'          { endBblock(); }
+              |   'R' 'E' 'S' 'T' 'A' 'R' 'T' ';' code 'P' 'R' 'O' 'G' 'R' 'A' 'M' 'M' 'E' ';'  { endBblock(); }
+              |   'P' 'R' 'O' 'G' 'R' 'A' 'M' ';'                                               { endBblock(); }
+              |   'P' 'R' 'O' 'G' 'R' 'A' 'M' 'M' 'E' ';'                                       { endBblock(); }
               |   storespec  p0head
               ;
 
-storespec     :   'V' UNSIGNED_INTEGER ';'      { reserveStore('V', $2); }
+storespec     :   'V' UNSIGNED_INTEGER ';'           { reserveStore('V', $2); }
               |   'V' ';'                          /* believe that this specifies the absence of any V-stores in P0 */
-              |   'W' UNSIGNED_INTEGER ';'      { reserveStore('W', $2); }
-              |   ystref UNSIGNED_INTEGER ';'   { reserveStore('Y' + $1 * 256, $2); }
+              |   'W' UNSIGNED_INTEGER ';'           { reserveStore('W', $2); }
+              |   'W' ';'                          /* believe that this specifies the absence of any W-stores in P0 */
+              |   ystref UNSIGNED_INTEGER ';'        { reserveStore('Y' + $1 * 256, $2); }
+              |   ystref ';'                                         /* ignore -- default is no storage reserved */
               |   ystref UNSIGNED_INTEGER '=' 'E' UNSIGNED_INTEGER ';'
-                                                { fixY0($1, $2, $5); }
+                                                     { fixY0($1, $2, $5); }
+              |   'H' UNSIGNED_INTEGER '=' 'E' UNSIGNED_INTEGER ';'
+                                                     { fixY0(-3, $2, $5); }
+
+              |   ystref UNSIGNED_INTEGER '=' 'E' ';'{ fprintf(stderr,"Y0=E; not understood\n"); }
+
+              |   'S' 'T' 'A' 'R' 'T' UNSIGNED_INTEGER ';'
+                                                     { progstart = $6 + ptform; }
               |   'S' 'T' ';'                      /* no need to do anything - default is 0 */
-              |   'S' 'T' UNSIGNED_INTEGER ';'  { Bblock('S', $3); }
-              |   'T' 'L' UNSIGNED_INTEGER ';'  { Bblock('L', $3); }
+              |   'T' 'L' ';'                      /* no need to do anything - default is 0 */
+              |   'M' 'T' 'P' 'R' ';'              /* no ides what this meant - do nothing */
+              |   'S' 'T' UNSIGNED_INTEGER ';'       { Bblock('S', $3); }
+              |   'T' 'L' UNSIGNED_INTEGER ';'       { Bblock('L', $3); }
               |   COMMENT
               ;
 
@@ -134,6 +166,7 @@ codeloc       : UNSIGNED_INTEGER                  { $$ = codeloc(-1, $1); }   /*
               | 'P' UNSIGNED_INTEGER              { $$ = codeloc($2, 0); }
               | UNSIGNED_INTEGER 'P' UNSIGNED_INTEGER { $$ = codeloc($3, $1); }
               | 'E' UNSIGNED_INTEGER              { $$ = $2 * 6; }
+              | 'L' UNSIGNED_INTEGER              { $$ = codeloc(2999, 0); printf("L%d not available\n", $2); }
               ;
 
 jumpinstr     :  'J' codeloc ';'                  { storejump(0200, 0260, $2); }
@@ -142,6 +175,7 @@ jumpinstr     :  'J' codeloc ';'                  { storejump(0200, 0260, $2); }
               |  'J' codeloc '!' '=' ';'          { storejump(0200, 0020, $2); }
               |  'J' codeloc '/' '=' ';'          { storejump(0200, 0020, $2); }
               |  'J' codeloc '#' ';'              { storejump(0200, 0020, $2); }
+              |  'J' codeloc '±' ';'              { storejump(0200, 0020, $2); }
               |  'J' codeloc 'N' 'E' ';'          { storejump(0200, 0020, $2); }
               |  'J' codeloc '*' 'N' 'E' ';'      { storejump(0200, 0020, $2); }
               |  'J' codeloc '<' 'Z' ';'          { storejump(0220, 0040, $2); }
@@ -149,6 +183,7 @@ jumpinstr     :  'J' codeloc ';'                  { storejump(0200, 0260, $2); }
               |  'J' codeloc '*' 'L' 'T' 'Z' ';'  { storejump(0220, 0040, $2); }
               |  'J' codeloc '>' '=' 'Z' ';'      { storejump(0200, 0040, $2); }
               |  'J' codeloc 'G' 'E' 'Z' ';'      { storejump(0200, 0040, $2); }
+              |  'J' codeloc '_' '>' 'Z' ';'      { storejump(0200, 0040, $2); }   /* for paper tape input */
               |  'J' codeloc '*' 'G' 'E' 'Z' ';'  { storejump(0200, 0040, $2); }
               |  'J' codeloc '>' 'Z' ';'          { storejump(0220, 0100, $2); }
               |  'J' codeloc '*' 'G' 'T' 'Z' ';'  { storejump(0220, 0100, $2); }
@@ -156,10 +191,12 @@ jumpinstr     :  'J' codeloc ';'                  { storejump(0200, 0260, $2); }
               |  'J' codeloc '<' '=' 'Z' ';'      { storejump(0200, 0100, $2); }
               |  'J' codeloc '*' 'L' 'E' 'Z' ';'  { storejump(0200, 0100, $2); }
               |  'J' codeloc 'L' 'E' 'Z' ';'      { storejump(0200, 0100, $2); }
+              |  'J' codeloc '_' '<' 'Z' ';'      { storejump(0200, 0100, $2); }   /* for paper tape input */
               |  'J' codeloc '=' 'Z' ';'          { storejump(0220, 0140, $2); }
               |  'J' codeloc '!' '=' 'Z' ';'      { storejump(0200, 0140, $2); }
               |  'J' codeloc '/' '=' 'Z' ';'      { storejump(0200, 0140, $2); }
               |  'J' codeloc '#' 'Z' ';'          { storejump(0200, 0140, $2); }
+              |  'J' codeloc '±' 'Z' ';'          { storejump(0200, 0140, $2); }
               |  'J' codeloc '*' 'N' 'E' 'Z' ';'  { storejump(0200, 0140, $2); }
               |  'J' codeloc 'N' 'E' 'Z' ';'      { storejump(0200, 0140, $2); }
               |  'J' codeloc 'V' ';'              { storejump(0220, 0200, $2); }
@@ -179,7 +216,9 @@ vchars        :  'V' UNSIGNED_INTEGER '='                        { setprintercon
               |  'V' UNSIGNED_INTEGER '/' UNSIGNED_INTEGER '='   { setprinterconst($2, $4); }
               ;
 
-vspec         :  'V' UNSIGNED_INTEGER '=' vstoreval ';'           { setvstore($2); }
+vspec         :  'V' UNSIGNED_INTEGER '=' vstoreval ';'           { setvstore($2, 0, 6); }
+              |  'V' UNSIGNED_INTEGER 'U' '=' vstoreval ';'       { setvstore($2, 0, 3); }
+              |  'V' UNSIGNED_INTEGER 'L' '=' vstoreval ';'       { setvstore($2, 3, 6); }
               |  vchars 'P' ';'                              /* V-store printer characters */
               ;
 
@@ -207,28 +246,28 @@ vstoreval     :  digitsequence                             { vfraction($1, 47); 
               |  '+' digitsequence '.' UNSIGNED_INTEGER '/' UNSIGNED_INTEGER  { vfraction($2, $6); }
               |  '+' digitsequence '/' UNSIGNED_INTEGER    { vfraction($2, $4); }
               |  'Q' bit16 '/' bit16 '/' bit16             { vqformat($2, $4, $6); }
-              | 'A' memref                                 { vqformat(0, 0, $2); }
-              | 'F' digitsequence '.' UNSIGNED_INTEGER     { vfloat($2, 0); vfppos(); }
-              | 'F' digitsequence                          { vfloat($2, 0); vfppos(); }
-              | 'F' digitsequence '.' UNSIGNED_INTEGER '@' UNSIGNED_INTEGER   { vfloat($2, $6); vfppos(); }
-              | 'F' digitsequence '.' UNSIGNED_INTEGER '@' '-' UNSIGNED_INTEGER   { vfloat($2, -$7); vfppos(); }
-              | 'F' digitsequence '.' UNSIGNED_INTEGER '@' '+' UNSIGNED_INTEGER   { vfloat($2, $7); vfppos(); }
-              | 'F' digitsequence '@' UNSIGNED_INTEGER     { vfloat($2, $4); vfppos(); }
-              | 'F' digitsequence '@' '-' UNSIGNED_INTEGER     { vfloat($2, -$5); vfppos(); }
-              | 'F' '-' digitsequence '.' UNSIGNED_INTEGER { vfloat($3, 0); vfpneg(); }
-              | 'F' '-' digitsequence                      { vfloat($3, 0); vfpneg(); }
-              | 'F' '-' digitsequence '.' UNSIGNED_INTEGER '@' UNSIGNED_INTEGER   { vfloat($3, $7); vfpneg(); }
-              | 'F' '-' digitsequence '.' UNSIGNED_INTEGER '@' '-' UNSIGNED_INTEGER   { vfloat($3, -$8); vfpneg(); }
-              | 'F' '-' digitsequence '.' UNSIGNED_INTEGER '@' '+' UNSIGNED_INTEGER   { vfloat($3, $8); vfpneg(); }
-              | 'F' '-' digitsequence '@' UNSIGNED_INTEGER { vfloat($3, $5); vfpneg(); }
-              | 'F' '-' digitsequence '@' '-' UNSIGNED_INTEGER { vfloat($3, -$6); vfpneg(); }
-              | 'F' '+' digitsequence '.' UNSIGNED_INTEGER { vfloat($3, 0); vfppos(); }
-              | 'F' '+' digitsequence                      { vfloat($3, 0); vfppos(); }
-              | 'F' '+' digitsequence '.' UNSIGNED_INTEGER '@' UNSIGNED_INTEGER   { vfloat($3, $7); vfppos(); }
-              | 'F' '+' digitsequence '.' UNSIGNED_INTEGER '@' '-' UNSIGNED_INTEGER   { vfloat($3, -$8); vfppos(); }
-              | 'F' '+' digitsequence '.' UNSIGNED_INTEGER '@' '+' UNSIGNED_INTEGER   { vfloat($3, $8); vfppos(); }
-              | 'F' '+' digitsequence '@' UNSIGNED_INTEGER { vfloat($3, $5); vfppos(); }
-              | 'F' '+' digitsequence '@' '-' UNSIGNED_INTEGER { vfloat($3, -$6); vfppos(); }
+              |  'A' memref                                 { vqformat(0, 0, $2); }
+              |  'F' digitsequence '.' UNSIGNED_INTEGER     { vfloat($2, 0); vfppos(); }
+              |  'F' digitsequence                          { vfloat($2, 0); vfppos(); }
+              |  'F' digitsequence '.' UNSIGNED_INTEGER '~' UNSIGNED_INTEGER   { vfloat($2, $6); vfppos(); }
+              |  'F' digitsequence '.' UNSIGNED_INTEGER '~' '-' UNSIGNED_INTEGER   { vfloat($2, -$7); vfppos(); }
+              |  'F' digitsequence '.' UNSIGNED_INTEGER '~' '+' UNSIGNED_INTEGER   { vfloat($2, $7); vfppos(); }
+              |  'F' digitsequence '~' UNSIGNED_INTEGER     { vfloat($2, $4); vfppos(); }
+              |  'F' digitsequence '~' '-' UNSIGNED_INTEGER     { vfloat($2, -$5); vfppos(); }
+              |  'F' '-' digitsequence '.' UNSIGNED_INTEGER { vfloat($3, 0); vfpneg(); }
+              |  'F' '-' digitsequence                      { vfloat($3, 0); vfpneg(); }
+              |  'F' '-' digitsequence '.' UNSIGNED_INTEGER '~' UNSIGNED_INTEGER   { vfloat($3, $7); vfpneg(); }
+              |  'F' '-' digitsequence '.' UNSIGNED_INTEGER '~' '-' UNSIGNED_INTEGER   { vfloat($3, -$8); vfpneg(); }
+              |  'F' '-' digitsequence '.' UNSIGNED_INTEGER '~' '+' UNSIGNED_INTEGER   { vfloat($3, $8); vfpneg(); }
+              |  'F' '-' digitsequence '~' UNSIGNED_INTEGER { vfloat($3, $5); vfpneg(); }
+              |  'F' '-' digitsequence '~' '-' UNSIGNED_INTEGER { vfloat($3, -$6); vfpneg(); }
+              |  'F' '+' digitsequence '.' UNSIGNED_INTEGER { vfloat($3, 0); vfppos(); }
+              |  'F' '+' digitsequence                      { vfloat($3, 0); vfppos(); }
+              |  'F' '+' digitsequence '.' UNSIGNED_INTEGER '~' UNSIGNED_INTEGER   { vfloat($3, $7); vfppos(); }
+              |  'F' '+' digitsequence '.' UNSIGNED_INTEGER '~' '-' UNSIGNED_INTEGER   { vfloat($3, -$8); vfppos(); }
+              |  'F' '+' digitsequence '.' UNSIGNED_INTEGER '~' '+' UNSIGNED_INTEGER   { vfloat($3, $8); vfppos(); }
+              |  'F' '+' digitsequence '~' UNSIGNED_INTEGER { vfloat($3, $5); vfppos(); }
+              |  'F' '+' digitsequence '~' '-' UNSIGNED_INTEGER { vfloat($3, -$6); vfppos(); }
 
               |  '+' digitsequence '.' UNSIGNED_INTEGER '/' '-' UNSIGNED_INTEGER  { vfraction($2, -$7); }
               ;
@@ -267,27 +306,32 @@ ystref        :  'Y'        {  $$ = 0; }
               ;
 
 memref        :  'V' integer                        {  $$ = dataloc(-1, $2); }
+              |  'V' integer 'U'                    {  $$ = dataloc(-1, $2) << 1; }
+              |  'V' integer 'L'                    {  $$ = (dataloc(-1, $2) << 1) | 1; }
               |  'V' integer 'P' UNSIGNED_INTEGER   {  $$ = dataloc($4, $2); }
-              |  'R' integer                        {  $$ = codeloc(-1, $2)/6; }
-              |  'R' integer 'P' UNSIGNED_INTEGER   {  $$ = codeloc($4, $2)/6; }
-              |  'E' integer                        {  $$ = $2 & 07777; }            /* OK so long as address < 4096 */
+              |  'R' integer                        {  $$ = wordform(codeloc(-1, $2)); }
+              |  'R' integer 'P' UNSIGNED_INTEGER   {  $$ = wordform(codeloc($4, $2)); }
+              |  'P' UNSIGNED_INTEGER               {  $$ = codeloc($2, 0)/6; }      /* P-routine always starts on word boundary */
+              |  'E' integer                        {  $$ = $2; }
               |  ystref integer                     {  $$ = ystoreloc($1, $2); }
               |  'W' integer                        {  $$ = ystoreloc(-1, $2); }     /* W stores indicated as -1 */
+              |  'Z' integer                        {  $$ = ystoreloc(-2, $2); }     /* Z stores indicated as -2 */
+              |  'H' integer                        {  $$ = ystoreloc(-3, $2); }     /* H stores are a mystery */
               ;
 
-mqmq          :  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER ';'  {$$ = twosylqx(0100, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' ';'  {$$ = twosylqx(0102, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'N' ';'  {$$ = twosylqx(0110, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' 'N' ';'  {$$ = twosylqx(0112, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'H' ';'  {$$ = twosylqx(0104, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' 'H' ';'  {$$ = twosylqx(0106, $4, $2); }
-              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'H' 'N' ';'  {$$ = twosylqx(0114, $4, $2); }
+mqmq          :  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER ';'              {$$ = twosylqx(0100, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' ';'          {$$ = twosylqx(0102, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'N' ';'          {$$ = twosylqx(0110, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' 'N' ';'      {$$ = twosylqx(0112, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'H' ';'          {$$ = twosylqx(0104, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' 'H' ';'      {$$ = twosylqx(0106, $4, $2); }
+              |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'H' 'N' ';'      {$$ = twosylqx(0114, $4, $2); }
               |  'M' UNSIGNED_INTEGER 'M' UNSIGNED_INTEGER 'Q' 'H' 'N' ';'  {$$ = twosylqx(0116, $4, $2); }
               ;
 
-shiftval      :  UNSIGNED_INTEGER
-              |  '+' UNSIGNED_INTEGER    {  $$ = $2; }
+shiftval      :  '+' UNSIGNED_INTEGER    {  $$ = $2; }
               |  '-' UNSIGNED_INTEGER    {  $$ = (-$2) & 0177; }
+              |  UNSIGNED_INTEGER
               ;
 
 instruction   :  ';'
@@ -296,23 +340,24 @@ instruction   :  ';'
               |  vspec
               |  'P' UNSIGNED_INTEGER ';'  { newproutine($2, -1); }
               |  'P' UNSIGNED_INTEGER 'V' UNSIGNED_INTEGER ';'  { newproutine($2, $4); }
+              |  'L' UNSIGNED_INTEGER ';'  { newproutine(-$2, -1); }
 
-              |  memref ';'     { store3syl(0300, $1); }                  /* Vn;  VnPn;  etc */
-              |  '=' memref ';'     { store3syl(0301, $2); }
+              |  memref ';'     { storememinstr(0300, $1, 0); }                  /* Vn;  VnPn; Yn; YAn;  etc */
+              |  '=' memref ';'     { storememinstr(0301, $2, 0); }
 
-              |  memref 'M' UNSIGNED_INTEGER ';'         { qnum($3); store3syl(0300, $1 + ($3<<12)); }    /* VnMm;  etc */
-              |  '=' memref 'M' UNSIGNED_INTEGER ';'     { qnum($4); store3syl(0301, $2 + ($4<<12)); }
-              |  memref 'M' UNSIGNED_INTEGER 'Q' ';'     { qnum($3); store3syl(0302, $1 + ($3<<12)); }    /* VnMmQ;  etc */
-              |  '=' memref 'M' UNSIGNED_INTEGER 'Q' ';' { qnum($4); store3syl(0303, $2 + ($4<<12)); }
+              |  memref 'M' UNSIGNED_INTEGER ';'         { qnum($3); storememinstr(0300, $1, $3); }    /* VnMm;  etc */
+              |  '=' memref 'M' UNSIGNED_INTEGER ';'     { qnum($4); storememinstr(0301, $2, $4); }
+              |  memref 'M' UNSIGNED_INTEGER 'Q' ';'     { qnum($3); storememinstr(0302, $1, $3); }    /* VnMmQ;  etc */
+              |  '=' memref 'M' UNSIGNED_INTEGER 'Q' ';' { qnum($4); storememinstr(0303, $2, $4); }
 
-              |  'S' 'E' 'T' UNSIGNED_INTEGER ';'   {  store3syl(0304, $4); }
-              |  'S' 'E' 'T' 'B' digitsequence ';'   {  store3syl(0304, octalval($5)); }
-              |  'S' 'E' 'T' '-' UNSIGNED_INTEGER ';'   {  store3syl(0304, (-$5)&0177777); }
-              |  'S' 'E' 'T' '+' UNSIGNED_INTEGER ';'   {  store3syl(0304, $5); }
-              |  'S' 'E' 'T' 'A' memref ';'             {  store3syl(0304, $5); }
-              |  'S' 'E' 'T' 'A' memref 'U' ';'         {  store3syl(0304, $5<<1); }
-              |  'S' 'E' 'T' 'A' memref 'L' ';'         {  store3syl(0304, $5<<1 + 1); }
-              |  'S' 'E' 'T' 'A' 'P' UNSIGNED_INTEGER ';'   {  store3syl(0304, codeloc($6, 0)/6); }
+              |  'S' 'E' 'T' UNSIGNED_INTEGER ';'         {  store3syl(0304, $4); }
+              |  'S' 'E' 'T' 'B' digitsequence ';'        {  store3syl(0304, octalval($5)); }
+              |  'S' 'E' 'T' '-' UNSIGNED_INTEGER ';'     {  store3syl(0304, (-$5)&0177777); }
+              |  'S' 'E' 'T' '+' UNSIGNED_INTEGER ';'     {  store3syl(0304, $5); }
+              |  'S' 'E' 'T' 'A' memref ';'               {  store3syl(0304, $5); }
+              |  'S' 'E' 'T' 'A' memref 'U' ';'           {  store3syl(0304, $5<<1); }
+              |  'S' 'E' 'T' 'A' memref 'L' ';'           {  store3syl(0304, ($5<<1) + 1); }
+              |  'S' 'E' 'T' 'A' 'P' UNSIGNED_INTEGER ';' {  store3syl(0304, codeloc($6, 0)/6); }
 
               |  mqmq                 {  store2syl($1); }                /* MnMn;    MnMnQ;   etc */
               |  '=' mqmq                {  store2syl(256 + $2); }
@@ -482,38 +527,43 @@ instruction   :  ';'
                                                               { store3syl(0202 - (($5&1)<<1), (0360<<8) + codeloc($8, 0)); }  /* !!! */
 
               |  'C' 'T' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0120, $4, 000)); }
-              |  'M' 'A' 'N' 'U' 'A' 'L' 'Q' UNSIGNED_INTEGER ';' { store2syl(twosylqx(0120, $8, 001)); }
-              |  'B' 'U' 'S' 'Y' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0120, $6, 002)); }
+              |  'P' 'R' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0124, $4, 000)); }
+              |  'P' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
+              |  'T' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
+              |  'L' 'P' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
+              |  'M' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
+
               |  'M' 'L' 'B' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0120, $5, 004)); }
               |  'M' 'B' 'T' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0120, $5, 010)); }
               |  'P' 'A' 'R' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0121, $5, 000)); }
               |  'M' 'E' 'T' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0122, $5, 000)); }
               |  'M' 'F' 'R' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0124, $5, 000)); }
-              |  'P' 'R' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0124, $4, 000)); }
               |  'C' 'L' 'O' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0124, $5, 002)); }
               |  'T' 'L' 'O' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0124, $5, 004)); }
               |  'P' 'R' 'C' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0124, $5, 010)); }
               |  'M' 'R' 'E' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0125, $5, 000)); }
               |  'P' 'R' 'E' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0125, $5, 000)); }
-              |  'P' 'R' 'C' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0125, $6, 010)); }
               |  'M' 'B' 'R' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0126, $5, 000)); }
-              |  'M' 'B' 'R' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0127, $6, 000)); }
-              |  'P' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
-              |  'T' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
               |  'P' 'W' 'C' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0130, $5, 010)); }
-              |  'M' 'W' 'Q' UNSIGNED_INTEGER ';'                 { store2syl(twosylqx(0130, $4, 000)); }
               |  'M' 'L' 'W' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0130, $5, 010)); }
-              |  'M' 'G' 'A' 'P' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0130, $6, 014)); }
-              |  'P' 'G' 'A' 'P' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0130, $6, 014)); }
-              |  'M' 'W' 'I' 'P' 'E' 'Q' UNSIGNED_INTEGER ';'     { store2syl(twosylqx(0130, $7, 004)); }
+              |  'I' 'N' 'T' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0134, $5, 002)); }
               |  'M' 'W' 'E' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0131, $5, 000)); }
               |  'P' 'W' 'E' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0131, $5, 000)); }
               |  'T' 'W' 'E' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0131, $5, 000)); }
+
+              |  'B' 'U' 'S' 'Y' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0120, $6, 002)); }
+              |  'M' 'G' 'A' 'P' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0130, $6, 014)); }
+              |  'P' 'G' 'A' 'P' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0130, $6, 014)); }
               |  'M' 'L' 'W' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0131, $6, 010)); }
               |  'M' 'F' 'S' 'K' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0134, $6, 000)); }
-              |  'I' 'N' 'T' 'Q' UNSIGNED_INTEGER ';'             { store2syl(twosylqx(0134, $5, 002)); }
               |  'M' 'B' 'S' 'K' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0136, $6, 000)); }
               |  'M' 'R' 'W' 'D' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0136, $6, 010)); }
+              |  'M' 'B' 'R' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0127, $6, 000)); }
+              |  'M' 'F' 'R' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0125, $6, 000)); }
+              |  'P' 'R' 'C' 'E' 'Q' UNSIGNED_INTEGER ';'         { store2syl(twosylqx(0125, $6, 010)); }
+
+              |  'M' 'W' 'I' 'P' 'E' 'Q' UNSIGNED_INTEGER ';'     { store2syl(twosylqx(0130, $7, 004)); }
+              |  'M' 'A' 'N' 'U' 'A' 'L' 'Q' UNSIGNED_INTEGER ';' { store2syl(twosylqx(0120, $8, 001)); }
 
 
               |  'P' 'I' 'A' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0124, $5, 000)); }   /* ordinary read */
@@ -538,10 +588,10 @@ instruction   :  ';'
               |  'P' 'M' 'D' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0136, $5, 010)); }   /* MRWD */
               |  'P' 'M' 'E' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0136, $5, 000)); }   /* MBSK */
               |  'P' 'M' 'F' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0122, $5, 000)); }   /* MET */
-              |  'P' 'M' 'G' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0134, $5, 010)); }   /* Read C-store - Bill's best guess */
-              |  'P' 'M' 'H' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0134, $5, 004)); }   /* Set lockout - Bill's best guess */
-              |  'P' 'M' 'K' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0135, $5, 000)); }   /* IBM Even parity skip forward - Bill's best guess */
-              |  'P' 'M' 'L' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0137, $5, 000)); }   /* IBM Even parity skip back - Bill's best guess */
+              |  'P' 'M' 'G' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0122, $5, 004)); }   /* Read C-store - definitive from KAA01 */
+              |  'P' 'M' 'H' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0130, $5, 002)); }   /* Set lockout - definitive from KAA01 */
+              |  'P' 'M' 'K' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0134, $5, 004)); }   /* IBM Even parity skip forward - definitive from KAA01 */
+              |  'P' 'M' 'L' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0136, $5, 004)); }   /* IBM Even parity skip back - definitive from KAA01 */
 
               |  'P' 'O' 'G' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0132, $5, 000)); }   /* CP A/N;       FD Next sector - Bill's confident guess */
               |  'P' 'O' 'H' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0133, $5, 000)); }   /* CP A/N, EM;   FD Next sector, EM - Bill's confident guess */
@@ -549,9 +599,8 @@ instruction   :  ';'
               |  'P' 'O' 'L' 'Q' UNSIGNED_INTEGER ';'   { store2syl(twosylqx(0132, $5, 010)); }   /* CP A/N, Character mode;     FD Next sector, fixed heads - Bill's confident guess */
 
 
+              |  '$'                        { startnewword(); }
               |  '*'                        { startnewword(); }
               ;
-
 %%
-
 

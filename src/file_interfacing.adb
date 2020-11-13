@@ -2,8 +2,8 @@
 --
 -- Provide an Ada.Text_IO interface to the file system of the real OS.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,15 +16,7 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Exceptions;
---
-with HCI;
-
-use  HCI;
-
 package body file_interfacing is
-
-   pragma Unsuppress(All_Checks);
 
    procedure initialize (some_file : in out File_Type;
                          mode      : in File_Mode;
@@ -42,15 +34,9 @@ package body file_interfacing is
 
    procedure finalize (some_file : in out File_Type;
                        file_name : in String) is
+      pragma Unreferenced(file_name);
    begin
       Close(some_file);
-   exception
-      when error : others =>
-         log_line("Failure in ee9: "
-                & Ada.Exceptions.Exception_Information(error)
-                & " was raised for '" & file_name & "'"
-                & " in 'file_interfacing.finalize'!");
-         raise;
    end finalize;
 
 end file_interfacing;

@@ -2,8 +2,8 @@
 --
 -- Provide logging output to a named text file.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -26,8 +26,6 @@ use  Ada.Text_IO;
 use  file_interfacing;
 
 package body logging.file is
-
-   pragma Unsuppress(All_Checks);
 
    overriding
    procedure tab_log (logger   : in out file.output;

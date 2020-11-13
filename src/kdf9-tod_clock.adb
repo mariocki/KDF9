@@ -2,8 +2,8 @@
 --
 -- functions that implement timing for Director emulation.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,30 +17,28 @@
 --
 
 with Ada.Calendar;
+with Ada.Calendar.Time_Zones;
 with Ada.Calendar.Formatting;
 
 use  Ada.Calendar;
+use  Ada.Calendar.Time_Zones;
 use  Ada.Calendar.Formatting;
 
 package body KDF9.TOD_clock is
 
-   pragma Unsuppress(All_Checks);
-
    function todays_date_28n_years_ago
    return KDF9.word is
 
-      -- For values of i in 0..99, return two 6-bit KDF9 decimal digits.
-      function as_2_digits (i : KDF9.word)
-      return KDF9.word is
-         zero : constant KDF9.word := 8#20#;  -- KDF9 code for '0'.
-      begin
-         return (i/10 + zero)*64 or (i mod 10 + zero);
-      end as_2_digits;
-
-      slash : constant KDF9.word := 8#17#;  -- The result is in the form DD/MM/YY.
+      zero  : constant KDF9.word := 8#20#;
+      slash : constant KDF9.word := 8#17#;
       today : constant Ada.Calendar.Time := Ada.Calendar.Clock;
 
       year, month, day, hour, minute, second, sub_second : KDF9.word;
+
+      -- For values of i in 0..99, return two 6-bit KDF9 decimal digits.
+      function as_2_digits (i : KDF9.word)
+      return KDF9.word
+      is ((i/10 + zero)*64 or (i mod 10 + zero));
 
    begin  -- todays_date_28n_years_ago
       Split(today,
@@ -50,7 +48,8 @@ package body KDF9.TOD_clock is
             Hour_Number(hour),
             Minute_Number(minute),
             Second_Number(second),
-            Second_Duration(sub_second)
+            Second_Duration(sub_second),
+            Time_Zone => UTC_Time_Offset(today)
            );
       loop  -- Repeat n > 0 times, assuming no time travel into the past!
          year := year - 28;
@@ -62,7 +61,7 @@ package body KDF9.TOD_clock is
    end todays_date_28n_years_ago;
 
    function the_time_of_day
-   return KDF9.microseconds is
+   return KDF9.us is
       today : constant Ada.Calendar.Time := Ada.Calendar.Clock;
       year, month, day, hour, minute, second, sub_second : KDF9.word;
    begin
@@ -73,10 +72,10 @@ package body KDF9.TOD_clock is
             Hour_Number(hour),
             Minute_Number(minute),
             Second_Number(second),
-            Second_Duration(sub_second)
+            Second_Duration(sub_second),
+            Time_Zone => UTC_Time_Offset(today)
            );
-      return KDF9.microseconds(hour*3600 + minute*60 + second) * 1_000_000;
+      return KDF9.us(hour*3600 + minute*60 + second) * 1_000_000;
    end the_time_of_day;
-
 
 end KDF9.TOD_clock;

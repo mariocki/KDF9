@@ -1,9 +1,9 @@
--- settings-io.ads
+-- settings.IO.ads
 --
 -- Settings-reader I/O support.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,14 +17,12 @@
 --
 
 with Ada.Text_IO;
+--
+with postscript;
 
 use  Ada.Text_IO;
 
-with postscript;
-
 package settings.IO is
-
-   pragma Unsuppress(All_Checks);
 
    line_number : Natural := 0;
 
@@ -53,7 +51,11 @@ package settings.IO is
 
    -- Read an address as a KDF9.word in either octal or decimal,
    --    using get_octal or get_decimal as indicated by the syntax.
-   procedure get_address (file : in File_Type; value : out KDF9.word);
+   procedure get_word (file : in File_Type; value : out KDF9.word);
+
+   -- Read the character value immediately following an octal or decimal number,
+   --    if it is not a space character; if it is a space, leave value unchanged.
+   procedure get_char (file : in File_Type; value : out Character);
 
    package colour_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_colour);
    package  width_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_tip_size);

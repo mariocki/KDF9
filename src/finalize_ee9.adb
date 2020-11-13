@@ -2,8 +2,8 @@
 --
 -- Shut down processing in preparation for a dignified exit.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -26,16 +26,11 @@ use  HCI;
 use  IOC;
 use  state_display;
 
-procedure finalize_ee9 is
-
-   pragma Unsuppress(All_Checks);
-
+procedure finalize_ee9 (because : in String) is
 begin
-   show_final_state;
+   show_final_state(because);
    finalize_all_KDF9_buffers;
 exception
    when error : others =>
-      log_line("Failure in ee9: "
-             & Ada.Exceptions.Exception_Information(error)
-             & " was raised in 'finalize_ee9'!");
+      log_line("Failure in finalize_ee9: " & Ada.Exceptions.Exception_Information(error));
 end finalize_ee9;

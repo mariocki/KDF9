@@ -1,11 +1,10 @@
 -- OS_specifics.ads
 --
--- Special operations for the console terminal streams.
--- This specification is the same for the Windows, Linux, OS X and UNIX versions;
---    although not all features are used in all system types.
+-- Specific feature values and operation for the console terminal streams.
+-- This specification is the same for Windows, Linux, macOS and UNIX versions of ee9.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,31 +17,26 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with IO;
-
-use  IO;
-
 package OS_specifics is
 
-   pragma Unsuppress(All_Checks);
-
-   -- open_ui opens /dev/tty on UNIX systems and CON{IN|OUT}$ on Windows.
-   procedure open_ui;
-
-   -- make_transparent sets the "binary" mode of I/O on Windows/Cygwin;
-   --    it does nothing on UNIX-family systems, where no such precaution is necessary.
+   -- make_transparent sets the "binary" mode of I/O on Windows/Cygwin.
+   -- It does nothing on UNIX-family systems, where no such precaution is necessary.
    procedure make_transparent (fd : in Integer);
 
-   function the_terminal_is_ANSI_compatible
-   return Boolean;
+   -- UI_in_name returns the interactive input device name appropriate to the host OS, e.g.:
+   -- "/dev/tty"  for macOS/UNIX/Linux,
+   -- "CONIN$" for Windows.
+   function UI_in_name
+   return String;
 
-   -- set_text_colour_to_* is effective iff the_terminal_is_ANSI_compatible yields True.
-   procedure set_text_colour_to_red   (the_flexowriter_output : in out IO.stream);
+   -- UI_out_name returns the interactive output device name appropriate to the host OS, e.g.:
+   -- "/dev/tty"  for macOS/UNIX/Linux,
+   -- "CONOUT$" for Windows.
+   function UI_out_name
+   return String;
 
-   procedure set_text_colour_to_black (the_flexowriter_output : in out IO.stream);
-
-   -- EOL returns the appropriate line terminator for the selected host OS:
-   -- LF for OS X/UNIX/Linux,
+   -- EOL returns the appropriate line terminator for the selected host OS, e.g.:
+   -- LF for macOS/UNIX/Linux,
    -- CRLF for Windows.
    function EOL
    return String;

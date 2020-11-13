@@ -14,6 +14,14 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
 - Amended all shell scripts to convert output to UTF8 for correct display on modern terminals.
 - Replaced KDF9Flex with a sed script to perform conversion between modern glyphs and those expected by the Whetstone compiler.
 
+### Differences in the Whetstone interpreter
+- Amended the `whet` shell script to look for files with a suffix of `.w60` and if found will apply the conversion to `.a60` format expected by the Whetstone interpreter. This allows you to write Algol60 code in a more modern format without the need to manually convert before interpreting.
+- `~` is used as the exponent i.e. `layout := format({+d.dddddddd~+nd});` converts to `layout := format(_[+d.ddddddddº+nd_]);`
+- `\` is used for integer division `z := (a \ y);` converts to `z := (a ÷ y);`
+- `|` is not replaced as in KDF9Flex
+
+
+
 ## Folder structure
 - `src` Main source code for ee9
 - `builddefs` Gnat adc pragma files for the various build options.

@@ -1,9 +1,9 @@
 -- formatting.ads
 --
--- Provide basic data-formatting operations.
+-- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -22,13 +22,9 @@ use  KDF9;
 
 package formatting is
 
-   pragma Unsuppress(All_Checks);
-
-   digit_map : constant array (KDF9.halfword range 0 .. 15) of Character := "0123456789ABCDEF";
-
-   subtype unit_string               is String(1 .. 1);
-   subtype word_as_byte_string       is String(1 .. 8);
-   subtype pair_as_byte_string       is String(1 .. 16);
+   subtype unit_string         is String(1 .. 1);
+   subtype word_as_byte_string is String(1 .. 8);
+   subtype pair_as_byte_string is String(1 .. 16);
 
    -- Return N as 3 octal digits.
    function oct_of (N : KDF9.syllable)
@@ -47,57 +43,71 @@ package formatting is
    function oct_of (N : KDF9.Q_part; min_digits : octal_width := 6)
    return String;
 
+   -- Return N as 1 .. 5 decimal digits, with zero suppression and sign when neagtive.
+   function signed_dec_of (N : KDF9.Q_part)
+   return String;
+
    -- Return N as 1 .. 6 decimal digits, with zero suppression.
    function dec_of (N : KDF9.Q_part)
    return String;
 
-   -- Return N as 5 octal digits.
-   function oct_of (N : KDF9.code_location)
+   -- Return N as up to 5 octal digits.
+   function oct_of (N : KDF9.order_word_number)
    return String;
+
+   -- Return N as decimal digits, with zero suppression.
+   function dec_of (N : KDF9.order_word_number)
+   return String ;
 
    -- Return N as 8 octal digits.
    function oct_of (N : KDF9.halfword)
    return String;
 
    -- Return N as #wwwww/s, where w and s are octal digits.
-   function oct_of (N : KDF9.code_link)
+   function oct_of (N : KDF9.sjns_link)
    return String;
 
    -- Return N as #wwwww/s, where w and s are octal digits.
-   function oct_of (N : KDF9.code_point)
+   function oct_of (N : KDF9.syllable_address)
    return String;
 
    -- Return N as dddd/d, where d is a decimal digit.
-   function dec_of (N : KDF9.code_point)
+   function dec_of (N : KDF9.syllable_address)
    return String;
 
    -- Return N as #wwwww/s, where w and s are octal digits;
    --    or as dddd/s, where d is a decimal digit, according to octal_option.
-   function oct_or_dec_of (N : KDF9.code_point; octal_option : Boolean)
+   function oct_or_dec_of (N : KDF9.syllable_address; octal_option : Boolean)
    return String;
 
-   -- Return N as 16 octal digits
+   -- Return N as 16 octal digits.
    function oct_of (N : KDF9.word)
+   return String;
+
+   function as_DR_command (Q_operand : KDF9.Q_register)
+   return String;
+
+   function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
    return String;
 
    -- Return "L', R'", or "L'" if R' is empty: "'" indicates removal of trailing blanks.
    function "-" (L, R : String)
    return String;
 
-   -- Return S with all leading an trailing blanks removed.
+   -- Return S with all leading and trailing blanks removed.
    function trimmed (S : String)
    return String;
 
    -- Return trimmed(S), right-justified in a field of width at least W.
-   function justified (S : String; W : Positive := 3)
+   function just_right (S : String; W : Positive := 3)
    return String;
 
-   -- Return (if B then S else ""): for pre-Ada 2012 compliers.
-   function optional (B : Boolean; T : String)
+   -- Return trimmed(S), left-justified in a field of width at least W.
+   function just_left (S : String; W : Positive := 3)
    return String;
 
-   -- Return (if B then S else T): for pre-Ada 2012 compliers.
-   function optional (B : Boolean; S, T : String)
+   -- Return the (pluralizing) suffix if count /= 1.
+   function plurality (count : KDF9.word; for_1 : String := ""; for_more : String := "s")
    return String;
 
    -- Return C converted to a 1-character string.
@@ -127,5 +137,8 @@ package formatting is
    -- Return the result of applying to_string to each word of a double-word.
    function to_string (P : KDF9.pair)
    return pair_as_byte_string;
+
+   -- Take a string and ignore it.
+   procedure discard (S : String);
 
 end formatting;

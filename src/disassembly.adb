@@ -2,8 +2,8 @@
 --
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,164 +16,210 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with exceptions;
 with formatting;
 with KDF9.CPU;
-with KDF9.compressed_opcodes;
+with KDF9.decoding;
 
+use  exceptions;
 use  formatting;
 use  KDF9.CPU;
-use  KDF9.compressed_opcodes;
+use  KDF9.decoding;
 
 package body disassembly is
 
-   pragma Unsuppress(All_Checks);
+   function flagged (flag : String; s : KDF9.syllable)
+   return String
+   is (flag & oct_of(s));
 
    function machine_code (decoded : KDF9.decoded_order)
-   return String is
-   begin
-      case decoded.kind is
-         when one_syllable_order =>
-            return "#" & oct_of(decoded.order.syllable_0);
-         when two_syllable_order =>
-            return "#" & oct_of(decoded.order.syllable_0)
-                 & ":" & oct_of(decoded.order.syllable_1);
-         when normal_jump_order | data_access_order=>
-            return "#" & oct_of(decoded.order.syllable_0)
-                 & ":" & oct_of(decoded.order.syllable_1)
-                 & ":" & oct_of(decoded.order.syllable_2);
-      end case;
-   end machine_code;
+   return String
+   is (
+       case decoded.kind is
+          when one_syllable_order => flagged("#", decoded.order.syllable_0),
+
+          when two_syllable_order => flagged("#", decoded.order.syllable_0)
+                                   & flagged(":", decoded.order.syllable_1),
+          when normal_jump_order
+             | data_access_order  => flagged("#", decoded.order.syllable_0)
+                                   & flagged(":", decoded.order.syllable_1)
+                                   & flagged(":", decoded.order.syllable_2)
+      );
 
    function one_syllable_order_name (decoded : KDF9.decoded_order)
-   return String is
-   begin
-      case decoded.syndrome is
-         when VR =>
-            return "VR";
-         when TO_TR =>
-            return "=TR";
-         when BITS =>
-            return "BITS";
-         when XF =>
-            return "×F";
-         when XDF =>
-            return "×DF";
-         when XPLUSF =>
-            return "×+F";
-         when NEGD =>
-            return "NEGD";
-         when OR_9 =>
-            return "OR";
-         when PERM =>
-            return "PERM";
-         when TOB =>
-            return "TOB";
-         when ROUNDH =>
-            return "ROUNDH";
-         when NEV =>
-            return "NEV";
-         when ROUND =>
-            return "ROUND";
-         when DUMMY =>
-            return "DUMMY";
-         when ROUNDF =>
-            return "ROUNDF";
-         when ROUNDHF =>
-            return "ROUNDHF";
-         when MINUSDF =>
-            return "-DF";
-         when PLUSDF =>
-            return "+DF";
-         when FLOAT_9 =>
-            return "FLOAT";
-         when FLOATD =>
-            return "FLOATD";
-         when ABS_9 =>
-            return "ABS";
-         when NEG =>
-            return "NEG";
-         when ABSF =>
-            return "ABSF";
-         when NEGF =>
-            return "NEGF";
-         when MAX =>
-            return "MAX";
-         when NOT_9 =>
-            return "NOT";
-         when XD =>
-            return "×D";
-         when X_frac =>
-            return "×";
-         when MINUS =>
-            return "-";
-         when SIGN =>
-            return "SIGN";
-         when ZERO =>
-            return "ZERO";
-         when DUP =>
-            return "DUP";
-         when DUPD =>
-            return "DUPD";
-         when DIVI =>
-            return "DIVI";
-         when FIX =>
-            return "FIX";
-         when STR =>
-            return "STR";
-         when CONT =>
-            return "CONT";
-         when REVD =>
-            return "REVD";
-         when ERASE =>
-            return "ERASE";
-         when MINUSD =>
-            return "-D";
-         when AND_9 =>
-            return "AND";
-         when PLUS =>
-            return "+";
-         when PLUSD =>
-            return "+D";
-         when DIV =>
-            return "DIV";
-         when DIVD =>
-            return "DIVD";
-         when DIVF =>
-            return "DIVF";
-         when DIVDF =>
-            return "DIVDF";
-         when DIVR =>
-            return "DIVR";
-         when REV =>
-            return "REV";
-         when CAB =>
-            return "CAB";
-         when FRB =>
-            return "FRB";
-         when STAND =>
-            return "STAND";
-         when NEGDF =>
-            return "NEGDF";
-         when MAXF =>
-            return "MAXF";
-         when PLUSF =>
-            return "+F";
-         when MINUSF =>
-            return "-F";
-         when SIGNF =>
-            return "SIGNF";
-         when others =>
-            return machine_code(decoded);
-      end case;
-   end one_syllable_order_name;
+   return String
+   is (
+       case decoded.compressed_opcode is
+          when ABS_9   => "ABS",
+          when ABSF    => "ABSF",
+          when AND_9   => "AND",
+          when BITS    => "BITS",
+          when CAB     => "CAB",
+          when CONT    => "CONT",
+          when DIV     => "/",
+          when DIVD    => "/D",
+          when DIVDF   => "/DF",
+          when DIVF    => "/F",
+          when DIVI    => "/I",
+          when DIVR    => "/R",
+          when DUMMY   => "DUMMY",
+          when DUP     => "DUP",
+          when DUPD    => "DUPD",
+          when ERASE   => "ERASE",
+          when FIX     => "FIX",
+          when FLOAT_9 => "FLOAT",
+          when FLOATD  => "FLOATD",
+          when FRB     => "FRB",
+          when MAX     => "MAX",
+          when MAXF    => "MAXF",
+          when MINUS   => "-",
+          when MINUSD  => "-D",
+          when MINUSDF => "-DF",
+          when MINUSF  => "-F",
+          when NEG     => "NEG",
+          when NEGD    => "NEGD",
+          when NEGDF   => "NEGDF",
+          when NEGF    => "NEGF",
+          when NEV     => "NEV",
+          when NOT_9   => "NOT",
+          when OR_9    => "OR",
+          when PERM    => "PERM",
+          when PLUS    => "+",
+          when PLUSD   => "+D",
+          when PLUSDF  => "+DF",
+          when PLUSF   => "+F",
+          when REV     => "REV",
+          when REVD    => "REVD",
+          when ROUND   => "ROUND",
+          when ROUNDF  => "ROUNDF",
+          when ROUNDH  => "ROUNDH",
+          when ROUNDHF => "ROUNDHF",
+          when SIGN    => "SIGN",
+          when SIGNF   => "SIGNF",
+          when STAND   => "STAND",
+          when STR     => "STR",
+          when TO_TR   => "=TR",
+          when TOB     => "TOB",
+          when VR      => "VR",
+          when X_frac  => "×",
+          when XD      => "×D",
+          when XDF     => "×DF",
+          when XF      => "×F",
+          when XPLUSF  => "×+F",
+          when ZERO    => "ZERO",
+          when 0       => "DUMMY0",
+          when others  =>  machine_code(decoded)
+       );
 
    function two_syllable_order_name (decoded : KDF9.decoded_order)
    return String is
 
-      k : constant String := trimmed(KDF9.Q_number'Image(decoded.Qk));
-      q : constant String := trimmed(KDF9.Q_number'Image(decoded.Qq));
+      default : constant String := machine_code(decoded);
+      invalid : constant String := "";
+      k       : constant String := trimmed(decoded.Qk'Image);
+      q       : constant String := trimmed(decoded.Qq'Image);
+      opcode  : constant KDF9.compressed_opcode := (decoded.Qk and not manual_bit);
+      CT      : constant Boolean := (decoded.Qk and manual_bit) = 0;
 
-      function shift_count return String is
+      function IO_order (stem : String)
+      return String
+      is (if stem = invalid then default else stem & "Q" & q);
+
+      function IO_order_name
+      return String
+      is (
+          case decoded.compressed_opcode is
+               when PIA_PIC_CLO_TLO_Qq =>
+                                   IO_order(case opcode is
+                                               when PIA_bits => "PIA",
+                                               when PIC_bits => "PIC",
+                                               when CLO_bits => "CLO",
+                                               when TLO_bits => "TLO",
+                                               when others   => invalid),
+               when PIB_PID_Qq =>
+                                   IO_order(case opcode is
+                                               when PIB_bits => "PIB",
+                                               when PID_bits => "PID",
+                                               when others   => invalid),
+               when PIE_PIG_Qq =>
+                                   IO_order(case opcode is
+                                               when PIE_bits => "PIE",
+                                               when PIG_bits => "PIG",
+                                               when others   => invalid),
+               when PIF_PIH_Qq =>
+                                   IO_order(case opcode is
+                                               when PIF_bits => "PIF",
+                                               when PIH_bits => "PIH",
+                                               when others   => invalid),
+               when PMA_PMK_INT_Qq =>
+                                   IO_order(case opcode is
+                                               when PMA_bits => "PMA",
+                                               when PMK_bits => "PMK",
+                                               when INT_bits => "INT",
+                                               when others   => invalid),
+               when CT_PMB_PMC_BUSY_Qq =>
+                                   IO_order(case opcode is
+                                               when PMB_bits  => "PMB",
+                                               when PMC_bits  => "PMC",
+                                               when BUSY_bits => "BUSY",
+                                               when CTQ_bits => (if CT then "CT" else "MANUAL"),
+                                               when others    => invalid),
+               when PMD_PME_PML_Qq =>
+                                   IO_order(case opcode is
+                                               when PMD_bits => "PMD",
+                                               when PME_bits => "PME",
+                                               when PML_bits => "PML",
+                                               when others   => invalid),
+               when PMF_PMG_Qq =>
+                                   IO_order(case opcode is
+                                               when PMF_bits => "PMF",
+                                               when PMG_bits => "PMG",
+                                               when others   => invalid),
+               when POA_POC_POE_POF_PMH_Qq =>
+                                   IO_order(case opcode is
+                                               when POA_bits => "POA",
+                                               when POC_bits => "POC",
+                                               when POE_bits => "POE",
+                                               when POF_bits => "POF",
+                                               when PMH_bits => "PMH",
+                                               when others   => invalid),
+               when POB_POD_Qq =>
+                                   IO_order(case opcode is
+                                               when POB_bits => "POB",
+                                               when POD_bits => "POD",
+                                               when others   => invalid),
+               when POG_POL_Qq =>
+                                   IO_order(case opcode is
+                                               when POG_bits => "POG",
+                                               when POL_bits => "POL",
+                                               when others   => invalid),
+               when POH_POK_Qq =>
+                                   IO_order(case opcode is
+                                               when POH_bits => "POH",
+                                               when POL_bits => "POK",
+                                               when others   => invalid),
+               when PAR_Qq =>      IO_order("PAR"),
+               when others =>      IO_order(invalid)
+         );
+
+      function indirect_store_order_name (suffix : String := "")
+      return String
+      is ("=M" & k & "M" & q & suffix);
+
+      function indirect_fetch_order_name (suffix : String := "")
+      return String
+      is ("M" & k & "M" & q & suffix);
+
+      function Qq_to_Qk_name (part : String)
+      return String
+      is (part & q & " TO Q" & k);
+
+      function Qq_order_name (action : String; suffix : String := "")
+      return String
+      is (action & q & suffix);
+
+      function shift_count
+      return String is
          constant_flag : constant := 1;
          fixed_shift   : CPU.signed_Q_part;
       begin
@@ -182,713 +228,406 @@ package body disassembly is
             if fixed_shift > 63 then
                fixed_shift := fixed_shift - 128;
             end if;
-            return optional(fixed_shift<0, "", "+")
-                 & trimmed(CPU.signed_Q_part'Image(fixed_shift));
+            return (if fixed_shift < 0 then "" else "+") & trimmed(fixed_shift'Image);
          else
             return "C" & q;
          end if;
       end shift_count;
 
-      function IO_order_name (decoded : KDF9.decoded_order)
-      return String is
-         IO_opcode : constant KDF9.syndrome := (decoded.Qk and not manual_bit);
-      begin
-         case decoded.syndrome is
+      function shift_order_name (action : String)
+      return String
+      is (action & shift_count);
 
-            when PARQq =>
-               return "PARQ" & q;
+   begin -- two_syllable_order_name
+      return
+         (
+          case decoded.compressed_opcode is
+             when MkMq       => indirect_fetch_order_name,
+             when MkMqQ      => indirect_fetch_order_name(suffix => "Q"),
+             when MkMqH      => indirect_fetch_order_name(suffix => "H"),
+             when MkMqQH     => indirect_fetch_order_name(suffix => "QH"),
+             when MkMqN      => indirect_fetch_order_name(suffix => "N"),
+             when MkMqQN     => indirect_fetch_order_name(suffix => "QN"),
+             when MkMqHN     => indirect_fetch_order_name(suffix => "HN"),
+             when MkMqQHN    => indirect_fetch_order_name(suffix => "QHN"),
 
-            when PIAQq_PICQq_CLOQq_TLOQq =>
-               case IO_opcode is
-                  when PIAQq_bits =>
-                     return "PIAQ" & q;
-                  when PICQq_bits =>
-                     return "PICQ" & q;
-                  when CLOQq_bits =>
-                     return "CLOQ" & q;
-                  when TLOQq_bits =>
-                     return "TLOQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when TO_MkMq    => indirect_store_order_name,
+             when TO_MkMqQ   => indirect_store_order_name(suffix => "Q"),
+             when TO_MkMqH   => indirect_store_order_name(suffix => "H"),
+             when TO_MkMqQH  => indirect_store_order_name(suffix => "QH"),
+             when TO_MkMqN   => indirect_store_order_name(suffix => "N"),
+             when TO_MkMqQN  => indirect_store_order_name(suffix => "QN"),
+             when TO_MkMqHN  => indirect_store_order_name(suffix => "HN"),
+             when TO_MkMqQHN => indirect_store_order_name(suffix => "QHN"),
 
-            when PIBQq_PIDQq =>
-               case IO_opcode is
-                  when PIBQq_bits =>
-                     return "PIBQ" & q;
-                  when PIDQq_bits =>
-                     return "PIDQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when M_PLUS_Iq  => Qq_order_name("M+I"),
+             when M_MINUS_Iq => Qq_order_name("M-I"),
+             when NCq        => Qq_order_name("NC"),
+             when DCq        => Qq_order_name("DC"),
+             when POS1_TO_Iq => Qq_order_name("I",  suffix => "=+1"),
+             when NEG1_TO_Iq => Qq_order_name("I",  suffix => "=-1"),
+             when POS2_TO_Iq => Qq_order_name("I",  suffix => "=+2"),
+             when NEG2_TO_Iq => Qq_order_name("I",  suffix => "=+2"),
+             when JCqNZS     => Qq_order_name("JC", suffix => "NZS"),
 
-            when PIEQq_PIGQq =>
-               case IO_opcode is
-                  when PIEQq_bits =>
-                     return "PIEQ" & q;
-                  when PIGQq_bits =>
-                     return "PIGQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when MqTOQk     => Qq_to_Qk_name("M"),
+             when IqTOQk     => Qq_to_Qk_name("I"),
+             when IMqTOQk    => Qq_to_Qk_name("IM"),
+             when CqTOQk     => Qq_to_Qk_name("C"),
+             when CMqTOQk    => Qq_to_Qk_name("CM"),
+             when CIqTOQk    => Qq_to_Qk_name("CI"),
+             when QqTOQk     => Qq_to_Qk_name("Q"),
+             when QCIMq =>
+                (
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then  Qq_order_name("Q")
+                 elsif (decoded.Qk and M_part_choice) /= 0       then  Qq_order_name("M")
+                 elsif (decoded.Qk and C_part_choice) /= 0       then  Qq_order_name("C")
+                 elsif (decoded.Qk and I_part_choice) /= 0       then  Qq_order_name("I")
+                 else  default
+                ),
+             when TO_RCIMq =>
+                (
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_order_name("=Q")
+                 elsif (decoded.Qk and M_part_choice) /= 0 then
+                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RM" else "=M")
+                 elsif (decoded.Qk and C_part_choice) /= 0 then
+                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RC" else "=C")
+                 elsif (decoded.Qk and I_part_choice) /= 0 then
+                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RI" else "=I")
+                 else default
+                ),
+             when ADD_TO_QCIMq =>
+                (
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_order_name("=+Q")
+                 elsif (decoded.Qk and M_part_choice) /= 0       then Qq_order_name("=+M")
+                 elsif (decoded.Qk and C_part_choice) /= 0       then Qq_order_name("=+C")
+                 elsif (decoded.Qk and I_part_choice) /= 0       then Qq_order_name("=+I")
+                 else  default
+                ),
 
-            when PIFQq_PIHQq =>
-               case IO_opcode is
-                  when PIFQq_bits =>
-                     return "PIFQ" & q;
-                  when PIHQq_bits =>
-                     return "PIHQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when SHA   => shift_order_name("SHA"),
+             when SHAD  => shift_order_name("SHAD"),
+             when MACC  => shift_order_name("×+"),
+             when SHL   => shift_order_name("SHL"),
+             when SHLD  => shift_order_name("SHLD"),
+             when SHC   => shift_order_name("SHC"),
 
-            when PMAQq_PMKQq_INTQq =>
-               case IO_opcode is
-                  when PMAQq_bits =>
-                     return "PMAQ" & q;
-                  when PMKQq_bits =>
-                     return "PMKQ" & q;
-                  when INTQq_bits =>
-                     return "INTQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when TO_Kq =>
+                (
+                 case decoded.Qq is
+                    when K0 => "=K0",
+                    when K1 => "=K1",
+                    when K2 => "=K2",
+                    when K3 => "=K3",
+                    when others => default
+                ),
+             when Kk =>
+                (
+                 case decoded.Qk is
+                   when K4 => "K4",
+                   when K5 => "K5",
+                   when K7 => "K7",
+                   when others => default
+                ),
 
-            when CTQq_PMBQq_PMCQq_BUSYQq =>
-               case IO_opcode is
-                  when CTQq_bits =>
-                     if (decoded.Qk and manual_bit) /= 0 then
-                        return "MANUALQ" & q;
-                     else
-                        return "CTQ" & q;
-                     end if;
-                  when PMBQq_bits =>
-                     return "PMBQ" & q;
-                  when PMCQq_bits =>
-                     return "PMCQ" & q;
-                  when BUSYQq_bits =>
-                     return "BUSYQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
+             when LINK    => "LINK",
+             when TO_LINK => "=LINK",
 
-            when PMDQq_PMEQq_PMLQq =>
-               case IO_opcode is
-                  when PMDQq_bits =>
-                     return "PMDQ" & q;
-                  when PMEQq_bits =>
-                     return "PMEQ" & q;
-                  when PMLQq_bits =>
-                     return "PMLQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
-
-            when PMFQq =>
-               return "PMFQ" & q;
-
-            when PMGQq =>
-               return "PMGQ" & q;
-
-            when PMHQq =>
-               return "PMHQ" & q;
-
-            when POAQq_POCQq_POEQq_POFQq =>
-               case IO_opcode is
-                  when POAQq_bits =>
-                     return "POAQ" & q;
-                  when POCQq_bits =>
-                     return "POCQ" & q;
-                  when POEQq_bits =>
-                     return "POEQ" & q;
-                  when POFQq_bits =>
-                     return "POFQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
-
-            when POBQq_PODQq =>
-               case IO_opcode is
-                  when POBQq_bits =>
-                     return "POBQ" & q;
-                  when PODQq_bits =>
-                     return "PODQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
-
-            when POGQq_POLQq =>
-               case IO_opcode is
-                  when POGQq_bits =>
-                     return "POGQ" & q;
-                  when POLQq_bits =>
-                     return "POLQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
-
-            when POHQq_POKQq =>
-               case IO_opcode is
-                  when POHQq_bits =>
-                     return "POHQ" & q;
-                  when POLQq_bits =>
-                     return "POKQ" & q;
-                  when others =>
-                     return machine_code(decoded);
-               end case;
-
-            when others =>
-               return machine_code(decoded);
-         end case;
-      end IO_order_name;
-
-   begin
-      case decoded.syndrome is
-         when JCqNZS =>
-            return "JC" & q & "NZS";
-         when MkMq =>
-            return "M" & k & "M" & q;
-         when MkMqQ =>
-            return "M" & k & "M" & q & "Q";
-         when MkMqH =>
-            return "M" & k & "M" & q & "H";
-         when MkMqQH =>
-            return "M" & k & "M" & q & "QH";
-         when MkMqN =>
-            return "M" & k & "M" & q & "N";
-         when MkMqQN =>
-            return "M" & k & "M" & q & "QN";
-         when MkMqHN =>
-            return "M" & k & "M" & q & "HN";
-         when MkMqQHN =>
-            return "M" & k & "M" & q & "QHN";
-         when TO_MkMq =>
-            return "=M" & k & "M" & q;
-         when TO_MkMqQ =>
-            return "=M" & k & "M" & q & "Q";
-         when TO_MkMqH =>
-            return "=M" & k & "M" & q & "H";
-         when TO_MkMqQH =>
-            return "=M" & k & "M" & q & "QH";
-         when TO_MkMqN =>
-            return "=M" & k & "M" & q & "N";
-         when TO_MkMqQN =>
-            return "=M" & k & "M" & q & "QN";
-         when TO_MkMqHN =>
-            return "=M" & k & "M" & q & "HN";
-         when TO_MkMqQHN =>
-            return "=M" & k & "M" & q & "QHN";
-         when M_PLUS_Iq =>
-            return "M+I" & q;
-         when M_MINUS_Iq =>
-            return "M-I" & q;
-         when NCq =>
-            return "NC" & q;
-         when DCq =>
-            return "DC" & q;
-         when POS1_TO_Iq =>
-            return "I" & q & "=+1";
-         when NEG1_TO_Iq =>
-            return "I" & q & "=-1";
-         when POS2_TO_Iq =>
-            return "I" & q & "=+2";
-         when NEG2_TO_Iq =>
-            return "I" & q & "=-2";
-         when MqTOQk =>
-            return "M"  & q & "TOQ" & k;
-         when IqTOQk =>
-            return "I"  & q & "TOQ" & k;
-         when IMqTOQk =>
-            return "IM" & q & "TOQ" & k;
-         when CqTOQk =>
-            return "C"  & q & "TOQ" & k;
-         when CMqTOQk =>
-            return "CM" & q & "TOQ" & k;
-         when CIqTOQk =>
-            return "CI" & q & "TOQ" & k;
-         when QqTOQk =>
-            return "Q"  & q & "TOQ" & k;
-         when QCIMq =>
-            if (decoded.Qk and all_Q_choice) = all_Q_choice then
-               return "Q" & q;
-            else
-               if (decoded.Qk and M_part_choice) /= 0 then
-                  return "M" & q;
-               elsif (decoded.Qk and C_part_choice) /= 0 then
-                  return "C" & q;
-               elsif (decoded.Qk and I_part_choice) /= 0 then
-                  return "I" & q;
-               else
-                  return machine_code(decoded);
-               end if;
-            end if;
-         when TO_RCIMq =>
-            if (decoded.Qk and all_Q_choice) = all_Q_choice then
-               return "=Q" & q;
-            else
-               if (decoded.Qk and M_part_choice) /= 0 then
-                  return optional((decoded.Qk and reset_choice) /= 0, "=RM" & q, "=M" & q);
-               elsif (decoded.Qk and C_part_choice) /= 0 then
-                  return optional((decoded.Qk and reset_choice) /= 0, "=RC" & q, "=C" & q);
-               elsif (decoded.Qk and I_part_choice) /= 0 then
-                  return optional((decoded.Qk and reset_choice) /= 0, "=RI" & q, "=I" & q);
-               else
-                  return machine_code(decoded);
-               end if;
-            end if;
-         when ADD_TO_QCIMq =>
-            if (decoded.Qk and all_Q_choice) = all_Q_choice then
-               return "=+Q" & q;
-            else
-               if (decoded.Qk and M_part_choice) /= 0 then
-                  return "=+M" & q;
-               elsif (decoded.Qk and C_part_choice) /= 0 then
-                  return "=+C" & q;
-               elsif (decoded.Qk and I_part_choice) /= 0 then
-                  return "=+I" & q;
-               else
-                  return machine_code(decoded);
-               end if;
-            end if;
-         when SHA =>
-            return "SHA"  & shift_count;
-         when SHAD =>
-            return "SHAD" & shift_count;
-         when MACC =>
-            return "×+"   & shift_count;
-         when SHL =>
-            return "SHL"  & shift_count;
-         when SHLD =>
-            return "SHLD" & shift_count;
-         when SHC =>
-            return "SHC"  & shift_count;
-         when TO_Kk =>
-            case decoded.Qq is
-               when K0 =>
-                  return "=K0";
-               when K1 =>
-                  return "=K1";
-               when K2 =>
-                  return "=K2";
-               when K3 =>
-                  return "=K3";
-               when others =>
-                  return machine_code(decoded);
-            end case;
-         when Kk =>
-            case decoded.Qk is
-               when K4 =>
-                  return "K4";
-               when K5 =>
-                  return "K5";
-               when K7 =>
-                  return "K7";
-               when others =>
-                  return machine_code(decoded);
-            end case;
-         when LINK =>
-            return "LINK";
-         when TO_LINK =>
-            return "=LINK";
-         when others =>
-            return IO_order_name(decoded);
-      end case;
+             when others  => IO_order_name
+          );
    end two_syllable_order_name;
 
    function normal_jump_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean)
+                                    octal_option : Boolean := True;
+                                    both_bases   : Boolean := True)
    return String is
-      the_target  : code_point renames decoded.target;
+
+      the_target  : syllable_address renames decoded.target;
       the_address : constant String := oct_or_dec_of(the_target, octal_option);
-   begin
-      case decoded.syndrome is
-         when JrEQ =>
-            return "JE" & the_address & "EQ";
-         when JrGTZ =>
-            return "JE" & the_address & "GTZ";
-         when JrLTZ =>
-            return "JE" & the_address & "LTZ";
-         when JrEQZ =>
-            return "JE" & the_address & "EQZ";
-         when JrV =>
-            return "JE" & the_address & "V";
-         when JrEN =>
-            return "JE" & the_address & "EN";
-         when Jr =>
-            return "JE" & the_address;
-         when JrEJ =>
-            return "JE" & the_address & "EJ";
-         when JSr =>
-            return "JSE" & the_address;
-         when JrTR =>
-            return "JE" & the_address & "TR";
-         when EXIT_9 =>
-            if the_target.syllable_number = 0 then  -- c.f. decode_a_jump_order.
-               -- No halfword offset applies.
-               if the_target.word_number < 8 then
-                  if the_target.word_number = 0 then
-                     return "EXIT";
-                  else
-                     return "EXIT " & digit_map(KDF9.halfword(2*the_target.word_number));
-                  end if;
-               else
-                  return "EXITAE" & oct_or_dec_of((0, the_target.word_number), octal_option);
-               end if;
-            elsif the_target.word_number < 8 then
-               return "EXIT " & digit_map(KDF9.halfword(2*the_target.word_number + 1));
-            else
-               return "EXITAE" & oct_or_dec_of((3, the_target.word_number), octal_option);
-            end if;
-         when JrNE =>
-            return "JE" & the_address & "NE";
-         when JrLEZ =>
-            return "JE" & the_address & "LEZ";
-         when JrGEZ =>
-            return "JE" & the_address & "GEZ";
-         when JrNEZ =>
-            return "JE" & the_address & "NEZ";
-         when JrNV =>
-            return "JE" & the_address & "NV";
-         when JrNEN =>
-            return "JE" & the_address & "NEN";
-         when JrNEJ =>
-            return "JE" & the_address & "NEJ";
-         when JrNTR =>
-            return "JE" & the_address & "NTR";
-         when OUT_9 =>
-            return "OUT";
-         when EXITD =>
-            return "EXITD";
-         when JrCqZ =>
-            return "JE" & the_address
-                       & "C" & trimmed(KDF9.Q_number'Image(decoded.Qq)) & "Z";
-         when JrCqNZ =>
-            return "JE" & the_address
-                       & "C" & trimmed(KDF9.Q_number'Image(decoded.Qq)) & "NZ";
-         when others =>
-            return machine_code(decoded);
-      end case;
+      remark      : constant String
+                  := ";("
+                   & (if   octal_option
+                      then dec_of(KDF9.Q_part(the_target.order_word_number))
+                      else "#" & oct_of(the_target.order_word_number))
+                   & ")";
+
+      function jump (on_condition : String)
+      return String
+      is ("JE" & the_address & on_condition & (if both_bases then remark else ""));
+
+      function leave (and_how : String)
+      return String
+      is ("EXIT" & and_how & remark);
+
+   begin  -- normal_jump_order_name
+      return (
+              case decoded.compressed_opcode is
+                 when JrEQ   => jump("EQ"),
+                 when JrGTZ  => jump("GTZ"),
+                 when JrLTZ  => jump("LTZ"),
+                 when JrEQZ  => jump("EQZ"),
+                 when JrV    => jump("V"),
+                 when JrEN   => jump("EN"),
+                 when Jr     => jump(""),
+                 when JrEJ   => jump("EJ"),
+                 when JrTR   => jump("TR"),
+                 when JrNE   => jump("NE"),
+                 when JrLEZ  => jump("LEZ"),
+                 when JrGEZ  => jump("GEZ"),
+                 when JrNEZ  => jump("NEZ"),
+                 when JrNV   => jump("NV"),
+                 when JrNEN  => jump("NEN"),
+                 when JrNEJ  => jump("NEJ"),
+                 when JrNTR  => jump("NTR"),
+
+                 when JrCqZ  => jump("C" & trimmed(decoded.Qq'Image) & "Z"),
+                 when JrCqNZ => jump("C" & trimmed(decoded.Qq'Image) & "NZ"),
+
+                 when JSr    => "JSE" & the_address,
+                 when OS_OUT => "OUT",
+
+                 when EXITD  => leave("D"),
+                 when EXIT_n =>
+                    -- Try to give the most helpful interpretation of the operand.
+                    (
+                     if the_target.syllable_index = 0 then  -- c.f. decode_a_jump_order.
+                        -- No halfword offset applies.
+                        (
+                         if the_target.order_word_number < 4 then
+                           leave(
+                                 if the_target.order_word_number = 0
+                                 then ""
+                                 else oct_of(KDF9.Q_part(2*the_target.order_word_number), 1)
+                                )
+                         else
+                           leave("AE" & oct_or_dec_of((the_target.order_word_number, 0), octal_option))
+                        )
+                     elsif the_target.order_word_number < 4 then
+                        leave(oct_of(KDF9.Q_part(2*the_target.order_word_number + 1), 1))
+                     else
+                        leave("AE" & oct_or_dec_of((the_target.order_word_number, 3), octal_option))
+                    ),
+
+                 when others =>  machine_code(decoded)
+             );
    end normal_jump_order_name;
 
    function data_access_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean)
+                                    octal_option : Boolean;
+                                    both_bases   : Boolean := True)
    return String is
-      operand     : KDF9.Q_part   renames decoded.operand;
-      Qq          : KDF9.Q_number renames decoded.Qq;
-      the_address : constant String
-                  := optional(octal_option,
-                              "#" & oct_of(operand),
-                              trimmed(KDF9.Q_part'Image(operand)));
-      the_Q_store : constant String
-                  := optional(Qq /= 0,
-                              "M" & trimmed(KDF9.Q_number'Image(Qq)));
+
+      operand      : KDF9.Q_part   renames decoded.operand;
+      Qq           : KDF9.Q_number renames decoded.Qq;
+      the_address  : constant String
+                   := (if octal_option then "#" & oct_of(operand, 1) else dec_of(operand));
+      remark       : constant String
+                   := ";(" & (if octal_option then dec_of(operand) else "#" & oct_of(operand, 1)) & ")";
+      any_modifier : constant String
+                   := (if Qq /= 0 then "M" & trimmed(Qq'Image) else "");
    begin
-      case decoded.syndrome is
-         when EaMq =>
-            return "E"  & the_address & the_Q_store;
-         when TO_EaMq =>
-            return "=E" & the_address & the_Q_store;
-         when EaMqQ =>
-            return "E"  & the_address & the_Q_store & "Q" ;
-         when TO_EaMqQ =>
-            return "=E" & the_address & the_Q_store & "Q" ;
-         when SET =>
-            return "SET " & optional(octal_option,"B" & oct_of(operand, 2), dec_of(operand));
-         when others =>
-            return machine_code(decoded);
-      end case;
+      return (
+              case decoded.compressed_opcode is
+                 when EaMq     => "E"   & the_address & any_modifier & remark,
+                 when TO_EaMq  => "=E"  & the_address & any_modifier & remark,
+                 when EaMqQ    => "E"   & the_address & any_modifier & "Q" & remark,
+                 when TO_EaMqQ => "=E"  & the_address & any_modifier & "Q" & remark,
+                 when SET      => "SET" & (
+                                           if octal_option
+                                           then "B" & oct_of(operand, 2)
+                                              & (
+                                                 if operand > 7 and both_bases
+                                                 then ";(" & signed_dec_of(operand) & ")"
+                                                 else ""
+                                                )
+                                           else signed_dec_of(operand)
+                                              & (
+                                                 if operand > 9 and both_bases
+                                                 then ";(B" & oct_of(operand, 2) & ")"
+                                                 else ""
+                                                )
+                                          ),
+                 when others   => "?"
+             );
    end data_access_order_name;
 
-   function the_name_of (order : KDF9.decoded_order; octal_option : Boolean := True)
+   function the_full_name_of (order        : KDF9.decoded_order;
+                              octal_option : Boolean := True;
+                              both_bases   : Boolean := True)
    return String is
+      result : constant String
+         := (
+             case order.kind is
+                when one_syllable_order => one_syllable_order_name(order),
+                when two_syllable_order => two_syllable_order_name(order),
+                when normal_jump_order  => normal_jump_order_name(order, octal_option, both_bases),
+                when data_access_order  => data_access_order_name(order, octal_option, both_bases)
+            );
    begin
-      case order.kind is
-         when one_syllable_order =>
-            return one_syllable_order_name(order);
-         when two_syllable_order =>
-            return two_syllable_order_name(order);
-         when normal_jump_order =>
-            return normal_jump_order_name(order, octal_option);
-         when data_access_order =>
-            return data_access_order_name(order, octal_option);
-      end case;
-   end the_name_of;
+      return (if result(1) /= '?' then result else "an INVALID order");
+   end the_full_name_of;
 
-   function the_order (order : KDF9.syllable_group; octal_option : Boolean)
-   return String is
-      its_INS : KDF9.decoded_order;
-   begin
-      its_INS.order := order;
-      decode(its_INS);
-      return the_name_of(its_INS, octal_option);
-   end the_order;
-
-   function the_order_at (address : KDF9.code_point; octal_option : Boolean)
-   return String is
-      saved_CIA : constant KDF9.code_point := CIA;
-      saved_NIA : constant KDF9.code_point := NIA;
-      saved_INS : constant KDF9.decoded_order := INS;
-   begin
-      set_NIA_to(address);
-      decode_the_next_order;
-      return result : constant String := the_name_of(INS, octal_option) do
-         CIA := saved_CIA;
-         set_NIA_to(saved_NIA);
-         INS := saved_INS;
-      end return;
-   end the_order_at;
-
+   function the_code_and_name_of_INS
+   return String
+   is (machine_code(INS) & ", i.e. " & the_full_name_of(INS));
 
    function two_syllable_skeleton (encoding : KDF9.syllable)
    return String is
 
-      function IO_skeleton (encoding : KDF9.syllable)
-      return String is
-      begin
-         case encoding and 8#77# is
-            when PARQq =>
-               return "PARQq";
-            when PIAQq_PICQq_CLOQq_TLOQq =>
-               return "{PIA|PIC|CLO|TLO}Qq";
-            when PIBQq_PIDQq =>
-               return "{PIB|PID}Qq";
-            when PIEQq_PIGQq =>
-               return "{PIE|PIG}Qq";
-            when PIFQq_PIHQq =>
-               return "{PIF|PIH}Qq";
-            when PMAQq_PMKQq_INTQq =>
-               return "{INT|PMA|PMK}Qq";
-            when CTQq_PMBQq_PMCQq_BUSYQq =>
-               return "{BUSY|CTQ|PMB|PMC}Qq";
-            when PMDQq_PMEQq_PMLQq =>
-               return "{PMD|PME}Qq";
-            when PMFQq =>
-               return "PMFQq";
-            when PMGQq =>
-               return "PMGQq";
-            when PMHQq =>
-               return "PMHQq";
-            when POAQq_POCQq_POEQq_POFQq =>
-               return "{POA|POC|POE|POF}Qq";
-            when POBQq_PODQq =>
-               return "{POB|POD}Qq";
-            when POGQq_POLQq =>
-               return "{POG|POL}Qq";
-            when POHQq_POKQq =>
-               return "{POH|POK}Qq";
-            when others =>
-               return "P??Qq";
-         end case;
-      end IO_skeleton;
+      function IO_skeleton
+      return String
+      is (
+          case encoding and 8#77# is
+             when POA_POC_POE_POF_PMH_Qq => "{POA|POC|POE|POF|PMH}Qq",
+             when PIA_PIC_CLO_TLO_Qq     => "{PIA|PIC|CLO|TLO}Qq",
+             when CT_PMB_PMC_BUSY_Qq     => "{BUSY|CT|MANUAL|PMB|PMC}Qq",
+             when PAR_Qq                 => "PARQq",
+             when PIB_PID_Qq             => "{PIB|PID}Qq",
+             when PIE_PIG_Qq             => "{PIE|PIG}Qq",
+             when PIF_PIH_Qq             => "{PIF|PIH}Qq",
+             when PMA_PMK_INT_Qq         => "{INT|PMA|PMK}Qq",
+             when PMD_PME_PML_Qq         => "{PMD|PME}Qq",
+             when PMF_PMG_Qq             => "{PMF|PMG}Qq",
+             when POB_POD_Qq             => "{POB|POD}Qq",
+             when POG_POL_Qq             => "{POG|POL}Qq",
+             when POH_POK_Qq             => "{POH|POK}Qq",
+             when others                 => raise emulation_failure
+                                               with "invalid code in IO_skeleton"
+         );
 
-   begin
-      case encoding and 8#77# is
-         when JCqNZS =>
-            return "JCqNZS";
-         when MkMq =>
-            return "MkMq";
-         when MkMqQ =>
-            return "MkMqQ";
-         when MkMqH =>
-            return "MkMqH";
-         when MkMqQH =>
-            return "MkMqQH";
-         when MkMqN =>
-            return "MkMqN";
-         when MkMqQN =>
-            return "MkMqQN";
-         when MkMqHN =>
-            return "MkMqHN";
-         when MkMqQHN =>
-            return "MkMqQHN";
-         when TO_MkMq =>
-            return "=MkMq";
-         when TO_MkMqQ =>
-            return "=MkMqQ";
-         when TO_MkMqH =>
-            return "=MkMqH";
-         when TO_MkMqQH =>
-            return "=MkMqQH";
-         when TO_MkMqN =>
-            return "=MkMqN";
-         when TO_MkMqQN =>
-            return "=MkMqQN";
-         when TO_MkMqHN =>
-            return "=MkMqHN";
-         when TO_MkMqQHN =>
-            return "=MkMqQHN";
-         when M_PLUS_Iq =>
-            return "M+Iq";
-         when M_MINUS_Iq =>
-            return "M-Iq";
-         when NCq =>
-            return "NCq";
-         when DCq =>
-            return "DCq";
-         when POS1_TO_Iq =>
-            return "Iq=+1";
-         when NEG1_TO_Iq =>
-            return "Iq=-1";
-         when POS2_TO_Iq =>
-            return "Iq=+2";
-         when NEG2_TO_Iq =>
-            return "Iq=-2";
-         when MqTOQk =>
-            return "MqTOQk";
-         when IqTOQk =>
-            return "IqTOQk";
-         when IMqTOQk =>
-            return "IMqTOQk";
-         when CqTOQk =>
-            return "CqTOQk";
-         when CMqTOQk =>
-            return "CMqTOQk";
-         when CIqTOQk =>
-            return "CIqTOQk";
-         when QqTOQk =>
-            return "QqTOQk";
-         when QCIMq =>
-            return "{Q|C|I|M}q";
-         when TO_RCIMq =>
-            return "=[R]{Q|C|I|M}q";
-         when ADD_TO_QCIMq =>
-            return "=+{Q|C|I|M}q";
-         when SHA =>
-            return "SHA";
-         when SHAD =>
-            return "SHAD";
-         when MACC =>
-            return "×+";
-         when SHL =>
-            return "SHL";
-         when SHLD =>
-            return "SHLD";
-         when SHC =>
-            return "SHC";
-         when TO_Kk =>
-            case encoding mod 16 is
-               when K0 =>
-                  return "=K0";
-               when K1 =>
-                  return "=K1";
-               when K2 =>
-                  return "=K2";
-               when K3 =>
-                  return "=K3";
-               when others =>
-                  return "=K?";
-            end case;
-         when Kk =>
-            case encoding mod 16 is
-               when K4 =>
-                  return "K4";
-               when K5 =>
-                  return "K5";
-               when K7 =>
-                  return "K7";
-               when others =>
-                  return "K?";
-            end case;
-         when LINK =>
-            return "LINK";
-         when TO_LINK =>
-            return "=LINK";
-         when others =>
-            return IO_skeleton (encoding);
-      end case;
+   begin  -- two_syllable_skeleton
+      return
+         (
+          case encoding and 8#77# is
+             when MkMq         => "MkMq",
+             when MkMqQ        => "MkMqQ",
+             when MkMqH        => "MkMqH",
+             when MkMqQH       => "MkMqQH",
+             when MkMqN        => "MkMqN",
+             when MkMqQN       => "MkMqQN",
+             when MkMqHN       => "MkMqHN",
+             when MkMqQHN      => "MkMqQHN",
+
+             when TO_MkMq      => "=MkMq",
+             when TO_MkMqQ     => "=MkMqQ",
+             when TO_MkMqH     => "=MkMqH",
+             when TO_MkMqQH    => "=MkMqQH",
+             when TO_MkMqN     => "=MkMqN",
+             when TO_MkMqQN    => "=MkMqQN",
+             when TO_MkMqHN    => "=MkMqHN",
+             when TO_MkMqQHN   => "=MkMqQHN",
+
+             when JCqNZS       => "JCqNZS",
+             when M_PLUS_Iq    => "M+Iq",
+             when M_MINUS_Iq   => "M-Iq",
+             when NCq          => "NCq",
+             when DCq          => "DCq",
+             when POS1_TO_Iq   => "Iq=+1",
+             when NEG1_TO_Iq   => "Iq=-1",
+             when POS2_TO_Iq   => "Iq=+2",
+             when NEG2_TO_Iq   => "Iq=-2",
+
+             when MqTOQk       => "MqTOQk",
+             when IqTOQk       => "IqTOQk",
+             when IMqTOQk      => "IMqTOQk",
+             when CqTOQk       => "CqTOQk",
+             when CMqTOQk      => "CMqTOQk",
+             when CIqTOQk      => "CIqTOQk",
+             when QqTOQk       => "QqTOQk",
+
+             when QCIMq        => "{Q|C|I|M}q",
+             when TO_RCIMq     => "=[R]{Q|C|I|M}q",
+             when ADD_TO_QCIMq => "=+{Q|C|I|M}q",
+
+             when SHA          => "SHA",
+             when SHAD         => "SHAD",
+             when MACC         => "×+",
+             when SHL          => "SHL",
+             when SHLD         => "SHLD",
+             when SHC          => "SHC",
+
+             when TO_Kq =>
+                (
+                 case encoding / 16 mod 16 is
+                    when K0 => "=K0",
+                    when K1 => "=K1",
+                    when K2 => "=K2",
+                    when K3 => "=K3",
+                    when others => "=K?"
+                ),
+             when Kk =>
+                (
+                 case encoding mod 16 is
+                    when K4 => "K4",
+                    when K5 => "K5",
+                    when K7 => "K7",
+                    when others => "K?"
+                ),
+
+             when LINK =>    "LINK",
+             when TO_LINK => "=LINK",
+
+             when others =>  IO_skeleton
+         );
    end two_syllable_skeleton;
 
    function normal_jump_skeleton (encoding : KDF9.syllable)
-   return String is
-   begin
-      case encoding and 8#77# is
-         when JrEQ =>
-            return "JrEQ";
-         when JrGTZ =>
-            return "JrGTZ";
-         when JrLTZ =>
-            return "JrLTZ";
-         when JrEQZ =>
-            return "JrEQZ";
-         when JrV =>
-            return "JrV";
-         when JrEN =>
-            return "JrEN";
-         when Jr =>
-            return "Jr";
-         when JrEJ =>
-            return "JrEJ";
-         when JSr =>
-            return "JSr";
-         when JrTR =>
-            return "JrTR";
-         when EXIT_9 =>
-            return "EXIT";
-         when JrNE =>
-            return "JrNE";
-         when JrLEZ =>
-            return "JrLEZ";
-         when JrGEZ =>
-            return "JrGEZ";
-         when JrNEZ =>
-            return "JrNEZ";
-         when JrNV =>
-            return "JrNV";
-         when JrNEN =>
-            return "JrNEN";
-         when JrNEJ =>
-            return "JrNEJ";
-         when JrNTR =>
-            return "JrNTR";
-         when OUT_9 =>
-            return "OUT";
-         when EXITD =>
-            return "EXITD";
-         when JrCqZ .. JrCqZ+2#1111# =>
-            return "JrCqZ";
-         when JrCqNZ .. JrCqNZ+2#1111# =>
-            return "JrCqNZ";
-         when others =>
-            return "Jr?";
-      end case;
-   end normal_jump_skeleton;
+   return String
+   is (
+       case encoding and 8#77# is
+          when JrCqZ  .. JrCqZ+2#1111#  => "JrCqZ",
+          when JrCqNZ .. JrCqNZ+2#1111# => "JrCqNZ",
+          when JrEQ   => "JrEQ",
+          when JrGTZ  => "JrGTZ",
+          when JrLTZ  => "JrLTZ",
+          when JrEQZ  => "JrEQZ",
+          when JrV    => "JrV",
+          when JrEN   => "JrEN",
+          when Jr     => "Jr",
+          when JrEJ   => "JrEJ",
+          when JSr    => "JSr",
+          when JrTR   => "JrTR",
+          when EXIT_n => "EXIT",
+          when JrNE   => "JrNE",
+          when JrLEZ  => "JrLEZ",
+          when JrGEZ  => "JrGEZ",
+          when JrNEZ  => "JrNEZ",
+          when JrNV   => "JrNV",
+          when JrNEN  => "JrNEN",
+          when JrNEJ  => "JrNEJ",
+          when JrNTR  => "JrNTR",
+          when OS_OUT => "OUT",
+          when EXITD  => "EXITD",
+          when others => raise emulation_failure
+                            with "invalid code in normal_jump_skeleton"
+      );
 
-   function data_access_skeleton (decoded : KDF9.decoded_order)
-   return String is
-   begin
-      case decoded.syndrome is
-         when EaMq =>
-            return "EeMq";
-         when TO_EaMq =>
-            return "=EeMq";
-         when EaMqQ =>
-            return "EeMqQ";
-         when TO_EaMqQ =>
-            return "=EeMqQ";
-         when SET =>
-            return "SET";
-         when others =>
-            return machine_code(decoded);
-      end case;
-   end data_access_skeleton;
+   function data_access_skeleton (compressed_opcode : KDF9.compressed_opcode)
+   return String
+   is (
+       case compressed_opcode is
+          when EaMq     => "EeMq",
+          when TO_EaMq  => "=EeMq",
+          when EaMqQ    => "EeMqQ",
+          when TO_EaMqQ => "=EeMqQ",
+          when SET      => "SET",
+          when others   => raise emulation_failure
+                              with "invalid compressed opcode in data_access_skeleton"
+      );
 
-   function the_skeleton_order (syllable_0 : KDF9.syllable)
+   function the_short_name_of (syllable_0 : KDF9.syllable)
    return String is
-      its_INS : KDF9.decoded_order;
+      its_INS : KDF9.decoded_order := (order => (syllable_0, 0, 0), others => <>);
    begin
-      its_INS.order := (syllable_0, 0, 0);
-      case KDF9.INS_kind(syllable_0 / 2**6) is
-         when one_syllable_order =>
-            decode(its_INS);
-            return one_syllable_order_name(its_INS);
-         when two_syllable_order =>
-            return two_syllable_skeleton(syllable_0);
-         when normal_jump_order =>
-            return normal_jump_skeleton(syllable_0);
-         when data_access_order =>
-            decode(its_INS);
-            return data_access_skeleton(its_INS);
-      end case;
-   end the_skeleton_order;
+      decode(its_INS);
+      return
+         (
+          case KDF9.INS_kind(syllable_0 / 2**6) is
+             when one_syllable_order   => one_syllable_order_name(its_INS),
+             when two_syllable_order   => two_syllable_skeleton(syllable_0),
+             when normal_jump_order    => normal_jump_skeleton(syllable_0),
+             when data_access_order    => data_access_skeleton(its_INS.compressed_opcode)
+         );
+   end the_short_name_of;
 
 end disassembly;

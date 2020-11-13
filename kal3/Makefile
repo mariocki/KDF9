@@ -11,7 +11,7 @@ kal3: kal3.c kal3syntax.c
 clean:
 	$(RM) -f kal3
 	$(RM) -f kal3syntax.c
-	$(RM) -f y.tab.h
+	$(RM) -f y.tab.h y.output
 
 .PHONY: deploy
 deploy: kal3

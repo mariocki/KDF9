@@ -2,8 +2,8 @@
 --
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,10 +17,14 @@
 --
 
 with Interfaces.C;
+--
+with OS_specifics;
+
+use  OS_specifics;
 
 package POSIX is
 
-   pragma Unsuppress(All_Checks);
+   NL : constant String := OS_specifics.EOL;
 
    package C renames Interfaces.C;
 
@@ -73,16 +77,14 @@ package POSIX is
                   whence    : POSIX.seek_origin := from_start)
    return POSIX.file_position;
 
-   function read (fd : Natural;  buffer : String;  count : Natural)
+   function read (fd : Natural;  buffer : out String;  count : Natural)
    return Integer;
 
-   function write (fd : Natural;  buffer : String;  count : Natural)
+   function write (fd : Natural;  buffer : in String;  count : Natural)
    return Integer;
 
    function close (fd : Natural)
    return Integer;
-
-   procedure put_error_message (error_message : in String);
 
    --  get the task-safe error number
    function error_number
@@ -91,25 +93,54 @@ package POSIX is
    --  set the task-safe error number
    procedure set_error_number (error_number : in Integer);
 
-   procedure ensure_ui_is_open;
-
-   ui_in_fd, ui_out_fd : Natural;
-   ui_is_open          : Boolean := False;
-
-   procedure output (message  : in String);
-
-   procedure output (message  : in Character);
-
-   procedure output_line (message : in String);  -- output(message & EOL)
-
-   procedure input  (message  : out Character);
-
-   procedure prompt (message  : in  String := "?";
-                     response : out Character;
-                     default  : in  Character := ' ');
+   procedure put_error_message (error_message : in String); -- and set the errno error number
 
    procedure exit_program (status : in Natural);
 
    procedure verify (IO_status : in Integer; what : in String := "");
+
+   -- The following all act on the interactive UI.
+
+   procedure ensure_UI_is_open;
+
+   UI_in_FD, UI_out_FD : Natural;
+   UI_is_open          : Boolean := False;
+
+   procedure output (message : in String);
+
+   procedure output (message : in Character);
+
+   procedure output_line (message : in String);  -- output(message & EOL)
+
+   procedure output_line;  -- output(EOL)
+
+   procedure input  (message  : out Character);
+
+   type response_kind is (EOF_response, name_response, at_response, here_response, wrong_response);
+
+   -- If we are in non-interactive mode, log an error and set response to wrong_response.
+   -- Display a message and read a reply, letter.
+   -- If it is null (EOF signalled) or EOL, set response to EOF_response.
+   -- If it is in 'd' | 'f' | 'p' | 't' | 'D' | 'F' | 'P' | 'T', set response to name_response.
+   -- If it is anything else, set response to wrong_response.
+   procedure debug_prompt (offline   : in  Boolean;
+                           reason    : in String;
+                           response  : out response_kind;
+                           letter    : out Character);
+
+   -- If we are in non-interactive mode, log an error and set response to wrong_response.
+   -- Display a prompt message and read a reply.
+   -- If it is null or EOL:   set response to EOF_response.
+   -- If it is /:             set response to name_response.
+   -- If it is @:             set response to at_response.
+   -- If it is =:             set response to here_response.
+   -- If it is anything else: set response to wrong_response.
+   procedure data_prompt (offline   : in  Boolean;
+                          prompt    : in String;
+                          response  : out response_kind);
+
+   -- Get the name of the file.
+   function next_file_name (prompt : String)
+   return String;
 
 end POSIX;
