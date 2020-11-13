@@ -1,10 +1,10 @@
 # KDF9 emulator `ee9`
 This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) and all thanks go to him for his hard work.
 
-## How to run the KDF9 emulator
+## How to run the `ee9` the KDF9 emulator
 1. You will need to build everything first, see below for instructions.
 2. Read the Readme.pdf in the root folder for basic usage instructions.
-3. Read the more details documentation found in the `Documents` folder.
+3. Read the more detailed documentation found in the `Documents` folder.
 
 ## What different between this repo and the original
 - Converted to using Makefiles to build everything (see below).
@@ -30,7 +30,7 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
 - The test scripts are unchanged (but slightly broken ... caveat emptor).
 - The License, it's still GPLv3.
 
-## How to build ee9 (the KDF9 emulator)
+## How to build `ee9` (the KDF9 emulator)
 - `make ee9`
     Build ee9 in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
