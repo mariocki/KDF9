@@ -56,8 +56,11 @@ Packages required:
 
 ### Windows
 Only Windows10 + WSL2 is supported.
+
 Ensure you are running Windows 10 version 2004 (or above) (See here for details[https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004])
+
 Enable WSL2 [https://docs.microsoft.com/en-us/windows/wsl/install-win10]
+
 Choose a distribution of your choice and follow the instructions for Linux above
 
 I also *highly* recommend you install Microsoft's new (Windows Terminal[https://github.com/microsoft/terminal])
