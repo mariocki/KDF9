@@ -1,5 +1,10 @@
-# KDF9
+# KDF9 emulator `ee9`
 This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) and all thanks go to him for his hard work.
+
+## How to run the KDF9 emulator
+1. You will need to build everything first, see below for instructions.
+2. Read the Readme.pdf in the root folder for basic usage instructions.
+3. Read the more details documentation found in the `Documents` folder.
 
 ## What different between this repo and the original
 - Converted to using Makefiles to build everything (see below).
@@ -20,11 +25,12 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
 - `Documents` Various KDF9 and Whetstone related PDFs/HTML pages.
 
 ## What has not been changed
-- The ADA code is unchanged.
+- The ADA code is unchanged :)
+- I don't include pre-build binaries.
 - The test scripts are unchanged (but slightly broken ... caveat emptor).
 - The License, it's still GPLv3.
 
-## Using Make to build and run KDF9
+## How to build ee9 (the KDF9 emulator)
 - `make ee9`
     Build ee9 in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
@@ -63,9 +69,10 @@ Ensure you are running Windows 10 version 2004 or above [See here for details](h
 
 Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
 
-Choose a distribution of your choice and follow the instructions for Linux abovegiven above.
+Choose a distribution of your choice and follow the instructions for Linux given above.
 
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal)
 
 ### ToDo
 - [ ] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
+- [ ] Create a Docker container?
