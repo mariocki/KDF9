@@ -1,23 +1,24 @@
 #!/bin/bash
-BINARY=${KDF9_BINARY:-Binary}
-DATA=${KDF9_DATA:-Data}
-WHERE=${KIDSGROVE:-Kidsgrove}
+BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
+WHERE=${KDF9ROOT}/Kidsgrove
+SETTINGS=${KDF9ROOT}/settings
 
-trap "rm -f  ${WHERE}/chan6.pt ptp.bin mt.out ${WHERE}/punch.txt;
+trap "rm -f  /tmp/chan6.pt ptp.bin mt.out /tmp/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt;"   \
       0 1 2 3
 
-if [ -s settings_for_kalgol.txt ]
+if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
 then
-   cp settings_for_kalgol.txt settings_1.txt
+   cp ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
 fi
 
-./kalgol $1
+${KDF9ROOT}/kalgol $1
 
 if [ -s ${BINARY}/$1 ]
 then
-   cp settings_2.txt settings_1.txt
-   ./nine $1 $2 $3 $4
+   cp ${KDF9ROOT}/settings_2.txt ${KDF9ROOT}/settings_1.txt
+   ${KDF9ROOT}/nine $1 $2 $3 $4
 else
    exit 1
 fi

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-DATA=${KDF9_DATA:-Data}
-
 trap "rm -f ${DATA}/crtest_data.txt CR_test.log cr_test.diff" 0 1 2 3
 opt=${1:-ae}
 
@@ -67,10 +65,10 @@ ___________________________________________________________
 
 ++++
 
-> CR_test.log
+> ${LOGS}/CR_test.log
 
 echo TEST PIA PIB - POA 160-column binary write:
-./ucc CRTAB; ./crnine CRTAB crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CRTAB; ${KDF9ROOT}/crnine CRTAB crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -78,7 +76,7 @@ z)
 esac
 
 echo TEST PIC PID - POC 160-column character binary write:
-./ucc CRTCD; ./crnine CRTCD crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CRTCD; ${KDF9ROOT}/crnine CRTCD crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -86,7 +84,7 @@ z)
 esac
 
 echo TEST PIE PIF - POG 80-column alphanumeric write:
-./ucc CRTEF; ./crnine CRTEF crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CRTEF; ${KDF9ROOT}/crnine CRTEF crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -94,7 +92,7 @@ z)
 esac
 
 echo TEST PIG PIH - POL 80-column alphanumeric character-per-word write:
-./ucc CRTGH; ./crnine CRTGH crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CRTGH; ${KDF9ROOT}/crnine CRTGH crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -102,7 +100,7 @@ z)
 esac
 
 echo TEST POA POB - PIA 160-column binary read:
-./ucc CPTAB; ./crnine CPTAB crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CPTAB; ${KDF9ROOT}/crnine CPTAB crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -110,7 +108,7 @@ z)
 esac
 
 echo TEST POC POD - PIC 160-column character binary read:
-./ucc CPTCD; ./crnine CPTCD crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CPTCD; ${KDF9ROOT}/crnine CPTCD crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -118,7 +116,7 @@ z)
 esac
 
 echo TEST POG POH - PIE 80-column alphanumeric read:
-./ucc CPTGH; ./crnine CPTGH crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CPTGH; ${KDF9ROOT}/crnine CPTGH crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -126,7 +124,7 @@ z)
 esac
 
 echo TEST POL POK \(sic\) - PIG 80-column alphanumeric character-per-word read:
-./ucc CPTKL; ./crnine CPTKL crtest_data t $opt >> CR_test.log
+${KDF9ROOT}/ucc CPTKL; ${KDF9ROOT}/crnine CPTKL crtest_data t $opt >> ${LOGS}/CR_test.log
 case $opt in
 z)
    echo ====; cat CP0; echo ====; echo;;
@@ -134,12 +132,12 @@ z)
 esac
 
 echo
-diff CR_test.log CR_good_test.log >cr_test.diff
-if [ -s cr_test.diff ]
+diff ${LOGS}/CR_test.log ${TESTS}/CR_good_test.log > ${LOGS}/cr_test.diff
+if [ -s ${LOGS}/cr_test.diff ]
 then
    echo These are the unexpected variances for this run:
    echo ===
-   more cr_test.diff
+   more ${LOGS}/cr_test.diff
    echo ===
 else
    echo These tests ran as expected.

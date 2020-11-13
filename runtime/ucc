@@ -1,16 +1,16 @@
 #!/bin/sh
-BINARY=${KDF9_BINARY:-Binary}
-USERCODE=${KDF9_USERCODE:-Assembly}
+BINARY=${KDF9ROOT}/Binary
+USERCODE=${KDF9ROOT}/Assembly
 
 name=`basename "$1" ".k3"`
 if [ -f "${USERCODE}/$name.k3" ]
 then
-   ./kal3 ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt"
+   ${KDF9ROOT}/kal3 ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt"
    if test -r a.out
    then
       cp a.out ${BINARY}/"$name"
    else
-      echo ./kal3 detected error\(s\) in $name.k3
+      echo ${KDF9ROOT}/kal3 detected error\(s\) in $name.k3
       more "$name-listing.txt"
    fi
    rm -f a.out mt.out

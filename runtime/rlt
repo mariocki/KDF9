@@ -1,9 +1,11 @@
 #!/bin/bash
->MT0
->MT1
->MT2
->MT3
->MT4
->MT5
->ST0
-./nine_test RLT ${1:-RLT_data} $2 $3 $4
+BINARY=${KDF9ROOT}/Binary
+
+>${KDF9ROOT}/MT0
+>${KDF9ROOT}/MT1
+>${KDF9ROOT}/MT2
+>${KDF9ROOT}/MT3
+>${KDF9ROOT}/MT4
+>${KDF9ROOT}/MT5
+>${KDF9ROOT}/ST0
+${KDF9ROOT}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4

@@ -1,6 +1,6 @@
 #!/bin/bash
-DATA=${KDF9_DATA:-Data}
-BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9ROOT}/Data
+BINARY=${KDF9ROOT}/Binary
 
 trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 
@@ -21,14 +21,14 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 0-00-777AMPEXTM4|
 |
 ++++
-./rlt TSD_tape_labels - z
+${KDF9ROOT}/rlt ${DATA}/TSD_tape_labels - z
 
 # Create a call tape from the binary program.
-./a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
+${KDF9ROOT}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
 
 # Combine the call tape and the binary in a single paper tape file.
 cat ${BINARY}/$1          >> /tmp/$1.pblk
-mv /tmp/$1.pblk TR1
+mv /tmp/$1.pblk ${KDF9ROOT}/TR1
 
 #ucc PLT
 #nine PLT $1 - z kk
@@ -38,8 +38,8 @@ then
    : no data file
 else
    # Add the data file to the end of the paper tape.
-   ./a2b -L2p < ${DATA}/$2.txt >> TR1
+   ${KDF9ROOT}/a2b -L2p < ${DATA}/$2.txt >> ${KDF9ROOT}/TR1
 fi
 
 # Run Director.
-./tsd $3 $4 $5 $6
+${KDF9ROOT}/tsd $3 $4 $5 $6

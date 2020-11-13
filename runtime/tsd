@@ -1,23 +1,23 @@
 #!/bin/sh
 
-TSD=${DIRECTOR:-Binary/KKT40E007UPU}
+TSD=${KDF9ROOT}/Binary/KKT40E007UPU
 
-cp -f FW0_for_Director FW0
+cp -f ${KDF9ROOT}/Settings/FW0_for_Director ${KDF9ROOT}/FW0
 
 mode=-d$1
 miscellany=-m$2
 
 if [ "$mode" = "-d" ]
 then
-    ./ee9 -sb -df -TRkk -TPll  +${TSD};
+    ${KDF9ROOT}/ee9 -sb -df -TRkk -TPll  +${TSD};
 elif [ $mode = -df ]
 then
-    time ./ee9 -sb -df -TRkk -TPll  +${TSD};
+    time ${KDF9ROOT}/ee9 -sb -df -TRkk -TPll  +${TSD};
 elif [ $miscellany = -m ]
 then
-    ./ee9 -sb "$mode" -TRkk -TPll  +${TSD};
+    ${KDF9ROOT}/ee9 -sb "$mode" -TRkk -TPll  +${TSD};
 else
-    ./ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
+    ${KDF9ROOT}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
 fi
 
-/bin/sh ./printoutput
+/bin/sh ${KDF9ROOT}/printoutput

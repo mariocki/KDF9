@@ -1,10 +1,10 @@
 #!/bin/bash
-trap "rm -f LP0; >LP0" 1 2 3
+trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
 
 case $1$2 in
 1964|thecrows)
-   ln -sf /dev/tty LP0
-   ./whet WHETSTONE  f t;;
+   #ln -sf /dev/tty LP0
+   ${KDF9ROOT}/whet WHETSTONE  f t;;
 *)
-   ./whet WHETSTONE f;;
+   ${KDF9ROOT}/whet WHETSTONE f;;
 esac

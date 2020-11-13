@@ -1,15 +1,15 @@
 #!/bin/bash
-SOURCE=${KIDSGROVE:-Kidsgrove}
-TARGET=${WHETSTONE:-Whetstone}
+SOURCE=${KDF9ROOT}/Kidsgrove
+TARGET=${KDF9ROOT}/Whetstone
 
-trap "rm -f ports.commands  ports.tmp"   \
+trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
       0 1 2 3
 
 if [ ! -r  ${SOURCE}/$1.a60 ]
 then echo Could not find $1.a60 in ${SOURCE}; exit 1
 fi
 
-cat >ports.commands <<++++
+cat >/tmp/ports.commands <<++++
 1i\\
 $1|
 1,\$s/ _ /*/g
@@ -119,5 +119,5 @@ $1|
 |
 ++++
 
-tr  -d "\\r"  < ${SOURCE}/$1.a60  > ports.tmp
-sed -E -f ports.commands ports.tmp  > ${TARGET}/$1.a60
+tr  -d "\\r"  < ${SOURCE}/$1.a60  > /tmp/ports.tmp
+sed -E -f /tmp/ports.commands /tmp/ports.tmp  > ${TARGET}/$1.a60

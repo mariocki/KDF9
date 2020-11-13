@@ -1,4 +1,6 @@
 #!/bin/bash
+BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
 
 if [ x"$1"x = xx ]
 then
@@ -8,7 +10,7 @@ then
 fi
 
 program=`basename "$1"`
-program=${KDF9_BINARY:-Binary}/"$program"
+program=${BINARY}/"$program"
 if [ ! -r "$program" ]
 then
     echo The object code file "$program" is absent or unreadable.
@@ -18,12 +20,12 @@ fi
 
 if [ x"$2"x = xx -o x"$2"x = x-x ]
 then
-    >CR0
+    >${KDF9ROOT}/CR0
 else
-    data=${KDF9_DATA:-Data}/`basename "$2" .txt`.txt
+    data=${Data}/`basename "$2" .txt`.txt
     if [ -r "$data" ]
     then
-        cp "$data" CR0
+        cp "$data" ${KDF9ROOT}/CR0
     else
         echo The data file "$data" is absent or unreadable.
         echo
@@ -35,15 +37,15 @@ mode=-d$3
 miscellany=-m$4
 if   [ "$mode" = -d ]
 then
-    ./ee9 -sp -df "$miscellany" +"$program";
+    ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
 elif [ "$3" = - ]
 then
-    ./ee9 -sp -df "$miscellany" +"$program";
+   ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
 elif [ "$mode" = -df ]
 then
-    time ./ee9 -sp -df "$miscellany" +"$program";
+    time ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
 else
-    ./ee9 -sp "$mode" "$miscellany"  +"$program";
+    ${KDF9ROOT}/ee9 -sp "$mode" "$miscellany"  +"$program";
 fi
 
-/bin/sh ./printoutput
+/bin/sh ${KDF9ROOT}/printoutput

@@ -1,6 +1,6 @@
 #!/bin/sh
-BINARY=${KDF9_BINARY:-Binary}
-DATA=${KDF9_DATA:-Data}
+BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
 
 prog=$1
 data=$2
@@ -23,12 +23,12 @@ fi
 
 if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
-    >TR0
+    >${KDF9ROOT}/TR0
 else
     datatxt=${DATA}/`basename "${data}" ".txt"`.txt
     if [ -r "$datatxt" ]
     then
-        cp "$datatxt" TR1
+        cp "$datatxt" ${KDF9ROOT}/TR1
     else
         echo The file "$datatxt" is absent or unreadable.
         exit 3
@@ -68,10 +68,10 @@ fi
 
 if [ "$mode" = -df ]
 then
-    time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+    time ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 else
-    ./ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+   ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
-/bin/sh ./printoutput
+/bin/sh ${KDF9ROOT}/printoutput
 

@@ -1,15 +1,15 @@
 #!/bin/bash
-SOURCE=${WHETSTONE:-Whetstone}
-TARGET=${KIDSGROVE:-Kidsgrove}
+SOURCE=${KDF9ROOT}/Whetstone
+TARGET=${KDF9ROOT}/Kidsgrove
 
-trap "rm -f strop.commands strop.tmp[01]"   \
+trap "rm -f /tmp/strop.commands /tmp/strop.tmp[01]"   \
       0 1 2 3
 
 if [ ! -r  ${SOURCE}/$1.a60 ]
 then echo Could not find $1.a60 in ${SOURCE}; exit 1
 fi
 
-cat >strop.commands <<++++
+cat >/tmp/strop.commands <<++++
 2a\\
 !library A0, A1, A4, A5, A15;\\
 \\
@@ -86,5 +86,5 @@ cat >strop.commands <<++++
 1d
 ++++
 
-tr  "\\r" "\\n" < ${SOURCE}/$1.a60  > strop.tmp1
-sed -E -f strop.commands strop.tmp1 >${TARGET}/$1.a60
+tr  "\\r" "\\n" < ${SOURCE}/$1.a60  > /tmp/strop.tmp1
+sed -E -f /tmp/strop.commands /tmp/strop.tmp1 >${TARGET}/$1.a60

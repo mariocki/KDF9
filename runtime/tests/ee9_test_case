@@ -1,9 +1,4 @@
 #!/bin/bash
-export WHERE=
-export SOURCE=
-export DATA=
-export BINARY=
-export USERCODE=
 
 mode=ahipr$2
 encoding=
@@ -52,9 +47,9 @@ HQP) this_test="kids WEEHAAVIE -"
      exit 2;;
 esac
 
-rm -f Assembly/WEEHAAVIE.k3 Assembly/WEEHAAVIE-listing.txt Binary/WEEHAAVIE
+rm -f ${USERCODE}/WEEHAAVIE.k3 ${USERCODE}/WEEHAAVIE-listing.txt ${BINARY}/WEEHAAVIE
 
-if /bin/sh ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
+if /bin/sh ${KDF9ROOT}/ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
 then
   exit 0
 else

@@ -1,11 +1,11 @@
 #!/bin/bash
-BINARY=${KDF9_BINARY:-Binary}
-DATA=${KDF9_DATA:-Data}
+BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
 
-ucc PLT
+${KDF9ROOT}/ucc ${KDF9ROOT}/PLT
 if [ x$1x = xx ]
 then
-   >MT1
+   >${KDF9ROOT}/MT1
    cat > ${DATA}/mt_test_labels.txt <<++++
 -00-1234WHETLIST|
 00000000        |
@@ -16,17 +16,17 @@ then
 0-00-777AMPEXTM4|
 |
 ++++
-   ./nine_test RLT mt_test_labels - zw
-   ./nine PLT
-   ./mtp MT1
+   ${KDF9ROOT}/nine_test RLT ${DATA}/mt_test_labels - zw
+   ${KDF9ROOT}/nine PLT
+   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
    exit 0
 fi
 if [ -r ${BINARY}/$1 ]
 then
-   ./a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
+   ${KDF9ROOT}/a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
    cat ${BINARY}/$1 >> ${DATA}/$1-forPLT.txt
-   ./nine PLT $1-forPLT.txt t - lk
-   ./mtp MT1
+   ${KDF9ROOT}/nine PLT ${DATA}/$1-forPLT.txt t - lk
+   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
 else
    exit 0
 fi

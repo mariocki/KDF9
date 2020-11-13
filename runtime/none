@@ -1,6 +1,6 @@
 #!/bin/bash
-BINARY=${KDF9_BINARY:-Binary}
-DATA=${KDF9_DATA:-Data}
+BINARY=${KDF9ROOT}/Binary
+DATA${KDF9ROOT}/Data
 
 prog=$1
 data=$2
@@ -68,10 +68,10 @@ fi
 
 if [ "$mode" = -df ]
 then
-   time ./ee9 $state "$mode" "$TRmode" -TPkk "$miscellany" +"$program"
+   time ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" -TPkk "$miscellany" +"$program"
 else
-        ./ee9 $state "$mode" "$TRmode" -TPkk "$miscellany" +"$program"
+        ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" -TPkk "$miscellany" +"$program"
 fi
 
-/bin/sh ./printoutput
+/bin/sh ${KDF9ROOT}/printoutput
 esac

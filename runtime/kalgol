@@ -1,11 +1,11 @@
 #!/bin/bash
-ALGOL_COMPONENTS=${ADJUNCTS:-../Adjuncts}
-BINARY=${KDF9_BINARY:-Binary}
-DATA=${KDF9_DATA:-Data}
-SOURCE=${KIDSGROVE:-Kidsgrove}
-USERCODE=${KDF9_USERCODE:-Assembly}
+ALGOL_COMPONENTS=${ADJUNCTS:-../kalgol}
+SOURCE=${KDF9ROOT}/Kidsgrove
+DATA=${KDF9ROOT}/Data
+TESTS=${KDF9ROOT}/tests
+BINARY=${KDF9ROOT}/Binary
 
-trap "rm -f  ${ALGOL_COMPONENTS}/chan6.pt ptp.bin mt.out ${ALGOL_COMPONENTS}/punch.txt error_output;
+trap "rm -f  /tmp/chan6.pt ptp.bin mt.out ${ALGOL_COMPONENTS}/punch.txt error_output;
       rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
       0 1 2 3
       
@@ -26,7 +26,7 @@ else
    name=$1
 fi
 
-> settings_1.txt
+> ${KDF9ROOT}/settings_1.txt
 
 cat > ${DATA}/kalgol_labels.txt <<++++
 00000000        |
@@ -38,7 +38,7 @@ cat > ${DATA}/kalgol_labels.txt <<++++
 |
 ++++
 
-./nine_test RLT kalgol_labels - zw
+${TESTS}nine_test ${BINARY}/RLT {DATA}/kalgol_labels - zw
 # echo The compiler work tapes have been labelled.
 
 if [ ! -r ${DATA}/systape.txt ]
@@ -46,16 +46,16 @@ then
    cp ${ALGOL_COMPONENTS}/systape.txt ${DATA}/systape.txt
 fi
 
-./nine MKSYS2 systape - wz
+${KDF9ROOT}/nine MKSYS2 systape - wz
 # echo The compiler overlay tape has been generated.; echo
 
-./mkchan ${SOURCE}/$name.a60 ${ALGOL_COMPONENTS}/chan6.pt > /dev/null
+${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
 # echo The basic symbol source program tape has been made.; echo
 
-> TP0
+> ${KDF9ROOT}/TP0
 rm -f ${BINARY}/$name
 rm -f ${USERCODE}/$name.k3
-cp ${ALGOL_COMPONENTS}/chan6.pt ${DATA}/ABS_text.txt
+cp /tmp/chan6.pt ${DATA}/ABS_text.txt
 chmod 755 TR0
 
 if [ -r settings_for_kalgol.txt ]
@@ -68,37 +68,37 @@ if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
 then
    shift
 fi
-./kidopt with $* ${KIDSOPTS} >> settings_1.txt
+${KDF9ROOT}/kidopt with $* ${KIDSOPTS} >> settings_1.txt
 
-if ./nine KAB00DH--USU ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> error_output
+if ${KDF9ROOT}/nine ${BINARY}/KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
 then
-   if [ -s error_output ]
+   if [ -s ${LOGS}/error_output ]
    then
       echo The compilation was abandoned.; printf "\\a\\a\\a"
-      echo error_output:
+      echo ${LOGS}/error_output:
       echo ===
-      more error_output
+      more ${LOGS}/error_output
       echo ===
       exit 2
       exit 999
    fi
 
-   if fgrep FAIL LP0 >/dev/null  2>/dev/null
+   if fgrep FAIL ${KDF9ROOT}/LP0 >/dev/null  2>/dev/null
    then
       echo The compilation was abandoned.; printf "\\a\\a\\a"
       echo LP0:
       echo ===
-      more LP0
+      more ${KDF9ROOT}/LP0
       echo ===
       exit 2
    fi
 
-   if fgrep FAIL TP0 >/dev/null  2>/dev/null
+   if fgrep FAIL ${KDF9ROOT}/TP0 >/dev/null  2>/dev/null
    then
       echo The compilation was abandoned.; printf "\\a\\a\\a"
       echo TP0:
       echo ===
-      more TP0
+      more ${KDF9ROOT}/TP0
       echo ===
       exit 3
    fi
@@ -106,7 +106,7 @@ then
 fi
 
 # a2b -p2t < TP0 > ${USERCODE}/$name.k3
-./mtp MT0T > ${USERCODE}/$name.k3
+${KDF9ROOT}/mtp ${KDF9ROOT}/MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
@@ -116,8 +116,8 @@ fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
-   ./neat $name ${ST:-24000} ${TL:-99999}
-   ./ucc $name
+   ${KDF9ROOT}/neat $name ${ST:-24000} ${TL:-99999}
+   ${KDF9ROOT}/ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
       echo An object program could not be assembled.; printf "\\a\\a\\a"; echo

@@ -26,16 +26,12 @@ deploy:
 	> TP1
 	> TR0
 	> TR1
-	> ee9_test_case.log
-	> trace.log
-	> KDF9.log
 	> settings_1.txt
 	> settings_2.txt
 
 .PHONY: clean
 clean:
-	$(RM) -f ee9
-	$(RM) -f kal3 mkchan mtp kidopt a2b
+	$(RM) -f ee9 kal3 mkchan mtp kidopt a2b
 	$(RM) -f mt.out
 	$(RM) -f a.out
 	$(RM) -f Assembly/*-listing.txt
@@ -51,13 +47,11 @@ clean:
 	$(RM) -f ST[01]
 	$(RM) -f TP[01]
 	$(RM) -f TR[01]
-	$(RM) -f ee9_test_case.log
-	$(RM) -f trace.log mt_test.log
-	$(RM) -f KDF9.log
+	$(RM) -f ee9_test_case.log POSIX-ee9_test_case.log
+	$(RM) -f trace.log mt_test.log KDF9.log
 	$(RM) -f settings_1.txt settings_2.txt settings_for_kalgol.txt
-
 	${RM} -f Binary/MKSYS2 Binary/KAB00DH--USU
 
 .PHONY: test
 test:
-	./ee9_reg_test
+	tests/ee9_reg_test
