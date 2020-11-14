@@ -1,14 +1,12 @@
 // Under development -- always
 
-// Currently all rights are reserved, but this will be made available under the GNU Public License.
-
-// June 2020 -- new facility for producing standard form of ABSes on paper tape
+// June 2020 -- new facility for producing standard from of ABSes on paper tape
 
 // Usage: mkchan [switches] input_file output_file
 
 // The type of output is defined by the output_file extension (i.e. bit after the dot)
 //     .mt       // POST format data in MT form for DH's emulator
-//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81 or mksys2.k4
+//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81
 //     .dsk      // PROMPT format data in emulated disk blocks -- mainly for KAL4
 //     .txt      // Paper tape Latin-1 representation of KDF9 input chars 1 for 1
 
@@ -82,7 +80,6 @@ FILE *diag;
 
 char buff[3846];
 char opbuff[20];
-char ch2[3];             // used for really UTF-8 nasties
 
 unsigned char store[640*6 + 6 + 900];        // 640 words in case of PROMPT output + 1 word for MT header
 
@@ -184,16 +181,6 @@ void settables(int starval)
       abs8bit(i, 046 - 'a' + i);
    for  ( i = '0'; i<='9'; i++ )
       abs8bit(i, i - '0');
-
-// real UTF-8 nasties which can appear from on-line forms in data from web pages
-// These need to be first so that they do not become the paper tape version
-   ch2[2] = 0;             // string terminator
-   ch2[0] = 0xC2;
-   ch2[1] = 0xB1;  abs2char(strdup(ch2), 0322);  // Bill Findlay's not-equals ±
-   ch2[1] = 0xBA;  abs2char(strdup(ch2), 012);   // Bill Findlay's subscript-10 º
-   ch2[0] = 0xC3;
-   ch2[1] = 0xB7;  abs2char(strdup(ch2), 0221);  // Bill Findlay's integer divide ÷
-   ch2[1] = 0x97;  abs2char(ch2, 0261);          // Bill Findlay's multiply ×
 
    abs8bit('*', starval);        // * is multiply by default
    abs8bit('_', 0216);           // _ is star
@@ -303,7 +290,6 @@ void settables(int starval)
    abs8bit('\\', 012);     // subscript 10 - as in Algol 68
    abs8bit(0xBA, 012);     // subscript 10 - masculine ordinal indicator
    abs8bit('|', 0276);     // end message
-
 
 // now to sort so that we search the longest first
 // simple exchange sort
@@ -581,9 +567,7 @@ int main(int argc, char **argv)
       }
       memcpy(store + sz*6, emword, 6);
       prepBlock(bsz, ++sz, blknum, progid, 0);   // noc = 0 marks end of chain of file blocks
-      if  ( blknum >= -1000000 )                 // if not writing real paper tape
-         mtwrite(dvout, sz, bsz, blknum);        // write final output block, adding in word for em
-
+      mtwrite(dvout, sz, bsz, blknum);           // write final output block, adding in word for em
       if  ( blknum >= 0 )                        // writing MT format
          close(dvout);
       else if  ( libid != NULL  &&  heading == NULL )
@@ -592,13 +576,12 @@ int main(int argc, char **argv)
             sprintf((libid = buff), "%c%04d", *fnout, atoi(fnout+1));
          sprintf(buff+10, "R %s %d blocks %s\n\n", libid, blknum + 1000001, fnin);
          heading = strdup(buff+10);
-      // printf("Second pass for %s\n", heading);
+      // printf("Second pas for %s\n", heading);
          main(argc, argv);                       // second pass
       }
       else
       {  write(dvout, ";;;;@|@|\n", 9);          // terminator on paper tape
-         if  ( blknum + 1000001 >= 0 )           // may not even need this now that we have -l switch
-            printf("%d blocks written\n", blknum + 1000001);
+         printf("%d blocks written\n", blknum + 1000001);
          close(dvout);
       }
 

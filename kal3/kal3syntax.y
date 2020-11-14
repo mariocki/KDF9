@@ -9,11 +9,9 @@
 // will be seen as a separate asterisk.  DIV is valid UCA3 for integer divide.
 %{
 #include <ctype.h>
-/* kal3.y KDF9 assembler for USERCODE */
+/* KDF9 assembler for USERCODE */
 #include <stdio.h>
 
-#define MAXP  4000
-         // this is needed for fudging L77
 extern int yylex();
 extern void yyerror(char *s);
 extern int tree;
@@ -168,7 +166,7 @@ codeloc       : UNSIGNED_INTEGER                  { $$ = codeloc(-1, $1); }   /*
               | 'P' UNSIGNED_INTEGER              { $$ = codeloc($2, 0); }
               | UNSIGNED_INTEGER 'P' UNSIGNED_INTEGER { $$ = codeloc($3, $1); }
               | 'E' UNSIGNED_INTEGER              { $$ = $2 * 6; }
-              | 'L' UNSIGNED_INTEGER              { $$ = codeloc(MAXP-1, 0); printf("L%d not available\n", $2); }
+              | 'L' UNSIGNED_INTEGER              { $$ = codeloc(2999, 0); printf("L%d not available\n", $2); }
               ;
 
 jumpinstr     :  'J' codeloc ';'                  { storejump(0200, 0260, $2); }

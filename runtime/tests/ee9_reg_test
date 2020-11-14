@@ -8,15 +8,36 @@ export WHETSTONE=${KDF9ROOT}/Whetstone
 export LOGS=${KDF9ROOT}/logs
 export TESTS=${KDF9ROOT}/tests
 
-echo ${TESTS}
-
-rm -f ${KDF9ROOT}/settings_1.txt ${KDF9ROOT}/settings_2.txt
-
-#trap "cp settings_1.copy settings_1.txt; \
-#      cp settings_2.copy settings_2.txt; \
-#      rm -f settings_?.copy;             \
-#      exit 999"                         \
-#      1 2 3
+function resetOutputFiles {
+> ${KDF9ROOT}/CP0
+> ${KDF9ROOT}/CP1
+> ${KDF9ROOT}/CR0
+> ${KDF9ROOT}/CR1
+> ${KDF9ROOT}/DR0
+> ${KDF9ROOT}/FD0
+> ${KDF9ROOT}/FW0
+> ${KDF9ROOT}/GP0
+> ${KDF9ROOT}/LP0
+> ${KDF9ROOT}/LP1
+> ${KDF9ROOT}/MT0
+> ${KDF9ROOT}/MT1
+> ${KDF9ROOT}/MT2
+> ${KDF9ROOT}/MT3
+> ${KDF9ROOT}/MT4
+> ${KDF9ROOT}/MT5
+> ${KDF9ROOT}/MT6
+> ${KDF9ROOT}/MT7
+> ${KDF9ROOT}/SI0
+> ${KDF9ROOT}/SI1
+> ${KDF9ROOT}/ST0
+> ${KDF9ROOT}/ST1
+> ${KDF9ROOT}/TP0
+> ${KDF9ROOT}/TP1
+> ${KDF9ROOT}/TR0
+> ${KDF9ROOT}/TR1
+> ${KDF9ROOT}/settings_1.txt
+> ${KDF9ROOT}/settings_2.txt
+}
 
 echo
 echo This runs a variety of tests, designed to verify that ee9 is working.
@@ -42,17 +63,18 @@ esac
 
 echo
 
-> ${KDF9ROOT}/settings_1.txt
-> ${KDF9ROOT}/settings_2.txt
-rm -f ${KDF9ROOT}/settings_for_kalgol.txt
+resetOutputFiles
+
+#rm -f ${KDF9ROOT}/settings_for_kalgol.txt
 > ${LOGS}/ee9_test_case.log
 
 echo; echo
 echo Running MT emulation tests:
 echo ==========================
 echo
-#${TESTS}/ee9_test_run MT "run_mt_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run MT "run_mt_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
+resetOutputFiles
 
 echo; echo
 echo Running FD emulation tests:
@@ -60,31 +82,22 @@ echo ==========================
 echo
 #${TESTS}/ee9_test_run FD "run_fd_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
+resetOutputFiles
+
 echo; echo
 echo Running CR emulation tests:
 echo ==========================
 echo
 #${TESTS}/ee9_test_run CR "run_cr_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
+resetOutputFiles
+
 echo; echo
 echo Running problem program correctness tests:
 echo =========================================
 echo
 
-> ${KDF9ROOT}/CP0
-> ${KDF9ROOT}/DR0
-> ${KDF9ROOT}/FD0
-> ${KDF9ROOT}/GP0
-> ${KDF9ROOT}/LP0
-> ${KDF9ROOT}/MT0
-> ${KDF9ROOT}/MT1
-> ${KDF9ROOT}/MT2
-> ${KDF9ROOT}/MT3
-> ${KDF9ROOT}/MT4
-> ${KDF9ROOT}/MT5
-> ${KDF9ROOT}/ST0
-> ${KDF9ROOT}/TP0
-> ${KDF9ROOT}/TP1
+resetOutputFiles
 
 #${TESTS}/ee9_test_case HIG $1 >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case LOG $1 >> ${LOGS}/ee9_test_case.log; echo
@@ -101,7 +114,7 @@ echo
 #${TESTS}/ee9_test_case TOX $1 >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case MTW $1 >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case INP $1 >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case HQP $1 >> ${LOGS}/ee9_test_case.log; echo
+#${TESTS}/ee9_test_case HQP $1 >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case WAB n  >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case FLO $1 >> ${LOGS}/ee9_test_case.log; echo
 #${TESTS}/ee9_test_case 1DH $1 >> ${LOGS}/ee9_test_case.log; echo

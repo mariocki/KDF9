@@ -51,6 +51,7 @@ clean:
 	$(RM) -f settings_1.txt settings_2.txt settings_for_kalgol.txt
 	${RM} -f Binary/MKSYS2 Binary/KAB00DH--USU
 	$(RM) -f logs/*
+	$(RM) -d Data/systape.txt Data/systape_kalgol.txt Data/ABS_text.txt Data/kalgol_labels.txt
 	$(RM) Assembly/WEEHAA*
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 

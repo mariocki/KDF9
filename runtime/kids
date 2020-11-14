@@ -11,13 +11,13 @@ WHERE=${KDF9ROOT}/Kidsgrove
 SETTINGS=${KDF9ROOT}/settings
 
 #trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
-#      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt;"   \
+#      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt;"   \
 #      0 1 2 3
 
-if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
-then
+#if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
+#then
    cp ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
-fi
+#fi
 
 ${KDF9ROOT}/kalgol $1
 

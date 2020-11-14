@@ -11,8 +11,8 @@ BINARY=${KDF9ROOT}/Binary
 LOGS=${KDF9ROOT}/Logs
 SETTINGS=${KDF9ROOT}/settings
 
-#trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt ${LOGS}/error_output;
-#      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
+#trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
+#      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
 #      0 1 2 3
       
 if [ x${KIDSMODE}x = xfx ]
@@ -34,18 +34,7 @@ fi
 
 > ${KDF9ROOT}/settings_1.txt
 
-cat > ${DATA}/kalgol_labels.txt <<++++
-00000000        |
-00000001        |
-00000002        |
-00000003        |
-00000004        |
-00000005        |
-|
-++++
-
-#${KDF9ROOT}/nine_test RLT {DATA}/kalgol_labels - zw
-${KDF9ROOT}/rlt {DATA}/kalgol_labels - zw
+${KDF9ROOT}/rlt tape_labels_for_KAlgol.txt - wz
 #echo "The compiler work tapes have been labelled."
 
 if [ ! -r ${DATA}/systape.txt ]
@@ -65,10 +54,10 @@ rm -f ${USERCODE}/$name.k3
 cp /tmp/chan6.pt ${DATA}/ABS_text.txt
 chmod 755 ${KDF9ROOT}/TR0
 
-if [ -r ${SETTINGS}/settings_for_kalgol.txt ]
-then
+#if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
+#then
    cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
-fi
+#fi
 
 shift
 if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]

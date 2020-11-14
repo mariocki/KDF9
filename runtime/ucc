@@ -5,10 +5,10 @@ USERCODE=${KDF9ROOT}/Assembly
 name=`basename "$1" ".k3"`
 if [ -f "${USERCODE}/$name.k3" ]
 then
-   ${KDF9ROOT}/kal3 ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt"
-   if test -r a.out
+   ${KDF9ROOT}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt"
+   if [ -s a.out ]
    then
-      cp a.out ${BINARY}/"$name"
+      mv -f a.out ${BINARY}/"$name"
    else
       echo ${KDF9ROOT}/kal3 detected error\(s\) in $name.k3
       more "$name-listing.txt"
