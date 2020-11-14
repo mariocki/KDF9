@@ -1,12 +1,12 @@
 #!/bin/bash
 opt=${1:-ae}
 
-cat >settings_1.txt <<++++
+cat >${KDF9ROOT}/settings_1.txt <<++++
 K 14 FD
 ++++
 
 echo TEST TDISK - POA, PIA, PMA, PMF - should end normally:
->FD0; ./ucc TDISK; ./nine_test TDISK - t $opt
+>FD0; ${KDF9ROOT}/ucc TDISK; ${KDF9ROOT}/nine_test TDISK - t $opt
 echo TEST TDISK - POA, PIA, PMA, PMF done.
 case $1 in
 z)
@@ -16,7 +16,7 @@ z)
 esac
 
 echo TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:
- >FD0; ./ucc TDISKOR; ./nine_test TDISKOR - t $opt
+ >FD0; ${KDF9ROOT}/ucc TDISKOR; ${KDF9ROOT}/nine_test TDISKOR - t $opt
 echo TEST TDISKOR - POA, PIA, PMA, PMF done.
 case $1 in
 z)
@@ -26,7 +26,7 @@ z)
 esac
 
 echo TEST TDISKEM - POB, PIA, PMA - should end normally:
->FD0; ./ucc TDISKEM; ./nine_test TDISKEM - t $opt
+>FD0; ${KDF9ROOT}/ucc TDISKEM; ${KDF9ROOT}/nine_test TDISKEM - t $opt
 echo TEST TDISKEM - POB, PIA, PMA done.
 case $1 in
 z)
@@ -36,7 +36,7 @@ z)
 esac
 
 echo TEST TDISKFH - POC, PIC - should end normally:
->FD0; ./ucc TDISKFH; ./nine_test TDISKFH - t $opt
+>FD0; ${KDF9ROOT}/ucc TDISKFH; ${KDF9ROOT}/nine_test TDISKFH - t $opt
 echo TEST TDISKFH - POC, PIC done.
 case $1 in
 z)
@@ -46,7 +46,7 @@ z)
 esac
 
 echo TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:
->FD0; ./ucc TDISKFHNS; ./nine_test TDISKFHNS - t $opt
+>FD0; ${KDF9ROOT}/ucc TDISKFHNS; ${KDF9ROOT}/nine_test TDISKFHNS - t $opt
 echo TEST TDISKFHNS - POC, POK, PIC, PIG done.
 case $1 in
 z)

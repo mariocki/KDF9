@@ -4,7 +4,7 @@ USERCODE=${KDF9ROOT}/Assembly
 trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp"   \
       0 1 2 3
 
-cat >STTL.commands <<++++
+cat >/tmp/STTL.commands <<++++
 /^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
 ++++
 if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 > /tmp/STTL_tmp

@@ -28,6 +28,7 @@ deploy:
 	> TR1
 	> settings_1.txt
 	> settings_2.txt
+	for f in Assembly/*.k3; do p=`basename $$f .k3`; ./ucc $$p; done
 
 .PHONY: clean
 clean:
@@ -47,10 +48,10 @@ clean:
 	$(RM) -f ST[01]
 	$(RM) -f TP[01]
 	$(RM) -f TR[01]
-	$(RM) -f ee9_test_case.log POSIX-ee9_test_case.log
-	$(RM) -f trace.log mt_test.log KDF9.log
 	$(RM) -f settings_1.txt settings_2.txt settings_for_kalgol.txt
 	${RM} -f Binary/MKSYS2 Binary/KAB00DH--USU
+	$(RM) -f logs/*
+	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 
 .PHONY: test
 test:

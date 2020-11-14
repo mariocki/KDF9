@@ -49,7 +49,7 @@ esac
 
 rm -f ${USERCODE}/WEEHAAVIE.k3 ${USERCODE}/WEEHAAVIE-listing.txt ${BINARY}/WEEHAAVIE
 
-if /bin/sh ${KDF9ROOT}/ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
+if /bin/sh ${TESTS}/ee9_test_run "$1" "${KDF9ROOT}/$this_test t $mode $encoding" "$signature"
 then
   exit 0
 else

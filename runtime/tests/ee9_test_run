@@ -1,9 +1,15 @@
 #!/bin/bash
 
 > ${LOGS}/KDF9.log
-this_test="$2"
+testtorun=$(echo "$2" | cut -f1 -d' ')
+if [ -f "$testtorun" ]
+then
+   this_test="$2"
+else
+   this_test=${TESTS}/"$2"
+fi
 echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"
-if /bin/sh ${TESTS}/$this_test
+if /bin/sh $this_test
 then
    case x$3x in
    xx)  exit_code=0

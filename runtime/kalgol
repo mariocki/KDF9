@@ -1,12 +1,13 @@
 #!/bin/bash
-ALGOL_COMPONENTS=${ADJUNCTS:-../kalgol}
 SOURCE=${KDF9ROOT}/Kidsgrove
 DATA=${KDF9ROOT}/Data
 TESTS=${KDF9ROOT}/tests
 BINARY=${KDF9ROOT}/Binary
+LOGS=${KDF9ROOT}/Logs
+SETTINGS=${KDF9ROOT}/settings
 
-trap "rm -f  /tmp/chan6.pt ptp.bin mt.out ${ALGOL_COMPONENTS}/punch.txt error_output;
-      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
+trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt ${LOGS}/error_output;
+      rm -f  ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
       0 1 2 3
       
 if [ x${KIDSMODE}x = xfx ]
@@ -38,39 +39,31 @@ cat > ${DATA}/kalgol_labels.txt <<++++
 |
 ++++
 
-${TESTS}nine_test ${BINARY}/RLT {DATA}/kalgol_labels - zw
-# echo The compiler work tapes have been labelled.
-
-if [ ! -r ${DATA}/systape.txt ]
-then
-   cp ${ALGOL_COMPONENTS}/systape.txt ${DATA}/systape.txt
-fi
+${KDF9ROOT}/nine_test RLT {DATA}/kalgol_labels - zw
+#echo "The compiler work tapes have been labelled."
 
 ${KDF9ROOT}/nine MKSYS2 systape - wz
-# echo The compiler overlay tape has been generated.; echo
+#echo "The compiler overlay tape has been generated."; echo
 
 ${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
-# echo The basic symbol source program tape has been made.; echo
+#echo "The basic symbol source program tape has been made."; echo
 
 > ${KDF9ROOT}/TP0
 rm -f ${BINARY}/$name
 rm -f ${USERCODE}/$name.k3
 cp /tmp/chan6.pt ${DATA}/ABS_text.txt
-chmod 755 TR0
+chmod 755 ${KDF9ROOT}/TR0
 
-if [ -r settings_for_kalgol.txt ]
-then
-   cp settings_for_kalgol.txt settings_1.txt
-fi
+cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
 
 shift
 if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
 then
    shift
 fi
-${KDF9ROOT}/kidopt with $* ${KIDSOPTS} >> settings_1.txt
+${KDF9ROOT}/kidopt with $* ${KIDSOPTS} >> ${KDF9ROOT}/settings_1.txt
 
-if ${KDF9ROOT}/nine ${BINARY}/KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
+if ${KDF9ROOT}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
@@ -106,7 +99,7 @@ then
 fi
 
 # a2b -p2t < TP0 > ${USERCODE}/$name.k3
-${KDF9ROOT}/mtp ${KDF9ROOT}/MT0T > ${USERCODE}/$name.k3
+${KDF9ROOT}/mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then

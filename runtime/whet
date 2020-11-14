@@ -2,6 +2,7 @@
 
 BINARY=${KDF9ROOT}/Binary
 SOURCE=${KDF9ROOT}/Whetstone
+FW0FILES=${KDF9ROOT}/FW0Files
 
 if [ x"$1"x = xx ]
 then
@@ -21,7 +22,7 @@ else
     exit 2
 fi
 
-cp FW0_for_Whetstone FW0
+cp -f ${FW0FILES}/FW0_for_Whetstone ${KDF9ROOT}/FW0
 
 mode=-d$2
 miscellany=-m$3

@@ -43,9 +43,7 @@ builddefs:
 kalgol: 
 	gnatmake -j4 -c -i ${SRC}/a2b.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
 	gnatbind ${SRC}/a2b ${CSC_LIST:%=-aO%/} -shared
-	gnatlink ${SRC}/a2b -o ${KALGOL}/a2b
-	${KALGOL}/a2b -r2p < ${KALGOL}/mksys2.bin >${RUNTIME}/Binary/MKSYS2
-	${KALGOL}/a2b -r2p < ${KALGOL}/KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
+	gnatlink ${SRC}/a2b -o ${SRC}/a2b
 
 .PHONY: kidopt
 kidopt:
@@ -74,19 +72,21 @@ clean:
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
-	$(RM) -f ${MAIN}
-	$(RM) -f ${CSC_LIST}/gnat.adc
-	$(RM) -f ${KALGOL}/a2b
+	$(RM) -f ${MAIN} ${SRC}/a2b ${SRC}/mtp ${SRC}/kidopt ${SRC}/gnat.adc
+	$(RM) -f ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
 .PHONY: deploy 
 deploy: $(MAIN) kidopt kalgol mtp
 	$(MAKE) -e -C ${KAL3} deploy
 	$(MAKE) -e -C ${MKCHAN}	deploy
-	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${MAIN} ${RUNTIME}
 	cp -f ${SRC}/kidopt ${RUNTIME}
 	cp -f ${SRC}/mtp ${RUNTIME}
-	cp -f ${KALGOL}/a2b ${RUNTIME}
+	cp -f ${SRC}/a2b ${RUNTIME}
+	${RUNTIME}/a2b -r2p < ${KALGOL}/mksys2.bin >${RUNTIME}/Binary/MKSYS2
+	${RUNTIME}/a2b -r2p < ${KALGOL}/KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
+	$(MAKE) -e -C ${RUNTIME} deploy
+	cp -f ${KALGOL}/systape.txt ${RUNTIME}/Data/
 
 .PHONY: test
 test: deploy

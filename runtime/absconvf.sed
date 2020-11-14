@@ -31,7 +31,7 @@ s/'true'/_t_r_u_e/g
 s/'false'/_f_a_l_s_e/g
 s/{/_[/g
 s/}/_]/g
-s/!=/\#/g
+s/!=/±/g
 s/>=/_>/g
 s/<=/_</g
 s/~/º/g

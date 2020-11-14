@@ -1,5 +1,5 @@
 # KDF9 emulator `ee9`
-This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
+This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
 
 ## How to run the `ee9` the KDF9 emulator
 1. You will need to build everything first, see below for instructions.
@@ -7,35 +7,31 @@ This repo is a copy of FindlayW's KDF9 emulator ([original found here](http://ww
 3. Read the more detailed documentation found in the `Documents` folder.
 
 ## What different between this repo and the original
+- Source code changed to write KDF9.log to the logs folder and also don't assume everyone uses black on white terminals :unamused:
 - Converted to using Makefiles to build everything (see below).
-- Removed special build case for Raspberry PI as I don't think it is required anymore (please let me know if I am incorrect).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
-- Removed all .bat files (see above re Cygwin).
-- Amended all shell scripts to convert output to UTF8 for correct display on modern terminals.
-- Replaced KDF9Flex with a sed script to perform conversion between modern glyphs and those expected by the Whetstone compiler.
-
-### Differences in the Whetstone interpreter
-- Amended the `whet` shell script to look for files with a suffix of `.w60` and if found will apply the conversion to `.a60` format expected by the Whetstone interpreter. This allows you to write Algol60 code in a more modern format without the need to manually convert before interpreting.
-- `~` is used as the exponent i.e. `layout := format({+d.dddddddd~+nd});` converts to `layout := format(_[+d.ddddddddº+nd_]);`
-- `\` is used for integer division `z := (a \ y);` converts to `z := (a ÷ y);`
-- `|` is not replaced as in KDF9Flex
-
 
 
 ## Folder structure
 - `src` Main source code for ee9
 - `builddefs` Gnat adc pragma files for the various build options.
 - `kal3` Source code for kal3
+- `kalgol` Data files using during the compilation of Kidsgrove Algol
+- `mkchan` Source code for mkchan
 - `runtime` Runtime environment
-    - `runtime/Algol` Whetstone Algol source files
+    - `runtime/Kidsgrove` Kidsgrove Algol source files
+    - `runtime/Whetstone` Whetstone Algol source files
     - `runtime/Binary` Compiled KDF9 binaries
-    - `runtime/Assembly` Usercode assembly source code (one compiled the binaries are placed in `runtime/Binary`)
+    - `runtime/Data` Data files
+    - `runtime/FW0Files` Various FW0 files for director or Whetstone interpreter etc
+    - `runtime/logs` log files are written in here
+    - `runtime/test` test scripts
+    - `runtime/setting` Various settings files which canb be copied to settings_[12].txt
+    - `runtime/Assembly` Usercode assembly source code (once compiled the binaries are placed in `runtime/Binary`)
 - `Documents` Various KDF9 and Whetstone related PDFs/HTML pages.
 
 ## What has not been changed
-- The ADA code is unchanged :smiley:
 - I don't include pre-build binaries.
-- The test scripts are unchanged (but slightly broken ... caveat emptor :fire:).
 - The License, it's still GPLv3 :thumbsup:
 
 ## How to build `ee9` (the KDF9 emulator)

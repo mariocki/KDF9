@@ -4,7 +4,7 @@ trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
 case $1$2 in
 1964|thecrows)
    #ln -sf /dev/tty LP0
-   ${KDF9ROOT}/whet WHETSTONE  f t;;
+   ${KDF9ROOT}/whet WHETSTONE f t;;
 *)
    ${KDF9ROOT}/whet WHETSTONE f;;
 esac

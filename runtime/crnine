@@ -22,7 +22,7 @@ if [ x"$2"x = xx -o x"$2"x = x-x ]
 then
     >${KDF9ROOT}/CR0
 else
-    data=${Data}/`basename "$2" .txt`.txt
+    data=${DATA}/`basename "$2" .txt`.txt
     if [ -r "$data" ]
     then
         cp "$data" ${KDF9ROOT}/CR0

@@ -42,7 +42,7 @@ ex /tmp/neat_tmp_3  <<++++
 /^|/
 .+1,\$d
 s/^|.*/|/
-w! neat_tmp_4
+w! /tmp/neat_tmp_4
 q!
 ++++
 

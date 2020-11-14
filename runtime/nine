@@ -73,5 +73,12 @@ else
    ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
-/bin/sh ${KDF9ROOT}/printoutput
+case $4$8 in
+   *z*)
+      ;;
+   *-*)
+      ;;
+   *)
+    /bin/sh ${KDF9ROOT}/printoutput
+esac
 
