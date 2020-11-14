@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#trap "rm -f ${KDF9ROOT}/MTx ${DATA}/mt_test_labels.txt  ${LOGS}/mt_test.diff"  0 1 2 3
+trap "rm -f ${KDF9ROOT}/MTx ${DATA}/mt_test_labels.txt  ${LOGS}/mt_test.diff"  0 1 2 3
 
 opt=${1:-ahpr}
 

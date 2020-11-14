@@ -1,5 +1,5 @@
 #!/bin/bash
-trap "rm -f whet_test.diff"  \
+trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log"  \
       0 1 2 3
 
 >${LOGS}/whet_test.log

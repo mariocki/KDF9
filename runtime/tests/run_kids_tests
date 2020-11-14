@@ -2,7 +2,7 @@
 SOURCE=${KDF9_USERCODE:-Assembly}
 BINARY=${KDF9_BINARY:-Binary}
 
-trap "rm -f kids_test_diff.txt"  \
+trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt"  \
       0 1 2 3
 
 export KIDSMISC=wz

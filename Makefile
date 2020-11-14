@@ -1,4 +1,4 @@
-BUILD_TYPE=max
+BUILD_TYPE=ee9
 # ee9 : optimised and with runtime checking
 # unop : unoptimised and with no optional warnings
 # warn : unoptimised and with many optional warnings

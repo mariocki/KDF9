@@ -39,34 +39,9 @@ function resetOutputFiles {
 > ${KDF9ROOT}/settings_2.txt
 }
 
-echo
-echo This runs a variety of tests, designed to verify that ee9 is working.
-echo The distributed ee9 takes less than 60 seconds on a 2017 iMac.
-echo
-echo N.B. All I/O device files \(e.g. TR1 or MT0\) may be overwritten by this test.
-echo
-echo "     Quit at the prompt if you do not want that to be done."
-echo
-echo The ee9 output scrolls past rapidly, but at the end you will
-echo get to see, page-by-page, a listing of the relevant results.
-echo
-echo Before each new phase, it will pause \(like this\) and wait for you to ...
-echo
-printf "Press q to quit: "
-
-read reply
-case ${reply} in
-    q|Q) exit 0
-    ;;
-    *) ;;
-esac
-
-echo
-
 resetOutputFiles
 
-#rm -f ${KDF9ROOT}/settings_for_kalgol.txt
-> ${LOGS}/ee9_test_case.log
+rm -f ${LOGS}/*
 
 echo; echo
 echo Running MT emulation tests:
@@ -80,7 +55,7 @@ echo; echo
 echo Running FD emulation tests:
 echo ==========================
 echo
-#${TESTS}/ee9_test_run FD "run_fd_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run FD "run_fd_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
@@ -88,7 +63,7 @@ echo; echo
 echo Running CR emulation tests:
 echo ==========================
 echo
-#${TESTS}/ee9_test_run CR "run_cr_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run CR "run_cr_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
@@ -99,25 +74,25 @@ echo
 
 resetOutputFiles
 
-#${TESTS}/ee9_test_case HIG $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case LOG $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case DMP $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case ACK $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case HLT $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case HKT $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case MOB $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case GPR $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case FLU $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case WBM $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case RLT $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case TO4 $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case TOX $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case MTW $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case INP $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case HQP $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case WAB n  >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case FLO $1 >> ${LOGS}/ee9_test_case.log; echo
-#${TESTS}/ee9_test_case 1DH $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case HIG $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case LOG $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case DMP $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case ACK $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case HLT $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case HKT $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case MOB $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case GPR $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case FLU $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case WBM $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case RLT $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case TO4 $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case TOX $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case MTW $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case INP $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case HQP $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case WAB n  >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case FLO $1 >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case 1DH $1 >> ${LOGS}/ee9_test_case.log; echo
 
 diff -B ${LOGS}/ee9_test_case.log ${TESTS}/ee9_good_test_case.log > ${LOGS}/ee9_test_case.diff
 
