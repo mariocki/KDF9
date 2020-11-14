@@ -12,6 +12,7 @@ EXE=ee9
 SRC=$(CURDIR)/src
 export RUNTIME=$(CURDIR)/runtime
 KAL3=$(CURDIR)/kal3
+KAL4=$(CURDIR)/kal4
 MKCHAN=$(CURDIR)/mkchan
 KALGOL=$(CURDIR)/kalgol
 
@@ -61,6 +62,10 @@ mtp:
 kal3:
 	$(MAKE) -e -C ${KAL3}
 
+.PHONY: kal4
+kal4:
+	$(MAKE) -e -C ${KAL4}	
+
 .PHONY: mkchan
 mkchan:
 	$(MAKE) -e -C ${MKCHAN}
@@ -68,6 +73,7 @@ mkchan:
 .PHONY: clean
 clean:
 	$(MAKE) -e -C ${KAL3} clean
+	$(MAKE) -e -C ${KAL4} clean
 	$(MAKE) -e -C ${MKCHAN}	clean
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
@@ -78,6 +84,7 @@ clean:
 .PHONY: deploy 
 deploy: $(MAIN) kidopt kalgol mtp
 	$(MAKE) -e -C ${KAL3} deploy
+	$(MAKE) -e -C ${KAL4} clean
 	$(MAKE) -e -C ${MKCHAN}	deploy
 	cp -f ${MAIN} ${RUNTIME}
 	cp -f ${SRC}/kidopt ${RUNTIME}

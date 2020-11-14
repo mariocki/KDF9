@@ -1,6 +1,9 @@
 # KDF9 emulator `ee9`
 This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
 
+## kal3 and kal4
+kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
+
 ## How to run the `ee9` the KDF9 emulator
 1. You will need to build everything first, see below for instructions.
 2. Read the Readme.pdf in the root folder for basic usage instructions.
