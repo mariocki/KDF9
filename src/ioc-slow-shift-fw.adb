@@ -59,7 +59,7 @@ package body IOC.slow.shift.FW is
 
    -- These are the ANSI SGR terminal escape codes for styling FW output.
    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-   black_font_code : constant String := ESC & "[0m" & ESC & "[37m";
+   black_font_code : constant String := "";
    underline_code  : constant String := ESC & "[4m";
    plain_font_code : constant String := ESC & "[0m";
 

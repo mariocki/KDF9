@@ -101,7 +101,7 @@ package body IOC.slow is
             return;
          elsif response = at_response then
             declare
-               here : constant String := value_of("KDF9_DATA", default => "Data") & "/";
+               here : constant String := value_of("KDF9ROOT", default => "") & "/Data/";
                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
             begin
                if next = "" then

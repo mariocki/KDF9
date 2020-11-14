@@ -43,7 +43,7 @@ clean:
 	$(RM) -f FW0
 	$(RM) -f GP0
 	$(RM) -f LP[01]
-	$(RM) -f MT[01234567]
+	$(RM) -f MT[0123456789]
 	$(RM) -f SI[01]
 	$(RM) -f ST[01]
 	$(RM) -f TP[01]
@@ -51,6 +51,7 @@ clean:
 	$(RM) -f settings_1.txt settings_2.txt settings_for_kalgol.txt
 	${RM} -f Binary/MKSYS2 Binary/KAB00DH--USU
 	$(RM) -f logs/*
+	$(RM) Assembly/WEEHAA*
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 
 .PHONY: test

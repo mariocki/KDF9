@@ -29,6 +29,7 @@ with IOC.equipment;
 with IOC.slow.shift.TP;
 with IOC.slow.shift.TR;
 with settings;
+with value_of;
 
 with say_goodbye;
 
@@ -43,7 +44,7 @@ procedure ee9 is
 
    package CLI renames Ada.Command_Line;
 
-   the_log_file_name : constant String := "logs/KDF9.log";
+   the_log_file_name : constant String := value_of("KDF9ROOT", default => "") & "/logs/KDF9.log";
 
    a_command_line_error_is_detected : exception;
 

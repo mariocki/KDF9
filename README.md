@@ -7,7 +7,10 @@ This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://ww
 3. Read the more detailed documentation found in the `Documents` folder.
 
 ## What different between this repo and the original
-- Source code changed to write KDF9.log to the logs folder and also don't assume everyone uses black on white terminals :unamused:
+- Source code changes 
+    - Write KDF9.log to the `{KDFROOT}/logs` folder 
+    - don't assume everyone uses black on white terminals :unamused:
+    - Use the `KDFROOT` env variable to determine the default paths for `Binaries` and `Data`
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
 

@@ -287,8 +287,8 @@ package body KDF9.Directors is
       end prepare_successor;
 
       procedure overlay_a_new_program (program_name : in String) is
-         overlay : constant String := value_of("KDF9_BINARY", default => "Binary")
-                                    & "/"
+         overlay : constant String := value_of("KDF9ROOT", default => "")
+                                    & "/Binary/"
                                     & program_name;
          W : KDF9.word;
       begin

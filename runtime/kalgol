@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# kalgol : compiles a60 to usercode and then onto a binary
+#------------------------------------------------------------------------
+
 SOURCE=${KDF9ROOT}/Kidsgrove
 DATA=${KDF9ROOT}/Data
 TESTS=${KDF9ROOT}/tests
@@ -6,9 +11,9 @@ BINARY=${KDF9ROOT}/Binary
 LOGS=${KDF9ROOT}/Logs
 SETTINGS=${KDF9ROOT}/settings
 
-trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt ${LOGS}/error_output;
-      rm -f  ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
-      0 1 2 3
+#trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt ${LOGS}/error_output;
+#      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
+#      0 1 2 3
       
 if [ x${KIDSMODE}x = xfx ]
 then
@@ -39,8 +44,14 @@ cat > ${DATA}/kalgol_labels.txt <<++++
 |
 ++++
 
-${KDF9ROOT}/nine_test RLT {DATA}/kalgol_labels - zw
+#${KDF9ROOT}/nine_test RLT {DATA}/kalgol_labels - zw
+${KDF9ROOT}/rlt {DATA}/kalgol_labels - zw
 #echo "The compiler work tapes have been labelled."
+
+if [ ! -r ${DATA}/systape.txt ]
+then
+   cp ${DATA}/systape_kalgol.txt ${DATA}/systape.txt
+fi
 
 ${KDF9ROOT}/nine MKSYS2 systape - wz
 #echo "The compiler overlay tape has been generated."; echo
@@ -54,7 +65,10 @@ rm -f ${USERCODE}/$name.k3
 cp /tmp/chan6.pt ${DATA}/ABS_text.txt
 chmod 755 ${KDF9ROOT}/TR0
 
-cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
+if [ -r ${SETTINGS}/settings_for_kalgol.txt ]
+then
+   cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
+fi
 
 shift
 if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
@@ -67,7 +81,7 @@ if ${KDF9ROOT}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-}
 then
    if [ -s ${LOGS}/error_output ]
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.; echo
       echo ${LOGS}/error_output:
       echo ===
       more ${LOGS}/error_output
@@ -78,7 +92,7 @@ then
 
    if fgrep FAIL ${KDF9ROOT}/LP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.; echo
       echo LP0:
       echo ===
       more ${KDF9ROOT}/LP0
@@ -88,7 +102,7 @@ then
 
    if fgrep FAIL ${KDF9ROOT}/TP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.; echo
       echo TP0:
       echo ===
       more ${KDF9ROOT}/TP0
@@ -103,7 +117,7 @@ ${KDF9ROOT}/mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
-   echo The Usercode object program could not be retrieved.; printf "\\a\\a\\a"; echo
+   echo The Usercode object program could not be retrieved.; echo; echo
    exit 4
 fi
 
@@ -113,7 +127,7 @@ y)
    ${KDF9ROOT}/ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
-      echo An object program could not be assembled.; printf "\\a\\a\\a"; echo
+      echo An object program could not be assembled.; echo; echo
       exit 5
    fi
    echo The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name; echo

@@ -23,6 +23,7 @@ fi
 
 if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
+    echo "Readiung data from TR0"
     >${KDF9ROOT}/TR0
 else
     datatxt=${DATA}/`basename "${data}" ".txt"`.txt

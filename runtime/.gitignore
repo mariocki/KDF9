@@ -6,6 +6,7 @@ mkchan
 mtp
 FW0
 CP[01]
+CR[01]
 DR0
 FD0
 FW0*
@@ -19,4 +20,8 @@ TR[01]
 settings_1.txt
 settings_2.txt
 *.out
+Data/ABS_text.txt
+Data/kalgol_labels.txt
+Data/systape.txt
+Data/systape_kalgol.txt
 

@@ -1,14 +1,23 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# kids : Compiles and runs a Kidsgrove Algol program
+#        calls kalgol to perform compilation
+#------------------------------------------------------------------------
+
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 WHERE=${KDF9ROOT}/Kidsgrove
 SETTINGS=${KDF9ROOT}/settings
 
-trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
-      rm -f  ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt;"   \
-      0 1 2 3
+#trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
+#      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt;"   \
+#      0 1 2 3
 
-cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
+if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
+then
+   cp ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
+fi
 
 ${KDF9ROOT}/kalgol $1
 

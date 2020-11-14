@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap "rm -f crtest_data.txt CR_test.log cr_test.diff" 0 1 2 3
+trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/CR_test.log ${LOGS}/cr_test.diff" 0 1 2 3
 opt=${1:-ae}
 
 data=${DATA}/crtest_data.txt

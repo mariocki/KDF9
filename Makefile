@@ -19,7 +19,7 @@ KALGOL=$(CURDIR)/kalgol
 MAIN=${SRC}/${EXE}
 
 export CC=gcc
-export CFLAGS=-funwind-tables -march=znver2 -O3 -funroll-loops -fno-stack-check
+export CFLAGS=-funwind-tables -march=native -O3 -funroll-loops -fno-stack-check
 GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
@@ -73,7 +73,7 @@ clean:
 	$(RM) -f ${CSC_LIST:%=%/*.ali}
 	$(RM) -f ${CSC_LIST:%=%/*.o}
 	$(RM) -f ${MAIN} ${SRC}/a2b ${SRC}/mtp ${SRC}/kidopt ${SRC}/gnat.adc
-	$(RM) -f ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
+	$(RM) -f ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
 .PHONY: deploy 
 deploy: $(MAIN) kidopt kalgol mtp
@@ -86,7 +86,7 @@ deploy: $(MAIN) kidopt kalgol mtp
 	${RUNTIME}/a2b -r2p < ${KALGOL}/mksys2.bin >${RUNTIME}/Binary/MKSYS2
 	${RUNTIME}/a2b -r2p < ${KALGOL}/KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
 	$(MAKE) -e -C ${RUNTIME} deploy
-	cp -f ${KALGOL}/systape.txt ${RUNTIME}/Data/
+	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
 
 .PHONY: test
 test: deploy
