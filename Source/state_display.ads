@@ -2,8 +2,8 @@
 --
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -22,8 +22,6 @@ use  KDF9;
 
 package state_display is
 
-   pragma Unsuppress(All_Checks);
-
    procedure show_all_prerun_dump_areas;
 
    procedure show_CIA_and_NIA;
@@ -34,9 +32,15 @@ package state_display is
 
    procedure show_sjns;
 
+   procedure show_IO_register (the_Q_register : in KDF9.Q_register;
+                               width          : in Positive := 8;
+                               for_DR,
+                               for_FD,
+                               for_FH,
+                               for_seek       : in Boolean  := False);
+
    procedure show_Q_register (the_Q_register : in KDF9.Q_register;
-                              width          : in Positive := 8;
-                              with_FD_C_part : in Boolean  := False);
+                              width          : in Positive := 8);
 
    procedure show_Q_store;
 
@@ -60,17 +64,17 @@ package state_display is
 
    procedure show_current_state;
 
-   procedure show_final_state;
+   procedure show_final_state (because : String);
 
    procedure mark_all_code_blocks_and_data_blocks;
 
-   the_code_space_has_been_marked : Boolean := False;
+   the_program_has_been_analysed : Boolean := False;
 
    procedure show_core_as_word_forms (first, last : in KDF9.address);
 
-   procedure show_core_as_syllables (first, last : in KDF9.code_point);
+   procedure show_core_as_syllables (first, last : in KDF9.syllable_address);
 
-   procedure show_core_as_Usercode (first, last  : in KDF9.code_point;
+   procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
                                     octal_option : in Boolean);
 
    procedure show_core_in_print_code (first, last : in KDF9.address);
@@ -84,5 +88,14 @@ package state_display is
    procedure show_core_in_case_shift (first, last : in KDF9.address);
 
    procedure show_core_in_Latin_1 (first, last : in KDF9.address);
+
+   -- poke is included here as it has the same relationship to dumping as show_core_*.
+   procedure poke (address    : in KDF9.address;
+                   sub_word   : in Character;
+                   position   : in KDF9.address;
+                   value      : in KDF9.word);
+
+   -- Take note that an OUT 2 or OUT 0 has been obeyed.
+   procedure notify_termination;
 
 end state_display;

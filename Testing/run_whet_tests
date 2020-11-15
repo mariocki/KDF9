@@ -1,0 +1,27 @@
+trap "rm -f whet_test_diff.txt"  \
+      0 1 2 3
+
+>whet_test_log.txt
+
+whet FLUID     t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet GPSPRIMES t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet HAAVIE    t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet HANOI     t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet INPUT     t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet MANORBOYX t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet MATMULT   t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet PENTOMINO t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet WHETSTONE t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+whet ZELLER    t prh >>whet_test_log.txt; fgrep "Digital signature" KDF9_log.txt >>whet_test_log.txt
+
+echo
+diff whet_test_log.txt whet_good_test_log.txt >whet_test_diff.txt
+if [ -s whet_test_diff.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more whet_test_diff.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi

@@ -1,9 +1,9 @@
 -- generic_sets.ads
 --
--- Arbitrary-sized sets of a discrete member type.
+-- Powersets of a discrete member type.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -20,20 +20,19 @@ generic
    type member is (<>);
 package generic_sets is
 
-   pragma Unsuppress(All_Checks);
+   pragma Preelaborate;
 
-   type set is array (generic_sets.member) of Boolean;
-   for  set'Component_Size use 1;
-   pragma Convention(C, Entity => set);
+--
+-- This package implements only those set operations that are needed by ee9.
+--
 
-   universe  : constant generic_sets.set;
+   type set is array (generic_sets.member) of Boolean
+      with Component_Size => 1, Convention => C;
 
-   empty_set : constant generic_sets.set;
+   universe  : constant generic_sets.set := (others => True);
 
-   function is_empty (set : generic_sets.set)
-   return Boolean;
+   empty_set : constant generic_sets.set := (others => False);
 
-   -- The cardinality of the set.
    function "abs" (set : generic_sets.set)
    return Natural;
 
@@ -44,63 +43,18 @@ package generic_sets is
    function "/" (member : generic_sets.member; set : generic_sets.set)
    return Boolean;
 
-   -- Constructors.
+    function "or"  (member : generic_sets.member; set : generic_sets.set)
+    return generic_sets.set;
 
-   function singleton (member : generic_sets.member)
-   return generic_sets.set;
-
-   function interval  (low, high : generic_sets.member)
-   return generic_sets.set;
-
-   function "not" (member : generic_sets.member)
-   return generic_sets.set;
-
--- "not" (set : generic_sets.set) is predefined
-
-   function "and" (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set;
-
-   function "and" (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set;
-
--- "and" (set1, set2 : generic_sets.set) is predefined
-
-   function "or"  (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set;
-
-   function "or"  (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set;
+    function "or"  (set : generic_sets.set; member : generic_sets.member)
+    return generic_sets.set;
 
 -- "or"  (set1, set2 : generic_sets.set) is predefined
-
-   function "xor" (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set;
-
-   function "xor" (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set;
-
--- "xor" (set1, set2 : generic_sets.set) is predefined
 
    function "-" (set : generic_sets.set; member : generic_sets.member)
    return generic_sets.set;
 
    function "-" (set1, set2 : generic_sets.set)
    return generic_sets.set;
-
-   -- subset
-   overriding
-   function "<=" (set1, set2 : generic_sets.set)
-   return Boolean;
-
-   -- proper subset
-   overriding
-   function "<"  (set1, set2 : generic_sets.set)
-   return Boolean;
-
-private
-
-   universe  : constant generic_sets.set := (others => True);
-
-   empty_set : constant generic_sets.set := (others => False);
 
 end generic_sets;

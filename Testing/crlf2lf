@@ -1,2 +1,0 @@
-tr -d "\\r" > tmp1 <$1
-mv tmp1 WF-`basename $1`

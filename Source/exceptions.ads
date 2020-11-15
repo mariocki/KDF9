@@ -2,8 +2,8 @@
 --
 -- Declare the exceptions used in emulation-mode control.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,26 +18,41 @@
 
 package exceptions is
 
-   -- program_exit is raised when a KDF9 program terminates.
-   program_exit        : exception;
+   -- program_exit is raised when a KDF9 program terminates normally.
+   program_exit : exception;
 
    -- time_expired is raised when a KDF9 program executes too many instructions.
-   time_expired        : exception;
-
-   -- NYI_trap is raised by a KDF9 feature that is Not Yet Implemented.
-   NYI_trap            : exception;
-
-   -- emulation_failure is raised when the emulator discovers it has gone wrong.
-   emulation_failure   : exception;
-
-   -- Director_failure is raised when a failure is detected in Director mode.
-   Director_failure    : exception;
+   time_expired : exception;
 
    -- quit_request is raised when the user requests a quit at a break-in.
-   quit_request        : exception;
+   quit_request : exception;
 
    -- input_is_impossible is raised when an attempt is made to read from the terminal in
    --    noninteractive mode.  This prevents absent-user scripted usage from hanging.
    input_is_impossible : exception;
+
+   -- operator_error is raised when the operating context is invalid; e.g. labelled tape not mounted.
+   operator_error : exception;
+
+   -- operand_error is raised when an instruction has an invalid operand in problem program state.
+   operand_error : exception;
+
+   -- Director_operand_error is raised for an operand error happening in Director state.
+   Director_operand_error : exception;
+
+   -- Director_failure is raised for an instruction that would LIV in problem program state.
+   Director_failure : exception;
+
+   -- invalid_paper_tape_file is raised when given invalid data for a KDF9-code paper tape file.
+   invalid_paper_tape_file : exception;
+
+   -- not_yet_implemented is raised by an incomplete emulation.
+   not_yet_implemented : exception;
+
+   -- emulation_failure is raised when an emulator self-check fails.
+   emulation_failure : exception;
+
+   -- debugging_stop is raised when a debugging run needs to halt at once.
+   debugging_stop : exception;
 
 end exceptions;

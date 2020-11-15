@@ -2,8 +2,8 @@
 --
 -- Implement the APIs  (OUTs) of the supported KDF9 Directors.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,8 +18,6 @@
 
 package KDF9.Directors is
 
-   pragma Unsuppress(All_Checks);
-
    -- Emulate a subset of the EGDON Director's OUT API.
    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word);
 
@@ -29,20 +27,7 @@ package KDF9.Directors is
    -- Emulate a subset of the Time Sharing Director's OUT API.
    procedure do_a_TSD_OUT (OUT_number : in KDF9.word);
 
-   -- These are the device-type codes to be given when requesting
-   --    the allocation of a peripheral with TSD OUT 5,
-   --       according to the Manual and the document
-   --          "Order Code Notes 18-Further OUTs".
-
-   FW_OUT5_code : constant := 0;
-   TP_OUT5_code : constant := 1;
-   TR_OUT5_code : constant := 2;
-   LP_OUT5_code : constant := 3;
-   CR_OUT5_code : constant := 4;
-   CP_OUT5_code : constant := 7;
-   GP_OUT5_code : constant := 8#20#;
-
    -- Set the base for virtual elapsed time reckoning.
-   procedure set_the_time_of_loading (the_time : in KDF9.microseconds);
+   procedure set_the_time_of_loading (the_time : in KDF9.us);
 
 end KDF9.Directors;

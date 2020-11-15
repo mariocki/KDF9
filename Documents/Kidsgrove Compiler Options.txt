@@ -1,0 +1,16 @@
+CM+LP      #100   print call matrix and level parameters
+TABLES     #040
+ORIG-SW    #020   use original software for assembly
+TEXT       #010
+NO-OPT     #004
+NO-TEST    #002
+NO-WARN    #001
+L+G*4d     #200000
+KALGOL     #100000
+WALGOL     #40000
+USERCODE;  #20000
+FORTRAN    #10000
+UC/RLB     #4000
+KAL4       #2000
+D15        #1000
+D16        #400

@@ -1,0 +1,37 @@
+V9; W0;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(test for MBSK at BTW - should LIV);
+
+   V0 = Q0/AV1/AV1;        (for TP0 tracing output);
+   V1 = 0;                 (TP0 output word);
+   V2 = PEFPBEAAG;         (tape label);
+   V3 = B6445636400520277; (TEST J);
+   V4 = B5542635300575302; (MBSK OK);
+   V5 = B4651565163500277; (FINISH);
+
+   (claim tape);
+   V2; SET4; OUT; =RC1;
+
+   (claim TP0);
+   SET 1; SET 5; OUT; V0; =Q10; =C10;
+   V3; =V1; POAQ10;
+
+   (rewind at BTW should be OK);
+   MRWDQ1;
+
+   (FINISH message - this should be the last output);
+   V5; =V1; POAQ10;
+
+   (attempt a backward skip - should LIV at BTW);
+   SET1; =M1;
+   MBSKQ1;
+
+   (MBSK OK message - this output should NOT happen);
+   V4; =V1; POAQ10;
+
+   ZERO; OUT;
+
+FINISH;
+|

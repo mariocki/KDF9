@@ -1,16 +1,26 @@
+P
+HORNERP00UPU
+HORNER PROGRAM|
+ST3348 ; TL 50 ;
 V1; W0;  YA100;
 RESTART; J999; J999;
 PROGRAM;
-V1 = 1.0; (x);
-V1; =Q2;
-SET100; (n); DUP; =C1; =M1; I1=-1; J999C1Z;
-SETAYA0; =M2;
-YA0M1Q; (a0);
-*1;
-   M2M1Q; ZERO; (ai in d.p.);
-   CAB; Q2; ×+F; REV; ERASE;
-J1C1NZS;
+SET 10; SET 47; FLOAT; (x);
+=Q2;
+SET 4; (n); =RC1;
+Q1 TO Q3;
+
+*111;
+   C3; SET 47; FLOAT; =YA0M3Q;
+J111C3NZS;
+
+SETAYA1; =M9;
+YA0M1; (a0); ZERO;
+*1; YA0M1Q; (ai in d.p.);
+    Q2;
+*  ×+F; J1C1NZS;
 
 999; ZERO; OUT;
 FINISH;
+|
 

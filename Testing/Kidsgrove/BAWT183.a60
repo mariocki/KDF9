@@ -1,0 +1,29 @@
+!begin
+!library A1, A4, A5, A12, A15;
+
+!real  x, y;
+
+open(30);
+y := 1.0;
+!for x := 1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125, 0.015625, 0.0078125,
+	0.00390625, 0.001953125, 0.0009765625, 0.00048828125, 0.000244140625,
+	0.0001220703125, 0.00006103515625, 0.000030517578125, 0.0000152587890625,
+	0.00000762939453125, 0.000003814697265625, 0.0000019073486328125,
+	0.00000095367431640625, 0.000000476837158203125 !do
+      !begin
+      !if x ± y !then
+         !begin
+         writetext(30, {Computed _ value.});
+         write(30, format({-d.dddddddddº+ndc}), x);
+         writetext(30, {Literal _ value.});
+         write(30, format({-d.dddddddddº+ndc}), y);
+         writetext(30, {Difference.});
+         write(30, format({-d.dddddddddº+ndc}), x-y);
+         newline(30, 1);
+         !end ;
+      y := y / 2.0
+      !end ;
+writetext(30, {Run.});
+close(30);
+!end
+|

@@ -2,8 +2,8 @@
 --
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,18 +18,16 @@
 
 with Ada.Unchecked_Conversion;
 --
-with disassembly;
 with exceptions;
-with KDF9.compressed_opcodes;
+with KDF9.decoding;
 with KDF9.CPU;
 with KDF9.PHU_store;
 with KDF9.store;
 with settings;
 with tracing;
 
-use  disassembly;
 use  exceptions;
-use  KDF9.compressed_opcodes;
+use  KDF9.decoding;
 use  KDF9.CPU;
 use  KDF9.PHU_store;
 use  KDF9.store;
@@ -38,185 +36,122 @@ use  tracing;
 
 package body KDF9 is
 
-   C_part_scale : constant KDF9.word := 2**32;
-   I_part_scale : constant KDF9.word := 2**16;
+   C_part_scale : constant := 2**32;
+   I_part_scale : constant := 2**16;
 
    function as_Q (the_word : KDF9.word)
-   return KDF9.Q_register is
-   begin
-      return (
-              C => KDF9.Q_part(KDF9.word'(the_word / C_part_scale)),
-              I => KDF9.Q_part(KDF9.word'(the_word / I_part_scale) and Q_part_mask),
-              M => KDF9.Q_part(the_word and Q_part_mask)
-             );
-   end as_Q;
+   return KDF9.Q_register
+   is (
+       (C => KDF9.Q_part(KDF9.word'(the_word / C_part_scale)),
+        I => KDF9.Q_part(KDF9.word'(the_word / I_part_scale) and Q_part_mask),
+        M => KDF9.Q_part(the_word and Q_part_mask)
+       )
+      );
 
    function as_word (the_Q : KDF9.Q_register)
-   return KDF9.word is
-   begin
-      return KDF9.word(the_Q.C) * C_part_scale
-           + KDF9.word(the_Q.I) * I_part_scale
-           + KDF9.word(the_Q.M);
-   end;
+   return KDF9.word
+   is (KDF9.word(the_Q.C)*C_part_scale + KDF9.word(the_Q.I)*I_part_scale + KDF9.word(the_Q.M));
 
    function sign_extended (Q : KDF9.Q_part)
-   return KDF9.word is
-   begin
-      return unsign(CPU.signed(resign(Q)));
-   end sign_extended;
+   return KDF9.word
+   is (unsign(CPU.signed(resign(Q))));
 
-   function as_word (the_link : KDF9.code_link) return KDF9.word is
-      function link_Q_part is new Ada.Unchecked_Conversion(KDF9.code_link, KDF9.Q_part);
+   function as_word (the_link : KDF9.sjns_link)
+   return KDF9.word is
+      function link_Q_part is new Ada.Unchecked_Conversion(KDF9.sjns_link, KDF9.Q_part);
    begin
       return KDF9.word(link_Q_part(the_link));
    end as_word;
 
-   function as_link (the_word : KDF9.word) return KDF9.code_link is
-      function Q_part_link is new Ada.Unchecked_Conversion(KDF9.Q_part, KDF9.code_link);
+   function as_link (the_word : KDF9.word)
+   return KDF9.sjns_link is
+      function Q_part_link is new Ada.Unchecked_Conversion(KDF9.Q_part, KDF9.sjns_link);
    begin
       return Q_part_link(KDF9.Q_part(the_word and Q_part_mask));
    end as_link;
 
-   procedure deal_with_empty_sjns is
-   begin
-      raise NOUV_trap with "SJNS empty";
-   end deal_with_empty_sjns;
-
-   procedure deal_with_full_sjns is
-   begin
-      raise NOUV_trap with "SJNS full";
-   end deal_with_full_sjns;
-
    procedure ensure_that_the_sjns_is_not_empty is
    begin
-      if the_sjns_depth > 0 or else the_CPU_state = Director_state then return; end if;
-      deal_with_empty_sjns;
+      if the_sjns_depth > 0             or else
+            the_CPU_state = Director_state then
+         return;
+      end if;
+      effect(NOUV_interrupt, "empty SJNS");
    end ensure_that_the_sjns_is_not_empty;
 
    procedure ensure_that_the_sjns_is_not_full is
    begin
-      if the_sjns_depth < 16 or else the_CPU_state = Director_state then return; end if;
-      deal_with_full_sjns;
+      if the_sjns_depth < 16             or else
+            the_CPU_state = Director_state  then
+         return;
+      end if;
+      effect(NOUV_interrupt, "full SJNS");
    end ensure_that_the_sjns_is_not_full;
 
-   procedure push (the_link : in KDF9.code_point) is
-      pragma Assert(the_sjns_depth < 16 or else the_CPU_state = Director_state);
+   procedure push (the_link : in KDF9.syllable_address) is
    begin
-      the_sjns(the_sjns_depth) := KDF9.code_link(the_link);
+      the_sjns(the_sjns_depth) := KDF9.sjns_link(the_link);
       the_sjns_depth := the_sjns_depth + 1;
    end push;
 
    function pop
-   return KDF9.code_point is
-      pragma Assert(the_sjns_depth > 0 or else the_CPU_state = Director_state);
+   return KDF9.syllable_address is
    begin
       the_sjns_depth := the_sjns_depth - 1;
-      return KDF9.code_point(the_sjns(the_sjns_depth));
+      return KDF9.syllable_address(the_sjns(the_sjns_depth));
    end pop;
 
    function sjns_top
-   return KDF9.code_link is
-      pragma Assert(the_sjns_depth > 0 or else the_CPU_state = Director_state);
-   begin
-      return the_sjns(the_sjns_depth-1);
-   end sjns_top;
+   return KDF9.sjns_link
+   is (the_sjns(the_sjns_depth-1));
 
-   procedure deal_with_empty_nest is
-   begin
-      raise NOUV_trap with "NEST too empty";
-   end deal_with_empty_nest;
+   function words_needed (need : KDF9.nest_depth)
+   return String
+   is ("NEST lacks" & need'Image & " operand" & (if need > 1 then "s" else ""));
 
-   procedure deal_with_full_nest is
-   begin
-      raise NOUV_trap with "NEST too full";
-   end deal_with_full_nest;
-
-   procedure check_whether_the_nest_holds_an_operand is
-   begin
-      if the_nest_depth > 0                  or else
-            the_authenticity_mode = lax_mode or else
-               the_CPU_state = Director_state   then
-         return;
-      end if;
-      deal_with_empty_nest;
-   end check_whether_the_nest_holds_an_operand;
-
-   procedure check_whether_the_nest_holds_2_operands is
-   begin
-      if the_nest_depth > 1                  or else
-            the_authenticity_mode = lax_mode or else
-               the_CPU_state = Director_state   then
-         return;
-      end if;
-      deal_with_empty_nest;
-   end check_whether_the_nest_holds_2_operands;
-
-   procedure check_whether_the_nest_holds (at_least : in KDF9.nest_depth) is
+   procedure ensure_that_the_nest_holds (at_least : in KDF9.nest_depth) is
    begin
       if the_nest_depth >= at_least          or else
-            the_authenticity_mode = lax_mode or else
-               the_CPU_state = Director_state   then
+            the_CPU_state = Director_state      then
          return;
       end if;
-      deal_with_empty_nest;
-   end check_whether_the_nest_holds;
+      effect(NOUV_interrupt, words_needed(need => at_least-the_nest_depth));
+   end ensure_that_the_nest_holds;
 
    procedure ensure_that_the_nest_holds_an_operand is
    begin
-      if the_nest_depth > 0                or else
-            the_CPU_state = Director_state    then
-         return;
-      end if;
-      deal_with_empty_nest;
+      ensure_that_the_nest_holds (at_least => 1);
    end ensure_that_the_nest_holds_an_operand;
 
    procedure ensure_that_the_nest_holds_2_operands is
    begin
-      if the_nest_depth > 1                or else
-            the_CPU_state = Director_state    then
-         return;
-      end if;
-      deal_with_empty_nest;
+      ensure_that_the_nest_holds (at_least => 2);
    end ensure_that_the_nest_holds_2_operands;
 
-   procedure ensure_that_the_nest_holds (at_least : in KDF9.nest_depth) is
+   function space_needed (need : KDF9.nest_depth)
+   return String
+   is (if need = 1 then "full NEST" else "NEST too full for" & need'Image & " operands");
+
+   procedure ensure_that_the_nest_has_room_for (at_least : in KDF9.nest_depth) is
    begin
-      if the_nest_depth >= at_least        or else
+      if the_nest_depth <= 16-at_least     or else
             the_CPU_state = Director_state    then
          return;
       end if;
-      deal_with_empty_nest;
-   end ensure_that_the_nest_holds;
+      effect(NOUV_interrupt, space_needed(need => at_least - (16-the_nest_depth)));
+   end ensure_that_the_nest_has_room_for;
 
    procedure ensure_that_the_nest_has_room_for_a_result is
    begin
-      if the_nest_depth < 16               or else
-            the_CPU_state = Director_state    then
-         return;
-      end if;
-      deal_with_full_nest;
+      ensure_that_the_nest_has_room_for (at_least => 1);
    end ensure_that_the_nest_has_room_for_a_result;
 
    procedure ensure_that_the_nest_has_room_for_2_results is
    begin
-      if the_nest_depth < 15               or else
-            the_CPU_state = Director_state    then
-         return;
-      end if;
-      deal_with_full_nest;
+      ensure_that_the_nest_has_room_for (at_least => 2);
    end ensure_that_the_nest_has_room_for_2_results;
 
-   procedure ensure_that_the_nest_has_room_for (at_least : in KDF9.nest_depth) is
-   begin
-      if 16-the_nest_depth >= at_least     or else
-            the_CPU_state = Director_state    then
-         return;
-      end if;
-      deal_with_full_nest;
-   end ensure_that_the_nest_has_room_for;
-
    procedure push (the_word : in KDF9.word) is
-      pragma Assert(16-the_nest_depth > 0 or the_CPU_state = Director_state);
    begin
       the_nest(the_nest_depth) := the_word;
       the_nest_depth := the_nest_depth + 1;
@@ -224,9 +159,6 @@ package body KDF9 is
 
    function pop
    return KDF9.word is
-      pragma Assert(the_nest_depth > 0               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
    begin
       return result : constant KDF9.word := the_nest(the_nest_depth - 1) do
          the_nest(the_nest_depth - 1) := 0;
@@ -235,33 +167,21 @@ package body KDF9 is
    end pop;
 
    procedure pop is
-      pragma Assert(the_nest_depth > 0               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
    begin
       the_nest(the_nest_depth - 1) := 0;
       the_nest_depth := the_nest_depth - 1;
    end pop;
 
    function read_top
-   return KDF9.word is
-      pragma Assert(the_nest_depth > 0               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
-   begin
-      return the_nest(the_nest_depth-1);
-   end read_top;
+   return KDF9.word
+   is (the_nest(the_nest_depth-1));
 
    procedure write_top (the_word : in KDF9.word) is
-      pragma Assert(the_nest_depth > 0               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
    begin
       the_nest(the_nest_depth-1) := the_word;
    end write_top;
 
    procedure push (the_pair : in KDF9.pair) is
-      pragma Assert(16-the_nest_depth > 1 or the_CPU_state = Director_state);
    begin
       the_nest(the_nest_depth+0) := the_pair.lsw;
       the_nest(the_nest_depth+1) := the_pair.msw;
@@ -270,9 +190,6 @@ package body KDF9 is
 
    function pop
    return KDF9.pair is
-      pragma Assert(the_nest_depth > 1               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
    begin
       return result : constant KDF9.pair := (msw => the_nest(the_nest_depth-1),
                                              lsw => the_nest(the_nest_depth-2)) do
@@ -283,19 +200,10 @@ package body KDF9 is
    end pop;
 
    function read_top
-   return KDF9.pair is
-      pragma Assert(the_nest_depth > 1               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
-   begin
-      return (msw => the_nest(the_nest_depth-1),
-              lsw => the_nest(the_nest_depth-2));
-   end read_top;
+   return KDF9.pair
+   is ((msw => the_nest(the_nest_depth-1), lsw => the_nest(the_nest_depth-2)));
 
    procedure write_top (the_pair : in KDF9.pair) is
-      pragma Assert(the_nest_depth > 1               or
-                    the_authenticity_mode = lax_mode or
-                    the_CPU_state = Director_state);
    begin
       the_nest(the_nest_depth-1) := the_pair.msw;
       the_nest(the_nest_depth-2) := the_pair.lsw;
@@ -307,6 +215,7 @@ package body KDF9 is
 --
 
    -- Set BA (bits D38:47), CPL (D34:35) and NOL (D24:33).
+
    procedure set_K1_register (setting : in KDF9.word) is
    begin
       BA  := KDF9.address(setting mod 2**10) * 2**5;
@@ -315,142 +224,161 @@ package body KDF9 is
    end set_K1_register;
 
    -- Set CPDAR (bits D32:47).
+
    procedure set_K2_register (setting : in KDF9.word) is
-      CPDAR_Q : KDF9.Q_part := KDF9.Q_part(setting mod 2**16) and KDF9.Q_part_mask;
+      CPDAR_Q : KDF9.Q_part := as_Q(setting).M;
    begin
       for i in KDF9.buffer_number loop
-         the_CPDAR(15-i) := KDF9.one_bit(CPDAR_Q mod 2);
+         the_CPDAR(i) := (CPDAR_Q mod 2) = 1;
          CPDAR_Q := CPDAR_Q / 2;
       end loop;
    end set_K2_register;
 
    -- Set context (bits D0:1), nest_depth (D2:6) and sjns_depth (D7:11).
+
    procedure set_K3_register (setting : in KDF9.word) is
    begin
       -- Save the current register values in the register bank.
-      register_bank(the_context).nest := the_nest;
-      register_bank(the_context).sjns := the_sjns;
+      register_bank(the_context).NEST := the_nest;
+      register_bank(the_context).SJNS := the_sjns;
       register_bank(the_context).Q_store := the_Q_store;
       -- Set the new context.
       the_context := KDF9.context(KDF9.word'(setting / 2**46));
       the_nest_depth := KDF9.nest_depth(setting / 2**41 mod 2**5);
       the_sjns_depth := KDF9.sjns_depth(setting / 2**36 mod 2**5);
       -- Restore the register values for the new context.
-      the_nest := register_bank(the_context).nest;
-      the_sjns := register_bank(the_context).sjns;
+      the_nest := register_bank(the_context).NEST;
+      the_sjns := register_bank(the_context).SJNS;
       the_Q_store := register_bank(the_context).Q_store;
    end set_K3_register;
 
-   a_jiffy : constant := 1.0 / 1_048_576.0;  -- = 2 **(-20)
-   type seconds is delta a_jiffy range 0.0 .. 31_622_400_000.0;  -- 1000 leapyears!
+   a_jiffy : constant := 1.0 / 2.0**20;  -- a bit less than a microsecond
+
+   type seconds is delta a_jiffy range 0.0 .. 1000.0*366.0*24.0*3600.0;  -- 1000 leap years!
+
+   procedure update_the_elapsed_time;
 
    -- Let the real elapsed time catch up with the_real_time virtual seconds.
-   procedure delay_until (the_real_time : in KDF9.microseconds) is
-      quantum : constant seconds := seconds(2**10) * a_jiffy;  -- ~= TR character time
+
+   procedure delay_until (the_real_time : in KDF9.us) is
+      quantum : constant seconds := seconds(2**10) * a_jiffy;  -- ca. TR character-read time of 1ms
       the_lag : seconds;
    begin
+       if the_real_time < the_last_delay_time then
+          the_last_delay_time := the_real_time;
+       end if;
       the_lag := seconds(the_real_time - the_last_delay_time) * a_jiffy;
       if the_lag >= quantum then  -- More than a quantum of virtual elapsed time has passed.
          delay Duration(the_lag);
          the_last_delay_time := the_real_time;
       end if;
-      the_elapsed_time := the_real_time;
+     -- the_elapsed_time := the_real_time;
+      update_the_elapsed_time;
    end delay_until;
 
-   procedure delay_by (the_delay_time : in KDF9.microseconds) is
+   procedure delay_by (the_delay_time : in KDF9.us) is
    begin
-      if authentic_timing_is_wanted then
+      if authentic_timing_is_enabled then
          delay_until(the_clock_time + the_delay_time);
       end if;
    end delay_by;
 
    -- Advance to the larger of the_CPU_time, the_elapsed_time, and the_last_delay_time.
    -- Cap the increase to prevent a spurious double-clock (RESET) interrupt in Director.
+
    procedure update_the_elapsed_time is
-      max_elapsed_time : constant KDF9.microseconds := the_last_K4_time + 2**20 - 1;
+      max_elapsed_time : constant KDF9.us := the_last_K4_time + 2**20 - 1;
    begin
-      the_elapsed_time := KDF9.microseconds'Max(the_elapsed_time, the_last_delay_time);
-      the_elapsed_time := KDF9.microseconds'Max(the_elapsed_time, the_CPU_time);
+      the_elapsed_time := KDF9.us'Max(the_elapsed_time, the_last_delay_time);
+      the_elapsed_time := KDF9.us'Max(the_elapsed_time, the_CPU_time);
       if the_execution_mode = boot_mode and the_CPU_state = Director_state then
-         the_elapsed_time := KDF9.microseconds'Min(the_elapsed_time, max_elapsed_time);
+         the_elapsed_time := KDF9.us'Min(the_elapsed_time, max_elapsed_time);
       end if;
    end update_the_elapsed_time;
 
    -- The virtual elapsed time.
+
    function the_clock_time
-   return KDF9.microseconds is
+   return KDF9.us is
    begin
       update_the_elapsed_time;
       return the_elapsed_time;
    end the_clock_time;
 
-   procedure advance_the_clock_past (this_time : in KDF9.microseconds) is
+   procedure advance_the_clock (past : in KDF9.us) is
    begin
-      the_elapsed_time := KDF9.microseconds'Max(the_elapsed_time, this_time);
+      the_elapsed_time := KDF9.us'Max(the_elapsed_time, past);
       update_the_elapsed_time;
-      if authentic_timing_is_wanted then
+      if authentic_timing_is_enabled then
          delay_until(the_elapsed_time);
       end if;
-   end advance_the_clock_past;
+   end advance_the_clock;
 
    procedure synchronize_the_real_and_virtual_times is
    begin
-      update_the_elapsed_time;
-      if authentic_timing_is_wanted then
+      if authentic_timing_is_enabled then
+         update_the_elapsed_time;
          delay_until(the_elapsed_time);
       end if;
    end synchronize_the_real_and_virtual_times;
 
    -- Get clock (bits D0:15) and RFIR (D16:31).
+
    function get_K4_operand
    return KDF9.word is
 
-      function RFIR_in_a_word return KDF9.word is
+      function RFIR_in_a_word
+      return KDF9.word is
          result : KDF9.word := 0;
       begin
-         for r in the_RFIR'Range loop
+         for r of the_RFIR loop
             result := result*2;
-            if the_RFIR(r) then
+            if r then
                result := result or 1;
             end if;
          end loop;
          return result;
       end RFIR_in_a_word;
 
-      -- The KDF9's clock ticks once per 32 탎;
-      --    the emulator's virtual time has a resolution of 1탎.
-      time_now : constant KDF9.microseconds := the_clock_time;
-      interval : KDF9.microseconds := (time_now - the_last_K4_time) / 32;
+      -- The KDF9's interval timing clock ticks once per 32 탎;
+      --    the emulator virtual time has a resolution of 1 탎.
+
+      time_now : constant KDF9.us := the_clock_time;
+      interval : constant KDF9.us := (time_now - the_last_K4_time);
+
    begin
       the_last_K4_time := time_now;
-      if interval >= 2**16 then
-         the_RFIR(RESET_flag) := True;
-         interval := interval mod 2**16;
+      if interval / 32 >= 2**16 then
+         effect(RESET_interrupt, "double clock");
+         the_RFIR(RESET_interrupt) := True;
+      elsif interval / 32 >= 2**15 then
+         effect(CLOCK_interrupt, "time since a K4" & interval'Image & "us");
+         the_RFIR(CLOCK_interrupt) := True;  --?? why is this needed?
       end if;
-      return (KDF9.word(interval) * 2**16 or RFIR_in_a_word) * 2**16;
+      return (KDF9.word(interval / 32) * 2**32) or (RFIR_in_a_word * 2**16);
    end get_K4_operand;
 
    -- Get PHUi (bits D6i:6i+5, i = 0 .. 3).
+
    function get_K5_operand
-   return KDF9.word is
-   begin
-      return K5_operand;
-   end get_K5_operand;
+   return KDF9.word
+   is (K5_operand);
 
    -- Get context (bits D0:1), nest_depth (D2:6) and sjns_depth (D7:11).
-   function get_K7_operand
-   return KDF9.word is
-   begin
-      return (KDF9.word(the_context)    * 2**46)
-          or (KDF9.word(the_nest_depth) * 2**41)
-          or (KDF9.word(the_sjns_depth) * 2**36);
-   end get_K7_operand;
 
-   procedure reset_the_internal_registers (the_new_state : in CPU_state := Director_state) is
+   function get_K7_operand
+   return KDF9.word
+   is (
+       (KDF9.word(the_context)    * 2**46) or
+       (KDF9.word(the_nest_depth) * 2**41) or
+       (KDF9.word(the_sjns_depth) * 2**36)
+      );
+
+   procedure reset_the_internal_registers (the_new_state : in CPU_state) is
    begin
-      -- Set the state of a newly bootstrapped CPU.  ??
-      the_V_bit := 0;
-      the_T_bit := 0;
+      -- Set the state of a newly bootstrapped CPU.
+      the_V_bit_is_set := False;
+      the_T_bit_is_set := False;
       CIA := (0, 0);
       CPL := 0;
       BA  := 0;
@@ -462,24 +390,24 @@ package body KDF9 is
       the_last_delay_time := 0;
       the_last_K4_time := 0;
       the_CPU_state := the_new_state;
-      the_CPDAR := (0 => 1, others => 0);  -- FW0 is always allocated.
+      the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.
    end reset_the_internal_registers;
+
+   empty_nest : constant NEST := (others => 0);
+   empty_sjns : constant SJNS := (others => (0, 0));
+   empty_Q_s  : constant Q_store := (others => (0, 0, 0));
 
    procedure reset_the_CPU_state is
    begin
       the_context := 0;
-      for set in register_bank'Range loop
-         register_bank(set) := (
-                                nest    => (others => 0),
-                                sjns    => (others => (0, 0)),
-                                Q_store => (others => (0, 0, 0))
-                               );
+      for bank of register_bank loop
+         bank := (NEST => empty_nest, SJNS => empty_sjns, Q_store => empty_Q_s);
       end loop;
       the_nest_depth := 0;
-      the_nest       := (others => 0);
+      the_nest       := empty_nest;
       the_sjns_depth := 0;
-      the_sjns       := (others => (0, 0));
-      the_Q_store    := (others => (0, 0, 0));
+      the_sjns       := empty_sjns;
+      the_Q_store    := empty_Q_s;
       if the_execution_mode = program_mode then
          reset_the_internal_registers(program_state);
       else
@@ -492,138 +420,230 @@ package body KDF9 is
    procedure reset_the_program_state is
    begin
       the_nest_depth := 0;
-      the_nest       := (others => 0);
+      the_nest       := empty_nest;
       the_sjns_depth := 0;
-      the_sjns       := (others => (0, 0));
-      the_V_bit := 0;
-      the_T_bit := 0;
-      the_CPDAR := (0 => 1, others => 0);  -- FW0 is always allocated.
+      the_sjns := empty_sjns;
+      the_V_bit_is_set := False;
+      the_T_bit_is_set := False;
+      the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.
       -- Setting NIA must follow program loading, as it fetches E0 into the IWBs.
       set_NIA_to((0, 0));
    end reset_the_program_state;
 
-   procedure signal_interrupt (the_reason : in KDF9.interrupt_number) is
+   procedure effect (this_interrupt : in KDF9.interrupt_number; message : in String := "") is
+      return_address : KDF9.syllable_address;
    begin
-      take_note_of(the_reason,
-                   ICR, CIA, the_elapsed_time,
-                   (the_CPU_state = Director_state), CPL
-                  );
-      the_RFIR(the_reason) := True;
+      take_note_of_interrupt(this_interrupt, message);
+      the_RFIR(this_interrupt) := True;
       case the_execution_mode is
          when boot_mode =>
             -- Interrupts are either effected or deferred to Director.
-            if the_CPU_state = program_state or the_reason = RESET_flag then
+            if the_CPU_state = program_state or else this_interrupt = RESET_interrupt then
                -- Effect an actual interrupt into Director.
-               if the_reason = LOV_flag or the_reason = LIV_flag then
-                  push(CIA);  -- Resume after LOV at the interrupted instruction.
+               if this_interrupt in LOV_interrupt | OUT_interrupt then
+                  return_address := CIA;  -- Restart the interrupted instruction.
                else
-                  push(NIA);  -- Restart after the interrupted instruction.
+                  return_address := NIA;  -- Proceed after the interrupted instruction.
+               end if;
+               if the_sjns_depth < 16 then
+                  push(return_address);                  -- The program link fits into the SJNS.
+               else
+                  JB := KDF9.sjns_link(return_address);  -- The program link overwrites JB.
                end if;
                BA := 0;
-               the_CPU_state := Director_state;
+               fetching_normally := True;
                set_NIA_to((0, 0));
+               the_CPU_state := Director_state;
+               raise abandon_this_order;
             else
                -- Defer: Director will eventually find any request left in the_RFIR.
                -- NOUV is completely suppressed in Director state.
-               the_RFIR(NOUV_flag) := False;
+               the_RFIR(NOUV_interrupt) := False;
             end if;
+
          when test_program_mode =>
             -- Interrupts other than LOV and RESET are ignored.
-            case the_reason is
-               when LOV_flag =>
-                  raise LOV_trap;
-               when RESET_flag =>
-                  raise RESET_trap;
+            -- There is no need to accurately emulate the address placed by the hardware in JB.
+            case this_interrupt is
+               when LOV_interrupt =>
+                  raise LOV_trap with message;
+               when RESET_interrupt =>
+                  raise RESET_trap with message;
                when others =>
                   null;
             end case;
+
          when program_mode =>
             -- Interrupts other than LOV are treated as failures.
-            case the_reason is
-               when PR_flag =>
-                  raise PR_trap;
-               when FLEX_flag =>
-                  raise FLEX_trap;
-               when LIV_flag =>
-                  raise LIV_trap;
-               when NOUV_flag =>
-                  raise NOUV_trap;
-               when EDT_flag =>
-                  raise EDT_trap;
-               when OUT_flag =>
-                  raise OUT_trap;
-               when LOV_flag =>
-                  raise LOV_trap;
-               when RESET_flag =>
-                  raise RESET_trap;
+            -- There is no need to accurately emulate the address placed by the hardware in JB.
+            case this_interrupt is
+               when PR_interrupt =>
+                  raise PR_trap with message;
+               when FLEX_interrupt =>
+                  raise FLEX_trap with message;
+               when LIV_interrupt =>
+                  raise LIV_trap with message;
+               when NOUV_interrupt =>
+                  raise NOUV_trap with message;
+               when EDT_interrupt =>
+                  raise EDT_trap with message;
+               when OUT_interrupt =>
+                  raise OUT_trap with message;
+               when LOV_interrupt =>
+                  raise LOV_trap with message;
+               when RESET_interrupt =>
+                  raise RESET_trap with message;
                when others =>
-                  raise emulation_failure with "invalid RFI";
+                  raise emulation_failure with "invalid RFI in KDF9.effect";
             end case;
       end case;
-   end signal_interrupt;
+   end effect;
 
-   procedure LIV_if_user_mode (the_reason : in String := "Director-only instruction") is
+   procedure effect_clock_interrupt (interval : in KDF9.us)
+      with Inline => False;
+
+   procedure effect_clock_interrupt (interval : in KDF9.us) is
    begin
-      if the_CPU_state = Director_state then
-         return;
-      end if;
-      if the_execution_mode = boot_mode then
-         signal_interrupt(LIV_flag);
-      else
-         raise LIV_trap with the_reason;
-      end if;
-   end LIV_if_user_mode;
+      effect(CLOCK_interrupt, interval'Image & " KDF9 us");
+   end effect_clock_interrupt;
 
-   procedure LOV_if_user_mode is
+   procedure check_for_a_clock_interrupt is
+      interval : KDF9.us;
+   begin
+      -- Clock ticks are ignored in program_mode and test_program_mode.
+      -- In boot_mode:
+      --    they are actioned in program_state;
+      --    they are deferred in Director_state: Director will eventually find the time for itself.
+      if the_execution_mode = boot_mode and then
+            the_CPU_state = program_state   then
+         interval := (the_clock_time - the_last_K4_time);
+         if interval >= 2**20 then
+            effect_clock_interrupt(interval);
+         end if;
+      end if;
+   end check_for_a_clock_interrupt;
+
+   procedure fail_in_problem_program_state is
+   begin
+      case the_execution_mode is
+         when program_mode =>
+            -- The unprivileged program has attempted a privileged operation.
+            raise LIV_trap with "%Director-only instruction";
+         when test_program_mode =>
+            -- The privileged program is allowed to use privileged instructions.
+            return;
+         when boot_mode =>
+            if the_CPU_state = program_state then
+               -- Punt the error to Director.
+               effect(LIV_interrupt);
+            else
+               -- All privileged operations are permitted to Director.
+               return;
+            end if;
+      end case;
+   end fail_in_problem_program_state;
+
+   procedure LOV_if_user_mode (device_name : in String) is
    begin
       -- LOV was TOTALLY suppressed in Director state.
       if the_CPU_state /= Director_state then
          set_NIA_to(CIA);
-         signal_interrupt(LOV_flag);
+         effect(LOV_interrupt, device_name);
       end if;
    end LOV_if_user_mode;
 
-   procedure trap_invalid_instruction (the_message : in String := "invalid instruction") is
+   -- The %  prepended to the_message aids parsing of exception error messages in failure shutdown.
+
+   procedure trap_invalid_instruction (the_message : in String := "invalid opcode") is
    begin
-      LIV_if_user_mode(the_message);
-      -- We get here only in Director mode.
-      -- Invalid operations in Director raise a debugging exception for now.
-      raise Director_failure with the_message & ": " & the_name_of(INS);
+      -- The program has failed in a manner that could cause a LIV interrupt.
+      case the_execution_mode is
+         when program_mode
+            | test_program_mode =>
+            raise LIV_trap with "%" & the_message;
+         when boot_mode =>
+            if the_CPU_state = program_state then
+               -- Punt the problem to Director.
+               effect(LIV_interrupt, the_message);
+            else
+               -- The Director itself has gone seriously wrong.
+               -- LIV is impossible in Director, so ee9 takes responsibility for stopping the run
+               --    to avert consequential emulation failure.
+               raise Director_failure with "%" & the_message;
+            end if;
+      end case;
    end trap_invalid_instruction;
 
-   procedure change_to_user_state_at (new_IAR : in KDF9.code_point) is  -- STUB
+   procedure trap_invalid_operand (the_message : in String := "invalid operand") is
+   begin
+      -- The program has failed in a manner that does not cause a LIV interrupt,
+      --    but needs to be handled in a similar manner by ee9.
+      case the_execution_mode is
+         when program_mode
+            | test_program_mode =>
+            raise operand_error with "%" & the_message;
+         when boot_mode =>
+            if the_CPU_state = program_state then
+               raise operand_error with "%" & the_message;
+            else
+               -- The Director itself has gone seriously wrong.
+               raise Director_operand_error with "%" & the_message;
+            end if;
+      end case;
+   end trap_invalid_operand;
+
+   procedure trap_operator_error (the_message : in String) is
+   begin
+      -- The program has failed for a reason, such as a misconfigured environment,
+      --    that is beyond its control and prevents further execution.
+      raise operator_error with "%" & the_message;
+   end trap_operator_error;
+
+   procedure trap_unimplemented_feature (the_message : in String) is
+   begin
+      -- The program has attempted to use something that ee9 does not (yet) support.
+      raise not_yet_implemented with "%" & the_message;
+   end trap_unimplemented_feature;
+
+   procedure trap_invalid_paper_tape (the_message : in String) is
+   begin
+      -- The paper tape file given to load or boot has defects.
+      raise invalid_paper_tape_file with "%" & the_message;
+   end trap_invalid_paper_tape;
+
+   procedure return_from_Director_to (new_IAR : in KDF9.syllable_address) is
    begin
       the_CPU_state := program_state;
       set_NIA_to(new_IAR);
-   end change_to_user_state_at;
+   end return_from_Director_to;
 
-   procedure increment_by_1 (the_link : in out KDF9.code_point) is
+   procedure increment_by_1 (the_link : in out KDF9.syllable_address) is
    begin
-      if the_link.syllable_number < 5 then
-         the_link.syllable_number := the_link.syllable_number + 1;
+      if the_link.syllable_index < 5 then
+         the_link.syllable_index := the_link.syllable_index + 1;
       else
-         the_link.syllable_number := 0;
-         the_link.word_number     := the_link.word_number + 1;
+         the_link.syllable_index := 0;
+         the_link.order_word_number     := the_link.order_word_number + 1;
       end if;
    end increment_by_1;
 
-   procedure increment_by_2 (the_link : in out KDF9.code_point) is
+   procedure increment_by_2 (the_link : in out KDF9.syllable_address) is
    begin
-      if the_link.syllable_number < 4 then
-         the_link.syllable_number := the_link.syllable_number + 2;
+      if the_link.syllable_index < 4 then
+         the_link.syllable_index := the_link.syllable_index + 2;
       else
-         the_link.syllable_number := the_link.syllable_number - 4;
-         the_link.word_number     := the_link.word_number + 1;
+         the_link.syllable_index := the_link.syllable_index - 4;
+         the_link.order_word_number     := the_link.order_word_number + 1;
       end if;
    end increment_by_2;
 
-   procedure increment_by_3 (the_link : in out KDF9.code_point) is
+   procedure increment_by_3 (the_link : in out KDF9.syllable_address) is
    begin
-      if the_link.syllable_number < 3 then
-         the_link.syllable_number := the_link.syllable_number + 3;
+      if the_link.syllable_index < 3 then
+         the_link.syllable_index := the_link.syllable_index + 3;
       else
-         the_link.syllable_number := the_link.syllable_number - 3;
-         the_link.word_number     := the_link.word_number + 1;
+         the_link.syllable_index := the_link.syllable_index - 3;
+         the_link.order_word_number     := the_link.order_word_number + 1;
       end if;
    end increment_by_3;
 
@@ -633,42 +653,51 @@ package body KDF9 is
    subtype syllable_cache_range is Natural range 0 .. 11;
 
    the_syllable_cache  : array (syllable_cache_range) of KDF9.syllable;
-   the_cache_index     : syllable_cache_range := 0;
-   the_cached_location : KDF9.code_location   := 0;
+   the_cache_index     : syllable_cache_range   := 0;
+   the_cached_location : KDF9.order_word_number := 0;
 
-   -- The amount by which the_CPU_time is increased, for a refill of the_syllable_cache.
-   the_instruction_fetch_time : constant := 8;  -- microseconds
+   function NIA
+   return KDF9.syllable_address
+   is (
+       if the_cache_index > 5 then
+          (the_cached_location, KDF9.syllable_index(the_cache_index-6))
+       else
+          (the_cached_location-1, KDF9.syllable_index(the_cache_index))
+      );
 
-   function NIA return KDF9.code_point is
+   function NIA_word_number
+   return KDF9.order_word_number
+   is (the_cached_location - (if the_cache_index > 5 then 0 else 1));
+
+   procedure trap_an_invalid_order_address (new_NIA : in KDF9.syllable_address)
+      with Inline => False;
+
+   procedure trap_an_invalid_order_address (new_NIA : in KDF9.syllable_address) is
    begin
-      if the_cache_index > 5 then
-         return (KDF9.syllable_code(the_cache_index-6), the_cached_location);
+      if new_NIA.syllable_index = 6 then
+         effect(RESET_interrupt, "syllable number = 6");
+      elsif new_NIA.syllable_index = 7 then
+         effect(RESET_interrupt, "syllable number = 7");
       else
-         return (KDF9.syllable_code(the_cache_index), the_cached_location-1);
+         effect(LIV_interrupt, "jump to 8191");  -- See EE Report K/GD y 82.
       end if;
-   end NIA;
+   end trap_an_invalid_order_address;
 
-   function NIA_word_number return KDF9.code_location is
+   procedure set_NIA_to (new_NIA : in KDF9.syllable_address) is
+      mask        : constant := 8#377#;
+      shift       : constant := 8#400#;
+      IWB0, IWB1  : KDF9.word;
    begin
-      if the_cache_index > 5 then
-         return the_cached_location;
-      else
-         return the_cached_location - 1;
-      end if;
-   end NIA_word_number;
-
-   procedure set_NIA_to (new_NIA : in KDF9.code_point) is
-      mask  : constant := 8#377#;
-      shift : constant := 8#400#;
-      IWB0  : KDF9.word := fetch_word(KDF9.address(new_NIA.word_number) + 0);
-      IWB1  : KDF9.word := fetch_word(KDF9.address(new_NIA.word_number) + 1);
-   begin
-      if new_NIA.syllable_number > 5 then
-         raise RESET_trap with "syllable number > 5";
+      if new_NIA.order_word_number = 8191 or else
+            new_NIA.syllable_index > 5       then
+         trap_an_invalid_order_address(new_NIA);
       end if;
 
-      the_cache_index := syllable_cache_range(new_NIA.syllable_number);
-      the_cached_location := new_NIA.word_number + 1;
+      IWB0 := fetch_word(KDF9.address(new_NIA.order_word_number) + 0);
+      IWB1 := fetch_word(KDF9.address(new_NIA.order_word_number) + 1);
+
+      the_cache_index := syllable_cache_range(new_NIA.syllable_index);
+      the_cached_location := new_NIA.order_word_number + 1;
 
       the_syllable_cache(5+0) := KDF9.syllable(IWB0 and mask);
       IWB0 := IWB0 / shift;
@@ -702,14 +731,7 @@ package body KDF9 is
 
    procedure set_IWB0_and_IWB1_for_a_JCqNZS_loop is
    begin
-      if CIA.syllable_number = 5 then
-         -- KDF9 did not actually detect this error, and the JCqNZS instruction often worked,
-         --    unless broken-into by an interrupt, which returned to the word following that
-         --       containing the first syllable of the JCqNZS instruction.
-         -- I see no case for reproducing this behaviour.
-         trap_invalid_instruction ("JCqNZS instruction at syllable 5");
-      end if;
-      set_NIA_to((word_number => CIA.word_number-1, syllable_number => 0));
+      set_NIA_to((order_word_number => CIA.order_word_number-1, syllable_index => 0));
       fetching_normally := False;
    end set_IWB0_and_IWB1_for_a_JCqNZS_loop;
 
@@ -720,19 +742,19 @@ package body KDF9 is
 
    procedure continue_after_JCqNZS is
    begin
-      if CIA.syllable_number = 4 and the_cached_location = CIA.word_number then
-         set_NIA_to((word_number => CIA.word_number+1, syllable_number => 0));
-         -- Part-overlapped order-word fetch: can happen only once per instruction,
-         --    and only before the instruction is executed, so no need to ADD to the_CPU_delta.
-         -- The formula implements a small pseudo-random variation.
-         the_CPU_delta := the_instruction_fetch_time - (the_elapsed_time and 2) / 2;
+      if CIA.syllable_index = 4 and the_cached_location = CIA.order_word_number then
+         set_NIA_to((order_word_number => CIA.order_word_number+1, syllable_index => 0));
       end if;
       fetching_normally := True;
    end continue_after_JCqNZS;
 
    function next_order_syllable
-   return KDF9.syllable;
-   pragma Inline(next_order_syllable);
+   return KDF9.syllable
+      with Inline;
+
+   -- The amount by which the_CPU_time is increased, for a refill of both Instruction Word Buffers.
+
+   the_IWB01_reload_time : constant KDF9.us := 7;  -- microseconds
 
    function next_order_syllable
    return KDF9.syllable is
@@ -742,49 +764,53 @@ package body KDF9 is
       if the_cache_index < 11 then
          the_cache_index := the_cache_index + 1;
       elsif fetching_normally then
-         set_NIA_to((word_number => CIA.word_number+1, syllable_number => 0));
+         set_NIA_to((order_word_number => CIA.order_word_number+1, syllable_index => 0));
          -- Part-overlapped order-word fetch: can happen only once per instruction,
-         --    and only before the instruction is executed, so no need to add to the_CPU_delta.
-         -- The formula implements a small pseudo-random variation.
-         the_CPU_delta := the_instruction_fetch_time - (the_elapsed_time and 2) / 2;
+         --    and only before the instruction is executed, so no need to ADD to the_CPU_delta.
+         if (CIA.order_word_number and 15) < 10 then
+            -- The fudge factor applied here gives the Whetstone Benchmark its historical run time.
+            the_CPU_delta := the_IWB01_reload_time + 1;
+         else
+            the_CPU_delta := the_IWB01_reload_time;
+         end if;
       else
          go_back_to_the_start_of_IWB0;
       end if;
       return the_next_syllable;
    end next_order_syllable;
 
-   procedure decode_syllable_0 (decoded : in out KDF9.decoded_order);
-   pragma Inline(decode_syllable_0);
+   procedure decode_syllable_0 (decoded : in out KDF9.decoded_order)
+      with Inline;
 
-   procedure decode_syllable_1 (decoded : in out KDF9.decoded_order);
-   pragma Inline(decode_syllable_1);
+   procedure decode_syllable_1 (decoded : in out KDF9.decoded_order)
+      with Inline;
 
-   procedure decode_a_jump_order (decoded : in out KDF9.decoded_order);
-   pragma Inline(decode_a_jump_order);
+   procedure decode_a_jump_order (decoded : in out KDF9.decoded_order)
+      with Inline;
 
-   procedure decode_a_store_access_order (decoded : in out KDF9.decoded_order);
-   pragma Inline(decode_a_store_access_order);
+   procedure decode_a_store_access_order (decoded : in out KDF9.decoded_order)
+      with Inline;
 
-   procedure decode_a_set_literal_order (decoded : in out KDF9.decoded_order);
-   pragma Inline(decode_a_set_literal_order);
+   procedure decode_a_set_literal_order (decoded : in out KDF9.decoded_order)
+      with Inline;
 
    procedure decode_syllable_0 (decoded : in out KDF9.decoded_order) is
    begin
-      decoded.syndrome := decoded.order.syllable_0 and 8#77#;
+      decoded.compressed_opcode := decoded.order.syllable_0 and 8#77#;
       decoded.kind := KDF9.INS_kind(decoded.order.syllable_0 / 2**6);
    end decode_syllable_0;
 
    procedure process_syllable_0_of_INS is
    begin
       if the_cache_index > 5 then
-         CIA.word_number := the_cached_location;
-         CIA.syllable_number := KDF9.syllable_code(the_cache_index-6);
+         CIA.order_word_number := the_cached_location;
+         CIA.syllable_index   := KDF9.syllable_index(the_cache_index-6);
       else
-         CIA.word_number := the_cached_location - 1;
-         CIA.syllable_number := KDF9.syllable_code(the_cache_index);
+         CIA.order_word_number := the_cached_location - 1;
+         CIA.syllable_index   := KDF9.syllable_index(the_cache_index);
       end if;
       INS.order.syllable_0 := next_order_syllable;
-      INS.syndrome := INS.order.syllable_0 and 8#77#;
+      INS.compressed_opcode := INS.order.syllable_0 and 8#77#;
       INS.kind := KDF9.INS_kind(INS.order.syllable_0 / 2**6);
    end process_syllable_0_of_INS;
 
@@ -808,22 +834,24 @@ package body KDF9 is
 
    procedure decode_a_jump_order (decoded : in out KDF9.decoded_order) is
    begin
-      decoded.target.syllable_number := KDF9.syllable_code(decoded.order.syllable_0 and syllable_nr_mask);
-      decoded.target.word_number := KDF9.code_location(decoded.order.syllable_2)
-                           + KDF9.code_location(decoded.Qk) * 2**8
-                           + KDF9.code_location(decoded.order.syllable_0 and D4_mask) * 2**9;
-      if (decoded.syndrome and D2_mask) /= 0 then -- not JrCq ...
-         decoded.syndrome := decoded.syndrome and D0_thru_3_mask;
+      decoded.target.syllable_index
+         := KDF9.syllable_index(decoded.order.syllable_0 and syllable_nr_mask);
+      decoded.target.order_word_number
+         := KDF9.order_word_number(decoded.order.syllable_2)
+          + KDF9.order_word_number(decoded.Qk) * 2**8
+          + KDF9.order_word_number(decoded.order.syllable_0 and D4_mask) * 2**9;
+      if (decoded.compressed_opcode and D2_mask) /= 0 then -- not JrCq ...
+         decoded.compressed_opcode := decoded.compressed_opcode and D0_thru_3_mask;
       else
-         decoded.syndrome := (decoded.syndrome and D0_thru_3_mask) or KDF9.syllable(decoded.Qq);
+         decoded.compressed_opcode := (decoded.compressed_opcode and D0_thru_3_mask) or KDF9.syllable(decoded.Qq);
       end if;
-      if decoded.syndrome = EXIT_9 then
+      if decoded.compressed_opcode = EXIT_n then
          -- The syllable part of EXIT is actually a halfword offset,
          --    so convert it to an actual syllable number.
-         if decoded.target.syllable_number = 2 then
-            decoded.target.syllable_number := 0;
+         if decoded.target.syllable_index = 2 then
+            decoded.target.syllable_index := 0;
          else
-            decoded.target.syllable_number := 3;
+            decoded.target.syllable_index := 3;
          end if;
       end if;
    end decode_a_jump_order;
@@ -836,32 +864,39 @@ package body KDF9 is
    end process_syllables_1_and_2_of_a_jump_order;
 
    D5_thru_7_mask : constant := 2#111#;
+   D5_and_7_mask  : constant := 2#101#;
    D2_thru_4_mask : constant := 2#111000#;
 
    procedure decode_a_store_access_order (decoded : in out KDF9.decoded_order) is
    begin
       decoded.operand := KDF9.Q_part(decoded.order.syllable_2) + KDF9.Q_part(decoded.Qk)*2**8
                        + KDF9.Q_part((decoded.order.syllable_0 and D2_thru_4_mask)) * 2**9;
-      decoded.syndrome := decoded.syndrome and D5_thru_7_mask;
+      decoded.compressed_opcode := decoded.compressed_opcode and D5_thru_7_mask;
    end decode_a_store_access_order;
 
    procedure decode_a_set_literal_order (decoded : in out KDF9.decoded_order) is
    begin
       decoded.operand := KDF9.Q_part(decoded.order.syllable_2)
                        + KDF9.Q_part(decoded.order.syllable_1)*2**8;
-      decoded.syndrome := 2#100#;
+      decoded.compressed_opcode := 2#100#;
    end decode_a_set_literal_order;
 
    procedure process_syllables_1_and_2_of_a_data_access_order is
    begin
-      if (INS.syndrome and D5_thru_7_mask) < 2#100# then
+      if (INS.compressed_opcode and D5_thru_7_mask) < SET then
          process_syllable_1_of_INS;
          INS.order.syllable_2 := next_order_syllable;
          decode_a_store_access_order(INS);
-      else  -- SET n and some invalid opcodes (to be discarded later)
+      elsif (INS.compressed_opcode and D5_and_7_mask) = SET then
+         -- SET n
          INS.order.syllable_1 := next_order_syllable;
          INS.order.syllable_2 := next_order_syllable;
          decode_a_set_literal_order(INS);
+      else
+         INS.order.syllable_1 := next_order_syllable;
+         INS.order.syllable_2 := next_order_syllable;
+         decode_a_set_literal_order(INS);
+         INS.compressed_opcode := 7;  -- an invalid compression.
       end if;
    end process_syllables_1_and_2_of_a_data_access_order;
 
@@ -894,20 +929,25 @@ package body KDF9 is
             decode_syllable_1(the_order);
             decode_a_jump_order(the_order);
          when data_access_order =>
-            if (the_order.syndrome and D5_thru_7_mask) < 2#100# then
+            if (the_order.compressed_opcode and D5_thru_7_mask) < SET then
                decode_syllable_1(the_order);
                decode_a_store_access_order(the_order);
-            else  -- SET n and some invalid opcodes (to be discarded later)
+            elsif (INS.compressed_opcode and D5_and_7_mask) = SET then
+               -- SET n
                decode_a_set_literal_order(the_order);
+            else
+               decode_a_set_literal_order(the_order);
+               INS.compressed_opcode := 7;  -- an invalid compression.
             end if;
       end case;
    end decode;
 
    -- the_order_at_NIA gets three syllables starting at [NIA].  It is FOR DIAGNOSTIC USE ONLY!
-   -- It does NOT update the CPU time properly and MUST NOT be used inside an instruxtion cycle.
+   -- It does NOT update the CPU time properly and MUST NOT be used inside an instruction cycle.
+
    function the_order_at_NIA
    return KDF9.syllable_group is
-      saved_NIA : constant KDF9.code_point := NIA;
+      saved_NIA : constant KDF9.syllable_address := NIA;
       result    : KDF9.syllable_group;
    begin
       result.syllable_0 := next_order_syllable;
@@ -918,7 +958,8 @@ package body KDF9 is
    end the_order_at_NIA;
 
    -- This is the initial jump from the top halfword of E0 just after loading.
-   E0U : KDF9.word := 0;  -- N.B. only the upper halfword is used.
+
+   E0U : KDF9.word := 0;  -- N.B. the lower halfword is used for option flags.
 
    procedure save_the_initial_jump is
    begin
@@ -931,36 +972,33 @@ package body KDF9 is
    end restore_the_initial_jump;
 
    function the_initial_jump_was_corrupted
-   return Boolean is
-   begin
-      return E0U /= fetch_halfword(0, 0);
-   end the_initial_jump_was_corrupted;
+   return Boolean
+   is (E0U /= fetch_halfword(0, 0));
 
    function is_an_invalid_order (decoded : KDF9.decoded_order)
-   return Boolean is
-   begin
-      return (decoded.kind = normal_jump_order and decoded.target.syllable_number > 5)
-         or else decoded.order.syllable_0 = 8#000#
-            or else decoded.order.syllable_0 = 8#006#
-               or else decoded.order.syllable_0 = 8#040#
-                  or else decoded.order.syllable_0 = 8#046#
-                     or else decoded.order.syllable_0 = 8#055#
-                        or else decoded.order.syllable_0 = 8#073#
-                           or else decoded.order.syllable_0 = 8#076#
-                              or else decoded.order.syllable_0 = 8#150#;
-   end is_an_invalid_order;
+   return Boolean
+   is (
+       (decoded.kind = data_access_order and then (decoded.order.syllable_0 and 2#101#) > 2#100#)
+         or else (decoded.kind = normal_jump_order and decoded.target.syllable_index > 5)
+            -- 0 is now treated as a valid DUMMY0 order for KAlgol
+               or else decoded.order.syllable_0 = 8#006#
+                  or else decoded.order.syllable_0 = 8#040#
+                     or else decoded.order.syllable_0 = 8#046#
+                        or else decoded.order.syllable_0 = 8#055#
+                           or else decoded.order.syllable_0 = 8#073#
+                              or else decoded.order.syllable_0 = 8#076#
+                                 or else decoded.order.syllable_0 = 8#150#
+      );
 
    the_signature_hash : KDF9.word := 0;
 
    function the_digital_signature
-   return KDF9.word is
-   begin
-      return the_signature_hash;
-   end the_digital_signature;
+   return KDF9.word
+   is (the_signature_hash);
 
    function visible_state_hash
-   return KDF9.word;
-   pragma Inline(visible_state_hash);
+   return KDF9.word
+      with Inline;
 
    function visible_state_hash
    return KDF9.word is

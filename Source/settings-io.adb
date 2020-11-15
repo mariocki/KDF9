@@ -1,9 +1,9 @@
--- settings-io.ads
+-- settings-IO.ads
 --
 -- Settings-reader I/O support.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,15 +16,14 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with Ada.Characters.Latin_1;
+--
 with file_interfacing;
 with KDF9;
-with Latin_1;
 
-use  Latin_1;
+use  Ada.Characters.Latin_1;
 
 package body settings.IO is
-
-   pragma Unsuppress(All_Checks);
 
    procedure open_options_file (file : in out File_Type; name : in String) is
    begin
@@ -75,7 +74,7 @@ package body settings.IO is
          look_ahead(file, flag, end_line);
          if end_line                      or else
                flag = comment_flag_character then
-            skip_line(file);
+            Skip_Line(file);
             line_number := line_number + 1;
          else
             exit;
@@ -142,6 +141,9 @@ package body settings.IO is
       value := 0;
       ensure_not_at_end_of_line(file);
       get(file, next_char);
+      if next_char not in '0' .. '9' then
+         raise Program_Error with "get_decimal " & next_char;
+      end if;
       loop
          if next_char in '0' .. '9' then
             value := value*10 + KDF9.word(Character'Pos(next_char)-digit_offset);
@@ -157,7 +159,7 @@ package body settings.IO is
             if last_char = '_' or place = 0 then
                raise Data_Error;
             end if;
-            exit;
+      exit;
          end if;
          last_char := next_char;
          look_ahead(file, next_char, end_line);
@@ -168,24 +170,38 @@ package body settings.IO is
             if last_char = '_' or place = 0 then
                raise Data_Error;
             end if;
-            exit;
+      exit;
          end if;
       end loop;
    end get_decimal;
 
-   procedure get_address (file : in File_Type; value : out KDF9.word) is
+   procedure get_word (file : in File_Type; value : out KDF9.word) is
       next_char : Character;
       end_line  : Boolean;
-      pragma Warnings(Off, end_line);
    begin
       ensure_not_at_end_of_line(file);
       look_ahead(file, next_char, end_line);
+      pragma Unreferenced(end_line);
       if next_char = '#' then
          get_octal(file, value);
       else
          get_decimal(file, value);
       end if;
-   end get_address;
+   end get_word;
+
+   procedure get_char (file : in File_Type; value : out Character) is
+      end_line : Boolean;
+      char     : Character;
+   begin
+      ensure_not_at_end_of_line(file);
+      look_ahead(file, char, end_line);
+      if end_line then
+         raise Data_Error;
+      end if;
+      if char /= ' ' then
+         get(file, value);
+      end if;
+   end get_char;
 
 end settings.IO;
 

@@ -1,0 +1,143 @@
+# This file is part of ee9 (V5), the GNU Ada emulator of the English Electric KDF9.
+# Copyright (C) 2020, W. Findlay; all rights reserved.
+#
+# The ee9 system is free software; you can redistribute it and/or
+# modify it under terms of the GNU General Public License as published
+# by the Free Software Foundation; either version 3, or (at your option)
+# any later version. This program is distributed in the hope that it
+# will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details. You should have
+# received a copy of the GNU General Public License distributed with
+# this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+
+ROOT=..
+A=${ROOT}/Adjuncts
+B=${ROOT}/Build
+S=${ROOT}/Source
+T=${ROOT}/Testing
+U=${T}/Assembly
+X=${T}/Binary
+K=${T}/Kidsgrove
+
+echo
+echo Tidying ${U} and ${X}.
+chmod 644 ${U}/* ${X}/*
+for f in ${K}/*.a60
+do
+  g=`basename $f .a60`
+  rm -f ${U}/${g}.k3 ${U}/${g}-listing.txt ${X}/${g}
+done
+
+echo
+echo Tidying ${A}.
+chmod 644 ${A}/*
+ls -la ${A}
+
+echo
+echo Tidying ${B}.
+rm -f  ${B}/b\~*.* ${B}/*.ali ${B}/*.o ${B}/*.su ${B}/._*
+chmod 755 ${B}/mk9 ${B}/tidy ${B}/pk9 ${B}/zipup
+ls -la ${B}
+
+echo
+echo Tidying ${T}.
+rm -rf ${T}/._*
+> ${T}/CP0
+> ${T}/CP1
+> ${T}/CR0
+> ${T}/CR1
+> ${T}/DR0
+> ${T}/FD0
+> ${T}/FW0
+> ${T}/FW0_copy
+> ${T}/GP0
+> ${T}/LP0
+> ${T}/LP1
+> ${T}/MT0
+> ${T}/MT1
+> ${T}/MT2
+> ${T}/MT3
+> ${T}/MT4
+> ${T}/MT5
+> ${T}/MT6
+> ${T}/MT7
+> ${T}/SI0
+> ${T}/SI1
+> ${T}/ST0
+> ${T}/ST1
+> ${T}/TP0
+> ${T}/TP1
+> ${T}/TR0
+> ${T}/TR1
+> ${T}/KDF9_log.txt
+> ${T}/ee9_test_case_log.txt
+> ${T}/kids_test_log.txt
+> ${T}/mt_test_log.txt
+> ${T}/settings_1.txt
+> ${T}/settings_2.txt
+> ${T}/trace.txt
+> ${T}/whet_test_log.txt
+chmod 444 ${T}/FW0_for_*
+chmod 644 ${T}/??[01234567]
+chmod 644 ${T}/Assembly/*
+chmod 644 ${T}/Binary/*
+chmod 644 ${T}/Data/*
+chmod 644 ${T}/Kidsgrove/*
+chmod 644 ${T}/Whetstone/*
+chmod 644 ${T}/ee9_test_case_log.txt ${T}/trace.txt ${T}/KDF9_log.txt ${T}/*_test_log.txt
+chmod 644 ${T}/settings_1.txt ${T}/settings_2.txt
+chmod 755 ${T}/Assembly
+chmod 755 ${T}/Binary
+chmod 755 ${T}/Data
+chmod 755 ${T}/Kidsgrove
+chmod 755 ${T}/Whetstone
+chmod 755 ${T}/a2b
+chmod 755 ${T}/crnine
+chmod 755 ${T}/ee9
+chmod 755 ${T}/ee9_reg_test
+chmod 755 ${T}/ee9_test_case
+chmod 755 ${T}/ee9_test_run
+chmod 755 ${T}/kal3
+chmod 755 ${T}/kalgol
+chmod 755 ${T}/kids
+chmod 755 ${T}/mkchan
+chmod 755 ${T}/mtp
+chmod 755 ${T}/neat
+chmod 755 ${T}/nine
+chmod 755 ${T}/nine_test
+chmod 755 ${T}/peep
+chmod 755 ${T}/plt
+chmod 755 ${T}/ports
+chmod 755 ${T}/rlt
+chmod 755 ${T}/run_cr_tests
+chmod 755 ${T}/run_dr_tests
+chmod 755 ${T}/run_fd_tests
+chmod 755 ${T}/run_kids_tests
+chmod 755 ${T}/run_liv_tests
+chmod 755 ${T}/run_mt_tests
+chmod 755 ${T}/run_nouv_tests
+chmod 755 ${T}/run_si_tests
+chmod 755 ${T}/run_whet_tests
+chmod 755 ${T}/stone
+chmod 755 ${T}/strop
+chmod 755 ${T}/sttl
+chmod 755 ${T}/tsd
+chmod 755 ${T}/tsdnine
+chmod 755 ${T}/ucc
+chmod 755 ${T}/whet
+ls -la ${T}
+
+echo
+echo Tidying ${S}.
+rm -rf ${S}/._*
+chmod 644 ${S}/*
+ls -la ${S}
+
+echo
+echo Tidying ${T}/Assembly.
+rm -rf ${T}/._*
+chmod 644 ${T}/Assembly/*
+rm -rf ${T}/Assembly/*-listing.txt
+ls -la ${T}/Assembly
+

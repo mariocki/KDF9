@@ -1,0 +1,22 @@
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
+WHERE=${KIDSGROVE:-Kidsgrove}
+
+trap "rm -f  ${WHERE}/chan6.pt ptp.bin mt.out ${WHERE}/punch.txt;
+      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt;"   \
+      0 1 2 3
+
+if [ -s settings_for_kalgol.txt ]
+then
+   cp settings_for_kalgol.txt settings_1.txt
+fi
+
+kalgol $1
+
+if [ -s ${BINARY}/$1 ]
+then
+   cp settings_2.txt settings_1.txt
+   nine $1 $2 $3 $4
+else
+   exit 1
+fi

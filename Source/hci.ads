@@ -8,8 +8,8 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -31,8 +31,6 @@ use  logging.file;
 use  logging.panel;
 
 package HCI is
-
-   pragma Unsuppress(All_Checks);
 
    file_logger  : aliased logging.file.output;
    panel_logger : aliased logging.panel.display;
@@ -69,12 +67,10 @@ package HCI is
 
    procedure log_message (message : in String);
 
-   procedure log_error_message (message : in String);
-
    procedure log_title (message : in String);
 
    procedure log_ee9_status (message  : in String;
-                             skip     : in Natural := 1;
+                             skip     : in Natural := 0;
                              complete : in Boolean := True;
                              iff      : in Boolean := True);
 
@@ -84,10 +80,7 @@ package HCI is
 
    procedure show_line (message : in String);
 
-   procedure respond_to_prompt (prompt   : in String;
-                                response : out Character);
-
-   procedure continue_when_GO_is_pressed (caption  : in String := "");
+   procedure interact (reason : in String := "Mode");
 
    procedure open  (logfile_name : in String);
 

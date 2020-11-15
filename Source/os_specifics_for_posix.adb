@@ -1,10 +1,10 @@
--- os_specifics.adb
+-- OS_specifics.adb
 --
--- Special operations for the console streams.
--- This is the Linux, OS X and UNIX version.
+-- Specific feature values and operation for the console terminal streams.
+-- This is the Linux, macOS and UNIX version.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,54 +17,20 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Latin_1;
-with POSIX;
-
-use  Latin_1;
-use  POSIX;
-
 package body OS_specifics is
 
-   procedure make_transparent (fd : in Integer) is
-      pragma Unreferenced(fd);
-   begin
-      null;  -- Real POSIX systems are already transparent!
-   end make_transparent;
-
-   function the_terminal_is_ANSI_compatible
-   return Boolean
-   renames True;
-
-   red_font_code   : constant String := ESC & "[1;31m";
-   black_font_code : constant String := ESC & "[22m" & ESC & "[39m";
-
-   procedure set_text_colour_to_red (the_flexowriter_output : in out IO.stream) is
-   begin
-      put_bytes(red_font_code, the_flexowriter_output);
-      flush(the_flexowriter_output);
-   end set_text_colour_to_red;
-
-   procedure set_text_colour_to_black (the_flexowriter_output : in out IO.stream) is
-   begin
-      put_bytes(black_font_code, the_flexowriter_output);
-      flush(the_flexowriter_output);
-   end set_text_colour_to_black;
+   procedure make_transparent (fd : in Integer) is null;
 
    function EOL
-   return String is
-   begin
-      return (1 => LF);
-   end EOL;
+   return String
+   is (1 => Character'Val(16#0A#));
 
-   procedure open_ui is
-      ui_in_name  : constant String := "/dev/tty";
-      ui_out_name : constant String := "/dev/tty";
-   begin
-      ui_in_fd := open(ui_in_name, read_mode);
-      verify(ui_in_fd, ui_in_name);
-      ui_out_fd := open(ui_out_name, write_mode);
-      verify(ui_out_fd, ui_out_name);
-      ui_is_open := True;
-   end open_ui;
+   function UI_in_name
+   return String
+   is ("/dev/tty");
+
+   function UI_out_name
+   return String
+   is ("/dev/tty");
 
 end OS_specifics;

@@ -1,60 +1,27 @@
-V99; W0;
+V90; W0;
 RESTART; J999; J999;
 PROGRAM;
-   V1 = B2001010101010101;
-   V2 = B1010101010101010;
-   V3 = B0012121212121212;
-   V4 = B0404040404040404;
+   V1 = B20;        (plotter pen-down command);
+   V2 = Q0/AV1/AV1; (to plot data);
+   V3 = Q0/AV33/AV33; (to read data - not in same lockout group as output area);
+   V4 = B02;        (TR device-type code);
+   V5 = B20;        (GP device-type code);
 
-   V5 = B6000000000000000;
-   V7 = B1414141414141414;
-   V8 = B4000000000000000;
-   V9 = B0303030303030303;
+   V4; SET 5; OUT;  (claim TR);
+   V3; =Q3; =C3;    (set up Q3 for TR input);
+   V5; SET 5; OUT;  (claim GP);
+   V2; =Q2; =C2;    (set up Q2 for GP output);
 
-   V33 = Q50/1/0;
-   V32 = Q0/AV1/AV1;   (plot data);
+   POCQ2;           (pen down);
 
-
-   SET B20; SET 5; OUT; =V6; (claim the plotter);
-   V32; =Q12; V6; =C12; Q12; =V32;
-
-   V33; =Q11;
 *1;
-   POAQ12; DC11; *J1C11NZS;
-   ZERO; OUT;
-
-   V5; V1; NEV; =V1; (convert pen down to pen up);
-
-   V33; =Q11;
-*2;
-   POAQ12; DC11; *J2C11NZS;
-
-   V5; V1; NEV; =V1; (convert pen up back to pen down);
-
-   V33; =Q11;
-*3;
-   POAQ12; DC11; *J3C11NZS;
-
-   V4; V7; NEV; =V4; (convert E to W);
-   V2; V9; NEV; =V2; (convert S to N);
-
-   V33; =Q11;
-*4;
-   POAQ12; DC11; *J4C11NZS;
-
-   V5; V1; NEV; =V1; (convert pen down to pen up);
-
-   V33; =Q11;
-*5;
-   POAQ12; DC11; *J5C11NZS;
-
-   V5; V1; NEV; =V1; (convert pen up back to pen down);
-
-   V33; =Q11;
-*6;
-   POAQ12; DC11; *J6C11NZS;
+   PICQ3;           (read one plotting command from TR);
+   PARQ3; J999TR;   (exit loop to 999 at EOF);
+   V33; =V1;
+   POCQ2;           (write one plotting command to GP);
+   J1;
 
 999;
-   ZERO; OUT;
+   ZERO; OUT;       (end run);
 FINISH;
 |

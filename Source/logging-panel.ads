@@ -2,8 +2,8 @@
 --
 -- Provide logging output to an interactive terminal/control panel.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,8 +17,6 @@
 --
 
 package logging.panel is
-
-   pragma Unsuppress(All_Checks);
 
    type display is new logging.output with private;
 
@@ -58,13 +56,7 @@ package logging.panel is
    procedure show_line (logger : in out panel.display; message : in String := "");
 
    not overriding
-   procedure respond_to_prompt (logger   : in out panel.display;
-                                prompt   : in String;
-                                response : out Character);
-
-   not overriding
-   procedure continue_when_GO_is_pressed (logger  : in out panel.display;
-                                          caption : in String := "");
+   procedure interact (logger : in out panel.display; reason : in String := "Mode");
 
    overriding
    procedure open (logger : in out panel.display; logfile_name : in String) is null;

@@ -1,63 +1,116 @@
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
+
+prog=$1
+data=$2
+
+
 cp FW0 FW0_copy
 
-trap "cp FW0_copy FW0; exit 2" SIGQUIT SIGKILL SIGINT
-
-HERE=`pwd`
-
-program=`basename "$1" ".kdf9"`.kdf9
-if [ ! -f Binary/"$program" ]
+if [ x"${prog}"x = xx ]
 then
-   echo `basename "$0"`: there is no program named "$program" in the Binary folder!
+   echo You have not named a binary program to be run.
+   echo
    exit 1
 fi
-if /bin/sh ./lud "$2" | grep "data file"
+
+program=`basename "${prog}"`
+program=${BINARY}/"$program"
+if [ ! -r "$program" ]
 then
+   echo The object code file "$program" is absent or unreadable.
    echo
    exit 2
 fi
 
-> FW0
-
-mode=-d$3
-miscellany=-m$4
-if   [ "$mode" = -d ]
+if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
-        $HERE/ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
-elif [ "$3" = - ]
-then
-        $HERE/ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
-elif [ "$mode" = -df ]
-then
-   time $HERE/ee9 -sp -df "$miscellany" <Binary/"$program"  >TP0;
+   >TR0
 else
-        $HERE/ee9 -sp "$mode" "$miscellany"  <Binary/"$program"  >TP0;
-fi
-cp FW0 FW0_copy
-
-if [ -s CP0 ]
-then
-   echo
-   echo CP0:
-   echo ===
-   more CP0
-   echo ===
+   datatxt=${DATA}/`basename "${data}" ".txt"`.txt
+   if [ -r "$datatxt" ]
+   then
+      cp "$datatxt" TR1
+   else
+      echo The file "$datatxt" is absent or unreadable.
+      exit 3
+   fi
 fi
 
-if [ -s TP0 ]
+if [ x"$3"x = xx -o x"$3"x = x-x ]
 then
-   echo
-   echo TP0:
-   echo ===
-   more TP0
-   echo ===
+   mode=""
+else
+   mode="-d$3"
+fi
+if [ x"$4"x = xx -o x"$4"x = x-x ]
+then
+   miscellany=""
+else
+   miscellany="-m$4"
+fi
+if [ x"$5"x = xx -o x"$5"x = x-x ]
+then
+   TRmode="-TRll"
+else
+   TRmode="-TR$5"
+fi
+if [ x"$6"x = xx -o x"$6"x = x-x ]
+then
+   TPmode="-TPll"
+else
+   TPmode="-TP$6"
+fi
+if [ x"$7"x = xx -o x"$7"x = x-x ]
+then
+   state=""
+else
+   state="-s$7"
 fi
 
-if [ -s LP0 ]
+if [ "$mode" = -df ]
 then
-   echo
-   echo LP0:
-   echo ===
-   more LP0
-   echo ===
+   time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+else
+        ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
-exit 0
+
+case $4$8 in
+   *z*)
+      ;;
+   *-*)
+      ;;
+   *)
+      if [ -s CP0 ]
+      then
+         echo
+         echo CP0:
+         echo ===
+         more CP0
+         echo ===
+      fi
+
+      if [ -s TP0 ]
+      then
+         case $TPmode in
+            -TPk*)
+               ;;
+            -TPl*)
+               echo
+               echo TP0:
+               echo ===
+               more TP0
+               echo ===
+               ;;
+         esac
+      fi
+
+      if [ -s LP0 ]
+      then
+         echo
+         echo LP0:
+         echo ===
+         more LP0
+         echo ===
+      fi
+esac

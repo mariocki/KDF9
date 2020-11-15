@@ -3,8 +3,8 @@
 -- Provide operations supporting replicated output
 --    output to a list of logging interfaces.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -20,8 +20,6 @@
 -- generic
 --    max_logger_list_size : in Positive;
 package body generic_logger is
-
-   pragma Unsuppress(All_Checks);
 
    not overriding
    procedure set_logger_list (logger : in out replicator; list : in distribution_list) is

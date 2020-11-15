@@ -2,8 +2,8 @@
 --
 -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,36 +16,38 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with postscript; pragma Elaborate_All(postscript);
+with formatting;
+with KDF9;
+with postscript;
 
+use  formatting;
+use  KDF9;
 use  postscript;
 
 package body plotter is
 
-   pragma Unsuppress(All_Checks);
-
-   -- The plotter made equal movements in the x and y directions, in quanta of 0.005 inches.
-   -- Each command moves the plotting position by at most 1 quantum,
+   -- The plotter made equal movements in the x and y directions, in steps of 0.005 inches.
+   -- Each command moves the plotting position by at most 1 step,
    --   in either the positive or negative direction of each axis.
-
-   subtype step_change is Integer range -1 .. +1;
 
    type step is
       record
-         dx, dy : step_change;
+         dx, dy : Integer range -1 .. +1;
       end record;
 
+   null_step : constant plotter.step := (0, 0);
+
+   function image (s : plotter.step)
+   return String
+   is ("<" & trimmed(s.dx'Image) & ", " & trimmed(s.dy'Image) & ">");
+
    function "+" (p : postscript.point; s : plotter.step)
-   return postscript.point is
-   begin
-      return (p.x + s.dx, p.y + s.dy);
-   end "+";
+   return postscript.point
+   is ((p.x + s.dx, p.y + s.dy));
 
    function "-" (p, q : postscript.point)
-   return plotter.step is
-   begin
-      return (p.x - q.x, p.y - q.y);  -- Consecutive points are at most one unit apart.
-   end "-";
+   return plotter.step
+   is ((p.x - q.x, p.y - q.y));
 
    -- The plotter drew on a roll of paper 29.5 inches wide and 120 feet long.
    -- 29.5" is   5900 steps at 200 steps per inch = 59 * 100
@@ -60,50 +62,28 @@ package body plotter is
    --    a change of direction, a pen lift, or the need to close the plotter file.
    -- On these events, any vector thus defined is drawn via a single PostScript command.
 
-   -- last_step retains the direction of the previous plotter step.
-   last_step : plotter.step := (0, 0);
+   the_origin      : constant postscript.point := (0, 0);
 
    plot_position,
-   start_position : postscript.point := (+0, +0);
+   start_position  : postscript.point := the_origin;
+
+   -- last_step retains the direction of the previous plotter step.
+   last_step       : plotter.step := null_step;
 
    the_pen_is_down : Boolean := False;
 
-   procedure close_any_open_vector is
+   procedure notify_invalid_movement (this  : in postscript.point;
+                                      after : in plotter.step)
+      with Inline => False, No_Return;
+
+   procedure notify_invalid_movement (this  : in postscript.point;
+                                      after : in plotter.step) is
    begin
-      if the_pen_is_down                and then
-            start_position /= plot_position then
-         draw_a_PostScript_vector(start_position, plot_position);
-         start_position := plot_position;
-      end if;
-   end close_any_open_vector;
-
-   procedure draw_to (p : in postscript.point);
-   pragma Inline(draw_to);
-
-   procedure draw_to (p : in postscript.point) is
-   begin
-      if (plot_position - p) = last_step then
-         -- p is colinear with the previous step, so merely extend the vector to p.
-         plot_position := p;
-      else
-         -- Draw the whole vector and start a new one.
-         draw_a_PostScript_vector(start_position, plot_position);
-         last_step := plot_position - p;
-         start_position := plot_position;
-         plot_position := p;
-      end if;
-   end draw_to;
-
-   procedure jump_to (p : in postscript.point);
-   pragma Inline(jump_to);
-
-   procedure jump_to (p : in postscript.point) is
-   begin
-      -- Posit a new vector starting at p.
-      last_step := (0, 0);
-      plot_position := p;
-      start_position := p;
-   end;
+      trap_invalid_operand("impossible movement for plotter from "
+                       & image(this)
+                       & " by "
+                       & image(after));
+   end notify_invalid_movement;
 
    procedure ensure_the_validity_of (this  : in postscript.point;
                                      after : in plotter.step) is
@@ -112,62 +92,86 @@ package body plotter is
             this.y + after.dy < 0                  or else
                this.x + after.dx > plot_limit.x    or else
                   this.y + after.dy > plot_limit.y    then
-         raise plotting_error
-            with "movement to an impossible position from ("
-                & this.x'Img
-                & this.y'Img
-                & ") by ("
-                & after.dx'Img
-                & after.dy'Img
-                & ")"
-                ;
+         notify_invalid_movement(this, after);
       end if;
    end ensure_the_validity_of;
 
-   procedure draw_by (this_step : in plotter.step);
-   pragma Inline(draw_by);
+   procedure jump_to (p : in postscript.point)
+      with Inline;
 
-   procedure draw_by (this_step : in plotter.step) is
+   procedure jump_to (p : in postscript.point) is
    begin
-      ensure_the_validity_of(this => plot_position, after => this_step);
-      draw_to(plot_position + this_step);
-   exception
-      when plotting_error =>
-         null;
-   end draw_by;
+      -- Posit a new vector starting at p.
+      last_step := null_step;
+      plot_position := p;
+      start_position := p;
+   end;
 
-   procedure jump_by (this_step : in plotter.step);
-   pragma Inline(jump_by);
+   procedure jump_by (this_step : in plotter.step)
+      with Inline;
 
    procedure jump_by (this_step : in plotter.step) is
    begin
       ensure_the_validity_of(this => plot_position, after => this_step);
       jump_to(plot_position + this_step);
-   exception
-      when plotting_error =>
-         null;
    end jump_by;
 
-   procedure move_by (this_step : in plotter.step);
-   pragma Inline(move_by);
-
-   procedure move_by (this_step : in plotter.step) is
+   procedure close_any_open_vector (stream : in out host_IO.stream) is
    begin
-      -- Convert from natural orientation of X axis to PostScript direction.
-      if the_pen_is_down then
-         draw_by((-this_step.dx, +this_step.dy));
-      else
-         jump_by((-this_step.dx, +this_step.dy));
+      if the_pen_is_down                and then
+            start_position /= plot_position then
+         draw_a_PS_vector(stream, start_position, plot_position);
+         start_position := plot_position;
       end if;
-   end move_by;
+   end close_any_open_vector;
 
-   procedure perform (symbol : in plotter.command) is
-   begin
-      case symbol is
+   procedure perform (action : in plotter.command; stream : in out host_IO.stream) is
+
+      procedure draw_to (p : in postscript.point)
+         with Inline;
+
+      procedure draw_to (p : in postscript.point) is
+      begin
+         if (plot_position - p) = last_step then
+            -- p is colinear with the previous step, so merely extend the vector to p.
+            plot_position := p;
+         else
+            -- Draw the whole vector and start a new one.
+            draw_a_PS_vector(stream, start_position, plot_position);
+            last_step := plot_position - p;
+            start_position := plot_position;
+            plot_position := p;
+         end if;
+      end draw_to;
+
+      procedure draw_by (this_step : in plotter.step)
+         with Inline;
+
+      procedure draw_by (this_step : in plotter.step) is
+      begin
+         ensure_the_validity_of(this => plot_position, after => this_step);
+         draw_to(plot_position + this_step);
+      end draw_by;
+
+      procedure move_by (this_step : in plotter.step)
+         with Inline;
+
+      procedure move_by (this_step : in plotter.step) is
+      begin
+         -- Convert from natural orientation of X axis to PostScript direction.
+         if the_pen_is_down then
+            draw_by((-this_step.dx, +this_step.dy));
+         else
+            jump_by((-this_step.dx, +this_step.dy));
+         end if;
+      end move_by;
+
+   begin -- perform
+      case action is
          when dummy =>
             null;
          when pen_up =>
-            close_any_open_vector;
+            close_any_open_vector(stream);
             the_pen_is_down := False;
          when pen_down =>
             the_pen_is_down := True;
@@ -183,30 +187,36 @@ package body plotter is
             move_by((+1, +1));
          when go_nXnY =>
             move_by((-1, -1));
+         when go_pXnY =>
+            move_by((+1, -1));
+         when go_nXpY =>
+            move_by((-1, +1));
          when others =>
-            close_the_plot_file;
-            raise plotting_error with "invalid plotter command";
+            -- EM causes a 'peculiar' motion, according to the Manual, Appendix 5.2, p.303,
+            --    and other codes cause 'unpredictable' effects.
+            -- ee9 therefore performs an arbitrary, but safe, operation: moving to the origin.
+            close_any_open_vector(stream);
+            plot_position := the_origin;
       end case;
    end perform;
 
    a_plot_is_open : Boolean := False;
 
-   procedure open_the_plot_file is
+   procedure open_the_plot_file (stream : in out host_IO.stream) is
    begin
       if a_plot_is_open then
-         close_the_plot_file;
-         raise plotting_error with "the plotter was already open";
+         close_the_plot_file(stream);
       end if;
       plot_position := (0,0);
       a_plot_is_open := True;
    end open_the_plot_file;
 
-   procedure close_the_plot_file is
+   procedure close_the_plot_file (stream : in out host_IO.stream) is
    begin
       if not a_plot_is_open then
-         raise plotting_error with "the plotter was already closed";
+         return;
       end if;
-      close_any_open_vector;
+      close_any_open_vector(stream);
       a_plot_is_open := False;
    end close_the_plot_file;
 

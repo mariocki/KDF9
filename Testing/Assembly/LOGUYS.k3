@@ -1,0 +1,12 @@
+ST 32; TL 9;
+V3; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   V0 = Q0/AV1/AV3;
+   V1 = B0750063245325432; ("H_e_l_" in Flexowriter code);
+   V2 = B3254325777777700; ("_l_o " in Flexowriter code);
+   V3 = B0664065045624577; ("there" in Flexowriter code);
+   V0; =Q9; POAQ9;         (write to Flexowriter);
+999;  OUT;
+   FINISH;
+|

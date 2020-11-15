@@ -1,0 +1,55 @@
+V9; W0;
+YS26000;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   V1 = B1212121212121212; (radix 10 for FRB);
+   V2 = B2020202020202020; (high bits for decimal digits);
+   V3 = B0202777777777777; (newline);
+   V4 = B0741062107230637; ("A[3,"  in Flexowriter code);
+   V5 = B0731062200250007; ("9] = " in Flexowriter code);
+   V6 = B7777777777777777;
+
+      ZERO; NOT; =M1;      (Q1 := 0/0/-1);
+      SETAYS0; =M2; I2=2;  (Q2 := 0/2/AYS0: M2 is the stack pointer);
+      SET 3; =RC7;         (Q7 := 3/1/0: C7 = m);
+      SET 9; =RC8;         (Q8 := 7/1/0: C8 = n);
+   JSP1;                   (call Ackermann function);
+      V1; REV; FRB;        (convert result to base 10);
+      V2; OR;              (convert decimal digits to characters);
+      V6; REV;
+      SHLD+24; REV; ERASE; (eliminate leading zeros);
+      SHL-12; SHL+12;
+      SETB0202; OR; =V6;   (or-in 2 newlines);
+
+      SETAV6; =RM9;
+      SETAV3; =I9;
+      TWQ9;                (write result to Flexowriter);
+
+999;  ZERO; OUT;           (terminate run);
+
+P1; (To compute A[m, n]);
+
+   99;
+      J1C7NZ;           (to 1 if m ± 0);
+         I8; =+C8;      (n := n + 1);
+         C8;            (result to NEST);
+      EXIT 1;           (return);
+   *1;
+      J2C8NZ;           (to 2 if n ± 0);
+         I8; =C8;       (n := 1);
+         DC7;           (m := m - 1);
+      J99;              (tail recursion for A[m-1, 1]);
+   *2;
+         LINK; =M0M2;   (push return address);
+         C7; =M0M2QN;   (push m);
+         DC8;           (n := n - 1);
+      JSP1;             (full recursion for A[m, n-1]);
+         =C8;           (n := A[m, n-1]);
+         M1M2; =C7;     (m := top of stack);
+         DC7;           (m := m - 1);
+         M-I2;          (pop stack);
+         M0M2; =LINK;   (return address := top of stack);
+      J99;              (tail recursion for A[m-1, A[m, n-1]]);
+
+FINISH;
+|

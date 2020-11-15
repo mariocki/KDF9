@@ -2,8 +2,8 @@
 --
 -- Provide logging output to an interactive terminal/control panel.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,24 +16,18 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with OS_specifics;
 with POSIX;
 with settings;
 
-use  OS_specifics;
 use  POSIX;
 use  settings;
 
 package body logging.panel is
 
-   pragma Unsuppress(All_Checks);
-
    not overriding
    function column (logger : panel.display)
-   return Positive is
-   begin
-      return logger.column_number;
-   end column;
+   return Positive
+   is (logger.column_number);
 
    overriding
    procedure tab_log (logger   : in out panel.display;
@@ -81,7 +75,9 @@ package body logging.panel is
                   iff    : in Boolean := True) is
    begin
       if not iff then return; end if;
-      POSIX.output(text);
+      if text /= "" then
+         POSIX.output(text);
+      end if;
       logger.column_number := logger.column_number + text'Length;
    end log;
 
@@ -90,7 +86,7 @@ package body logging.panel is
                            iff    : in Boolean := True) is
    begin
       if not iff then return; end if;
-      POSIX.output(EOL);
+      POSIX.output_line;
       logger.column_number := 1;
    end log_new_line;
 
@@ -98,7 +94,6 @@ package body logging.panel is
    procedure show (logger : in out panel.display; message : in String := "") is
    begin
       if message /= "" then
-         logger.log_new_line;
          logger.log(message);
       end if;
    end show;
@@ -107,51 +102,46 @@ package body logging.panel is
    procedure show_line (logger : in out panel.display; message : in String := "") is
    begin
       if message /= "" then
-         logger.log_new_line;
          logger.log(message);
       end if;
       logger.log_new_line;
    end show_line;
 
    not overriding
-   procedure respond_to_prompt (logger   : in out panel.display;
-                                prompt   : in String;
-                                response : out Character) is
-   begin
-      POSIX.prompt(prompt, response, default => ' ');
-      logger.column_number := 1;
-   end respond_to_prompt;
-
-   not overriding
-   procedure continue_when_GO_is_pressed (logger  : in out panel.display;
-                                          caption : in String := "") is
-      prompt   : constant String
-               := "Breakpoint:" & caption & " (f:ast | t:race | p:ause or q:uit)? ";
+   procedure interact (logger : in out panel.display; reason : in String := "Mode") is
       old_mode : constant settings.diagnostic_mode := the_diagnostic_mode;
-      response : Character;
+      response : response_kind;
+      choice   : Character;
    begin
+   interaction_loop:
       loop
-         logger.respond_to_prompt(prompt, response);
-         case response is
-            when 'q' | 'Q' =>
-               quit_was_requested := True;
-               return;
-            when ' ' =>
-               exit;
-            when 'f' | 'F' =>
-               set_diagnostic_mode(fast_mode);
-               exit;
-            when 'p' | 'P' =>
-               set_diagnostic_mode(pause_mode);
-               exit;
-            when 't' | 'T' =>
-               set_diagnostic_mode(trace_mode);
-               exit;
-            when others =>
-               null;
-         end case;
-      end loop;
+         logger.column_number := 1;
+         POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
+         if response = name_response then
+            case choice is
+               when 'q' | 'Q' =>
+                  quit_was_requested := True;
+                  exit interaction_loop;
+               when 'd' | 'D' =>
+                  debugging_is_enabled := not debugging_is_enabled;
+                  exit interaction_loop;
+               when 'f' | 'F' =>
+                  set_diagnostic_mode(fast_mode);
+                  exit interaction_loop;
+               when 'p' | 'P' =>
+                  set_diagnostic_mode(pause_mode);
+                  exit interaction_loop;
+               when 't' | 'T' =>
+                  set_diagnostic_mode(trace_mode);
+                  exit interaction_loop;
+               when others =>
+                  null; -- An invalid choice, try again.
+            end case;
+         elsif response = EOF_response then
+            exit;
+         end if;
+      end loop interaction_loop;
       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
-   end continue_when_GO_is_pressed;
+   end interact;
 
 end logging.panel;

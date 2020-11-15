@@ -2,8 +2,8 @@
 --
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -23,8 +23,6 @@ use  KDF9;
 use  logging.file;
 
 package settings is
-
-   pragma Unsuppress(All_Checks);
 
 --
    -- In fast mode: code runs as efficiently as possible, without diagnostics.
@@ -63,30 +61,35 @@ package settings is
    --    they are both requested, and offered by the_diagnostic_mode.
    -- These requests may be set by the miscellany and visibilty options.
 
-   miscellany_flags  : constant String := "adefghilnprstz0123456789";
-   miscellany_prompt : constant String := "{a|d|e|f|g|h|i|l|n|p|r|s|t|z|1..9}";
+   miscellany_flags  : constant String := "adefghimnopqrstwxz0123456789ADEFGHILMNOPQRSTWXZ";
+   miscellany_prompt : constant String := "{a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|1..9}";
 
    the_log_is_wanted,
-   API_logging_is_requested,
-   the_signature_is_requested,
-   the_histogram_is_requested,
-   peripheral_tracing_is_requested,
-   interrupt_tracing_is_requested,
-   retrospective_tracing_is_requested,
-   the_final_state_is_wanted  : Boolean := True;
+   API_logging_is_wanted,
+   the_signature_is_wanted,
+   any_histogram_is_wanted,
+   the_final_state_is_wanted,
+   interrupt_tracing_is_wanted,
+   peripheral_tracing_is_wanted,
+   flexowriter_output_is_wanted,
+   realistic_FW_output_is_wanted,
+   the_terminal_is_ANSI_compatible,
+   retrospective_tracing_is_wanted    : Boolean := True;
 
-   the_graph_plotter_is_configured,
-   noninteractive_usage_is_enabled,
+   do_not_execute,
    debugging_is_enabled,
    the_signature_is_enabled,
    the_histogram_is_enabled,
-   the_peripheral_trace_is_enabled,
+   the_graph_plotter_is_enabled,
+   pre_overlay_state_is_enabled,
+   the_external_trace_is_enabled,
    the_interrupt_trace_is_enabled,
-   the_retrospective_trace_is_enabled,
-   the_external_trace_is_enabled  : Boolean := False;
+   noninteractive_usage_is_enabled,
+   the_peripheral_trace_is_enabled,
+   the_retrospective_trace_is_enabled : Boolean := False;
 
-   -- This option may also be set by an authenticity option.
-   authentic_timing_is_wanted : Boolean := False;
+   -- This option may also be set by an authenticity option (see KDF9).
+   authentic_timing_is_enabled : Boolean := False;
 
    -- In boot_mode: a Director program is read from TR0 and executed
    --    in Director state, with full use of the emulated hardware.
@@ -103,23 +106,9 @@ package settings is
    the_execution_default : constant settings.execution_mode := program_mode;
    the_execution_mode    :          settings.execution_mode := the_execution_default;
 
-
-   -- In lax_mode, NOUV is NOT caused by an order that increases the nest depth,
-   --    or leaves it the same, even if the nest contains too few cells for the operation:
-   --       e.g., obeying REV or DUP with a nest depth of less than 2.
-   -- KDF9 did not detect an error in these cases but ee9 does, in strict_mode, by default.
-   -- N.B. In both nest modes, the test is made BEFORE the operation, unlike KDF9.
    --
-   -- Moreover, in lax_mode, any attempt to update Q0 is ignored,
-   --    but in strict_mode it is treated as an invalid instruction.
-
-   type authenticity_mode is (lax_mode, strict_mode, authentic_time_mode);
-
-   the_authenticity_default : constant settings.authenticity_mode := strict_mode;
-   the_authenticity_mode    :          settings.authenticity_mode := the_authenticity_default;
-
-
    -- Tracing bound settings.
+   --
 
    -- time_limit bounds the number of KDF9 instructions executed.
 
@@ -131,10 +120,14 @@ package settings is
 
    -- low_bound and high_bound bound the static scope of tracing.
 
-   low_bound_default  : constant KDF9.code_location := 0;
-   high_bound_default : constant KDF9.code_location := KDF9.code_location'Last;
-   low_bound          :          KDF9.code_location := low_bound_default;
-   high_bound         :          KDF9.code_location := high_bound_default;
+   low_bound_default  : constant KDF9.order_word_number := 0;
+   high_bound_default : constant KDF9.order_word_number := KDF9.order_word_number'Last;
+   low_bound          :          KDF9.order_word_number := low_bound_default;
+   high_bound         :          KDF9.order_word_number := high_bound_default;
+
+   -- nominated_address sets a flow analysis starting point for Usercode format dumps.
+   invalid_address    :          KDF9.order_word_number := 8191;
+   nominated_address  :          KDF9.order_word_number := invalid_address;
 
    -- low_count and high_count bound the dynamic scope of tracing.
 
@@ -143,21 +136,30 @@ package settings is
    low_count          :          KDF9.order_counter := low_count_default;
    high_count         :          KDF9.order_counter := high_count_default;
 
+   -- Histogram bin frequencies less than histogram_cutoff are not logged.
+   the_profile_is_wanted  :          Boolean := False;
+   the_INS_plot_is_wanted :          Boolean := False;
+   cutoff_default         : constant Long_Float := 0.0;
+   histogram_cutoff       :          Long_Float := cutoff_default;
 
    function is_invalid_miscellany_flag (option : in Character)
    return Boolean;
 
    procedure set_this_miscellany_flag (option : in Character);
 
+   -- do_not_execute is set if a quit is requested in the settings file.
+   -- The K option is not actioned unless version = "1".
    procedure get_settings_from_file (version : in String);
 
-   procedure display_execution_modes;
+   procedure display_execution_modes (for_this_run : in String := "");
 
    procedure quit_if_requested;
 
    quit_was_requested          : Boolean := False;
 
    the_diagnostic_mode_changed : Boolean := False;
+
+   loading_was_successful      : Boolean := False;
 
    mode_change_request         : exception;
 

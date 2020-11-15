@@ -1,9 +1,9 @@
 -- generic_sets.adb
 --
--- Arbitrary-sized sets of a discrete member type.
+-- Powersets of a discrete member type.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -20,8 +20,6 @@
 --    type member is (<>);
 package body generic_sets is
 
-   pragma Unsuppress(All_Checks);
-
    function "abs" (set : generic_sets.set)
    return Natural is
       result : Natural := 0;
@@ -34,63 +32,13 @@ package body generic_sets is
       return result;
    end "abs";
 
-   function is_empty (set : generic_sets.set)
-   return Boolean is
-   begin
-      return set = empty_set;
-   end is_empty;
-
-   function singleton (member : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := empty_set do
-         result(member) := True;
-      end return;
-   end singleton;
-
-   function interval (low, high : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := empty_set do
-         result(low .. high) := (others => True);
-      end return;
-   end interval;
-
    function "/" (member : generic_sets.member; set : generic_sets.set)
-   return Boolean is
-   begin
-      return set(member);
-   end "/";
+   return Boolean
+   is (set(member));
 
    function "/" (set : generic_sets.set; member : generic_sets.member)
-   return Boolean is
-   begin
-      return set(member);
-   end "/";
-
-   function "not" (member : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := universe do
-         result(member) := False;
-      end return;
-   end "not";
-
-   function "and" (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := empty_set do
-         result(member) := set(member);
-      end return;
-   end "and";
-
-   function "and" (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := empty_set do
-         result(member) := set(member);
-      end return;
-   end "and";
+   return Boolean
+   is (set(member));
 
    function "or" (member : generic_sets.member; set : generic_sets.set)
    return generic_sets.set is
@@ -108,22 +56,6 @@ package body generic_sets is
       end return;
    end "or";
 
-   function "xor" (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := set do
-         result(member) := not set(member);
-      end return;
-   end "xor";
-
-   function "xor" (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := set do
-         result(member) := not set(member);
-      end return;
-   end "xor";
-
    function "-" (set : generic_sets.set; member : generic_sets.member)
    return generic_sets.set is
    begin
@@ -134,22 +66,14 @@ package body generic_sets is
 
    function "-" (set1, set2 : generic_sets.set)
    return generic_sets.set is
-   begin
-      return set1 and not set2;
+   begin -- (set1 and not set2), avoiding need for large statically allocated workspace
+      return result : generic_sets.set := set1 do
+         for m in generic_sets.member loop
+            if set2(m) then
+               result(m) := False;
+            end if;
+         end loop;
+      end return;
    end "-";
-
-   overriding
-   function "<=" (set1, set2 : generic_sets.set)
-   return Boolean is
-   begin
-      return set1 = (set1 and set2);
-   end "<=";
-
-   overriding
-   function "<"  (set1, set2 : generic_sets.set)
-   return Boolean is
-   begin
-      return (set1 <= set2) and (set1 /= set2);
-   end "<";
 
 end generic_sets;

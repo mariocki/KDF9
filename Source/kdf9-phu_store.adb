@@ -2,8 +2,8 @@
 --
 -- The K5 operation data formats.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,22 +16,22 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Unchecked_Conversion;
-
+with Ada.Unchecked_Conversion;
+--
 with KDF9.CPU;
 
 package body KDF9.PHU_store is
 
-   pragma Unsuppress(All_Checks);
-
    function short_PHU (p : KDF9.priority)
    return KDF9.word is
 
-      type PHU_as_6_bits is mod 2**6;
-      for  PHU_as_6_bits'Size use 6;
+      use type KDF9.store.group_address;
 
-      function as_6_bits is new Unchecked_Conversion(Source => PHU_store.PHU_subset,
-                                                     Target => short_PHU.PHU_as_6_bits);
+      type PHU_as_6_bits is mod 2**6
+         with Size => 6;
+
+      function as_6_bits is new Ada.Unchecked_Conversion(Source => PHU_store.PHU_subset,
+                                                         Target => short_PHU.PHU_as_6_bits);
 
       the_reason    : PHU_store.blockage_kind;
       the_parameter : KDF9.buffer_number;
@@ -50,17 +50,16 @@ package body KDF9.PHU_store is
          the_parameter := KDF9.buffer_number(PHU(p).blockage.group_nr mod 2**4);
       end if;
 
-      return KDF9.word(as_6_bits((True, the_reason, the_parameter)));
+      return KDF9.word(as_6_bits((the_parameter, the_reason, True)));
    end short_PHU;
 
    function K5_operand
-   return KDF9.word is
-   begin
-      return
-          KDF9.CPU.shift_word_left(short_PHU(0), 47-05) or
-          KDF9.CPU.shift_word_left(short_PHU(1), 47-11) or
-          KDF9.CPU.shift_word_left(short_PHU(2), 47-17) or
-          KDF9.CPU.shift_word_left(short_PHU(3), 47-23);
-   end K5_operand;
+   return KDF9.word
+   is (
+       KDF9.CPU.shift_word_left(short_PHU(0), 48-06) or
+       KDF9.CPU.shift_word_left(short_PHU(1), 48-12) or
+       KDF9.CPU.shift_word_left(short_PHU(2), 48-18) or
+       KDF9.CPU.shift_word_left(short_PHU(3), 48-24)
+      );
 
 end KDF9.PHU_store;

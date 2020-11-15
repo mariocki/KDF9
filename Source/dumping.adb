@@ -2,8 +2,8 @@
 --
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -24,14 +24,23 @@ use  state_display;
 
 package body dumping is
 
-   pragma Unsuppress(All_Checks);
+   type poke_list_entry is
+      record
+         address  : KDF9.address;
+         sub_word : Character;
+         position : KDF9.address;
+         value    : KDF9.word;
+      end record;
+
+   length_of_poke_list : constant := 100;
+   poke_list_count     : Natural range 0 .. length_of_poke_list := 0;
+   poke_list           : array (Positive range 1 .. length_of_poke_list) of poke_list_entry;
 
    use dumping.flag_support;
 
-   function dumping_flag (c : Character) return dumping.flag is
-   begin
-      return dumping.flag(dumping.form'(to_upper(c)));
-   end dumping_flag;
+   function dumping_flag (c : Character)
+   return dumping.flag
+   is (dumping.flag(to_upper(c)));
 
    type area is
       record
@@ -41,22 +50,18 @@ package body dumping is
 
    no_dumping_area : constant dumping.area := (no_dumping_flag, 0, 0);
 
-   dumping_area : array (dumping.area_number) of dumping.area := (others => no_dumping_area);
+   dumping_areas : array (dumping.area_number) of dumping.area := (others => no_dumping_area);
 
-   pre_dumping_area_count  : Natural range 0 .. nr_of_dumping_areas := 0;
-   post_dumping_area_count : Natural range 0 .. nr_of_dumping_areas := 0;
+   pre_dumping_area_count  : area_count := 0;
+   post_dumping_area_count : area_count := 0;
 
    function nr_of_pre_dumping_areas
-   return dumping.area_count is
-   begin
-      return pre_dumping_area_count;
-   end nr_of_pre_dumping_areas;
+   return dumping.area_count
+   is (pre_dumping_area_count);
 
    function nr_of_post_dumping_areas
-   return dumping.area_count is
-   begin
-      return post_dumping_area_count;
-   end nr_of_post_dumping_areas;
+   return dumping.area_count
+   is (post_dumping_area_count);
 
    procedure request_a_dumping_area (format_set  : in dumping.format_set;
                                      first, last : in KDF9.address;
@@ -66,23 +71,23 @@ package body dumping is
       if pre_dumping_area_count+post_dumping_area_count = nr_of_dumping_areas then
          return;
       end if;
-      for d in dumping_area'Range loop
-         if dumping_area(d) = (format_set, first, last) then
+      for d of dumping_areas loop
+         if d = (format_set, first, last) then
             was_stored := True;
             return;
          end if;
       end loop;
-      if format_set/expunge_dump_flag then
-         remove_specified_areas(format_set - expunge_dump_flag, first, last);
+      if format_set/expunge_flag then
+         remove_specified_areas(format_set - expunge_flag, first, last);
       end if;
-      for d in dumping_area'Range loop
-         if dumping_area(d).format_set = no_dumping_flag then
-            dumping_area(d) := (format_set, first, last);
+      for d of dumping_areas loop
+         if d.format_set = no_dumping_flag then
+            d := (format_set, first, last);
             was_stored := True;
-            if initial_dump_flag/format_set then
+            if initial_flag/format_set then
                pre_dumping_area_count := pre_dumping_area_count + 1;
             end if;
-            if final_dump_flag/format_set then
+            if final_flag/format_set then
                post_dumping_area_count := post_dumping_area_count + 1;
             end if;
             return;
@@ -92,7 +97,6 @@ package body dumping is
 
    max_types : constant Positive := abs is_dumping_flag - 1; -- P XOR Q
 
-   -- format_image returns no_specification if format_set is empty.
    function format_image (format_set : dumping.format_set)
    return String is
       image_set  : dumping.format_set := format_set;
@@ -101,12 +105,12 @@ package body dumping is
    begin
       if image_set = no_dumping_flag then
          return result;
-      elsif image_set/initial_dump_flag then
-          image_set := image_set - initial_dump_flag;
-          result(1) := Character(initial_dump_flag);
+      elsif image_set/initial_flag then
+          image_set := image_set - initial_flag;
+          result(1) := Character(initial_flag);
       else
-          image_set := image_set - final_dump_flag;
-          result(1) := Character(final_dump_flag);
+          image_set := image_set - final_flag;
+          result(1) := Character(final_flag);
       end if;
       for f in dumping.flag loop
          if image_set/f then
@@ -119,9 +123,9 @@ package body dumping is
 
    function area_image (d : dumping.area_number)
    return String is
-      first       : constant KDF9.address := dumping_area(d).first;
-      last        : constant KDF9.address := dumping_area(d).last;
-      format_set  : constant dumping.format_set := dumping_area(d).format_set;
+      first       : constant KDF9.address := dumping_areas(d).first;
+      last        : constant KDF9.address := dumping_areas(d).last;
+      format_set  : constant dumping.format_set := dumping_areas(d).format_set;
       result      : String(1 .. max_types+2*(7)) := (others => ' ');
    begin
       if pre_dumping_area_count+post_dumping_area_count = 0 then
@@ -139,109 +143,132 @@ package body dumping is
       if pre_dumping_area_count+post_dumping_area_count = 0 then
          return;
       end if;
-      for d in dumping_area'Range loop
-         if dumping_area(d).first >= first and dumping_area(d).last <= last then
-            dumping_area(d).format_set := dumping_area(d).format_set - format_set;
-            if dumping_area(d).format_set-initial_dump_flag-final_dump_flag = no_dumping_flag then
-               dumping_area(d) := no_dumping_area;
+      for d of dumping_areas loop
+         if d.first >= first and d.last <= last then
+            d.format_set := d.format_set - format_set;
+            if d.format_set-initial_flag-final_flag = no_dumping_flag then
+               d := no_dumping_area;
             end if;
-            if initial_dump_flag/dumping_area(d).format_set then
+            if initial_flag/d.format_set then
                pre_dumping_area_count := Integer'Max(pre_dumping_area_count - 1, 0);
             end if;
-            if final_dump_flag/dumping_area(d).format_set then
+            if final_flag/d.format_set then
                post_dumping_area_count := Integer'Max(post_dumping_area_count - 1, 0);
             end if;
          end if;
       end loop;
    end remove_specified_areas;
 
-   procedure print_formatted_area (d : in dumping.area_number) is
-      format_set  : constant dumping.format_set := dumping_area(d).format_set;
-      first       : constant KDF9.address := dumping_area(d).first;
-      last        : constant KDF9.address := dumping_area(d).last;
+   procedure print_formatted_area (d : in dumping.area) is
+      format_set  : constant dumping.format_set := d.format_set;
+      first       : constant KDF9.address := d.first;
+      last        : constant KDF9.address := d.last;
    begin
-      if format_set/tape_code_dump_flag then
+      if format_set/tape_code_flag then
          show_core_in_tape_code(first, last);
       end if;
-      if format_set/normal_dump_flag then
+      if format_set/normal_flag then
          show_core_in_case_normal(first, last);
       end if;
-      if format_set/shift_dump_flag then
+      if format_set/shift_flag then
          show_core_in_case_shift(first, last);
       end if;
-      if format_set/ card_code_dump_flag then
+      if format_set/ card_code_flag then
          show_core_in_card_code(first, last);
       end if;
-      if format_set/printer_dump_flag then
+      if format_set/printer_flag then
          show_core_in_print_code(first, last);
       end if;
-      if format_set/ASCII_dump_flag then
+      if format_set/ASCII_flag then
          show_core_in_Latin_1(first, last);
       end if;
-      if format_set/word_dump_flag then
+      if format_set/word_flag then
          show_core_as_word_forms(first, last);
       end if;
-      if format_set/Usercode_dump_flag then
-         show_core_as_Usercode((0, KDF9.code_location(first)),
-                               (0, KDF9.code_location( last)),
-                                octal_option => not format_set/decimal_dump_flag);
+      if format_set/Usercode_flag then
+         show_core_as_Usercode((KDF9.order_word_number(first), 0),
+                               (KDF9.order_word_number(last), 0),
+                                octal_option => not format_set/decimal_flag);
       end if;
-      if format_set/orders_dump_flag then
-         show_core_as_syllables((0, KDF9.code_location(first)),
-                                (0, KDF9.code_location( last)));
+      if format_set/orders_flag then
+         show_core_as_syllables((KDF9.order_word_number(first), 0),
+                                (KDF9.order_word_number( last), 0));
       end if;
    end print_formatted_area;
 
-   procedure print_prerun_dump_areas is
+   procedure print_dump_areas (flag : in dumping.flag; count : in dumping.area_count) is
+      Usercode_wanted : Boolean := False;
    begin
-      if pre_dumping_area_count = 0 then
+      if count = 0 then
          return;
       end if;
-      mark_all_code_blocks_and_data_blocks;
-      for d in dumping_area'Range loop
-         if dumping_area(d).format_set/initial_dump_flag then
+      for d of dumping_areas loop
+         Usercode_wanted := Usercode_wanted or d.format_set/Usercode_flag;
+      end loop;
+      if Usercode_wanted then
+         mark_all_code_blocks_and_data_blocks;
+      end if;
+      for d of dumping_areas loop
+         if d.format_set/flag then
             print_formatted_area(d);
          end if;
       end loop;
-   end print_prerun_dump_areas;
+   end print_dump_areas;
 
-   procedure remove_prerun_dump_areas is
+   procedure print_prerun_dump_areas is
    begin
-      if pre_dumping_area_count = 0 then
-         return;
-      end if;
-      for d in dumping_area'Range loop
-         if dumping_area(d).format_set/initial_dump_flag then
-            dumping_area(d) := (no_dumping_flag, 0, 0);
-         end if;
-      end loop;
-      pre_dumping_area_count := 0;
-   end remove_prerun_dump_areas;
+      print_dump_areas(initial_flag, pre_dumping_area_count);
+   end print_prerun_dump_areas;
 
    procedure print_postrun_dump_areas is
    begin
-      if post_dumping_area_count = 0 then
+      print_dump_areas(final_flag, post_dumping_area_count);
+   end print_postrun_dump_areas;
+
+   procedure remove_dump_areas (flag : in dumping.flag; count : in out dumping.area_count) is
+   begin
+      if count = 0 then
          return;
       end if;
-      mark_all_code_blocks_and_data_blocks;
-      for d in dumping_area'Range loop
-         if dumping_area(d).format_set/final_dump_flag then
-            print_formatted_area(d);
+      for d of dumping_areas loop
+         if d.format_set/flag then
+            d := (no_dumping_flag, 0, 0);
          end if;
       end loop;
-   end print_postrun_dump_areas;
+      count := 0;
+   end remove_dump_areas;
+
+   procedure remove_prerun_dump_areas is
+   begin
+      remove_dump_areas(initial_flag, pre_dumping_area_count);
+   end remove_prerun_dump_areas;
 
    procedure remove_postrun_dump_areas is
    begin
-      if post_dumping_area_count = 0 then
-         return;
-      end if;
-      for d in dumping_area'Range loop
-         if dumping_area(d).format_set/final_dump_flag then
-            dumping_area(d) := (no_dumping_flag, 0, 0);
-         end if;
-      end loop;
-      post_dumping_area_count := 0;
+      remove_dump_areas(final_flag, post_dumping_area_count);
    end remove_postrun_dump_areas;
+
+   procedure add_to_poke_list (address    : in KDF9.address;
+                               sub_word   : in Character;
+                               position   : in KDF9.address;
+                               value      : in KDF9.word;
+                               was_stored : out Boolean) is
+   begin
+      if poke_list_count < length_of_poke_list then
+         poke_list_count := poke_list_count + 1;
+         poke_list(poke_list_count) := (address, sub_word, position, value);
+         was_stored := True;
+      else
+         was_stored := False;
+      end if;
+   end add_to_poke_list;
+
+   procedure poke_all_amendments is
+   begin
+      for p in 1..poke_list_count loop
+         poke(poke_list(p).address, poke_list(p).sub_word, poke_list(p).position, poke_list(p).value);
+      end loop;
+      poke_list_count := 0;
+   end poke_all_amendments;
 
 end dumping;

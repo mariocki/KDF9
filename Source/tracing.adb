@@ -2,8 +2,8 @@
 --
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -19,62 +19,62 @@
 with exceptions;
 with formatting;
 with HCI;
-with KDF9.compressed_opcodes;
+with KDF9.decoding;
 with KDF9.store;
-with settings;
 with state_display;
 
 use exceptions;
 use formatting;
 use HCI;
-use KDF9.compressed_opcodes;
+use KDF9;
+use KDF9.decoding;
 use KDF9.store;
-use settings;
 use state_display;
 
 package body tracing is
 
-   pragma Unsuppress(All_Checks);
-
-   procedure clear_all_breakpoints is
+   procedure clear_the_histogram is
    begin
-      is_a_breakpoint := (others => False);
-   end clear_all_breakpoints;
+      the_histogram := (others => 0);
+   end clear_the_histogram;
 
-   procedure set_breakpoints (first, last : in KDF9.code_location) is
+   procedure clear_the_profile is
+   begin
+      the_profile := (others => 0);
+   end clear_the_profile;
+
+   procedure set_breakpoints (first, last : in KDF9.order_word_number) is
    begin
       for p in first .. last loop
-         is_a_breakpoint(p) := True;
+         breakpoints(p) := True;
       end loop;
    end set_breakpoints;
 
    procedure handle_breakpoint is
    begin
       short_witness;
-      continue_when_GO_is_pressed(caption => " at " & oct_of(NIA));
+      interact;
       quit_if_requested;
       change_diagnostic_mode_if_requested;
    end handle_breakpoint;
 
    procedure clear_all_watchpoints is
    begin
-      for p in is_a_fetch_point'Range loop
-         is_a_fetch_point(p) := False;
-      end loop;
-      is_a_store_point := is_a_fetch_point;
+      fetchpoints := (others => False);
+      storepoints := (others => False);
    end clear_all_watchpoints;
 
    procedure set_fetch_points (first, last : in KDF9.address) is
    begin
       for p in first .. last loop
-         is_a_fetch_point(p) := True;
+         fetchpoints(p) := True;
       end loop;
    end set_fetch_points;
 
    procedure set_store_points (first, last : in KDF9.address) is
    begin
       for p in first .. last loop
-         is_a_store_point(p) := True;
+         storepoints(p) := True;
       end loop;
    end set_store_points;
 
@@ -83,38 +83,39 @@ package body tracing is
       retro_FIFO_count := 0; retro_FIFO_index := 0;
    end clear_retro_FIFO;
 
-   procedure take_note_of (the_IAR   : in KDF9.code_point;
+   procedure take_note_of (the_IAR   : in KDF9.syllable_address;
                            the_value : in KDF9.word) is
    begin
       if the_retrospective_trace_is_enabled           and then
             ICR in low_count .. high_count            and then
                NIA_word_number in low_bound .. high_bound then
-         if retro_FIFO_count = 0 then
-            retro_FIFO(0) := (location   => the_IAR,
-                              order      => INS.order,
-                              parameter  => the_value,
-                              ICR_value  => ICR,
-                              CPU_time   => the_CPU_time,
-                              nested     => the_nest_depth,
-                              called     => the_sjns_depth,
-                              V          => the_V_bit,
-                              T          => the_T_bit);
-            retro_FIFO_count := 1;
-         else
-            retro_FIFO_index := retro_FIFO_index + 1;
-            retro_FIFO(retro_FIFO_index) := (location => the_IAR,
-                                            order     => INS.order,
-                                            parameter => the_value,
-                                            ICR_value => ICR,
-                                            CPU_time  => the_CPU_time,
-                                            nested    => the_nest_depth,
-                                            called    => the_sjns_depth,
-                                            V         => the_V_bit,
-                                            T         => the_T_bit);
-            if retro_FIFO_count < FIFO_size then
-               retro_FIFO_count := retro_FIFO_count + 1;
+         declare
+            the_note : constant retro_FIFO_entry
+                     := (
+                         location   => the_IAR,
+                         order      => INS.order,
+                         parameter  => the_value,
+                         ICR_value  => ICR,
+                         CPU_time   => the_CPU_time,
+                         nested     => the_nest_depth,
+                         called     => the_sjns_depth,
+                         V          => the_V_bit_is_set,
+                         T          => the_T_bit_is_set,
+                         D          => the_CPU_state = Director_state,
+                         level      => CPL
+                        );
+         begin
+            if retro_FIFO_count = 0 then
+               retro_FIFO(0) := the_note;
+               retro_FIFO_count := 1;
+            else
+               retro_FIFO_index := retro_FIFO_index + 1;
+               retro_FIFO(retro_FIFO_index) := the_note;
+               if retro_FIFO_count < FIFO_size then
+                  retro_FIFO_count := retro_FIFO_count + 1;
+               end if;
             end if;
-         end if;
+         end;
       end if;
    end take_note_of;
 
@@ -128,74 +129,7 @@ package body tracing is
       IOC_FIFO_count := 0; IOC_FIFO_index := 0;
    end clear_IOC_FIFO;
 
-   procedure take_note_of
-         (
-          kind            : in IOC_event_kind;
-          ICR_value       : in KDF9.order_counter;
-          order_address   : in KDF9.code_point;
-          decoded_order   : in KDF9.decoded_order;
-          initiation_time : in KDF9.microseconds;
-          device_name     : in KDF9.logical_device_name;
-          completion_time : in KDF9.microseconds := 0;
-          is_for_Director : in Boolean := False;
-          priority_level  : in KDF9.priority := 0;
-          control_word    : in KDF9.Q_register := (0, 0, 0)
-         ) is
-
-      function the_note
-      return IOC_FIFO_entry is
-      begin
-         case take_note_of.kind is
-            when start_transfer =>
-               return (
-                       kind            => start_transfer,
-                       ICR_value       => take_note_of.ICR_value,
-                       order_address   => take_note_of.order_address,
-                       decoded_order   => take_note_of.decoded_order,
-                       initiation_time => take_note_of.initiation_time,
-                       completion_time => take_note_of.completion_time,
-                       is_for_Director => take_note_of.is_for_Director,
-                       priority_level  => take_note_of.priority_level,
-                       control_word    => take_note_of.control_word,
-                       device_name     => take_note_of.device_name
-                      );
-            when finis_transfer =>
-               return (
-                       kind            => finis_transfer,
-                       ICR_value       => take_note_of.ICR_value,
-                       order_address   => take_note_of.order_address,
-                       decoded_order   => take_note_of.decoded_order,
-                       initiation_time => take_note_of.initiation_time,
-                       completion_time => take_note_of.completion_time,
-                       is_for_Director => take_note_of.is_for_Director,
-                       priority_level  => take_note_of.priority_level,
-                       control_word    => take_note_of.control_word,
-                       device_name     => take_note_of.device_name
-                      );
-            when store_lockout =>
-               return (
-                       kind            => store_lockout,
-                       ICR_value       => take_note_of.ICR_value,
-                       order_address   => take_note_of.order_address,
-                       decoded_order   => take_note_of.decoded_order,
-                       initiation_time => take_note_of.initiation_time,
-                       data_address    => the_locked_out_address,
-                       device_name     => take_note_of.device_name
-                      );
-            when buffer_lockout =>
-               return (
-                       kind             => buffer_lockout,
-                       ICR_value        => take_note_of.ICR_value,
-                       order_address    => take_note_of.order_address,
-                       decoded_order    => take_note_of.decoded_order,
-                       initiation_time  => take_note_of.initiation_time,
-                       device_name      => take_note_of.device_name
-                      );
-            when test_buffer_status =>
-               raise emulation_failure with "in the_note";
-         end case;
-      end the_note;
-
+   procedure register_IO_event (the_note : in IOC_FIFO_entry) is
    begin
       if the_peripheral_trace_is_enabled              and then
             ICR in low_count .. high_count            and then
@@ -211,92 +145,171 @@ package body tracing is
             end if;
          end if;
       end if;
-   end take_note_of;
+   end register_IO_event;
 
-   procedure take_note_of
-         (
-          Q_register  : in KDF9.Q_register;
-          device_name : in KDF9.logical_device_name := "   ";
-          status      : in KDF9.word := KDF9.word'Last
-         ) is
+   procedure take_note_of_IO_start (
+                                    device_name     : in IOC.device_name;
+                                    completion_time : in KDF9.us;
+                                    control_word    : in KDF9.Q_register
+                                   )
+   is
+      the_note : constant  IOC_FIFO_entry
+               :=
+                (
+                 kind            => start_transfer,
+                 ICR_value       => ICR,
+                 order_address   => CIA,
+                 decoded_order   => INS,
+                 initiation_time => the_clock_time,
+                 device_name     => take_note_of_IO_start.device_name,
+                 completion_time => take_note_of_IO_start.completion_time,
+                 is_for_Director => (the_CPU_state = Director_state),
+                 priority_level  => CPL,
+                 context         => the_context,
+                 control_word    => take_note_of_IO_start.control_word
+                );
+   begin
+      register_IO_event(the_note);
+   end take_note_of_IO_start;
 
-      function the_note
-      return IOC_FIFO_entry is
-      begin
-         return (
-                 kind            => test_buffer_status,
+   procedure take_note_of_IO_finis (
+                                    ICR_value       : in KDF9.order_counter;
+                                    order_address   : in KDF9.syllable_address;
+                                    decoded_order   : in KDF9.decoded_order;
+                                    initiation_time : in KDF9.us;
+                                    device_name     : in IOC.device_name;
+                                    is_for_Director : Boolean;
+                                    priority_level  : in KDF9.priority;
+                                    completion_time : in KDF9.us;
+                                    control_word    : in KDF9.Q_register
+                                   )
+   is
+      the_note : constant  IOC_FIFO_entry
+               :=
+                (
+                 kind            => finis_transfer,
+                 ICR_value       => take_note_of_IO_finis.ICR_value,
+                 order_address   => take_note_of_IO_finis.order_address,
+                 decoded_order   => take_note_of_IO_finis.decoded_order,
+                 initiation_time => take_note_of_IO_finis.initiation_time,
+                 device_name     => take_note_of_IO_finis.device_name,
+                 is_for_Director => take_note_of_IO_finis.is_for_Director,
+                 priority_level  => take_note_of_IO_finis.priority_level,
+                 context         => the_context,
+                 completion_time => take_note_of_IO_finis.completion_time,
+                 control_word    => take_note_of_IO_finis.control_word
+                );
+
+   begin
+      register_IO_event(the_note);
+   end take_note_of_IO_finis;
+
+   procedure take_note_of_store_lockout (device_name : in IOC.device_name) is
+      the_note : constant  IOC_FIFO_entry
+               :=
+                (
+                 kind            => store_lockout,
+                 ICR_value       => ICR,
+                 order_address   => CIA,
+                 decoded_order   => INS,
+                 initiation_time => the_clock_time,
+                 device_name     => take_note_of_store_lockout.device_name,
+                 is_for_Director => False,
+                 priority_level  => CPL,
+                 context         => the_context,
+                 data_address    => the_locked_out_address
+                );
+   begin
+      register_IO_event(the_note);
+   end take_note_of_store_lockout;
+
+   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name) is
+      the_note : constant  IOC_FIFO_entry
+               :=
+                (
+                 kind            => buffer_lockout,
+                 ICR_value       => ICR,
+                 order_address   => CIA,
+                 decoded_order   => INS,
+                 initiation_time => the_clock_time,
+                 device_name     => take_note_of_buffer_lockout.device_name,
+                 is_for_Director => False,
+                 priority_level  => CPL,
+                 context         => the_context
+                );
+   begin
+      register_IO_event(the_note);
+   end take_note_of_buffer_lockout;
+
+   procedure take_note_of_test (
+                                device_name : in IOC.device_name;
+                                Q_register  : in KDF9.Q_register;
+                                status      : in Boolean
+                               )
+   is
+      the_note : constant  IOC_FIFO_entry
+               :=
+                (
+                 kind            => buffer_status,
                  ICR_value       => ICR+1,  -- ICR is not incremented until the end of an order.
                  order_address   => CIA,
                  decoded_order   => INS,
                  initiation_time => the_clock_time,
-                 device_name     => take_note_of.device_name,
-                 Q_register      => take_note_of.Q_register,
-                 status          => take_note_of.status
+                 device_name     => take_note_of_test.device_name,
+                 is_for_Director => (the_CPU_state = Director_state),
+                 priority_level  => CPL,
+                 context         => the_context,
+                 Q_register      => take_note_of_test.Q_register,
+                 status          => take_note_of_test.status
                 );
-      end the_note;
-
    begin
-      if the_peripheral_trace_is_enabled              and then
-            ICR in low_count .. high_count            and then
-               NIA_word_number in low_bound .. high_bound then
-         if IOC_FIFO_count = 0 then
-            IOC_FIFO(0) := the_note;
-            IOC_FIFO_count := 1;
-         else
-            IOC_FIFO_index := IOC_FIFO_index + 1;
-            IOC_FIFO(IOC_FIFO_index) := the_note;
-            if IOC_FIFO_count < FIFO_size then
-               IOC_FIFO_count := IOC_FIFO_count + 1;
-            end if;
-         end if;
-      end if;
-   end take_note_of;
-
+      register_IO_event(the_note);
+   end take_note_of_test;
 
    procedure clear_interrupt_FIFO is
    begin
       interrupt_FIFO_count := 0; interrupt_FIFO_index := 0;
    end clear_interrupt_FIFO;
 
-   procedure take_note_of
-         (
-          interrupt_code : in KDF9.interrupt_number;
-          ICR_value      : in KDF9.order_counter;
-          order_address  : in KDF9.code_point;
-          busy_time      : in KDF9.microseconds;
-          in_Director    : in Boolean := False;
-          priority_level : in KDF9.priority
-         ) is
-
-      function the_note
-      return interrupt_FIFO_entry is
-      begin
-         return (
-                 interrupt_code => take_note_of.interrupt_code,
-                 ICR_value      => take_note_of.ICR_value,
-                 order_address  => take_note_of.order_address,
-                 busy_time      => take_note_of.busy_time,
-                 in_Director    => take_note_of.in_Director,
-                 priority_level => take_note_of.priority_level
-                );
-      end the_note;
-
+   procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
+   is
+      length : constant Natural := message'Length;
+      memo   : String(1..max_interrupt_message_length) := (others => ' ');
    begin
-      if the_interrupt_trace_is_enabled               and then
-            ICR in low_count .. high_count            and then
-               NIA_word_number in low_bound .. high_bound then
-         if interrupt_FIFO_count = 0 then
-            interrupt_FIFO(0) := the_note;
-            interrupt_FIFO_count := 1;
-         else
-            interrupt_FIFO_index := interrupt_FIFO_index + 1;
-            interrupt_FIFO(interrupt_FIFO_index) := the_note;
-            if interrupt_FIFO_count < FIFO_size then
-               interrupt_FIFO_count := interrupt_FIFO_count + 1;
+      if length > max_interrupt_message_length then
+         raise Program_Error
+            with "interrupt note message is too long '" & message & "'" & length'Image;
+      end if;
+      memo(1..length) := message;
+      declare
+         the_note : constant interrupt_FIFO_entry
+                  :=
+                   (
+                    interrupt_code => take_note_of_interrupt.interrupt_code,
+                    ICR_value      => ICR,
+                    order_address  => CIA,
+                    busy_time      => the_clock_time,
+                    priority_level => CPL,
+                    context        => the_context,
+                    message        => memo
+                   );
+      begin
+         if the_interrupt_trace_is_enabled               and then
+               ICR in low_count .. high_count            and then
+                  NIA_word_number in low_bound .. high_bound then
+            if interrupt_FIFO_count = 0 then
+               interrupt_FIFO(0) := the_note;
+               interrupt_FIFO_count := 1;
+            else
+               interrupt_FIFO_index := interrupt_FIFO_index + 1;
+               interrupt_FIFO(interrupt_FIFO_index) := the_note;
+               if interrupt_FIFO_count < FIFO_size then
+                  interrupt_FIFO_count := interrupt_FIFO_count + 1;
+               end if;
             end if;
          end if;
-      end if;
-   end take_note_of;
+      end;
+   end take_note_of_interrupt;
 
    procedure add_INS_to_the_histogram is
       syllable_0 : KDF9.syllable := INS.order.syllable_0;
@@ -309,14 +322,16 @@ package body tracing is
       the_histogram(syllable_0) := the_histogram(syllable_0) + 1;
    end add_INS_to_the_histogram;
 
-   procedure preview_a_one_syllable_order is
+   procedure add_CIA_to_the_profile is
    begin
-      null;
-   end preview_a_one_syllable_order;
+      the_profile(CIA.order_word_number) := the_profile(CIA.order_word_number) + 1;
+   end add_CIA_to_the_profile;
+
+   procedure preview_a_one_syllable_order is null;
 
    procedure preview_a_two_syllable_order is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when TO_MkMq
             | TO_MkMqQ
             | TO_MkMqH
@@ -333,7 +348,7 @@ package body tracing is
 
    procedure preview_a_jump_order is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when JrEQ
             | JrNE
             | JrGTZ
@@ -342,30 +357,32 @@ package body tracing is
             | JrLEZ
             | JrGEZ
             | JrNEZ
-            | OUT_9 =>
+            | OS_OUT =>
             if the_nest_depth > 0 then
                the_trace_operand := read_top;
             end if;
-         when JrV
-            | JrNV =>
-            the_trace_operand := the_V_bit;
          when JrEN
             | JrNEN =>
             the_trace_operand := KDF9.word(the_nest_depth);
          when JrEJ
             | JrNEJ =>
             the_trace_operand := KDF9.word(the_sjns_depth);
-         when JrTR
-            | JrNTR =>
-            the_trace_operand := the_T_bit;
-         when EXIT_9
+         when EXIT_n
             | EXITD =>
             if the_sjns_depth > 0 then
                the_trace_operand := as_word(sjns_top);
+            else
+               the_trace_operand := -1;
             end if;
          when JrCqZ
             | JrCqNZ =>
             the_trace_operand := as_word(the_Q_store(INS.Qq));
+         when JrV
+            | JrNV =>
+            the_trace_operand := (if the_V_bit_is_set then 1 else 0);
+         when JrTR
+            | JrNTR =>
+            the_trace_operand := (if the_T_bit_is_set then 1 else 0);
          when others =>
             null;
       end case;
@@ -373,7 +390,7 @@ package body tracing is
 
    procedure preview_a_data_access_order is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when TO_EaMq
             | TO_EaMqQ =>
             the_trace_operand := read_top;
@@ -385,9 +402,7 @@ package body tracing is
    procedure look_back_at_a_one_syllable_order is
       AB : KDF9.pair;
    begin
-      case INS.syndrome is
-         when TO_TR =>
-            the_trace_operand := the_T_bit;
+      case INS.compressed_opcode is
          when XDF
             | XPLUSF
             | MINUSDF
@@ -416,15 +431,12 @@ package body tracing is
       end case;
    end look_back_at_a_one_syllable_order;
 
-   procedure look_back_at_an_IO_order is
-   begin
-      null;
-   end look_back_at_an_IO_order;
+   procedure look_back_at_an_IO_order is null;
 
    procedure look_back_at_a_two_syllable_order is
       AB : KDF9.pair;
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when MkMq
             | MkMqQ
             | MkMqH
@@ -436,7 +448,7 @@ package body tracing is
             | SHA
             | SHL
             | SHC
-            | TO_Kk
+            | TO_Kq
             | Kk
             | LINK =>
             the_trace_operand := read_top;
@@ -482,12 +494,16 @@ package body tracing is
    end look_back_at_a_two_syllable_order;
 
    procedure look_back_at_a_jump_order is
+      BA_image  : constant String := "BA #" & oct_of(BA);
+      NOL_image : constant String := "NOL"  & NOL'Image;
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when Jr =>
-            the_trace_operand := as_word(code_link(NIA));
+            the_trace_operand := as_word(sjns_link(NIA));
          when JSr =>
             the_trace_operand := as_word(sjns_top);
+         when EXITD =>
+            take_note_of_interrupt(EXITD_flag, BA_image & " " & NOL_image & " @ " & oct_of(NIA));
          when others =>
             null;
       end case;
@@ -495,7 +511,7 @@ package body tracing is
 
    procedure look_back_at_a_data_access_order is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when EaMq
             | EaMqQ
             | SET =>
@@ -508,13 +524,11 @@ package body tracing is
    procedure act_on_any_fetchpoint is
       use type watch_flags.set;
    begin
-      if the_trace_address / is_a_fetch_point then
+      if the_trace_address/fetchpoints then
          log_new_line;
-         log("Fetch watchhpoint: N1 := [#");
-         log(oct_of(the_trace_address));
-         log("]");
+         log("Fetch watchhpoint: N1 := [#" & oct_of(the_trace_address) & "]");
          short_witness;
-         continue_when_GO_is_pressed;
+         interact;
          quit_if_requested;
          change_diagnostic_mode_if_requested;
       end if;
@@ -523,14 +537,16 @@ package body tracing is
    procedure act_on_any_storepoint is
       use type watch_flags.set;
    begin
-      if the_trace_address / is_a_store_point then
+      if the_trace_address/storepoints then
          log_new_line;
-         log("Store watchpoint: #");
-         log(oct_of(the_trace_address));
-         log(" := [N1] = #");
-         log(oct_of(the_trace_operand));
+         log(
+             "Store watchpoint: #"
+           & oct_of(the_trace_address)
+           & " := [N1] = #"
+           & oct_of(the_trace_operand)
+            );
          short_witness;
-         continue_when_GO_is_pressed;
+         interact;
          quit_if_requested;
          change_diagnostic_mode_if_requested;
       end if;
@@ -538,7 +554,7 @@ package body tracing is
 
    procedure act_on_any_two_syllable_order_watchpoints is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when MkMq
             | MkMqQ
             | MkMqH
@@ -563,7 +579,7 @@ package body tracing is
 
    procedure act_on_any_data_access_order_watchpoints is
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
          when EaMq
             | EaMqQ =>
             act_on_any_fetchpoint;

@@ -3,8 +3,8 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -21,32 +21,35 @@ with Ada.Unchecked_Conversion;
 
 package KDF9.CPU is
 
+--
+--
    --
-   -- 48-bit integer and fractional ALU
+   -- 48-bit integer and fractional ALU types and operations
    --
+--
+--
 
-   type signed is range -2**47 .. +2**47 - 1;
-   for  signed'Size use KDF9.word'Size;
+   type signed is range -2**47 .. +2**47 - 1 with Size => KDF9.word'Size;
 
    function unsign is new Ada.Unchecked_Conversion (CPU.signed, KDF9.word);
 
    function resign is new Ada.Unchecked_Conversion (KDF9.word, CPU.signed);
 
    function "-" (I : CPU.signed)
-   return KDF9.word;
-   pragma Inline("-");
+   return KDF9.word
+      with Inline;
 
    function "abs" (I : CPU.signed)
-   return KDF9.word;
-   pragma Inline("abs");
+   return KDF9.word
+      with Inline;
 
    function "+" (L, R : CPU.signed)
-   return KDF9.word;
-   pragma Inline("+");
+   return KDF9.word
+      with Inline;
 
    function "-" (L, R : CPU.signed)
-   return KDF9.word;
-   pragma Inline("-");
+   return KDF9.word
+      with Inline;
 
    function "*" (L, R : CPU.signed)
    return KDF9.word;
@@ -54,11 +57,13 @@ package KDF9.CPU is
    -- Determine the Quotient and Remainder of L/R, where:
    --    sign(Remainder) = sign(R) and |Remainder| < |R|, i.e. Remainder = L mod R;
    --    Quotient = (L - Remainder) / R.
+
    procedure do_DIVI (L : in KDF9.word;
                       R : in KDF9.word;
                       Quotient, Remainder : out KDF9.word);
 
-   -- Signed single-length integer division is removed from consideration.
+   -- Signed single-length integer substrate division is removed from consideration.
+
    function "/" (L, R : CPU.signed)
    return KDF9.word is abstract;
 
@@ -66,51 +71,60 @@ package KDF9.CPU is
    return KDF9.word is abstract;
 
    -- Contract a double-word, setting the V bit if necessary.
+
    function contracted (P : KDF9.pair)
-   return KDF9.word;
-   pragma Inline(contracted);
+   return KDF9.word
+      with Inline;
 
    -- Contract a double-word, represented by its components, setting the V bit if necessary.
+
    function contracted (msw, lsw : KDF9.word)
-   return KDF9.word;
-   pragma Inline(contracted);
+   return KDF9.word
+      with Inline;
 
-   -- KDF9-semantics shifting operations.
+--
+--
+   -- Shifting operations with KDF9 semantics.
+--
+--
 
-   type signed_Q_part is range  -2**15 .. +2**15 - 1;
-   for  signed_Q_part'Size use KDF9.Q_part'Size;
+   type signed_Q_part is range  -2**15 .. +2**15 - 1 with Size => KDF9.Q_part'Size;
 
    function resign is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
 
-   -- L>0 for left-shift, L<0 for right two_shift.
+   -- L>0 for left-shift, L<0 for right-shift.
 
    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
-   return KDF9.word;
-   pragma Inline(shift_logical);
+   return KDF9.word
+      with Inline;
 
    function shift_circular (W : KDF9.word; L : CPU.signed_Q_part)
-   return KDF9.word;
-   pragma Inline(shift_circular);
+   return KDF9.word
+      with Inline;
 
    -- shift_arithmetic rounds the result correctly.
    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
-   return KDF9.word;
-   pragma Inline(shift_arithmetic);
+   return KDF9.word
+      with Inline;
 
    -- cardinality yields the number of 1-bits in W.
    function cardinality (W : KDF9.word)
-   return KDF9.word;
-   pragma Inline(cardinality);
+   return KDF9.word
+      with Inline;
 
+--
+--
    -- A fraction is a word W interpreted as the value W / 2**47;
+--
+--
 
    KDF9_small : constant := 2.0**(-47);
-   type fraction is delta KDF9_small range -1.0 .. +1.0 - KDF9_small;
-   for fraction'Size use KDF9.word'Size;
 
-   function fractional is new Ada.Unchecked_Conversion (KDF9.word, CPU.fraction);
+   type fraction is delta KDF9_small range -1.0 .. +1.0 - KDF9_small with Size => KDF9.word'Size;
 
-   function integral is new Ada.Unchecked_Conversion (CPU.fraction, KDF9.word);
+   function as_fraction is new Ada.Unchecked_Conversion (KDF9.word, CPU.fraction);
+
+   function as_word     is new Ada.Unchecked_Conversion (CPU.fraction, KDF9.word);
 
    -- These operations treat the KDF9.word operands as full-word fractions,
 
@@ -121,160 +135,174 @@ package KDF9.CPU is
    return CPU.fraction;
 
 
+--
+--
    --
-   -- double-word (95- and 96-bit) ALU
+   -- 48-bit integer and fractional ALU operations
    --
+--
+--
 
    function "+" (L, R : KDF9.pair)
-   return KDF9.pair;
-   pragma Inline("+");
+   return KDF9.pair
+      with Inline;
 
    function "-" (J : KDF9.pair)
-   return KDF9.pair;
-   pragma Inline("-");
+   return KDF9.pair
+      with Inline;
 
    function "-" (L, R : KDF9.pair)
-   return KDF9.pair;
-   pragma Inline("-");
+   return KDF9.pair
+      with Inline;
 
    -- 48 * 48 -> 96-bit, for XD, etc.
+
    function "*" (L, R : KDF9.word)
    return KDF9.pair;
 
    -- 96 / 48 -> 48-bit, for DIVD, DIVR and DIVDF.
+
    procedure do_DIVD (L : in KDF9.pair;
                       R : in KDF9.word;
-                      Q : out KDF9.word;
-                      round : in Boolean := True
+                      Q : out KDF9.word
                      );
 
    procedure do_DIVR (L : in KDF9.pair;
                       R : in KDF9.word;
-                      Quotient, Remainder : out KDF9.word
+                      Quotient,
+                      Remainder : out KDF9.word
                      );
 
    function shift_logical (P : KDF9.pair; L : CPU.signed_Q_part)
-   return KDF9.pair;
-   pragma Inline(shift_logical);
+   return KDF9.pair
+      with Inline;
 
    function shift_arithmetic (P : KDF9.pair; L : CPU.signed_Q_part)
-   return KDF9.pair;
-   pragma Inline(shift_arithmetic);
+   return KDF9.pair
+      with Inline;
 
 
+--
+--
    --
-   -- 48-bit floating point ALU
+   -- 48-bit floating point ALU types and operations
    --
+--
+--
 
-   type float is mod 2**48;  -- This is a substrate for KDF9 f.p., not an Ada f.p. type.
-   for  float'Size use KDF9.word'Size;
+   -- This is a substrate for KDF9 floating point, not an Ada f.p. type.
 
-   -- Remove useless substrate modular operations.
+   type f48 is mod 2**48 with Size => KDF9.word'Size;
 
-   overriding
-   function "not" (R : CPU.float)
-   return CPU.float is abstract;
-
-   overriding
-   function "and" (L, R : CPU.float)
-   return CPU.float is abstract;
+   -- Remove useless substrate modular operations not, and, or, xor and mod.
 
    overriding
-   function "or" (L, R : CPU.float)
-   return CPU.float is abstract;
+   function "not" (R : CPU.f48)
+   return CPU.f48 is abstract;
 
    overriding
-   function "xor" (L, R : CPU.float)
-   return CPU.float is abstract;
+   function "and" (L, R : CPU.f48)
+   return CPU.f48 is abstract;
 
    overriding
-   function "mod" (L, R : CPU.float)
-   return CPU.float is abstract;
+   function "or" (L, R : CPU.f48)
+   return CPU.f48 is abstract;
 
-   function as_word is new Ada.Unchecked_Conversion (CPU.float, KDF9.word);
+   overriding
+   function "xor" (L, R : CPU.f48)
+   return CPU.f48 is abstract;
 
-   function as_float is new Ada.Unchecked_Conversion (KDF9.word, CPU.float);
+   overriding
+   function "mod" (L, R : CPU.f48)
+   return CPU.f48 is abstract;
 
-   procedure push (F : in CPU.float);
-   pragma Inline(push);
+   function as_word is new Ada.Unchecked_Conversion (CPU.f48, KDF9.word);
+
+   function as_f48  is new Ada.Unchecked_Conversion (KDF9.word, CPU.f48);
+
+   procedure push (F : in CPU.f48);
 
    function pop
-   return CPU.float;
-   pragma Inline(pop);
+   return CPU.f48
+      with Inline;
 
-   procedure write_top (F : in CPU.float);
-   pragma Inline(write_top);
+   procedure write_top (F : in CPU.f48)
+      with Inline;
 
    function read_top
-   return CPU.float;
-   pragma Inline(read_top);
+   return CPU.f48
+      with Inline;
 
     -- Standardize a (possibly) non-normalized floating-point number.
-   function normalized  (R : CPU.float)
-   return CPU.float;
+
+   function normalized  (R : CPU.f48)
+   return CPU.f48;
 
    -- Convert a 47-bit fraction to a rounded, standardized 39-bit mantissa,
-   --    and adjust its exponent accordingly.
-   procedure normalize (fraction, exponent : in out KDF9.word);
-   pragma Inline(normalize);
+   --    and adjust its exponent accordingly, setting overflow when necessary.
+
+   procedure normalize (fraction, exponent : in out KDF9.word)
+      with Inline;
 
    -- Convert a 39-bit mantissa to a 47-bit fraction, preserving the sign.
-   function fraction_word (mantissa : CPU.float)
-   return KDF9.word;
-   pragma Inline(fraction_word);
+
+   function fraction_word (mantissa : CPU.f48)
+   return KDF9.word
+      with Inline;
 
    -- The floating-point number with the exponent field set to 0.
-   function masked_mantissa (F : CPU.float)
-   return CPU.float;
-   pragma Inline(masked_mantissa);
 
-   -- The algebraic scale-factor,  not the hardware exponent, -128 <= scaler < +128.
-   function scaler (F : CPU.float)
-   return KDF9.word;
-   pragma Inline(scaler);
+   function masked_mantissa (F : CPU.f48)
+   return CPU.f48
+      with Inline;
+
+   -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
+
+   function scaler (F : CPU.f48)
+   return KDF9.word
+      with Inline;
 
     -- Synthesize a normalized floating-point number from its components.
+
    function normalized (full_fraction, scaler : KDF9.word)
-   return CPU.float;
-   pragma Inline(normalized);
+   return CPU.f48
+      with Inline;
 
    -- Round a 48-bit floating-point number to 24-bit format.
-   function rounded (R : CPU.float)
-   return CPU.float;
+
+   function narrowed (R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "-" (R : CPU.float)
-   return CPU.float;
+   function "-" (R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "abs" (R : CPU.float)
-   return CPU.float;
+   function "abs" (R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "+" (L, R : CPU.float)
-   return CPU.float;
+   function "+" (L, R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "-" (L, R : CPU.float)
-   return CPU.float;
+   function "-" (L, R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "*" (L, R : CPU.float)
-   return CPU.float;
+   function "*" (L, R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "/" (L, R : CPU.float)
-   return CPU.float;
+   function "/" (L, R : CPU.f48)
+   return CPU.f48;
 
    overriding
-   function "<" (L, R : CPU.float)
+   function "<" (L, R : CPU.f48)
    return Boolean;
 
-   function host_float (X : CPU.float)
+   function host_float (X : CPU.f48)
    return Long_Float;
-
-   function KDF9_float (X : Long_Float)
-   return CPU.float;
 
    exponent_mask : constant KDF9.word := KDF9.word'(2#11_111_111#) * 2**39;
    mantissa_mask : constant KDF9.word := not exponent_mask;
@@ -283,162 +311,161 @@ package KDF9.CPU is
    overflow_mask : constant KDF9.word := 2**39;  -- bit set on rounding overflow
 
 
+--
+--
    --
-   -- 96-bit floating point ALU
+   -- 96-bit floating point ALU types and operations
    --
+--
+--
 
-   type double is
+   type f96 is
       record
-         msw, lsw : CPU.float;
+         msw, lsw : CPU.f48;
       end record;
 
-   function as_pair is new Ada.Unchecked_Conversion (CPU.double, KDF9.pair);
+   function as_pair is new Ada.Unchecked_Conversion (CPU.f96, KDF9.pair);
 
-   function as_double is new Ada.Unchecked_Conversion (KDF9.pair, CPU.double);
+   function as_f96  is new Ada.Unchecked_Conversion (KDF9.pair, CPU.f96);
 
-   procedure push (DF : in CPU.double);
-   pragma Inline(push);
+   procedure push (DF : in CPU.f96)
+      with Inline,
+           Pre => the_nest_depth < 15
+               or else the_CPU_state = Director_state;
 
    function pop
-   return CPU.double;
-   pragma Inline(pop);
+   return CPU.f96
+      with Inline;
 
-   procedure write_top (DF : in CPU.double);
-   pragma Inline(write_top);
+   procedure write_top (DF : in CPU.f96)
+      with Inline;
 
    function read_top
-   return CPU.double;
-   pragma Inline(read_top);
+   return CPU.f96
+      with Inline;
 
-   -- The algebraic scale-factor,  not the hardware exponent, -128 <= scaler < +128.
-   function scaler (DF : CPU.double)
-   return KDF9.word;
-   pragma Inline(scaler);
+   -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
+
+   function scaler (DF : CPU.f96)
+   return KDF9.word
+      with Inline;
+
+   procedure validate_scaler (E : in KDF9.word; where : in String)
+      with Inline => False,
+           Post   =>  resign(E) in -254 .. +256;
 
    -- Round a 96-bit double-precision floating-point number to 48 bit format.
-   function rounded (DF : CPU.double)
-   return CPU.float;
-   pragma Inline(rounded);
+
+   function narrowed (DF : CPU.f96)
+   return CPU.f48
+      with Inline;
 
    -- Derive a 96-bit fraction from the double-precision floating-point number,
    --    with the mantissa bits in D9-D47 and D49-D87,
    --       and with D1-D8 copies of the sign, D48 zero, and D87-D95 zero.
-   function fraction_pair (DF : CPU.double)
-   return KDF9.pair;
-   pragma Inline(fraction_pair);
+
+   function fraction_pair (DF : CPU.f96)
+   return KDF9.pair
+      with Inline;
 
    -- Convert 96-bit fraction, and an algebraic scale-factor exponent,
    --    into a 96-bit floating point number, setting overflow when necessary.
+
    procedure reconstruct (frac   : in out KDF9.pair;
                           scaler : in KDF9.word);
 
-   function "-" (R : CPU.double)
-   return CPU.double;
+   function "-" (R : CPU.f96)
+   return CPU.f96;
 
-   function "+" (L, R : CPU.double)
-   return CPU.double;
+   function "+" (L, R : CPU.f96)
+   return CPU.f96;
 
-   function "-" (L, R : CPU.double)
-   return CPU.double;
+   function "-" (L, R : CPU.f96)
+   return CPU.f96;
 
-   function "*" (L, R : CPU.float)
-   return CPU.double;
+   function "*" (L, R : CPU.f48)
+   return CPU.f96;
 
-   function "/" (L : CPU.double;
-                 R : CPU.float)
-   return CPU.float;
+   function "/" (L : CPU.f96;
+                 R : CPU.f48)
+   return CPU.f48;
 
-   function host_double (X : CPU.double)
-   return Long_Float;
+------------------------------------------------------------------------------------------------
 
-   function KDF9_double (X : Long_Float)
-   return CPU.double;
-
-
+--
+--
    --
    -- These are the emulation host's register types and their operations.
    --
+--
+--
 
-   type u_64 is mod 2**64;
-   for  u_64'Size use 64;
+   type u_64 is mod 2**64 with Size => 64;
+
+   pragma Provide_Shift_Operators (u_64);
 
    function as_word (u : CPU.u_64)
-   return KDF9.word;
-   pragma Inline(as_word);
+   return KDF9.word
+      with Inline;
 
-   function rotate_right (u : CPU.u_64; amount : Natural)
-   return CPU.u_64;
-
-   function shift_right (u : CPU.u_64; amount : Natural)
-   return CPU.u_64;
-
-   function shift_right_arithmetic (u : CPU.u_64; amount : Natural)
-   return CPU.u_64;
-
-   function rotate_left (u : CPU.u_64; amount : Natural)
-   return CPU.u_64;
-
-   function shift_left (u : CPU.u_64; amount : Natural)
-   return CPU.u_64;
-
-   pragma Import(Intrinsic, rotate_left);
-   pragma Import(Intrinsic, rotate_right);
-   pragma Import(Intrinsic, shift_left);
-   pragma Import(Intrinsic, shift_right);
-   pragma Import(Intrinsic, shift_right_arithmetic);
-
-   type s_64 is range -2**63 .. +2**63-1;
-   for  s_64'Size use CPU.u_64'Size;
+   type s_64 is range -2**63 .. +2**63-1 with Size => 64;
 
    -- The signed as_word sets the V bit if necessary.
+
    function as_word (s : CPU.s_64)
-   return KDF9.word;
-   pragma Inline(as_word);
+   return KDF9.word
+      with Inline;
 
    function unsign is new Ada.Unchecked_Conversion(CPU.s_64, CPU.u_64);
 
    function resign is new Ada.Unchecked_Conversion(CPU.u_64, CPU.s_64);
 
-
+--
+--
    --
-   -- These are KDF9's 48-bit primitive, fixed-direction, shift operations.
+   -- These are the 48-bit primitive, fixed-direction, shift operations.
    --
+--
+--
 
    function shift_time (amount : Natural)
-   return KDF9.microseconds;
-   pragma Inline(shift_time);
+   return KDF9.us
+      with Inline;
 
    subtype word_shift_length is Natural range 0..48;
 
    function shift_word_left (W : KDF9.word; amount : word_shift_length)
-   return KDF9.word;
-   pragma Inline(shift_word_left);
+   return KDF9.word
+      with Inline;
 
    function shift_word_right (W : KDF9.word; amount : word_shift_length)
-   return KDF9.word;
-   pragma Inline(shift_word_right);
+   return KDF9.word
+      with Inline;
 
    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
-   return KDF9.word;
-   pragma Inline(rotate_word_left);
+   return KDF9.word
+      with Inline;
 
    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
-   return KDF9.word;
-   pragma Inline(rotate_word_right);
+   return KDF9.word
+      with Inline;
 
    -- scale_up may set the V bit.
+
    function scale_up (W : KDF9.word; amount : Natural)
-   return KDF9.word;
-   pragma Inline(scale_up);
+   return KDF9.word
+      with Inline;
 
    -- scale_down_and_round rounds correctly.
+
    function scale_down_and_round (W : KDF9.word; amount : Natural)
-   return KDF9.word;
-   pragma Inline(scale_down_and_round);
+   return KDF9.word
+      with Inline;
 
    -- scale_down never rounds.
+
    function scale_down (W : KDF9.word; amount : Natural)
-   return KDF9.word;
-   pragma Inline(scale_down);
+   return KDF9.word
+      with Inline;
 
 end KDF9.CPU;

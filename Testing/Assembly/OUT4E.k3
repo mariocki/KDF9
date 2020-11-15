@@ -1,0 +1,45 @@
+ST8192; TL12;
+V99; W0; YA4096;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(test attempt to write past PET - should fail);
+
+   V0 = PEFPBEAAG;         (tape label);
+   V1 = Q0/AV2/AV3;        (to read label data);
+   V2 = 0;                 (for TSN);
+   V3 = 0;                 (for label);
+
+   V4 = Q0/AV5/AV5;        (for TP0 tracing output);
+   V5 = 0;                 (tracing word);
+
+   V6 = Q1/AYA0/AYA4095;   (for data output)
+
+   V13 = B6445636400450277;  (TEST E);
+   V14 = B5441424554004602;  (LABEL B);
+   V15 = B4651565163500277;  (FINISH);
+
+   (claim tape);
+   V0; SET4; OUT; V1; =Q1; =C1;
+
+   (claim TP0);
+   SET 1; SET 5; OUT; V4; =Q10; =C10;
+   V13; =V5; POAQ10;
+
+   MFRQ1; (read label);
+   V0; V3; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V14; =V5; POAQ10;
+
+   (FINISH message);
+   V15; =V5; POAQ10;
+
+   V6; =Q6; C1 TO Q6;
+2;
+   MWQ6; (write a big block);
+   J2;   (deliberate infinite loop to fill the tape);
+
+   MRWDQ0; (fail - should not get here);
+
+FINISH;
+|

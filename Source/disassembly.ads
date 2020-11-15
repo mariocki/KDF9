@@ -2,8 +2,8 @@
 --
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -22,35 +22,15 @@ use  KDF9;
 
 package disassembly is
 
-   pragma Unsuppress(All_Checks);
-
-   function machine_code (decoded : KDF9.decoded_order)
+   function the_code_and_name_of_INS
    return String;
 
-   function one_syllable_order_name (decoded : KDF9.decoded_order)
+   function the_full_name_of (order        : KDF9.decoded_order;
+                              octal_option : Boolean := True;
+                              both_bases   : Boolean := True)
    return String;
 
-   function two_syllable_order_name (decoded : KDF9.decoded_order)
-   return String;
-
-   function normal_jump_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean)
-   return String;
-
-   function data_access_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean)
-   return String;
-
-   function the_name_of (order : KDF9.decoded_order; octal_option : Boolean := True)
-   return String;
-
-   function the_order (order : KDF9.syllable_group; octal_option : Boolean)
-   return String;
-
-   function the_order_at (address : KDF9.code_point; octal_option : Boolean)
-   return String;
-
-   function the_skeleton_order (syllable_0 : KDF9.syllable)
+   function the_short_name_of (syllable_0 : KDF9.syllable)
    return String;
 
 end disassembly;

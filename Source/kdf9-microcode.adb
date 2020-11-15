@@ -2,8 +2,8 @@
 --
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,12 +16,13 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with break_in;
 with exceptions;
 with IOC;
-with IOC.assignment;
-with KDF9.compressed_opcodes;
+with IOC.dispatcher;
 with KDF9.CPU;
 with KDF9.Directors;
+with KDF9.decoding;
 with KDF9.store;
 with POSIX;
 with settings;
@@ -30,11 +31,12 @@ with tracing;
 
 use  exceptions;
 use  IOC;
-use  IOC.assignment;
-use  KDF9.compressed_opcodes;
+use  IOC.dispatcher;
 use  KDF9.CPU;
 use  KDF9.Directors;
+use  KDF9.decoding;
 use  KDF9.store;
+use  POSIX;
 use  settings;
 use  state_display;
 use  tracing;
@@ -43,25 +45,31 @@ package body KDF9.microcode is
 
    procedure do_a_one_syllable_order is
       A, B, C, E : KDF9.word;
+      bit_count  : KDF9.word;
       AB, CD     : KDF9.pair;
-      X, Y       : CPU.float;
-      XY, ZT     : CPU.double;
+      X, Y       : CPU.f48;
+      XY, ZT     : CPU.f96;
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
+
+         when 0 =>
+            -- The DUMMY order originally had code 0, before being changed to #17.
+            -- The Kidsgrove compiler continued to use code 0, so we must assume that,
+            --    despite the Manual, 0 continued to be a valid no-op order.
+            the_CPU_delta := the_CPU_delta + 1;
 
          when VR =>
-            the_V_bit := 0;
+            the_V_bit_is_set := False;
             the_CPU_delta := the_CPU_delta + 1;
 
          when TO_TR =>
             ensure_that_the_nest_holds_an_operand;
             if resign(pop) < 0 then
-               the_T_bit := 1;
+               the_T_bit_is_set := True;
             end if;
             the_CPU_delta := the_CPU_delta + 2;
 
          when BITS =>
-            check_whether_the_nest_holds_an_operand;
             write_top(cardinality(read_top));
             the_CPU_delta := the_CPU_delta + 27;
 
@@ -69,7 +77,7 @@ package body KDF9.microcode is
             ensure_that_the_nest_holds_2_operands;
             X := pop;
             Y := read_top;
-            write_top(CPU.float'(Y * X));
+            write_top(CPU.f48'(Y * X));
             the_CPU_delta := the_CPU_delta + 15;
 
          when XDF =>
@@ -88,7 +96,6 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 18;
 
          when NEGD =>
-            check_whether_the_nest_holds_2_operands;
             AB := read_top;
             write_top( - AB);
             the_CPU_delta := the_CPU_delta + 2;
@@ -100,7 +107,6 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 1;
 
          when PERM =>
-            check_whether_the_nest_holds(at_least => 3);
             A := pop;
             CD := pop;
             push(A);
@@ -109,19 +115,22 @@ package body KDF9.microcode is
 
          when TOB =>
             ensure_that_the_nest_holds_2_operands;
-            A := pop;
-            B := read_top;
+            A := pop;      -- the value
+            bit_count := cardinality(A);
+            B := read_top; -- the radixes
             C := 0;
+
             for i in 1 .. 8 loop
                A := rotate_word_left(A, 6);
                B := rotate_word_left(B, 6);
-               C := C*(B and 8#77#) + (A and 8#77#);
+               E := B and 8#77#; -- this radix
+               C := C*E + (A and 8#77#);
             end loop;
+
             write_top(C);
-            the_CPU_delta := the_CPU_delta + 27;
+            the_CPU_delta := the_CPU_delta + 2 + 4*KDF9.us(bit_count);
 
          when ROUNDH =>
-            check_whether_the_nest_holds_an_operand;
             A := read_top;
             write_top(resign(A) + 2**23);
             the_CPU_delta := the_CPU_delta + 22;
@@ -145,13 +154,12 @@ package body KDF9.microcode is
             ensure_that_the_nest_holds_2_operands;
             XY := pop;
             ZT := XY;
-            push(rounded(XY));
+            push(narrowed(XY));
             the_CPU_delta := the_CPU_delta + 3;
 
          when ROUNDHF =>
-            check_whether_the_nest_holds_an_operand;
             X := pop;
-            push(rounded(X));
+            push(narrowed(X));
             the_CPU_delta := the_CPU_delta + 3;
 
          when MINUSDF =>
@@ -170,33 +178,35 @@ package body KDF9.microcode is
 
          when FLOAT_9 =>
             ensure_that_the_nest_holds_2_operands;
-            A := pop;
+            -- There is great uncertainty as to how the FLOAT/FLOATD orders handled scale factors
+            --   in N1 that lie outside the range allowed by the Manual, namely -128 <= N1 <= +127.
+            -- ee9 here takes a safety-first approach which is consistent with the
+            --    behaviour of the Kidsgrove sqrt function with arguments < 0.5º0.
+            A := shift_arithmetic(shift_logical(pop, +40), -40);
             B := read_top;
             write_top(KDF9.word(normalized(full_fraction => B, scaler => A)));
-            the_CPU_delta := the_CPU_delta + 7;
 
          when FLOATD =>
             ensure_that_the_nest_holds(at_least => 3);
-            A := pop;
+            A := shift_arithmetic(shift_logical(pop, +40), -40);
             CD := read_top;
-            -- See §3.4 of Report K/GD.y.83, dated 6/12/1962.
-            CD.lsw := CD.lsw and not 8#77#;  -- The 6 l.s.b. are lost.
+            -- See §3.4 of Report K/GD.y.83, dated 6/12/1962.  It would seem to require this:
+            -- CD.lsw := CD.lsw and not 8#77#;  -- The 6 l.s.b. are lost.
+            -- The above is commented out because it gives the wrong answer with KAA01.
+            -- A post-document hardware modification is suspected.
             reconstruct(CD, scaler => A);
             write_top(CD);
             the_CPU_delta := the_CPU_delta + 8;
 
          when ABS_9 =>
-            check_whether_the_nest_holds_an_operand;
             write_top( abs resign(read_top));
             the_CPU_delta := the_CPU_delta + 1;
 
          when NEG =>
-            check_whether_the_nest_holds_an_operand;
             write_top( - resign(read_top));
             the_CPU_delta := the_CPU_delta + 1;
 
          when ABSF =>
-            check_whether_the_nest_holds_an_operand;
             X := read_top;
             if resign(KDF9.word(X)) < 0 then
                write_top( - X);
@@ -206,22 +216,19 @@ package body KDF9.microcode is
             end if;
 
          when NEGF =>
-            check_whether_the_nest_holds_an_operand;
             X := read_top;
             write_top( - X);
             the_CPU_delta := the_CPU_delta + 3;
 
          when MAX =>
-            check_whether_the_nest_holds_2_operands;
             AB := read_top;
             if resign(AB.lsw) >= resign(AB.msw) then
                write_top(KDF9.pair'(msw => AB.lsw, lsw =>AB.msw));
-               the_V_bit := 1;
+               the_V_bit_is_set := True;
             end if;
             the_CPU_delta := the_CPU_delta + 4;
 
          when NOT_9 =>
-            check_whether_the_nest_holds_an_operand;
             A := read_top;
             write_top(not A);
             the_CPU_delta := the_CPU_delta + 1;
@@ -235,7 +242,7 @@ package body KDF9.microcode is
          when X_frac =>
             ensure_that_the_nest_holds_2_operands;
             A := pop;
-            write_top(integral(CPU.fraction'(read_top * A)));
+            write_top(as_word(CPU.fraction'(read_top * A)));
             the_CPU_delta := the_CPU_delta + 15;
 
          when MINUS =>
@@ -264,21 +271,18 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when DUP =>
-            check_whether_the_nest_holds_an_operand;
             ensure_that_the_nest_has_room_for_a_result;
             A := read_top;
             push(A);
             the_CPU_delta := the_CPU_delta + 2;
 
          when DUPD =>
-            check_whether_the_nest_holds_2_operands;
             ensure_that_the_nest_has_room_for_2_results;
             AB := read_top;
             push(AB);
             the_CPU_delta := the_CPU_delta + 4;
 
          when DIVI =>
-            check_whether_the_nest_holds_2_operands;
             AB := read_top;
             do_DIVI(L => AB.lsw,
                     R => AB.msw,
@@ -296,7 +300,6 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 6;
 
          when STR =>
-            check_whether_the_nest_holds_an_operand;
             ensure_that_the_nest_has_room_for_a_result;
             A := read_top;
             if resign(A) < 0 then
@@ -315,7 +318,6 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when REVD =>
-            check_whether_the_nest_holds(at_least => 4);
             AB := pop;
             CD := pop;
             push(AB);
@@ -357,7 +359,7 @@ package body KDF9.microcode is
          when DIV =>
             ensure_that_the_nest_holds_2_operands;
             AB := pop;
-            push(integral(CPU.fraction'(AB.lsw / AB.msw)));
+            push(as_word(CPU.fraction'(AB.lsw / AB.msw)));
             the_CPU_delta := the_CPU_delta + 36;
 
          when DIVD =>
@@ -371,7 +373,6 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 36;
 
          when DIVF =>
-            check_whether_the_nest_holds_2_operands;
             X := pop;
             Y := read_top;
             write_top(Y / X);
@@ -396,13 +397,11 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 36;
 
          when REV =>
-            check_whether_the_nest_holds_2_operands;
             AB := read_top;
             write_top(KDF9.pair'(msw => AB.lsw, lsw =>AB.msw));
             the_CPU_delta := the_CPU_delta + 1;
 
          when CAB =>
-            check_whether_the_nest_holds(at_least => 3);
             AB := pop;
             C := pop;
             push(AB);
@@ -411,36 +410,45 @@ package body KDF9.microcode is
 
          when FRB =>
             ensure_that_the_nest_holds_2_operands;
-            A := pop;
-            B := read_top;
+            A := pop;      -- the value
+            bit_count := cardinality(A);
+            B := read_top; -- the radixes
             C := 0;
+
             for i in 1 .. 8 loop
-               C := C or (A mod (B and 8#77#));
-               A := KDF9.word'(A / (B and 8#77#));
+               E := B and 8#77#;
+               if E /= 0 then
+                  C := C or (A mod E);
+                  A := A / E;
+               else
+                  if A /= 0 then the_V_bit_is_set := True; end if;
+               end if;
                B := shift_word_right(B, 6);
                C := rotate_word_right(C, 6);
             end loop;
+
+            if A /= 0 then
+               -- The value was too big for the representation; see Manual.
+               the_V_bit_is_set := True;
+            end if;
             write_top(C);
-            the_CPU_delta := the_CPU_delta + 30;
+            the_CPU_delta := the_CPU_delta + 8 + 3*KDF9.us(bit_count);
 
          when STAND =>
-            check_whether_the_nest_holds_an_operand;
             X := read_top;
             write_top(normalized(X));
             the_CPU_delta := the_CPU_delta + 5;
 
          when NEGDF =>
-            check_whether_the_nest_holds_2_operands;
             XY := read_top;
             write_top( - XY);
             the_CPU_delta := the_CPU_delta + 9;
 
          when MAXF =>
-            check_whether_the_nest_holds_2_operands;
             XY := read_top;
             if XY.lsw >= XY.msw then
-               write_top(CPU.double'(msw => XY.lsw, lsw =>XY.msw));
-               the_V_bit := 1;
+               write_top(CPU.f96'(msw => XY.lsw, lsw =>XY.msw));
+               the_V_bit_is_set := True;
             end if;
             the_CPU_delta := the_CPU_delta + 6;
 
@@ -466,7 +474,7 @@ package body KDF9.microcode is
             elsif XY.lsw < XY.msw then
                push(all_one_bits);
             else
-               push(one_in_ls_bit);
+               push(KDF9.word(1));
             end if;
             the_CPU_delta := the_CPU_delta + 5;
 
@@ -476,192 +484,201 @@ package body KDF9.microcode is
       end case;
    end do_a_one_syllable_order;
 
-   procedure do_an_IO_order is
-      set_offline : constant Boolean         := (INS.Qk and manual_bit) /= 0;
-      IO_opcode   : constant KDF9.syndrome   := (INS.Qk and not manual_bit);
-      IO_operand  : constant KDF9.Q_register := the_Q_store(INS.Qq);
-   begin
-      case INS.syndrome is
 
-         when PARQq =>
+   procedure do_an_IO_order is
+      IO_opcode   : constant KDF9.compressed_opcode := (INS.Qk and not manual_bit);
+      IO_operand  : constant KDF9.Q_register := the_Q_store(INS.Qq);
+      set_offline : constant Boolean         := (INS.Qk and manual_bit) /= 0;
+   begin
+      case INS.compressed_opcode is
+
+         when PAR_Qq =>
             the_CPU_delta := the_CPU_delta + 11;
-            PAR(IO_operand, set_offline, the_T_bit);
+            PAR(IO_operand, set_offline, the_T_bit_is_set);
             the_CPU_delta := the_CPU_delta + 3;
 
-         when PIAQq_PICQq_CLOQq_TLOQq =>
+         when PIA_PIC_CLO_TLO_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when PIAQq_bits =>
+               when PIA_bits =>
                   PIA(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when PICQq_bits =>
+               when PIC_bits =>
                   PIC(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when CLOQq_bits =>
-                  LIV_if_user_mode;
+               when CLO_bits =>
+                  fail_in_problem_program_state;
                   CLO(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 1;
-               when TLOQq_bits =>
-                  TLO(IO_operand, the_T_bit);
+               when TLO_bits =>
+                  TLO(IO_operand, the_T_bit_is_set);
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PIBQq_PIDQq =>
+         when PIB_PID_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when PIBQq_bits =>
+               when PIB_bits =>
                   PIB(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when PIDQq_bits =>
+               when PID_bits =>
                   PID(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PIEQq_PIGQq =>
+         when PIE_PIG_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when PIEQq_bits =>
+               when PIE_bits =>
                   PIE(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when PIGQq_bits =>
+               when PIG_bits =>
                   PIG(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PIFQq_PIHQq =>
+         when PIF_PIH_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when PIFQq_bits =>
+               when PIF_bits =>
                   PIF(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when PIHQq_bits =>
+               when PIH_bits =>
                   PIH(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PMAQq_PMKQq_INTQq =>
+         when PMA_PMK_INT_Qq =>
             the_CPU_delta := the_CPU_delta + 11;
             case IO_opcode is
-               when PMAQq_bits =>
+               when PMA_bits =>
                   PMA(IO_operand, set_offline);
-               when PMKQq_bits =>
+               when PMK_bits =>
                   PMK(IO_operand, set_offline);
-               when INTQq_bits =>
+               when INT_bits =>
                   INT(IO_operand, set_offline);
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when CTQq_PMBQq_PMCQq_BUSYQq =>
+         when CT_PMB_PMC_BUSY_Qq =>
             the_CPU_delta := the_CPU_delta + 11;
             case IO_opcode is
-               when CTQq_bits =>
-                  LIV_if_user_mode;
-                  CTQ(IO_operand, set_offline);
-                  the_CPU_delta := the_CPU_delta + 2;
-               when PMBQq_bits =>
+               when CTQ_bits =>
+                  -- if set_offline then MANUALQq else CTQq
+                  if set_offline                      or else
+                        the_CPU_state = Director_state   then
+                     MANUAL_CT(IO_operand, set_offline);
+                     the_CPU_delta := the_CPU_delta + 2;
+                  else
+                     trap_invalid_instruction; -- This will always LIV, as we are not in Director.
+                  end if;
+               when PMB_bits =>
                   PMB(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 3;
-               when PMCQq_bits =>
+               when PMC_bits =>
                   PMC(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 3;
-               when BUSYQq_bits =>
-                  BUSY(IO_operand, set_offline, the_T_bit);
+               when BUSY_bits =>
+                  BUSY(IO_operand, set_offline, the_T_bit_is_set);
                   the_CPU_delta := the_CPU_delta + 2;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PMDQq_PMEQq_PMLQq =>
+         when PMD_PME_PML_Qq =>
             the_CPU_delta := the_CPU_delta + 14;
             case IO_opcode is
-               when PMDQq_bits =>
+               when PMD_bits =>
                   PMD(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 5;
-               when PMEQq_bits =>
+               when PME_bits =>
                   PME(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 5;
-               when PMLQq_bits =>
+               when PML_bits =>
                   PML(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 5;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when PMFQq =>
+         when PMF_PMG_Qq =>
             the_CPU_delta := the_CPU_delta + 11;
-            PMF(IO_operand, set_offline);
-            the_CPU_delta := the_CPU_delta + 3;
+            case IO_opcode is
+               when PMF_bits =>
+                  PMF(IO_operand, set_offline);
+                  the_CPU_delta := the_CPU_delta + 3;
+               when PMG_bits =>
+                  fail_in_problem_program_state;
+                  the_CPU_delta := the_CPU_delta + 14;  -- ??
+                  PMG(IO_operand, set_offline);
+                when others =>
+                  trap_invalid_instruction;
+            end case;
 
-         when PMGQq =>
-            LIV_if_user_mode;
-            the_CPU_delta := the_CPU_delta + 14;  -- ??
-            PMG(IO_operand, set_offline);
-
-         when PMHQq =>
-            LIV_if_user_mode;
-            the_CPU_delta := the_CPU_delta + 16;  -- ??
-            PMH(IO_operand, set_offline);
-
-         when POAQq_POCQq_POEQq_POFQq =>
+         when POA_POC_POE_POF_PMH_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when POAQq_bits =>
+               when POA_bits =>
                   POA(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when POCQq_bits =>
+               when POC_bits =>
                   POC(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when POEQq_bits =>
+               when POE_bits =>
                   POE(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 4;
-               when POFQq_bits =>
+               when POF_bits =>
                   POF(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 4;
+               when PMH_bits =>
+                  fail_in_problem_program_state;
+                  SLO(IO_operand, set_offline);
+                  the_CPU_delta := the_CPU_delta + 1;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when POBQq_PODQq =>
+         when POB_POD_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when POBQq_bits =>
+               when POB_bits =>
                   POB(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when PODQq_bits =>
+               when POD_bits =>
                   POD(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when POGQq_POLQq =>
+         when POG_POL_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when POGQq_bits =>
+               when POG_bits =>
                   POG(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when POLQq_bits =>
+               when POL_bits =>
                   POL(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
                   trap_invalid_instruction;
             end case;
 
-         when POHQq_POKQq =>
+         when POH_POK_Qq =>
             the_CPU_delta := the_CPU_delta + 15;
             case IO_opcode is
-               when POHQq_bits =>
+               when POH_bits =>
                   POH(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
-               when POKQq_bits =>
+               when POK_bits =>
                   POK(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
@@ -670,61 +687,63 @@ package body KDF9.microcode is
 
          when others =>
             trap_invalid_instruction;
+
       end case;
    end do_an_IO_order;
 
+
    all_zero_Q_store : constant KDF9.Q_register := (C | I | M => 0);
 
-   procedure ensure_that_Q0_contains_zero (suspect : KDF9.Q_number);
-   pragma Inline(ensure_that_Q0_contains_zero);
+   procedure ensure_that_Q0_contains_zero (suspect : KDF9.Q_number)
+      with Inline;
 
    procedure ensure_that_Q0_contains_zero (suspect : KDF9.Q_number) is
    begin
-      if suspect /= 0 then
-         return;  -- There cannot be a problem.
-      end if;
-      -- Q0 was updated, so deal with the possibility of a non-zero result.
-      if the_Q_store(0) = all_zero_Q_store then
-         return;  -- All is well.
-      end if;
-      if the_authenticity_mode = lax_mode or the_CPU_state = Director_state then
-         the_Q_store(0) := all_zero_Q_store;  -- Suppress the assignment to Q0.
-      else
-         trap_invalid_instruction;
+      if suspect = 0 then
+         the_Q_store(0) := all_zero_Q_store;  -- Override any assignment to Q0.
       end if;
    end ensure_that_Q0_contains_zero;
 
-   procedure auto_increment;
-   pragma Inline(auto_increment);
+   procedure auto_increment
+      with Inline;
 
    procedure auto_increment is
    begin
-      the_Q_store(INS.Qq).M := the_Q_store(INS.Qq).M + the_Q_store(INS.Qq).I;
-      the_Q_store(INS.Qq).C := the_Q_store(INS.Qq).C - 1;
-      ensure_that_Q0_contains_zero(suspect => INS.Qq);
+      if INS.Qq /= 0 then
+         the_Q_store(INS.Qq).M := the_Q_store(INS.Qq).M + the_Q_store(INS.Qq).I;
+         the_Q_store(INS.Qq).C := the_Q_store(INS.Qq).C - 1;
+      end if;
    end auto_increment;
 
-   function shift_count return CPU.signed_Q_part;
-   pragma Inline(shift_count);
+   function shift_count
+   return CPU.signed_Q_part
+      with Inline;
 
-   function shift_count return CPU.signed_Q_part is
-      constant_flag : constant := 1;  -- D15 of order = 1 => fixed amount
-   begin
-      if (INS.order.syllable_1 and constant_flag) /= 0  then
-         return resign(KDF9.Q_part(INS.order.syllable_1/2 xor 64)) - 64;
-      else
-         return resign((the_Q_store(INS.Qq).C and 255) xor 128) - 128;
-      end if;
-   end shift_count;
+   function shift_count
+   return CPU.signed_Q_part
+   is (
+       if (INS.order.syllable_1 and constant_bit) /= 0  then
+          resign(KDF9.Q_part(INS.order.syllable_1/2 xor 64)) - 64
+       else
+          resign((the_Q_store(INS.Qq).C and 255) xor 128) - 128
+      );
+
 
    procedure do_a_two_syllable_order is
       A  : KDF9.word;
       AB : KDF9.pair;
       CD : KDF9.pair;
    begin
-      case INS.syndrome is
+      case INS.compressed_opcode is
 
          when JCqNZS =>
+            if CIA.syllable_index = 5 then
+               -- KDF9 did not actually detect this error, and the JCqNZS instruction often worked,
+               --    unless broken-into by an interrupt, which returned to the word following that
+               --       containing the first syllable of the JCqNZS instruction.
+               -- I see no case for reproducing this behaviour.
+               trap_invalid_instruction ("JCqNZS instruction at syllable 5");
+            end if;
             if the_Q_store(INS.Qq).C /= 0 then
                if fetching_normally then
                   set_IWB0_and_IWB1_for_a_JCqNZS_loop;
@@ -738,16 +757,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 4;
 
          when MkMq =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQ =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
@@ -755,16 +774,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqH =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_nest_has_room_for_a_result;
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQH =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_nest_has_room_for_a_result;
             push(the_trace_operand);
@@ -772,16 +791,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
@@ -789,16 +808,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqHN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_nest_has_room_for_a_result;
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQHN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_nest_has_room_for_a_result;
             push(the_trace_operand);
@@ -806,16 +825,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMq =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQ =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
@@ -823,16 +842,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqH =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQH =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M/2);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
@@ -840,16 +859,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
@@ -857,16 +876,16 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqHN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQHN =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
-            validate_access(the_trace_address);
+            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
@@ -887,66 +906,78 @@ package body KDF9.microcode is
 
          when DCq =>
             the_CPU_delta := the_CPU_delta + 3;
-            the_Q_store(INS.Qq).C := the_Q_store(INS.Qq).C - 1;
-            ensure_that_Q0_contains_zero(suspect => INS.Qq);
+            if INS.Qq /= 0 then
+               the_Q_store(INS.Qq).C := the_Q_store(INS.Qq).C - 1;
+            end if;
 
          when POS1_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
-            the_Q_store(INS.Qq).I := + 1;
-            ensure_that_Q0_contains_zero(suspect => INS.Qq);
+            if INS.Qq /= 0 then
+               the_Q_store(INS.Qq).I := + 1;
+            end if;
 
          when NEG1_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
-            the_Q_store(INS.Qq).I := - 1;
-            ensure_that_Q0_contains_zero(suspect => INS.Qq);
+            if INS.Qq /= 0 then
+               the_Q_store(INS.Qq).I := - 1;
+            end if;
 
          when POS2_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
-            the_Q_store(INS.Qq).I := + 2;
-            ensure_that_Q0_contains_zero(suspect => INS.Qq);
+            if INS.Qq /= 0 then
+               the_Q_store(INS.Qq).I := + 2;
+            end if;
 
          when NEG2_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
-            the_Q_store(INS.Qq).I := - 2;
-            ensure_that_Q0_contains_zero(suspect => INS.Qq);
+            if INS.Qq /= 0 then
+               the_Q_store(INS.Qq).I := - 2;
+            end if;
 
          when CqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
+            end if;
 
          when IqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
+            end if;
 
          when MqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
+            end if;
 
          when QqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk) := the_Q_store(INS.Qq);
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk) := the_Q_store(INS.Qq);
+            end if;
 
          when CIqTOQk =>
-            the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
-            the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+           the_CPU_delta := the_CPU_delta + 4;
+           if INS.Qk /= 0 then
+              the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
+              the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
+           end if;
 
          when IMqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
-            the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk).I := the_Q_store(INS.Qq).I;
+               the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
+            end if;
 
          when CMqTOQk =>
             the_CPU_delta := the_CPU_delta + 4;
-            the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
-            the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
-            ensure_that_Q0_contains_zero(suspect => INS.Qk);
+            if INS.Qk /= 0 then
+               the_Q_store(INS.Qk).C := the_Q_store(INS.Qq).C;
+               the_Q_store(INS.Qk).M := the_Q_store(INS.Qq).M;
+            end if;
 
          when QCIMq =>
             ensure_that_the_nest_has_room_for_a_result;
@@ -1006,6 +1037,12 @@ package body KDF9.microcode is
          when ADD_TO_QCIMq =>
             ensure_that_the_nest_has_room_for_a_result;
             ensure_that_the_nest_holds_an_operand;
+
+            -- Because the following does not push the Q operand on to the NEST,
+            --   it will not leave an authentic bit pattern in the NEST core stack,
+            --      in the event of a subsequent NOUV.
+            -- I take this to be of no importance.
+
             if (INS.Qk and all_Q_choice) = all_Q_choice then -- =+Qq
                the_Q_store(INS.Qq) := as_Q(as_word(the_Q_store(INS.Qq)) + pop);
                the_CPU_delta := the_CPU_delta + 5;
@@ -1027,13 +1064,11 @@ package body KDF9.microcode is
             ensure_that_Q0_contains_zero(suspect => INS.Qq);
 
          when SHA =>
-            check_whether_the_nest_holds_an_operand;
             A := read_top;
             write_top(KDF9.word'(shift_arithmetic(A, shift_count)));
             the_CPU_delta := the_CPU_delta + 2 + shift_time(Natural(abs shift_count));
 
          when SHAD =>
-            check_whether_the_nest_holds_2_operands;
             AB := read_top;
             write_top(KDF9.pair'(shift_arithmetic(AB, shift_count)));
             the_CPU_delta := the_CPU_delta + 2 + shift_time(Natural(abs shift_count));
@@ -1047,28 +1082,24 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 15 + shift_time(Natural(abs shift_count));
 
          when SHL =>
-            check_whether_the_nest_holds_an_operand;
             write_top(KDF9.word'(shift_logical(read_top, shift_count)));
             the_CPU_delta := the_CPU_delta + 2 + shift_time(Natural(abs shift_count));
 
          when SHLD =>
-            check_whether_the_nest_holds_2_operands;
             write_top(KDF9.pair'(shift_logical(read_top, shift_count)));
             the_CPU_delta := the_CPU_delta + 2 + shift_time(Natural(abs shift_count));
 
          when SHC =>
-            check_whether_the_nest_holds_an_operand;
             write_top(shift_circular(read_top, shift_count));
             the_CPU_delta := the_CPU_delta + 3 + shift_time(Natural(abs shift_count));
 
-         when TO_Kk =>
-            LIV_if_user_mode;
-            ensure_that_the_nest_holds_an_operand;
+         when TO_Kq =>
+            fail_in_problem_program_state;
             case INS.Qq is
                when K0 =>
                   if read_top /= all_zero_bits then
                      for w in all_zero_bits .. read_top mod 8 loop
-                        POSIX.output_line("HOOT!");
+                        POSIX.output_line("BLEEP!");
                      end loop;
                      delay 10.0;
                   end if;
@@ -1084,7 +1115,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 3;
 
          when Kk =>
-            LIV_if_user_mode;
+            fail_in_problem_program_state;
             ensure_that_the_nest_has_room_for_a_result;
             case INS.Qk is
                when K4 =>
@@ -1106,148 +1137,164 @@ package body KDF9.microcode is
             else
                ensure_that_the_nest_has_room_for_a_result;
                ensure_that_the_sjns_is_not_empty;
-               push(as_word(KDF9.code_link(KDF9.code_point'(pop))));
+               push(as_word(KDF9.sjns_link(KDF9.syllable_address'(pop))));
             end if;
             the_CPU_delta := the_CPU_delta + 4;
 
          when TO_LINK =>
             ensure_that_the_sjns_is_not_full;
             ensure_that_the_nest_holds_an_operand;
-            push(KDF9.code_point(as_link(pop)));
+            push(KDF9.syllable_address(as_link(pop)));
             the_CPU_delta := the_CPU_delta + 3;
 
          when others =>
             do_an_IO_order;
+
       end case;
    end do_a_two_syllable_order;
 
    procedure do_a_jump_order is
-      RA        : KDF9.code_point;
+      RA        : KDF9.syllable_address;
       A         : KDF9.word;
    begin
-      case INS.syndrome is
+      fetching_normally := True;
+
+      case INS.compressed_opcode is
 
          when Jr =>
             set_NIA_to_the_INS_target_address;
-            fetching_normally := True;
             the_CPU_delta := the_CPU_delta + 8;
 
          when JSr =>
-            ensure_that_the_sjns_is_not_full;
-            push(CIA);
-            set_NIA_to_the_INS_target_address;
-            fetching_normally := True;
-            the_CPU_delta := the_CPU_delta + 11;
+            if the_sjns_depth < 16 or else the_CPU_state = Director_state  then
+               push(CIA);
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
+            else
+               effect(NOUV_interrupt, "full SJNS");
+            end if;
 
          when JrEQ =>
-            ensure_that_the_nest_holds_2_operands;
-            A := pop;
-            if A = read_top then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 12;
+            if the_nest_depth >= 2 or else the_CPU_state = Director_state then
+               A := pop;
+               if A = read_top then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 12;
+               else
+                  the_CPU_delta := the_CPU_delta + 5;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 5;
+               effect(NOUV_interrupt, words_needed(need => 2-the_nest_depth));
             end if;
 
          when JrNE =>
-            ensure_that_the_nest_holds_2_operands;
-            A := pop;
-            if A /= read_top then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 12;
+            if the_nest_depth >= 2 or else the_CPU_state = Director_state then
+               A := pop;
+               if A /= read_top then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 12;
+               else
+                  the_CPU_delta := the_CPU_delta + 5;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 5;
+               effect(NOUV_interrupt, words_needed(need => 2-the_nest_depth));
             end if;
 
          when JrGTZ =>
-            ensure_that_the_nest_holds_an_operand;
-            if resign(pop) > 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+               if resign(pop) > 0 then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrLTZ =>
-            ensure_that_the_nest_holds_an_operand;
-            A := pop;
-            if resign(A) < 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+               A := pop;
+               if resign(A) < 0 then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrEQZ =>
-            ensure_that_the_nest_holds_an_operand;
-             if pop = all_zero_bits then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+                if pop = all_zero_bits then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrLEZ =>
-            ensure_that_the_nest_holds_an_operand;
-            if resign(pop) <= 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+               if resign(pop) <= 0 then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrGEZ =>
-            ensure_that_the_nest_holds_an_operand;
-            if resign(pop) >= 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+               if resign(pop) >= 0 then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrNEZ =>
-            ensure_that_the_nest_holds_an_operand;
-            if pop /= all_zero_bits then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 11;
+            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
+               if pop /= all_zero_bits then
+                  set_NIA_to_the_INS_target_address;
+                  the_CPU_delta := the_CPU_delta + 11;
+               else
+                  the_CPU_delta := the_CPU_delta + 4;
+               end if;
             else
-               the_CPU_delta := the_CPU_delta + 4;
+               effect(NOUV_interrupt, "empty NEST");
             end if;
 
          when JrV =>
-            the_trace_operand := the_V_bit;
-            if the_V_bit /= 0 then
+            if the_V_bit_is_set then
+               the_V_bit_is_set := False;
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             else
                the_CPU_delta := the_CPU_delta + 3;
             end if;
 
          when JrNV =>
-            the_trace_operand := the_V_bit;
-            if the_V_bit = 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 10;
-            else
+            if the_V_bit_is_set then
+               the_V_bit_is_set := False;
                the_CPU_delta := the_CPU_delta + 3;
+            else
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 10;
             end if;
-            the_V_bit := 0;
 
          when JrEN =>
             the_trace_operand := KDF9.word(the_nest_depth);
             if the_nest_depth = 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             else
                the_CPU_delta := the_CPU_delta + 3;
@@ -1257,7 +1304,6 @@ package body KDF9.microcode is
             the_trace_operand := KDF9.word(the_nest_depth);
             if the_nest_depth /= 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             else
                the_CPU_delta := the_CPU_delta + 3;
@@ -1267,7 +1313,6 @@ package body KDF9.microcode is
             the_trace_operand := KDF9.word(the_sjns_depth);
             if the_sjns_depth = 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             end if;
             the_CPU_delta := the_CPU_delta + 3;
@@ -1276,57 +1321,54 @@ package body KDF9.microcode is
             the_trace_operand := KDF9.word(the_sjns_depth);
             if the_sjns_depth /= 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             end if;
             the_CPU_delta := the_CPU_delta + 3;
 
          when JrTR =>
-            the_trace_operand := the_T_bit;
-            if the_T_bit /= 0 then
+            if the_T_bit_is_set then
+               the_T_bit_is_set := False;
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 10;
             else
                the_CPU_delta := the_CPU_delta + 3;
             end if;
-            the_T_bit := 0;
 
          when JrNTR =>
-            the_trace_operand := the_T_bit;
-            if the_T_bit = 0 then
-               set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
-               the_CPU_delta := the_CPU_delta + 10;
-            else
+            if the_T_bit_is_set then
+               the_T_bit_is_set := False;
                the_CPU_delta := the_CPU_delta + 3;
+            else
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 10;
             end if;
-            the_T_bit := 0;
 
-         when EXIT_9 =>
-            ensure_that_the_sjns_is_not_empty;
-            RA := pop;
-            if INS.target.syllable_number = 3 then  -- c.f. decode_a_jump_order.
-               increment_by_3(RA);
+         when EXIT_n =>
+            if the_sjns_depth > 0 or else the_CPU_state = Director_state then
+               RA := pop;
+               if INS.target.syllable_index = 3 then  -- c.f. decode_a_jump_order.
+                  increment_by_3(RA);
+               end if;
+               RA.order_word_number := RA.order_word_number+INS.target.order_word_number;
+               set_NIA_to(RA);
+               the_CPU_delta := the_CPU_delta + 12 + KDF9.us(INS.target.syllable_index mod 2);
+            else
+               effect(NOUV_interrupt, "empty SJNS");
             end if;
-            RA.word_number := RA.word_number+INS.target.word_number;
-            set_NIA_to(RA);
-            fetching_normally := True;
-            the_CPU_delta := the_CPU_delta + 12 + KDF9.microseconds(INS.target.syllable_number mod 2);
 
-         when EXITD =>  -- STUB
-            LIV_if_user_mode;
-            ensure_that_the_sjns_is_not_empty;
+         when EXITD =>
+            fail_in_problem_program_state;
+            if the_sjns_depth = 0 then
+               -- This indicates a serious failure in Director; best to abandon it at once.
+               trap_invalid_instruction("empty SJNS in Director");
+            end if;
             RA := pop;
-            change_to_user_state_at(RA);
-            fetching_normally := True;
             the_CPU_delta := the_CPU_delta + 11;
-            raise program_exit;  -- STUB for now
+            return_from_Director_to(RA);
 
          when JrCqZ =>
             if the_Q_store(INS.Qq).C = 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 11;
             else
                the_CPU_delta := the_CPU_delta + 4;
@@ -1335,32 +1377,32 @@ package body KDF9.microcode is
          when JrCqNZ =>
             if the_Q_store(INS.Qq).C /= 0 then
                set_NIA_to_the_INS_target_address;
-               fetching_normally := True;
                the_CPU_delta := the_CPU_delta + 11;
             else
                the_CPU_delta := the_CPU_delta + 4;
             end if;
 
-         when OUT_9 =>
-            fetching_normally := True;
+         when OS_OUT =>
             the_CPU_delta := the_CPU_delta + 13;
-            if the_execution_mode = boot_mode then
-               -- Emulate the hardware behaviour.
-               signal_interrupt(OUT_flag);
-               return;  -- we get here only in Director state, so the OUT does not interrupt.
-            end if;
-            if the_nest_depth = 0 then
-               push(all_zero_bits);
-            end if;
-            A := read_top;
-            -- Emulate a subset of the appropriate Director's API.
-            if A <= 47 then
-               do_a_TSD_OUT(OUT_number => A);
-            elsif A > 99 then
-               do_an_EGDON_OUT(OUT_number => A);
+            if the_sjns_depth < 16 or else the_CPU_state = Director_state then
+               A := (if the_nest_depth = 0 then 0 else read_top);
+               if the_execution_mode = boot_mode then
+                  effect(OUT_interrupt, A'Image);
+                  -- We get here only in Director state, when the OUT does not interrupt.
+                  -- Arguably, this should be notified as an error.
+                  return; -- OUT has the effect of a no-op in Director state.
+               end if;
+               -- Emulate a subset of the appropriate Director's API.
+               if A <= 99 then
+                  do_a_TSD_OUT(OUT_number => A);
+               elsif A <= 199 then
+                  do_an_EGDON_OUT(OUT_number => A);
+               else
+                  -- Other Directors are not handled yet.
+                  trap_invalid_operand("invalid OUT number");
+               end if;
             else
-               -- Other Directors are not handled yet.
-               trap_invalid_instruction("invalid OUT number");
+               effect(NOUV_interrupt, "full SJNS in OUT");
             end if;
 
          when others =>
@@ -1371,26 +1413,27 @@ package body KDF9.microcode is
 
    procedure do_a_data_access_order is
    begin
-      case (INS.syndrome) is
+      case INS.compressed_opcode is
+
          when EaMq =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qq).M, INS.operand);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 6;
 
          when TO_EaMq =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qq).M, INS.operand);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 6;
 
          when EaMqQ =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qq).M, INS.operand);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
@@ -1398,8 +1441,8 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_EaMqQ =>
-            the_trace_address := validated_sum(the_Q_store(INS.Qq).M, INS.operand);
-            validate_access(the_trace_address);
+            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            check_address_and_lockout(the_trace_address);
             ensure_that_the_nest_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
@@ -1414,11 +1457,12 @@ package body KDF9.microcode is
 
          when others =>
             trap_invalid_instruction;
+
       end case;
    end do_a_data_access_order;
 
-   procedure update_the_virtual_clocks;
-   pragma Inline(update_the_virtual_clocks);
+   procedure update_the_virtual_clocks
+      with Inline;
 
    procedure update_the_virtual_clocks is
    begin
@@ -1432,6 +1476,11 @@ package body KDF9.microcode is
 
    procedure do_a_fast_time_slice is
    begin
+
+      if break_in.has_been_requested then
+         break_in.handler;
+      end if;
+
       for i in 1 .. time_slice loop
 
          the_CPU_delta := 0;
@@ -1452,11 +1501,11 @@ package body KDF9.microcode is
          end case;
 
          update_the_virtual_clocks;
-
-         if the_elapsed_time > the_next_interrupt_time       and then
-               (INS.syndrome /= EXITD and INS.syndrome /= OUT_9) then
+         check_for_a_clock_interrupt;
+         if the_elapsed_time > the_next_interrupt_time then
             act_on_pending_interrupts;
          end if;
+
       end loop;
 
    exception
@@ -1467,12 +1516,30 @@ package body KDF9.microcode is
          synchronize_the_real_and_virtual_times;
          raise;
 
+      -- These traps represent interrupts that are handled by Director.
+      -- Other traps pass through, to preserve their diagnostic message.
+
+      when PR_trap =>
+         effect(PR_interrupt);
+
+      when FLEX_trap =>
+         effect(FLEX_interrupt);
+
+      when EDT_trap =>
+         effect(EDT_interrupt);
+
+      when OUT_trap =>
+         effect(OUT_interrupt);
+
+      when LOV_trap =>
+         effect(LOV_interrupt);
+
    end do_a_fast_time_slice;
 
    procedure do_a_traced_instruction_cycle is
       use tracing.order_flags;
 
-      procedure finalize_traced_instruction_execution is
+      procedure finalize_the_traced_instruction_execution is
       begin
          update_the_virtual_clocks;
          synchronize_the_real_and_virtual_times;
@@ -1485,6 +1552,7 @@ package body KDF9.microcode is
             end if;
             if the_histogram_is_enabled then
                add_INS_to_the_histogram;
+               add_CIA_to_the_profile;
             end if;
             if the_external_trace_is_enabled then
                log_to_external_trace;
@@ -1498,14 +1566,20 @@ package body KDF9.microcode is
                   null;
             end case;
          end if;
-      end finalize_traced_instruction_execution;
+      end finalize_the_traced_instruction_execution;
 
-   begin
+   begin  -- do_a_traced_instruction_cycle
+
+      if break_in.has_been_requested then
+         break_in.handler;
+      end if;
+
       the_trace_operand := 0;
       the_trace_address := 0;
       the_CPU_delta := 0;
 
       process_syllable_0_of_INS;
+
       case INS.kind is
          when one_syllable_order =>
             preview_a_one_syllable_order;
@@ -1528,25 +1602,21 @@ package body KDF9.microcode is
             look_back_at_a_data_access_order;
       end case;
 
-      finalize_traced_instruction_execution;
-
-      if the_Q_store(0) /= all_zero_Q_store then
-         raise emulation_failure with "Q0 is not zero";
-      end if;
-
-      if the_elapsed_time > the_next_interrupt_time       and then
-            (INS.syndrome /= EXITD and INS.syndrome /= OUT_9) then
-         act_on_pending_interrupts;
-      end if;
+      finalize_the_traced_instruction_execution;
 
       if ICR >= time_limit then
          raise time_expired;
       end if;
 
-      if (NIA_word_number/is_a_breakpoint    and then
+      if (NIA_word_number / breakpoints      and then
              ICR in low_count .. high_count)  or else
                 the_diagnostic_mode = pause_mode then
          handle_breakpoint;
+      end if;
+
+      check_for_a_clock_interrupt;
+      if the_elapsed_time > the_next_interrupt_time then
+         act_on_pending_interrupts;
       end if;
 
    exception
@@ -1562,11 +1632,27 @@ package body KDF9.microcode is
             when data_access_order =>
                look_back_at_a_data_access_order;
          end case;
-
          complete_all_extant_transfers;
-         finalize_traced_instruction_execution;
-
+         finalize_the_traced_instruction_execution;
          raise;
+
+      -- These traps represent interrupts that are handled by Director.
+      -- Other traps pass through, to preserve their diagnostic message.
+
+      when PR_trap =>
+         effect(PR_interrupt);
+
+      when FLEX_trap =>
+         effect(FLEX_interrupt);
+
+      when EDT_trap =>
+         effect(EDT_interrupt);
+
+      when OUT_trap =>
+         effect(OUT_interrupt);
+
+      when LOV_trap =>
+          effect(LOV_interrupt);
 
    end do_a_traced_instruction_cycle;
 

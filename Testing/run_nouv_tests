@@ -1,0 +1,50 @@
+opt=${1:-ae}
+
+
+echo TEST NOUV0 - REV should end normally, as the NEST depth is constant
+ucc NOUV0; nine NOUV0 - t $opt
+echo TEST NOUV0 done.
+
+
+echo TEST NOUV1 - ERASE empty NEST
+ucc NOUV1; nine NOUV1 - t $opt
+echo TEST NOUV1 done.
+
+
+echo TEST NOUV2 - DUPD overfills NEST
+ucc NOUV2; nine NOUV2 - t $opt
+echo TEST NOUV2 done.
+
+
+echo TEST NOUV3 - LINK with empty SJNS
+ucc NOUV3; nine NOUV3 - t $opt
+echo TEST NOUV3 done.
+
+
+echo TEST NOUV4 - =LINK loop overfills SJNS
+ucc NOUV4; nine NOUV4 - t $opt
+echo TEST NOUV4 done.
+
+echo TEST NOUV5 - Jr= with 1 word in NEST
+ucc NOUV5; nine NOUV5 - t $opt
+echo TEST NOUV5 done.
+
+
+echo TEST NOUV6 - Jr=Z with empty NEST
+ucc NOUV6; nine NOUV6 - t $opt
+echo TEST NOUV6 done.
+
+
+echo TEST NOUV7 - EXIT with empty SJNS
+ucc NOUV7; nine NOUV7 - t $opt
+echo TEST NOUV7 done.
+
+
+echo TEST NOUV8 - JSr loop overfills SJNS
+ucc NOUV8; nine NOUV8 - t $opt
+echo TEST NOUV8 done.
+
+
+echo TEST NOUV9 - +D with only 1 word in NEST
+ucc NOUV9; nine NOUV9 - t $opt
+echo TEST NOUV9 done.

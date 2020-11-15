@@ -1,0 +1,199 @@
+!begin
+!library A0, A1, A4, A5, A15;
+
+'real' 'procedure' ICR;
+   'KDF9' 2/0/0/0;
+   SET 99; OUT; SET 47; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2;
+!integer i1, i2;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s); i1 := ICR; t1 := Time !end pre;
+
+!procedure post;
+   !begin i2 := ICR - i1; t2 := Time - t1;  write(30, layout, t2 ×  1.0º6 - c) !end post;
+
+!real  x, y, z, t;
+!real  a, b, c, d, layout;
+
+!integer  !array  E1[1:1], E2[1:1, 1:1], E3[1:1, 1:1, 1:1];
+!integer  i, j, k, l, m, n;
+
+!procedure  p0; ;
+
+!procedure  p1(x); !value  x; !real  x; ;
+
+!procedure  p2(x, y); !value  x, y; !real  x, y; ;
+
+!procedure  p3(x, y, z); !value  x, y, z; !real  x, y, z; ;
+
+y := 1.0; z := 2.0; l := 1; m := 2;
+a := 1; b := 2;
+layout := format({nd.dddc});
+
+writetext(30, {null _ statement _ timing _ overhead _ in _ microseconds{ss}});
+i1 := ICR; t1 := Time; ; i2 := ICR - i1; t2 := Time - t1; c := t ×  1.0º6; write(30, layout, c);
+
+writetext(30, {{c}all _ following _ times _ are _ in _ microseconds{c}});
+
+
+pre({{c}!for  _ loop _ zero _ iterations _ overhead{ss}});
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+post;
+
+n := 100;
+pre({{c}!for  _ i _ := _ 1 _ !step  _ 1 _ !until  _ n _ !do  _ STEP{ss}});
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+post;
+
+pre({{c}!for  _ i _ := _ 1 _ !step  _ 1 _ !until  _ 1 _ !do  _ TOTAL{ss}});
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+
+post;
+i := n;
+
+pre({{c}!while  _ loop _ zero _ iterations _ overhead{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+i := -1;
+pre({{c}!for  _ i _ := _ i _ + _ 1 _ !while  _ i _ < _ n _ !do  _ STEP{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+i := 98;
+pre({{c}!for  _ i _ := _ i _ + _ 1 _ !while  _ i _ < _ n _ !do  _ TOTAL{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+pre({{c}goto _ abcd{ss}});
+   !begin  !goto  abcd; abcd: !end ;
+post;
+
+pre({{c}switch{ss}});
+   !begin  !switch  ss := pq; !goto  ss[1]; pq: !end ;
+post;
+
+pre({{c}if _ true{ss}});
+   !if  !true  !then ;
+post;
+
+pre({{c}if _ y _ > _ x{ss}});
+   !if   y > x !then ;
+post;
+
+pre({{c}p0{ss}});
+   p0;
+post;
+
+pre({{c}p1{ss}});
+   p1(x);
+post;
+
+pre({{c}p2{ss}});
+   p2(x,y);
+post;
+
+pre({{c}p3{ss}});
+   p3(x,y,z);
+post;
+
+pre({{c}abs{ss}});
+   abs(y);
+post;
+
+pre({{c}arctan{ss}});
+   arctan(y);
+post;
+
+pre({{c}cos{ss}});
+   cos(y);
+post;
+
+pre({{c}entier{ss}});
+   entier(y);
+post;
+
+pre({{c}exp{ss}});
+   exp(y);
+post;
+
+pre({{c}ln{ss}});
+   ln(y);
+post;
+
+pre({{c}sign{ss}});
+   sign(y);
+post;
+
+pre({{c}sin _ value _ is _ hors _ de _ combat{ss}});
+   sin(y);
+post;
+
+pre({{c}sqrt{ss}});
+   sqrt(y);
+post;
+
+!end
+|

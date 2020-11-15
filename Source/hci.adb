@@ -8,8 +8,8 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -23,17 +23,13 @@
 --
 
 with formatting;
-with generic_logger; pragma Elaborate_All(generic_logger);
-with Latin_1;
+with generic_logger;
 with settings;
 
 use  formatting;
-use  Latin_1;
 use  settings;
 
 package body HCI is
-
-   pragma Unsuppress(All_Checks);
 
    package log_manager is new generic_logger(max_logger_list_size => 2);
 
@@ -99,9 +95,9 @@ package body HCI is
       cc_list.log_new_line(iff);
    end log_new_line;
 
-   half_ruler : constant String (1 .. 36) := (others => '_');
-   half_blank : constant String (1 .. 36) := (others => ' ');
-   full_ruler : constant String (1 .. 72) := half_ruler & half_ruler;
+   half_ruler : constant String (1 .. 40) := (others => '_');
+   half_blank : constant String (1 .. 40) := (others => ' ');
+   full_ruler : constant String (1 .. 80) := half_ruler & half_ruler;
 
    procedure log_rule (start_a_new_line : in Boolean := False;
                        iff              : in Boolean := True) is
@@ -133,17 +129,13 @@ package body HCI is
       cc_list.log_new_line;
    end log_title;
 
-   procedure log_error_message (message : in String) is
-   begin
-      log_line("Error: " & message);
-   end log_error_message;
-
    procedure log_ee9_status (message  : in String;
-                             skip     : in Natural := 1;
+                             skip     : in Natural := 0;
                              complete : in Boolean := True;
                              iff      : in Boolean := True) is
    begin
       if not iff then return; end if;
+      panel_logger.tab_log_to(1);
       for i in 1 .. skip loop
          log_new_line;
       end loop;
@@ -156,7 +148,7 @@ package body HCI is
 
    procedure hoot (message : in String := "") is
    begin
-      panel_logger.log(message & BEL);
+      panel_logger.log(message & Character'Val (7));  -- Append a BEL to the message.
    end hoot;
 
    procedure show (message : in String) is
@@ -175,16 +167,10 @@ package body HCI is
       end if;
    end show_line;
 
-   procedure respond_to_prompt (prompt   : in String;
-                                response : out Character) is
+   procedure interact (reason : in String := "Mode") is
    begin
-      panel_logger.respond_to_prompt(prompt, response);
-   end respond_to_prompt;
-
-   procedure continue_when_GO_is_pressed (caption : in String := "") is
-   begin
-      panel_logger.continue_when_GO_is_pressed(caption);
-   end continue_when_GO_is_pressed;
+      panel_logger.interact(reason);
+   end interact;
 
    procedure open (logfile_name : in String) is
    begin

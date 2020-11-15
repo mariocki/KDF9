@@ -1,0 +1,35 @@
+V99; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+      V1 = Q 2/AV32/AV33;
+      V2 = Q 0/AV32/AV33;
+      V3 = B0702550253556720;
+      V4 = P201--UPU;
+
+
+      V1; =Q1; SET 1; SET 5; OUT; =C1; Q1; =V1;  (TP);
+      V2; =Q2; SET 2; SET 5; OUT; =C2; Q2; =V2;  (TR);
+
+      (copy E0 and E1);
+      PIAQ2; PARQ2; J999TR;
+      POAQ1; PARQ1; J999TR;
+
+      (read E2 and E3 and ignore the incorrect data);
+      PIAQ2; PARQ2; J999TR;
+
+      (output corrected E2 and E3);
+      V3; =V32; V4; =V33;
+      POAQ1; PARQ1; J999TR;
+
+1;    (copy the rest of the program);
+      PIAQ2; PARQ2; J999TR;
+      POAQ1; PARQ1; J999TR;
+      J1;
+
+999;  C1; SET 6; OUT;
+      C2; SET 6; OUT;
+
+      ZERO; OUT;
+
+FINISH;
+|

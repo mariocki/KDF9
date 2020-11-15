@@ -2,8 +2,8 @@
 --
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (V2.0r), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2015, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -21,37 +21,35 @@ with GNAT.Ctrl_C;
 with Ada.Command_Line;
 with Ada.Exceptions;
 --
-with configuration;
+with break_in;
+with dumping;
 with exceptions;
 with HCI;
-with IOC;
-with IOC.two_shift.TR;
+with IOC.slow.shift.TR;
 with KDF9;
 with KDF9.microcode;
-with KDF9.store;
-with map_CTRL_C_to_FLEX;
-with finalize_ee9;
 with settings;
 with state_display;
 
+with say_goodbye;
+
 use  Ada.Command_Line;
+use  Ada.Exceptions;
+
 --
+use  dumping;
 use  exceptions;
 use  HCI;
-use  IOC;
-use  IOC.two_shift.TR;
+use  IOC.slow.shift.TR;
 use  KDF9;
 use  KDF9.microcode;
-use  KDF9.store;
 use  settings;
 use  state_display;
 
-procedure execute is
+procedure execute (program_name : in String) is
 
-   pragma Unsuppress(All_Checks);
-
-   procedure check_times_and_modes;
-   pragma Inline(check_times_and_modes);
+   procedure check_times_and_modes
+      with Inline;
 
    pause_count : KDF9.order_counter := 0;
 
@@ -66,42 +64,46 @@ procedure execute is
       end if;
    end check_times_and_modes;
 
-   procedure make_a_dignified_exit (status : in Exit_Status := Failure) is
-   begin
-      finalize_ee9;
-      Set_Exit_Status(status);
-   exception
-      when error : others =>
-         log_line("Failure in ee9: "
-                & Ada.Exceptions.Exception_Information(error)
-                & " was raised in 'make_a_dignified_exit'!");
-         Set_Exit_Status(Failure);
-   end make_a_dignified_exit;
-
-begin
-   GNAT.Ctrl_C.Install_Handler(map_CTRL_C_to_FLEX'Access);
+begin  -- execute
+   GNAT.Ctrl_C.Install_Handler(break_in.note_user_interrupt'Access);
 
    if the_external_trace_is_enabled then
       log_an_external_trace_header;
    end if;
 
-   reset_the_internal_registers;
-
    case the_execution_mode is
       when boot_mode =>
-         bootstrap_the_KDF9;
+         reset_the_internal_registers(Director_state);
+         bootstrap_the_KDF9(program_name);
+      when test_program_mode=>
+         reset_the_internal_registers(Director_state);
+         load_a_program(program_name);
       when program_mode =>
-         load_a_program;
-      when test_program_mode =>
-         load_a_program;
+         reset_the_internal_registers(program_state);
+         load_a_program(program_name);
    end case;
 
+   if not loading_was_successful then
+      say_goodbye("Could not load the specified program.");
+      return;
+   end if;
+
+   poke_all_amendments;
    show_all_prerun_dump_areas;
+
+   if do_not_execute then
+      log_new_line;
+      log_line("Run abandoned as requested.");
+      return;
+   end if;
 
    reset_the_CPU_state;
 
+execution_loop:
    loop
+
       begin
+
          check_times_and_modes;
          if the_diagnostic_mode /= fast_mode then
             -- Do a single, traced instruction, breaking-in conditionally.
@@ -114,66 +116,82 @@ begin
                check_times_and_modes;
             end loop;
          end if;
-      exception
+
+      exception  -- handler for execution_loop
+
+         when debugging_stop =>
+            null;
+
          when mode_change_request =>
             quit_if_requested;
+
+         when abandon_this_order =>
+            null;  -- Just get on with it after an interrupt.
+
          when LOV_trap =>
-            IOC.handle_a_main_store_lockout(the_locked_out_address);
+            IOC.handle_a_main_store_lockout;
+
+         when program_exit =>
+            say_goodbye("Normal end of run", status => Success);
+            exit execution_loop;
+
+         when quit_request =>
+            say_goodbye("Run stopped by the user", status => Success);
+            exit execution_loop;
+
+         when time_expired =>
+            say_goodbye("Infinite loop? Run failed by exceeding the time limit");
+            exit execution_loop;
+
+         when diagnostic : NOUV_trap =>
+            say_goodbye("NOUV interrupt", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when input_is_impossible =>
+            say_goodbye("Noninteractive mode cannot handle a prompt");
+            exit execution_loop;
+
+         when diagnostic : not_yet_implemented =>
+            say_goodbye("Not yet implemented", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : RESET_trap =>
+            say_goodbye("RESET interrupt", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : LIV_trap =>
+            say_goodbye( "LIV interrupt", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : Director_failure =>
+            say_goodbye("Invalid operation in Director", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : operand_error =>
+            say_goodbye("Invalid operand", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : Director_operand_error =>
+            say_goodbye("Invalid operand in Director", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : operator_error =>
+            say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
+            exit execution_loop;
+
       end;
-   end loop;
 
-exception
+   end loop execution_loop;
 
-   when program_exit =>
-      make_a_dignified_exit(Success);
+exception  -- handler for execute
 
-   when quit_request =>
-      log_new_line;
-      log_line("Run stopped by the user.");
-      make_a_dignified_exit(Success);
+   when diagnostic : invalid_paper_tape_file =>
+      say_goodbye("Invalid paper tape file supplied", Exception_Message(diagnostic));
 
-   when time_expired =>
-      log_new_line;
-      log_line("Run terminated on reaching time limit! Infinite loop?");
-      make_a_dignified_exit;
+   when diagnostic : operator_error =>
+      say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
 
-   when NYI_trap =>
-      log_new_line;
-      log_line("Instruction Not Yet Implemented!");
-      make_a_dignified_exit;
-
-   when NOUV_trap =>
-      log_new_line;
-      log_line("NOUV (NEST/SJNS Overflow/Underflow Violation)!");
-      make_a_dignified_exit;
-
-   when error : LIV_trap =>
-      log_new_line;
-      log_line("LIV (Lock-In Violation)! "
-             & Ada.Exceptions.Exception_Message(error));
-      make_a_dignified_exit;
-
-   when RESET_trap =>
-      log_new_line;
-      log_line("RESET (Reset Violation)!");
-      make_a_dignified_exit;
-
-   when error : Director_failure =>
-      log_new_line;
-      log_line("Failure detected in Director! "
-             & Ada.Exceptions.Exception_Information(error));
-      make_a_dignified_exit;
-
-   when error : input_is_impossible =>
-      log_new_line;
-      log_line("Noninteractive mode; "
-             & Ada.Exceptions.Exception_Message(error));
-      make_a_dignified_exit;
-
-   when error : others =>
-      log_new_line;
-      log_line("Failure in ee9! "
-             & Ada.Exceptions.Exception_Information(error));
-      make_a_dignified_exit;
+   when diagnostic : others =>
+      say_goodbye("Apologies for this dismal failure", Exception_Message(diagnostic));
 
 end execute;

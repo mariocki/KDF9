@@ -1,0 +1,49 @@
+V20; W0;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(tests valid WIPE at end of data - should terminate normally);
+
+   V0 = PEFPBEAAG;         (label);
+   V1 = Q0/AV2/AV3;        (to read label);
+   V2 = 0;                 (TSN);
+   V3 = 0;                 (label);
+
+   V8 = Q0/AV9/AV9;        (for TP0 trace);
+   V9 = 0;                 (TP0 trace word);
+
+   V11 = B6445636400430277;  (TEST C);
+   V12 = B5441424554004602;  (LABEL F);
+   V13 = B6762576445005402;  (WROTE L);
+   V14 = B6751604544027777;  (WIPED);
+   V15 = B4651565163500277;  (FINISH);
+
+   (claim tape);
+   V0; SET4; OUT; V1; =Q1; =C1;
+
+   (claim TP0);
+   SET 1; SET 5; OUT; V8; =Q10; =C10;
+   V11; =V9; POAQ10;
+
+   MFRQ1; (read label);
+   V0; V3; DUPD; NEV; J777NEZ;
+   V12; =V9; POAQ10;
+   ERASE; ERASE;
+
+   MLWQ1; (write 2nd copy of label as last block);
+   V13; =V9; POAQ10;
+
+   SET1000; =M1;
+   MWIPEQ1; (wipe in unwiped and wiped areas);
+   V14; =V9; POAQ10;
+
+   (FINISH message);
+   V15; =V9; POAQ10;
+
+   ZERO; OUT;
+
+777;
+   MRWDQ0; (deliberately fail);
+
+FINISH;
+|

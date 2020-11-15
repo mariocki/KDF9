@@ -1,0 +1,41 @@
+!begin
+
+!library A0, A1, A5, A15;
+
+!integer p, m, n, r;
+
+n := 25 600;
+r := entier(2×sqrt(n));
+
+   !begin
+
+   !boolean !array candidate [2 : n];
+
+   !comment deal with 2 separately;
+   candidate[2] := !true ;
+   !for m := 4 !step 2 !until n !do
+      candidate[m] := !false;
+
+   !comment now deal with the other factors;
+   !for p := 3 !step 2 !until n !do
+      candidate[p]:= !true ;
+
+   !for p := 3 !step 2 !until r !do
+      !begin
+      !if candidate[p] !then
+         !for m := p × p !step p !until n !do
+            candidate[m] := !false
+      !end;
+
+   m := 1; !comment because 2 is prime;
+   !for p := 3 !step 2 !until n !do
+      !if candidate[p] !then m := m + 1;
+   !end;
+
+writetext(30, {{c}number _ of _ primes _ below:});
+write(30, format({nddddd}), n);
+writetext(30, { _ is:});
+write(30, format({ndddddc}), m);
+
+!end
+|
