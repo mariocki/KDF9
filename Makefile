@@ -87,10 +87,15 @@ kal4:
 mkchan:
 	$(MAKE) -e -C ${MKCHAN}
 
+.PHONY: kalgol
+kalgol:
+	$(MAKE) -e -C ${KALGOL}
+
 .PHONY: clean
 clean:
 	$(MAKE) -e -C ${KAL3} clean
 	$(MAKE) -e -C ${KAL4} clean
+	$(MAKE) -e -C ${KALGOL}	clean
 	$(MAKE) -e -C ${MKCHAN}	clean
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) ${CSC_LIST:%=%/*.ali}
@@ -101,22 +106,25 @@ clean:
 distclean: clean
 	$(MAKE) -e -C ${KAL3} distclean
 	$(MAKE) -e -C ${KAL4} distclean
+	$(MAKE) -e -C ${KALGOL}	distclean
 	$(MAKE) -e -C ${MKCHAN}	distclean
 	$(MAKE) -e -C ${RUNTIME} distclean
 	$(RM) ${RUNTIME}/${MAIN} ${RUNTIME}/a2b ${RUNTIME}/kidopt ${RUNTIME}/mtp ${RUNTIME}/gnat.adc
 	$(RM) ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
+.PHONY: all
+all: $(MAIN) a2b kal3 kal4 kalgol kidopt mkchan mtp
+
 .PHONY: deploy 
-deploy: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan
+deploy: all
 	cp -f ${MAIN} ${RUNTIME}
 	cp -f ${SRC}/a2b ${RUNTIME}
 	cp -f ${SRC}/kidopt ${RUNTIME}
 	cp -f ${SRC}/mtp ${RUNTIME}
 	$(MAKE) -e -C ${KAL3} deploy
 	$(MAKE) -e -C ${KAL4} deploy
+	$(MAKE) -e -C ${KALGOL}	deploy
 	$(MAKE) -e -C ${MKCHAN}	deploy
-	${RUNTIME}/a2b -r2p < ${KALGOL}/mksys2.bin >${RUNTIME}/Binary/MKSYS2
-	${RUNTIME}/a2b -r2p < ${KALGOL}/KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
 	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
 
@@ -124,8 +132,7 @@ deploy: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan
 check: deploy
 	$(MAKE) -e -C ${KAL3} check
 	$(MAKE) -e -C ${KAL4} check
+	$(MAKE) -e -C ${KALGOL}	check
 	$(MAKE) -e -C ${MKCHAN}	check
 	$(MAKE) -C ${RUNTIME} check
 
-.PHONY: all
-all: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan

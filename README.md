@@ -1,5 +1,5 @@
 # `ee9` the KDF9 emulator
-This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/emulation/emulator.html)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
+This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/#Emulator)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
 
 ## kal3 and kal4
 kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
@@ -46,14 +46,14 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Build ee9 in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
 
-- `make kal3`
-    Build kal3 in-place in the kal3 folder.
+- `make kal3|kal4|mkchan`
+    Build the requested executable in-place in its respective folder.
 
 - `make all`
-    Builds ee9 and kal3 in-place.
+    Builds ee9/kal3/kal4/mkchan in-place.
 
 - `make deploy`
-    Builds ee9 and kal3, copies them into `runtime` and also resets the runtime to a 'clean' environment.
+    Builds the executables and copies them into `runtime` and also resets the runtime to a 'clean' environment.
 
 - `make check`
     As per `make deploy` but also then runs the `ee9_reg_test` script.
@@ -61,14 +61,15 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `make clean`
     Removes all intermediate and transient files from compilation but leaves the runtime intact.
 
-- `make clean`
+- `make distclean`
     As per `make clean` but also deletes all files created during the execution of the runtime to leave the folder structure 
     exactly as was when first extracted/downloaded.
     
 ## Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
-Simply `cd` to the root folder and type `make deploy`.
+Simply `cd` to the root folder and type `make deploy` or `make check`.
+Once completed the `runtime` folder will contain all you need to start using `ee9`.
 
 ### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`
