@@ -121,8 +121,11 @@ deploy: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan
 	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
 
 .PHONY: check
-: deploy
-	$(MAKE) -C ${RUNTIME} test
+check: deploy
+	$(MAKE) -e -C ${KAL3} check
+	$(MAKE) -e -C ${KAL4} check
+	$(MAKE) -e -C ${MKCHAN}	check
+	$(MAKE) -C ${RUNTIME} check
 
 .PHONY: all
 all: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan

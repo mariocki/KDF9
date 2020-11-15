@@ -32,3 +32,6 @@ deploy: mkchan
 .PHONY: distclean
 distclean: clean
 	$(RM) ${RUNTIME}/mkchan
+
+.PHONY: check
+check: 

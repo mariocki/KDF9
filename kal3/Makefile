@@ -36,3 +36,6 @@ deploy: kal3
 .PHONY: distclean
 distclean: clean
 	$(RM) ${RUNTIME}/kal3
+
+.PHONY: check
+check: 
