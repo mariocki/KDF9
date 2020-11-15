@@ -1,4 +1,10 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# tsdnine : Executes a KDF9 binary in the director.
+#------------------------------------------------------------------------
+
+
 DATA=${KDF9ROOT}/Data
 BINARY=${KDF9ROOT}/Binary
 
@@ -6,7 +12,7 @@ trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 
 if [ x$1x = xx ]
 then
-   echo; echo No program name was given.; echo
+   echo; echo "No program name was given."; echo
    exit 1
 fi
 

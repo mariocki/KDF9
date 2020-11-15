@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# strop : Convert Whetstone Algol to Kidsgrove format.
+#------------------------------------------------------------------------
+
 SOURCE=${KDF9ROOT}/Whetstone
 TARGET=${KDF9ROOT}/Kidsgrove
 

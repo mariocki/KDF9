@@ -1,4 +1,9 @@
 #!/bin/sh
+
+#------------------------------------------------------------------------
+# nine : Executes a KDF9 binary with input on TR0 or datafile
+#------------------------------------------------------------------------
+
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 

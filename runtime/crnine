@@ -2,6 +2,10 @@
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 
+#------------------------------------------------------------------------
+# crnine : Executes a KDF9 binary with input on CR0
+#------------------------------------------------------------------------
+
 if [ x"$1"x = xx ]
 then
     echo "You have not named a binary program to be run."

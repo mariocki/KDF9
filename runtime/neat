@@ -1,10 +1,17 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# neat : ???
+#------------------------------------------------------------------------
+
 USERCODE=${KDF9ROOT}/Assembly
 
 trap "rm -f /tmp/neat.commands /tmp/neat_tmp_[0123456789]" 0 1 2 3
 
 if [ ! -r ${USERCODE}/$1.k3 ]
-then echo Could not find $1.k3 in ${USERCODE}; exit 1
+then 
+   echo "Could not find $1.k3 in ${USERCODE}";
+   exit 1
 fi
 
 tr  "\\r\\t" "\\n " < ${USERCODE}/$1.k3  > /tmp/neat_tmp_0

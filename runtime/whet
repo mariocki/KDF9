@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------
+# whet : Executes a Whetstone Algol program.
+#------------------------------------------------------------------------
+
 BINARY=${KDF9ROOT}/Binary
 SOURCE=${KDF9ROOT}/Whetstone
 FW0FILES=${KDF9ROOT}/FW0Files

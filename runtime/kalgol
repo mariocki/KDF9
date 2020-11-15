@@ -11,9 +11,9 @@ LOGS=${KDF9ROOT}/Logs
 SETTINGS=${KDF9ROOT}/settings
 USERCODE=${KDF9ROOT}/Assembly
 
-#trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
-#      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
-#      0 1 2 3
+trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
+      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
+      0 1 2 3
       
 if [ x${KIDSMODE}x = xfx ]
 then
@@ -67,32 +67,32 @@ if ${KDF9ROOT}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-}
 then
    if [ -s ${LOGS}/error_output ]
    then
-      echo The compilation was abandoned.; echo
-      echo ${LOGS}/error_output:
-      echo ===
-      more ${LOGS}/error_output
-      echo ===
+      echo "The compilation was abandoned."; echo
+      echo "${LOGS}/error_output":
+      echo "==="
+      more "${LOGS}/error_output"
+      echo "==="
       exit 2
       exit 999
    fi
 
    if fgrep FAIL ${KDF9ROOT}/LP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; echo
-      echo LP0:
-      echo ===
-      more ${KDF9ROOT}/LP0
-      echo ===
+      echo "The compilation was abandoned."; echo
+      echo "LP0:"
+      echo "==="
+      more "${KDF9ROOT}/LP0"
+      echo "==="
       exit 2
    fi
 
    if fgrep FAIL ${KDF9ROOT}/TP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; echo
-      echo TP0:
-      echo ===
-      more ${KDF9ROOT}/TP0
-      echo ===
+      echo "The compilation was abandoned."; echo
+      echo "TP0:"
+      echo "==="
+      more "${KDF9ROOT}/TP0"
+      echo "==="
       exit 3
    fi
 
@@ -103,7 +103,7 @@ ${KDF9ROOT}/mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
-   echo The Usercode object program could not be retrieved.; echo; echo
+   echo "The Usercode object program could not be retrieved."; echo; echo
    exit 4
 fi
 
@@ -113,10 +113,10 @@ y)
    ${KDF9ROOT}/ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
-      echo An object program could not be assembled.; echo; echo
+      echo "An object program could not be assembled."; echo; echo
       exit 5
    fi
-   echo The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name; echo
+   echo "The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name"; echo
    ;;
 *)
    ;;

@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# sttl : ????
+#------------------------------------------------------------------------
+
 USERCODE=${KDF9ROOT}/Assembly
 
 trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp"   \
@@ -12,5 +17,5 @@ if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 > /tmp/STTL_tmp
 then
    mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
 else
-   echo \*\*\*\* FAILURE when correcting ST and TL in ${USERCODE}/$1.k3
+   echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
 fi

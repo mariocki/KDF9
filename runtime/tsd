@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#------------------------------------------------------------------------
+# tsp : Runs the KDF9 director.
+#------------------------------------------------------------------------
+
 TSD=${KDF9ROOT}/Binary/KKT40E007UPU
 
 cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0

@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#------------------------------------------------------------------------
+# ports : Convert Kidsgrove Algol to Whetstone format.
+#------------------------------------------------------------------------
+
 SOURCE=${KDF9ROOT}/Kidsgrove
 TARGET=${KDF9ROOT}/Whetstone
 
