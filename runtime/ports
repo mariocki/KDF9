@@ -110,7 +110,7 @@ $1|
 1,\$s/\*/×/g
 1,\$s/~/º/g
 1,\$s/\\\\/º/g
-1,\$s/{/_[/g
+1,\$s/\{/_[/g
 1,\$s/}/_]/g
 1,\$s/>=/_>/g
 1,\$s/<=/_</g
@@ -121,5 +121,5 @@ $1|
 |
 ++++
 
-tr  -d "\\r"  < ${SOURCE}/$1.a60  > /tmp/ports.tmp
-sed -E -f /tmp/ports.commands /tmp/ports.tmp  > ${TARGET}/$1.a60
+dos2unix ${SOURCE}/$1.a60
+sed -E -f /tmp/ports.commands ${SOURCE}/$1.a60  > ${TARGET}/$1.a60

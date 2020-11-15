@@ -22,6 +22,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `src` Main source code for ee9
 - `builddefs` Gnat adc pragma files for the various build options.
 - `kal3` Source code for kal3
+- `kal4` Source code for kal4
 - `kalgol` Data files using during the compilation of Kidsgrove Algol
 - `mkchan` Source code for mkchan
 - `runtime` Runtime environment

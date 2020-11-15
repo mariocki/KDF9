@@ -6,10 +6,10 @@
 
 SOURCE=${KDF9ROOT}/Kidsgrove
 DATA=${KDF9ROOT}/Data
-TESTS=${KDF9ROOT}/tests
 BINARY=${KDF9ROOT}/Binary
 LOGS=${KDF9ROOT}/Logs
 SETTINGS=${KDF9ROOT}/settings
+USERCODE=${KDF9ROOT}/Assembly
 
 #trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
 #      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
@@ -34,7 +34,7 @@ fi
 
 > ${KDF9ROOT}/settings_1.txt
 
-${KDF9ROOT}/rlt tape_labels_for_KAlgol.txt - wz
+${KDF9ROOT}/rlt tape_labels_for_KAlgol - wz
 #echo "The compiler work tapes have been labelled."
 
 if [ ! -r ${DATA}/systape.txt ]
@@ -98,7 +98,7 @@ then
 
 fi
 
-# a2b -p2t < TP0 > ${USERCODE}/$name.k3
+#${KDF9ROOT}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
 ${KDF9ROOT}/mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
