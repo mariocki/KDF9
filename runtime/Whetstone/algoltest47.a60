@@ -1,0 +1,23 @@
+algoltest47|
+_b_e_g_i_n
+  _c_o_m_m_e_n_t Knuth's Man or Boy program;
+
+   _p_r_o_c_e_d_u_r_e output(dv, i);
+   _v_a_l_u_e dv, i;
+   _i_n_t_e_g_e_r dv, i;
+   _K_D_F_9 1,0,0,0;
+      _[dv_]; _[i_]; MRWDQ0; _E_X_I_T;
+   _A_L_G_O_L;
+
+  _r_e_a_l _p_r_o_c_e_d_u_r_e A(k, x1, x2, x3, x4, x5);
+  _v_a_l_u_e k; _i_n_t_e_g_e_r k, x1, x2, x3, x4, x5;
+  _b_e_g_i_n
+    _r_e_a_l _p_r_o_c_e_d_u_r_e B;
+    _b_e_g_i_n k := k - 1;
+          B := A := A(k, B, x1, x2, x3, x4);
+    _e_n_d;
+    _i_f k _< 0 _t_h_e_n A := x4 + x5 _e_l_s_e B;
+  _e_n_d;
+  output(30, A(10, 1, -1, -1, 1, 0));
+_e_n_d
+|

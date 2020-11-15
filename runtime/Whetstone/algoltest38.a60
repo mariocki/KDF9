@@ -1,0 +1,9 @@
+algoltest38|
+_b_e_g_i_n _i_n_t_e_g_e_r i, j, k;
+   i:= 0;
+   _c_o_m_m_e_n_t _f_o_r j := 1 _s_t_e_p 1 _u_n_t_i_l 7 _d_o ;
+   _i_f  i = 0
+   _t_h_e_n
+      k := i × j;
+_e_n_d
+|

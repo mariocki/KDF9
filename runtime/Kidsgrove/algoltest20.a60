@@ -1,0 +1,21 @@
+'begin'
+'integer' i, j;
+   'procedure' open(dv);
+   'value' dv;
+   'integer' dv;
+   'begin'
+      dv := 0;
+   'end' open;
+
+   'real' 'procedure' read(dv);
+   'value' dv;
+   'integer' dv;
+   'begin'
+      read := 0;
+   'end' open;
+
+   open(20);
+   i := read(20);
+   'for'  j:=1 'step' 1 'until' i 'do'
+      output(30, j);
+'end'

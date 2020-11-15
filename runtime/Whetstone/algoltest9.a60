@@ -1,0 +1,29 @@
+algoltest9|
+_b_e_g_i_n _c_o_m_m_e_n_t progam to investigate formal procedure calls;
+
+_p_r_o_c_e_d_u_r_e call2f(i, p1, ip2);
+  _v_a_l_u_e i;  _i_n_t_e_g_e_r i;
+  _p_r_o_c_e_d_u_r_e p1;
+  _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e ip2;
+  _b_e_g_i_n
+    _i_n_t_e_g_e_r loc;
+    loc := ip2(4);
+    p1(5, loc);
+  _e_n_d call2f;
+
+_p_r_o_c_e_d_u_r_e act1(i, j);
+  _v_a_l_u_e i, j; _i_n_t_e_g_e_r i, j;
+  _b_e_g_i_n
+     i := 1;
+  _e_n_d act1;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e act2(j);
+  _v_a_l_u_e j; _i_n_t_e_g_e_r j;
+  _b_e_g_i_n
+    j := 2;
+  _e_n_d act2;
+
+  call2f(22, act1, act2);
+
+_e_n_d
+|

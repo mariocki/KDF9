@@ -1,0 +1,38 @@
+algoltest23|
+_b_e_g_i_n _c_o_m_m_e_n_t progam to investigate formal procedure calls;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e iabs(x);
+   _v_a_l_u_e x;  _i_n_t_e_g_e_r x; _c_o_m_m_e_n_t 2;
+   _K_D_F_9 0,0,0,0;
+      _[x_]; ABS;  _E_X_I_T;
+   _A_L_G_O_L;
+
+_p_r_o_c_e_d_u_r_e call2f(i, p1, ip2);
+  _v_a_l_u_e i;  _i_n_t_e_g_e_r i;   _c_o_m_m_e_n_t 3;
+  _p_r_o_c_e_d_u_r_e p1;           _c_o_m_m_e_n_t 97;
+  _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e ip2; _c_o_m_m_e_n_t 98;
+  _b_e_g_i_n
+    _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e inner(ii);
+      _v_a_l_u_e ii;  _i_n_t_e_g_e_r ii; _c_o_m_m_e_n_t 4;
+        inner := ii + ip2(ii); _c_o_m_m_e_n_t this is a bit hard;
+    _i_n_t_e_g_e_r loc;
+    loc := ip2(4) + inner(7);;
+    p1(5, iabs(loc));
+  _e_n_d call2f;
+
+_p_r_o_c_e_d_u_r_e act2(i, j);
+  _v_a_l_u_e i, j; _i_n_t_e_g_e_r i, j; _c_o_m_m_e_n_t 5;
+  _b_e_g_i_n
+     i := 1;
+  _e_n_d act2;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e iact1(j);
+  _v_a_l_u_e j; _i_n_t_e_g_e_r j; _c_o_m_m_e_n_t 6;
+  _b_e_g_i_n
+    iact1 := 2;
+  _e_n_d iact1;
+
+  call2f(22, act2, iact1);
+
+_e_n_d
+|

@@ -1,0 +1,26 @@
+algoltest29|
+_b_e_g_i_n  _c_o_m_m_e_n_t formalproc;
+_r_e_a_l _p_r_o_c_e_d_u_r_e onetwothree(formal);
+ _r_e_a_l _p_r_o_c_e_d_u_r_e formal;
+ _b_e_g_i_n;
+ onetwothree := formal(10);
+ _e_n_d;
+
+ _p_r_o_c_e_d_u_r_e nopars;
+ _b_e_g_i_n
+   _r_e_a_l x;
+   x := 13;
+ _e_n_d;
+
+
+_r_e_a_l _p_r_o_c_e_d_u_r_e actual(i);
+ _v_a_l_u_e i;
+ _r_e_a_l i;
+ _b_e_g_i_n
+ actual := i;
+ _e_n_d;
+ _r_e_a_l result;
+ result := onetwothree(actual);
+ nopars;
+_e_n_d
+|

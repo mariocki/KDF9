@@ -1,0 +1,14 @@
+'begin'
+'procedure' T(x);
+   'value' x;
+   'integer' x;
+   'KDF9' 7/5/0/2;
+   ZERO; DUP; DUP; =V1; =V2;
+   SET1; +; ={x};
+   'ALGOL';
+
+
+T(100);
+
+
+'end'

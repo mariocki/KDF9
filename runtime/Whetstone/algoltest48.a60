@@ -1,0 +1,27 @@
+algoltest48|
+_b_e_g_i_n
+
+_p_r_o_c_e_d_u_r_e writetext(dv, s);
+_v_a_l_u_e dv;
+_i_n_t_e_g_e_r dv;  _s_t_r_i_n_g s;
+_K_D_F_9 1,1,1,1;  _[dv_];  _[s_];  JS22P295;  MRWDQ0;
+   _E_X_I_T;
+_A_L_G_O_L;
+
+_s_w_i_t_c_h S := l1, l2;
+_s_w_i_t_c_h S2 := S[p(1)], S[p(p(1))];
+
+_i_n_t_e_g_e_r i;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e p(i);
+ _i_n_t_e_g_e_r i;
+ _b_e_g_i_n
+  p := i;
+ _e_n_d;
+
+_g_o_t_o l2;
+i := 0;
+l1: l2:  writetext(30, _[Labels×were×a×bad×idea_[c_]_]);
+  i := i+1;  _g_o_t_o S2[i];
+_e_n_d
+|

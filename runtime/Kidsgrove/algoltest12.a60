@@ -1,0 +1,32 @@
+'begin' 'comment' DavidHu/namechain;
+
+'integer' 'procedure' p(i);
+ 'integer' i;
+'begin'
+ p := f(i);
+ p := f(i);
+ p := f(i);
+ p := f(i);
+ p := f(i);
+ p := f(i);
+ p := f(i);
+'end' p;
+
+'integer' 'procedure' f (n);
+ 'integer' n;
+'begin'
+ f := n;
+'end' p;
+ 'integer' j;
+ j:= f( j + p(10));
+ j:= f( j + p(10));
+ j:= f( j + p(10));
+ j:= f( j + p(10));
+'comment'  signs that we have floater if we do any more;
+  j:= f( j + p(10));
+'comment'      j:= f( j + p(10));
+'comment'       j:= f( j + p(10));
+'comment'   j:= f( j + p(10));
+'comment'   j:= f( j + p(10));
+'comment'   j:= f( j + p(10));
+'end'

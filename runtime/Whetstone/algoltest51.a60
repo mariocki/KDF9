@@ -1,0 +1,24 @@
+algoltest51|
+_b_e_g_i_n  _c_o_m_m_e_n_t test to explore level parameters;
+   _r_e_a_l _p_r_o_c_e_d_u_r_e abs(z);
+   _v_a_l_u_e z;  _r_e_a_l z;
+   _K_D_F_9 0,0,0,0;
+      _[z_]; ABSF;  _E_X_I_T;
+   _A_L_G_O_L;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e p0(x);
+   _v_a_l_u_e x;  _r_e_a_l x;
+   _b_e_g_i_n
+      _r_e_a_l _p_r_o_c_e_d_u_r_e p1(x, y);
+      _v_a_l_u_e x, y;  _r_e_a_l x, y;
+         p1 := x + y;
+      p0 := x + p1(x, x)'
+   _e_n_d;
+
+   _b_e_g_i_n
+      _i_n_t_e_g_e_r i, j;  _r_e_a_l qqqqq;
+      _f_o_r  i:= -3 _s_t_e_p 1 _u_n_t_i_l +3 _d_o
+         qqqqq := p0(abs(i));
+   _e_n_d;
+_e_n_d
+|

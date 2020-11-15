@@ -1,0 +1,14 @@
+l0:'begin'
+'switch' S := l1, l2, l0;
+'switch' S2 := S[p(2)], S[p(p(2))];
+
+'integer' 'procedure' p(i);
+ 'integer' i;
+ 'begin'
+  p := i + i;
+ 'end';
+
+'goto' l2;
+
+l1: l2:  writetext(30, {Labels _ were _ a _ bad _ idea{c}});  'goto' S2[1];
+'end';

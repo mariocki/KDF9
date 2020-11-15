@@ -1,0 +1,46 @@
+'begin'  'comment' DavidHu/arraytest;
+'begin'
+'comment' 'real' xyz;
+'comment' 'array' peter[6:7];
+'switch' S := 20, 30, 40;
+
+
+'procedure' jimmy(a);
+   'string' a;
+   'begin'
+   'procedure' nest(i);
+   'integer' i;
+      'begin'
+      i := 0;
+      'end';
+
+   nest(100);
+   'end';
+'integer' anne;
+'array' fred[1:3,2:4];
+'real' 'procedure' jim(x,i,b,a, p, l )switch:(sw);
+   'value' x, i, b,a;
+   'real' x; 'integer' i; 'boolean' b;
+   'integer' 'array' a;
+   'integer' 'procedure' p;
+   'label' l;
+   'switch' sw;
+   'begin'
+   'boolean' 'procedure' nested( x);
+   'real' x;
+      'begin'
+      x := 100;
+      'end';
+   nested(x);
+   x := S[1];
+   'end';
+'begin'
+'integer' 'array' ken[0:100];
+'boolean' 'array' boo[1:99];
+'real' x;
+next: jim(x, x,x);
+jimmy({string});  'goto' next;
+
+'end';
+'end';
+'end'

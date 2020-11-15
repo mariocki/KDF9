@@ -1,0 +1,14 @@
+'begin'
+'real' b;
+'begin'
+'real' x;
+'begin'
+'boolean' b;
+'end';
+'begin'
+'begin'
+'real' y;
+'begin'
+'integer' i;
+i:= i +1; 'end';'end';'end';'end';
+'end'

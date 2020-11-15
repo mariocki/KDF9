@@ -1,0 +1,16 @@
+algoltest46|
+_b_e_g_i_n
+_r_e_a_l b;
+_b_e_g_i_n
+_r_e_a_l x;
+_b_e_g_i_n
+_b_o_o_l_e_a_n b;
+_e_n_d;
+_b_e_g_i_n
+_b_e_g_i_n
+_r_e_a_l y;
+_b_e_g_i_n
+_i_n_t_e_g_e_r i;
+i:= i +1; _e_n_d;_e_n_d;_e_n_d;_e_n_d;
+_e_n_d
+|

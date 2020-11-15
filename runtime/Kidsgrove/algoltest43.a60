@@ -1,0 +1,14 @@
+'begin' 'integer' i, j, k;
+'comment'  no longer FAILS Tape format error;
+'comment'  now fails 18/22;
+
+'procedure' nopars;
+'begin'
+'end' nopars;
+
+   i:= 0;
+   'for' j := 1 'step' 1 'until' 7 'do'
+      'if'  i = 0
+      'then'
+         k := i + j;
+'end'

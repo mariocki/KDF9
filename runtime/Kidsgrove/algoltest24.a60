@@ -1,0 +1,26 @@
+'begin'   'comment' David's test for the Les Hodges version of KAB20;
+'integer' iabc; 'integer' j; 'comment' was a comma seperated list;
+   'procedure' open(dv);
+   'value' dv;
+   'integer' dv;
+   'begin'
+        'real' x;
+        x := 3.14159;
+      dv := 1234567;
+   'end' open;
+
+   'real' 'procedure' read(dv);
+   'value' dv;
+   'integer' dv;
+   'KDF9' 1/0/0/0;
+      ZERO; ={dv}; ZERO;
+   'ALGOL';
+
+   open(20);
+   iabc := read(20);
+        'begin'
+           'integer' j;  'integer' jim;
+           'for'  j:=1 'step' 1 'until' iabc 'do'
+           'begin' jim := read(1); 'end';
+        'end';
+'end'

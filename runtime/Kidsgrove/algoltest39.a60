@@ -1,0 +1,13 @@
+'begin'
+   'real' 'procedure' abs(x);
+   'value' x;  'real' x;
+   'KDF9' 0/0/0/0;
+      {x}; ABSF;  'EXIT';
+   'ALGOL';
+
+   'begin'
+      'integer' i, j, k;
+      'for'  i:= 1 'step' 1 'until' 99 'do'
+         j := i + 1;
+   'end';
+'end'

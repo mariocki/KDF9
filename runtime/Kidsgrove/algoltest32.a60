@@ -1,0 +1,15 @@
+'begin' 'comment' DHu's second test;
+'procedure' onetwothree(i);
+        'value' i;
+        'integer' i;
+        'begin'
+i := 0;
+        'end';
+ 'real' x,y;
+        'begin'
+        'integer' i;
+        'end';
+'if' y = 0 'then'  x := (x+2) + (x+2) 'else'
+  y := x:= 23.0 + 1.0;
+ y := 0.0;
+'end'

@@ -1,0 +1,54 @@
+algoltest58|
+
+_b_e_g_i_n _c_o_m_m_e_n_t 
+   _c_o_m_m_e_n_t program to integrate f(x,y) over triangle (0,0), (1,0), (1,1);
+   _c_o_m_m_e_n_t using Jensen's device -- David Ho;
+
+   _r_e_a_l x, y;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e f(x, y);
+   _v_a_l_u_e x,y;  _r_e_a_l x,y;
+      f:= x + x + y + y;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e int(a, b, x, f);
+   _c_o_m_m_e_n_t integrates f(x) over range a to b;
+   _v_a_l_u_e a, b; _r_e_a_l a, b, x, f;
+   _b_e_g_i_n
+      _r_e_a_l _p_r_o_c_e_d_u_r_e intint(a, b, fa, fb);
+      _v_a_l_u_e a, b, fa, fb;  _r_e_a_l a, b, fa, fb;
+      _b_e_g_i_n
+         _r_e_a_l c, fc, ff;
+         x := c := (a + b) / 2;
+         fc := f;
+         ff := (fa + 4×fc + fb)/6;
+         _c_o_m_m_e_n_t answer is good enough if simrule no better than trapezoidal;
+         _i_f  abs( (fa + fb)/2 - ff ) < 0.001
+         _t_h_e_n
+            intint := ff × (b - a)
+         _e_l_s_e
+            intint := intint(a, c, fa, fc) + intint(c, b, fc, fb);
+      _e_n_d;
+      _r_e_a_l fa;
+      x := a;   fa := f;  x := b;
+      int := intint(a, b, fa, f);
+   _e_n_d;
+
+   _r_e_a_l answer;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e minitest(x);
+   _v_a_l_u_e x;  _r_e_a_l x;
+   _b_e_g_i_n
+      minitest := x×x×x;
+   _e_n_d;
+
+   writetext(30, _[minitest×0×to×2×x^3_[c_]_]);
+   answer := int(0, 2, x, minitest(x));
+   output(30, answer);
+   output(30, answer×100);
+
+_c_o_m_m_e_n_t   writetext(30, _[fulltest×0×to×1×triangle×=×_]);
+_c_o_m_m_e_n_t   answer := int(0, 1, x, int(0, x, y, f(x,y)));
+_c_o_m_m_e_n_t   output(30, answer×100);
+
+_e_n_d
+|

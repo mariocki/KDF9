@@ -1,0 +1,13 @@
+'begin'  'comment' DavidHu/first;
+'procedure' onetwothree(i);
+   'value' i;
+   'integer' i;
+'begin';
+   j := i;
+'end';
+'boolean' a12345678;
+'integer' j;
+
+onetwothree(j);
+
+'end'

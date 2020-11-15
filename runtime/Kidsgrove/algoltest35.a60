@@ -1,0 +1,13 @@
+'begin'   'comment' David Hu's "first";
+'procedure' one(i);
+ 'value' i;
+ 'integer' i;
+'begin';
+ j := i;
+'end';
+
+'integer' j;
+
+one(j);
+
+'end'

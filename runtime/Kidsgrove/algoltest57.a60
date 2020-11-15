@@ -1,0 +1,8 @@
+'begin' 'library' A0, A6;
+   'comment' testing I/O;
+   'real' x;
+   open(20); open(30);
+   'for' x := read(20) 'while' x < 1000000  'do'
+       output(30, x);
+   close(20); close(30);
+'end'

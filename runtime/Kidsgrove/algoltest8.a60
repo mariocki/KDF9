@@ -1,0 +1,41 @@
+'begin' 'library' A0, A6;
+ 'comment' DavidHu/procsPlusCode;
+'real' x;
+   x := 123;
+'begin'
+'procedure' P1( x);
+   'real' x;
+'begin'
+   'integer' i;
+   x :=0;
+'end';
+
+'real' 'procedure' P2( x);
+   'real' x;
+'begin'
+   'integer' i;
+   x :=0;
+   P2 := x;
+'end';
+'integer' 'procedure' P3( x);
+   'real' x;
+
+'begin'
+   'integer' i;
+   x :=0;
+   P3 := x;
+'end';
+'boolean' 'procedure' P4( x);
+   'real' x;
+
+'begin'
+   'integer' i;
+   x :=0;
+   P4 := x> 0;
+'end';
+'end';
+   writetext(30, {Hello _ World{c}});
+   x := 123;
+   output(30, x);
+   writetext(30, {What {s} a _ 'real' _ 'procedure' _ this {s} is {c}});
+'end'

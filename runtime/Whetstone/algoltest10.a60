@@ -1,0 +1,35 @@
+algoltest10|
+_b_e_g_i_n  _c_o_m_m_e_n_t DavidHu/firstOpt;
+_p_r_o_c_e_d_u_r_e onetwothree(i);
+   _v_a_l_u_e i;
+   _i_n_t_e_g_e_r i;
+_b_e_g_i_n
+_i_n_t_e_g_e_r _a_r_r_a_y a[1:10]; _i_n_t_e_g_e_r index;
+   _f_o_r index := 0 _s_t_e_p 1 _u_n_t_i_l 10 _d_o
+      a[index] := 0;
+a[5]:= a[10] + 2.0;
+_e_n_d;
+_p_r_o_c_e_d_u_r_e four(i);
+   _v_a_l_u_e i;
+   _i_n_t_e_g_e_r i;
+_b_e_g_i_n
+_i_n_t_e_g_e_r _a_r_r_a_y a[1:10]; _i_n_t_e_g_e_r index;
+   _f_o_r index := 0 _s_t_e_p 1 _u_n_t_i_l 10 _d_o
+      a[index] := 0;
+a[5]:= a[10] + 2.0;
+_e_n_d;
+
+_i_n_t_e_g_e_r j, index;
+_a_r_r_a_y aa[1:10];
+index := 1000;
+   _f_o_r index := 0 _s_t_e_p 1 _u_n_t_i_l 10 _d_o
+   _b_e_g_i_n
+_c_o_m_m_e_n_t      _f_o_r j := 0 _s_t_e_p 1 _u_n_t_i_l 10 _d_o _b_e_g_i_n
+_c_o_m_m_e_n_t         aa[index] := 0;
+_c_o_m_m_e_n_t         aa[j] := 10;
+_c_o_m_m_e_n_t      _e_n_d;
+   _e_n_d;
+aa[5]:= aa[10] + 2.0;
+
+_e_n_d
+|

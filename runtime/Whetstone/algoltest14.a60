@@ -1,0 +1,48 @@
+algoltest14|
+_b_e_g_i_n  _c_o_m_m_e_n_t DavidHu/HoGrammar;
+_p_r_o_c_e_d_u_r_e jim( p);
+   _i_n_t_e_g_e_r p;
+   _b_e_g_i_n
+      _r_e_a_l jinx;
+   _e_n_d;
+
+_p_r_o_c_e_d_u_r_e james ( nI, vR);
+    _v_a_l_u_e vR;
+    _i_n_t_e_g_e_r nI;
+    _r_e_a_l vR;
+    _b_e_g_i_n
+   nI := vR;
+    _e_n_d;
+_r_e_a_l x; _r_e_a_l y; _r_e_a_l z;
+_i_n_t_e_g_e_r i; _i_n_t_e_g_e_r j; _i_n_t_e_g_e_r k;
+_b_o_o_l_e_a_n a; _b_o_o_l_e_a_n b; _b_o_o_l_e_a_n c;
+    _b_e_g_i_n
+    _r_e_a_l x; _r_e_a_l y; _r_e_a_l z;
+    _i_n_t_e_g_e_r i; _i_n_t_e_g_e_r j; _i_n_t_e_g_e_r k;
+    _b_o_o_l_e_a_n a; _b_o_o_l_e_a_n b; _b_o_o_l_e_a_n c;
+        _b_e_g_i_n
+           _s_w_i_t_c_h Sw := label1; _c_o_m_m_e_n_t ,label2;
+label1:            i:=10; j:=100; c := (-0.1 < 0);
+label2:         _g_o_t_o  Sw[1];
+        _e_n_d;
+    _e_n_d;
+    _b_e_g_i_n
+    _r_e_a_l x; _r_e_a_l y; _r_e_a_l z;
+    _i_n_t_e_g_e_r i; _i_n_t_e_g_e_r j; _i_n_t_e_g_e_r k;
+    _b_o_o_l_e_a_n a; _b_o_o_l_e_a_n b; _b_o_o_l_e_a_n c;
+        _b_e_g_i_n
+        i:=10; j:=100; z := -0.1;
+            _b_e_g_i_n
+                _a_r_r_a_y p[1:i,0:j]; _a_r_r_a_y q[1:i,0:j]; _a_r_r_a_y r[1:i,0:j];
+                _i_n_t_e_g_e_r _a_r_r_a_y fred[0:_i_f z < 0 _t_h_e_n 1 _e_l_s_e 4:20];
+                y := fred[i];
+                z := p[2,3];
+            _e_n_d;
+        _e_n_d;
+
+    james(  x, 1000);
+    b := (i+j+k - x) < (x+y+z );
+    x := x- y - z;
+    _e_n_d;
+_e_n_d
+|

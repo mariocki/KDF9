@@ -1,0 +1,50 @@
+'begin'
+   'comment' program to integrate f(x,y) over triangle (0,0), (1,0), (1,1);
+
+   'real' 'procedure' abs(x);
+   'value' x;  'real' x;
+   'KDF9' 0/0/0/0;
+      {x}; ABSF;  'EXIT';
+   'ALGOL';
+
+
+   'real' 'procedure' f(x, y);
+   'value' x,y;  'real' x,y;
+      f:= x×x + y×y;
+
+   'real' 'procedure' int(a, b, f);
+   'comment' integrates f(x) over range a to b;
+   'value' a, b; 'real' a, b;  'real' 'procedure' f;
+   'begin'
+      'real' 'procedure' intint(a, b, fa, fb);
+      'value' a, b, fa, fb;  'real' a, b, fa, fb;
+      'begin'
+         'real' c, fc, ff;
+         c := (a + b) / 2;
+         fc := f(c);
+         ff := (fa + 4×fc + fb)/6;
+         'comment' answer is good enough if simrule no better than trapezoidal;
+         'if'  abs( (fa + fb)/2 - ff ) < 0.001
+         'then'
+            intint := ff × (b - a)
+         'else'
+            intint := intint(a, c, fa, fc) + intint(c, b, fc, fb);
+      'end';
+      int := intint(a, b, f(a), f(b));
+   'end';
+
+   'real' 'procedure' intfy(x);
+   'comment' integral 0 to x of f(x,y) dy;
+   'value' x;  'real' x;
+   'begin'
+      'real' 'procedure' fx(y);
+      'value' y;  'real' y;
+         fx := f(x,y);
+      intfy := int(0, x, fx);
+   'end';
+
+   'real' answer;
+
+   answer := int(0, 1, intfy);
+
+'end'

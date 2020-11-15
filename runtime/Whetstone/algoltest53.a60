@@ -1,0 +1,14 @@
+algoltest53|
+_b_e_g_i_n _c_o_m_m_e_n_t invalid progam to investigate FAILS 00N in KAB01;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e iabs(x)
+   _v_a_l_u_e x;  _i_n_t_e_g_e_r x;
+   _K_D_F_9 0,0,0,0;
+      _[x_]; ABS;  _E_X_I_T;
+   _A_L_G_O_L;
+
+   _i_n_t_e_g_e_r res;
+   res := iabs(-9);
+
+_e_n_d
+|

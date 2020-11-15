@@ -1,0 +1,16 @@
+algoltest49|
+l0:_b_e_g_i_n
+_s_w_i_t_c_h S := l1, l2, l0;
+_s_w_i_t_c_h S2 := S[p(2)], S[p(p(2))];
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e p(i);
+ _i_n_t_e_g_e_r i;
+ _b_e_g_i_n
+  p := i + i;
+ _e_n_d;
+
+_g_o_t_o l2;
+
+l1: l2:  writetext(30, _[Labels×were×a×bad×idea_[c_]_]);  _g_o_t_o S2[1];
+_e_n_d;
+|

@@ -1,0 +1,21 @@
+'begin'
+
+   'real' 'procedure' abs(x1);
+   'value' x1;  'real' x1;
+   'KDF9' 0/0/0/0;
+      {x1}; ABSF;  'EXIT';
+   'ALGOL';
+
+
+   'real' 'procedure' veryveryveryslowabs(x);
+   'value' x;  'real' x;
+   'begin'
+      veryveryveryslowabs := 'if' x<0 'then' -x 'else' x;
+   'end';
+
+   'begin'
+      'integer' i, j, k123456789;
+      'for'  i:= 1 'step' 1 'until' 99 'do'
+         j := i + 1;
+   'end';
+'end'

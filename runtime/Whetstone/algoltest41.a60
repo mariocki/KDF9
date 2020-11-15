@@ -1,0 +1,30 @@
+algoltest41|
+_b_e_g_i_n
+_i_n_t_e_g_e_r i, j;
+   _p_r_o_c_e_d_u_r_e open(dv);
+   _v_a_l_u_e dv;
+   _i_n_t_e_g_e_r dv;
+   _b_e_g_i_n
+      dv := 0;
+   _e_n_d open;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e read(dv);
+   _v_a_l_u_e dv;
+   _i_n_t_e_g_e_r dv;
+   _K_D_F_9 1,0,0,0;
+      ZERO; =_[dv_]; ZERO; _E_X_I_T;
+   _A_L_G_O_L;
+
+   _p_r_o_c_e_d_u_r_e output(dv, i);
+   _v_a_l_u_e dv, i;
+   _i_n_t_e_g_e_r dv, i;
+   _K_D_F_9 1,0,0,0;
+      _[dv_]; _[i_];  JS789P295; _E_X_I_T;
+   _A_L_G_O_L;
+
+   open(20);
+   i := read(20);
+   _f_o_r  j:=1 _s_t_e_p 1 _u_n_t_i_l i _d_o
+      output(30, j);
+_e_n_d
+|

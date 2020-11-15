@@ -1,0 +1,8 @@
+'begin' 'library' A0, A6;
+ 'comment' Hello World + a bit;
+'real' x;
+   writetext(30, {Hello _ World{c}});
+   x := 123;
+   output(30, x);
+   writetext(30, {What {s} a _ 'real' _ 'procedure' _ this {s} is {c}});
+'end'

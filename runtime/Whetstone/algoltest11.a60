@@ -1,0 +1,15 @@
+algoltest11|
+_b_e_g_i_n  _c_o_m_m_e_n_t DavidHu/first;
+_p_r_o_c_e_d_u_r_e onetwothree(i);
+   _v_a_l_u_e i;
+   _i_n_t_e_g_e_r i;
+_b_e_g_i_n;
+   j := i;
+_e_n_d;
+_b_o_o_l_e_a_n a12345678;
+_i_n_t_e_g_e_r j;
+
+onetwothree(j);
+
+_e_n_d
+|

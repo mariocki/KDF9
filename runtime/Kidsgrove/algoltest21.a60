@@ -1,0 +1,18 @@
+'begin'  'comment' David's formalproc;
+'integer' 'procedure' onetwothree(formal);
+ 'integer' 'procedure' formal;
+ 'begin';
+ onetwothree := formal(10);
+ 'end';
+
+'integer' 'procedure' actual(i);
+ 'value' i;
+ 'integer' i;
+ 'begin'
+ actual := i;
+ 'end';
+
+'integer' result;
+ result := onetwothree(actual);
+
+'end'
