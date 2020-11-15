@@ -11,35 +11,34 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## What different between this repo and the original
 - Source code changes 
-    - Write KDF9.log to the `{KDFROOT}/logs` folder 
-    - don't assume everyone uses black on white terminals :unamused:
-    - Use the `KDFROOT` env variable to determine the default paths for `Binaries` and `Data`
+    - Write KDF9.log to the `{KDFROOT}/logs` folder.
+    - don't assume everyone uses black on white terminals. :unamused:
+    - Use the `KDFROOT` env variable to determine the default paths for `Binaries` and `Data`.
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
-
+- I don't include pre-build binaries.
 
 ## Folder structure
-- `src` Main source code for ee9
+- `src` Main source code for ee9.
 - `builddefs` Gnat adc pragma files for the various build options.
-- `kal3` Source code for kal3
-- `kal4` Source code for kal4
-- `kalgol` Data files using during the compilation of Kidsgrove Algol
-- `mkchan` Source code for mkchan
-- `runtime` Runtime environment
-    - `runtime/Kidsgrove` Kidsgrove Algol source files
-    - `runtime/Whetstone` Whetstone Algol source files
-    - `runtime/Binary` Compiled KDF9 binaries
-    - `runtime/Data` Data files
-    - `runtime/FW0Files` Various FW0 files for director or Whetstone interpreter etc
-    - `runtime/logs` log files are written in here
-    - `runtime/test` test scripts
-    - `runtime/setting` Various settings files which canb be copied to settings_[12].txt
-    - `runtime/Assembly` Usercode assembly source code (once compiled the binaries are placed in `runtime/Binary`)
+- `kal3` Source code for kal3.
+- `kal4` Source code for kal4.
+- `kalgol` Data files using during the compilation of Kidsgrove Algol.
+- `mkchan` Source code for mkchan.
+- `runtime` Runtime environment.
+    - `runtime/Kidsgrove` Kidsgrove Algol source files.
+    - `runtime/Whetstone` Whetstone Algol source files.
+    - `runtime/Binary` Compiled KDF9 binaries.
+    - `runtime/Data` Data files.
+    - `runtime/FW0Files` Various FW0 files for director or Whetstone interpreter etc.
+    - `runtime/logs` log files are written in here.
+    - `runtime/test` test scripts.
+    - `runtime/setting` Various settings files which canb be copied to settings_[12].txt.
+    - `runtime/Assembly` Usercode assembly source code (once compiled the binaries are placed in `runtime/Binary`).
 - `Documents` Various KDF9 and Whetstone related PDFs/HTML pages.
 
 ## What has not been changed
-- I don't include pre-build binaries.
-- The License, it's still GPLv3 :thumbsup:
+- The License, it's still GPLv3. :thumbsup:
 
 ## How to build `ee9` (the KDF9 emulator)
 - `make ee9`
@@ -72,20 +71,20 @@ Simply `cd` to the root folder and type `make deploy` or `make check`.
 Once completed the `runtime` folder will contain all you need to start using `ee9`.
 
 ### Ubuntu and other Debian derived distributions.
-Packages required: `make` `build-essentials` `bison` `gnat`
+Packages required: `make` `build-essentials` `bison` `gnat`.
 
 *let me know if I have missed aything*
 
 ### Windows
 Only Windows10 + WSL2 is supported.
 
-Ensure you are running Windows 10 version 2004 or above [See here for details](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004)
+Ensure you are running Windows 10 version 2004 or above [See here for details](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004).
 
-Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
+Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 Choose a distribution of your choice and follow the instructions for Linux given above.
 
-I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal)
+I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
 
 ### ToDo
 - [ ] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(

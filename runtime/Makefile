@@ -45,8 +45,8 @@ deploy:
 	> TR1
 	> settings_1.txt
 	> settings_2.txt
-	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a; fi; done
-	for f in Assembly/*.k3; do p=`basename $$f .k3`; echo "Compiling: " $$p; ./ucc $$p; done
+	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then chmod a+x $$a; cat $$a | tr -d '\r' > $$a; fi; done
+	echo -n "Compiling: "; for f in Assembly/*.k3; do p=`basename $$f .k3`; echo -n $$p " "; ./ucc $$p; done; echo
 
 .PHONY: clean
 clean:
