@@ -8,7 +8,7 @@ mkchan:
 
 .PHONY: clean
 clean:
-	$(RM) -f mkchan
+	$(RM) mkchan
 
 .PHONY: deploy
 deploy: mkchan

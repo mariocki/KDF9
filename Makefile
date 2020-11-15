@@ -76,10 +76,10 @@ clean:
 	$(MAKE) -e -C ${KAL4} clean
 	$(MAKE) -e -C ${MKCHAN}	clean
 	$(MAKE) -e -C ${RUNTIME} clean
-	$(RM) -f ${CSC_LIST:%=%/*.ali}
-	$(RM) -f ${CSC_LIST:%=%/*.o}
-	$(RM) -f ${MAIN} ${SRC}/a2b ${SRC}/mtp ${SRC}/kidopt ${SRC}/gnat.adc
-	$(RM) -f ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
+	$(RM) ${CSC_LIST:%=%/*.ali}
+	$(RM) ${CSC_LIST:%=%/*.o}
+	$(RM) ${MAIN} ${SRC}/a2b ${SRC}/mtp ${SRC}/kidopt ${SRC}/gnat.adc
+	$(RM) ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
 .PHONY: deploy 
 deploy: $(MAIN) kidopt kalgol mtp

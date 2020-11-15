@@ -33,26 +33,26 @@ deploy:
 
 .PHONY: clean
 clean:
-	$(RM) -f ee9 kal3 mkchan mtp kidopt a2b
-	$(RM) -f mt.out
-	$(RM) -f a.out
-	$(RM) -f Assembly/*-listing.txt
-	$(RM) -f CP[01]
-	$(RM) -f CR[01]
-	$(RM) -f DR0
-	$(RM) -f FD0
-	$(RM) -f FW0
-	$(RM) -f GP0
-	$(RM) -f LP[01]
-	$(RM) -f MT[0123456789]
-	$(RM) -f SI[01]
-	$(RM) -f ST[01]
-	$(RM) -f TP[01]
-	$(RM) -f TR[01]
-	$(RM) -f settings_1.txt settings_2.txt settings_for_kalgol.txt
-	${RM} -f Binary/MKSYS2 Binary/KAB00DH--USU
-	$(RM) -f logs/*
-	$(RM) -d Data/systape.txt Data/systape_kalgol.txt Data/ABS_text.txt Data/kalgol_labels.txt
+	$(RM) ee9 kal3 mkchan mtp kidopt a2b
+	$(RM) mt.out
+	$(RM) a.out
+	$(RM) Assembly/*-listing.txt
+	$(RM) CP[01]
+	$(RM) CR[01]
+	$(RM) DR0
+	$(RM) FD0
+	$(RM) FW0
+	$(RM) GP0
+	$(RM) LP[01]
+	$(RM) MT[0123456789]
+	$(RM) SI[01]
+	$(RM) ST[01]
+	$(RM) TP[01]
+	$(RM) TR[01]
+	$(RM) settings_1.txt settings_2.txt settings_for_kalgol.txt
+	${RM} Binary/MKSYS2 Binary/KAB00DH--USU
+	$(RM) logs/*
+	$(RM) Data/systape.txt Data/systape_kalgol.txt Data/ABS_text.txt Data/kalgol_labels.txt
 	$(RM) Assembly/WEEHAA*
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 

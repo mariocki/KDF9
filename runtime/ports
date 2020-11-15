@@ -6,7 +6,9 @@ trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
       0 1 2 3
 
 if [ ! -r  ${SOURCE}/$1.a60 ]
-then echo Could not find $1.a60 in ${SOURCE}; exit 1
+then 
+      echo "Could not find $1.a60 in ${SOURCE}"; 
+      exit 1
 fi
 
 cat >/tmp/ports.commands <<++++
