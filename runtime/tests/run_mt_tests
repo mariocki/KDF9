@@ -117,7 +117,7 @@ case $opt in
 esac
 
 echo "TEST T - like TEST A but for 7-track decks - should end normally:"
-${KDF9ROOT}/nine_test RLT ${DATA}/mt_test_labels - zw; ${KDF9ROOT}/ucc OUT4T; ${KDF9ROOT}/nine OUT4T - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+${KDF9ROOT}/rlt mt_test_labels - zw; ${KDF9ROOT}/ucc OUT4T; ${KDF9ROOT}/nine OUT4T - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;

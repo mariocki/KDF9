@@ -16,7 +16,8 @@ then
 0-00-777AMPEXTM4|
 |
 ++++
-   ${KDF9ROOT}/nine_test RLT mt_test_labels - zw
+
+   ${KDF9ROOT}/rlt mt_test_labels - zw
    ${KDF9ROOT}/nine PLT
    ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
    exit 0
