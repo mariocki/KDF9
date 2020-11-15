@@ -26,7 +26,7 @@ else
 fi
 
 echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"
-if /bin/sh $this_test
+if $this_test
 then
    case x$3x in
    xx)  exit 0

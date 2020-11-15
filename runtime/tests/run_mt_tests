@@ -16,7 +16,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-trap "rm -f ${KDF9ROOT}/MTx ${DATA}/mt_test_labels.txt  ${LOGS}/mt_test.diff"  0 1 2 3
+trap "rm -f ${KDF9ROOT}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff"  0 1 2 3
 
 opt=${1:-ahpr}
 
@@ -141,7 +141,7 @@ case $opt in
 esac
 
 echo
-diff ${LOGS}/mt_test.log ${TESTS}/MT_good_test.log >${LOGS}/mt_test.diff
+diff -iEZbwB --strip-trailing-cr ${LOGS}/mt_test.log ${TESTS}/mt_good_test.log >${LOGS}/mt_test.diff
 if [ -s mt_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

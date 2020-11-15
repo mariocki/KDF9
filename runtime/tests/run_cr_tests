@@ -16,7 +16,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/CR_test.log ${LOGS}/cr_test.diff" 0 1 2 3
+trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/cr_test.log ${LOGS}/cr_test.diff" 0 1 2 3
 opt=${1:-ae}
 
 data=${DATA}/crtest_data.txt
@@ -80,10 +80,10 @@ ___________________________________________________________
 
 ++++
 
-> ${LOGS}/CR_test.log
+> ${LOGS}/cr_test.log
 
 echo "TEST PIA PIB - POA 160-column binary write:"
-${KDF9ROOT}/ucc CRTAB; ${KDF9ROOT}/crnine CRTAB crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CRTAB; ${KDF9ROOT}/crnine CRTAB crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -91,7 +91,7 @@ z)
 esac
 
 echo "TEST PIC PID - POC 160-column character binary write:"
-${KDF9ROOT}/ucc CRTCD; ${KDF9ROOT}/crnine CRTCD crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CRTCD; ${KDF9ROOT}/crnine CRTCD crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -99,7 +99,7 @@ z)
 esac
 
 echo "TEST PIE PIF - POG 80-column alphanumeric write:"
-${KDF9ROOT}/ucc CRTEF; ${KDF9ROOT}/crnine CRTEF crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CRTEF; ${KDF9ROOT}/crnine CRTEF crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -107,7 +107,7 @@ z)
 esac
 
 echo "TEST PIG PIH - POL 80-column alphanumeric character-per-word write:"
-${KDF9ROOT}/ucc CRTGH; ${KDF9ROOT}/crnine CRTGH crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CRTGH; ${KDF9ROOT}/crnine CRTGH crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -115,7 +115,7 @@ z)
 esac
 
 echo "TEST POA POB - PIA 160-column binary read:"
-${KDF9ROOT}/ucc CPTAB; ${KDF9ROOT}/crnine CPTAB crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CPTAB; ${KDF9ROOT}/crnine CPTAB crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -123,7 +123,7 @@ z)
 esac
 
 echo "TEST POC POD - PIC 160-column character binary read:"
-${KDF9ROOT}/ucc CPTCD; ${KDF9ROOT}/crnine CPTCD crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CPTCD; ${KDF9ROOT}/crnine CPTCD crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -131,7 +131,7 @@ z)
 esac
 
 echo "TEST POG POH - PIE 80-column alphanumeric read:"
-${KDF9ROOT}/ucc CPTGH; ${KDF9ROOT}/crnine CPTGH crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CPTGH; ${KDF9ROOT}/crnine CPTGH crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -139,7 +139,7 @@ z)
 esac
 
 echo "TEST POL POK (sic) - PIG 80-column alphanumeric character-per-word read:"
-${KDF9ROOT}/ucc CPTKL; ${KDF9ROOT}/crnine CPTKL crtest_data t $opt >> ${LOGS}/CR_test.log
+${KDF9ROOT}/ucc CPTKL; ${KDF9ROOT}/crnine CPTKL crtest_data t $opt >> ${LOGS}/cr_test.log
 case $opt in
 z)
    echo "===="; cat CP0; echo "===="; echo;;
@@ -147,7 +147,7 @@ z)
 esac
 
 echo
-diff ${LOGS}/CR_test.log ${TESTS}/CR_good_test.log > ${LOGS}/cr_test.diff
+diff -iEZbwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_good_test.log > ${LOGS}/cr_test.diff
 if [ -s ${LOGS}/cr_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

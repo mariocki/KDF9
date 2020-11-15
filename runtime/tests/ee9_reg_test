@@ -110,7 +110,7 @@ ${TESTS}/ee9_test_case WAB n  >> ${LOGS}/ee9_test_case.log; echo
 ${TESTS}/ee9_test_case FLO $1 >> ${LOGS}/ee9_test_case.log; echo
 ${TESTS}/ee9_test_case 1DH $1 >> ${LOGS}/ee9_test_case.log; echo
 
-diff -B ${LOGS}/ee9_test_case.log ${TESTS}/ee9_good_test_case.log > ${LOGS}/ee9_test_case.diff
+diff -iEZbwB --strip-trailing-cr ${LOGS}/ee9_test_case.log ${TESTS}/ee9_good_test_case.log > ${LOGS}/ee9_test_case.diff
 
 if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]
 then

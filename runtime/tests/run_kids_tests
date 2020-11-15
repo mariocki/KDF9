@@ -62,7 +62,7 @@ fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/ZELLER.k3    ${BINARY}/ZELLER      ${SOURCE}/ZELLER-listing.txt
 
 echo
-diff ${LOGS}/kids_test.log ${LOGS}/kids_good_test.log >${LOGS}/kids_test.diff
+diff -iEZbwB --strip-trailing-cr ${LOGS}/kids_test.log ${LOGS}/kids_good_test.log >${LOGS}/kids_test.diff
 if [ -s ${LOGS}/kids_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
