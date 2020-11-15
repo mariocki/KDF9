@@ -16,7 +16,6 @@
 #------------------------------------------------------------------------
 CC=gcc
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-d --debug
 RUNTIME=../runtime
 
 mkchan: 

@@ -50,7 +50,7 @@ deploy:
 
 .PHONY: clean
 clean:
-	$(RM) ee9 kal3 mkchan mtp kidopt a2b
+	$(RM) ee9 kal[34] mkchan mtp kidopt a2b
 	$(RM) mt.out
 	$(RM) a.out
 	$(RM) Assembly/*-listing.txt
