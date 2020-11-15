@@ -4,7 +4,7 @@ DATA=${KDF9ROOT}/Data
 
 if [ x"$1"x = xx ]
 then
-    echo You have not named a binary program to be run.
+    echo "You have not named a binary program to be run."
     echo
     exit 1
 fi
@@ -13,7 +13,7 @@ program=`basename "$1"`
 program=${BINARY}/"$program"
 if [ ! -r "$program" ]
 then
-    echo The object code file "$program" is absent or unreadable.
+    echo "The object code file "$program" is absent or unreadable."
     echo
     exit 2
 fi
@@ -27,7 +27,7 @@ else
     then
         cat "$data" > ${KDF9ROOT}/CR0
     else
-        echo The data file "$data" is absent or unreadable.
+        echo "The data file "$data" is absent or unreadable."
         echo
         exit 3
     fi
