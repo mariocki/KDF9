@@ -67,15 +67,9 @@ Building from source should be the same on any modern Linux or MacOS installatio
 Simply `cd` to the root folder and type `make deploy`.
 
 ### Ubuntu and other Debian derived distributions.
-Packages required:
-```
-    make
-    build-essentials
-    bison
-    gnat
-    dos2unix
-```
-    *let me know if I have missed aything*
+Packages required: `make` `build-essentials` `bison` `gnat` `dos2unix`
+
+*let me know if I have missed aything*
 
 ### Windows
 Only Windows10 + WSL2 is supported.
