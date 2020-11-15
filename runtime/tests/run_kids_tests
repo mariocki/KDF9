@@ -7,6 +7,7 @@ trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt"  \
 
 export KIDSMISC=wz
 export KIDSLIST=""
+
 >${LOGS}/kids_test.log
 
 ${KDF9ROOT}/kids FLUID FLUID_data t prh         >>${LOGS}/kids_test.log
@@ -47,10 +48,10 @@ echo
 diff ${LOGS}/kids_test.log ${LOGS}/kids_good_test.log >${LOGS}/kids_test.diff
 if [ -s ${LOGS}/kids_test.diff ]
 then
-   echo These are the unexpected variances for this run:
-   echo ===
+   echo "These are the unexpected variances for this run:"
+   echo "==="
    more ${LOGS}/kids_test.diff
-   echo ===
+   echo "==="
 else
-   echo These tests ran as expected.
+   echo "These tests ran as expected."
 fi

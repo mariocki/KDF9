@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 TSD=${KDF9ROOT}/Binary/KKT40E007UPU
 
-cp -f ${KDF9ROOT}/Settings/FW0_for_Director ${KDF9ROOT}/FW0
+cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0
 
 mode=-d$1
 miscellany=-m$2
@@ -20,4 +20,4 @@ else
     ${KDF9ROOT}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
 fi
 
-/bin/sh ${KDF9ROOT}/printoutput
+${KDF9ROOT}/printoutput

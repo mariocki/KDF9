@@ -43,7 +43,7 @@ INP) this_test="whet INPUT"
 HQP) this_test="kids WEEHAAVIE -"
      export KIDSMISC=w-
      signature=\#4200133757004705;;
-*)   echo test case "$1"\;  UNKNOWN!
+*)   echo "test case '$1'\;  UNKNOWN!"
      exit 2;;
 esac
 

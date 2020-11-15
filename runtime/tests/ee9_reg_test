@@ -44,32 +44,32 @@ resetOutputFiles
 rm -f ${LOGS}/*
 
 echo; echo
-echo Running MT emulation tests:
-echo ==========================
+echo "Running MT emulation tests:"
+echo "=========================="
 echo
 ${TESTS}/ee9_test_run MT "run_mt_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
 echo; echo
-echo Running FD emulation tests:
-echo ==========================
+echo "Running FD emulation tests:"
+echo "=========================="
 echo
 ${TESTS}/ee9_test_run FD "run_fd_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
 echo; echo
-echo Running CR emulation tests:
-echo ==========================
+echo "Running CR emulation tests:"
+echo "=========================="
 echo
 ${TESTS}/ee9_test_run CR "run_cr_tests ahipr a"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
 echo; echo
-echo Running problem program correctness tests:
-echo =========================================
+echo "Running problem program correctness tests:"
+echo "=========================="===============
 echo
 
 resetOutputFiles

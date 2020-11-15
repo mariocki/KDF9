@@ -39,7 +39,7 @@ ${KDF9ROOT}/rlt tape_labels_for_KAlgol.txt - wz
 
 if [ ! -r ${DATA}/systape.txt ]
 then
-   cp ${DATA}/systape_kalgol.txt ${DATA}/systape.txt
+   cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
 fi
 
 ${KDF9ROOT}/nine MKSYS2 systape - wz
@@ -51,13 +51,10 @@ ${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
 > ${KDF9ROOT}/TP0
 rm -f ${BINARY}/$name
 rm -f ${USERCODE}/$name.k3
-cp /tmp/chan6.pt ${DATA}/ABS_text.txt
+cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
 chmod 755 ${KDF9ROOT}/TR0
 
-#if [ -s ${SETTINGS}/settings_for_kalgol.txt ]
-#then
-   cp -f ${SETTINGS}/settings_for_kalgol.txt ${KDF9ROOT}/settings_1.txt
-#fi
+cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9ROOT}/settings_1.txt
 
 shift
 if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]

@@ -28,7 +28,7 @@ else
     datatxt=${DATA}/`basename "${data}" ".txt"`.txt
     if [ -r "$datatxt" ]
     then
-        cp "$datatxt" ${KDF9ROOT}/TR1
+        cat "$datatxt" > ${KDF9ROOT}/TR1
     else
         echo The file "$datatxt" is absent or unreadable.
         exit 3
@@ -79,6 +79,6 @@ case $4$8 in
    *-*)
       ;;
    *)
-    /bin/sh ${KDF9ROOT}/printoutput
+    ${KDF9ROOT}/printoutput
 esac
 

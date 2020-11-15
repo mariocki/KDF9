@@ -19,10 +19,10 @@ echo
 diff ${LOGS}/whet_test.log ${TESTS}/whet_good_test.log >${LOGS}/whet_test.diff
 if [ -s ${LOGS}/whet_test.diff ]
 then
-   echo These are the unexpected variances for this run:
-   echo ===
+   echo "These are the unexpected variances for this run:"
+   echo "==="
    more ${LOGS}/whet_test.diff
-   echo ===
+   echo "==="
 else
-   echo These tests ran as expected.
+   echo "These tests ran as expected."
 fi

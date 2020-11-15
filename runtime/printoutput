@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 RED='\033[1;31m'
 GREEN='\033[1;32m'
@@ -10,7 +10,8 @@ then
     #echo "${RED} CP0: ${GREEN}===================================================================================${NC}"
     echo "CP0:"
     echo "==="
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/CP0) -t UTF8 < ${KDF9ROOT}/CP0 
+    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/CP0) -t UTF8 < ${KDF9ROOT}/CP0 
+    cat ${KDF9ROOT}/CP0
     echo "==="
     #echo "${GREEN} ========================================================================================${NC}"
 fi
@@ -21,7 +22,8 @@ then
     #echo "${RED} TP0: ${GREEN}===================================================================================${NC}"
     echo "TP0:"
     echo "==="
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP0) -t UTF8 < ${KDF9ROOT}/TP0 
+    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP0) -t UTF8 < ${KDF9ROOT}/TP0 
+    cat ${KDF9ROOT}/TP0    
     #echo "${GREEN} ========================================================================================${NC}"
     echo "==="
 fi
@@ -32,7 +34,8 @@ then
     #echo "${RED} TP1: ${GREEN}===================================================================================${NC}"
     echo "TP1:"
     echo "==="
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP1) -t UTF8 < ${KDF9ROOT}/TP1
+    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP1) -t UTF8 < ${KDF9ROOT}/TP1
+    cat ${KDF9ROOT}/TP1
     echo "==="
     #echo "${GREEN} ========================================================================================${NC}"
 fi
@@ -43,7 +46,8 @@ then
     #echo "${RED} LP0: ${GREEN}===================================================================================${NC}"
     echo "LP0:"
     echo "==="
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 
+    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 
+    cat ${KDF9ROOT}/LP0
     echo "==="
     #echo "${GREEN} ========================================================================================${NC}"
 fi
@@ -54,7 +58,8 @@ then
     #echo "${RED} LP1: ${GREEN}===================================================================================${NC}"
     echo "LP1:"
     echo "==="    
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 
+    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 
+    cat ${KDF9ROOT}/LP1
     echo "==="
     #echo "${GREEN} ========================================================================================${NC}"
 fi

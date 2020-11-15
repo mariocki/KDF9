@@ -25,7 +25,7 @@ else
     data=${DATA}/`basename "$2" .txt`.txt
     if [ -r "$data" ]
     then
-        cp "$data" ${KDF9ROOT}/CR0
+        cat "$data" > ${KDF9ROOT}/CR0
     else
         echo The data file "$data" is absent or unreadable.
         echo
@@ -48,4 +48,4 @@ else
     ${KDF9ROOT}/ee9 -sp "$mode" "$miscellany"  +"$program";
 fi
 
-/bin/sh ${KDF9ROOT}/printoutput
+${KDF9ROOT}/printoutput

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 BINARY=${KDF9ROOT}/Binary
 USERCODE=${KDF9ROOT}/Assembly
 

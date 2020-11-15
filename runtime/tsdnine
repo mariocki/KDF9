@@ -21,13 +21,14 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 0-00-777AMPEXTM4|
 |
 ++++
-${KDF9ROOT}/rlt ${DATA}/TSD_tape_labels - z
+
+${KDF9ROOT}/rlt $TSD_tape_labels - z
 
 # Create a call tape from the binary program.
 ${KDF9ROOT}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
 
 # Combine the call tape and the binary in a single paper tape file.
-cat ${BINARY}/$1          >> /tmp/$1.pblk
+cat ${BINARY}/$1 >> /tmp/$1.pblk
 mv /tmp/$1.pblk ${KDF9ROOT}/TR1
 
 #ucc PLT

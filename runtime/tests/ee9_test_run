@@ -13,21 +13,19 @@ echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"
 if /bin/sh $this_test
 then
    case x$3x in
-   xx)  exit_code=0
+   xx)  exit 0
         ;;
-   x*x) echo The signature of this test should be "$3". It was as follows:
+   x*x) echo "The signature of this test should be "$3". It was as follows:"
         fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log
         echo "------------------- END OF Test Case $1 -------------------"
-        exit_code=0
+        exit 0
         ;;
    esac
 else
    echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    echo Test Case "$1": $this_test FAILED!
    echo "------------------- END OF Test Case $1 -------------------"
-   exit_code=1
+   exit 1
 fi
-echo
-echo
-exit $exit_code
+
 

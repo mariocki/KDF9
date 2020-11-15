@@ -15,14 +15,14 @@ program=`basename "$1" ".a60"`.a60
 program=${SOURCE}/"$program"
 if [ -r "$program" ]
 then
-    cp "$program" TR1
+    cat "$program" > ${KDF9ROOT}/TR1
 else
     echo The source file "$program" is absent or unreadable.
     echo
     exit 2
 fi
 
-cp -f ${FW0FILES}/FW0_for_Whetstone ${KDF9ROOT}/FW0
+cat ${FW0FILES}/FW0_for_Whetstone > ${KDF9ROOT}/FW0
 
 mode=-d$2
 miscellany=-m$3
@@ -40,4 +40,4 @@ else
     ${KDF9ROOT}/ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
 fi
 
-/bin/sh ${KDF9ROOT}/printoutput
+${KDF9ROOT}/printoutput

@@ -28,7 +28,8 @@ deploy:
 	> TR1
 	> settings_1.txt
 	> settings_2.txt
-	for f in Assembly/*.k3; do p=`basename $$f .k3`; ./ucc $$p; done
+	for f in Assembly/*.k3; do p=`basename $$f .k3`; echo "Compiling: " $$p; ./ucc $$p; done
+	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then dos2unix $$a; fi; done
 
 .PHONY: clean
 clean:
