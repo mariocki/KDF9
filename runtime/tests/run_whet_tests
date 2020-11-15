@@ -33,7 +33,7 @@ ${KDF9ROOT}/whet WHETSTONE t prh >>${LOGS}/whet_test.log; fgrep "Digital signatu
 ${KDF9ROOT}/whet ZELLER    t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
 
 echo
-diff -iEZbwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_good_test.log >${LOGS}/whet_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_good_test.log >${LOGS}/whet_test.diff
 if [ -s ${LOGS}/whet_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

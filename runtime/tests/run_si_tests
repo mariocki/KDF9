@@ -83,7 +83,7 @@ ${KDF9ROOT}/ucc SI12TPC; ${KDF9ROOT}/nine SI12TPC - t $opt
 cat ${KDF9ROOT}/TP0 >>${LOGS}/si_test.log
 
 echo
-diff -iEZbwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_good_test.log >${LOGS}/si_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_good_test.log >${LOGS}/si_test.diff
 if [ -s ${LOGS}/si_test_diffs.txt ]
 then
    echo "These are the unexpected variances for this run:"

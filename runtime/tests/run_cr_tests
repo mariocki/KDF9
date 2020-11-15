@@ -147,7 +147,7 @@ z)
 esac
 
 echo
-diff -iEZbwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_good_test.log > ${LOGS}/cr_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_good_test.log > ${LOGS}/cr_test.diff
 if [ -s ${LOGS}/cr_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
