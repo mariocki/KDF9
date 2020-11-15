@@ -95,7 +95,7 @@ clean:
 	$(MAKE) -e -C ${RUNTIME} clean
 	$(RM) ${CSC_LIST:%=%/*.ali}
 	$(RM) ${CSC_LIST:%=%/*.o}
-	$(RM) ${MAIN} ${SRC}/a2b ${SRC}/mtp ${SRC}/kidopt ${SRC}/gnat.adc
+	$(RM) ${MAIN} ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
 	$(RM) ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
 .PHONY: deploy 
@@ -117,4 +117,4 @@ test: deploy
 	$(MAKE) -C ${RUNTIME} test
 
 .PHONY: all
-all: $(MAIN) kal3 mkchan kalgol
+all: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan
