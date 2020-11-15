@@ -45,14 +45,17 @@ deploy:
 	> TR1
 	> settings_1.txt
 	> settings_2.txt
+	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a; fi; done
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; echo "Compiling: " $$p; ./ucc $$p; done
-	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then dos2unix $$a; fi; done
 
 .PHONY: clean
 clean:
-	$(RM) ee9 kal[34] mkchan mtp kidopt a2b
 	$(RM) mt.out
 	$(RM) a.out
+	$(RM) logs/*
+
+.PHONY: distclean
+distclean: clean
 	$(RM) Assembly/*-listing.txt
 	$(RM) CP[01]
 	$(RM) CR[01]
@@ -66,13 +69,12 @@ clean:
 	$(RM) ST[01]
 	$(RM) TP[01]
 	$(RM) TR[01]
+	$(RM) Assembly/WEEHAA*
 	$(RM) settings_1.txt settings_2.txt settings_for_kalgol.txt
 	${RM} Binary/MKSYS2 Binary/KAB00DH--USU
-	$(RM) logs/*
 	$(RM) Data/systape.txt Data/systape_kalgol.txt Data/ABS_text.txt Data/kalgol_labels.txt
-	$(RM) Assembly/WEEHAA*
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 
-.PHONY: test
-test:
+.PHONY: check
+check:
 	tests/ee9_reg_test

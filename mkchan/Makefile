@@ -28,3 +28,7 @@ clean:
 .PHONY: deploy
 deploy: mkchan
 	cp -f mkchan $(RUNTIME)
+
+.PHONY: distclean
+distclean: clean
+	$(RM) ${RUNTIME}/mkchan

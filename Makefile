@@ -96,6 +96,14 @@ clean:
 	$(RM) ${CSC_LIST:%=%/*.ali}
 	$(RM) ${CSC_LIST:%=%/*.o}
 	$(RM) ${MAIN} ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
+
+.PHONY: distclean
+distclean: clean
+	$(MAKE) -e -C ${KAL3} distclean
+	$(MAKE) -e -C ${KAL4} distclean
+	$(MAKE) -e -C ${MKCHAN}	distclean
+	$(MAKE) -e -C ${RUNTIME} distclean
+	$(RM) ${RUNTIME}/${MAIN} ${RUNTIME}/a2b ${RUNTIME}/kidopt ${RUNTIME}/mtp ${RUNTIME}/gnat.adc
 	$(RM) ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
 
 .PHONY: deploy 
@@ -112,8 +120,8 @@ deploy: $(MAIN) a2b kidopt mtp kal3 kal4 mkchan
 	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
 
-.PHONY: test
-test: deploy
+.PHONY: check
+: deploy
 	$(MAKE) -C ${RUNTIME} test
 
 .PHONY: all

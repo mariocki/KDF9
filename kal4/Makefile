@@ -32,3 +32,7 @@ clean:
 .PHONY: deploy
 deploy: kal4
 	cp -f kal4 $(RUNTIME)
+
+.PHONY: distclean
+distclean: clean
+	$(RM) ${RUNTIME}/kal4

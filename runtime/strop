@@ -108,5 +108,4 @@ cat >/tmp/strop.commands <<++++
 1d
 ++++
 
-dos2unix ${SOURCE}/$1.a60
-sed -E -f /tmp/strop.commands ${SOURCE}/$1.a60 >${TARGET}/$1.a60
+cat ${SOURCE}/$1.a60 | tr -r '/r' | sed -E -f /tmp/strop.commands >${TARGET}/$1.a60

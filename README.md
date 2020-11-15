@@ -55,19 +55,23 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `make deploy`
     Builds ee9 and kal3, copies them into `runtime` and also resets the runtime to a 'clean' environment.
 
-- `make test`
-    As per `make deploy` but also then runs the `ee9_self_test` script.
+- `make check`
+    As per `make deploy` but also then runs the `ee9_reg_test` script.
 
 - `make clean`
-    Removes all intermediate and transient files. Only really needs to be used if you have really messed up your runtime.
+    Removes all intermediate and transient files from compilation but leaves the runtime intact.
 
+- `make clean`
+    As per `make clean` but also deletes all files created during the execution of the runtime to leave the folder structure 
+    exactly as was when first extracted/downloaded.
+    
 ## Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
 Simply `cd` to the root folder and type `make deploy`.
 
 ### Ubuntu and other Debian derived distributions.
-Packages required: `make` `build-essentials` `bison` `gnat` `dos2unix`
+Packages required: `make` `build-essentials` `bison` `gnat`
 
 *let me know if I have missed aything*
 
