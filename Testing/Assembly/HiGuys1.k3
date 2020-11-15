@@ -1,0 +1,13 @@
+V9; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   V0 = Q0/AV1/AV3;
+   V1 = B0750064554545700; ("Hello " in Flexowriter code);
+   V2 = B0767065762544434; ("World;" in Flexowriter code);
+   V8 = Q0/AV2/AV3;
+   V0; =Q9; POAQ9;         (write "Hello World;" to Flexowriter);
+   V1; =V2;
+   V8; =Q8; POAQ8;         (write the response);
+999;  OUT;
+   FINISH;
+|
