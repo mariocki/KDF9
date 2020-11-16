@@ -14,6 +14,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     - Write KDF9.log to the `{KDFROOT}/logs` folder.
     - don't assume everyone uses black on white terminals. :unamused:
     - Use the `KDFROOT` env variable to determine the default paths for `Binaries` and `Data`.
+    - Use the `KDFROOT` env variable to determine the default paths for MT* in `mtp`.
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
 - I don't include pre-build binaries.
