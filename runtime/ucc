@@ -25,19 +25,24 @@ then
     exit 1;
 fi
 
+trap "rm -f  a.out mt.out"   \
+      0 1 2 3
+
 BINARY=${KDF9ROOT}/Binary
 USERCODE=${KDF9ROOT}/Assembly
 
 name=`basename "$1" ".k3"`
 if [ -f "${USERCODE}/$name.k3" ]
 then
-   ${KDF9ROOT}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt"
+   ${KDF9ROOT}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
    if [ -s a.out ]
    then
       mv -f a.out ${BINARY}/"$name"
    else
       echo "${KDF9ROOT}/kal3 detected error\(s\) in $name.k3"
-      more "$name-listing.txt"
+      echo;
+      more ${USERCODE}/"$name-listing.txt"
+      exit 1;
    fi
    rm -f a.out mt.out
    exit 0

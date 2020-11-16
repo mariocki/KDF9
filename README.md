@@ -1,5 +1,5 @@
 # `ee9` the KDF9 emulator
-This repo is a fork of FindlayW's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/#Emulator)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
+This repo is a fork of Bill Findlay's KDF9 emulator ([original found here](http://www.findlayw.plus.com/KDF9/#Emulator)) I take no credit at all for the actual emulator code and runtime files, all thanks go to him for his hard work :heart:.
 
 ## kal3 and kal4
 kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm

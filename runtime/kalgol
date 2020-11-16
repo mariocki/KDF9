@@ -73,7 +73,7 @@ ${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
 rm -f ${BINARY}/$name
 rm -f ${USERCODE}/$name.k3
 cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
-chmod 755 ${KDF9ROOT}/TR0
+#chmod 755 ${KDF9ROOT}/TR0
 
 cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9ROOT}/settings_1.txt
 

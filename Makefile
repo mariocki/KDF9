@@ -127,6 +127,9 @@ deploy: all
 	$(MAKE) -e -C ${MKCHAN}	deploy
 	$(MAKE) -e -C ${RUNTIME} deploy
 	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
+	@echo ------
+	@echo "ee9 runtime environment is now set up in ${RUNTIME}"
+	@echo ------
 
 .PHONY: check
 check: deploy
