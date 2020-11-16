@@ -25,6 +25,9 @@ then
     exit 1;
 fi
 
+trap ">${KDF9ROOT}/FW0"  \
+      0 1 2 3
+
 TSD=${KDF9ROOT}/Binary/KKT40E007UPU
 
 cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0

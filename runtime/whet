@@ -25,6 +25,9 @@ then
     exit 1;
 fi
 
+trap ">${KDF9ROOT}/FW0"  \
+      0 1 2 3
+
 BINARY=${KDF9ROOT}/Binary
 SOURCE=${KDF9ROOT}/Whetstone
 FW0FILES=${KDF9ROOT}/FW0Files
