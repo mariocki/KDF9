@@ -18,6 +18,13 @@
 #------------------------------------------------------------------------
 # rtl : Labels tapes
 #------------------------------------------------------------------------
+
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 BINARY=${KDF9ROOT}/Binary
 
 >${KDF9ROOT}/MT0

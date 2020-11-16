@@ -19,6 +19,12 @@
 # neat : ???
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 USERCODE=${KDF9ROOT}/Assembly
 
 trap "rm -f /tmp/neat.commands /tmp/neat_tmp_[0123456789]" 0 1 2 3

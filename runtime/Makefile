@@ -16,7 +16,7 @@
 #------------------------------------------------------------------------
 
 .PHONY: deploy
-deploy: 
+deploy: check-env
 	> CP0
 	> CP1
 	> CR0
@@ -80,3 +80,9 @@ distclean: clean
 .PHONY: check
 check:
 	tests/ee9_reg_test
+
+.PHONY: check-env
+check-env:
+ifndef KDF9ROOT
+	$(error "KDF9ROOT is undefined")
+endif

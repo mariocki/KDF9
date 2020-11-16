@@ -19,6 +19,12 @@
 # stone : Calls whet with special case for "1964" or "thecrows"
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
 
 case $1$2 in

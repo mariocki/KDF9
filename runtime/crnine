@@ -20,6 +20,12 @@
 # crnine : Executes a KDF9 binary with input on CR0
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 

@@ -21,6 +21,12 @@
 #            converting the output to UTF8
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 TMPFILE=/tmp/mtp.dump
 
 trap "rm -f ${TMPFILE}" 0 1 2 3

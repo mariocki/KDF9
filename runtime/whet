@@ -19,6 +19,12 @@
 # whet : Executes a Whetstone Algol program.
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 BINARY=${KDF9ROOT}/Binary
 SOURCE=${KDF9ROOT}/Whetstone
 FW0FILES=${KDF9ROOT}/FW0Files

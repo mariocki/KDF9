@@ -19,6 +19,12 @@
 # printoutput : Prints contents of CP0/TP0/TP1/LP0/LP1 to screen.
 #------------------------------------------------------------------------
 
+if [ -z $KDF9ROOT ]
+then
+    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
+    exit 1;
+fi
+
 RED='\033[1;31m'
 GREEN='\033[1;32m'
 NC='\033[0m' # No Color
