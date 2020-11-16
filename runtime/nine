@@ -25,6 +25,9 @@ then
     exit 1;
 fi
 
+>${KDF9ROOT}/LP0
+>${KDF9ROOT}/LP1
+
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 

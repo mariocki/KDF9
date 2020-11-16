@@ -25,66 +25,85 @@ then
     exit 1;
 fi
 
-RED='\033[1;31m'
-GREEN='\033[1;32m'
-NC='\033[0m' # No Color
+trap "rm -f  /tmp/printoutput" 0 1 2 3
 
-if [ -s CP0 ]
-then
-    echo
-    echo -e "${RED} CP0: ${GREEN}===================================================================================${NC}"
-    #echo "CP0:"
-    #echo "==="
-    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/CP0) -t UTF8 < ${KDF9ROOT}/CP0 
-    cat ${KDF9ROOT}/CP0
-    #echo "==="
-    echo -e "${GREEN} ========================================================================================${NC}"
-fi
+TEST=1
 
-if [ -s TP0 ]
-then
-    echo
-    echo -e "${RED} TP0: ${GREEN}===================================================================================${NC}"
-    #echo "TP0:"
-    #echo "==="
-    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP0) -t UTF8 < ${KDF9ROOT}/TP0 
-    #cat ${KDF9ROOT}/TP0    
-    #echo "==="
-    echo -e "${GREEN} ========================================================================================${NC}"
-fi
+function printline {
+    echo -e "${RED}$1${GREEN}${BAR}${NC}";
+    cat /tmp/printoutput;
+    echo -e "${GREEN}${BAR}${NC}";
+}
 
-if [ -s TP1 ]
+if [ ${TEST} -eq 0 ]
 then
-    echo
-    echo -e "${RED} TP1: ${GREEN}===================================================================================${NC}"
-    #echo "TP1:"
-    #echo "==="
-    #iconv -f $(file -b --mime-encoding ${KDF9ROOT}/TP1) -t UTF8 < ${KDF9ROOT}/TP1
-    #cat ${KDF9ROOT}/TP1
-    #echo "==="
-    echo -e "${GREEN} ========================================================================================${NC}"
-fi
+    BAR="========================================================================================"
+    RED='\033[1;31m'
+    GREEN='\033[1;32m'
+    NC='\033[0m'  #No Color
 
-if [ -s LP0 ]
-then
-    echo
-    echo -e "${RED} LP0: ${GREEN}===================================================================================${NC}"
-    #echo "LP0:"
-    #echo "==="
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 
-    #cat ${KDF9ROOT}/LP0
-    #echo "==="
-    echo -e "${GREEN} ========================================================================================${NC}"
-fi
+    if [ -s CP0 ]
+    then
+        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        printline "CP0:"
+    fi
 
-if [ -s LP1 ]
-then
-    echo
-    echo -e "${RED} LP1: ${GREEN}===================================================================================${NC}"
-    #echo "LP1:"
-    #echo "==="    
-    iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 
-    #cat ${KDF9ROOT}/LP1
-    #echo "==="
-    echo -e "${GREEN} ========================================================================================${NC}"
+    if [ -s TP0 ]
+    then
+        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        printline "TP0:"
+    fi
+
+    if [ -s TP1 ]
+    then
+        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        printline "TP1:"
+    fi
+
+    if [ -s LP0 ]
+    then
+        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 > /tmp/printoutput;
+        printline "LP0:"
+    fi
+
+    if [ -s LP1 ]
+    then
+        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 > /tmp/printoutput;
+        printline "LP1:"
+    fi
+else
+    BAR="==="
+    RED=''
+    GREEN=''
+    NC=''
+
+    if [ -s CP0 ]
+    then
+        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        printline "CP0:\n"
+    fi
+
+    if [ -s TP0 ]
+    then
+        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        printline "TP0:\n"
+    fi
+
+    if [ -s TP1 ]
+    then
+        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        printline "TP1:\n"
+    fi
+
+    if [ -s LP0 ]
+    then
+        cat ${KDF9ROOT}/LP0 > /tmp/printoutput;
+        printline "LP0:\n"
+    fi
+
+    if [ -s LP1 ]
+    then
+        cat ${KDF9ROOT}/LP1 > /tmp/printoutput;
+        printline "LP1:\n"
+    fi
 fi
