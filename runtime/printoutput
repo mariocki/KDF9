@@ -25,9 +25,7 @@ then
     exit 1;
 fi
 
-trap "rm -f  /tmp/printoutput" 0 1 2 3
-
-TEST=1
+trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
 
 function printline {
     echo -e "${RED}$1${GREEN}${BAR}${NC}";
@@ -35,7 +33,12 @@ function printline {
     echo -e "${GREEN}${BAR}${NC}";
 }
 
-if [ ${TEST} -eq 0 ]
+# fix any formatting issues from Kalgol
+cat >/tmp/format.commands <<++++
+1,\$s/'UP'/^/g
+++++
+
+if [ -z $EE9REGTEST ]
 then
     BAR="========================================================================================"
     RED='\033[1;31m'
@@ -62,13 +65,13 @@ then
 
     if [ -s LP0 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP0:"
     fi
 
     if [ -s LP1 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP1:"
     fi
 else

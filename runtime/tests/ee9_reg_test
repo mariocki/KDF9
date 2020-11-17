@@ -30,6 +30,8 @@ export WHETSTONE=${KDF9ROOT}/Whetstone
 export LOGS=${KDF9ROOT}/logs
 export TESTS=${KDF9ROOT}/tests
 
+export EE9REGTEST=1
+
 trap "rm -f ${LOGS}/error_output"  \
       0 1 2 3
 

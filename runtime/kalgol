@@ -36,6 +36,10 @@ trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
       0 1 2 3
       
+trap " >${KDF9ROOT}/MT0 >${KDF9ROOT}/MT1 >${KDF9ROOT}/MT2 >${KDF9ROOT}/MT3 >${KDF9ROOT}/MT4
+       >${KDF9ROOT}/MT5 >${KDF9ROOT}/MT6 >${KDF9ROOT}/MT7
+       >${KDF9ROOT}/TR0 >${KDF9ROOT}/TR1 " 0
+
 if [ x${KIDSMODE}x = xfx ]
 then
    KIDSMODE=""

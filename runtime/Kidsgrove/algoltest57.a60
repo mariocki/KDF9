@@ -1,4 +1,5 @@
-'begin' 'library' A0, A6;
+'begin' 
+!library A0, A1, A4, A5, A12, A15;
    'comment' testing I/O;
    'real' x;
    open(20); open(30);

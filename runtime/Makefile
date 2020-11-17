@@ -47,7 +47,7 @@ deploy: check-env
 	> settings_2.txt
 	for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a.tmp; mv -f $$a.tmp $$a; chmod a+x $$a; fi; done
 	for a in *; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a.tmp; mv -f $$a.tmp $$a; chmod a+x $$a; fi; done
-	echo -n "Compiling: "; for f in Assembly/[A-Z]*.k3; do p=`basename $$f .k3`; echo -n $$p " "; ./ucc $$p; done; echo
+	echo -n "Compiling: "; for f in Assembly/*.k3; do p=`basename $$f .k3`; echo -n $$p " "; ./ucc $$p; done; echo
 
 .PHONY: clean
 clean:
