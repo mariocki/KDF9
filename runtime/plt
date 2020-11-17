@@ -25,6 +25,8 @@ then
     exit 1;
 fi
 
+trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
+
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 

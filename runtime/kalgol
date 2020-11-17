@@ -62,10 +62,7 @@ fi
 ${KDF9ROOT}/rlt tape_labels_for_KAlgol - wz
 #echo "The compiler work tapes have been labelled."
 
-if [ ! -r ${DATA}/systape.txt ]
-then
-   cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
-fi
+cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
 
 ${KDF9ROOT}/nine MKSYS2 systape - wz
 #echo "The compiler overlay tape has been generated."; echo

@@ -29,11 +29,13 @@ clean:
 deploy: 
 	${RUNTIME}/a2b -r2p < mksys2.bin >${RUNTIME}/Binary/MKSYS2
 	${RUNTIME}/a2b -r2p < KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
+	cp -f systape_kalgol.txt ${RUNTIME}/Data/
 
 .PHONY: distclean
 distclean: clean
 	$(RM) ${RUNTIME}/Binary/MKSYS2
 	$(RM) ${RUNTIME}/Binary/KAB00DH--USU
-
+	$(RM) ${RUNTIME}/Data/systape_kalgol.txt
+	
 .PHONY: check
 check: 

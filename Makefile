@@ -109,8 +109,7 @@ distclean: clean
 	$(MAKE) -e -C ${KALGOL}	distclean
 	$(MAKE) -e -C ${MKCHAN}	distclean
 	$(MAKE) -e -C ${RUNTIME} distclean
-	$(RM) ${RUNTIME}/${MAIN} ${RUNTIME}/a2b ${RUNTIME}/kidopt ${RUNTIME}/mtp ${RUNTIME}/gnat.adc
-	$(RM) ${RUNTIME}/Data/systape_kalgol.txt ${RUNTIME}/Data/systape.txt ${RUNTIME}/Data/crtest_data.txt ${RUNTIME}/Data/mt_test_labels.txt
+	$(RM) ${RUNTIME}/${EXE} ${RUNTIME}/a2b ${RUNTIME}/kidopt ${RUNTIME}/mtp ${RUNTIME}/gnat.adc
 
 .PHONY: all
 all: $(MAIN) a2b kal3 kal4 kalgol kidopt mkchan mtp
@@ -126,7 +125,6 @@ deploy: all
 	$(MAKE) -e -C ${KALGOL}	deploy
 	$(MAKE) -e -C ${MKCHAN}	deploy
 	$(MAKE) -e -C ${RUNTIME} deploy
-	cp -f ${KALGOL}/systape_kalgol.txt ${RUNTIME}/Data/
 	@echo ------
 	@echo "ee9 runtime environment is now set up in ${RUNTIME}"
 	@echo ------

@@ -51,10 +51,13 @@ deploy: check-env
 
 .PHONY: clean
 clean:
+	$(RM) MT0T MTx
 	$(RM) mt.out
 	$(RM) a.out
 	$(RM) logs/*
 	$(RM) *.tmp tests/*.tmp
+	$(RM) Data/crtest_data.txt Data/systape.txt Data/ABS_text.txt Data/mt_test_labels.txt 
+	$(RM) /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt 
 
 .PHONY: distclean
 distclean: clean
@@ -72,9 +75,7 @@ distclean: clean
 	$(RM) TP[01]
 	$(RM) TR[01]
 	$(RM) Assembly/WEEHAA*
-	$(RM) settings_1.txt settings_2.txt settings_for_kalgol.txt
-	${RM} Binary/MKSYS2 Binary/KAB00DH--USU
-	$(RM) Data/systape.txt Data/systape_kalgol.txt Data/ABS_text.txt Data/kalgol_labels.txt
+	$(RM) settings_1.txt settings_2.txt
 	for f in Assembly/*.k3; do p=`basename $$f .k3`; $(RM) Binary/$$p; done
 
 .PHONY: check
