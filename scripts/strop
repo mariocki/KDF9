@@ -19,14 +19,13 @@
 # strop : Convert Whetstone Algol to Kidsgrove format.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-SOURCE=${KDF9ROOT}/Whetstone
-TARGET=${KDF9ROOT}/Kidsgrove
+SOURCE=${KDF9RUNTIME}/Whetstone
+TARGET=${KDF9RUNTIME}/Kidsgrove
 
 trap "rm -f /tmp/strop.commands /tmp/strop.tmp[01]"   \
       0 1 2 3

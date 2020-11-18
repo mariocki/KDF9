@@ -16,7 +16,8 @@
 #------------------------------------------------------------------------
 CC=gcc
 CFLAGS=-I. -fPIE -fPIC
-RUNTIME=../runtime
+
+INSTALL_PATH?=/usr/local
 
 mkchan: 
 	$(CC) -o mkchan mkchan.c $(CFLAGS)
@@ -25,13 +26,6 @@ mkchan:
 clean:
 	$(RM) mkchan
 
-.PHONY: deploy
-deploy: mkchan
-	cp -f mkchan $(RUNTIME)
-
-.PHONY: distclean
-distclean: clean
-	$(RM) ${RUNTIME}/mkchan
-
-.PHONY: check
-check: 
+.PHONY: install
+install: mkchan
+	install -m 755 mkchan $(INSTALL_PATH)/bin/

@@ -16,46 +16,23 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# plt : Create or update program library magnetic tape files.
+# dumptape : Displays the contents of a tape drive using mtp and
+#            converting the output to UTF8
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
+TMPFILE=/tmp/mtp.dump
 
-BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
+trap "rm -f ${TMPFILE}" 0 1 2 3
 
-${KDF9ROOT}/ucc ${KDF9ROOT}/PLT
-if [ x$1x = xx ]
+mtp $1 $2 $3 $4 > ${TMPFILE}
+
+if [ -s ${TMPFILE} ] 
 then
-   >${KDF9ROOT}/MT1
-   cat > ${DATA}/mt_test_labels.txt <<++++
--00-1234WHETLIST|
-00000000        |
--00-0552EFPBEAAG|
-00000000        |
--00-2339+KOUTPUT/0023004|
-0-00-929PRINTEND|
-0-00-777AMPEXTM4|
-|
-++++
+    iconv -f `file -b --mime-encoding ${TMPFILE}` -t UTF8 < ${TMPFILE}; >/dev/null
+fi
 
-   ${KDF9ROOT}/rlt mt_test_labels - zw
-   ${KDF9ROOT}/nine PLT
-   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
-   exit 0
-fi
-if [ -r ${BINARY}/$1 ]
-then
-   ${KDF9ROOT}/a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
-   cat ${BINARY}/$1 >> ${DATA}/$1-forPLT.txt
-   ${KDF9ROOT}/nine PLT ${DATA}/$1-forPLT.txt t - lk
-   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
-else
-   exit 0
-fi

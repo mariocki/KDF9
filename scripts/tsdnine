@@ -1,0 +1,70 @@
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# tsdnine : Executes a KDF9 binary in the director.
+#------------------------------------------------------------------------
+
+if [ -z $KDF9RUNTIME ]
+then
+    KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+DATA=${KDF9RUNTIME}/Data
+
+trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
+
+if [ x$1x = xx ]
+then
+   echo; echo "No program name was given."; echo
+   exit 1
+fi
+
+# Set up a set of labelled tapes, including at least one ZERO (scratch) tape.
+cat > ${DATA}/TSD_tape_labels.txt <<++++
+-00-1478        |
+-66-1909EXAMTIME|
+-00-0552EFPBEAAG|
+        MS-DUMP.|
+-00-2339+KOUTPUT/0023004|
+0-00-929PRINTEND|
+0-00-777AMPEXTM4|
+|
+++++
+
+rlt $TSD_tape_labels - z
+
+# Create a call tape from the binary program.
+a2b -p2c P < Binary/$1  > /tmp/$1.pblk
+
+# Combine the call tape and the binary in a single paper tape file.
+cat Binary/$1 >> /tmp/$1.pblk
+mv /tmp/$1.pblk ${KDF9RUNTIME}/TR1
+
+#ucc PLT
+#nine PLT $1 - z kk
+
+if [ x"$2"x = xx -o x"$2"x = x-x ]
+then
+   : no data file
+else
+   # Add the data file to the end of the paper tape.
+   a2b -L2p < ${DATA}/$2.txt >> ${KDF9RUNTIME}/TR1
+fi
+
+# Run Director.
+tsd $3 $4 $5 $6

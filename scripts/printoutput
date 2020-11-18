@@ -19,10 +19,9 @@
 # printoutput : Prints contents of CP0/TP0/TP1/LP0/LP1 to screen.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
@@ -30,6 +29,7 @@ trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
 function printline {
     echo -e "${RED}$1${GREEN}${BAR}${NC}";
     cat /tmp/printoutput;
+    echo;
     echo -e "${GREEN}${BAR}${NC}";
 }
 
@@ -45,33 +45,33 @@ then
     GREEN='\033[1;32m'
     NC='\033[0m'  #No Color
 
-    if [ -s CP0 ]
+    if [ -s ${KDF9RUNTIME}/CP0 ]
     then
-        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/CP0 > /tmp/printoutput;
         printline "CP0:"
     fi
 
-    if [ -s TP0 ]
+    if [ -s ${KDF9RUNTIME}/TP0 ]
     then
-        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
         printline "TP0:"
     fi
 
-    if [ -s TP1 ]
+    if [ -s ${KDF9RUNTIME}/TP1 ]
     then
-        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP1 > /tmp/printoutput;
         printline "TP1:"
     fi
 
-    if [ -s LP0 ]
+    if [ -s ${KDF9RUNTIME}/LP0 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9RUNTIME}/LP0) -t UTF8 < ${KDF9RUNTIME}/LP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP0:"
     fi
 
-    if [ -s LP1 ]
+    if [ -s ${KDF9RUNTIME}/LP1 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 | sed -E -f /tmp/format.commands > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9RUNTIME}/LP1) -t UTF8 < ${KDF9RUNTIME}/LP1 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP1:"
     fi
 else
@@ -80,33 +80,33 @@ else
     GREEN=''
     NC=''
 
-    if [ -s CP0 ]
+    if [ -s ${KDF9RUNTIME}/CP0 ]
     then
-        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/CP0 > /tmp/printoutput;
         printline "CP0:\n"
     fi
 
-    if [ -s TP0 ]
+    if [ -s ${KDF9RUNTIME}/TP0 ]
     then
-        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
         printline "TP0:\n"
     fi
 
-    if [ -s TP1 ]
+    if [ -s ${KDF9RUNTIME}/TP1 ]
     then
-        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP1 > /tmp/printoutput;
         printline "TP1:\n"
     fi
 
-    if [ -s LP0 ]
+    if [ -s ${KDF9RUNTIME}/LP0 ]
     then
-        cat ${KDF9ROOT}/LP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/LP0 > /tmp/printoutput;
         printline "LP0:\n"
     fi
 
-    if [ -s LP1 ]
+    if [ -s ${KDF9RUNTIME}/LP1 ]
     then
-        cat ${KDF9ROOT}/LP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/LP1 > /tmp/printoutput;
         printline "LP1:\n"
     fi
 fi

@@ -21,6 +21,7 @@ with Ada.Text_IO;
 --
 with HCI;
 with host_IO;
+with get_runtime_paths;
 
 use  Ada.Text_IO;
 --
@@ -101,7 +102,7 @@ package body IOC.slow.shift.FW is
       if the_FW.device_name = "FW0" then
          -- Attempt to open the command file for the console the_FW.
          begin
-            Open(interaction_file, In_File, "FW0");
+            Open(interaction_file, In_File, get_runtime_paths & "FW0");
          response_list_loop:
             while not End_of_file(interaction_file) loop
                if last_interaction = max_interactions then
@@ -157,8 +158,8 @@ package body IOC.slow.shift.FW is
                log_line("The file FW0 exists, but cannot be read!");
          end;
       end if;
-      open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
-      open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
+      open(the_FW.stream, get_runtime_paths & the_FW.device_name, read_mode, UI_in_FD);
+      open(the_FW.output, get_runtime_paths & the_FW.device_name, write_mode, UI_out_FD);
       IOC.device(the_FW).Initialize;
       the_FW.current_case := KDF9_char_sets.Case_Normal;
    end Initialize;

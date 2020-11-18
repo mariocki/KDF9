@@ -19,14 +19,13 @@
 # ports : Convert Kidsgrove Algol to Whetstone format.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-SOURCE=${KDF9ROOT}/Kidsgrove
-TARGET=${KDF9ROOT}/Whetstone
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+TARGET=${KDF9RUNTIME}/Whetstone
 
 trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
       0 1 2 3

@@ -22,9 +22,6 @@ BUILD_TYPE=ee9
 # max : optimised and with no optional warnings or checking
 # verbose : optimised and with extra warnings
 
-# Executable name
-EXE=ee9
-
 # Folder locations
 SRC=$(CURDIR)/src
 export RUNTIME=$(CURDIR)/runtime
@@ -33,8 +30,7 @@ KAL4=$(CURDIR)/kal4
 MKCHAN=$(CURDIR)/mkchan
 KALGOL=$(CURDIR)/kalgol
 
-# Main target to build
-MAIN=${SRC}/${EXE}
+export INSTALL_PATH?=/usr/local
 
 export CC=gcc
 export CFLAGS=-funwind-tables -march=native -O3 -funroll-loops -fno-stack-check
@@ -42,37 +38,35 @@ GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W 
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
 
-CSC_LIST=$(SRC)
-LIB_DIR=${foreach dir,${CSC_LIST},${dir}}
+.PHONY: all
+all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
 
-$(MAIN) : objects ${LIB_DIR} ${OPT_DEPENDS}
-	gnatbind ${MAIN} ${CSC_LIST:%=-aO%/} -shared
-	gnatlink ${MAIN} -o ${MAIN}
-
-.PHONY: objects
-objects: builddefs
-	gnatmake -j4 -c -i ${MAIN}.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+.phony: ee9
+ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
+	gnatmake -c ee9 -i ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/ee9.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/ee9.ali -o ${SRC}/ee9
 
 .PHONY: builddefs
 builddefs:
-	cp -f builddefs/adc-${BUILD_TYPE}.adc ${CSC_LIST}/gnat.adc
+	cp -f builddefs/adc-${BUILD_TYPE}.adc ${SRC}/gnat.adc
 
 .PHONY: a2b
 a2b: 
-	gnatmake -j4 -c -i ${SRC}/a2b.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/a2b ${CSC_LIST:%=-aO%/} -shared
+	gnatmake -j4 -c -i ${SRC}/a2b.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/a2b ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/a2b -o ${SRC}/a2b
 
 .PHONY: kidopt
 kidopt:
-	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/kidopt ${CSC_LIST:%=-aO%/} -shared
+	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/kidopt ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/kidopt -o ${SRC}/kidopt	
 
 .PHONY: mtp
 mtp:
-	gnatmake -j4 -c -i ${SRC}/mtp.adb ${CSC_LIST:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/mtp ${CSC_LIST:%=-aO%/} -shared
+	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/mtp ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/mtp -o ${SRC}/mtp
 
 .PHONY: kal3
@@ -97,43 +91,19 @@ clean:
 	$(MAKE) -e -C ${KAL4} clean
 	$(MAKE) -e -C ${KALGOL}	clean
 	$(MAKE) -e -C ${MKCHAN}	clean
-	$(MAKE) -e -C ${RUNTIME} clean
-	$(RM) ${CSC_LIST:%=%/*.ali}
-	$(RM) ${CSC_LIST:%=%/*.o}
-	$(RM) ${MAIN} ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
+	$(RM) ${SRC:%=%/*.ali}
+	$(RM) ${SRC:%=%/*.o}
+	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
 
-.PHONY: distclean
-distclean: clean
-	$(MAKE) -e -C ${KAL3} distclean
-	$(MAKE) -e -C ${KAL4} distclean
-	$(MAKE) -e -C ${KALGOL}	distclean
-	$(MAKE) -e -C ${MKCHAN}	distclean
-	$(MAKE) -e -C ${RUNTIME} distclean
-	$(RM) ${RUNTIME}/${EXE} ${RUNTIME}/a2b ${RUNTIME}/kidopt ${RUNTIME}/mtp ${RUNTIME}/gnat.adc
-
-.PHONY: all
-all: $(MAIN) a2b kal3 kal4 kalgol kidopt mkchan mtp
-
-.PHONY: deploy 
-deploy: all
-	cp -f ${MAIN} ${RUNTIME}
-	cp -f ${SRC}/a2b ${RUNTIME}
-	cp -f ${SRC}/kidopt ${RUNTIME}
-	cp -f ${SRC}/mtp ${RUNTIME}
-	$(MAKE) -e -C ${KAL3} deploy
-	$(MAKE) -e -C ${KAL4} deploy
-	$(MAKE) -e -C ${KALGOL}	deploy
-	$(MAKE) -e -C ${MKCHAN}	deploy
-	$(MAKE) -e -C ${RUNTIME} deploy
-	@echo ------
-	@echo "ee9 runtime environment is now set up in ${RUNTIME}"
-	@echo ------
-
-.PHONY: check
-check: deploy
-	$(MAKE) -e -C ${KAL3} check
-	$(MAKE) -e -C ${KAL4} check
-	$(MAKE) -e -C ${KALGOL}	check
-	$(MAKE) -e -C ${MKCHAN}	check
-	$(MAKE) -C ${RUNTIME} check
-
+.PHONY: install
+install: all
+	install -d $(INSTALL_PATH)/lib/kdf9/runtime
+	cp -aR runtime $(INSTALL_PATH)/lib/kdf9/
+	install -d $(INSTALL_PATH)/bin/
+	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(INSTALL_PATH)/bin/
+	install -m 755 scripts/* $(INSTALL_PATH)/bin/
+	$(MAKE) -e -C ${KAL3} install
+	$(MAKE) -e -C ${KAL4} install
+	$(MAKE) -e -C ${MKCHAN}	install
+	install -d $(INSTALL_PATH)/lib/kdf9/runtime/Data
+	$(MAKE) -e -C ${KALGOL}	install

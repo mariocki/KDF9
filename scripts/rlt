@@ -16,21 +16,19 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# stone : Calls whet with special case for "1964" or "thecrows"
+# rtl : Labels tapes
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
-
-case $1$2 in
-1964|thecrows)
-   ln -sf /dev/tty LP0
-   ${KDF9ROOT}/whet WHETSTONE f t;;
-*)
-   ${KDF9ROOT}/whet WHETSTONE f;;
-esac
+>${KDF9RUNTIME}/MT0
+>${KDF9RUNTIME}/MT1
+>${KDF9RUNTIME}/MT2
+>${KDF9RUNTIME}/MT3
+>${KDF9RUNTIME}/MT4
+>${KDF9RUNTIME}/MT5
+>${KDF9RUNTIME}/ST0
+nine_test RLT ${1:-RLT_data} $2 $3 $4

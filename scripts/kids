@@ -16,13 +16,25 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# nine_test : Calls nine specifying test mode.
+# kids : Compiles and runs a Kidsgrove Algol program
+#        calls kalgol to perform compilation
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-${KDF9ROOT}/nine "$1" "$2" "$3" "$4" "$5" "$6" t
+DATA=${KDF9RUNTIME}/Data
+WHERE=${KDF9RUNTIME}/Kidsgrove
+SETTINGS=${KDF9RUNTIME}/settings
+
+kalgol $1
+
+if [ -s ${KDF9RUNTIME}/Binary/$1 ]
+then
+   cat ${KDF9RUNTIME}/settings_2.txt > ${KDF9RUNTIME}/settings_1.txt
+   nine $1 $2 $3 $4
+else
+   exit 1
+fi

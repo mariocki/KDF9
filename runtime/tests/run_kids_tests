@@ -27,39 +27,39 @@ export KIDSLIST=""
 
 >${LOGS}/kids_test.log
 
-${KDF9ROOT}/kids FLUID FLUID_data t prh         >>${LOGS}/kids_test.log
+kids FLUID FLUID_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/FLUID.k3     ${BINARY}/FLUID       ${SOURCE}/FLUID-listing.txt
-${KDF9ROOT}/kids HAAVIE - t prh                 >>${LOGS}/kids_test.log
+   rm ${SOURCE}/FLUID.k3     Binary/FLUID       ${SOURCE}/FLUID-listing.txt
+kids HAAVIE - t prh                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/HAAVIE.k3 ${BINARY}/HAAVIE         ${SOURCE}/HAAVIE-listing.txt
-${KDF9ROOT}/kids HANOI HANOI_data t prh         >>${LOGS}/kids_test.log
+   rm ${SOURCE}/HAAVIE.k3 Binary/HAAVIE         ${SOURCE}/HAAVIE-listing.txt
+kids HANOI HANOI_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/HANOI.k3     ${BINARY}/HANOI       ${SOURCE}/HANOI-listing.txt
-${KDF9ROOT}/kids INPUT INPUT_data t prh         >>${LOGS}/kids_test.log
+   rm ${SOURCE}/HANOI.k3     Binary/HANOI       ${SOURCE}/HANOI-listing.txt
+kids INPUT INPUT_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/INPUT.k3     ${BINARY}/INPUT       ${SOURCE}/INPUT-listing.txt
-${KDF9ROOT}/kids MANORBOYX - t prh              >>${LOGS}/kids_test.log
+   rm ${SOURCE}/INPUT.k3     Binary/INPUT       ${SOURCE}/INPUT-listing.txt
+kids MANORBOYX - t prh              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/MANORBOYX.k3 ${BINARY}/MANORBOYX   ${SOURCE}/MANORBOYX-listing.txt
-${KDF9ROOT}/kids MATMULT - t prh                >>${LOGS}/kids_test.log
+   rm ${SOURCE}/MANORBOYX.k3 Binary/MANORBOYX   ${SOURCE}/MANORBOYX-listing.txt
+kids MATMULT - t prh                >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/MATMULT.k3   ${BINARY}/MATMULT     ${SOURCE}/MATMULT-listing.txt
-${KDF9ROOT}/kids PALSQR - t prh                 >>${LOGS}/kids_test.log
+   rm ${SOURCE}/MATMULT.k3   Binary/MATMULT     ${SOURCE}/MATMULT-listing.txt
+kids PALSQR - t prh                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/PALSQR.k3    ${BINARY}/PALSQR      ${SOURCE}/PALSQR-listing.txt
-${KDF9ROOT}/kids PENTOMINO PENTOMINO_data t prh >>${LOGS}/kids_test.log
+   rm ${SOURCE}/PALSQR.k3    Binary/PALSQR      ${SOURCE}/PALSQR-listing.txt
+kids PENTOMINO PENTOMINO_data t prh >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/PENTOMINO.k3 ${BINARY}/PENTOMINO   ${SOURCE}/PENTOMINO-listing.txt
-${KDF9ROOT}/kids QSORT - t prh                  >>${LOGS}/kids_test.log
+   rm ${SOURCE}/PENTOMINO.k3 Binary/PENTOMINO   ${SOURCE}/PENTOMINO-listing.txt
+kids QSORT - t prh                  >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/QSORT.k3 ${BINARY}/QSORT    ${SOURCE}/QSORT-listing.txt
-${KDF9ROOT}/kids WHETSTONE - t prh              >>${LOGS}/kids_test.log
+   rm ${SOURCE}/QSORT.k3 Binary/QSORT    ${SOURCE}/QSORT-listing.txt
+kids WHETSTONE - t prh              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/WHETSTONE.k3 ${BINARY}/WHETSTONE   ${SOURCE}/WHETSTONE-listing.txt
-${KDF9ROOT}/kids ZELLER ZELLER_data t prh       >>${LOGS}/kids_test.log
+   rm ${SOURCE}/WHETSTONE.k3 Binary/WHETSTONE   ${SOURCE}/WHETSTONE-listing.txt
+kids ZELLER ZELLER_data t prh       >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-   rm ${SOURCE}/ZELLER.k3    ${BINARY}/ZELLER      ${SOURCE}/ZELLER-listing.txt
+   rm ${SOURCE}/ZELLER.k3    Binary/ZELLER      ${SOURCE}/ZELLER-listing.txt
 
 echo
 diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log ${LOGS}/kids_good_test.log >${LOGS}/kids_test.diff

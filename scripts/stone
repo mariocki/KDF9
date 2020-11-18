@@ -16,27 +16,20 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# kids : Compiles and runs a Kidsgrove Algol program
-#        calls kalgol to perform compilation
+# stone : Calls whet with special case for "1964" or "thecrows"
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
-WHERE=${KDF9ROOT}/Kidsgrove
-SETTINGS=${KDF9ROOT}/settings
+trap "rm -f ${KDF9RUNTIME}/LP0; >${KDF9RUNTIME}/LP0" 1 2 3
 
-${KDF9ROOT}/kalgol $1
-
-if [ -s ${BINARY}/$1 ]
-then
-   cat ${KDF9ROOT}/settings_2.txt > ${KDF9ROOT}/settings_1.txt
-   ${KDF9ROOT}/nine $1 $2 $3 $4
-else
-   exit 1
-fi
+case $1$2 in
+1964|thecrows)
+   ln -sf /dev/tty LP0
+   whet WHETSTONE f t;;
+*)
+   whet WHETSTONE f;;
+esac

@@ -16,22 +16,53 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# rtl : Labels tapes
+# whet : Executes a Whetstone Algol program.
 #------------------------------------------------------------------------
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9";
 fi
 
-BINARY=${KDF9ROOT}/Binary
+trap ">${KDF9RUNTIME}/FW0"  \
+      0 1 2 3
 
->${KDF9ROOT}/MT0
->${KDF9ROOT}/MT1
->${KDF9ROOT}/MT2
->${KDF9ROOT}/MT3
->${KDF9ROOT}/MT4
->${KDF9ROOT}/MT5
->${KDF9ROOT}/ST0
-${KDF9ROOT}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4
+SOURCE=${KDF9RUNTIME}/Whetstone
+FW0FILES=${KDF9RUNTIME}/FW0Files
+
+if [ x"$1"x = xx ]
+then
+    echo "You have not named a Whetstone Algol program to be run."
+    echo
+    exit 1
+fi
+
+program=`basename "$1" ".a60"`.a60
+program=${SOURCE}/"$program"
+if [ -r "$program" ]
+then
+    cat "$program" > ${KDF9RUNTIME}/TR1
+else
+    echo "The source file "$program" is absent or unreadable."
+    echo
+    exit 2
+fi
+
+cat ${FW0FILES}/FW0_for_Whetstone > ${KDF9RUNTIME}/FW0
+
+mode=-d$2
+miscellany=-m$3
+
+if   [ "$mode" = -d ]
+then
+    ee9 +Binary/KMW0201--UPU;
+elif [ "$mode" = -d- ]
+then
+    ee9 -sp -df "$miscellany" +Binary/KMW0201--UPU;
+elif [ "$mode" = -df ]
+then
+    time ee9 -sp -df "$miscellany" +Binary/KMW0201--UPU;
+else
+    ee9 -sp "$mode" "$miscellany" +Binary/KMW0201--UPU;
+fi
+
+printoutput

@@ -27,6 +27,7 @@ with magtape_data;
 with OS_specifics;
 with POSIX;
 with value_of;
+with get_runtime_paths;
 
 use  Ada.Characters.Handling;
 use  Ada.Characters.Latin_1;
@@ -191,7 +192,7 @@ procedure mtp is
 
    procedure open_the_tape_file is
       fd : Integer with Warnings => Off;  -- only written, never read!
-      argument : Constant String := value_of("KDF9ROOT", default => "") & CLI.Argument(1)(1..3);
+      argument : Constant String := get_runtime_paths & CLI.Argument(1)(1..3);
    begin
       fd := close(fd => 0);
       begin

@@ -16,38 +16,12 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# ucc : Compiles a Usercode file to a Binary
+# nine_test : Calls nine specifying test mode.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-trap "rm -f  a.out mt.out"   \
-      0 1 2 3
-
-BINARY=${KDF9ROOT}/Binary
-USERCODE=${KDF9ROOT}/Assembly
-
-name=`basename "$1" ".k3"`
-if [ -f "${USERCODE}/$name.k3" ]
-then
-   ${KDF9ROOT}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
-   if [ -s a.out ]
-   then
-      mv -f a.out ${BINARY}/"$name"
-   else
-      echo "${KDF9ROOT}/kal3 detected error\(s\) in $name.k3"
-      echo;
-      more ${USERCODE}/"$name-listing.txt"
-      exit 1;
-   fi
-   rm -f a.out mt.out
-   exit 0
-else
-   echo "`basename "$0"`: there is no file named "$name.k3" in the ${USERCODE} folder!"
-   echo
-   exit 1
-fi
+nine "$1" "$2" "$3" "$4" "$5" "$6" t

@@ -19,6 +19,7 @@
 with HCI;
 with OS_specifics;
 with value_of;
+with get_runtime_paths;
 
 use HCI;
 
@@ -101,7 +102,7 @@ package body IOC.slow is
             return;
          elsif response = at_response then
             declare
-               here : constant String := value_of("KDF9ROOT", default => "") & "Data/";
+               here : constant String := get_runtime_paths & "Data/";
                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
             begin
                if next = "" then

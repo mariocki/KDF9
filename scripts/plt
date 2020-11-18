@@ -16,57 +16,44 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# tsdnine : Executes a KDF9 binary in the director.
+# plt : Create or update program library magnetic tape files.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-DATA=${KDF9ROOT}/Data
-BINARY=${KDF9ROOT}/Binary
+trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
 
-trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
+DATA=${KDF9RUNTIME}/Data
 
+ucc ${KDF9RUNTIME}/PLT
 if [ x$1x = xx ]
 then
-   echo; echo "No program name was given."; echo
-   exit 1
-fi
-
-# Set up a set of labelled tapes, including at least one ZERO (scratch) tape.
-cat > ${DATA}/TSD_tape_labels.txt <<++++
--00-1478        |
--66-1909EXAMTIME|
+   >${KDF9RUNTIME}/MT1
+   cat > ${DATA}/mt_test_labels.txt <<++++
+-00-1234WHETLIST|
+00000000        |
 -00-0552EFPBEAAG|
-        MS-DUMP.|
+00000000        |
 -00-2339+KOUTPUT/0023004|
 0-00-929PRINTEND|
 0-00-777AMPEXTM4|
 |
 ++++
 
-${KDF9ROOT}/rlt $TSD_tape_labels - z
-
-# Create a call tape from the binary program.
-${KDF9ROOT}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
-
-# Combine the call tape and the binary in a single paper tape file.
-cat ${BINARY}/$1 >> /tmp/$1.pblk
-mv /tmp/$1.pblk ${KDF9ROOT}/TR1
-
-#ucc PLT
-#nine PLT $1 - z kk
-
-if [ x"$2"x = xx -o x"$2"x = x-x ]
-then
-   : no data file
-else
-   # Add the data file to the end of the paper tape.
-   ${KDF9ROOT}/a2b -L2p < ${DATA}/$2.txt >> ${KDF9ROOT}/TR1
+   rlt mt_test_labels - zw
+   nine PLT
+   mtp ${KDF9RUNTIME}/MT1
+   exit 0
 fi
-
-# Run Director.
-${KDF9ROOT}/tsd $3 $4 $5 $6
+if [ -r Binary/$1 ]
+then
+   ${KDF9RUNTIME}/a2b -p2c < Binary/$1 > ${DATA}/$1-forPLT.txt
+   cat Binary/$1 >> ${DATA}/$1-forPLT.txt
+   nine PLT ${DATA}/$1-forPLT.txt t - lk
+   mtp ${KDF9RUNTIME}/MT1
+else
+   exit 0
+fi

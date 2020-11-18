@@ -18,7 +18,8 @@ CC=gcc
 YACC=yacc
 CFLAGS=-I. -fPIE -fPIC
 YFLAGS=-d --debug
-RUNTIME=../runtime
+
+INSTALL_PATH?=/usr/local
 
 kal3: kal3.c kal3syntax.c
 	$(CC) -o kal3 kal3.c kal3syntax.c $(CFLAGS)
@@ -29,13 +30,6 @@ clean:
 	$(RM) kal3syntax.c
 	$(RM) y.tab.h y.output
 
-.PHONY: deploy
-deploy: kal3
-	cp -f kal3 $(RUNTIME)
-
-.PHONY: distclean
-distclean: clean
-	$(RM) ${RUNTIME}/kal3
-
-.PHONY: check
-check: 
+.PHONY: install
+install: kal3
+	install -m 755 kal3 $(INSTALL_PATH)/bin/

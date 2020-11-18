@@ -11,10 +11,8 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## What different between this repo and the original
 - Source code changes 
-    - Write KDF9.log to the `{KDFROOT}/logs` folder.
+    - `ee9` now honors the `KDF9RUNTIME` environment variable during disk IO (log files, devices etc).
     - don't assume everyone uses black on white terminals. :unamused:
-    - Use the `KDFROOT` env variable to determine the default paths for `Binaries` and `Data`.
-    - Use the `KDFROOT` env variable to determine the default paths for MT* in `mtp`.
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
 - I don't include pre-build binaries.
@@ -26,6 +24,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `kal4` Source code for kal4.
 - `kalgol` Data files using during the compilation of Kidsgrove Algol.
 - `mkchan` Source code for mkchan.
+- `scripts` Bash scripts to simplify the execution of ee9.
 - `runtime` Runtime environment.
     - `runtime/Kidsgrove` Kidsgrove Algol source files.
     - `runtime/Whetstone` Whetstone Algol source files.
@@ -52,24 +51,21 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `make all`
     Builds ee9/kal3/kal4/mkchan in-place.
 
-- `make deploy`
-    Builds the executables and copies them into `runtime` and also resets the runtime to a 'clean' environment.
+- `make install`
+    Builds the executables and installs them along with the scripts into `INSTALL_PATH` which is `/usr/local` by default however you can change this by passing a new location as shown below:
 
-- `make check`
-    As per `make deploy` but also then runs the `ee9_reg_test` script.
-
-- `make clean`
-    Removes all intermediate and transient files from compilation but leaves the runtime intact.
+    `make -n install INSTALL_PATH=/opt/kdf9`
 
 - `make distclean`
-    As per `make clean` but also deletes all files created during the execution of the runtime to leave the folder structure 
+    Removes all intermediate and transient files from compilation but leaves the runtime intact.
+    Also deletes all files created during the execution of the runtime to leave the folder structure 
     exactly as was when first extracted/downloaded.
     
 ## Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
-Simply `cd` to the root folder and type `make deploy` or `make check`.
-Once completed the `runtime` folder will contain all you need to start using `ee9`.
+Simply `cd` to the root folder and type `make install` as root.
+Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory.
 
 ### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`.
@@ -88,5 +84,5 @@ Choose a distribution of your choice and follow the instructions for Linux given
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
 
 ### ToDo
-- [ ] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
+- [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
 - [ ] Create a Docker container?

@@ -16,36 +16,60 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# tsp : Runs the KDF9 director.
+# crnine : Executes a KDF9 binary with input on CR0
 #------------------------------------------------------------------------
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-trap ">${KDF9ROOT}/FW0"  \
-      0 1 2 3
+DATA=${KDF9RUNTIME}/Data
 
-TSD=${KDF9ROOT}/Binary/KKT40E007UPU
-
-cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0
-
-mode=-d$1
-miscellany=-m$2
-
-if [ "$mode" = "-d" ]
+if [ x"$1"x = xx ]
 then
-    ${KDF9ROOT}/ee9 -sb -df -TRkk -TPll  +${TSD};
-elif [ $mode = -df ]
+    echo "You have not named a binary program to be run."
+    echo
+    exit 1
+fi
+
+program=`basename "$1"`
+program=Binary/"$program"
+if [ ! -r "${KDF9RUNTIME}/$program" ]
 then
-    time ${KDF9ROOT}/ee9 -sb -df -TRkk -TPll  +${TSD};
-elif [ $miscellany = -m ]
+    echo "The object code file "${KDF9RUNTIME}/$program" is absent or unreadable."
+    echo
+    exit 2
+fi
+
+if [ x"$2"x = xx -o x"$2"x = x-x ]
 then
-    ${KDF9ROOT}/ee9 -sb "$mode" -TRkk -TPll  +${TSD};
+    >${KDF9RUNTIME}/CR0
 else
-    ${KDF9ROOT}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
+    data=${DATA}/`basename "$2" .txt`.txt
+    if [ -r "$data" ]
+    then
+        cat "$data" > ${KDF9RUNTIME}/CR0
+    else
+        echo "The data file "$data" is absent or unreadable."
+        echo
+        exit 3
+    fi
 fi
 
-${KDF9ROOT}/printoutput
+mode=-d$3
+miscellany=-m$4
+if   [ "$mode" = -d ]
+then
+    ee9 -sp -df "$miscellany" +"$program";
+elif [ "$3" = - ]
+then
+   ee9 -sp -df "$miscellany" +"$program";
+elif [ "$mode" = -df ]
+then
+    time ee9 -sp -df "$miscellany" +"$program";
+else
+    ee9 -sp "$mode" "$miscellany"  +"$program";
+fi
+
+printoutput

@@ -1,3 +1,4 @@
+#!/bin/bash
 #------------------------------------------------------------------------
 #    This file is part of ee9.
 #
@@ -14,22 +15,27 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-CC=gcc
-YACC=yacc
-CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-d --debug
+#------------------------------------------------------------------------
+# sttl : Set the store size and time limit on Usercode files.
+#------------------------------------------------------------------------
 
-INSTALL_PATH?=/usr/local
+if [ -z $KDF9RUNTIME ]
+then
+    KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-kal3: kal4.c kal4syntax.c kal4tab.c
-	$(CC) -o kal4 kal4.c kal4tab.c kal4syntax.c $(CFLAGS)
+USERCODE=${KDF9RUNTIME}/Assembly
 
-.PHONY: clean
-clean:
-	$(RM) kal4
-	$(RM) kal4syntax.c
-	$(RM) y.tab.h y.output
+trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp"   \
+      0 1 2 3
 
-.PHONY: install
-install: kal4
-	install -m 755 kal4 $(INSTALL_PATH)/bin/
+cat >/tmp/STTL.commands <<++++
+/^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
+++++
+
+if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 > /tmp/STTL_tmp
+then
+   mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
+else
+   echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
+fi

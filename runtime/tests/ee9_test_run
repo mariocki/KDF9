@@ -16,13 +16,14 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-> ${LOGS}/KDF9.log
+>${LOGS}/KDF9.log
+
 testtorun=$(echo "$2" | cut -f1 -d' ')
-if [ -f "$testtorun" ]
+if [ -f "${TESTS}/$testtorun" ]
 then
-   this_test="$2"
+   this_test="${TESTS}/$testtorun"
 else
-   this_test=${TESTS}/"$2"
+   this_test="$2"
 fi
 
 echo "+++++++++++++++++++ BEGIN  Test Case $1 +++++++++++++++++++"
