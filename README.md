@@ -64,7 +64,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 Building from source should be the same on any modern Linux or MacOS installation.
 
 Simply `cd` to the root folder and type `make install` as root.
-Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME`.
+Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory.
 
 ### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`.
