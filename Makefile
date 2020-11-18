@@ -97,13 +97,13 @@ all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
 .PHONY: install
 install: all
 	for a in scripts/*; do sed -i 's/\$${KDF9BIN}\///' $$a ; done
-	install -d $(INSTALL_PATH)/lib/kdf/runtime
-	#find runtime -type f -exec install -Dm 644 "{}" $(INSTALL_PATH)/lib/kdf/ \;
-	cp -aR runtime $(INSTALL_PATH)/lib/kdf/
+	install -d $(INSTALL_PATH)/lib/kdf9/runtime
+	cp -aR runtime $(INSTALL_PATH)/lib/kdf9/
 	install -d $(INSTALL_PATH)/bin/
 	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(INSTALL_PATH)/bin/
 	install -m 755 scripts/* $(INSTALL_PATH)/bin/
 	$(MAKE) -e -C ${KAL3} install
 	$(MAKE) -e -C ${KAL4} install
-	$(MAKE) -e -C ${KALGOL}	install
 	$(MAKE) -e -C ${MKCHAN}	install
+	install -d $(INSTALL_PATH)/lib/kdf9/runtime/Data
+	$(MAKE) -e -C ${KALGOL}	install

@@ -30,3 +30,5 @@ deploy:
 
 .PHONY: install
 install: 
+	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(INSTALL_PATH)/lib/kdf9/runtime/Data/
+	

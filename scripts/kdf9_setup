@@ -16,59 +16,56 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# whet : Executes a Whetstone Algol program.
+# kdf9_setup : sets up the kdf environment in a users $HOME/.kdf9/
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT="$HOME/.kdf9/";
+    KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=$KDF9ROOT
+# Copy everything down
+install -d ${KDF9ROOT}
+cp -aR /usr/local/lib/kdf9/runtime/* ${KDF9ROOT}/
 
-trap ">${KDF9ROOT}/FW0"  \
-      0 1 2 3
+cd ${KDF9ROOT}
 
-BINARY=${KDF9ROOT}/Binary
-SOURCE=${KDF9ROOT}/Whetstone
-FW0FILES=${KDF9ROOT}/FW0Files
+# Set up the various devices
+> CP0
+> CP1
+> CR0
+> CR1
+> DR0
+> FD0
+> FW0
+> GP0
+> LP0
+> LP1
+> MT0
+> MT1
+> MT2
+> MT3
+> MT4
+> MT5
+> MT6
+> MT7
+> SI0
+> SI1
+> ST0
+> ST1
+> TP0
+> TP1
+> TR0
+> TR1
+> settings_1.txt
+> settings_2.txt
+chown -R $USER .;
 
-if [ x"$1"x = xx ]
-then
-    echo "You have not named a Whetstone Algol program to be run."
-    echo
-    exit 1
-fi
+for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a.tmp; mv -f $$a.tmp $$a; chmod a+x $$a; fi; done
 
-program=`basename "$1" ".a60"`.a60
-program=${SOURCE}/"$program"
-if [ -r "$program" ]
-then
-    cat "$program" > ${KDF9ROOT}/TR1
-else
-    echo "The source file "$program" is absent or unreadable."
-    echo
-    exit 2
-fi
+a2b -r2p < Data/mksys2.bin > Binary/MKSYS2
+a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU
 
-cat ${FW0FILES}/FW0_for_Whetstone > ${KDF9ROOT}/FW0
-
-mode=-d$2
-miscellany=-m$3
-
-if   [ "$mode" = -d ]
-then
-    ${KDF9BIN}/ee9 +${BINARY}/KMW0201--UPU;
-elif [ "$mode" = -d- ]
-then
-    ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
-elif [ "$mode" = -df ]
-then
-    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
-else
-    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
-fi
-
-${KDF9BIN}/printoutput
+echo -n "Compiling: "; for f in Assembly/*.k3; do p=`basename $f .k3`; echo -n $p " "; ucc $p; done; echo

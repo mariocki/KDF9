@@ -52,15 +52,10 @@ deploy: check-env
 .PHONY: clean
 clean:
 	$(RM) MT0T MTx
-	$(RM) mt.out
-	$(RM) a.out
 	$(RM) logs/*
 	$(RM) *.tmp tests/*.tmp
 	$(RM) Data/crtest_data.txt Data/systape.txt Data/ABS_text.txt Data/mt_test_labels.txt 
-	$(RM) /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt 
-
-.PHONY: distclean
-distclean: clean
+	$(RM) /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt /tmp/a.out
 	$(RM) Assembly/*-listing.txt
 	$(RM) CP[01]
 	$(RM) CR[01]

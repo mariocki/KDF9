@@ -23,7 +23,7 @@ KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT="~/.kdf9/"
+    KDF9ROOT="$HOME/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
