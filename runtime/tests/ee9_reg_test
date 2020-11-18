@@ -23,7 +23,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 export BINARY=${KDF9ROOT}/Binary
 export DATA=${KDF9ROOT}/Data

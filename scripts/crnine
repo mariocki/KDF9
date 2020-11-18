@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
@@ -66,15 +66,15 @@ mode=-d$3
 miscellany=-m$4
 if   [ "$mode" = -d ]
 then
-    ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+    ee9 -sp -df "$miscellany" +"$program";
 elif [ "$3" = - ]
 then
-   ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+   ee9 -sp -df "$miscellany" +"$program";
 elif [ "$mode" = -df ]
 then
-    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+    time ee9 -sp -df "$miscellany" +"$program";
 else
-    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany"  +"$program";
+    ee9 -sp "$mode" "$miscellany"  +"$program";
 fi
 
-${KDF9BIN}/printoutput
+printoutput

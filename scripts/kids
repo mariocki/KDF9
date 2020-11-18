@@ -27,19 +27,19 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 WHERE=${KDF9ROOT}/Kidsgrove
 SETTINGS=${KDF9ROOT}/settings
 
-${KDF9BIN}/kalgol $1
+kalgol $1
 
 if [ -s ${BINARY}/$1 ]
 then
    cat ${KDF9ROOT}/settings_2.txt > ${KDF9ROOT}/settings_1.txt
-   ${KDF9BIN}/nine $1 $2 $3 $4
+   nine $1 $2 $3 $4
 else
    exit 1
 fi

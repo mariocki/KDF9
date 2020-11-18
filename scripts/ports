@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 SOURCE=${KDF9ROOT}/Kidsgrove
 TARGET=${KDF9ROOT}/Whetstone

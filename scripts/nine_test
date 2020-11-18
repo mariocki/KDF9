@@ -26,6 +26,6 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
 
-${KDF9BIN}/nine "$1" "$2" "$3" "$4" "$5" "$6" t
+
+nine "$1" "$2" "$3" "$4" "$5" "$6" t

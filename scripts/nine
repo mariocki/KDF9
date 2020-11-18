@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 >${KDF9ROOT}/LP0
 >${KDF9ROOT}/LP1
@@ -100,9 +100,9 @@ fi
 
 if [ "$mode" = -df ]
 then
-    time ${KDF9BIN}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+    time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 else
-   ${KDF9BIN}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+   ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
 case $4$8 in
@@ -111,6 +111,6 @@ case $4$8 in
    *-*)
       ;;
    *)
-    ${KDF9BIN}/printoutput
+    printoutput
 esac
 

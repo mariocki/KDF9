@@ -60,15 +60,15 @@ miscellany=-m$3
 
 if   [ "$mode" = -d ]
 then
-    ${KDF9BIN}/ee9 +${BINARY}/KMW0201--UPU;
+    ee9 +${BINARY}/KMW0201--UPU;
 elif [ "$mode" = -d- ]
 then
-    ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+    ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
 elif [ "$mode" = -df ]
 then
-    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+    time ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
 else
-    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
+    ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
 fi
 
-${KDF9BIN}/printoutput
+printoutput

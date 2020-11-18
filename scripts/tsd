@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 trap ">${KDF9ROOT}/FW0"  \
       0 1 2 3
@@ -40,15 +40,15 @@ miscellany=-m$2
 
 if [ "$mode" = "-d" ]
 then
-    ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
+    ee9 -sb -df -TRkk -TPll  +${TSD};
 elif [ $mode = -df ]
 then
-    time ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
+    time ee9 -sb -df -TRkk -TPll  +${TSD};
 elif [ $miscellany = -m ]
 then
-    ${KDF9BIN}/ee9 -sb "$mode" -TRkk -TPll  +${TSD};
+    ee9 -sb "$mode" -TRkk -TPll  +${TSD};
 else
-    ${KDF9BIN}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
+    ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
 fi
 
-${KDF9BIN}/printoutput
+printoutput

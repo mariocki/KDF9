@@ -26,14 +26,14 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
 
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 
-${KDF9BIN}/ucc ${KDF9ROOT}/PLT
+ucc ${KDF9ROOT}/PLT
 if [ x$1x = xx ]
 then
    >${KDF9ROOT}/MT1
@@ -48,17 +48,17 @@ then
 |
 ++++
 
-   ${KDF9BIN}/rlt mt_test_labels - zw
-   ${KDF9BIN}/nine PLT
-   ${KDF9BIN}/mtp ${KDF9ROOT}/MT1
+   rlt mt_test_labels - zw
+   nine PLT
+   mtp ${KDF9ROOT}/MT1
    exit 0
 fi
 if [ -r ${BINARY}/$1 ]
 then
    ${KDF9ROOT}/a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
    cat ${BINARY}/$1 >> ${DATA}/$1-forPLT.txt
-   ${KDF9BIN}/nine PLT ${DATA}/$1-forPLT.txt t - lk
-   ${KDF9BIN}/mtp ${KDF9ROOT}/MT1
+   nine PLT ${DATA}/$1-forPLT.txt t - lk
+   mtp ${KDF9ROOT}/MT1
 else
    exit 0
 fi

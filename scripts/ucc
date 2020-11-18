@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 trap "rm -f  /tmp/a.out /tmp/mt.out"   \
       0 1 2 3
@@ -37,7 +37,7 @@ USERCODE=${KDF9ROOT}/Assembly
 name=`basename "$1" ".k3"`
 if [ -f "${USERCODE}/$name.k3" ]
 then
-   ${KDF9BIN}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
+   kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
    if [ -s /tmp/a.out ]
    then
       mv -f /tmp/a.out ${BINARY}/"$name"

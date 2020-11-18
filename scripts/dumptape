@@ -27,13 +27,13 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 TMPFILE=/tmp/mtp.dump
 
 trap "rm -f ${TMPFILE}" 0 1 2 3
 
-${KDF9BIN}/mtp $1 $2 $3 $4 > ${TMPFILE}
+mtp $1 $2 $3 $4 > ${TMPFILE}
 
 if [ -s ${TMPFILE} ] 
 then

@@ -26,7 +26,7 @@ then
     KDF9ROOT="$HOME/.kdf9/"
 fi
 
-KDF9BIN=${KDF9ROOT}
+
 
 SOURCE=${KDF9ROOT}/Kidsgrove
 DATA=${KDF9ROOT}/Data
@@ -62,15 +62,15 @@ fi
 
 > ${KDF9ROOT}/settings_1.txt
 
-${KDF9BIN}/rlt tape_labels_for_KAlgol - wz
+rlt tape_labels_for_KAlgol - wz
 #echo "The compiler work tapes have been labelled."
 
 cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
 
-${KDF9BIN}/nine MKSYS2 systape - wz
+nine MKSYS2 systape - wz
 #echo "The compiler overlay tape has been generated."; echo
 
-${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
+mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
 > ${KDF9ROOT}/TP0
@@ -86,9 +86,9 @@ if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
 then
    shift
 fi
-${KDF9ROOT}/kidopt with $* ${KIDSOPTS} >> ${KDF9ROOT}/settings_1.txt
+kidopt with $* ${KIDSOPTS} >> ${KDF9ROOT}/settings_1.txt
 
-if ${KDF9BIN}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
+if nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
@@ -124,7 +124,7 @@ then
 fi
 
 #${KDF9ROOT}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
-${KDF9BIN}/mtp MT0T > ${USERCODE}/$name.k3
+mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
@@ -134,8 +134,8 @@ fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
-   ${KDF9BIN}/neat$name ${ST:-24000} ${TL:-99999}
-   ${KDF9BIN}/ucc $name
+   neat$name ${ST:-24000} ${TL:-99999}
+   ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
       echo "An object program could not be assembled."; echo; echo
