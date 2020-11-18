@@ -288,8 +288,7 @@ package body KDF9.Directors is
       end prepare_successor;
 
       procedure overlay_a_new_program (program_name : in String) is
-         overlay : constant String := get_runtime_paths
-                                    & "Binary/"
+         overlay : constant String := "Binary/"
                                     & program_name;
          W : KDF9.word;
       begin
