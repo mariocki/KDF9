@@ -19,11 +19,14 @@
 # crnine : Executes a KDF9 binary with input on CR0
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
@@ -63,15 +66,15 @@ mode=-d$3
 miscellany=-m$4
 if   [ "$mode" = -d ]
 then
-    ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
+    ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
 elif [ "$3" = - ]
 then
-   ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
+   ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
 elif [ "$mode" = -df ]
 then
-    time ${KDF9ROOT}/ee9 -sp -df "$miscellany" +"$program";
+    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
 else
-    ${KDF9ROOT}/ee9 -sp "$mode" "$miscellany"  +"$program";
+    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany"  +"$program";
 fi
 
-${KDF9ROOT}/printoutput
+${KDF9BIN}/printoutput

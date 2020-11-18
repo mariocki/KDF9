@@ -23,7 +23,7 @@ K 14 DR
 ++++
 
 echo "TEST TDRUM - POA, PIA - should end normally:"
->${KDF9ROOT}/DR0; ${KDF9ROOT}/ucc TDRUM; ${KDF9ROOT}/nine_test TDRUM - t $opt
+>${KDF9ROOT}/DR0; ${KDF9BIN}/ucc TDRUM; ${KDF9BIN}/nine_test TDRUM - t $opt
 echo "TEST TDRUM - POA, PIA done."
 case $1 in
 z)
@@ -33,7 +33,7 @@ z)
 esac
 
 echo "TEST TDRUMEOF - POA, PIA - should fail  \"Invalid operand\":"
->${KDF9ROOT}/DR0; ${KDF9ROOT}/ucc TDRUMEOF; ${KDF9ROOT}/nine_test TDRUMEOF - t $opt
+>${KDF9ROOT}/DR0; ${KDF9BIN}/ucc TDRUMEOF; ${KDF9BIN}/nine_test TDRUMEOF - t $opt
 echo "TEST TDRUMEOF - POA, PIA done."
 case $1 in
 z)
@@ -43,7 +43,7 @@ z)
 esac
 
 echo "TEST TDRUMR2EM - POA, PIB - should end normally:"
->${KDF9ROOT}/DR0; ${KDF9ROOT}/ucc TDRUMR2EM; ${KDF9ROOT}/nine_test TDRUMR2EM - t $opt
+>${KDF9ROOT}/DR0; ${KDF9BIN}/ucc TDRUMR2EM; ${KDF9BIN}/nine_test TDRUMR2EM - t $opt
 echo "TEST  TDRUMR2EM - POA, PIB done."
 case $1 in
 z)
@@ -53,7 +53,7 @@ z)
 esac
 
 echo "TEST TDRUMW2EM - POB, PIA - should end normally:"
->${KDF9ROOT}/DR0; ${KDF9ROOT}/ucc TDRUMW2EM; ${KDF9ROOT}/nine_test TDRUMW2EM - t $opt
+>${KDF9ROOT}/DR0; ${KDF9BIN}/ucc TDRUMW2EM; ${KDF9BIN}/nine_test TDRUMW2EM - t $opt
 echo "TEST TDRUMW2EM - POB, PIA done."
 case $1 in
 z)

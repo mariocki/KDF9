@@ -19,11 +19,14 @@
 # whet : Executes a Whetstone Algol program.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 trap ">${KDF9ROOT}/FW0"  \
       0 1 2 3
@@ -57,15 +60,15 @@ miscellany=-m$3
 
 if   [ "$mode" = -d ]
 then
-    ${KDF9ROOT}/ee9 +${BINARY}/KMW0201--UPU;
+    ${KDF9BIN}/ee9 +${BINARY}/KMW0201--UPU;
 elif [ "$mode" = -d- ]
 then
-    ${KDF9ROOT}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+    ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
 elif [ "$mode" = -df ]
 then
-    time ${KDF9ROOT}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
 else
-    ${KDF9ROOT}/ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
+    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
 fi
 
-${KDF9ROOT}/printoutput
+${KDF9BIN}/printoutput

@@ -19,11 +19,14 @@
 # kalgol : compiles a60 to usercode and then onto a binary
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 SOURCE=${KDF9ROOT}/Kidsgrove
 DATA=${KDF9ROOT}/Data
@@ -59,12 +62,12 @@ fi
 
 > ${KDF9ROOT}/settings_1.txt
 
-${KDF9ROOT}/rlt tape_labels_for_KAlgol - wz
+${KDF9BIN}/rlt tape_labels_for_KAlgol - wz
 #echo "The compiler work tapes have been labelled."
 
 cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
 
-${KDF9ROOT}/nine MKSYS2 systape - wz
+${KDF9BIN}/nine MKSYS2 systape - wz
 #echo "The compiler overlay tape has been generated."; echo
 
 ${KDF9ROOT}/mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
@@ -85,7 +88,7 @@ then
 fi
 ${KDF9ROOT}/kidopt with $* ${KIDSOPTS} >> ${KDF9ROOT}/settings_1.txt
 
-if ${KDF9ROOT}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
+if ${KDF9BIN}/nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
@@ -121,7 +124,7 @@ then
 fi
 
 #${KDF9ROOT}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
-${KDF9ROOT}/mtp MT0T > ${USERCODE}/$name.k3
+${KDF9BIN}/mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
@@ -131,8 +134,8 @@ fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
-   ${KDF9ROOT}/neat $name ${ST:-24000} ${TL:-99999}
-   ${KDF9ROOT}/ucc $name
+   ${KDF9BIN}/neat$name ${ST:-24000} ${TL:-99999}
+   ${KDF9BIN}/ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
       echo "An object program could not be assembled."; echo; echo

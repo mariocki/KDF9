@@ -37,6 +37,7 @@ with state_display;
 with tracing;
 
 with value_of;
+with get_runtime_paths;
 
 use  dumping;
 use  exceptions;
@@ -287,7 +288,7 @@ package body KDF9.Directors is
       end prepare_successor;
 
       procedure overlay_a_new_program (program_name : in String) is
-         overlay : constant String := value_of("KDF9ROOT", default => "")
+         overlay : constant String := get_runtime_paths
                                     & "Binary/"
                                     & program_name;
          W : KDF9.word;

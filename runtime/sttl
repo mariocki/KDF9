@@ -19,11 +19,14 @@
 # sttl : Set the store size and time limit on Usercode files.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 USERCODE=${KDF9ROOT}/Assembly
 

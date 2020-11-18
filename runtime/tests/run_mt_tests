@@ -39,7 +39,7 @@ cat > ${DATA}/mt_test_labels.txt <<++++
 |
 ++++
 
-${KDF9ROOT}/rlt mt_test_labels - zw
+${KDF9BIN}/rlt mt_test_labels - zw
 
 cat ${KDF9ROOT}/MT2 > ${KDF9ROOT}/MTx
 
@@ -47,84 +47,84 @@ cat ${KDF9ROOT}/MT2 > ${KDF9ROOT}/MTx
 > ${LOGS}/mt_test.log
 
 echo "TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4A; ${KDF9ROOT}/nine OUT4A - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4A; ${KDF9BIN}/nine OUT4A - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST B - GAP in unWIPEd area - should fail \"Invalid operand\":"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4B; ${KDF9ROOT}/nine OUT4B - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4B; ${KDF9BIN}/nine OUT4B - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST C - valid WIPE at end of data - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4C; ${KDF9ROOT}/nine OUT4C - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4C; ${KDF9BIN}/nine OUT4C - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST D - reading past the end of data - should fail \"Invalid operand\":"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4D; ${KDF9ROOT}/nine OUT4D - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4D; ${KDF9BIN}/nine OUT4D - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST E - attempt to write past PET - should fail \"Invalid operand\":"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4E; ${KDF9ROOT}/nine OUT4E - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4E; ${KDF9BIN}/nine OUT4E - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST F - MW, MWE, MFRE and MBRE - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4F; ${KDF9ROOT}/nine OUT4F - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4F; ${KDF9BIN}/nine OUT4F - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST G - WIPE entire tape, leaving it unlabelled - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4G; ${KDF9ROOT}/nine OUT4G - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4G; ${KDF9BIN}/nine OUT4G - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST H - writing to ETW - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4H; ${KDF9ROOT}/nine OUT4H - t $opt >>${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4H; ${KDF9BIN}/nine OUT4H - t $opt >>${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST I - MBR at BTW - should LIV:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4I; ${KDF9ROOT}/nine OUT4I - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4I; ${KDF9BIN}/nine OUT4I - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST J - MBSK at BTW - should LIV:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4J; ${KDF9ROOT}/nine OUT4J - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4J; ${KDF9BIN}/nine OUT4J - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST K - MBR after label block, R/W 1-word blocks - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4K; ${KDF9ROOT}/nine OUT4K - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4K; ${KDF9BIN}/nine OUT4K - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;
    *) ;;
 esac
 echo "TEST L - R/W 32K-word blocks - should end normally:"
-cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9ROOT}/ucc OUT4L; ${KDF9ROOT}/nine OUT4L - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+cat ${KDF9ROOT}/MTx > ${KDF9ROOT}/MT2; ${KDF9BIN}/ucc OUT4L; ${KDF9BIN}/nine OUT4L - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 
 case $opt in
    z)
@@ -133,7 +133,7 @@ case $opt in
 esac
 
 echo "TEST T - like TEST A but for 7-track decks - should end normally:"
-${KDF9ROOT}/rlt mt_test_labels - zw; ${KDF9ROOT}/ucc OUT4T; ${KDF9ROOT}/nine OUT4T - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+${KDF9BIN}/rlt mt_test_labels - zw; ${KDF9BIN}/ucc OUT4T; ${KDF9BIN}/nine OUT4T - t $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9ROOT}/TP0; echo "======"; echo;;

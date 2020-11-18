@@ -19,10 +19,13 @@
 # nine_test : Calls nine specifying test mode.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
 
-${KDF9ROOT}/nine "$1" "$2" "$3" "$4" "$5" "$6" t
+KDF9BIN=${KDF9ROOT}
+
+${KDF9BIN}/nine "$1" "$2" "$3" "$4" "$5" "$6" t

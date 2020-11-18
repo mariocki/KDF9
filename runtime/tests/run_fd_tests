@@ -23,7 +23,7 @@ K 14 FD
 ++++
 
 echo "TEST TDISK - POA, PIA, PMA, PMF - should end normally:"
->${KDF9ROOT}/FD0; ${KDF9ROOT}/ucc TDISK; ${KDF9ROOT}/nine_test TDISK - t $opt
+>${KDF9ROOT}/FD0; ${KDF9BIN}/ucc TDISK; ${KDF9BIN}/nine_test TDISK - t $opt
 echo "TEST TDISK - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -33,7 +33,7 @@ z)
 esac
 
 echo "TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:"
- >${KDF9ROOT}/FD0; ${KDF9ROOT}/ucc TDISKOR; ${KDF9ROOT}/nine_test TDISKOR - t $opt
+ >${KDF9ROOT}/FD0; ${KDF9BIN}/ucc TDISKOR; ${KDF9BIN}/nine_test TDISKOR - t $opt
 echo "TEST TDISKOR - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -43,7 +43,7 @@ z)
 esac
 
 echo "TEST TDISKEM - POB, PIA, PMA - should end normally:"
->${KDF9ROOT}/FD0; ${KDF9ROOT}/ucc TDISKEM; ${KDF9ROOT}/nine_test TDISKEM - t $opt
+>${KDF9ROOT}/FD0; ${KDF9BIN}/ucc TDISKEM; ${KDF9BIN}/nine_test TDISKEM - t $opt
 echo "TEST TDISKEM - POB, PIA, PMA done."
 case $1 in
 z)
@@ -53,7 +53,7 @@ z)
 esac
 
 echo "TEST TDISKFH - POC, PIC - should end normally:"
->${KDF9ROOT}/FD0; ${KDF9ROOT}/ucc TDISKFH; ${KDF9ROOT}/nine_test TDISKFH - t $opt
+>${KDF9ROOT}/FD0; ${KDF9BIN}/ucc TDISKFH; ${KDF9BIN}/nine_test TDISKFH - t $opt
 echo "TEST TDISKFH - POC, PIC done."
 case $1 in
 z)
@@ -63,7 +63,7 @@ z)
 esac
 
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:"
->${KDF9ROOT}/FD0; ${KDF9ROOT}/ucc TDISKFHNS; ${KDF9ROOT}/nine_test TDISKFHNS - t $opt
+>${KDF9ROOT}/FD0; ${KDF9BIN}/ucc TDISKFHNS; ${KDF9BIN}/nine_test TDISKFHNS - t $opt
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG done."
 case $1 in
 z)

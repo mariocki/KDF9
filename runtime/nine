@@ -19,11 +19,14 @@
 # nine : Executes a KDF9 binary with input on TR0 or datafile.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 >${KDF9ROOT}/LP0
 >${KDF9ROOT}/LP1
@@ -97,9 +100,9 @@ fi
 
 if [ "$mode" = -df ]
 then
-    time ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+    time ${KDF9BIN}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 else
-   ${KDF9ROOT}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+   ${KDF9BIN}/ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
 case $4$8 in
@@ -108,6 +111,6 @@ case $4$8 in
    *-*)
       ;;
    *)
-    ${KDF9ROOT}/printoutput
+    ${KDF9BIN}/printoutput
 esac
 

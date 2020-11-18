@@ -19,11 +19,14 @@
 # neat : ???
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 USERCODE=${KDF9ROOT}/Assembly
 
@@ -131,5 +134,5 @@ sed -E -f /tmp/neat.commands /tmp/neat_tmp_4 > /tmp/neat_tmp_5
 > ${USERCODE}/$1-NEAT.k3
 tr -s "\\n" < /tmp/neat_tmp_5 > /tmp/neat_tmp_6
 tr "§" "\\n" < /tmp/neat_tmp_6 > ${USERCODE}/$1-NEAT.k3
-${KDF9ROOT}/sttl $1-NEAT $2 $3
+${KDF9BIN}/sttl $1-NEAT $2 $3
 mv -f ${USERCODE}/$1-NEAT.k3 ${USERCODE}/$1.k3

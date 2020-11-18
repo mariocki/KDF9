@@ -19,11 +19,14 @@
 # rtl : Labels tapes
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 BINARY=${KDF9ROOT}/Binary
 
@@ -34,4 +37,4 @@ BINARY=${KDF9ROOT}/Binary
 >${KDF9ROOT}/MT4
 >${KDF9ROOT}/MT5
 >${KDF9ROOT}/ST0
-${KDF9ROOT}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4
+${KDF9BIN}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4

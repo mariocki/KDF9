@@ -19,11 +19,14 @@
 # tsdnine : Executes a KDF9 binary in the director.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 DATA=${KDF9ROOT}/Data
 BINARY=${KDF9ROOT}/Binary
@@ -48,10 +51,10 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 |
 ++++
 
-${KDF9ROOT}/rlt $TSD_tape_labels - z
+${KDF9BIN}/rlt $TSD_tape_labels - z
 
 # Create a call tape from the binary program.
-${KDF9ROOT}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
+${KDF9BIN}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
 
 # Combine the call tape and the binary in a single paper tape file.
 cat ${BINARY}/$1 >> /tmp/$1.pblk
@@ -65,8 +68,8 @@ then
    : no data file
 else
    # Add the data file to the end of the paper tape.
-   ${KDF9ROOT}/a2b -L2p < ${DATA}/$2.txt >> ${KDF9ROOT}/TR1
+   ${KDF9BIN}/a2b -L2p < ${DATA}/$2.txt >> ${KDF9ROOT}/TR1
 fi
 
 # Run Director.
-${KDF9ROOT}/tsd $3 $4 $5 $6
+${KDF9BIN}/tsd $3 $4 $5 $6

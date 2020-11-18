@@ -19,18 +19,21 @@
 # stone : Calls whet with special case for "1964" or "thecrows"
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
 
 case $1$2 in
 1964|thecrows)
    ln -sf /dev/tty LP0
-   ${KDF9ROOT}/whet WHETSTONE f t;;
+   ${KDF9BIN}/whet WHETSTONE f t;;
 *)
-   ${KDF9ROOT}/whet WHETSTONE f;;
+   ${KDF9BIN}/whet WHETSTONE f;;
 esac

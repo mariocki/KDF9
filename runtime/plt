@@ -19,18 +19,21 @@
 # plt : Create or update program library magnetic tape files.
 #------------------------------------------------------------------------
 
+KDF9ROOT=${KDF9RUNTIME}
+
 if [ -z $KDF9ROOT ]
 then
-    echo "Please set the KDF9ROOT environment variable to the path of ee9.";
-    exit 1;
+    KDF9ROOT = "~/.kdf9/"
 fi
+
+KDF9BIN=${KDF9ROOT}
 
 trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
 
 BINARY=${KDF9ROOT}/Binary
 DATA=${KDF9ROOT}/Data
 
-${KDF9ROOT}/ucc ${KDF9ROOT}/PLT
+${KDF9BIN}/ucc ${KDF9ROOT}/PLT
 if [ x$1x = xx ]
 then
    >${KDF9ROOT}/MT1
@@ -45,17 +48,17 @@ then
 |
 ++++
 
-   ${KDF9ROOT}/rlt mt_test_labels - zw
-   ${KDF9ROOT}/nine PLT
-   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
+   ${KDF9BIN}/rlt mt_test_labels - zw
+   ${KDF9BIN}/nine PLT
+   ${KDF9BIN}/mtp ${KDF9ROOT}/MT1
    exit 0
 fi
 if [ -r ${BINARY}/$1 ]
 then
    ${KDF9ROOT}/a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
    cat ${BINARY}/$1 >> ${DATA}/$1-forPLT.txt
-   ${KDF9ROOT}/nine PLT ${DATA}/$1-forPLT.txt t - lk
-   ${KDF9ROOT}/mtp ${KDF9ROOT}/MT1
+   ${KDF9BIN}/nine PLT ${DATA}/$1-forPLT.txt t - lk
+   ${KDF9BIN}/mtp ${KDF9ROOT}/MT1
 else
    exit 0
 fi
