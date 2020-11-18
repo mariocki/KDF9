@@ -84,5 +84,5 @@ Choose a distribution of your choice and follow the instructions for Linux given
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
 
 ### ToDo
-- [ ] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
+- [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
 - [ ] Create a Docker container?
