@@ -27,24 +27,24 @@ fi
 trap ">${KDF9RUNTIME}/FW0"  \
       0 1 2 3
 
-TSD=${KDF9RUNTIME}/Binary/KKT40E007UPU
+FW0FILES=${KDF9RUNTIME}/FW0Files
 
-cat ${KDF9RUNTIME}/Settings/FW0_for_Director > ${KDF9RUNTIME}/FW0
+cat ${FW0FILES}/FW0_for_Director > ${KDF9RUNTIME}/FW0
 
 mode=-d$1
 miscellany=-m$2
 
 if [ "$mode" = "-d" ]
 then
-    ee9 -sb -df -TRkk -TPll  +${TSD};
+    ee9 -sb -df -TRkk -TPll  +Binary/KKT40E007UPU;
 elif [ $mode = -df ]
 then
-    time ee9 -sb -df -TRkk -TPll  +${TSD};
+    time ee9 -sb -df -TRkk -TPll  +Binary/KKT40E007UPU;
 elif [ $miscellany = -m ]
 then
-    ee9 -sb "$mode" -TRkk -TPll  +${TSD};
+    ee9 -sb "$mode" -TRkk -TPll  +Binary/KKT40E007UPU;
 else
-    ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
+    ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +Binary/KKT40E007UPU;
 fi
 
 printoutput
