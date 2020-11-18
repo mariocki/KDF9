@@ -41,7 +41,7 @@ GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
 ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
 	gnatmake -c ee9 -i ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
 	gnatbind ${SRC}/ee9.ali ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/ee9.ali -o ee9
+	gnatlink ${SRC}/ee9.ali -o ${SRC}/ee9
 
 .PHONY: builddefs
 builddefs:
@@ -96,9 +96,10 @@ all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
 
 .PHONY: install
 install: all
-	for a in scripts/*; do sed 's/${KDF9BIN}///' < $$a > $$a; done
+	for a in scripts/*; do sed -i 's/\$${KDF9BIN}\///' $$a ; done
 	install -d $(INSTALL_PATH)/lib/kdf/runtime
-	install -m 644 runtime $(INSTALL_PATH)/lib/kdf/runtime
+	#find runtime -type f -exec install -Dm 644 "{}" $(INSTALL_PATH)/lib/kdf/ \;
+	cp -aR runtime $(INSTALL_PATH)/lib/kdf/
 	install -d $(INSTALL_PATH)/bin/
 	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(INSTALL_PATH)/bin/
 	install -m 755 scripts/* $(INSTALL_PATH)/bin/
