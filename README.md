@@ -11,10 +11,8 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## What different between this repo and the original
 - Source code changes 
-    - Write KDF9.log to the `{KDF9RUNTIME}/logs` folder.
+    - `ee9` now honors the `{KDF9RUNTIME}` environment variable during disk IO (log files, devices etc).
     - don't assume everyone uses black on white terminals. :unamused:
-    - Use the `KDF9RUNTIME` env variable to determine the default paths for `Binaries` and `Data`.
-    - Use the `KDF9RUNTIME` env variable to determine the default paths for MT* in `mtp`.
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
 - I don't include pre-build binaries.
@@ -26,6 +24,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `kal4` Source code for kal4.
 - `kalgol` Data files using during the compilation of Kidsgrove Algol.
 - `mkchan` Source code for mkchan.
+- `scripts` Bash scripts to simplify the execution of ee9.
 - `runtime` Runtime environment.
     - `runtime/Kidsgrove` Kidsgrove Algol source files.
     - `runtime/Whetstone` Whetstone Algol source files.
@@ -53,7 +52,8 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Builds ee9/kal3/kal4/mkchan in-place.
 
 - `make install`
-    Builds the executables and installs them along with the scripts into `/usr/local/bin` and copies the base runtime to `/usr/local/lib/kdf9`.
+    Builds the executables and installs them along with the scripts into `$INSTALL_PATH` which is `/usr/local` by default however you can change this by passing a new location as shown below:
+    `make -n install INSTALL_PATH=/opt/kdf9`
 
 - `make distclean`
     Removes all intermediate and transient files from compilation but leaves the runtime intact.
