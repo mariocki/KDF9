@@ -11,7 +11,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## What different between this repo and the original
 - Source code changes 
-    - `ee9` now honors the `{KDF9RUNTIME}` environment variable during disk IO (log files, devices etc).
+    - `ee9` now honors the `KDF9RUNTIME` environment variable during disk IO (log files, devices etc).
     - don't assume everyone uses black on white terminals. :unamused:
 - Converted to using Makefiles to build everything (see below).
 - Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
@@ -52,7 +52,8 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Builds ee9/kal3/kal4/mkchan in-place.
 
 - `make install`
-    Builds the executables and installs them along with the scripts into `$INSTALL_PATH` which is `/usr/local` by default however you can change this by passing a new location as shown below:
+    Builds the executables and installs them along with the scripts into `INSTALL_PATH` which is `/usr/local` by default however you can change this by passing a new location as shown below:
+
     `make -n install INSTALL_PATH=/opt/kdf9`
 
 - `make distclean`
