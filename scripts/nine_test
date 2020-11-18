@@ -18,9 +18,10 @@
 #------------------------------------------------------------------------
 # nine_test : Calls nine specifying test mode.
 #------------------------------------------------------------------------
+
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 nine "$1" "$2" "$3" "$4" "$5" "$6" t

@@ -19,9 +19,10 @@
 # dumptape : Displays the contents of a tape drive using mtp and
 #            converting the output to UTF8
 #------------------------------------------------------------------------
+
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 TMPFILE=/tmp/mtp.dump

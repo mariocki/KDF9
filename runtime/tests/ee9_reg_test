@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------
 if [ -z $KDF9RUNTIME ]
 then
-    export KDF9RUNTIME="$HOME/.kdf9/"
+    export KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 export DATA=${KDF9RUNTIME}/Data

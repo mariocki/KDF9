@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 mode=ahipr$2

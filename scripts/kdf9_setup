@@ -18,9 +18,10 @@
 #------------------------------------------------------------------------
 # kdf9_setup : sets up the kdf environment in a users $HOME/.kdf9/
 #------------------------------------------------------------------------
+
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 echo "Setting up KDF9 runtime in ${KDF9RUNTIME}"

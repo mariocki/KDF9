@@ -19,9 +19,10 @@
 # kids : Compiles and runs a Kidsgrove Algol program
 #        calls kalgol to perform compilation
 #------------------------------------------------------------------------
+
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 DATA=${KDF9RUNTIME}/Data
@@ -30,7 +31,7 @@ SETTINGS=${KDF9RUNTIME}/settings
 
 kalgol $1
 
-if [ -s Binary/$1 ]
+if [ -s ${KDF9RUNTIME}/Binary/$1 ]
 then
    cat ${KDF9RUNTIME}/settings_2.txt > ${KDF9RUNTIME}/settings_1.txt
    nine $1 $2 $3 $4

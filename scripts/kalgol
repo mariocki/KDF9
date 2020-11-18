@@ -18,9 +18,10 @@
 #------------------------------------------------------------------------
 # kalgol : compiles a60 to usercode and then onto a binary
 #------------------------------------------------------------------------
+
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
@@ -130,7 +131,7 @@ case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
    neat $name ${ST:-24000} ${TL:-99999}
    ucc $name
-   if [ ! -s Binary/$name ]
+   if [ ! -s ${KDF9RUNTIME}/Binary/$name ]
    then
       echo "An object program could not be assembled."; echo; echo
       exit 5

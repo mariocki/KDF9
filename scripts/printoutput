@@ -21,7 +21,7 @@
 
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
@@ -29,6 +29,7 @@ trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
 function printline {
     echo -e "${RED}$1${GREEN}${BAR}${NC}";
     cat /tmp/printoutput;
+    echo;
     echo -e "${GREEN}${BAR}${NC}";
 }
 
