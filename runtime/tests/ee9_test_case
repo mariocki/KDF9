@@ -63,9 +63,9 @@ HQP) this_test="kids WEEHAAVIE -"
      exit 2;;
 esac
 
-rm -f ${USERCODE}/WEEHAAVIE.k3 ${USERCODE}/WEEHAAVIE-listing.txt ${BINARY}/WEEHAAVIE
+rm -f ${USERCODE}/WEEHAAVIE.k3 ${USERCODE}/WEEHAAVIE-listing.txt Binary/WEEHAAVIE
 
-if ${TESTS}/ee9_test_run "$1" "${KDF9ROOT}/$this_test t $mode $encoding" "$signature"
+if ${TESTS}/ee9_test_run "$1" "${KDF9RUNTIME}/$this_test t $mode $encoding" "$signature"
 then
   exit 0
 else

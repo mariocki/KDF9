@@ -19,14 +19,10 @@
 # printoutput : Prints contents of CP0/TP0/TP1/LP0/LP1 to screen.
 #------------------------------------------------------------------------
 
-KDF9ROOT=${KDF9RUNTIME}
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
-
-
 
 trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
 
@@ -50,31 +46,31 @@ then
 
     if [ -s CP0 ]
     then
-        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/CP0 > /tmp/printoutput;
         printline "CP0:"
     fi
 
     if [ -s TP0 ]
     then
-        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
         printline "TP0:"
     fi
 
     if [ -s TP1 ]
     then
-        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP1 > /tmp/printoutput;
         printline "TP1:"
     fi
 
     if [ -s LP0 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP0) -t UTF8 < ${KDF9ROOT}/LP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9RUNTIME}/LP0) -t UTF8 < ${KDF9RUNTIME}/LP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP0:"
     fi
 
     if [ -s LP1 ]
     then
-        iconv -f $(file -b --mime-encoding ${KDF9ROOT}/LP1) -t UTF8 < ${KDF9ROOT}/LP1 | sed -E -f /tmp/format.commands > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9RUNTIME}/LP1) -t UTF8 < ${KDF9RUNTIME}/LP1 | sed -E -f /tmp/format.commands > /tmp/printoutput;
         printline "LP1:"
     fi
 else
@@ -85,31 +81,31 @@ else
 
     if [ -s CP0 ]
     then
-        cat ${KDF9ROOT}/CP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/CP0 > /tmp/printoutput;
         printline "CP0:\n"
     fi
 
     if [ -s TP0 ]
     then
-        cat ${KDF9ROOT}/TP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
         printline "TP0:\n"
     fi
 
     if [ -s TP1 ]
     then
-        cat ${KDF9ROOT}/TP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/TP1 > /tmp/printoutput;
         printline "TP1:\n"
     fi
 
     if [ -s LP0 ]
     then
-        cat ${KDF9ROOT}/LP0 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/LP0 > /tmp/printoutput;
         printline "LP0:\n"
     fi
 
     if [ -s LP1 ]
     then
-        cat ${KDF9ROOT}/LP1 > /tmp/printoutput;
+        cat ${KDF9RUNTIME}/LP1 > /tmp/printoutput;
         printline "LP1:\n"
     fi
 fi

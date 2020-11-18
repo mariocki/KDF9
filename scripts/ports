@@ -19,17 +19,16 @@
 # ports : Convert Kidsgrove Algol to Whetstone format.
 #------------------------------------------------------------------------
 
-KDF9ROOT=${KDF9RUNTIME}
 
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
 
 
 
-SOURCE=${KDF9ROOT}/Kidsgrove
-TARGET=${KDF9ROOT}/Whetstone
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+TARGET=${KDF9RUNTIME}/Whetstone
 
 trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
       0 1 2 3

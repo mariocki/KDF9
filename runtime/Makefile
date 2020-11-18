@@ -79,6 +79,6 @@ check:
 
 .PHONY: check-env
 check-env:
-ifndef KDF9ROOT
-	$(error "KDF9ROOT is undefined")
+ifndef KDF9RUNTIME
+	$(error "KDF9RUNTIME is undefined")
 endif

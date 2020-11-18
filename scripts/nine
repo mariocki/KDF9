@@ -18,21 +18,15 @@
 #------------------------------------------------------------------------
 # nine : Executes a KDF9 binary with input on TR0 or datafile.
 #------------------------------------------------------------------------
-
-KDF9ROOT=${KDF9RUNTIME}
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
 
+>${KDF9RUNTIME}/LP0
+>${KDF9RUNTIME}/LP1
 
-
->${KDF9ROOT}/LP0
->${KDF9ROOT}/LP1
-
-BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
+DATA=${KDF9RUNTIME}/Data
 
 prog=$1
 data=$2
@@ -45,7 +39,7 @@ then
 fi
 
 program=`basename "${prog}"`
-program=${BINARY}/"$program"
+program=Binary/"$program"
 if [ ! -r "$program" ]
 then
     echo "The object code file "$program" is absent or unreadable."
@@ -55,12 +49,12 @@ fi
 
 if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
-    >${KDF9ROOT}/TR0
+    >${KDF9RUNTIME}/TR0
 else
     datatxt=${DATA}/`basename "${data}" ".txt"`.txt
     if [ -r "$datatxt" ]
     then
-        cat "$datatxt" > ${KDF9ROOT}/TR1
+        cat "$datatxt" > ${KDF9RUNTIME}/TR1
     else
         echo "The file "$datatxt" is absent or unreadable."
         exit 3

@@ -18,30 +18,24 @@
 #------------------------------------------------------------------------
 # kalgol : compiles a60 to usercode and then onto a binary
 #------------------------------------------------------------------------
-
-KDF9ROOT=${KDF9RUNTIME}
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
 
-
-
-SOURCE=${KDF9ROOT}/Kidsgrove
-DATA=${KDF9ROOT}/Data
-BINARY=${KDF9ROOT}/Binary
-LOGS=${KDF9ROOT}/logs
-SETTINGS=${KDF9ROOT}/settings
-USERCODE=${KDF9ROOT}/Assembly
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+DATA=${KDF9RUNTIME}/Data
+LOGS=${KDF9RUNTIME}/logs
+SETTINGS=${KDF9RUNTIME}/settings
+USERCODE=${KDF9RUNTIME}/Assembly
 
 trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
       0 1 2 3
       
-trap " >${KDF9ROOT}/MT0 >${KDF9ROOT}/MT1 >${KDF9ROOT}/MT2 >${KDF9ROOT}/MT3 >${KDF9ROOT}/MT4
-       >${KDF9ROOT}/MT5 >${KDF9ROOT}/MT6 >${KDF9ROOT}/MT7
-       >${KDF9ROOT}/TR0 >${KDF9ROOT}/TR1 " 0
+trap " >${KDF9RUNTIME}/MT0 >${KDF9RUNTIME}/MT1 >${KDF9RUNTIME}/MT2 >${KDF9RUNTIME}/MT3 >${KDF9RUNTIME}/MT4
+       >${KDF9RUNTIME}/MT5 >${KDF9RUNTIME}/MT6 >${KDF9RUNTIME}/MT7
+       >${KDF9RUNTIME}/TR0 >${KDF9RUNTIME}/TR1 " 0
 
 if [ x${KIDSMODE}x = xfx ]
 then
@@ -60,7 +54,7 @@ else
    name=$1
 fi
 
-> ${KDF9ROOT}/settings_1.txt
+> ${KDF9RUNTIME}/settings_1.txt
 
 rlt tape_labels_for_KAlgol - wz
 #echo "The compiler work tapes have been labelled."
@@ -73,20 +67,20 @@ nine MKSYS2 systape - wz
 mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
-> ${KDF9ROOT}/TP0
-rm -f ${BINARY}/$name
+> ${KDF9RUNTIME}/TP0
+rm -f Binary/$name
 rm -f ${USERCODE}/$name.k3
 cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
-#chmod 755 ${KDF9ROOT}/TR0
+#chmod 755 ${KDF9RUNTIME}/TR0
 
-cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9ROOT}/settings_1.txt
+cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9RUNTIME}/settings_1.txt
 
 shift
 if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
 then
    shift
 fi
-kidopt with $* ${KIDSOPTS} >> ${KDF9ROOT}/settings_1.txt
+kidopt with $* ${KIDSOPTS} >> ${KDF9RUNTIME}/settings_1.txt
 
 if nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
 then
@@ -101,29 +95,29 @@ then
       exit 999
    fi
 
-   if fgrep FAIL ${KDF9ROOT}/LP0 >/dev/null  2>/dev/null
+   if fgrep FAIL ${KDF9RUNTIME}/LP0 >/dev/null  2>/dev/null
    then
       echo "The compilation was abandoned."; echo
       echo "LP0:"
       echo "==="
-      more "${KDF9ROOT}/LP0"
+      more "${KDF9RUNTIME}/LP0"
       echo "==="
       exit 2
    fi
 
-   if fgrep FAIL ${KDF9ROOT}/TP0 >/dev/null  2>/dev/null
+   if fgrep FAIL ${KDF9RUNTIME}/TP0 >/dev/null  2>/dev/null
    then
       echo "The compilation was abandoned."; echo
       echo "TP0:"
       echo "==="
-      more "${KDF9ROOT}/TP0"
+      more "${KDF9RUNTIME}/TP0"
       echo "==="
       exit 3
    fi
 
 fi
 
-#${KDF9ROOT}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
+#${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
 mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
@@ -134,14 +128,14 @@ fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
-   neat$name ${ST:-24000} ${TL:-99999}
+   neat $name ${ST:-24000} ${TL:-99999}
    ucc $name
-   if [ ! -s ${BINARY}/$name ]
+   if [ ! -s Binary/$name ]
    then
       echo "An object program could not be assembled."; echo; echo
       exit 5
    fi
-   echo "The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name"; echo
+   echo "The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in Binary/$name"; echo
    ;;
 *)
    ;;

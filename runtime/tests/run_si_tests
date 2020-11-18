@@ -44,43 +44,43 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 ++++
 
-cat >${KDF9ROOT}/settings_1.txt <<++++
+cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 15 SI 14 SI
 ++++
 
 >${LOGS}/si_test.log
->${KDF9ROOT}/SI0
->${KDF9ROOT}/SI1
+>${KDF9RUNTIME}/SI0
+>${KDF9RUNTIME}/SI1
 
 echo; echo "TEST PIB/POB from SI0 to TP:; echo TEST PIB/POB from SI0 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9ROOT}/SI0
+cat $data > ${KDF9RUNTIME}/SI0
 ${KDF9BIN}/ucc SI2TP; ${KDF9BIN}/nine SI2TP - t $opt
-cat ${KDF9ROOT}/TP0 >>${LOGS}/si_test.log
+cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
 echo; echo "TEST PIC/POC from SI0 to TP:; echo TEST PIC/POC from SI0 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9ROOT}/SI0
+cat $data > ${KDF9RUNTIME}/SI0
 ${KDF9BIN}/ucc SI2TPC; ${KDF9BIN}/nine SI2TPC - t $opt
-cat ${KDF9ROOT}/TP0 >>${LOGS}/si_test.log
+cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
 echo; echo "TEST PIB/POB from TR to SI0:; echo TEST PIB/POB from TR to SI0:" >>${LOGS}/si_test.log
->${KDF9ROOT}/SI0
+>${KDF9RUNTIME}/SI0
 ${KDF9BIN}/ucc TR2SI; ${KDF9BIN}/nine TR2SI SI0_data t $opt
-cat ${KDF9ROOT}/SI0 >>${LOGS}/si_test.log
+cat ${KDF9RUNTIME}/SI0 >>${LOGS}/si_test.log
 
 echo; echo "TEST PIC/POC from TR to SI0:; echo TEST PIC/POC from TR to SI0:" >>${LOGS}/si_test.log
->${KDF9ROOT}/SI0
+>${KDF9RUNTIME}/SI0
 ${KDF9BIN}/ucc TR2SIC; ${KDF9BIN}/nine TR2SIC SI0_data t $opt
-cat ${KDF9ROOT}/SI0 >>${LOGS}/si_test.log
+cat ${KDF9RUNTIME}/SI0 >>${LOGS}/si_test.log
 
 echo; echo "TEST PIC/POC from TR to SI1:; echo TEST PIC/POC from TR to SI1:" >>${LOGS}/si_test.log
->${KDF9ROOT}/SI1
-${KDF9BIN}/ucc TR2SI1C; nine ${KDF9ROOT}/TR2SI1C SI0_data t $opt
+>${KDF9RUNTIME}/SI1
+${KDF9BIN}/ucc TR2SI1C; nine ${KDF9RUNTIME}/TR2SI1C SI0_data t $opt
 cat SI1 >>${LOGS}/si_test.log
 
 echo; echo "TEST PIC/POC from SI1 to TP:; echo TEST PIC/POC from SI1 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9ROOT}/SI1
+cat $data > ${KDF9RUNTIME}/SI1
 ${KDF9BIN}/ucc SI12TPC; ${KDF9BIN}/nine SI12TPC - t $opt
-cat ${KDF9ROOT}/TP0 >>${LOGS}/si_test.log
+cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
 echo
 diff -diwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_good_test.log >${LOGS}/si_test.diff

@@ -18,25 +18,19 @@
 #------------------------------------------------------------------------
 # plt : Create or update program library magnetic tape files.
 #------------------------------------------------------------------------
-
-KDF9ROOT=${KDF9RUNTIME}
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
-
-
 
 trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
 
-BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
+DATA=${KDF9RUNTIME}/Data
 
-ucc ${KDF9ROOT}/PLT
+ucc ${KDF9RUNTIME}/PLT
 if [ x$1x = xx ]
 then
-   >${KDF9ROOT}/MT1
+   >${KDF9RUNTIME}/MT1
    cat > ${DATA}/mt_test_labels.txt <<++++
 -00-1234WHETLIST|
 00000000        |
@@ -50,15 +44,15 @@ then
 
    rlt mt_test_labels - zw
    nine PLT
-   mtp ${KDF9ROOT}/MT1
+   mtp ${KDF9RUNTIME}/MT1
    exit 0
 fi
-if [ -r ${BINARY}/$1 ]
+if [ -r Binary/$1 ]
 then
-   ${KDF9ROOT}/a2b -p2c < ${BINARY}/$1 > ${DATA}/$1-forPLT.txt
-   cat ${BINARY}/$1 >> ${DATA}/$1-forPLT.txt
+   ${KDF9RUNTIME}/a2b -p2c < Binary/$1 > ${DATA}/$1-forPLT.txt
+   cat Binary/$1 >> ${DATA}/$1-forPLT.txt
    nine PLT ${DATA}/$1-forPLT.txt t - lk
-   mtp ${KDF9ROOT}/MT1
+   mtp ${KDF9RUNTIME}/MT1
 else
    exit 0
 fi

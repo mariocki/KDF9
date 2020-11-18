@@ -18,22 +18,17 @@
 #------------------------------------------------------------------------
 # tsp : Runs the KDF9 director.
 #------------------------------------------------------------------------
-
-KDF9ROOT=${KDF9RUNTIME}
-
-if [ -z $KDF9ROOT ]
+if [ -z $KDF9RUNTIME ]
 then
-    KDF9ROOT="$HOME/.kdf9/"
+    KDF9RUNTIME="$HOME/.kdf9/"
 fi
 
-
-
-trap ">${KDF9ROOT}/FW0"  \
+trap ">${KDF9RUNTIME}/FW0"  \
       0 1 2 3
 
-TSD=${KDF9ROOT}/Binary/KKT40E007UPU
+TSD=${KDF9RUNTIME}/Binary/KKT40E007UPU
 
-cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0
+cat ${KDF9RUNTIME}/Settings/FW0_for_Director > ${KDF9RUNTIME}/FW0
 
 mode=-d$1
 miscellany=-m$2
