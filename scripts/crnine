@@ -35,9 +35,9 @@ fi
 
 program=`basename "$1"`
 program=Binary/"$program"
-if [ ! -r "$program" ]
+if [ ! -r "${KDF9RUNTIME}/$program" ]
 then
-    echo "The object code file "$program" is absent or unreadable."
+    echo "The object code file "${KDF9RUNTIME}/$program" is absent or unreadable."
     echo
     exit 2
 fi

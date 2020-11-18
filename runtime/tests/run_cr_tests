@@ -16,7 +16,13 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
+if [ -z $KDF9RUNTIME ]
+then
+    KDF9RUNTIME="$HOME/.kdf9"
+fi
+
 trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/cr_test.log ${LOGS}/cr_test.diff" 0 1 2 3
+
 opt=${1:-ae}
 
 data=${DATA}/crtest_data.txt
