@@ -16,27 +16,39 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# dumptape : Displays the contents of a tape drive using mtp and
-#            converting the output to UTF8
+# tsp : Runs the KDF9 director.
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
-TMPFILE=/tmp/mtp.dump
+trap ">${KDF9ROOT}/FW0"  \
+      0 1 2 3
 
-trap "rm -f ${TMPFILE}" 0 1 2 3
+TSD=${KDF9ROOT}/Binary/KKT40E007UPU
 
-${KDF9BIN}/mtp $1 $2 $3 $4 > ${TMPFILE}
+cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0
 
-if [ -s ${TMPFILE} ] 
+mode=-d$1
+miscellany=-m$2
+
+if [ "$mode" = "-d" ]
 then
-    iconv -f `file -b --mime-encoding ${TMPFILE}` -t UTF8 < ${TMPFILE}; >/dev/null
+    ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
+elif [ $mode = -df ]
+then
+    time ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
+elif [ $miscellany = -m ]
+then
+    ${KDF9BIN}/ee9 -sb "$mode" -TRkk -TPll  +${TSD};
+else
+    ${KDF9BIN}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
 fi
 
+${KDF9BIN}/printoutput

@@ -16,30 +16,30 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# kids : Compiles and runs a Kidsgrove Algol program
-#        calls kalgol to perform compilation
+# sttl : Set the store size and time limit on Usercode files.
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
-BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
-WHERE=${KDF9ROOT}/Kidsgrove
-SETTINGS=${KDF9ROOT}/settings
+USERCODE=${KDF9ROOT}/Assembly
 
-${KDF9BIN}/kalgol $1
+trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp"   \
+      0 1 2 3
 
-if [ -s ${BINARY}/$1 ]
+cat >/tmp/STTL.commands <<++++
+/^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
+++++
+
+if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 > /tmp/STTL_tmp
 then
-   cat ${KDF9ROOT}/settings_2.txt > ${KDF9ROOT}/settings_1.txt
-   ${KDF9BIN}/nine $1 $2 $3 $4
+   mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
 else
-   exit 1
+   echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
 fi

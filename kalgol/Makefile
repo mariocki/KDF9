@@ -14,11 +14,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-CC=gcc
-YACC=yacc
-CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-d --debug
-RUNTIME=../runtime
+
+INSTALL_PATH?=/usr/local
 
 kalgol: 
 
@@ -31,11 +28,5 @@ deploy:
 	${RUNTIME}/a2b -r2p < KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
 	cp -f systape_kalgol.txt ${RUNTIME}/Data/
 
-.PHONY: distclean
-distclean: clean
-	$(RM) ${RUNTIME}/Binary/MKSYS2
-	$(RM) ${RUNTIME}/Binary/KAB00DH--USU
-	$(RM) ${RUNTIME}/Data/systape_kalgol.txt
-	
-.PHONY: check
-check: 
+.PHONY: install
+install: 

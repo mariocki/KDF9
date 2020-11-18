@@ -16,25 +16,30 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# rtl : Labels tapes
+# kids : Compiles and runs a Kidsgrove Algol program
+#        calls kalgol to perform compilation
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
 BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
+WHERE=${KDF9ROOT}/Kidsgrove
+SETTINGS=${KDF9ROOT}/settings
 
->${KDF9ROOT}/MT0
->${KDF9ROOT}/MT1
->${KDF9ROOT}/MT2
->${KDF9ROOT}/MT3
->${KDF9ROOT}/MT4
->${KDF9ROOT}/MT5
->${KDF9ROOT}/ST0
-${KDF9BIN}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4
+${KDF9BIN}/kalgol $1
+
+if [ -s ${BINARY}/$1 ]
+then
+   cat ${KDF9ROOT}/settings_2.txt > ${KDF9ROOT}/settings_1.txt
+   ${KDF9BIN}/nine $1 $2 $3 $4
+else
+   exit 1
+fi

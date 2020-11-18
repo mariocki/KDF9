@@ -16,24 +16,65 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# stone : Calls whet with special case for "1964" or "thecrows"
+# crnine : Executes a KDF9 binary with input on CR0
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
-trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
+BINARY=${KDF9ROOT}/Binary
+DATA=${KDF9ROOT}/Data
 
-case $1$2 in
-1964|thecrows)
-   ln -sf /dev/tty LP0
-   ${KDF9BIN}/whet WHETSTONE f t;;
-*)
-   ${KDF9BIN}/whet WHETSTONE f;;
-esac
+if [ x"$1"x = xx ]
+then
+    echo "You have not named a binary program to be run."
+    echo
+    exit 1
+fi
+
+program=`basename "$1"`
+program=${BINARY}/"$program"
+if [ ! -r "$program" ]
+then
+    echo "The object code file "$program" is absent or unreadable."
+    echo
+    exit 2
+fi
+
+if [ x"$2"x = xx -o x"$2"x = x-x ]
+then
+    >${KDF9ROOT}/CR0
+else
+    data=${DATA}/`basename "$2" .txt`.txt
+    if [ -r "$data" ]
+    then
+        cat "$data" > ${KDF9ROOT}/CR0
+    else
+        echo "The data file "$data" is absent or unreadable."
+        echo
+        exit 3
+    fi
+fi
+
+mode=-d$3
+miscellany=-m$4
+if   [ "$mode" = -d ]
+then
+    ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+elif [ "$3" = - ]
+then
+   ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+elif [ "$mode" = -df ]
+then
+    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
+else
+    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany"  +"$program";
+fi
+
+${KDF9BIN}/printoutput

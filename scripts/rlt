@@ -16,39 +16,25 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# tsp : Runs the KDF9 director.
+# rtl : Labels tapes
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
-trap ">${KDF9ROOT}/FW0"  \
-      0 1 2 3
+BINARY=${KDF9ROOT}/Binary
 
-TSD=${KDF9ROOT}/Binary/KKT40E007UPU
-
-cat ${KDF9ROOT}/Settings/FW0_for_Director > ${KDF9ROOT}/FW0
-
-mode=-d$1
-miscellany=-m$2
-
-if [ "$mode" = "-d" ]
-then
-    ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
-elif [ $mode = -df ]
-then
-    time ${KDF9BIN}/ee9 -sb -df -TRkk -TPll  +${TSD};
-elif [ $miscellany = -m ]
-then
-    ${KDF9BIN}/ee9 -sb "$mode" -TRkk -TPll  +${TSD};
-else
-    ${KDF9BIN}/ee9 -sb "$mode" "$miscellany"  -TRkk -TPll +${TSD};
-fi
-
-${KDF9BIN}/printoutput
+>${KDF9ROOT}/MT0
+>${KDF9ROOT}/MT1
+>${KDF9ROOT}/MT2
+>${KDF9ROOT}/MT3
+>${KDF9ROOT}/MT4
+>${KDF9ROOT}/MT5
+>${KDF9ROOT}/ST0
+${KDF9BIN}/nine_test ${BINARY}/RLT ${1:-RLT_data} $2 $3 $4

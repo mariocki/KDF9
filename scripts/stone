@@ -16,60 +16,24 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# tsdnine : Executes a KDF9 binary in the director.
+# stone : Calls whet with special case for "1964" or "thecrows"
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
-DATA=${KDF9ROOT}/Data
-BINARY=${KDF9ROOT}/Binary
+trap "rm -f ${KDF9ROOT}/LP0; >${KDF9ROOT}/LP0" 1 2 3
 
-trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
-
-if [ x$1x = xx ]
-then
-   echo; echo "No program name was given."; echo
-   exit 1
-fi
-
-# Set up a set of labelled tapes, including at least one ZERO (scratch) tape.
-cat > ${DATA}/TSD_tape_labels.txt <<++++
--00-1478        |
--66-1909EXAMTIME|
--00-0552EFPBEAAG|
-        MS-DUMP.|
--00-2339+KOUTPUT/0023004|
-0-00-929PRINTEND|
-0-00-777AMPEXTM4|
-|
-++++
-
-${KDF9BIN}/rlt $TSD_tape_labels - z
-
-# Create a call tape from the binary program.
-${KDF9BIN}/a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
-
-# Combine the call tape and the binary in a single paper tape file.
-cat ${BINARY}/$1 >> /tmp/$1.pblk
-mv /tmp/$1.pblk ${KDF9ROOT}/TR1
-
-#ucc PLT
-#nine PLT $1 - z kk
-
-if [ x"$2"x = xx -o x"$2"x = x-x ]
-then
-   : no data file
-else
-   # Add the data file to the end of the paper tape.
-   ${KDF9BIN}/a2b -L2p < ${DATA}/$2.txt >> ${KDF9ROOT}/TR1
-fi
-
-# Run Director.
-${KDF9BIN}/tsd $3 $4 $5 $6
+case $1$2 in
+1964|thecrows)
+   ln -sf /dev/tty LP0
+   ${KDF9BIN}/whet WHETSTONE f t;;
+*)
+   ${KDF9BIN}/whet WHETSTONE f;;
+esac

@@ -18,7 +18,8 @@ CC=gcc
 YACC=yacc
 CFLAGS=-I. -fPIE -fPIC
 YFLAGS=-d --debug
-RUNTIME=../runtime
+
+INSTALL_PATH?=/usr/local
 
 kal3: kal4.c kal4syntax.c kal4tab.c
 	$(CC) -o kal4 kal4.c kal4tab.c kal4syntax.c $(CFLAGS)
@@ -29,13 +30,6 @@ clean:
 	$(RM) kal4syntax.c
 	$(RM) y.tab.h y.output
 
-.PHONY: deploy
-deploy: kal4
-	cp -f kal4 $(RUNTIME)
-
-.PHONY: distclean
-distclean: clean
-	$(RM) ${RUNTIME}/kal4
-
-.PHONY: check
-check: 
+.PHONY: install
+install: kal4
+	install -m 755 kal4 $(INSTALL_PATH)/bin/

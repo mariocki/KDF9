@@ -16,65 +16,41 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# crnine : Executes a KDF9 binary with input on CR0
+# ucc : Compiles a Usercode file to a Binary
 #------------------------------------------------------------------------
 
 KDF9ROOT=${KDF9RUNTIME}
 
 if [ -z $KDF9ROOT ]
 then
-    KDF9ROOT = "~/.kdf9/"
+    KDF9ROOT="~/.kdf9/"
 fi
 
 KDF9BIN=${KDF9ROOT}
 
+trap "rm -f  a.out mt.out"   \
+      0 1 2 3
+
 BINARY=${KDF9ROOT}/Binary
-DATA=${KDF9ROOT}/Data
+USERCODE=${KDF9ROOT}/Assembly
 
-if [ x"$1"x = xx ]
+name=`basename "$1" ".k3"`
+if [ -f "${USERCODE}/$name.k3" ]
 then
-    echo "You have not named a binary program to be run."
-    echo
-    exit 1
-fi
-
-program=`basename "$1"`
-program=${BINARY}/"$program"
-if [ ! -r "$program" ]
-then
-    echo "The object code file "$program" is absent or unreadable."
-    echo
-    exit 2
-fi
-
-if [ x"$2"x = xx -o x"$2"x = x-x ]
-then
-    >${KDF9ROOT}/CR0
+   ${KDF9BIN}/kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
+   if [ -s a.out ]
+   then
+      mv -f a.out ${BINARY}/"$name"
+   else
+      echo "$kal3 detected error\(s\) in $name.k3"
+      echo;
+      more ${USERCODE}/"$name-listing.txt"
+      exit 1;
+   fi
+   rm -f a.out mt.out
+   exit 0
 else
-    data=${DATA}/`basename "$2" .txt`.txt
-    if [ -r "$data" ]
-    then
-        cat "$data" > ${KDF9ROOT}/CR0
-    else
-        echo "The data file "$data" is absent or unreadable."
-        echo
-        exit 3
-    fi
+   echo "`basename "$0"`: there is no file named "$name.k3" in the ${USERCODE} folder!"
+   echo
+   exit 1
 fi
-
-mode=-d$3
-miscellany=-m$4
-if   [ "$mode" = -d ]
-then
-    ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
-elif [ "$3" = - ]
-then
-   ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
-elif [ "$mode" = -df ]
-then
-    time ${KDF9BIN}/ee9 -sp -df "$miscellany" +"$program";
-else
-    ${KDF9BIN}/ee9 -sp "$mode" "$miscellany"  +"$program";
-fi
-
-${KDF9BIN}/printoutput
