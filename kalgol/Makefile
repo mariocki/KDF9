@@ -22,12 +22,6 @@ kalgol:
 .PHONY: clean
 clean:
 
-.PHONY: deploy
-deploy: 
-	${RUNTIME}/a2b -r2p < mksys2.bin >${RUNTIME}/Binary/MKSYS2
-	${RUNTIME}/a2b -r2p < KAB00.bin >${RUNTIME}/Binary/KAB00DH--USU
-	cp -f systape_kalgol.txt ${RUNTIME}/Data/
-
 .PHONY: install
 install: 
 	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(INSTALL_PATH)/lib/kdf9/runtime/Data/

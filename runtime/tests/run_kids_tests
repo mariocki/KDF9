@@ -27,37 +27,37 @@ export KIDSLIST=""
 
 >${LOGS}/kids_test.log
 
-${KDF9BIN}/kids FLUID FLUID_data t prh         >>${LOGS}/kids_test.log
+kids FLUID FLUID_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/FLUID.k3     Binary/FLUID       ${SOURCE}/FLUID-listing.txt
-${KDF9BIN}/kids HAAVIE - t prh                 >>${LOGS}/kids_test.log
+kids HAAVIE - t prh                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/HAAVIE.k3 Binary/HAAVIE         ${SOURCE}/HAAVIE-listing.txt
-${KDF9BIN}/kids HANOI HANOI_data t prh         >>${LOGS}/kids_test.log
+kids HANOI HANOI_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/HANOI.k3     Binary/HANOI       ${SOURCE}/HANOI-listing.txt
-${KDF9BIN}/kids INPUT INPUT_data t prh         >>${LOGS}/kids_test.log
+kids INPUT INPUT_data t prh         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/INPUT.k3     Binary/INPUT       ${SOURCE}/INPUT-listing.txt
-${KDF9BIN}/kids MANORBOYX - t prh              >>${LOGS}/kids_test.log
+kids MANORBOYX - t prh              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/MANORBOYX.k3 Binary/MANORBOYX   ${SOURCE}/MANORBOYX-listing.txt
-${KDF9BIN}/kids MATMULT - t prh                >>${LOGS}/kids_test.log
+kids MATMULT - t prh                >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/MATMULT.k3   Binary/MATMULT     ${SOURCE}/MATMULT-listing.txt
-${KDF9BIN}/kids PALSQR - t prh                 >>${LOGS}/kids_test.log
+kids PALSQR - t prh                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/PALSQR.k3    Binary/PALSQR      ${SOURCE}/PALSQR-listing.txt
-${KDF9BIN}/kids PENTOMINO PENTOMINO_data t prh >>${LOGS}/kids_test.log
+kids PENTOMINO PENTOMINO_data t prh >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/PENTOMINO.k3 Binary/PENTOMINO   ${SOURCE}/PENTOMINO-listing.txt
-${KDF9BIN}/kids QSORT - t prh                  >>${LOGS}/kids_test.log
+kids QSORT - t prh                  >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/QSORT.k3 Binary/QSORT    ${SOURCE}/QSORT-listing.txt
-${KDF9BIN}/kids WHETSTONE - t prh              >>${LOGS}/kids_test.log
+kids WHETSTONE - t prh              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/WHETSTONE.k3 Binary/WHETSTONE   ${SOURCE}/WHETSTONE-listing.txt
-${KDF9BIN}/kids ZELLER ZELLER_data t prh       >>${LOGS}/kids_test.log
+kids ZELLER ZELLER_data t prh       >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
    rm ${SOURCE}/ZELLER.k3    Binary/ZELLER      ${SOURCE}/ZELLER-listing.txt
 

@@ -15,6 +15,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    KDF9RUNTIME="$HOME/.kdf9/"
+fi
 
 mode=ahipr$2
 encoding=
@@ -65,7 +69,7 @@ esac
 
 rm -f ${USERCODE}/WEEHAAVIE.k3 ${USERCODE}/WEEHAAVIE-listing.txt Binary/WEEHAAVIE
 
-if ${TESTS}/ee9_test_run "$1" "${KDF9RUNTIME}/$this_test t $mode $encoding" "$signature"
+if ${TESTS}/ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
 then
   exit 0
 else

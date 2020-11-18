@@ -19,37 +19,37 @@
 opt=${1:-ae}
 
 echo "TEST LIV1 - should fail :  jump to 8191"
-${KDF9BIN}/ucc LIV1; ${KDF9BIN}/nine LIV1 - t $opt
+ucc LIV1; nine LIV1 - t $opt
 echo "TEST LIV1 done."
 
 echo "TEST LIV2 - should fail :  NOL \< virtual address = 32768"
-${KDF9BIN}/ucc LIV2; ${KDF9BIN}/nine LIV2 - t $opt
+ucc LIV2; nine LIV2 - t $opt
 echo "TEST LIV2 done."
 
 echo "TEST LIV3 - should fail : attempt to use unallocated I/O device \#03"
-${KDF9BIN}/ucc LIV3; ${KDF9BIN}/nine LIV3 - t $opt
+ucc LIV3; nine LIV3 - t $opt
 echo "TEST LIV3 done."
 
 echo "TEST LIV4 - should fail : 32K-1 \< virtual address = 32768"
-${KDF9BIN}/ucc LIV4; ${KDF9BIN}/nine LIV4 - t $opt
+ucc LIV4; nine LIV4 - t $opt
 echo "TEST LIV4 done."
 
 echo "TEST LIV5 - should fail : JCqNZS instruction at syllable 5"
-${KDF9BIN}/ucc LIV5; ${KDF9BIN}/nine LIV5 - t $opt
+ucc LIV5; nine LIV5 - t $opt
 echo "TEST LIV5 done."
 
 echo "TEST LIV6 - should fail : invalid SET-type opcode"
-${KDF9BIN}/ucc LIV6; ${KDF9BIN}/nine LIV6 - t $opt
+ucc LIV6; nine LIV6 - t $opt
 echo "TEST LIV6 done."
 
 echo "TEST LIV7 - should fail : privileged instruction K7"
-${KDF9BIN}/ucc LIV7; ${KDF9BIN}/nine LIV7 - t $opt
+ucc LIV7; nine LIV7 - t $opt
 echo "TEST LIV7 done."
 
 echo "TEST RESET6 - should fail : jump to syllable 6"
-${KDF9BIN}/ucc RESET6; ${KDF9BIN}/nine RESET6 - t $opt
+ucc RESET6; nine RESET6 - t $opt
 echo "TEST RESET6 done."
 
 echo "TEST RESET7 - should fail : jump to syllable 7"
-${KDF9BIN}/ucc RESET7; ${KDF9BIN}/nine RESET7 - t $opt
+ucc RESET7; nine RESET7 - t $opt
 echo "TEST RESET7 done."

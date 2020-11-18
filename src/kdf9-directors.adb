@@ -37,7 +37,6 @@ with state_display;
 with tracing;
 
 with value_of;
-with get_runtime_paths;
 
 use  dumping;
 use  exceptions;

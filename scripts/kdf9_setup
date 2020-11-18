@@ -18,13 +18,12 @@
 #------------------------------------------------------------------------
 # kdf9_setup : sets up the kdf environment in a users $HOME/.kdf9/
 #------------------------------------------------------------------------
-
-
 if [ -z $KDF9RUNTIME ]
 then
     KDF9RUNTIME="$HOME/.kdf9/"
 fi
 
+echo "Setting up KDF9 runtime in ${KDF9RUNTIME}"
 # Copy everything down
 install -d ${KDF9RUNTIME}
 cp -aR /usr/local/lib/kdf9/runtime/* ${KDF9RUNTIME}/
@@ -62,9 +61,12 @@ cd ${KDF9RUNTIME}
 > settings_2.txt
 chown -R $USER .;
 
+echo "Configuring runtime.";
 for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; then cat $$a | tr -d '\r' > $$a.tmp; mv -f $$a.tmp $$a; chmod a+x $$a; fi; done
 
-a2b -r2p < Data/mksys2.bin > Binary/MKSYS2
-a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU
+a2b -r2p < Data/mksys2.bin > Binary/MKSYS2;
+a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU;
 
-echo -n "Compiling: "; for f in Assembly/*.k3; do p=`basename $f .k3`; echo -n $p " "; ucc $p; done; echo
+echo "Compiling Binaries.";
+for f in Assembly/*.k3; do p=`basename $f .k3`; ucc $p; done; 
+echo "Done.";

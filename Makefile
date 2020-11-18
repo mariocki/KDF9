@@ -38,6 +38,10 @@ GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W 
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
 
+.PHONY: all
+all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
+
+.phony: ee9
 ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
 	gnatmake -c ee9 -i ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
 	gnatbind ${SRC}/ee9.ali ${SRC:%=-aO%/} -shared
@@ -91,12 +95,8 @@ clean:
 	$(RM) ${SRC:%=%/*.o}
 	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
 
-.PHONY: all
-all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
-
 .PHONY: install
 install: all
-	for a in scripts/*; do sed -i 's/\$${KDF9BIN}\///' $$a ; done
 	install -d $(INSTALL_PATH)/lib/kdf9/runtime
 	cp -aR runtime $(INSTALL_PATH)/lib/kdf9/
 	install -d $(INSTALL_PATH)/bin/

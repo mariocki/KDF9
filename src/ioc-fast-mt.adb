@@ -21,6 +21,7 @@ with Ada.IO_Exceptions;
 --
 with HCI;
 with tracing;
+with get_runtime_paths;
 
 use  HCI;
 use  tracing;
@@ -31,7 +32,7 @@ package body IOC.fast.MT is
 
    procedure open_RO (the_tape : in out MT.file; name : in String) is
    begin
-      MT_slice_IO.Open(the_tape.reel, In_File, name);
+      MT_slice_IO.Open(the_tape.reel, In_File, get_runtime_paths & name);
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
@@ -40,7 +41,7 @@ package body IOC.fast.MT is
 
    procedure open_RW (the_tape : in out MT.file; name : in String) is
    begin
-      MT_slice_IO.Open(the_tape.reel, Inout_File, name);
+      MT_slice_IO.Open(the_tape.reel, Inout_File, get_runtime_paths & name);
       the_tape.has_a_WP_ring := True;
    exception
       when Ada.IO_Exceptions.Use_Error =>
