@@ -52,9 +52,9 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Builds ee9/kal3/kal4/mkchan in-place.
 
 - `make install`
-    Builds the executables and installs them along with the scripts into `INSTALL_PATH` which is `/usr/local` by default however you can change this by passing a new location as shown below:
+    Builds the executables and installs them along with the scripts into `/usr/local` by default however you can change this by passing a new location as shown below:
 
-    `make -n install INSTALL_PATH=/opt/kdf9`
+    `make -n prefix=/opt/kdf9 install`
 
 - `make distclean`
     Removes all intermediate and transient files from compilation but leaves the runtime intact.

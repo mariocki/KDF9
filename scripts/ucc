@@ -30,7 +30,9 @@ if [[ "$#" -gt 0 ]]; then
         -h|--help) 
             echo "UCC - Compiles a Usercode file to a Binary.";
             echo;
-            echo "Usage: ucc <filename>"
+            echo "Usage: ucc <filename> [options]"
+            echo "Options:";
+            echo "   -q                quiet mode."
             echo;
             echo "Note: <filename> must exist in ${USERCODE}"
             echo;
@@ -47,7 +49,10 @@ then
    if [ -s /tmp/a.out ]
    then
       mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
-      echo "Binary file "$name" placed in ${KDF9RUNTIME}/Binary/"
+      if [ x"$2"x != "x-qx" ]
+      then
+         echo "Binary file "$name" placed in ${KDF9RUNTIME}/Binary/"
+      fi      
    else
       echo "$kal3 detected error\(s\) in $name.k3"
       echo;

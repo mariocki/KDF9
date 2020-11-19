@@ -30,7 +30,7 @@ KAL4=$(CURDIR)/kal4
 MKCHAN=$(CURDIR)/mkchan
 KALGOL=$(CURDIR)/kalgol
 
-export INSTALL_PATH?=/usr/local
+export prefix?=/usr/local
 
 export CC=gcc
 export CFLAGS=-funwind-tables -march=native -O3 -funroll-loops -fno-stack-check
@@ -97,13 +97,14 @@ clean:
 
 .PHONY: install
 install: all
-	$(RM) -r $(INSTALL_PATH)/lib/kdf9/
-	cp -aR runtime $(INSTALL_PATH)/lib/kdf9/
-	install -d $(INSTALL_PATH)/bin/
-	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(INSTALL_PATH)/bin/
-	install -m 755 scripts/* $(INSTALL_PATH)/bin/
+	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
+	install -d $(DESTDIR)$(prefix)/bin/
+	install -d $(DESTDIR)$(prefix)/share/kdf9/
+	cp -aR runtime $(DESTDIR)$(prefix)/share/kdf9/
+	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(DESTDIR)$(prefix)/bin/
+	install -m 755 scripts/* $(DESTDIR)$(prefix)/bin/
+	sed "s|%prefix%|$(prefix)|g" < scripts/kdf9_setup > $(DESTDIR)$(prefix)/bin/kdf9_setup
 	$(MAKE) -e -C ${KAL3} install
 	$(MAKE) -e -C ${KAL4} install
 	$(MAKE) -e -C ${MKCHAN}	install
-	install -d $(INSTALL_PATH)/lib/kdf9/runtime/Data
 	$(MAKE) -e -C ${KALGOL}	install

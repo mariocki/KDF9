@@ -27,7 +27,8 @@ fi
 echo "Setting up KDF9 runtime in ${KDF9RUNTIME}"
 # Copy everything down
 install -d ${KDF9RUNTIME}
-cp -aR /usr/local/lib/kdf9/runtime/* ${KDF9RUNTIME}/
+install -d ${KDF9RUNTIME}/logs
+cp -aR %prefix%/share/kdf9/runtime/* ${KDF9RUNTIME}/
 
 cd ${KDF9RUNTIME}
 
@@ -63,10 +64,10 @@ cd ${KDF9RUNTIME}
 chown -R $USER .;
 
 echo "Configuring runtime.";
-for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again") ; chmod u+x $$a; fi; done
+for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again"); then chmod u+x $$a; fi; done
 a2b -r2p < Data/mksys2.bin > Binary/MKSYS2;
 a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU;
 
 echo "Compiling Binaries.";
-for f in Assembly/*.k3; do p=`basename $f .k3`; ucc $p; done; 
+for f in Assembly/*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
 echo "Done.";

@@ -19,7 +19,7 @@ YACC=yacc
 CFLAGS=-I. -fPIE -fPIC
 YFLAGS=-d --debug
 
-INSTALL_PATH?=/usr/local
+prefix?=/usr/local
 
 kal3: kal4.c kal4syntax.c kal4tab.c
 	$(CC) -o kal4 kal4.c kal4tab.c kal4syntax.c $(CFLAGS)
@@ -32,4 +32,4 @@ clean:
 
 .PHONY: install
 install: kal4
-	install -m 755 kal4 $(INSTALL_PATH)/bin/
+	install -m 755 kal4 $(DESTDIR)$(prefix)/bin/

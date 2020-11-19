@@ -15,7 +15,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-INSTALL_PATH?=/usr/local
+prefix?=/usr/local
 
 kalgol: 
 
@@ -24,5 +24,6 @@ clean:
 
 .PHONY: install
 install: 
-	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(INSTALL_PATH)/lib/kdf9/runtime/Data/
+	install -d $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
+	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
 	

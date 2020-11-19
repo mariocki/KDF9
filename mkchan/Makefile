@@ -17,7 +17,7 @@
 CC=gcc
 CFLAGS=-I. -fPIE -fPIC
 
-INSTALL_PATH?=/usr/local
+prefix?=/usr/local
 
 mkchan: 
 	$(CC) -o mkchan mkchan.c $(CFLAGS)
@@ -28,4 +28,4 @@ clean:
 
 .PHONY: install
 install: mkchan
-	install -m 755 mkchan $(INSTALL_PATH)/bin/
+	install -m 755 mkchan $(DESTDIR)$(prefix)/bin/
