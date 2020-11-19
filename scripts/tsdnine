@@ -46,13 +46,13 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 |
 ++++
 
-rlt $TSD_tape_labels - z
+rlt TSD_tape_labels.txt - z
 
 # Create a call tape from the binary program.
-a2b -p2c P < Binary/$1  > /tmp/$1.pblk
+a2b -p2c P < ${KDF9RUNTIME}/Binary/$1  > /tmp/$1.pblk
 
 # Combine the call tape and the binary in a single paper tape file.
-cat Binary/$1 >> /tmp/$1.pblk
+cat ${KDF9RUNTIME}/Binary/$1 >> /tmp/$1.pblk
 mv /tmp/$1.pblk ${KDF9RUNTIME}/TR1
 
 #ucc PLT

@@ -44,6 +44,7 @@ then
    if [ -s /tmp/a.out ]
    then
       mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
+      echo "Binary file "$name" placed in ${KDF9RUNTIME}/Binary/"
    else
       echo "$kal3 detected error\(s\) in $name.k3"
       echo;

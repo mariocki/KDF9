@@ -97,7 +97,8 @@ clean:
 
 .PHONY: install
 install: all
-	install -d $(INSTALL_PATH)/lib/kdf9/runtime
+	$(RM) -r $(INSTALL_PATH)/lib/kdf9/
+	#install -d $(INSTALL_PATH)/lib/kdf9/runtime
 	cp -aR runtime $(INSTALL_PATH)/lib/kdf9/
 	install -d $(INSTALL_PATH)/bin/
 	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(INSTALL_PATH)/bin/
