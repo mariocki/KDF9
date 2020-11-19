@@ -11,10 +11,11 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## What different between this repo and the original
 - Source code changes 
-    - `ee9` now honors the `KDF9RUNTIME` environment variable during disk IO (log files, devices etc).
-    - don't assume everyone uses black on white terminals. :unamused:
+    - `ee9` honors the `$KDF9RUNTIME` environment variable for all host IO (log files, devices etc).
+    - don't assume everyone uses (or wants to use) black on white terminals. :unamused:
 - Converted to using Makefiles to build everything (see below).
-- Removed special build case for Cygwin as Windows10 + WSL2 is a better alternative in this use-case.
+- Amended all the scripts to honor `$KDF9RUNTIME` when reading assembly, source-code, data and binary files.
+- Removed special build case for Cygwin.
 - I don't include pre-build binaries.
 
 ## Folder structure
@@ -41,32 +42,30 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - The License, it's still GPLv3. :thumbsup:
 
 ## How to build `ee9` (the KDF9 emulator)
-- `make ee9`
-    Build ee9 in-place in the src folder.
+- `make ee9|mtp|to_9_from_1934`
+    Build `ee9`|`mtp`|`to_9_from_1934` in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
 
-- `make kal3|kal4|mkchan|mtp|to_9_from_1934`
+- `make kal3|kal4|mkchan`
     Build the requested executable in-place in its respective folder.
 
 - `make all`
-    Builds `ee9`, `kal3`, `kal4`, `mkchan`, `to_9_from_1934` and `mtp`.
+    Builds all of `ee9`, `kal3`, `kal4`, `mkchan`, `to_9_from_1934` and `mtp`.
 
 - `make install`
-    Installs the `ee9` system into `/usr/local` by default, however you can change this by specifying a new `prefix` as shown below:
+    Installs all executables, scripts and the runtime system. The default installation location is into `/usr/local`, however you can change this by specifying a new `prefix` as shown below:
 
     `make -n prefix=/opt/kdf9 install`
 
 - `make distclean`
-    Removes all intermediate and transient files from compilation but leaves the runtime intact.
-    Also deletes all files created during the execution of the runtime to leave the folder structure 
-    exactly as was when first extracted/downloaded.
-    
-## Required dependencies.
-### Ubuntu and other Debian derived distributions.
+    Removes all intermediate and transient files from compilation.
+
+### Required dependencies.
+#### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`.
-### MacOs
+#### MacOs
 ?????
-### Windows
+#### Windows
 Only Windows10 + WSL2 is supported.
 
 Ensure you are running Windows 10 version 2004 or above [See here for details](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004).
@@ -76,13 +75,16 @@ Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 Choose a distribution of your choice and follow the instructions for Linux given above.
 
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
-## Building from source
+### Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
+### Installation
 Simply `cd` to the root folder and type `make install` as root.
-Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory but this can by changed by specifyinga location in the `$KDF9RUNTIME` environment variable.
 
-*let me know if I have missed aything*
+### Running ee9
+Once completed execute the `kdf9_setup` command to create the ee9 runtime. By default this will be placed in a folder named `.kdf9/` in your `$HOME` directory but this can by changed by specifying a location in the `$KDF9RUNTIME` environment variable.
+
+*let me know if I have missed anything*
 ### ToDo
 - [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
 - [ ] Create a Docker container?
