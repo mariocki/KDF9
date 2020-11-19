@@ -26,7 +26,7 @@ then
 fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
-SOURCE=${KDF9RUNTIME}/Data
+DATA=${KDF9RUNTIME}/Data
 
 if [[ "$#" -gt 0 ]]; then
     case $1 in
