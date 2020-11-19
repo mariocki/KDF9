@@ -146,4 +146,4 @@ $1|
 |
 ++++
 
-cat ${SOURCE}/$1.a60 | tr -d '/r' | sed -E -f /tmp/ports.commands > ${TARGET}/$1.a60
+cat ${SOURCE}/$1.a60 | sed -E -f /tmp/ports.commands > ${TARGET}/$1.a60

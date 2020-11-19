@@ -26,8 +26,7 @@ fi
 
 TARGET=${KDF9RUNTIME}/Kidsgrove
 
-trap "rm -f /tmp/strop0.commands  /tmp/strop0.tmp"   \
-      0 1 2 3
+trap "rm -f /tmp/strop0.commands" 0 1 2 3
 
 if [ ! -r $1.a60 ]
 then 
@@ -36,20 +35,14 @@ then
 fi
 
 cat >/tmp/strop0.commands <<++++
-1i\\
-$1|
-1,\$s/!=/±/g
-1,\$s/%/÷/g
-1,\$s/\*/×/g
-1,\$s/~/º/g
-1,\$s/\\\\/º/g
-1,\$s/\{/_[/g
-1,\$s/}/_]/g
-1,\$s/>=/_>/g
-1,\$s/<=/_</g
-1,\$s/^\*\*\*\*$/|/
-\$a\\
-|
+s/\!=/±/g
+s/%/÷/g
+s/\*/×/g
+s/\~/º/g
+s/\\\\/º/g
+s/\>=/_\>/g
+s/\<=/_\</g
+s/\^\\*\\*\\*\\*\$/\|/
 ++++
 
-cat $1.a60 | tr -d '/r' | sed -E -f /tmp/strop0.commands > ${TARGET}/$1.a60
+cat $1.a60 | sed -f /tmp/strop0.commands > ${TARGET}/$1.a60
