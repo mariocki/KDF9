@@ -61,21 +61,11 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Also deletes all files created during the execution of the runtime to leave the folder structure 
     exactly as was when first extracted/downloaded.
     
-## Building from source
-Building from source should be the same on any modern Linux or MacOS installation.
-
-### Required dependencies.
-#### Ubuntu and other Debian derived distributions.
+## Required dependencies.
+### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`.
-
-#### MacOs
+### MacOs
 ?????
-
-Simply `cd` to the root folder and type `make install` as root.
-Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory but this can by changed by specifyinga location in the `$KDF9RUNTIME` environment variable.
-
-*let me know if I have missed aything*
-
 ### Windows
 Only Windows10 + WSL2 is supported.
 
@@ -86,7 +76,13 @@ Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 Choose a distribution of your choice and follow the instructions for Linux given above.
 
 I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
+## Building from source
+Building from source should be the same on any modern Linux or MacOS installation.
 
+Simply `cd` to the root folder and type `make install` as root.
+Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory but this can by changed by specifyinga location in the `$KDF9RUNTIME` environment variable.
+
+*let me know if I have missed aything*
 ### ToDo
 - [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
 - [ ] Create a Docker container?
