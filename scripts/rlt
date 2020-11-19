@@ -16,12 +16,25 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# rtl : Labels tapes
+# rlt : Labels tapes
 #------------------------------------------------------------------------
 
 if [ -z $KDF9RUNTIME ]
 then
     KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "RLT - Labels tapes.";
+            echo;
+            echo "Usage: rlt <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
+            echo;
+            echo "Note: the specified <datafile> must exist in ${KDF9RUNTIME}/Data"
+            echo;
+            exit 0;;
+    esac
 fi
 
 >${KDF9RUNTIME}/MT0
@@ -31,4 +44,4 @@ fi
 >${KDF9RUNTIME}/MT4
 >${KDF9RUNTIME}/MT5
 >${KDF9RUNTIME}/ST0
-nine_test RLT ${1:-RLT_data} $2 $3 $4
+nine_test RLT ${1:-RLT_data} $2 $3 $4 $5

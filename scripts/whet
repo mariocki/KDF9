@@ -23,22 +23,23 @@ then
     KDF9RUNTIME="$HOME/.kdf9";
 fi
 
+SOURCE=${KDF9RUNTIME}/Whetstone
+FW0FILES=${KDF9RUNTIME}/FW0Files
+
 if [[ "$#" -gt 0 ]]; then
     case $1 in
         -h|--help) 
-            echo "whet:";
-            echo "(1) : Name of file in ${KDF9RUNTIME}/Whetstone/ to execute.";
-            echo "(2) : Name of data file in ${KDF9RUNTIME}/Data/ to use or '-'.";
-            echo "(3) : ee9 mode switch [f|p|t|x|-].";
-            echo "(4) : ee9 miscellany switch or '-'.";
+            echo "WHET - Executes a Whetstone Algol program.";
+            echo;
+            echo "Usage: whet <filename> <[f|p|t|x|-]> <miscellany switch or '-'>"
+            echo;
+            echo "Note: the specified <filename> must exist in ${SOURCE}"
+            echo;
             exit 0;;
     esac
 fi
 
 trap ">${KDF9RUNTIME}/FW0" 0 1 2 3
-
-SOURCE=${KDF9RUNTIME}/Whetstone
-FW0FILES=${KDF9RUNTIME}/FW0Files
 
 if [ x"$1"x = xx ]
 then

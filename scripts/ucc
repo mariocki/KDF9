@@ -23,19 +23,22 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+USERCODE=${KDF9RUNTIME}/Assembly
+
 if [[ "$#" -gt 0 ]]; then
     case $1 in
         -h|--help) 
-            echo "ucc:";
-            echo "(1) : Name of file in ${KDF9RUNTIME}/Assembly/ to compile.";
+            echo "UCC - Compiles a Usercode file to a Binary.";
+            echo;
+            echo "Usage: ucc <filename>"
+            echo;
+            echo "Note: the specified <filename> must exist in ${USERCODE}"
+            echo;
             exit 0;;
     esac
 fi
 
-trap "rm -f  /tmp/a.out /tmp/mt.out"   \
-      0 1 2 3
-
-USERCODE=${KDF9RUNTIME}/Assembly
+trap "rm -f  /tmp/a.out /tmp/mt.out" 0 1 2 3
 
 name=`basename "$1" ".k3"`
 if [ -f "${USERCODE}/$name.k3" ]

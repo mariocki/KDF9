@@ -27,6 +27,19 @@ fi
 SOURCE=${KDF9RUNTIME}/Kidsgrove
 TARGET=${KDF9RUNTIME}/Whetstone
 
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "PORTS - Convert Kidsgrove Algol to Whetstone format.";
+            echo;
+            echo "Usage: ports <filename>"
+            echo;
+            echo "Note: the specified <filename> must exist in ${SOURCE}"
+            echo;
+            exit 0;;
+    esac
+fi
+
 trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
       0 1 2 3
 

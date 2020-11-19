@@ -25,28 +25,29 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+SOURCE=${KDF9RUNTIME}/Data
+
 if [[ "$#" -gt 0 ]]; then
     case $1 in
         -h|--help) 
-            echo "kids:";
-            echo "(1) : Name of file in ${KDF9RUNTIME}/Kidsgrove/ to compile and execute.";
-            echo "(2) : Name of data file in ${KDF9RUNTIME}/Data/ to use or '-'.";
-            echo "(3) : ee9 mode switch [f|p|t|x|-].";
-            echo "(4) : ee9 miscellany switch or '-'.";
+            echo "KIDS - Compiles and runs a Kidsgrove Algol program.";
+            echo;
+            echo "Usage: kids <filename> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch> <[b|p|t|-]>"
+            echo;
+            echo "Note: the specified <filename> must exist in ${SOURCE}"
+            echo "      The specified <datafile> must exist in ${DATA}"
+            echo;
             exit 0;;
     esac
 fi
-
-DATA=${KDF9RUNTIME}/Data
-WHERE=${KDF9RUNTIME}/Kidsgrove
-SETTINGS=${KDF9RUNTIME}/settings
 
 kalgol $1
 
 if [ -s ${KDF9RUNTIME}/Binary/$1 ]
 then
    cat ${KDF9RUNTIME}/settings_2.txt > ${KDF9RUNTIME}/settings_1.txt
-   nine $1 $2 $3 $4
+   nine $1 $2 $3 $4 $5 $6 $7
 else
    exit 1
 fi

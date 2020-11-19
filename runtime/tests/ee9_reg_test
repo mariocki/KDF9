@@ -133,9 +133,6 @@ else
     echo "The test has shown incorrect results, held in \"${LOGS}/ee9_test_case.log\"."
     echo "The following lists the differences from the qualification test log."
     echo
-    echo "Press RETURN to see the discrepancies:"
-    read "reply"
-    echo
     more ${LOGS}/ee9_test_case.diff
 fi
 

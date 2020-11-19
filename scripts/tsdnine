@@ -26,6 +26,20 @@ fi
 
 DATA=${KDF9RUNTIME}/Data
 
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "TSDNINE - Executes a KDF9 binary in director with data from <datafile>.";
+            echo;
+            echo "Usage: crnine <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
+            echo;
+            echo "Note: The specified <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      The specified <datafile> must exist in ${DATA}"
+            echo;
+            exit 0;;
+    esac
+fi
+
 trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 
 if [ x$1x = xx ]

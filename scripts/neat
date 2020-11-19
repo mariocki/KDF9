@@ -26,6 +26,19 @@ fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
 
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "NEAT - ?.";
+            echo;
+            echo "Usage: neat <filename> <sizelimit> <timelimit>"
+            echo;
+            echo "Note: the specified <filename> must exist in ${USERCODE}"
+            echo;
+            exit 0;;
+    esac
+fi
+
 trap "rm -f /tmp/neat.commands /tmp/neat_tmp_[0123456789]" 0 1 2 3
 
 if [ ! -r ${USERCODE}/$1.k3 ]

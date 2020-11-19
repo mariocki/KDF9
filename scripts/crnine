@@ -16,7 +16,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# crnine : Executes a KDF9 binary with input on CR0
+# crnine : Executes a KDF9 binary with data on CR0
 #------------------------------------------------------------------------
 
 if [ -z $KDF9RUNTIME ]
@@ -27,11 +27,13 @@ fi
 if [[ "$#" -gt 0 ]]; then
     case $1 in
         -h|--help) 
-            echo "crnine:";
-            echo "(1) : Name of file in ${KDF9RUNTIME}/Binary/ to execute.";
-            echo "(2) : Name of data file in ${KDF9RUNTIME}/Data/ to use or '-'.";
-            echo "(3) : ee9 mode switch [f|p|t|x|-].";
-            echo "(4) : ee9 miscellany switch or '-'.";
+            echo "CRNINE - Executes a KDF9 binary with data on CR0.";
+            echo;
+            echo "Usage: crnine <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'>"
+            echo;
+            echo "Note: The specified <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      The specified <datafile> must exist in ${KDF9RUNTIME}/Data/"
+            echo;
             exit 0;;
     esac
 fi

@@ -24,10 +24,21 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+FW0FILES=${KDF9RUNTIME}/FW0Files
+
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "TSD - Runs the director.";
+            echo;
+            echo "Usage: tsd <[f|p|t|x|-]> <miscellany switch or '-'>"
+            echo;
+            exit 0;;
+    esac
+fi
+
 trap ">${KDF9RUNTIME}/FW0"  \
       0 1 2 3
-
-FW0FILES=${KDF9RUNTIME}/FW0Files
 
 cat ${FW0FILES}/FW0_for_Director > ${KDF9RUNTIME}/FW0
 

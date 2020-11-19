@@ -26,8 +26,20 @@ fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
 
-trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp"   \
-      0 1 2 3
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "STTL - Set the store size and time limit on Usercode files.";
+            echo;
+            echo "Usage: sttl <filefile>"
+            echo;
+            echo "Note: the specified <datafile> must exist in ${USERCODE}"
+            echo;
+            exit 0;;
+    esac
+fi
+
+trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp" 0 1 2 3
 
 cat >/tmp/STTL.commands <<++++
 /^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
