@@ -31,9 +31,9 @@ if [[ "$#" -gt 0 ]]; then
         -h|--help) 
             echo "PLT - Create or update program library magnetic tape files.";
             echo;
-            echo "Usage: plt <filename>"
+            echo "Usage: plt <binaryname>"
             echo;
-            echo "Note: the specified <filename> must exist in ${KDF9RUNTIME}/Binary"
+            echo "Note: <binaryname> must exist in ${KDF9RUNTIME}/Binary"
             echo;
             exit 0;;
     esac

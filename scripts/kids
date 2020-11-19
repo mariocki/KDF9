@@ -35,8 +35,8 @@ if [[ "$#" -gt 0 ]]; then
             echo;
             echo "Usage: kids <filename> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch> <[b|p|t|-]>"
             echo;
-            echo "Note: the specified <filename> must exist in ${SOURCE}"
-            echo "      The specified <datafile> must exist in ${DATA}"
+            echo "Note: <filename> must exist in ${SOURCE}"
+            echo "      <datafile> must exist in ${DATA}"
             echo;
             exit 0;;
     esac

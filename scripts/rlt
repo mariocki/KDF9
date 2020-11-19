@@ -31,7 +31,7 @@ if [[ "$#" -gt 0 ]]; then
             echo;
             echo "Usage: rlt <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
             echo;
-            echo "Note: the specified <datafile> must exist in ${KDF9RUNTIME}/Data"
+            echo "Note: <datafile> must exist in ${KDF9RUNTIME}/Data"
             echo;
             exit 0;;
     esac

@@ -37,7 +37,7 @@ if [[ "$#" -gt 0 ]]; then
             echo;
             echo "Usage: kalgol <filename>"
             echo;
-            echo "Note: the specified <filename> must exist in ${SOURCE}"
+            echo "Note: <filename> must exist in ${SOURCE}"
             echo;
             exit 0;;
     esac

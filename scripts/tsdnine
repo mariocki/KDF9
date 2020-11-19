@@ -33,8 +33,8 @@ if [[ "$#" -gt 0 ]]; then
             echo;
             echo "Usage: crnine <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
             echo;
-            echo "Note: The specified <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
-            echo "      The specified <datafile> must exist in ${DATA}"
+            echo "Note: <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      <datafile> must exist in ${DATA}"
             echo;
             exit 0;;
     esac

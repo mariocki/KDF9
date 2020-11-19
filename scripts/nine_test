@@ -31,8 +31,8 @@ if [[ "$#" -gt 0 ]]; then
             echo;
             echo "Usage: nine_test <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
             echo;
-            echo "Note: The specified <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
-            echo "      The specified <datafile> must exist in ${KDF9RUNTIME}/Data/"
+            echo "Note: <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      <datafile> must exist in ${KDF9RUNTIME}/Data/"
             echo;
             exit 0;;
     esac
