@@ -45,14 +45,14 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     Build ee9 in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
 
-- `make kal3|kal4|mkchan`
+- `make kal3|kal4|mkchan|mtp|to_9_from_1934`
     Build the requested executable in-place in its respective folder.
 
 - `make all`
-    Builds ee9/kal3/kal4/mkchan in-place.
+    Builds `ee9`, `kal3`, `kal4`, `mkchan`, `to_9_from_1934` and `mtp`.
 
 - `make install`
-    Builds the executables and installs them along with the scripts into `/usr/local` by default however you can change this by passing a new location as shown below:
+    Installs the `ee9` system into `/usr/local` by default, however you can change this by specifying a new `prefix` as shown below:
 
     `make -n prefix=/opt/kdf9 install`
 
@@ -64,11 +64,15 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 ## Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
-Simply `cd` to the root folder and type `make install` as root.
-Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory.
-
-### Ubuntu and other Debian derived distributions.
+### Required dependencies.
+#### Ubuntu and other Debian derived distributions.
 Packages required: `make` `build-essentials` `bison` `gnat`.
+
+#### MacOs
+?????
+
+Simply `cd` to the root folder and type `make install` as root.
+Once completed execute the `kdf9_setup` command to create a runtime named `.kdf9/` in your `$HOME` directory but this can by changed by specifyinga location in the `$KDF9RUNTIME` environment variable.
 
 *let me know if I have missed aything*
 

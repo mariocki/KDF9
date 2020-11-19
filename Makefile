@@ -39,7 +39,7 @@ GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnat
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
 
 .PHONY: all
-all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
+all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp to_9_from_1934
 
 .phony: ee9
 ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
@@ -54,20 +54,26 @@ builddefs:
 .PHONY: a2b
 a2b: 
 	gnatmake -j4 -c -i ${SRC}/a2b.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/a2b ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/a2b -o ${SRC}/a2b
+	gnatbind ${SRC}/a2b.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/a2b.ali -o ${SRC}/a2b
 
 .PHONY: kidopt
 kidopt:
 	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/kidopt ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/kidopt -o ${SRC}/kidopt	
+	gnatbind ${SRC}/kidopt.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/kidopt.ali -o ${SRC}/kidopt	
 
 .PHONY: mtp
 mtp:
 	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
-	gnatbind ${SRC}/mtp ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/mtp -o ${SRC}/mtp
+	gnatbind ${SRC}/mtp.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
+
+.PHONY: to_9_from_1934
+to_9_from_1934:
+	gnatmake -j4 -c -i ${SRC}/to_9_from_1934.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatbind ${SRC}/to_9_from_1934.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/to_9_from_1934.ali -o ${SRC}/to_9_from_1934
 
 .PHONY: kal3
 kal3:
@@ -93,7 +99,7 @@ clean:
 	$(MAKE) -e -C ${MKCHAN}	clean
 	$(RM) ${SRC:%=%/*.ali}
 	$(RM) ${SRC:%=%/*.o}
-	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
+	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc 
 
 .PHONY: install
 install: all
@@ -101,7 +107,7 @@ install: all
 	install -d $(DESTDIR)$(prefix)/bin/
 	install -d $(DESTDIR)$(prefix)/share/kdf9/
 	cp -aR runtime $(DESTDIR)$(prefix)/share/kdf9/
-	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(DESTDIR)$(prefix)/bin/
+	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 $(DESTDIR)$(prefix)/bin/
 	install -m 755 scripts/* $(DESTDIR)$(prefix)/bin/
 	sed "s|%prefix%|$(prefix)|g" < scripts/kdf9_setup > $(DESTDIR)$(prefix)/bin/kdf9_setup
 	$(MAKE) -e -C ${KAL3} install
