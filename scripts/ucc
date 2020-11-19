@@ -23,6 +23,15 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [[ "$#" -gt 0 ]]; then
+    case $1 in
+        -h|--help) 
+            echo "ucc:";
+            echo "(1) : Name of file in ${KDF9RUNTIME}/Assembly/ to compile.";
+            exit 0;;
+    esac
+fi
+
 trap "rm -f  /tmp/a.out /tmp/mt.out"   \
       0 1 2 3
 
