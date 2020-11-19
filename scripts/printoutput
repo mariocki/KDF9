@@ -53,7 +53,8 @@ then
 
     if [ -s ${KDF9RUNTIME}/TP0 ]
     then
-        cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
+        iconv -f $(file -b --mime-encoding ${KDF9RUNTIME}/TP0) -t UTF8 < ${KDF9RUNTIME}/TP0 | sed -E -f /tmp/format.commands > /tmp/printoutput;
+        #cat ${KDF9RUNTIME}/TP0 > /tmp/printoutput;
         printline "TP0:"
     fi
 
