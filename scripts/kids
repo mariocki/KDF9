@@ -83,7 +83,7 @@ while [[ "$#" -gt 0 ]]; do
     shift;
 done
 
-kalgol ${source} ${KIDSOPTS/-d/-d=}
+kalgol ${source} ${KIDSOPTS/-k/-k=}
 
 if [ -s ${KDF9RUNTIME}/Binary/${source} ]
 then
