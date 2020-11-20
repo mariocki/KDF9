@@ -109,6 +109,7 @@ if [ -z $NOCOLOR ]
 then
    RED='\033[1;31m'
    NC='\033[0m'  #No Color
+   GREEN='\033[1;32m'
 fi
 
 # I have noticed sometimes the kalgol compiler gets 'stuck' so put a 60 second timout to prevent that.
@@ -164,7 +165,8 @@ y)
       echo -e "${RED}**********************************************${NC}";
       exit 5
    fi
-   echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog"; echo
+   echo -e "${GREEN}Compilation successful.${NC}"
+   echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog";
    ;;
 *)
    ;;
