@@ -111,7 +111,8 @@ then
    NC='\033[0m'  #No Color
 fi
 
-if timeout 30 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output
+# I have noticed sometimes the kalgol compiler gets 'stuck' so put a 60 second timout to prevent that.
+if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
