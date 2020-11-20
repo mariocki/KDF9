@@ -44,6 +44,7 @@ while [[ "$#" -gt 0 ]]; do
             echo;
             echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
             echo "                              define the kalgol options.";
+            echo "  -nc, --no-color             do not colorize error output."
             echo;
             echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo;
@@ -51,6 +52,9 @@ while [[ "$#" -gt 0 ]]; do
         -k=*|--kids=*)
             KIDSOPTS=-k${1#*=};
             ;;
+        -nc|--no-color)
+            NOCOLOR=1
+            ;;            
         *)
             if [ -z ${prog} ];
             then
@@ -101,39 +105,36 @@ cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9RUNTIME}/settings_1.txt
 
 kidopt with ${KIDSOPTS:-NONE} >> ${KDF9RUNTIME}/settings_1.txt
 
-if nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2> ${LOGS}/error_output
+if [ -z $NOCOLOR ]
+then
+   RED='\033[1;31m'
+   NC='\033[0m'  #No Color
+fi
+
+if timeout 30 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
-      echo "The compilation was abandoned."; echo
-      echo "${LOGS}/error_output":
-      echo "==="
-      more "${LOGS}/error_output"
-      echo "==="
-      exit 2
-      exit 999
-   fi
-
-   if fgrep FAIL ${KDF9RUNTIME}/LP0 >/dev/null  2>/dev/null
-   then
-      echo "The compilation was abandoned."; echo
-      echo "LP0:"
-      echo "==="
-      more "${KDF9RUNTIME}/LP0"
-      echo "==="
+      echo -e "${RED}**********************************************";
+      echo "The compilation was abandoned for ${prog}."; 
+      echo "**********************************************${NC}";
+      echo;
+      cat "${LOGS}/error_output"
+      echo -e "${RED}**********************************************${NC}";
       exit 2
    fi
 
-   if fgrep FAIL ${KDF9RUNTIME}/TP0 >/dev/null  2>/dev/null
+   if grep -q FAIL ${KDF9RUNTIME}/LP0 || grep -q FAIL ${KDF9RUNTIME}/TP0
    then
-      echo "The compilation was abandoned."; echo
-      echo "TP0:"
-      echo "==="
-      more "${KDF9RUNTIME}/TP0"
-      echo "==="
+      echo -e "${RED}**********************************************";
+      echo "The compilation was abandoned for ${prog}."; 
+      echo -e "**********************************************${NC}";
+      cat ${KDF9RUNTIME}/LP0;
+      echo;
+      cat ${KDF9RUNTIME}/TP0;
+      echo -e "${RED}**********************************************${NC}";
       exit 3
    fi
-
 fi
 
 #${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$prog.k3
@@ -141,17 +142,25 @@ mtp MT0T > ${USERCODE}/$prog.k3
 
 if [ ! -s ${USERCODE}/$prog.k3 ]
 then
-   echo "The Usercode object program could not be retrieved."; echo; echo
+   echo -e "${RED}**********************************************";
+   echo "The Usercode object program could not be retrieved for ${prog}."; 
+   echo -e "**********************************************${NC}";
+   echo;
    exit 4
 fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
    neat $prog ${ST:-24000} ${TL:-99999}
-   ucc $prog
+   ucc $prog >${LOGS}/error_output 2>&1
    if [ ! -s ${KDF9RUNTIME}/Binary/$prog ]
    then
-      echo "An object program could not be assembled."; echo; echo
+      echo -e "${RED}**********************************************";
+      echo "An object program could not be assembled for ${prog}."; 
+      echo -e "**********************************************${NC}";
+      echo;
+      cat "${LOGS}/error_output"
+      echo -e "${RED}**********************************************${NC}";
       exit 5
    fi
    echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog"; echo
