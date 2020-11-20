@@ -25,6 +25,7 @@ then
 fi
 
 echo "Setting up KDF9 runtime in ${KDF9RUNTIME}"
+
 # Copy everything down
 install -d ${KDF9RUNTIME}
 install -d ${KDF9RUNTIME}/logs

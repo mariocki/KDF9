@@ -16,14 +16,14 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-opt=${1:-ae}
+opt="-d=t -m=ahipr"
 
 cat >settings_1.txt <<++++
 K 14 DR
 ++++
 
 echo "TEST TDRUM - POA, PIA - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUM; nine_test TDRUM - t $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUM; nine_test TDRUM $opt
 echo "TEST TDRUM - POA, PIA done."
 case $1 in
 z)
@@ -33,7 +33,7 @@ z)
 esac
 
 echo "TEST TDRUMEOF - POA, PIA - should fail  \"Invalid operand\":"
->${KDF9RUNTIME}/DR0; ucc TDRUMEOF; nine_test TDRUMEOF - t $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMEOF; nine_test TDRUMEOF $opt
 echo "TEST TDRUMEOF - POA, PIA done."
 case $1 in
 z)
@@ -43,7 +43,7 @@ z)
 esac
 
 echo "TEST TDRUMR2EM - POA, PIB - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUMR2EM; nine_test TDRUMR2EM - t $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMR2EM; nine_test TDRUMR2EM $opt
 echo "TEST  TDRUMR2EM - POA, PIB done."
 case $1 in
 z)
@@ -53,7 +53,7 @@ z)
 esac
 
 echo "TEST TDRUMW2EM - POB, PIA - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUMW2EM; nine_test TDRUMW2EM - t $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMW2EM; nine_test TDRUMW2EM $opt
 echo "TEST TDRUMW2EM - POB, PIA done."
 case $1 in
 z)

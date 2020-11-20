@@ -25,22 +25,36 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [[ "$#" -gt 0 ]]; then
-    case $1 in
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
+while [[ "$#" -gt 0 ]]; do
+    case ${1# } in
         -h|--help) 
             echo "DUMPTAPE - Displays the contents of a tape drive.";
             echo;
-            echo "Usage: dumptape <tape device> [T|{PQRS}{1357}{01234567}] [f|p|t|x|-] <miscellany switch or '-'>"
+            echo "Usage: dumptape TAPEDEVICE"
+            echo;
+            echo "Note: TAPEDEVICE must exist in ${KDF9RUNTIME}"
             echo;
             exit 0;;
+        *)
+            if [ -z ${tape} ];
+            then
+                tape="$1";
+            fi
+            ;;
     esac
-fi
+    shift;
+done
 
 TMPFILE=/tmp/mtp.dump
 
 trap "rm -f ${TMPFILE}" 0 1 2 3
 
-mtp $1 $2 $3 $4 > ${TMPFILE}
+mtp ${tape} > ${TMPFILE}
 
 if [ -s ${TMPFILE} ] 
 then

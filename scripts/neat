@@ -24,16 +24,21 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 USERCODE=${KDF9RUNTIME}/Assembly
 
 if [[ "$#" -gt 0 ]]; then
-    case $1 in
+    case ${1# } in
         -h|--help) 
             echo "NEAT - ?.";
             echo;
-            echo "Usage: neat <filename> <sizelimit> <timelimit>"
+            echo "Usage: neat USERCODEFILE SIZELIMIT TIMELIMIT"
             echo;
-            echo "Note: <filename> must exist in ${USERCODE}"
+            echo "Note: USERCODEFILE must exist in ${USERCODE}"
             echo;
             exit 0;;
     esac

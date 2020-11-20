@@ -24,27 +24,60 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 DATA=${KDF9RUNTIME}/Data
 
-if [[ "$#" -gt 0 ]]; then
-    case $1 in
+while [[ "$#" -gt 0 ]]; do
+    case ${1# } in
         -h|--help) 
-            echo "NINE - Executes a KDF9 binary with data on TR0 or <datafile>.";
+            echo "NINE - Executes a KDF9 binary with data on TR0 or DATAFILE.";
             echo;
-            echo "Usage: crnine <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch> <[b|p|t|-]>"
+            echo "Usage: nine [OPTION]... BINARYNAME [DATAFILE]"
             echo;
-            echo "Note: <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
-            echo "      <datafile> must exist in ${DATA}"
+            echo "  -d, --diag=[f|p|t]          define the diagnostic mode";
+            echo "  -s, --state=[b|p|t]         define the run state";
+            echo "  -m, --misc=[a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
+            echo "                              define the miscellaneous options";
+            echo "  -TP=TPMODE                  define the TP mode";
+            echo "  -TR=TRMODE                  define the TR mode";
+            echo;
+            echo "Note: BINARYNAME must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      DATAFILE must exist in ${DATA}"
             echo;
             exit 0;;
+        -s=*|--state=*)
+            state=-s${1#*=};
+            ;;
+        -d=*|--diag=*)
+            mode=-d${1#*=};
+            ;;
+        -m=*|--misc=*)
+            miscellany=-m${1#*=};
+            ;;
+        -TR=*)
+            TRmode=-TR${1#*=};
+            ;;
+        -TP=*)
+            TPmode=-TP${1#*=};
+            ;;
+        *)
+            if [ -z ${prog} ];
+            then
+                prog="$1";
+            else
+                datafile="$1";
+            fi
+            ;;
     esac
-fi
+    shift;
+done
 
 >${KDF9RUNTIME}/LP0
 >${KDF9RUNTIME}/LP1
-
-prog=$1
-data=$2
 
 if [ x"${prog}"x = xx ]
 then
@@ -62,11 +95,11 @@ then
     exit 2
 fi
 
-if [ x"${data}"x = xx -o x"${data}"x = x-x ]
+if [ x"${datafile}"x = xx ]
 then
     >${KDF9RUNTIME}/TR0
 else
-    datatxt=${DATA}/`basename "${data}" ".txt"`.txt
+    datatxt=${DATA}/`basename "${datafile}" ".txt"`.txt
     if [ -r "$datatxt" ]
     then
         cat "$datatxt" > ${KDF9RUNTIME}/TR1
@@ -76,48 +109,16 @@ else
     fi
 fi
 
-if [ x"$3"x = xx -o x"$3"x = x-x ]
-then
-    mode=""
-else
-    mode="-d$3"
-fi
-if [ x"$4"x = xx -o x"$4"x = x-x ]
-then
-    miscellany=""
-else
-    miscellany="-m$4"
-fi
-if [ x"$5"x = xx -o x"$5"x = x-x ]
-then
-    TRmode="-TRll"
-else
-    TRmode="-TR$5"
-fi
-if [ x"$6"x = xx -o x"$6"x = x-x ]
-then
-    TPmode="-TPll"
-else
-    TPmode="-TP$6"
-fi
-if [ x"$7"x = xx -o x"$7"x = x-x ]
-then
-    state=""
-else
-    state="-s$7"
-fi
 
 if [ "$mode" = -df ]
 then
-    time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+    time ee9 "$state" "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 else
-   ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+   ee9 "$state" "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
-case $4$8 in
+case $miscellany in
    *z*)
-      ;;
-   *-*)
       ;;
    *)
     printoutput

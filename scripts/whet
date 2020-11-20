@@ -23,32 +23,56 @@ then
     KDF9RUNTIME="$HOME/.kdf9";
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 SOURCE=${KDF9RUNTIME}/Whetstone
 FW0FILES=${KDF9RUNTIME}/FW0Files
 
-if [[ "$#" -gt 0 ]]; then
-    case $1 in
+while [[ "$#" -gt 0 ]]; do
+    case ${1# } in
         -h|--help) 
             echo "WHET - Executes a Whetstone Algol program.";
             echo;
-            echo "Usage: whet <filename> <[f|p|t|x|-]> <miscellany switch or '-'>"
+            echo "Usage: whet [OPTION]... SOURCEFILE"
             echo;
-            echo "Note: <filename> must exist in ${SOURCE}"
+            echo "  -d, --diag [f|p|t]          define the diagnostic mode";
+            echo "  -m, --misc [a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
+            echo "                              define the miscellaneous options";
+            echo "  -TP TPMODE                  define the TP mode";
+            echo "  -TR TRMODE                  define the TR mode";
+            echo;
+            echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo;
             exit 0;;
+        -d=*|--diag=*)
+            mode=-d${1#*=};
+            ;;
+        -m=*|--misc=*)
+            miscellany=-m${1#*=};
+            ;;
+        *)
+            if [ -z ${source} ];
+            then
+                source="$1";
+            fi
+            ;;
     esac
-fi
+    shift;
+done
 
 trap ">${KDF9RUNTIME}/FW0" 0 1 2 3
 
-if [ x"$1"x = xx ]
+if [ x"$source"x = xx ]
 then
     echo "You have not named a Whetstone Algol program to be run."
     echo
     exit 1
 fi
 
-program=`basename "$1" ".a60"`.a60
+program=`basename "$source" ".a60"`.a60
 program=${SOURCE}/"$program"
 if [ -r "$program" ]
 then
@@ -61,18 +85,9 @@ fi
 
 cat ${FW0FILES}/FW0_for_Whetstone > ${KDF9RUNTIME}/FW0
 
-mode=-d$2
-miscellany=-m$3
-
-if   [ "$mode" = -d ]
+if [ "$mode" = -df ]
 then
-    ee9 +Binary/KMW0201--UPU;
-elif [ "$mode" = -d- ]
-then
-    ee9 -sp -df "$miscellany" +Binary/KMW0201--UPU;
-elif [ "$mode" = -df ]
-then
-    time ee9 -sp -df "$miscellany" +Binary/KMW0201--UPU;
+    time ee9 -sp  ${mode} "$miscellany" +Binary/KMW0201--UPU;
 else
     ee9 -sp "$mode" "$miscellany" +Binary/KMW0201--UPU;
 fi

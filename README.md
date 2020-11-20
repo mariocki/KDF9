@@ -10,11 +10,13 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 3. Other more detailed documentation can also be found in the Documents folder.
 
 ## What different between this repo and the original
-- Source code changes 
+- Source code changes:
     - `ee9` honors the `$KDF9RUNTIME` environment variable for all host IO (log files, devices etc).
     - don't assume everyone uses (or wants to use) black on white terminals. :unamused:
 - Converted to using Makefiles to build everything (see below).
-- Amended all the scripts to honor `$KDF9RUNTIME` when reading assembly, source-code, data and binary files.
+- Amended all the scripts to:
+    - Parameters are now passed by command line arguments rather than position.
+    - Honor `$KDF9RUNTIME` when reading assembly, source-code, data and binary files.
 - Removed special build case for Cygwin.
 - I don't include pre-build binaries.
 
@@ -43,7 +45,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## How to build `ee9` (the KDF9 emulator)
 - `make ee9|mtp|to_9_from_1934`
-    Build `ee9`|`mtp`|`to_9_from_1934` in-place in the src folder.
+    Build `ee9`, `mtp`, `to_9_from_1934` in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
 
 - `make kal3|kal4|mkchan`
@@ -58,7 +60,7 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
     `make -n prefix=/opt/kdf9 install`
 
 - `make distclean`
-    Removes all intermediate and transient files from compilation.
+    Removes all intermediate and transient files created during compilation.
 
 ### Required dependencies.
 #### Ubuntu and other Debian derived distributions.
@@ -86,5 +88,5 @@ Once completed execute the `kdf9_setup` command to create the ee9 runtime. By de
 
 *let me know if I have missed anything*
 ### ToDo
-- [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/lib/KDF9`. This may require code changes to the ADA though :(
+- [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/share/KDF9`. This may require code changes to the ADA though :(
 - [ ] Create a Docker container?

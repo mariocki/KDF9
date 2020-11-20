@@ -24,17 +24,22 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 SOURCE=${KDF9RUNTIME}/Kidsgrove
 TARGET=${KDF9RUNTIME}/Whetstone
 
 if [[ "$#" -gt 0 ]]; then
-    case $1 in
+    case ${1# } in
         -h|--help) 
             echo "PORTS - Convert Kidsgrove Algol to Whetstone format.";
             echo;
-            echo "Usage: ports <filename>"
+            echo "Usage: ports SOURCEFILE"
             echo;
-            echo "Note: <filename> must exist in ${SOURCE}"
+            echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo;
             exit 0;;
     esac

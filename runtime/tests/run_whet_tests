@@ -16,21 +16,20 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log"  \
-      0 1 2 3
+trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log" 0 1 2 3
 
 >${LOGS}/whet_test.log
 
-whet FLUID     t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet GPSPRIMES t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet HAAVIE    t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet HANOI     t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet INPUT     t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet MANORBOYX t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet MATMULT   t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet PENTOMINO t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet WHETSTONE t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet ZELLER    t prh >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet FLUID     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet GPSPRIMES -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet HAAVIE    -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet HANOI     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet INPUT     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet MANORBOYX -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet MATMULT   -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet PENTOMINO -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet WHETSTONE -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+whet ZELLER    -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
 
 echo
 diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_good_test.log >${LOGS}/whet_test.diff

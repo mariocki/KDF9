@@ -24,16 +24,21 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 USERCODE=${KDF9RUNTIME}/Assembly
 
 if [[ "$#" -gt 0 ]]; then
-    case $1 in
+    case ${1# } in
         -h|--help) 
             echo "STTL - Set the store size and time limit on Usercode files.";
             echo;
-            echo "Usage: sttl <filefile>"
+            echo "Usage: sttl USERCODEFILE"
             echo;
-            echo "Note: <datafile> must exist in ${USERCODE}"
+            echo "Note: USERCODEFILE must exist in ${USERCODE}"
             echo;
             exit 0;;
     esac

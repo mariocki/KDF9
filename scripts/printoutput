@@ -29,7 +29,7 @@ trap "rm -f  /tmp/printoutput /tmp/format.commands" 0 1 2 3
 function printline {
     echo -e "${RED}$1${GREEN}${BAR}${NC}";
     cat /tmp/printoutput;
-    echo;
+    if [ -z $EE9REGTEST ]; then echo; fi
     echo -e "${GREEN}${BAR}${NC}";
 }
 

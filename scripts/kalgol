@@ -24,24 +24,42 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 SOURCE=${KDF9RUNTIME}/Kidsgrove
 DATA=${KDF9RUNTIME}/Data
 LOGS=${KDF9RUNTIME}/logs
 SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
 
-if [[ "$#" -gt 0 ]]; then
-    case $1 in
+while [[ "$#" -gt 0 ]]; do
+    case ${1# } in
         -h|--help) 
             echo "KALGOL - compiles a60 to usercode and then onto a binary.";
             echo;
-            echo "Usage: kalgol <filename>"
+            echo "Usage: kalgol [OPTION]... SOURCEFILE"
             echo;
-            echo "Note: <filename> must exist in ${SOURCE}"
+            echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
+            echo "                              define the kalgol options.";
+            echo;
+            echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo;
             exit 0;;
+        -k=*|--kids=*)
+            KIDSOPTS=-k${1#*=};
+            ;;
+        *)
+            if [ -z ${prog} ];
+            then
+                prog="$1";
+            fi
+            ;;            
     esac
-fi
+    shift;
+done
 
 trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
@@ -51,52 +69,39 @@ trap " >${KDF9RUNTIME}/MT0 >${KDF9RUNTIME}/MT1 >${KDF9RUNTIME}/MT2 >${KDF9RUNTIM
        >${KDF9RUNTIME}/MT5 >${KDF9RUNTIME}/MT6 >${KDF9RUNTIME}/MT7
        >${KDF9RUNTIME}/TR0 >${KDF9RUNTIME}/TR1 " 0
 
-if [ x${KIDSMODE}x = xfx ]
-then
-   KIDSMODE=""
-fi
-
-if [ x$1x = xx ]
+if [ x$progx = xx ]
 then
    echo No program name was given.; echo
    exit 1
-elif [ ! -r ${SOURCE}/$1.a60 ]
+elif [ ! -r ${SOURCE}/$prog.a60 ]
 then
-   echo The file ${SOURCE}/$1.a60 is absent or unreadable.; echo
+   echo The file ${SOURCE}/$prog.a60 is absent or unreadable.; echo
    exit 1
-else
-   name=$1
 fi
 
 > ${KDF9RUNTIME}/settings_1.txt
 
-rlt tape_labels_for_KAlgol - wz
+rlt tape_labels_for_KAlgol -m=wz
 #echo "The compiler work tapes have been labelled."
 
 cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
 
-nine MKSYS2 systape - wz
+nine MKSYS2 systape -m=wz
 #echo "The compiler overlay tape has been generated."; echo
 
-mkchan ${SOURCE}/$name.a60 /tmp/chan6.pt > /dev/null
+mkchan ${SOURCE}/$prog.a60 /tmp/chan6.pt > /dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
 > ${KDF9RUNTIME}/TP0
-rm -f Binary/$name
-rm -f ${USERCODE}/$name.k3
+rm -f Binary/$prog
+rm -f ${USERCODE}/$prog.k3
 cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
-#chmod 755 ${KDF9RUNTIME}/TR0
 
 cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9RUNTIME}/settings_1.txt
 
-shift
-if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
-then
-   shift
-fi
-kidopt with $* ${KIDSOPTS} >> ${KDF9RUNTIME}/settings_1.txt
+kidopt with ${KIDSOPTS:-NONE} >> ${KDF9RUNTIME}/settings_1.txt
 
-if nine KAB00DH--USU ${DATA}/ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> ${LOGS}/error_output
+if nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2> ${LOGS}/error_output
 then
    if [ -s ${LOGS}/error_output ]
    then
@@ -131,10 +136,10 @@ then
 
 fi
 
-#${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$name.k3
-mtp MT0T > ${USERCODE}/$name.k3
+#${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$prog.k3
+mtp MT0T > ${USERCODE}/$prog.k3
 
-if [ ! -s ${USERCODE}/$name.k3 ]
+if [ ! -s ${USERCODE}/$prog.k3 ]
 then
    echo "The Usercode object program could not be retrieved."; echo; echo
    exit 4
@@ -142,14 +147,14 @@ fi
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
-   neat $name ${ST:-24000} ${TL:-99999}
-   ucc $name
-   if [ ! -s ${KDF9RUNTIME}/Binary/$name ]
+   neat $prog ${ST:-24000} ${TL:-99999}
+   ucc $prog
+   if [ ! -s ${KDF9RUNTIME}/Binary/$prog ]
    then
       echo "An object program could not be assembled."; echo; echo
       exit 5
    fi
-   echo "The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in Binary/$name"; echo
+   echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog"; echo
    ;;
 *)
    ;;

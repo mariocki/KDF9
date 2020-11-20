@@ -24,25 +24,57 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 DATA=${KDF9RUNTIME}/Data
 
-if [[ "$#" -gt 0 ]]; then
-    case $1 in
+while [[ "$#" -gt 0 ]]; do
+    case ${1# } in
         -h|--help) 
-            echo "TSDNINE - Executes a KDF9 binary in director with data from <datafile>.";
+            echo "TSDNINE - Executes a KDF9 binary in director with data from DATAFILE.";
             echo;
-            echo "Usage: crnine <binaryname> <datafile> <[f|p|t|x|-]> <miscellany switch or '-'> <TR switch> <TP switch>"
+            echo "Usage: crnine [OPTION]... BINARYNAME [DATAFILE]"
             echo;
-            echo "Note: <binaryname> must exist in ${KDF9RUNTIME}/Binary/"
-            echo "      <datafile> must exist in ${DATA}"
+            echo "  -d, --diag [f|p|t]          define the diagnostic mode";
+            echo "  -m, --misc [a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
+            echo "                              define the miscellaneous options";
+            echo "  -TP TPMODE                  define the TP mode";
+            echo "  -TR TRMODE                  define the TR mode";
+            echo;
+            echo "Note: BINARYNAME must exist in ${KDF9RUNTIME}/Binary/"
+            echo "      DATAFILE must exist in ${DATA}"
             echo;
             exit 0;;
+        -d=*|--diag=*)
+            mode=-d${1#*=};
+            ;;
+        -m=*|--misc=*)
+            miscellany=-m${1#*=};
+            ;;
+        -TR=*)
+            TRmode=-TR${1#*=};
+            ;;
+        -TP=*)
+            TPmode=-TP${1#*=};
+            ;;
+        *)
+            if [ -z ${prog} ];
+            then
+                prog="$1";
+            else
+                datafile="$1";
+            fi
+            ;;
     esac
-fi
+    shift;
+done
 
 trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 
-if [ x$1x = xx ]
+if [ x${prog}x = xx ]
 then
    echo; echo "No program name was given."; echo
    exit 1
@@ -63,22 +95,22 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 rlt TSD_tape_labels.txt - z
 
 # Create a call tape from the binary program.
-a2b -p2c P < ${KDF9RUNTIME}/Binary/$1  > /tmp/$1.pblk
+a2b -p2c P < ${KDF9RUNTIME}/Binary/${prog}  > /tmp/${prog}.pblk
 
 # Combine the call tape and the binary in a single paper tape file.
-cat ${KDF9RUNTIME}/Binary/$1 >> /tmp/$1.pblk
-mv /tmp/$1.pblk ${KDF9RUNTIME}/TR1
+cat ${KDF9RUNTIME}/Binary/$1 >> /tmp/${prog}.pblk
+mv /tmp/${prog}.pblk ${KDF9RUNTIME}/TR1
 
 #ucc PLT
 #nine PLT $1 - z kk
 
-if [ x"$2"x = xx -o x"$2"x = x-x ]
+if [ x"${datafile}"x = xx ]
 then
    : no data file
 else
    # Add the data file to the end of the paper tape.
-   a2b -L2p < ${DATA}/$2.txt >> ${KDF9RUNTIME}/TR1
+   a2b -L2p < ${DATA}/${datafile}.txt >> ${KDF9RUNTIME}/TR1
 fi
 
 # Run Director.
-tsd $3 $4 $5 $6
+tsd "${mode/-d/-d=}" "${miscellany/-m/-m=}"

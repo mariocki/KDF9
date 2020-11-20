@@ -16,14 +16,14 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
-opt=${1:-ae}
+opt="-m=ahipr"
 
 cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 14 FD
 ++++
 
 echo "TEST TDISK - POA, PIA, PMA, PMF - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISK - t $opt
+>${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISK $opt
 echo "TEST TDISK - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -33,7 +33,7 @@ z)
 esac
 
 echo "TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:"
- >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISKOR - t $opt
+ >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISKOR $opt
 echo "TEST TDISKOR - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -43,7 +43,7 @@ z)
 esac
 
 echo "TEST TDISKEM - POB, PIA, PMA - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISKEM - t $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISKEM $opt
 echo "TEST TDISKEM - POB, PIA, PMA done."
 case $1 in
 z)
@@ -53,7 +53,7 @@ z)
 esac
 
 echo "TEST TDISKFH - POC, PIC - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISKFH - t $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISKFH $opt
 echo "TEST TDISKFH - POC, PIC done."
 case $1 in
 z)
@@ -63,7 +63,7 @@ z)
 esac
 
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISKFHNS - t $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISKFHNS $opt
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG done."
 case $1 in
 z)

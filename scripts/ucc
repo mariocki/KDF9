@@ -23,18 +23,23 @@ then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+if [ $# -eq 0 ]
+then
+    set -- "-h";
+fi
+
 USERCODE=${KDF9RUNTIME}/Assembly
 
 if [[ "$#" -gt 0 ]]; then
-    case $1 in
+    case ${1# } in
         -h|--help) 
             echo "UCC - Compiles a Usercode file to a Binary.";
             echo;
-            echo "Usage: ucc <filename> [options]"
-            echo "Options:";
+            echo "Usage: ucc [OPTION] USERCODEFILE"
+            echo;
             echo "   -q                quiet mode."
             echo;
-            echo "Note: <filename> must exist in ${USERCODE}"
+            echo "Note: USERCODEFILE must exist in ${USERCODE}"
             echo;
             exit 0;;
     esac
@@ -49,10 +54,6 @@ then
    if [ -s /tmp/a.out ]
    then
       mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
-      if [ x"$2"x != "x-qx" ]
-      then
-         echo "Binary file "$name" placed in ${KDF9RUNTIME}/Binary/"
-      fi      
    else
       echo "$kal3 detected error\(s\) in $name.k3"
       echo;
