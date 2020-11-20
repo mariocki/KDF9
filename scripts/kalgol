@@ -45,6 +45,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
             echo "                              define the kalgol options.";
             echo "  -nc, --no-color             do not colorize error output."
+            echo "  -k3, --no-k3                do not generate binary file."
             echo;
             echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo;
@@ -55,6 +56,9 @@ while [[ "$#" -gt 0 ]]; do
         -nc|--no-color)
             NOCOLOR=1
             ;;
+        -k3|--no-k3)
+            KIDSGROVE_ASSEMBLY=n
+            ;;            
         *)
             if [ -z ${prog} ];
             then
@@ -169,5 +173,7 @@ y)
    echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog";
    ;;
 *)
+   echo -e "${GREEN}Compilation successful.${NC}"
+   echo "The Usercode is in ${USERCODE}/$prog.k3.";
    ;;
 esac
