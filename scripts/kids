@@ -92,7 +92,7 @@ kalgol ${KIDSOPTS/-k/-k=} "${nc}" ${source}
 if [ -s ${KDF9RUNTIME}/Binary/${source} ]
 then
    cat ${KDF9RUNTIME}/settings_2.txt > ${KDF9RUNTIME}/settings_1.txt
-   nine "${state/-s/-s=}" "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" ${source}
+   nine "${state/-s/-s=}" "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" ${source} ${datafile}
 else
    exit 1
 fi
