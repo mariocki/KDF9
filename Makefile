@@ -114,3 +114,17 @@ install: all
 	$(MAKE) -e -C ${KAL4} install
 	$(MAKE) -e -C ${MKCHAN}	install
 	$(MAKE) -e -C ${KALGOL}	install
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(prefix)/bin/ee9
+	$(RM) $(DESTDIR)$(prefix)/bin/a2b
+	$(RM) $(DESTDIR)$(prefix)/bin/kidopt
+	$(RM) $(DESTDIR)$(prefix)/bin/mtp
+	$(RM) $(DESTDIR)$(prefix)/bin/to_9_from_1934
+	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
+	for a in scripts/*; do $(RM) $(DESTDIR)$(prefix)/bin/`basename $$a`; done
+	$(MAKE) -e -C ${KAL3} uninstall
+	$(MAKE) -e -C ${KAL4} uninstall
+	$(MAKE) -e -C ${MKCHAN}	uninstall
+	$(MAKE) -e -C ${KALGOL}	uninstall

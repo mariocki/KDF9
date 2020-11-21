@@ -22,7 +22,7 @@ YFLAGS=-d --debug
 prefix?=/usr/local
 
 kal3: kal3.c kal3syntax.c
-	$(CC) -o kal3 kal3.c kal3syntax.c $(CFLAGS)
+	$(CC) -o $@ $^ $(CFLAGS)
 
 .PHONY: clean
 clean:
@@ -33,3 +33,7 @@ clean:
 .PHONY: install
 install: kal3
 	install -m 755 kal3 $(DESTDIR)$(prefix)/bin/
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(prefix)/bin/kal3

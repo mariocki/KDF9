@@ -20,7 +20,7 @@ CFLAGS=-I. -fPIE -fPIC
 prefix?=/usr/local
 
 mkchan: 
-	$(CC) -o mkchan mkchan.c $(CFLAGS)
+	$(CC) -o $@ $@.c $(CFLAGS)
 
 .PHONY: clean
 clean:
@@ -29,3 +29,7 @@ clean:
 .PHONY: install
 install: mkchan
 	install -m 755 mkchan $(DESTDIR)$(prefix)/bin/
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(prefix)/bin/mkchan

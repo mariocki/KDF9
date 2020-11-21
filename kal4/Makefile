@@ -21,8 +21,8 @@ YFLAGS=-d --debug
 
 prefix?=/usr/local
 
-kal3: kal4.c kal4syntax.c kal4tab.c
-	$(CC) -o kal4 kal4.c kal4tab.c kal4syntax.c $(CFLAGS)
+kal4: kal4.c kal4syntax.c kal4tab.c
+	$(CC) -o $@ $^ $(CFLAGS)
 
 .PHONY: clean
 clean:
@@ -33,3 +33,7 @@ clean:
 .PHONY: install
 install: kal4
 	install -m 755 kal4 $(DESTDIR)$(prefix)/bin/
+
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(prefix)/bin/kal4

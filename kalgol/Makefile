@@ -27,3 +27,9 @@ install:
 	install -d $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
 	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
 	
+.PHONY: uninstall
+uninstall:
+	$(RM) $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/systape_kalgol.txt
+	$(RM) $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/mksys2.bin
+	$(RM) $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/KAB00.bin
+	
