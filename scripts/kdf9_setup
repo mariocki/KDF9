@@ -70,5 +70,5 @@ a2b -r2p < Data/mksys2.bin > Binary/MKSYS2;
 a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU;
 
 echo "Compiling Binaries.";
-for f in Assembly/*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
+for f in Assembly/[A-Z]*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
 echo "Done.";

@@ -2,13 +2,11 @@
 
 // Currently all rights are reserved, but this will be made available under the GNU Public License.
 
-// June 2020 -- new facility for producing standard form of ABSes on paper tape
-
 // Usage: mkchan [switches] input_file output_file
 
 // The type of output is defined by the output_file extension (i.e. bit after the dot)
 //     .mt       // POST format data in MT form for DH's emulator
-//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81 or mksys2.k4
+//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81 or mksys0.k4
 //     .dsk      // PROMPT format data in emulated disk blocks -- mainly for KAL4
 //     .txt      // Paper tape Latin-1 representation of KDF9 input chars 1 for 1
 
@@ -22,6 +20,10 @@
 //     -s           // star specified as asterisk - special for KAL4 bootstrap
 //     -k           // KDF9 program ID specified for inclusion in PROMPT blocks
 //     -l           // this is a library file for incorporation in the system tape
+
+// November 2020 -- a single space allowed inside := and also goto
+
+// June 2020 -- new facility for producing standard form of ABSes on paper tape
 
 // new facility May 2019, -l parameter to deal with library material
 
@@ -65,7 +67,7 @@
 unsigned char symval[NSYM];        // the value of the ABS
 char *symchars[NSYM];              // the same symbol in characters
 
-unsigned char *pttab[256];         // character form of each basic symbol
+unsigned char *pttab[256];         // character form of each basic symbol when output as paper tape
 
 int ulform = 1;          // compound symbols have embedded underlines
 int excform = 1;         // compound symbols have initial exclamation mark
@@ -122,6 +124,7 @@ void ulsym(int s, char *chs)
 
 void abs2char(char *chs, int abs)
 // makes entry for ABS that is 2 characters
+// Also it will work for any length string and is used for colon space equals
 {  symval[nsyms] = abs;
    pttab[abs] = symchars[nsyms++] = chs;
 }
@@ -205,6 +208,7 @@ void settables(int starval)
    abs8bit('\t', 0256);       // tab
    abs8bit('\n', 0240);       // newline
 
+   abs2char(": =", 0265);     // := do this first so that printouts do not have a space in
    abs2char(":=", 0265);      // :=
    abs2char(">=", 0262);      // >= for greater than or equals
    abs2char("<=", 0222);      // <= for less than or equals
@@ -226,6 +230,8 @@ void settables(int starval)
    ulsym(0303, "eqv");
    ulsym(0315, "false");
    ulsym(0206, "for");
+   ulsym(0210, "go to");      // do this first so that printouts do not have a space in
+   abs2char("_g_o _t_o", 0210);    // kludge to allow non-underlined space in goto
    ulsym(0210, "goto");
    ulsym(0302, "gt");
    ulsym(0205, "if");
@@ -253,7 +259,7 @@ void settables(int starval)
    ulsym(0226, "while");
 
 // Many (all?) of the following symbols have synonyms
-// For output only the last one counts
+// For output, only the last one counts
 
    abs2char("!=", 0322);      // != for not equals
    abs8bit('#', 0322);        // not equals
