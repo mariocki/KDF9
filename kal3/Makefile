@@ -43,4 +43,5 @@ uninstall:
 .PHONY: update
 update:
 	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
+	-git apply fixpaths.diff
 	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since

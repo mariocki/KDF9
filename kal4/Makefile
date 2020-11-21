@@ -43,6 +43,7 @@ uninstall:
 .PHONY: update
 update:
 	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.c --no-if-modified-since
+	-git apply fixpaths.diff
 	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.h --no-if-modified-since
 	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.y --no-if-modified-since
 	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4tab.c --no-if-modified-since

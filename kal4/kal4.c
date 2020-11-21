@@ -470,10 +470,10 @@ void ptwrite(int dv, int start, int stop)
 void ptbinout()
 // output a KDF9 paper tape binary program
 // not yet complete -- needs A-block and program identifier
-{  int fout = open("a.out", O_CREAT + O_BINARY + O_TRUNC + O_WRONLY, 0640);
+{  int fout = open("/tmp/a.out", O_CREAT + O_BINARY + O_TRUNC + O_WRONLY, 0640);
    int i, j;
    if  ( fout < 0 )
-      perror("a.out");
+      perror("/tmp/a.out");
    else
    {  if  ( ablk != 0 )        // A-block generation not suppressed to satisfy ee9 -- temp ??
       {  buff[16] = ptchar[075];                  // end-message
@@ -501,10 +501,10 @@ void ptbinout()
 void mtbinout()
 // output a KDF9 mag tape B-block and C-block
 // must be called after ptbinout()
-{  int fout = open("mt.out", O_CREAT + O_TRUNC + O_WRONLY + O_BINARY, 0640);
+{  int fout = open("/tmp/mt.out", O_CREAT + O_TRUNC + O_WRONLY + O_BINARY, 0640);
    int i, j;
    if  ( fout < 0 )
-      perror("mt.out");
+      perror("/tmp/mt.out");
    else
    {  if  ( corestore[12] == 0 )    // if program name not set in source text
       {  int prn[4];         // program name in KDF9 chars
