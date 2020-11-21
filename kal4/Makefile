@@ -15,20 +15,22 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 CC=gcc
-YACC=yacc
+YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-d --debug
+YFLAGS=--debug
 
 prefix?=/usr/local
 
-kal4: kal4.c kal4syntax.c kal4tab.c
+kal4: kal4.c kal4.tab.c kal4tab.c 
 	$(CC) -o $@ $^ $(CFLAGS)
+
+kal4.tab.c: kal4.y
+	$(YACC) --defines=kal4.tab.h $^ $(YFLAGS)
 
 .PHONY: clean
 clean:
 	$(RM) kal4
-	$(RM) kal4syntax.c
-	$(RM) y.tab.h y.output
+	$(RM) *.tab.[ch] y.output
 
 .PHONY: install
 install: kal4
@@ -37,3 +39,10 @@ install: kal4
 .PHONY: uninstall
 uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/kal4
+
+.PHONY: update
+update:
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.c --no-if-modified-since
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.h --no-if-modified-since
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4.y --no-if-modified-since
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/kal4tab.c --no-if-modified-since

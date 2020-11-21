@@ -33,3 +33,7 @@ install: mkchan
 .PHONY: uninstall
 uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/mkchan
+
+.PHONY: update
+update:
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/mkchan.c --no-if-modified-since

@@ -15,20 +15,22 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 CC=gcc
-YACC=yacc
+YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-d --debug
+YFLAGS=--debug
 
 prefix?=/usr/local
 
-kal3: kal3.c kal3syntax.c
+kal3: kal3.c kal3.tab.c
 	$(CC) -o $@ $^ $(CFLAGS)
+
+kal3.tab.c: kal3.y
+	$(YACC) --defines=kal3.tab.h $^ $(YFLAGS)
 
 .PHONY: clean
 clean:
 	$(RM) kal3
-	$(RM) kal3syntax.c
-	$(RM) y.tab.h y.output
+	$(RM) *.tab.[ch] y.output
 
 .PHONY: install
 install: kal3
@@ -37,3 +39,8 @@ install: kal3
 .PHONY: uninstall
 uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/kal3
+
+.PHONY: update
+update:
+	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
+	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since

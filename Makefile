@@ -101,6 +101,13 @@ clean:
 	$(RM) ${SRC:%=%/*.o}
 	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc
 
+.PHONY: update
+update:
+	$(MAKE) -e -C ${KAL3} update
+	$(MAKE) -e -C ${KAL4} update
+	$(MAKE) -e -C ${KALGOL}	update
+	$(MAKE) -e -C ${MKCHAN}	update
+
 .PHONY: install
 install: all
 	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/

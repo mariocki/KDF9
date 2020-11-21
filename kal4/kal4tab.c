@@ -35,8 +35,7 @@ extern int mplusi, mminusi, splusm, splusi, splusc, splusq, justj, justz;
 #define  EXIT  12
 #define  LATER  99
 
-    int
-    getidindex(unsigned char *s)
+int getidindex(unsigned char *s)
 /* fancy characters in instruction mnemonics need unsigned char */
 {  int hh = (((*s)<<7) + s[1]) % IDHASHSZ;
 

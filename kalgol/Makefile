@@ -25,7 +25,8 @@ clean:
 .PHONY: install
 install: 
 	install -d $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
-	install -m 644 systape_kalgol.txt mksys2.bin KAB00.bin $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
+	install -m 644 mksys2.bin KAB00.bin $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/
+	install -m 644 systape.txt $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/systape_kalgol.txt 
 	
 .PHONY: uninstall
 uninstall:
@@ -33,3 +34,8 @@ uninstall:
 	$(RM) $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/mksys2.bin
 	$(RM) $(DESTDIR)$(prefix)/share/kdf9/runtime/Data/KAB00.bin
 	
+.PHONY: update
+update:
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/systape.txt --no-if-modified-since
+	wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/KAB00.bin --no-if-modified-since
+	#wget -N http://settle.ddns.net/KDF9/kalgol/DavidHo/mksys2.bin --no-if-modified-since
