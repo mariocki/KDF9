@@ -76,7 +76,7 @@ Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 Choose a distribution of your choice and follow the instructions for Linux given above.
 
-I also *highly* recommend you install Microsoft's new [Windows Terminal](https://github.com/microsoft/terminal).
+I also *highly* recommend you install Microsoft's new [Windows Terminal](https://aka.ms/terminal).
 ### Building from source
 Building from source should be the same on any modern Linux or MacOS installation.
 
