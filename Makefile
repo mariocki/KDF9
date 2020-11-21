@@ -36,7 +36,7 @@ export CC=gcc
 export CFLAGS=-funwind-tables -march=native -O3 -funroll-loops -fno-stack-check
 GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.K -gnatw.Y
-GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn 
+GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
 
 .PHONY: all
 all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp to_9_from_1934
@@ -61,7 +61,7 @@ a2b:
 kidopt:
 	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
 	gnatbind ${SRC}/kidopt.ali ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/kidopt.ali -o ${SRC}/kidopt	
+	gnatlink ${SRC}/kidopt.ali -o ${SRC}/kidopt
 
 .PHONY: mtp
 mtp:
@@ -81,7 +81,7 @@ kal3:
 
 .PHONY: kal4
 kal4:
-	$(MAKE) -e -C ${KAL4}	
+	$(MAKE) -e -C ${KAL4}
 
 .PHONY: mkchan
 mkchan:
@@ -99,7 +99,7 @@ clean:
 	$(MAKE) -e -C ${MKCHAN}	clean
 	$(RM) ${SRC:%=%/*.ali}
 	$(RM) ${SRC:%=%/*.o}
-	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc 
+	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc
 
 .PHONY: install
 install: all
@@ -122,9 +122,9 @@ uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/kidopt
 	$(RM) $(DESTDIR)$(prefix)/bin/mtp
 	$(RM) $(DESTDIR)$(prefix)/bin/to_9_from_1934
-	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
 	for a in scripts/*; do $(RM) $(DESTDIR)$(prefix)/bin/`basename $$a`; done
 	$(MAKE) -e -C ${KAL3} uninstall
 	$(MAKE) -e -C ${KAL4} uninstall
 	$(MAKE) -e -C ${MKCHAN}	uninstall
 	$(MAKE) -e -C ${KALGOL}	uninstall
+	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
