@@ -43,7 +43,39 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 ## What has not been changed
 - The License, it's still GPLv3. :thumbsup:
 
-## How to build `ee9` (the KDF9 emulator)
+### Installing`ee9` (the KDF9 emulator) and usage
+Simply `cd` to the root folder and type `sudo make install`.
+
+If the build fails see the 'Required Dependencies' section below to ensure you have all the neccesary packages installed.
+
+By default the executables and scripts are installed into `/usr/local/bin` and the default runtime is placed in `/usr/local/share/kdf9/`. If you wish to change these locations you can do so by specifying a value for `prefix` during build.
+    `make -n prefix=/opt/kdf9 install`
+
+### Running ee9
+Once completed execute the `kdf9_setup` command to create the ee9 runtime. By default this will be placed in a folder named `.kdf9/` in your `$HOME` directory but this can by changed by specifying a location in the `$KDF9RUNTIME` environment variable.
+
+All the scripts as detailed in Bill Findlay's documentation remain mainly as-was but now use command line switches, you can pass the `-h` switch to see basic help.
+
+## Required dependencies.
+#### Ubuntu and other Debian derived distributions.
+Pakages required: `make` `build-essentials` `bison` `gnat`.
+#### Fedora etc
+*please let me know*
+### MacOs
+*please let me know, specifically any [Homebrew](https://brew.sh/) or [MacPorts](https://www.macports.org/) instructions*
+### Windows
+Only Windows10 + WSL2 is supported.
+
+Ensure you are running Windows 10 version 2004 or above [See here for details](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004).
+
+Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+Choose a distribution of your choice and follow the instructions for your chosen distro as given above in the Linux section.
+
+I also *highly* recommend you install Microsoft's new [Windows Terminal](https://aka.ms/terminal).
+### More detailed build instructions
+Building from source should be the same on any modern Linux or MacOS installation provided the correct packages have been installed.
+
 - `make ee9|mtp|to_9_from_1934`
     Build `ee9`, `mtp`, `to_9_from_1934` in-place in the src folder.
     There are various slightly different build options - see the top of the Makefile in the root folder to make changes if desired.
@@ -54,6 +86,9 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - `make all`
     Builds all of `ee9`, `kal3`, `kal4`, `mkchan`, `to_9_from_1934` and `mtp`.
 
+- `make update`
+    Fetches any updates for the `kal3`, `kal4` and `kalgol` runtimes from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
+
 - `make install`
     Installs all executables, scripts and the runtime system. The default installation location is into `/usr/local`, however you can change this by specifying a new `prefix` as shown below:
 
@@ -61,30 +96,6 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 - `make distclean`
     Removes all intermediate and transient files created during compilation.
-
-### Required dependencies.
-#### Ubuntu and other Debian derived distributions.
-Packages required: `make` `build-essentials` `bison` `gnat`.
-#### MacOs
-?????
-#### Windows
-Only Windows10 + WSL2 is supported.
-
-Ensure you are running Windows 10 version 2004 or above [See here for details](https://docs.microsoft.com/en-us/windows/whats-new/whats-new-windows-10-version-2004).
-
-Enable [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-
-Choose a distribution of your choice and follow the instructions for Linux given above.
-
-I also *highly* recommend you install Microsoft's new [Windows Terminal](https://aka.ms/terminal).
-### Building from source
-Building from source should be the same on any modern Linux or MacOS installation.
-
-### Installation
-Simply `cd` to the root folder and type `make install` as root.
-
-### Running ee9
-Once completed execute the `kdf9_setup` command to create the ee9 runtime. By default this will be placed in a folder named `.kdf9/` in your `$HOME` directory but this can by changed by specifying a location in the `$KDF9RUNTIME` environment variable.
 
 *let me know if I have missed anything*
 ### ToDo
