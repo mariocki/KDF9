@@ -55,18 +55,30 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <ctype.h>
 
-#ifndef O_BINARY
-#define O_BINARY  0
+// see if it is a Microsoft compiler
+
+#ifdef WIN32
+#include <io.h>
+#else
+#include <unistd.h>
 #endif
+
+#ifndef O_BINARY
+#define O_BINARY   0
+#endif
+
+// stop grumbles from Visual studio
+#define _CRT_SECURE_NO_WARNINGS
+
 
 #define NSYM  2000
 
 unsigned char symval[NSYM];        // the value of the ABS
 char *symchars[NSYM];              // the same symbol in characters
-
+unsigned char symlen[NSYM];        // the length of the symbol
+int topix[256];                    // thw top index to start with for each possible character
 unsigned char *pttab[256];         // character form of each basic symbol when output as paper tape
 
 int ulform = 1;          // compound symbols have embedded underlines
@@ -101,12 +113,15 @@ void ulsym(int s, char *chs)
    if  ( excform != 0 )        // exclamation mark in front of compound symbol (Eldon2 TTY style)
    {  symval[nsyms] = s;
       buff[0] = '!';
+      symlen[nsyms] = strlen(buff);
       symchars[nsyms++] = strdup(buff);
    }
    if  ( strform != 0 )        // single quote as strop mark
    {  symval[nsyms] = s;
       buff[0] = '\'';
       strcat(buff+3, "'");     // buff contains stropped form of ABS
+      symlen[nsyms] = strlen(buff);
+// printf("%03o  len = %d  chars = %s  index = %d\n", symval[nsyms], symlen[nsyms], buff, nsyms);
       symchars[nsyms++] = strdup(buff);
    }
    if  ( ulform != 0 )         // underline chars before every character
@@ -118,14 +133,16 @@ void ulsym(int s, char *chs)
          buff[i++] = *chs;
       }
       buff[i] = 0;     // terminate string
+      symlen[nsyms] = strlen(buff);
       pttab[s] = symchars[nsyms++] = strdup(buff);
    }
 }
 
 void abs2char(char *chs, int abs)
-// makes entry for ABS that is 2 characters
+// makes entry for ABS that is 2 or more characters
 // Also it will work for any length string and is used for colon space equals
 {  symval[nsyms] = abs;
+   symlen[nsyms] = strlen(chs);
    pttab[abs] = symchars[nsyms++] = chs;
 }
 
@@ -134,6 +151,7 @@ void abs8bit(unsigned char ch, int abs)
 {  symval[nsyms] = abs;
    buff[0] = ch;
    buff[1] = 0;
+   symlen[nsyms] = 1;
    pttab[abs] = symchars[nsyms++] = strdup(buff);
 }
 
@@ -147,8 +165,10 @@ int convline(char *dataline, int loc)
    unsigned char wc, wwc;
 
    while  ( (wc = dataline[p]) != 0 )
-   {  i = nsyms;
-      while  ( --i > 0  &&  memcmp(dataline + p, symchars[i], strlen(symchars[i])) != 0 ) ;
+   {  i = topix[wc&255];
+      while  ( --i > 0  &&  memcmp(dataline + p, symchars[i], symlen[i]) != 0 ) ;
+
+// printf("i = %d  chars = %s  len = %d  p = %d  ch = %c  abs = %03o\n", i,  symchars[i], symlen[i], p, dataline[p], symval[i]);
 
       if  ( (wc = symval[i]) < 255 )
          store[++j] = wc;
@@ -157,7 +177,7 @@ int convline(char *dataline, int loc)
 
 //    fprintf(stdout, "i = %d  symval = %03o symchars = %s\n", i, symval[i], symchars[i]);
 //    fprintf(stdout, "recognised %03o %s\n", wc&255, dataline+p);
-      p += strlen(symchars[i]);
+      p += symlen[i];
 
    }
 
@@ -175,7 +195,7 @@ int convline(char *dataline, int loc)
 
 void settables(int starval)
 // create the conversion tables
-{  int i, j;
+{  int i, j, diff;
    char *ws, wc;
 
    abs8bit('?', 0377);          // unrcognised chars deliver a dummy
@@ -317,15 +337,26 @@ void settables(int starval)
    while  ( --i >= 2 )              // leave location 0 alone
    {  j = i;
       while  ( --j >= 1 )
-         if  ( strlen(symchars[i]) < strlen(symchars[j]) )
+      {  if  ( (diff = *(symchars[i]) - *(symchars[j])) == 0 )
+            diff = symlen[i] - symlen[j];
+         if  ( diff < 0 )
          {  ws = symchars[i];
             symchars[i] = symchars[j];
             symchars[j] = ws;
             wc = symval[i];
             symval[i] = symval[j];
             symval[j] = wc;
+            wc = symlen[i];
+            symlen[i] = symlen[j];
+            symlen[j] = wc;
          }
+      }
    }
+   printf("Table length = %d\n", nsyms);
+   for  ( i = 0; i<256; i++ )
+      topix[i] = 1;                 // any unknown character will not screw the conversion
+   for  ( i = 0; i<nsyms; i++ )
+      topix[*(symchars[i])] = i+1;
 }
 
 unsigned char emword[] = { 1,0377,0377,0377,0276,0240 };     // end message word at end of program
@@ -459,7 +490,7 @@ int main(int argc, char **argv)
                progid[i] = wc&037 | 040;
 
          i = sz = 12;
-         while  ( i >= 0 )
+         while  ( i > 0 )
          {  i -= 4;
             wc = (progid[i]<<18) + (progid[i+1]<<12) + (progid[i+2]<<6) + progid[i+3];
             progid[--sz] = wc;
