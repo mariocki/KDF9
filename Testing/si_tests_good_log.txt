@@ -1,0 +1,126 @@
+TEST PIB/POB from SI0 to TP:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+TEST PIC/POC from SI0 to TP:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+TEST PIB/POB from TR to SI0:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+TEST PIC/POC from TR to SI0:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+TEST PIC/POC from TR to SI1:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+TEST PIC/POC from SI1 to TP:
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}\||XYZ{}\||
+@abcdefg@abcdefg
+hijklmnohijklmno
+pqrstuvwpqrstuvw
+xyz    .xyz          |

@@ -2,8 +2,8 @@
 --
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -15,19 +15,20 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with Ada.Exceptions;
---
+with formatting;
 with HCI;
 with IOC.equipment;
 with plotter;
 with postscript;
+with settings;
 with tracing;
 
+use  formatting;
 use  HCI;
 use  IOC.equipment;
 use  plotter;
 use  postscript;
+use  settings;
 use  tracing;
 
 package body IOC.slow.shift.GP is
@@ -124,7 +125,7 @@ package body IOC.slow.shift.GP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_GP, Q_operand, set_offline);
+      start_slow_transfer(the_GP, Q_operand, set_offline, output_operation);
       put_symbols(the_GP, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POA;
@@ -166,7 +167,7 @@ package body IOC.slow.shift.GP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_GP, Q_operand, set_offline);
+      start_slow_transfer(the_GP, Q_operand, set_offline, output_operation);
       put_words(the_GP, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POC;
@@ -192,6 +193,23 @@ package body IOC.slow.shift.GP is
                             unit    => 0,
                             quantum => GP_quantum);
       GP0_number := b;
+      the_graph_plotter_is_enabled := True;
    end enable;
+
+   procedure notify_invalid_movement (from_x, from_y, step_x, step_y : in Integer) is
+   begin
+      trap_failing_IO_operation(
+                                GP0.all,
+                                "cannot move from <"
+                              & trimmed(from_x'Image)
+                              & ", "
+                              & trimmed(from_y'Image)
+                              & "> by <"
+                              & trimmed(step_x'Image)
+                              & ", "
+                              & trimmed(step_y'Image)
+                              & ">"
+                               );
+   end notify_invalid_movement;
 
 end IOC.slow.shift.GP;

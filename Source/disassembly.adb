@@ -2,8 +2,8 @@
 --
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,12 +16,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with exceptions;
 with formatting;
 with KDF9.CPU;
 with KDF9.decoding;
 
-use  exceptions;
 use  formatting;
 use  KDF9.CPU;
 use  KDF9.decoding;
@@ -491,8 +489,7 @@ package body disassembly is
              when POB_POD_Qq             => "{POB|POD}Qq",
              when POG_POL_Qq             => "{POG|POL}Qq",
              when POH_POK_Qq             => "{POH|POK}Qq",
-             when others                 => raise emulation_failure
-                                               with "invalid code in IO_skeleton"
+             when others                 => "invalid IO group syllable #" & oct_of(encoding)
          );
 
    begin  -- two_syllable_skeleton
@@ -598,8 +595,7 @@ package body disassembly is
           when JrNTR  => "JrNTR",
           when OS_OUT => "OUT",
           when EXITD  => "EXITD",
-          when others => raise emulation_failure
-                            with "invalid code in normal_jump_skeleton"
+          when others => "invalid jump group syllable #" & oct_of(encoding)
       );
 
    function data_access_skeleton (compressed_opcode : KDF9.compressed_opcode)
@@ -611,8 +607,7 @@ package body disassembly is
           when EaMqQ    => "EeMqQ",
           when TO_EaMqQ => "=EeMqQ",
           when SET      => "SET",
-          when others   => raise emulation_failure
-                              with "invalid compressed opcode in data_access_skeleton"
+          when others   => "invalid data access compressed opcode #" & oct_of(compressed_opcode)
       );
 
    function the_short_name_of (syllable_0 : KDF9.syllable)

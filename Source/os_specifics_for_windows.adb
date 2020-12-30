@@ -3,8 +3,8 @@
 -- Specific feature values and operation for the console terminal streams.
 -- This is the Windows (i.e., somewhat crippled) version.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -40,8 +40,7 @@ package body OS_specifics is
       -- Convince Windows not to corrupt binary data.
       response := setmode(C.int(fd), get_O_BINARY);
       if response < 0 then  -- Either setmode or get_O_BINARY failed.
-         raise Program_Error
-            with "make_transparent failed, response from _setmode was " & response'Image;
+         raise Program_Error with "make_transparent fails; _setmode response was " & response'Image;
       end if;
    end make_transparent;
 

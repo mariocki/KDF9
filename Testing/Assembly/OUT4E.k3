@@ -10,7 +10,7 @@ PROGRAM;                   (main program);
    V2 = 0;                 (for TSN);
    V3 = 0;                 (for label);
 
-   V4 = Q0/AV5/AV5;        (for TP0 tracing output);
+   V4 = Q0/AV5/AV5;        (for TP tracing output);
    V5 = 0;                 (tracing word);
 
    V6 = Q1/AYA0/AYA4095;   (for data output)
@@ -18,6 +18,8 @@ PROGRAM;                   (main program);
    V13 = B6445636400450277;  (TEST E);
    V14 = B5441424554004602;  (LABEL B);
    V15 = B4651565163500277;  (FINISH);
+   V18 = B4562625762027777;  (ERROR);
+
 
    (claim tape);
    V0; SET4; OUT; V1; =Q1; =C1;
@@ -31,15 +33,16 @@ PROGRAM;                   (main program);
    ERASE; ERASE;
    V14; =V5; POAQ10;
 
-   (FINISH message);
-   V15; =V5; POAQ10;
-
    V6; =Q6; C1 TO Q6;
 2;
    MWQ6; (write a big block);
+   PARQ6;
+   J777TR;
    J2;   (deliberate infinite loop to fill the tape);
 
-   MRWDQ0; (fail - should not get here);
+777;
+   V18; =V5; POAQ10; (this output should appear last);
+   ZERO; OUT;
 
 FINISH;
 |

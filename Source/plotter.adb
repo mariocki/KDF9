@@ -2,8 +2,8 @@
 --
 -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,12 +16,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with formatting;
-with KDF9;
+with IOC.slow.shift.GP;
 with postscript;
 
-use  formatting;
-use  KDF9;
+use  IOC.slow.shift.GP;
 use  postscript;
 
 package body plotter is
@@ -31,15 +29,11 @@ package body plotter is
    --   in either the positive or negative direction of each axis.
 
    type step is
-      record
-         dx, dy : Integer range -1 .. +1;
-      end record;
+     record
+        dx, dy : Integer range -1 .. +1;
+     end record;
 
    null_step : constant plotter.step := (0, 0);
-
-   function image (s : plotter.step)
-   return String
-   is ("<" & trimmed(s.dx'Image) & ", " & trimmed(s.dy'Image) & ">");
 
    function "+" (p : postscript.point; s : plotter.step)
    return postscript.point
@@ -72,152 +66,139 @@ package body plotter is
 
    the_pen_is_down : Boolean := False;
 
-   procedure notify_invalid_movement (this  : in postscript.point;
-                                      after : in plotter.step)
-      with Inline => False, No_Return;
-
-   procedure notify_invalid_movement (this  : in postscript.point;
-                                      after : in plotter.step) is
+   procedure ensure_the_validity_of (from  : in postscript.point;
+                                     step  : in plotter.step) is
    begin
-      trap_invalid_operand("impossible movement for plotter from "
-                       & image(this)
-                       & " by "
-                       & image(after));
-   end notify_invalid_movement;
-
-   procedure ensure_the_validity_of (this  : in postscript.point;
-                                     after : in plotter.step) is
-   begin
-      if this.x + after.dx < 0                     or else
-            this.y + after.dy < 0                  or else
-               this.x + after.dx > plot_limit.x    or else
-                  this.y + after.dy > plot_limit.y    then
-         notify_invalid_movement(this, after);
-      end if;
+     if from.x + step.dx < 0                     or else
+           from.y + step.dy < 0                  or else
+              from.x + step.dx > plot_limit.x    or else
+                 from.y + step.dy > plot_limit.y    then
+        notify_invalid_movement(from.x, from.y, step.dx, step.dy);
+     end if;
    end ensure_the_validity_of;
 
    procedure jump_to (p : in postscript.point)
-      with Inline;
+     with Inline;
 
    procedure jump_to (p : in postscript.point) is
    begin
-      -- Posit a new vector starting at p.
-      last_step := null_step;
-      plot_position := p;
-      start_position := p;
+     -- Posit a new vector starting at p.
+     last_step := null_step;
+     plot_position := p;
+     start_position := p;
    end;
 
    procedure jump_by (this_step : in plotter.step)
-      with Inline;
+     with Inline;
 
    procedure jump_by (this_step : in plotter.step) is
    begin
-      ensure_the_validity_of(this => plot_position, after => this_step);
-      jump_to(plot_position + this_step);
+     ensure_the_validity_of(from => plot_position, step => this_step);
+     jump_to(plot_position + this_step);
    end jump_by;
 
    procedure close_any_open_vector (stream : in out host_IO.stream) is
    begin
-      if the_pen_is_down                and then
-            start_position /= plot_position then
-         draw_a_PS_vector(stream, start_position, plot_position);
-         start_position := plot_position;
-      end if;
+     if the_pen_is_down                and then
+           start_position /= plot_position then
+        draw_a_PS_vector(stream, start_position, plot_position);
+        start_position := plot_position;
+     end if;
    end close_any_open_vector;
 
    procedure perform (action : in plotter.command; stream : in out host_IO.stream) is
 
-      procedure draw_to (p : in postscript.point)
-         with Inline;
+     procedure draw_to (p : in postscript.point)
+        with Inline;
 
-      procedure draw_to (p : in postscript.point) is
-      begin
-         if (plot_position - p) = last_step then
-            -- p is colinear with the previous step, so merely extend the vector to p.
-            plot_position := p;
-         else
-            -- Draw the whole vector and start a new one.
-            draw_a_PS_vector(stream, start_position, plot_position);
-            last_step := plot_position - p;
-            start_position := plot_position;
-            plot_position := p;
-         end if;
-      end draw_to;
+     procedure draw_to (p : in postscript.point) is
+     begin
+        if (plot_position - p) = last_step then
+           -- p is colinear with the previous step, so merely extend the vector to p.
+           plot_position := p;
+        else
+           -- Draw the whole vector and start a new one.
+           draw_a_PS_vector(stream, start_position, plot_position);
+           last_step := plot_position - p;
+           start_position := plot_position;
+           plot_position := p;
+        end if;
+     end draw_to;
 
-      procedure draw_by (this_step : in plotter.step)
-         with Inline;
+     procedure draw_by (this_step : in plotter.step)
+        with Inline;
 
-      procedure draw_by (this_step : in plotter.step) is
-      begin
-         ensure_the_validity_of(this => plot_position, after => this_step);
-         draw_to(plot_position + this_step);
-      end draw_by;
+     procedure draw_by (this_step : in plotter.step) is
+     begin
+        ensure_the_validity_of(from => plot_position, step => this_step);
+        draw_to(plot_position + this_step);
+     end draw_by;
 
-      procedure move_by (this_step : in plotter.step)
-         with Inline;
+     procedure move_by (this_step : in plotter.step)
+        with Inline;
 
-      procedure move_by (this_step : in plotter.step) is
-      begin
-         -- Convert from natural orientation of X axis to PostScript direction.
-         if the_pen_is_down then
-            draw_by((-this_step.dx, +this_step.dy));
-         else
-            jump_by((-this_step.dx, +this_step.dy));
-         end if;
-      end move_by;
+     procedure move_by (this_step : in plotter.step) is
+     begin
+        -- Convert from natural orientation of X axis to PostScript direction.
+        if the_pen_is_down then
+           draw_by((-this_step.dx, +this_step.dy));
+        else
+           jump_by((-this_step.dx, +this_step.dy));
+        end if;
+     end move_by;
 
    begin -- perform
-      case action is
-         when dummy =>
-            null;
-         when pen_up =>
-            close_any_open_vector(stream);
-            the_pen_is_down := False;
-         when pen_down =>
-            the_pen_is_down := True;
-         when go_pY =>
-            move_by((+0, +1));
-         when go_nY =>
-            move_by((+0, -1));
-         when go_pX =>
-            move_by((+1, +0));
-         when go_nX =>
-            move_by((-1, +0));
-         when go_pXpY =>
-            move_by((+1, +1));
-         when go_nXnY =>
-            move_by((-1, -1));
-         when go_pXnY =>
-            move_by((+1, -1));
-         when go_nXpY =>
-            move_by((-1, +1));
-         when others =>
-            -- EM causes a 'peculiar' motion, according to the Manual, Appendix 5.2, p.303,
-            --    and other codes cause 'unpredictable' effects.
-            -- ee9 therefore performs an arbitrary, but safe, operation: moving to the origin.
-            close_any_open_vector(stream);
-            plot_position := the_origin;
-      end case;
+     case action is
+        when dummy =>
+           null;
+        when pen_up =>
+           close_any_open_vector(stream);
+           the_pen_is_down := False;
+        when pen_down =>
+           the_pen_is_down := True;
+        when go_pY =>
+           move_by((+0, +1));
+        when go_nY =>
+           move_by((+0, -1));
+        when go_pX =>
+           move_by((+1, +0));
+        when go_nX =>
+           move_by((-1, +0));
+        when go_pXpY =>
+           move_by((+1, +1));
+        when go_nXnY =>
+           move_by((-1, -1));
+        when go_pXnY =>
+           move_by((+1, -1));
+        when go_nXpY =>
+           move_by((-1, +1));
+        when others =>
+           -- EM causes a 'peculiar' motion, according to the Manual, Appendix 5.2, p.303,
+           --    and other codes cause 'unpredictable' effects.
+           -- ee9 therefore performs an arbitrary, but safe, operation: moving to the origin.
+           close_any_open_vector(stream);
+           plot_position := the_origin;
+     end case;
    end perform;
 
    a_plot_is_open : Boolean := False;
 
    procedure open_the_plot_file (stream : in out host_IO.stream) is
    begin
-      if a_plot_is_open then
-         close_the_plot_file(stream);
-      end if;
-      plot_position := (0,0);
-      a_plot_is_open := True;
+     if a_plot_is_open then
+        close_the_plot_file(stream);
+     end if;
+     plot_position := (0,0);
+     a_plot_is_open := True;
    end open_the_plot_file;
 
    procedure close_the_plot_file (stream : in out host_IO.stream) is
    begin
-      if not a_plot_is_open then
-         return;
-      end if;
-      close_any_open_vector(stream);
-      a_plot_is_open := False;
+     if not a_plot_is_open then
+        return;
+     end if;
+     close_any_open_vector(stream);
+     a_plot_is_open := False;
    end close_the_plot_file;
 
 end plotter;

@@ -2,8 +2,8 @@
 --
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -159,38 +159,6 @@ package body formatting is
       end loop;
       return oct;
    end oct_of;
-
-   function as_DR_command (Q_operand : KDF9.Q_register)
-   return String is
-      sector : constant KDF9.Q_part := Q_operand.C/64;
-      drive  : constant KDF9.Q_part := Q_operand.C/16 mod 4;
-   begin
-      -- The drum geometry and I/O command bits are as defined in the DR package.
-      return "SECT"
-           & (if sector < 10 then "00" elsif sector < 100 then "0" else "")
-           & dec_of(sector)
-           & "D"
-           & dec_of(drive);
-   end as_DR_command;
-
-   function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
-   return String is
-      parameter : constant KDF9.Q_part := Q_operand.C/16;
-      seek_bits : constant := 6;
-      cylinder  : constant KDF9.Q_part := parameter mod 2**seek_bits;
-      disk_bits : constant := 4;
-      platter   : constant KDF9.Q_part := parameter  /  2**seek_bits mod 2**disk_bits;
-      drive     : constant KDF9.Q_part := parameter  /  2**seek_bits  /  2**disk_bits;
-   begin
-      -- The disc geometry and I/O command bits are as defined in the FD package.
-      if for_seek then
-         return "D" & dec_of(drive)
-              & "P" & dec_of(if for_FH then KDF9.Q_part'(16) else platter)
-              & "C" & dec_of(cylinder);
-      else -- for data transfer, parameter is sector #, with maximum 96 sectors per track.
-         return "SECT" & (if parameter < 10 then "0" else "") & dec_of(parameter);
-      end if;
-   end as_FD_command;
 
    -- Return "L', R'", or "L'" if R' is empty; "'" indicates removal of trailing blanks.
    function "-" (L, R : String)

@@ -2,8 +2,8 @@
 --
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -113,9 +113,10 @@ package tracing is
 
    type IOC_event_kind is (start_transfer,
                            finis_transfer,
-                           store_lockout,
                            buffer_lockout,
+                           store_lockout,
                            buffer_status);
+
 
    type IOC_FIFO_entry (kind : IOC_event_kind := start_transfer) is
       record
@@ -127,6 +128,7 @@ package tracing is
          is_for_Director : Boolean;
          priority_level  : KDF9.priority;
          context         : KDF9.context;
+         operation       : IOC.transfer_kind := IOC.some_other_operation;
          case kind is
             when start_transfer | finis_transfer =>
                completion_time : KDF9.us;
@@ -152,7 +154,8 @@ package tracing is
    procedure take_note_of_IO_start (
                                     device_name     : in IOC.device_name;
                                     completion_time : in KDF9.us;
-                                    control_word    : in KDF9.Q_register
+                                    control_word    : in KDF9.Q_register;
+                                    operation       : in IOC.transfer_kind := IOC.some_other_operation
                                    );
 
    procedure take_note_of_IO_finis (
@@ -164,12 +167,14 @@ package tracing is
                                     is_for_Director : Boolean;
                                     priority_level  : in KDF9.priority;
                                     completion_time : in KDF9.us;
-                                    control_word    : in KDF9.Q_register
+                                    control_word    : in KDF9.Q_register;
+                                    operation       : in IOC.transfer_kind := IOC.some_other_operation
                                    );
 
    procedure take_note_of_store_lockout  (device_name : in IOC.device_name);
 
-   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name);
+   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
+                                          operation   : in IOC.transfer_kind := IOC.some_other_operation);
 
    procedure take_note_of_test (
                                 device_name : in IOC.device_name;
