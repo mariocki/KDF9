@@ -36,20 +36,13 @@
       SET 17; OUT; REV; ERASE; SHL-24; !EXIT;
       !ALGOL;
 
-   !integer !procedure random (z); !value z; !integer z;
-      !KDF9 2/0/0/0;
-      V0 = 131071;
-      V1 = 2147483647;
-      {z}; V0; XD; CONT; V1; AND; VR; !EXIT;
-      !ALGOL;
-
 layout := format({ndddddddcc});
 open(30);
 
 z := 1729;
 !for i := 1 !step 1 !until 10000 !do
    !begin
-   z := random(z);
+   z := mod(131071 * z, 2147483647);
    a[i] := z
    !end;
 

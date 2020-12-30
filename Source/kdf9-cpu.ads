@@ -3,8 +3,8 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -349,6 +349,10 @@ package KDF9.CPU is
    function scaler (DF : CPU.f96)
    return KDF9.word
       with Inline;
+
+   procedure validate_scaler (E : in KDF9.word; where : in String)
+      with Inline => False,
+           Post   =>  resign(E) in -254 .. +256;
 
    -- Round a 96-bit double-precision floating-point number to 48 bit format.
 

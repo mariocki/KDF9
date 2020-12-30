@@ -3,8 +3,8 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -19,15 +19,13 @@
 
 with Ada.Exceptions;
 --
-with exceptions;
+with disassembly;
 with IOC.slow;
 with KDF9.CPU;
 with KDF9.PHU_store;
 with tracing;
 
-with IOC.the_locker_of;
-
-use  exceptions;
+use  disassembly;
 use  KDF9.CPU;
 use  KDF9.PHU_store;
 use  tracing;
@@ -49,10 +47,6 @@ package body IOC is
          the_CPDAR(the_buffer.number) := allocated;
       end if;
     end set_state_of;
-
-   function is_allocated (the_buffer : device_class_access)
-   return Boolean
-   is (the_buffer.is_allocated);
 
    function is_unallocated (the_buffer : device_class_access)
    return Boolean
@@ -91,14 +85,13 @@ package body IOC is
             truncate(the_buffer.stream, to_length => 0);
          end if;
       else
-         trap_operator_error(the_buffer.device_name, "cannot be found");
+         trap_operator_error(the_buffer.device_name & ": cannot be found");
       end if;
       IOC.device(the_buffer).Initialize;
    end open;
 
    overriding
    procedure Finalize (the_buffer : in out IOC.device) is
-      buffer : constant String  := oct_of(KDF9.Q_part(the_buffer.number), 2);
    begin
       if IOC.device'Class(the_buffer).is_open   and then
             IOC.device'Class(the_buffer).usage /= 0 then
@@ -107,7 +100,10 @@ package body IOC is
    exception
       when error : others =>
          raise emulation_failure
-            with "Finalizing buffer #" & buffer & "; " & Ada.Exceptions.Exception_Information(error);
+            with "Finalize for buffer #"
+               & oct_of(KDF9.Q_part(the_buffer.number), 2)
+               & "; "
+               & Ada.Exceptions.Exception_Information(error);
    end Finalize;
 
    function is_open (the_buffer : IOC.device)
@@ -186,11 +182,9 @@ package body IOC is
       if buffer(the_device.number) /= null then
          raise emulation_failure
             with "attempt to install a second device, namely "
-               & the_device.device_name
+               & device_name_of(the_device)
                & ", on buffer #"
-               & oct_of(the_device.number)
-               & " which already has "
-               & buffer(the_device.number).device_name;
+               & oct_of(the_device.number);
       end if;
       buffer(the_device.number) := the_device'Unchecked_Access;
    end install;
@@ -205,8 +199,8 @@ package body IOC is
       Q : constant KDF9.Q_register := canonical(Q_operand);
    begin
       if not the_buffer.is_open then
-         trap_operator_error(the_buffer.device_name,
-                             " on buffer #"
+         trap_operator_error(the_buffer.device_name
+                           & " on buffer #"
                            & oct_of(KDF9.Q_part(the_buffer.number), 2)
                            & " is offline");
       end if;
@@ -220,14 +214,14 @@ package body IOC is
                & oct_of(KDF9.Q_part(the_buffer.number), 2);
       end if;
       if not the_CPDAR(the_buffer.number) and the_CPU_state /= Director_state then
-         trap_illegal_instruction("unallocated I/O device " & the_buffer.device_name);
+         trap_invalid_instruction("unallocated I/O device " & the_buffer.device_name);
       end if;
    end validate_device;
 
    procedure validate_bounds (Q_operand  : in KDF9.Q_register) is
    begin
       if Q_operand.I > Q_operand.M then
-         trap_illegal_instruction("invalid I/O Q operand: I > M");
+         trap_invalid_instruction("invalid I/O Q operand: I > M");
       end if;
       validate_address_range(Q_operand.I, Q_operand.M);
    end validate_bounds;
@@ -242,7 +236,7 @@ package body IOC is
    procedure validate_parity (the_buffer : in IOC.device'Class) is
    begin
       if the_buffer.is_abnormal then
-         trap_illegal_instruction("the buffer for "
+         trap_invalid_instruction("the buffer for "
                                 & the_buffer.device_name
                                 & " is abnormal (parity error or end-of-data)");
       end if;
@@ -251,16 +245,31 @@ package body IOC is
    procedure require_positive_count (count : in KDF9.Q_part) is
    begin
       if resign(count) <= 0 then
-         trap_illegal_instruction("nonpositive I/O repetition count");
+         trap_invalid_instruction("nonpositive I/O repetition count");
       end if;
    end require_positive_count;
 
    procedure require_nonnegative_count (count : in KDF9.Q_part) is
    begin
       if resign(count) < 0 then
-         trap_illegal_instruction("negative I/O repetition count");
+         trap_invalid_instruction("negative I/O repetition count");
       end if;
    end require_nonnegative_count;
+
+   function real (Q : KDF9.Q_register)
+   return KDF9.Q_register is
+   begin
+      if the_CPU_state = Director_state then
+         return Q;
+      elsif Q.I+BA > 32767 or Q.M+BA > 32767 then
+         effect(LIV_interrupt,
+                "transfer address too high in Q" & Q.C'Image & "/" & Q.I'Image & "/" & Q.M'Image);
+         raise emulation_failure
+            with "effect(LIV_interrupt, ...) returned to IOC.real";
+      else
+         return (Q.C, Q.I+BA, Q.M+BA);
+      end if;
+   end real;
 
    function image (the_buffer : in IOC.device'Class)
    return String
@@ -280,7 +289,7 @@ package body IOC is
                    is_held_up => True,
                    blockage   => (buffer_busy, the_buffer.number, by_INTQq => False)
                   );
-      take_note_of_buffer_lockout(the_buffer.device_name, the_buffer.operation);
+      take_note_of_buffer_lockout(the_buffer.device_name);
       if the_execution_mode = boot_mode then
          LOV_if_user_mode(the_buffer.device_name & " is busy");
       else
@@ -309,26 +318,21 @@ package body IOC is
       effect(code, the_buffer.image);
     end effect_device_interrupt;
 
-   function is_DMAing (the_buffer : in IOC.device'Class)
-   return Boolean
-   is (the_buffer.operation in input_operation | output_operation);
-
    procedure start_data_transfer (the_buffer   : in out IOC.device'Class;
                                   Q_operand    : in KDF9.Q_register;
                                   set_offline  : in Boolean;
                                   busy_time    : in KDF9.us;
-                                  operation    : in IOC.transfer_kind := some_other_operation) is
+                                  is_DMAing    : in Boolean := True) is
       pragma Unreferenced(set_offline);
-      transferring_data : constant Boolean := operation in input_operation | output_operation;
-      time_now          : constant KDF9.us := the_clock_time;
-      real_Q            : KDF9.Q_register := Q_operand;
+      time_now  : constant KDF9.us := the_clock_time;
+      real_Q    : KDF9.Q_register := Q_operand;
       EDT_needed,
-      PR_needed         : Boolean;
+      PR_needed : Boolean;
    begin
       -- Check the IO parameters and the buffer state, and handle any lockout set by another device.
       validate_device(the_buffer, Q_operand);
 
-      if transferring_data then
+      if is_DMAing then
          validate_bounds(real_Q);
          real_Q := (real_Q.C, real_Q.I+BA, real_Q.M+BA);
       else
@@ -352,7 +356,7 @@ package body IOC is
          end if;
       end if;
 
-      if transferring_data                            and then
+      if start_data_transfer.is_DMAing                and then
             there_are_locks_in_physical_addresses(real_Q) then
          LOV_if_user_mode(
                           "in "
@@ -367,7 +371,7 @@ package body IOC is
       the_buffer.is_for_Director := (the_CPU_state = Director_state);
       the_buffer.priority_level  := CPL;
       the_buffer.control_word    := real_Q;
-      the_buffer.operation       := operation;
+      the_buffer.is_DMAing       := is_DMAing;
       the_buffer.order_count     := ICR+1;
       the_buffer.order_address   := CIA;
       the_buffer.decoded_order   := INS;
@@ -375,7 +379,7 @@ package body IOC is
       the_buffer.transfer_time   := busy_time;
       the_buffer.completion_time := the_buffer.initiation_time + busy_time;
 
-      if busy_time > 0 or transferring_data then
+      if busy_time > 0 or is_DMAing then
          if the_buffer.completion_time < the_next_interrupt_time then
             the_next_interrupt_time := the_buffer.completion_time;
          end if;
@@ -383,8 +387,7 @@ package body IOC is
          take_note_of_IO_start(
                                the_buffer.device_name,
                                the_buffer.completion_time,
-                               the_buffer.control_word,
-                               the_buffer.operation
+                               the_buffer.control_word
                               );
       else
          the_buffer.is_busy := False;
@@ -397,8 +400,7 @@ package body IOC is
                                 the_buffer.is_for_Director,
                                 the_buffer.priority_level,
                                 the_buffer.completion_time,
-                                the_buffer.control_word,
-                                the_buffer.operation
+                                the_buffer.control_word
                                );
       end if;
       PHU(CPL) := idle_PHU;
@@ -447,19 +449,18 @@ package body IOC is
                                 the_buffer.is_for_Director,
                                 the_buffer.priority_level,
                                 the_buffer.completion_time,
-                                the_buffer.control_word,
-                                the_buffer.operation
+                                the_buffer.control_word
                                );
       end if;
 
       need_EDT := the_buffer.is_for_Director;
 
       -- Clear down the transfer and idle the buffer.
+      the_buffer.is_busy := False;
+      the_buffer.is_for_Director := False;
       if the_buffer.is_DMAing then
          unlock_absolute_addresses(the_buffer.control_word);
       end if;
-      the_buffer.is_busy := False;
-      the_buffer.is_for_Director := False;
 
       -- The following code is somewhat redundant, but written like this to exactly mirror the
       -- logic stated in the KDF9 TIME-SHARING DIRECTOR SUPPORT DOCUMENTATION of 1-May-1965.
@@ -574,6 +575,97 @@ package body IOC is
       end loop outer_loop;
    end complete_all_extant_transfers;
 
+   function the_buffer_responsible_for (address : KDF9.Q_part)
+   return KDF9.Q_part;
+
+   procedure diagnosis is
+      Q : KDF9.Q_register := real((0, 0, 31));
+      B : KDF9.Q_part;
+   begin
+      if not debugging_is_enabled then return; end if;
+      for g in Q_part'(0) .. 100 loop
+         if there_are_locks_in_physical_addresses(KDF9.Q_register'(0, 32*g, 32*g + 31)) then
+            output_line("there are locks in group" & g'Image & " PHY" & Q_part'(32*g)'Image);
+            B := the_buffer_responsible_for(32*g);
+            output("the_buffer_responsible_for is" & B'Image);
+            if B /= 16 then output_line(buffer(B).device_name); else output_line(""); end if;
+         end if;
+      end loop;
+      for the_buffer of buffer loop
+         if the_buffer /= null                        and then
+            the_buffer.initiation_time /= KDF9.us'Last then
+            output_line;
+            output_line("Current state of buffer #" & oct_of(the_buffer.number, 2));
+            output_line(
+                        "   device: " & the_buffer.device_name
+                      & "     kind: " & the_buffer.kind'Image
+                      & "     unit: " & the_buffer.unit'Image
+                       );
+            output_line("  is_busy: " & the_buffer.is_busy'Image);
+            output_line("   DMAing: " & the_buffer.is_DMAing'Image);
+            output_line(" off_line: " & the_buffer.is_offline'Image);
+            output_line(" abnormal: " & the_buffer.is_abnormal'Image);
+            output_line(" Director: " & the_buffer.is_for_Director'Image);
+            output_line(" priority: " & the_buffer.priority_level'Image);
+            output_line("initiated: " & the_buffer.initiation_time'Image);
+            output_line("xfer_time: " & the_buffer.transfer_time'Image);
+            output_line("completes: " & the_buffer.completion_time'Image);
+            output_line("  address: " & oct_of(the_buffer.order_address));
+            Q := the_buffer.control_word;
+            output_line(
+                        "  control: "
+                      & "Q"
+                      & Q.C'Image
+                      &"/"
+                      & group(Q.I)'Image
+                      & "/"
+                      & group(Q.M)'Image
+                       );
+            if Q.I <= max_address               and then
+                Q.M <= max_address              and then
+                   Q.I <= the_buffer.control_word.M then
+               output_line(
+                           "locked at: "
+                         & group(Q.I)'Image
+                         & ".."
+                         & group(Q.M)'Image
+                         & " is "
+                         & there_are_locks_in_physical_addresses(Q)'Image
+                          );
+            end if;
+            output_line("order ICR: " & the_buffer.order_count'Image);
+            output_line("    order: " & the_full_name_of(the_buffer.decoded_order));
+         end if;
+      end loop;
+   end diagnosis;
+
+   function the_buffer_responsible_for (address : KDF9.Q_part)
+   return KDF9.Q_part is
+      candidate_found  : Boolean := False;
+      candidate_time   : KDF9.us := KDF9.us'Last;
+      candidate_number : KDF9.buffer_number;
+   begin
+      -- Select the buffer active in the_group;
+      --    if there is more than one, choose the buffer with the earliest completion time.
+      -- The latter case should not arise in practice, but is allowed by the hardware.
+      for b in buffer'Range loop
+         if buffer(b) /= null                                      and then
+               buffer(b).is_busy                                   and then
+                  buffer(b).completion_time < candidate_time       and then
+                     group(address) in group(buffer(b).control_word.I)
+                                    .. group(buffer(b).control_word.M) then
+            candidate_number := b;
+            candidate_time   := buffer(b).completion_time;
+            candidate_found  := True;
+         end if;
+      end loop;
+      if candidate_found then
+         return candidate_number;
+      else
+         return 16;
+      end if;
+   end the_buffer_responsible_for;
+
    procedure handle_a_main_store_lockout is
       the_buffer : KDF9.buffer_number;
    begin
@@ -582,7 +674,7 @@ package body IOC is
                    blockage   => (locked_core, group_address(group(the_locked_out_address)))
                   );
       -- Store access LOV interrupts invoke instruction restart outside Director.
-      the_buffer := the_locker_of(the_locked_out_address);
+      the_buffer := the_buffer_responsible_for(the_locked_out_address);
       take_note_of_store_lockout(device_name_of(buffer(the_buffer).all));
       if the_execution_mode = boot_mode then
          if_user_mode_then_LOV(the_locked_out_address);
@@ -608,7 +700,7 @@ package body IOC is
          finalize_transfer(the_buffer, EDT_needed, PR_needed);
       end if;
       the_buffer.is_busy     := False;
-      the_buffer.operation   := some_other_operation;
+      the_buffer.is_DMAing   := False;
       the_buffer.is_abnormal := False;
       the_buffer.is_offline  := set_offline;
    end MANUAL_CT;
@@ -625,7 +717,7 @@ package body IOC is
                       is_held_up => True,
                       blockage   => (buffer_busy, the_buffer.number, by_INTQq => True)
                      );
-         take_note_of_buffer_lockout(the_buffer.device_name, the_buffer.operation);
+         take_note_of_buffer_lockout(the_buffer.device_name);
          if the_execution_mode = boot_mode then
             step := KDF9.us'Max((the_buffer.completion_time - now) / 16, 1);
             advance_the_clock(KDF9.us'Min(the_buffer.completion_time, now + step));
@@ -743,28 +835,15 @@ package body IOC is
       elsif XY = "TR" then -- Tape Reader
          return choose(TR_synonyms);
       else
-         raise emulation_failure with "in IOC.mnemonic for '" & order & "' on " & class;
+         raise emulation_failure
+            with "in IOC.mnemonic for '" & order & "' on " & class;
       end if;
    end mnemonic;
 
-   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String) is
-      the_diagnostic : constant String := "%" & the_message & " on " & the_buffer.device_name;
+   procedure trap_invalid_IO_operation (order : in String; buffer : in IOC.device) is
    begin
-      if the_execution_mode in program_mode | test_program_mode then
-         raise IO_error with the_diagnostic;
-      elsif the_CPU_state = program_state then
-         the_buffer.is_abnormal := True;
-         raise abandon_this_order with the_diagnostic;
-      else
-         -- The Director itself has gone seriously wrong.
-         raise Director_IO_error with the_diagnostic;
-      end if;
-   end trap_failing_IO_operation;
-
-   procedure trap_illegal_IO_operation (order : in String; buffer : in IOC.device) is
-   begin
-      trap_illegal_instruction(order & " cannot be used on " & buffer.device_name);
-   end trap_illegal_IO_operation;
+      trap_invalid_instruction(order & " cannot be used on " & buffer.device_name);
+   end trap_invalid_IO_operation;
 
    procedure PIA (the_buffer  : in out IOC.device;
                   Q_operand   : in KDF9.Q_register;
@@ -772,7 +851,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIA", the_buffer);
+      trap_invalid_IO_operation("PIA", the_buffer);
    end PIA;
 
    procedure PIB (the_buffer  : in out IOC.device;
@@ -781,7 +860,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIB", the_buffer);
+      trap_invalid_IO_operation("PIB", the_buffer);
    end PIB;
 
    procedure PIC (the_buffer  : in out IOC.device;
@@ -790,7 +869,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIC", the_buffer);
+      trap_invalid_IO_operation("PIC", the_buffer);
    end PIC;
 
    procedure PID (the_buffer  : in out IOC.device;
@@ -799,7 +878,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PID", the_buffer);
+      trap_invalid_IO_operation("PID", the_buffer);
    end PID;
 
    procedure PIE (the_buffer  : in out IOC.device;
@@ -808,7 +887,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIE", the_buffer);
+      trap_invalid_IO_operation("PIE", the_buffer);
    end PIE;
 
    procedure PIF (the_buffer  : in out IOC.device;
@@ -817,7 +896,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIF", the_buffer);
+      trap_invalid_IO_operation("PIF", the_buffer);
    end PIF;
 
    procedure PIG (the_buffer  : in out IOC.device;
@@ -826,7 +905,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIG", the_buffer);
+      trap_invalid_IO_operation("PIG", the_buffer);
    end PIG;
 
    procedure PIH (the_buffer  : in out IOC.device;
@@ -835,7 +914,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PIH", the_buffer);
+      trap_invalid_IO_operation("PIH", the_buffer);
    end PIH;
 
    procedure PMA (the_buffer  : in out IOC.device;
@@ -844,7 +923,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PMA", the_buffer);
+      trap_invalid_IO_operation("PMA", the_buffer);
    end PMA;
 
    procedure PMB (the_buffer  : in out IOC.device;
@@ -873,7 +952,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PMD", the_buffer);
+      trap_invalid_IO_operation("PMD", the_buffer);
    end PMD;
 
    procedure PME (the_buffer  : in out IOC.device;
@@ -882,7 +961,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PME", the_buffer);
+      trap_invalid_IO_operation("PME", the_buffer);
    end PME;
 
    procedure PMF (the_buffer  : in out IOC.device;
@@ -901,7 +980,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PMG", the_buffer);
+      trap_invalid_IO_operation("PMG", the_buffer);
    end PMG;
 
 -- procedure PMH is subsumed by SLOC.
@@ -912,7 +991,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PMK", the_buffer);
+      trap_invalid_IO_operation("PMK", the_buffer);
    end PMK;
 
    procedure PML (the_buffer  : in out IOC.device;
@@ -921,7 +1000,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("PML", the_buffer);
+      trap_invalid_IO_operation("PML", the_buffer);
    end PML;
 
    procedure POA (the_buffer  : in out IOC.device;
@@ -930,7 +1009,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POA", the_buffer);
+      trap_invalid_IO_operation("POA", the_buffer);
    end POA;
 
    procedure POB (the_buffer  : in out IOC.device;
@@ -939,7 +1018,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POB", the_buffer);
+      trap_invalid_IO_operation("POB", the_buffer);
    end POB;
 
    procedure POC (the_buffer  : in out IOC.device;
@@ -948,7 +1027,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POC", the_buffer);
+      trap_invalid_IO_operation("POC", the_buffer);
    end POC;
 
    procedure POD (the_buffer  : in out IOC.device;
@@ -957,7 +1036,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POD", the_buffer);
+      trap_invalid_IO_operation("POD", the_buffer);
    end POD;
 
    procedure POE (the_buffer  : in out IOC.device;
@@ -966,7 +1045,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POE", the_buffer);
+      trap_invalid_IO_operation("POE", the_buffer);
    end POE;
 
    procedure POF (the_buffer  : in out IOC.device;
@@ -975,7 +1054,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POF", the_buffer);
+      trap_invalid_IO_operation("POF", the_buffer);
    end POF;
 
    procedure POG (the_buffer  : in out IOC.device;
@@ -984,7 +1063,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POG", the_buffer);
+      trap_invalid_IO_operation("POG", the_buffer);
    end POG;
 
    procedure POH (the_buffer  : in out IOC.device;
@@ -993,7 +1072,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POH", the_buffer);
+      trap_invalid_IO_operation("POH", the_buffer);
    end POH;
 
    procedure POK (the_buffer  : in out IOC.device;
@@ -1002,7 +1081,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POK", the_buffer);
+      trap_invalid_IO_operation("POK", the_buffer);
    end POK;
 
    procedure POL (the_buffer  : in out IOC.device;
@@ -1011,7 +1090,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_IO_operation("POL", the_buffer);
+      trap_invalid_IO_operation("POL", the_buffer);
    end POL;
 
 end IOC;

@@ -2,8 +2,8 @@
 --
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -189,7 +189,8 @@ package body IOC.slow.shift.FW is
          begin
             if the.prompt_length = the.total_length then
                -- A null response, so terminate the program.
-               raise exceptions.quit_request with "at the prompt: '" & the_prompt & "'";
+               raise exceptions.quit_request
+                     with "at the prompt: '" & the_prompt & "'";
             end if;
             next_interaction := next_interaction + 1;
             if the.text(1..the.prompt_length-1) = the_prompt and then
@@ -468,7 +469,6 @@ package body IOC.slow.shift.FW is
       set_text_style_to_plain(the_FW.output);
       set_text_colour_to_black(the_FW.output);
       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
-      flush(the_FW.output);
 
    exception
 
@@ -499,7 +499,7 @@ package body IOC.slow.shift.FW is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_FW, Q_operand, set_offline);
       write(the_FW, Q_operand);
       lock_out_relative_addresses(Q_operand);
       reset(the_FW.stream);
@@ -511,10 +511,10 @@ package body IOC.slow.shift.FW is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_FW, Q_operand, set_offline);
       write_to_EM(the_FW, Q_operand);
       lock_out_relative_addresses(Q_operand);
-      -- reset(the_FW.stream);
+      reset(the_FW.stream);
    end POB;
 
    procedure put_words (the_FW         : in out FW.device;
@@ -624,7 +624,7 @@ package body IOC.slow.shift.FW is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_FW, Q_operand, set_offline);
       words_write(the_FW, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POC;
@@ -635,7 +635,7 @@ package body IOC.slow.shift.FW is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_FW, Q_operand, set_offline);
       words_write_to_EM(the_FW, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POD;
@@ -664,8 +664,8 @@ package body IOC.slow.shift.FW is
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if already_enabled then trap_operator_error("FW:", "more than one unit specified"); end if;
-      if b /= 0 then trap_operator_error("FW0", "must be on buffer 0"); end if;
+      if already_enabled then trap_operator_error("more than 1 FW unit specified"); end if;
+      if b /= 0 then trap_operator_error("FW0 must be on buffer 0"); end if;
       FW0 := new FW.device (number  => b,
                             kind    => FW_kind,
                             unit    => 0,

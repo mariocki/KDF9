@@ -2,8 +2,8 @@
 --
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -61,8 +61,8 @@ package settings is
    --    they are both requested, and offered by the_diagnostic_mode.
    -- These requests may be set by the miscellany and visibilty options.
 
-   miscellany_flags  : constant String := "abdefghikmnopqrstwxz.0123456789ABDEFGHIKMNOPQRSTWXZ";
-   miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|m|n|o|p|q|r|s|t|w|x|z|.|0..9}";
+   miscellany_flags  : constant String := "adefghimnopqrstwxz0123456789ADEFGHILMNOPQRSTWXZ";
+   miscellany_prompt : constant String := "{a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|1..9}";
 
    the_log_is_wanted,
    API_logging_is_wanted,

@@ -2,8 +2,8 @@
 --
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -59,7 +59,6 @@ package body settings is
    end is_invalid_miscellany_flag;
 
    procedure set_this_miscellany_flag (option : in Character) is
-      use IOC.equipment;
    begin
       if is_invalid_miscellany_flag(option) then
          log_line(
@@ -71,15 +70,11 @@ package body settings is
       end if;
       case option is
          when '-'        =>
-            null;  -- Ignore hyphens, to make the calling scripts easier.
-         when '.'        =>
-            time_limit := 1_000_000;
-         when '0' .. '9' =>
-            time_limit := (Character'Pos(option) - Character'Pos('0') + 1) * 100_000_000;
+            null;  -- Ignore hyphens to make the calling scripts easier.
+         when '1' .. '9' =>
+            time_limit := (Character'Pos(option) - Character'Pos('0')) * 10_000_000;
          when 'a' | 'A' =>
             API_logging_is_wanted := False;
-         when 'b' | 'B' =>
-            choice(KDF9.buffer_number'(15)) := SI;
          when 'd' | 'D' =>
             debugging_is_enabled := True;
          when 'e' | 'E' =>
@@ -92,8 +87,6 @@ package body settings is
             any_histogram_is_wanted := False;
          when 'i' | 'I' =>
             interrupt_tracing_is_wanted := False;
-         when 'k' | 'K' =>
-            choice(KDF9.buffer_number'(14)) := DR;
          when 'm' | 'M' =>
             the_terminal_is_ANSI_compatible := False;
          when 'n' | 'N' =>
@@ -126,7 +119,7 @@ package body settings is
             peripheral_tracing_is_wanted := False;
             retrospective_tracing_is_wanted := False;
          when others =>
-            raise emulation_failure with "invalid miscellany flag not previously failed";
+            raise emulation_failure with "invalid miscellany flag";
       end case;
       set_diagnostic_mode(the_diagnostic_mode);
    end set_this_miscellany_flag;
@@ -152,7 +145,7 @@ package body settings is
    begin -- display_execution_modes
       if not the_log_is_wanted then return; end if;
       if for_this_run = "" then
-         log("Resuming the run");
+         log("Restarting the run");
       else
          log(
              case the_execution_mode is
@@ -310,7 +303,6 @@ package body settings is
                log_line("***** Error in lower address; no breakpoint set.");
                return;
          end;
-
          log_new_line;
          log_line(
                   "Lower breakpoint: "
@@ -321,7 +313,6 @@ package body settings is
                   iff => the_log_is_wanted
                  );
          breakpoints(start) := True;
-
          begin
             get_word(settings_file, KDF9.word(end_point));
          exception

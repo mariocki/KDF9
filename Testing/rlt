@@ -5,4 +5,4 @@
 >MT4
 >MT5
 >ST0
-nine_priv RLT ${1:-RLT_data} $2 $3 $4
+nine_test RLT ${1:-RLT_data} $2 $3 $4

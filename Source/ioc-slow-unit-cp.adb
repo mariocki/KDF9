@@ -2,8 +2,8 @@
 --
 -- Emulation of a card punch buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -93,7 +93,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       write_card(the_CP, Q_operand, max_words => 20);
       lock_out_relative_addresses(Q_operand);
    end POA;
@@ -103,7 +103,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       write_card(the_CP, Q_operand, max_words => 20, writing_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end POB;
@@ -113,7 +113,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       words_write_card(the_CP, Q_operand, max_words => 160);
       lock_out_relative_addresses(Q_operand);
    end POC;
@@ -123,7 +123,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       words_write_card(the_CP, Q_operand, max_words => 160, writing_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end POD;
@@ -149,7 +149,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => False);
       lock_out_relative_addresses(Q_operand);
    end POG;
@@ -159,7 +159,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end POH;
@@ -169,7 +169,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       -- See the Manual, p289.
       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => True);
       lock_out_relative_addresses(Q_operand);
@@ -180,7 +180,7 @@ package body IOC.slow.unit.CP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+      start_slow_transfer(the_CP, Q_operand, set_offline);
       -- See the Manual, p289.
       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => False);
       lock_out_relative_addresses(Q_operand);
@@ -222,7 +222,7 @@ package body IOC.slow.unit.CP is
                                   quantum => CP_quantum);
             CP1_number := b;
          when others =>
-            trap_operator_error("CP:", "more than two units specified");
+            trap_operator_error("more than 2 CP units specified");
       end case;
       unit := unit + 1;
    end enable;

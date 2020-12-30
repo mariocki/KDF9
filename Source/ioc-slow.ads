@@ -2,8 +2,8 @@
 --
 -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -60,8 +60,7 @@ private
    -- Set the new buffer state, and project the next interrupt time.
    procedure start_slow_transfer (the_buffer   : in out slow.device;
                                   Q_operand    : in KDF9.Q_register;
-                                  set_offline  : in Boolean;
-                                  operation    : in IOC.transfer_kind := some_other_operation);
+                                  set_offline  : in Boolean);
 
    -- Read a character from the stream and deal with any input file concatenation.
    procedure get_char_from_stream (char       : out Character;

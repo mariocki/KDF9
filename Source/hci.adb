@@ -8,8 +8,8 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -145,14 +145,6 @@ package body HCI is
          log("ee9: " & message);
       end if;
    end log_ee9_status;
-
-   procedure log_API_message (message  : in String;
-                              skip     : in Natural := 1) is
-   begin
-      if API_logging_is_wanted then
-         log_ee9_status(message, skip, True);
-      end if;
-   end log_API_message;
 
    procedure hoot (message : in String := "") is
    begin

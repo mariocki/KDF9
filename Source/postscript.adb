@@ -2,8 +2,8 @@
 --
 -- Elementary Encapsulated PostScript (EPS) line drawing.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,17 +16,20 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Exceptions;
---
-with exceptions;
+with formatting;
+with KDF9;
 
-use  Ada.Exceptions;
---
-use  exceptions;
+use  formatting;
+use  KDF9;
 
 package body postscript is
 
    use host_IO;
+
+   function image (p : postscript.point)
+   return String
+   is ("<" & trimmed(p.x'Image) & ", " & trimmed(p.y'Image) & ">");
+
 
    -- A path is a series of vectors v1, v2, ..., vn such that the last point
    --    of vi is the same as the first point of v(i+1),
@@ -70,13 +73,13 @@ package body postscript is
    end put_unit_line;
 
    procedure put_integer (stream : in out host_IO.stream; i : Integer) is
-      integer_image  : constant String := i'Image;
+      image  : constant String := i'Image;
    begin
       ensure_separation(stream);
-      if integer_image(integer_image'First) /= ' ' then
-         put(stream, integer_image);
+      if image(image'First) /= ' ' then
+         put(stream, image);
       else  -- Suppress the nuisance blank character.
-         put(stream, integer_image(integer_image'First+1..integer_image'Last));
+         put(stream, image(image'First+1..image'Last));
       end if;
    end put_integer;
 
@@ -124,9 +127,9 @@ package body postscript is
       end if;
       the_last_point_in_the_path := final;
    exception
-      when error : others =>
+      when others =>
          close(stream);
-         raise emulation_failure with "drawing a PostScript vector: " & Exception_Information(error);
+         raise;
    end draw_a_PS_vector;
 
    subtype RGB is String(1..11);
@@ -217,9 +220,9 @@ package body postscript is
 
       put_line(stream, "save");
    exception
-      when error : others =>
+      when others =>
          close(stream);
-         raise emulation_failure with "initializing PostScript: " & Exception_Information(error);
+         raise;
    end initialize_PS_output;
 
    procedure finalize_PS_output (stream : in out host_IO.Stream) is
@@ -232,7 +235,7 @@ package body postscript is
          b : bound_string := (others => ' ');
       begin
          if n_image'Length > bound_string'Length then
-            raise emulation_failure with "infeasible PostScript bounding box size: " & n_image;
+            trap_invalid_operand("infeasible PostScript bounding box size");
          else
             b(b'Last-n_image'Length+b'First .. b'Last) := n_image;
             return b;
@@ -256,9 +259,9 @@ package body postscript is
 
       close(stream);
    exception
-      when error : others =>
+      when others =>
          close(stream);
-         raise emulation_failure with "closing PostScript output: " & Exception_Information(error);
+         raise;
    end finalize_PS_output;
 
 end postscript;

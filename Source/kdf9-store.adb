@@ -2,8 +2,8 @@
 --
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -32,7 +32,7 @@ package body KDF9.store is
 
    procedure diagnose_invalid_address (message : in String; address : in KDF9.word) is
    begin
-      trap_illegal_instruction(message & " =" & address'Image);
+      trap_invalid_instruction(message & " =" & address'Image);
    end diagnose_invalid_address;
 
    -- Check that EA, EA+BA are valid; LIV if invalid.
@@ -91,7 +91,6 @@ package body KDF9.store is
        PA2 : constant KDF9.Q_part := EA2 + BA;
    begin
       validate_address_range (EA1, EA2);
-
       if there_are_locks_in_physical_addresses(KDF9.Q_register'(C => 0, I => PA1, M => PA2)) then
          if the_CPU_state /= Director_state then
             if_user_mode_then_LOV(PA1, PA2, solo => False);

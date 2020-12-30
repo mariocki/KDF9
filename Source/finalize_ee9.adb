@@ -2,8 +2,8 @@
 --
 -- Shut down processing in preparation for a dignified exit.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -32,5 +32,5 @@ begin
    finalize_all_KDF9_buffers;
 exception
    when error : others =>
-      log_line("Failure: " & Ada.Exceptions.Exception_Information(error));
+      log_line("Failure in finalize_ee9: " & Ada.Exceptions.Exception_Information(error));
 end finalize_ee9;

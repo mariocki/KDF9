@@ -2,8 +2,8 @@
 --
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -27,8 +27,6 @@ with formatting;
 with generic_sets;
 with HCI;
 with IOC;
-with IOC.fast.DR;
-with IOC.fast.FD;
 with KDF9_char_sets;
 with KDF9.CPU;
 with KDF9.decoding;
@@ -38,7 +36,6 @@ with logging.file;
 with settings;
 with tracing;
 
-with IOC.diagnostics;
 
 use  Ada.Characters.Latin_1;
 use  Ada.Exceptions;
@@ -50,8 +47,6 @@ use  exceptions;
 use  formatting;
 use  HCI;
 use  IOC;
-use  IOC.fast.DR;
-use  IOC.fast.FD;
 use  KDF9_char_sets;
 use  KDF9.CPU;
 use  KDF9.decoding;
@@ -79,14 +74,13 @@ package body state_display is
                                for_DR,
                                for_FD,
                                for_FH,
-                               for_seek,
-                               for_OUT         : in Boolean  := False) is
+                               for_seek       : in Boolean  := False) is
    begin
       log('Q');
       if for_FD then
-         log(just_right(as_FD_command(the_Q_register, for_FD and for_seek, for_FD and for_FH), width));
+         log(just_right(as_FD_command(the_Q_register, for_seek, for_FH), width));
       elsif for_DR then
-         log(just_right(as_DR_command(the_Q_register, for_OUT), width));
+         log(just_right(as_DR_command(the_Q_register), width));
       else
          log(just_right("#" & oct_of(the_Q_register.C, width-2), width));
       end if;
@@ -253,12 +247,10 @@ package body state_display is
       end if;
    end show_V_and_T;
 
-   procedure show_nest (when_empty : Boolean := True) is
+   procedure show_nest is
    begin
       if the_nest_depth = 0 then
-         if when_empty then
-            log_line("The NEST is empty.");
-         end if;
+         log_line("The NEST is empty.");
       else
          log_line("NEST:");
          for i in reverse KDF9.nest_depth loop
@@ -272,12 +264,10 @@ package body state_display is
       end if;
    end show_nest;
 
-   procedure show_sjns (when_empty : Boolean := True) is
+   procedure show_sjns is
    begin
       if the_sjns_depth = 0 then
-         if when_empty then
-            log_line("The SJNS is empty.");
-         end if;
+         log_line("The SJNS is empty.");
       else
          log_line("SJNS:");
       end if;
@@ -600,7 +590,7 @@ package body state_display is
          log_new_line;
       end if;
       show_V_and_T;
-      show_nest(when_empty => False);
+      show_nest;
       log_rule;
    end short_witness;
 
@@ -911,7 +901,7 @@ package body state_display is
                               log_octal(this.parameter);
                            when others =>
                               raise emulation_failure
-                                 with "invalid K order: #" & oct_of(decoded.compressed_opcode);
+                                 with "invalid K-group order in show_retro_FIFO";
                         end case;
                      when TO_LINK =>
                         log(oct_of(as_link(this.parameter)));
@@ -1027,10 +1017,7 @@ package body state_display is
             this    : tracing.IOC_FIFO_entry renames IOC_FIFO(IOC_FIFO_index);
             decoded : constant KDF9.decoded_order := this.decoded_order;
 
-            procedure show_transfer (
-                                     Q                 : in KDF9.Q_register;
-                                     for_OUT, for_seek : in Boolean := False
-                                    ) is
+            procedure show_transfer (Q : in KDF9.Q_register) is
             begin
                case decoded.compressed_opcode is
                   when PAR_Qq =>
@@ -1043,8 +1030,7 @@ package body state_display is
                                       Q,
                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-                                      for_seek => (decoded.Qk in PMA_bits) or show_transfer.for_seek,
-                                      for_OUT  => show_transfer.for_OUT
+                                      for_seek => decoded.Qk = PMA_bits
                                      );
                   when PIA_PIC_CLO_TLO_Qq
                      | PIB_PID_Qq
@@ -1053,51 +1039,31 @@ package body state_display is
                      | POA_POC_POE_POF_PMH_Qq
                      | POB_POD_Qq
                      | POG_POL_Qq
-                     | POH_POK_Qq
-                     | OS_OUT =>
+                     | POH_POK_Qq =>
                      show_IO_register(
                                       Q,
                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-                                      for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk),
-                                      for_OUT  => show_transfer.for_OUT
+                                      for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk)
                                      );
+                  when OS_OUT =>
+                     show_IO_register(Q, for_DR => False, for_FD => False);
                   when others =>
-                     raise emulation_failure
-                        with "invalid IO order: #" & oct_of(decoded.compressed_opcode);
+                     raise emulation_failure with "in show_IOC_FIFO.show_transfer";
                end case;
             end show_transfer;
 
-            shown_ICR : KDF9.order_counter := this.ICR_value;
-            FD_seek   : Boolean := False;
-            FD_xfer   : Boolean := False;
-
-         begin -- show_IOC_FIFO
+         begin
             log(oct_of(this.order_address) & ":");
             tab_log_to(first_col);
-            if the_full_name_of(this.decoded_order) = "OUT"  then
+            if the_full_name_of(this.decoded_order) = "OUT" then
                 if this.device_name(1..2) in "MT" | "ST" and then
                       this.ICR_value >= the_final_ICR        then
-                  log("OUT 0/2 rewind");
-                  shown_ICR := the_final_ICR + 1;
+                  log("final rewind");
                elsif this.device_name(1..2) in "MT" | "ST" then
                   log("OUT 6/7 rewind");
-               elsif this.device_name(1..2) in "LP" | "TP" then
+               elsif this.device_name(1..2) in "FW" | "LP" | "TP" then
                   log("OUT 8");
-               elsif this.device_name(1..2) = "DR" then
-                  if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
-                     log(if this.operation = output_operation then "OUT 11" else "OUT 12");
-                  else
-                     log("OUT 11/12");
-                  end if;
-               elsif this.device_name(1..2) = "FD" then
-                  if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
-                     log(if this.operation = output_operation then "OUT 41" else "OUT 42");
-                  else
-                     log("OUT 41/42 seek"); FD_seek := True;
-                  end if;
-               elsif this.device_name(1..2) = "FW" then
-                  log("OUT 8/16");
                else
                   log("OUT ?");
                end if;
@@ -1109,7 +1075,7 @@ package body state_display is
             case this.kind is
                when store_lockout =>
                   tab_log_to(event_col);
-                  log("locks out #");
+                  log("lockout at #");
                   log(oct_of(this.data_address));
                   log(" = E");
                   log(dec_of(this.data_address));
@@ -1119,7 +1085,7 @@ package body state_display is
                   tab_log_to(time_col);
                   log(this.initiation_time'Image);
                   tab_log_to(ICR_col);
-                  log(shown_ICR'Image);
+                  log(this.ICR_value'Image);
                 when buffer_lockout =>
                   tab_log_to(event_col);
                   log("buffer lockout");
@@ -1129,7 +1095,7 @@ package body state_display is
                   tab_log_to(time_col);
                   log(this.initiation_time'Image);
                   tab_log_to(ICR_col);
-                  log(shown_ICR'Image);
+                  log(this.ICR_value'Image);
                when start_transfer =>
                   tab_log_to(event_col);
                   show_transfer(this.control_word);
@@ -1137,9 +1103,10 @@ package body state_display is
                   log(if this.is_for_Director then "D" else slot_name(this.context));
                   log(this.priority_level'Image);
                   tab_log_to(time_col-2);
-                  log(" S" & this.initiation_time'Image);
+                  log(" S"
+                    & this.initiation_time'Image);
                   tab_log_to(ICR_col);
-                  log(shown_ICR'Image);
+                  log(this.ICR_value'Image);
                when finis_transfer =>
                   tab_log_to(event_col);
                   show_transfer(this.control_word);
@@ -1147,16 +1114,13 @@ package body state_display is
                   log(if this.is_for_Director then "D" else slot_name(this.context));
                   log(this.priority_level'Image);
                   tab_log_to(time_col-2);
-                  log(" E" & this.completion_time'Image);
+                  log(" E"
+                    & this.completion_time'Image);
                   tab_log_to(ICR_col);
-                  log(shown_ICR'Image);
+                  log(this.ICR_value'Image);
                when buffer_status =>
                   tab_log_to(event_col);
-                  FD_xfer := this.device_name(1..2) = "FD";
-                  -- PMFQq entails no data transfer or seek, but has a sector address parameter.
-                  FD_seek := (FD_seek or (decoded.Qk in PMA_bits)) and FD_xfer;
-                  FD_seek := FD_seek and decoded.compressed_opcode /= PMF_PMG_Qq;
-                  show_IO_register(this.Q_register, for_FD => FD_xfer, for_seek => FD_seek);
+                  show_Q_register(this.Q_register);
                   tab_log_to(is_D_col);
                   log(if this.is_for_Director then "D" else slot_name(this.context));
                   log(this.priority_level'Image);
@@ -1164,7 +1128,7 @@ package body state_display is
                   tab_log_to(time_col);
                   log(this.initiation_time'Image);
                   tab_log_to(ICR_col);
-                  log(shown_ICR'Image);
+                  log(this.ICR_value'Image);
             end case;
             log_new_line;
          end;
@@ -1177,7 +1141,7 @@ package body state_display is
       end if;
       log_line("Total time waiting for unoverlapped I/O to finish ="
              & KDF9.us'Image((the_clock_time-the_CPU_time+500) / 1000)
-             & " ms.");
+             & "ms.");
       log_rule;
    end show_IOC_FIFO;
 
@@ -1232,7 +1196,7 @@ package body state_display is
    procedure show_retrospective_traces is
    begin
       if the_peripheral_trace_is_enabled then
-         pragma Debug(IOC.diagnostics);
+         pragma Debug(IOC.diagnosis);
       end if;
       if the_interrupt_trace_is_enabled then
          show_interrupt_FIFO;
@@ -2206,12 +2170,14 @@ package body state_display is
          when 'C' | 'c' =>
             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
          when others =>
-            raise emulation_failure with "invalid poke position " & sub_word & ".";
+            raise emulation_failure
+               with "invalid poke position " & sub_word & ".";
       end case;
    exception
       when error : others =>
          raise emulation_failure
-            with "invalid poke operation: " & Ada.Exceptions.Exception_Information(error);
+            with "invalid poke operation: "
+               & Ada.Exceptions.Exception_Information(error);
    end poke;
 
 end state_display;

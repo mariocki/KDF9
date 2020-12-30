@@ -2,8 +2,8 @@
 --
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -82,7 +82,7 @@ package IOC.slow.shift.TR is
    procedure reattach (unit : in Natural; next_file_name : in String);
 
    -- Read the 9-word bootstrap.
-   procedure boot_the_KDF9 (program_file_name : in String);
+   procedure bootstrap_the_KDF9 (program_file_name : in String);
 
    -- Read a binary program.
    procedure load_a_program (program_file_name : in String);

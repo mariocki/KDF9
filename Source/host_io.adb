@@ -2,8 +2,8 @@
 --
 -- Buffered I/O streams to support KDF9 device I/O.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -82,7 +82,8 @@ package body host_IO is
    procedure diagnose (the_stream : host_IO.stream;
                        caption    : String := "") is
    begin
-      raise stream_IO_error with image_of(the_stream, caption);
+      raise stream_IO_error
+         with image_of(the_stream, caption);
    end diagnose;
 
    procedure open (the_stream : in out host_IO.stream;
@@ -111,8 +112,7 @@ package body host_IO is
       open(the_stream, file_name, mode, fd);
    exception
       when POSIX_IO_error =>
-         trap_operator_error(file_name,
-                             " cannot be "
+         trap_operator_error(file_name & " cannot be "
                            & (case mode is
                                  when read_mode  => "read",
                                  when write_mode => "written",
@@ -192,7 +192,7 @@ package body host_IO is
       end if;
       close(the_stream);
       open(the_stream, file_name, (if the_stream.IO_mode = rd_wr_mode then rd_wr_mode else mode));
-       if old_fd = 0 and the_stream.fd /= 0 then
+      if old_fd = 0 and the_stream.fd /= 0 then
          diagnose(the_stream, "REATTACH: standard input cannot be reopened");
       end if;
       if the_stream.is_open then
@@ -205,7 +205,8 @@ package body host_IO is
       when stream_IO_error =>
          raise;
       when error : operator_error =>
-         raise operator_error with Ada.Exceptions.Exception_Information(error);
+         raise operator_error
+            with Ada.Exceptions.Exception_Information(error);
       when error : others =>
          diagnose(the_stream, "REATTACH: " & Ada.Exceptions.Exception_Information(error));
    end reattach;

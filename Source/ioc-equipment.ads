@@ -3,8 +3,8 @@
 -- Enable the devices included in the chosen KDF9 I/O configuration.
 --
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -86,11 +86,7 @@ package IOC.equipment is
 
    choice      : equipment.choices := default;
 
-   -- Attach the chosen devices to their buffers.
    procedure configure;
-
-   -- If a drum or disc has been enabled, replace it on the buffer used by the other.
-   procedure re_configure;
 
    procedure install_GP0;
 

@@ -2,8 +2,8 @@
 --
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -74,7 +74,7 @@ begin  -- execute
    case the_execution_mode is
       when boot_mode =>
          reset_the_internal_registers(Director_state);
-         boot_the_KDF9(program_name);
+         bootstrap_the_KDF9(program_name);
       when test_program_mode=>
          reset_the_internal_registers(Director_state);
          load_a_program(program_name);
@@ -126,7 +126,7 @@ execution_loop:
             quit_if_requested;
 
          when abandon_this_order =>
-            null;  -- Just get on with it after an interrupt or nullified order.
+            null;  -- Just get on with it after an interrupt.
 
          when LOV_trap =>
             IOC.handle_a_main_store_lockout;
@@ -167,16 +167,16 @@ execution_loop:
             say_goodbye("Invalid operation in Director", Exception_Message(diagnostic));
             exit execution_loop;
 
-         when diagnostic : IO_error =>
-            say_goodbye("Impossible I/O operation", Exception_Message(diagnostic));
+         when diagnostic : operand_error =>
+            say_goodbye("Invalid operand", Exception_Message(diagnostic));
             exit execution_loop;
 
-         when diagnostic : Director_IO_error =>
-            say_goodbye("Impossible I/O operation in Director", Exception_Message(diagnostic));
+         when diagnostic : Director_operand_error =>
+            say_goodbye("Invalid operand in Director", Exception_Message(diagnostic));
             exit execution_loop;
 
          when diagnostic : operator_error =>
-            say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
+            say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
             exit execution_loop;
 
       end;

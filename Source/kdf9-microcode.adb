@@ -2,8 +2,8 @@
 --
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -479,7 +479,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 5;
 
          when others =>
-            trap_illegal_instruction;
+            trap_invalid_instruction;
 
       end case;
    end do_a_one_syllable_order;
@@ -513,7 +513,7 @@ package body KDF9.microcode is
                when TLO_bits =>
                   TLO(IO_operand, the_T_bit_is_set);
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PIB_PID_Qq =>
@@ -526,7 +526,7 @@ package body KDF9.microcode is
                   PID(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PIE_PIG_Qq =>
@@ -539,7 +539,7 @@ package body KDF9.microcode is
                   PIG(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PIF_PIH_Qq =>
@@ -552,7 +552,7 @@ package body KDF9.microcode is
                   PIH(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PMA_PMK_INT_Qq =>
@@ -565,7 +565,7 @@ package body KDF9.microcode is
                when INT_bits =>
                   INT(IO_operand, set_offline);
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when CT_PMB_PMC_BUSY_Qq =>
@@ -578,7 +578,7 @@ package body KDF9.microcode is
                      MANUAL_CT(IO_operand, set_offline);
                      the_CPU_delta := the_CPU_delta + 2;
                   else
-                     trap_illegal_instruction; -- This will always LIV, as we are not in Director.
+                     trap_invalid_instruction; -- This will always LIV, as we are not in Director.
                   end if;
                when PMB_bits =>
                   PMB(IO_operand, set_offline);
@@ -590,7 +590,7 @@ package body KDF9.microcode is
                   BUSY(IO_operand, set_offline, the_T_bit_is_set);
                   the_CPU_delta := the_CPU_delta + 2;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PMD_PME_PML_Qq =>
@@ -606,7 +606,7 @@ package body KDF9.microcode is
                   PML(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 5;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when PMF_PMG_Qq =>
@@ -620,7 +620,7 @@ package body KDF9.microcode is
                   the_CPU_delta := the_CPU_delta + 14;  -- ??
                   PMG(IO_operand, set_offline);
                 when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when POA_POC_POE_POF_PMH_Qq =>
@@ -643,7 +643,7 @@ package body KDF9.microcode is
                   SLO(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 1;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when POB_POD_Qq =>
@@ -656,7 +656,7 @@ package body KDF9.microcode is
                   POD(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when POG_POL_Qq =>
@@ -669,7 +669,7 @@ package body KDF9.microcode is
                   POL(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when POH_POK_Qq =>
@@ -682,11 +682,11 @@ package body KDF9.microcode is
                   POK(IO_operand, set_offline);
                   the_CPU_delta := the_CPU_delta + 7;
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
 
          when others =>
-            trap_illegal_instruction;
+            trap_invalid_instruction;
 
       end case;
    end do_an_IO_order;
@@ -742,7 +742,7 @@ package body KDF9.microcode is
                --    unless broken-into by an interrupt, which returned to the word following that
                --       containing the first syllable of the JCqNZS instruction.
                -- I see no case for reproducing this behaviour.
-               trap_illegal_instruction ("JCqNZS instruction at syllable 5");
+               trap_invalid_instruction ("JCqNZS instruction at syllable 5");
             end if;
             if the_Q_store(INS.Qq).C /= 0 then
                if fetching_normally then
@@ -994,7 +994,7 @@ package body KDF9.microcode is
                push(sign_extended(the_Q_store(INS.Qq).I));
                the_CPU_delta := the_CPU_delta + 6;
             else
-               trap_illegal_instruction;
+               trap_invalid_instruction;
             end if;
 
          when TO_RCIMq =>
@@ -1030,7 +1030,7 @@ package body KDF9.microcode is
                   the_CPU_delta := the_CPU_delta + 2;
                end if;
             else
-               trap_illegal_instruction;
+               trap_invalid_instruction;
             end if;
             ensure_that_Q0_contains_zero(suspect => INS.Qq);
 
@@ -1059,7 +1059,7 @@ package body KDF9.microcode is
                                              (sign_extended(the_Q_store(INS.Qq).I) + pop));
                the_CPU_delta := the_CPU_delta + 7;
             else
-               trap_illegal_instruction;
+               trap_invalid_instruction;
             end if;
             ensure_that_Q0_contains_zero(suspect => INS.Qq);
 
@@ -1110,7 +1110,7 @@ package body KDF9.microcode is
                when K3 =>
                   set_K3_register(read_top);
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
             the_CPU_delta := the_CPU_delta + 3;
 
@@ -1126,7 +1126,7 @@ package body KDF9.microcode is
                when K7 =>
                   push(get_K7_operand);
                when others =>
-                  trap_illegal_instruction;
+                  trap_invalid_instruction;
             end case;
             the_CPU_delta := the_CPU_delta + 3;
 
@@ -1360,7 +1360,7 @@ package body KDF9.microcode is
             fail_in_problem_program_state;
             if the_sjns_depth = 0 then
                -- This indicates a serious failure in Director; best to abandon it at once.
-               trap_illegal_instruction("empty SJNS in Director");
+               trap_invalid_instruction("empty SJNS in Director");
             end if;
             RA := pop;
             the_CPU_delta := the_CPU_delta + 11;
@@ -1393,19 +1393,20 @@ package body KDF9.microcode is
                   return; -- OUT has the effect of a no-op in Director state.
                end if;
                -- Emulate a subset of the appropriate Director's API.
-               if A < 100 then
+               if A <= 99 then
                   do_a_TSD_OUT(OUT_number => A);
-               elsif A < 200 then
+               elsif A <= 199 then
                   do_an_EGDON_OUT(OUT_number => A);
                else
-                  do_some_other_OUT(OUT_number => A);
+                  -- Other Directors are not handled yet.
+                  trap_invalid_operand("invalid OUT number");
                end if;
             else
                effect(NOUV_interrupt, "full SJNS in OUT");
             end if;
 
          when others =>
-            trap_illegal_instruction;
+            trap_invalid_instruction;
 
       end case;
    end do_a_jump_order;
@@ -1455,7 +1456,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 4;
 
          when others =>
-            trap_illegal_instruction;
+            trap_invalid_instruction;
 
       end case;
    end do_a_data_access_order;
@@ -1515,11 +1516,23 @@ package body KDF9.microcode is
          synchronize_the_real_and_virtual_times;
          raise;
 
-      when program_restart =>
-         complete_all_extant_transfers;
-         update_the_virtual_clocks;
-         synchronize_the_real_and_virtual_times;
-         complete_TSD_OUT_2(the_trace_operand);
+      -- These traps represent interrupts that are handled by Director.
+      -- Other traps pass through, to preserve their diagnostic message.
+
+      when PR_trap =>
+         effect(PR_interrupt);
+
+      when FLEX_trap =>
+         effect(FLEX_interrupt);
+
+      when EDT_trap =>
+         effect(EDT_interrupt);
+
+      when OUT_trap =>
+         effect(OUT_interrupt);
+
+      when LOV_trap =>
+         effect(LOV_interrupt);
 
    end do_a_fast_time_slice;
 
@@ -1623,10 +1636,23 @@ package body KDF9.microcode is
          finalize_the_traced_instruction_execution;
          raise;
 
-      when program_restart =>
-         complete_all_extant_transfers;
-         finalize_the_traced_instruction_execution;
-         complete_TSD_OUT_2(the_trace_operand);
+      -- These traps represent interrupts that are handled by Director.
+      -- Other traps pass through, to preserve their diagnostic message.
+
+      when PR_trap =>
+         effect(PR_interrupt);
+
+      when FLEX_trap =>
+         effect(FLEX_interrupt);
+
+      when EDT_trap =>
+         effect(EDT_interrupt);
+
+      when OUT_trap =>
+         effect(OUT_interrupt);
+
+      when LOV_trap =>
+          effect(LOV_interrupt);
 
    end do_a_traced_instruction_cycle;
 

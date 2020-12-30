@@ -2,8 +2,8 @@
 --
 -- Generate a P option setting for the Kidsgrove compiler from symbolic option names.
 --
--- kidopt is an auxiliary of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- kidopt is an auxiliary of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -27,7 +27,7 @@ procedure kidopt is
 
    package CLI renames Ada.Command_Line;
 
-   type options is (SEGMENT, TRACE, TABLES, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO);
+   type options is (SEGMENT, TRACE, TABLES, LABELS, NO_OPT, DEBUG, NO_WARN);
 
    type values  is mod 2**8;
 
@@ -35,31 +35,22 @@ procedure kidopt is
 
    option_bit    : constant array(options) of values
                  := (
-                     SEGMENT     => 8#200#, -- D0
-                     TRACE       => 8#100#, -- D1
-                     TABLES      => 8#040#, -- D2
-                     ORIG_SW     => 8#020#, -- D3
-                     TEXT        => 8#010#, -- D4
-                     NO_OPT      => 8#004#, -- D5
-                     NO_TEST     => 8#002#, -- D6
-                     NO_WARN     => 8#001#, -- D7
-                     LOAD_AND_GO => 8#000#  -- so as not to mess with syllable 0
+                     SEGMENT   => 8#200#, -- D0
+                     TRACE     => 8#100#, -- D1
+                     TABLES    => 8#040#, -- D2
+                     -- D3 is ignored.    -- D3
+                     LABELS    => 8#010#, -- D4 was WITH TEXT !!
+                     NO_OPT    => 8#004#, -- D5
+                     DEBUG     => 8#002#, -- D6 was WITHOUT TESTING !!
+                     NO_WARN   => 8#001#  -- D7
                     );
-
-   load_and_go_is_requested : Boolean := False;
 
    procedure include_option (given : in String) is
    begin
-      if given in "SEGMENT"
-                | "TRACE" | "TABLES" | "ORIG_SW" | "TEXT" | "NO_OPT" | "NO_TEST" | "NO_WARN"
-                | "LOAD_AND_GO"
-      then
+      if given in "SEGMENT" | "TRACE" | "TABLES" | "LABELS" | "NO_OPT" | "DEBUG" | "NO_WARN" then
          for o in options loop
             if given = o'Image then
                options_set := options_set or option_bit(o);
-               if given = "LOAD_AND_GO" then
-                  load_and_go_is_requested := True;
-               end if;
             end if;
          end loop;
       else
@@ -89,8 +80,7 @@ begin -- kidopt
    elsif CLI.Argument_Count = 1                                 and then
             To_Upper(CLI.Argument(1)) in "-H" | "-HELP" | "--HELP"  then
       Put_Line(Standard_Error, "kidopt [ WITH ] { option }");
-      Put     (Standard_Error, "where option is one of: ");
-      Put_Line(Standard_Error, "TRACE, TABLES, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO");
+      Put_Line(Standard_Error, "where option is one of: LABELS, NO_OPT, DEBUG, and NONE");
       return;
    elsif CLI.Argument_Count > 0             and then
             To_Upper(CLI.Argument(1)) = "WITH"  then
@@ -106,8 +96,5 @@ begin -- kidopt
    end loop;
 
    Put_Line("P 11065S0 " & oct_of(options_set));
-   if load_and_go_is_requested then
-      Put_Line("P 11065S1 #200");
-   end if;
 
 end kidopt;

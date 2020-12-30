@@ -2,8 +2,8 @@
 --
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -15,7 +15,7 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
+with message;
 with GNAT.Source_Info;
 --
 with Ada.Text_IO;
@@ -23,13 +23,13 @@ with Ada.Command_Line;
 with Ada.Exceptions;
 --
 with exceptions;
+with execute;
 with HCI;
 with IOC.equipment;
 with IOC.slow.shift.TP;
 with IOC.slow.shift.TR;
 with settings;
 
-with execute;
 with say_goodbye;
 
 use  Ada.Text_IO;
@@ -257,13 +257,15 @@ begin -- ee9
 
    if the_program_name_position /= 0 then
       get_settings_from_file("1");
+message("ee9 has the_graph_plotter_is_enabled A = " & the_graph_plotter_is_enabled'Image);
       IOC.equipment.configure;
+message("ee9 has the_graph_plotter_is_enabled B = " & the_graph_plotter_is_enabled'Image);
       impose_all_flag_settings;
-      IOC.equipment.re_configure;
+message("ee9 has the_graph_plotter_is_enabled C = " & the_graph_plotter_is_enabled'Image);
       IOC.equipment.install_GP0;
       if the_log_is_wanted then
          log_line(
-                  "This is ee9 V5.2b, compiled by "
+                  "This is ee9 V5.1a, compiled by "
                 & Standard'Compiler_Version
                 & " on "
                 & GNAT.Source_Info.Compilation_ISO_Date
@@ -284,7 +286,7 @@ exception
       tidy_up("Invalid command line");
 
    when diagnostic : operator_error =>
-      say_goodbye("The KDF9 operator has made a mistake: ", Exception_Message(diagnostic));
+      say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
 
    when error : others =>
       tidy_up("Failure in ee9; unexpected exception: " & Exception_Information(error));

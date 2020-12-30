@@ -2,8 +2,8 @@
 --
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -178,6 +178,22 @@ package IOC.fast.MT is
    procedure enable_MT_deck (b : in KDF9.buffer_number);
 
    procedure enable_ST_deck (b : in KDF9.buffer_number);
+
+   -- The following support the emulation of OUTs 4 and 10.
+
+   type short_label is new String(1 .. 8);
+   type long_label  is new String(1 .. 16);
+
+   procedure find_tape_labelled (the_label  : in MT.short_label;
+                                 its_number : out KDF9.buffer_number;
+                                 its_serial : out KDF9.word);
+
+   procedure find_tape_labelled (the_label  : in MT.long_label;
+                                 its_number : out KDF9.buffer_number;
+                                 its_serial : out KDF9.word);
+
+   -- Rewind decks, on problem program termination, as would happen under Director.
+   procedure dispose_all_allocated_tapes;
 
 private
 
@@ -377,10 +393,5 @@ private
 
    overriding
    procedure flush(the_deck : in out MT.deck) is null;
-
-   procedure find_tape (the_label  : in  MT.data_storage;
-                        its_number : out KDF9.buffer_number;
-                        its_serial : out KDF9.word;
-                        requestor  : in  String);
 
 end IOC.fast.MT;

@@ -2,8 +2,8 @@
 --
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -519,11 +519,7 @@ package KDF9 is
    --    the flag does not correspond to any RFIR bit.
    EXITD_flag : constant KDF9.interrupt_number := 30;
 
-   -- abandon_this_order is raised
-   -- 1. when an interrupt is punted to Director
-   -- OR
-   -- 2. when an operation is attempted, in a program running under Director,
-   --    that is invalid but is not defined to cause a LIV interrupt.
+   -- abandon_this_order is raised when an interrupt is punted to Director.
    abandon_this_order : exception;
 
    --
@@ -561,16 +557,16 @@ package KDF9 is
    procedure check_for_a_clock_interrupt
       with Inline;
 
-   procedure trap_illegal_instruction (the_message : in String := "invalid opcode")
+   procedure trap_invalid_instruction (the_message : in String := "invalid opcode")
       with Inline => False;
 
-   procedure trap_operator_error (the_device, the_message : in String)
+   procedure trap_invalid_operand (the_message : in String := "invalid operand")
+      with Inline => False, No_Return;
+
+   procedure trap_operator_error (the_message : in String)
       with Inline => False, No_Return;
 
    procedure trap_unimplemented_feature (the_message : in String)
-      with Inline => False, No_Return;
-
-   procedure fail_OUT (OUT_number : in KDF9.word; the_message : in String)
       with Inline => False, No_Return;
 
    procedure trap_invalid_paper_tape (the_message : in String)

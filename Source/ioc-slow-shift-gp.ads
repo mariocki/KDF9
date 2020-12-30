@@ -2,8 +2,8 @@
 --
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -47,9 +47,6 @@ package IOC.slow.shift.GP is
                   set_offline : in Boolean);
 
    procedure enable (b : in KDF9.buffer_number);
-
-   procedure notify_invalid_movement (from_x, from_y, step_x, step_y : in Integer)
-      with Inline => False;
 
 private
 

@@ -1,8 +1,0 @@
-TEST TDRUM     POA, PIA.
-Digital signature of traced orders = #1022360156205114.
-TEST TDRUMR2EM POA, PIB.
-Digital signature of traced orders = #1532033637554075.
-TEST TDRUMW2EM POB, PIA.
-Digital signature of traced orders = #1532033637554075.
-TEST TDROUTS   11, 12, 13, 14.
-Digital signature of traced orders = #5105067026263327.

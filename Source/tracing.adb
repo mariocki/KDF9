@@ -2,8 +2,8 @@
 --
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2020, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -150,8 +150,7 @@ package body tracing is
    procedure take_note_of_IO_start (
                                     device_name     : in IOC.device_name;
                                     completion_time : in KDF9.us;
-                                    control_word    : in KDF9.Q_register;
-                                    operation       : in IOC.transfer_kind := IOC.some_other_operation
+                                    control_word    : in KDF9.Q_register
                                    )
    is
       the_note : constant  IOC_FIFO_entry
@@ -167,8 +166,7 @@ package body tracing is
                  is_for_Director => (the_CPU_state = Director_state),
                  priority_level  => CPL,
                  context         => the_context,
-                 control_word    => take_note_of_IO_start.control_word,
-                 operation       => take_note_of_IO_start.operation
+                 control_word    => take_note_of_IO_start.control_word
                 );
    begin
       register_IO_event(the_note);
@@ -183,8 +181,7 @@ package body tracing is
                                     is_for_Director : Boolean;
                                     priority_level  : in KDF9.priority;
                                     completion_time : in KDF9.us;
-                                    control_word    : in KDF9.Q_register;
-                                    operation       : in IOC.transfer_kind := IOC.some_other_operation
+                                    control_word    : in KDF9.Q_register
                                    )
    is
       the_note : constant  IOC_FIFO_entry
@@ -200,8 +197,7 @@ package body tracing is
                  priority_level  => take_note_of_IO_finis.priority_level,
                  context         => the_context,
                  completion_time => take_note_of_IO_finis.completion_time,
-                 control_word    => take_note_of_IO_finis.control_word,
-                 operation       => take_note_of_IO_finis.operation
+                 control_word    => take_note_of_IO_finis.control_word
                 );
 
    begin
@@ -221,15 +217,13 @@ package body tracing is
                  is_for_Director => False,
                  priority_level  => CPL,
                  context         => the_context,
-                 data_address    => the_locked_out_address,
-                 operation       => IOC.some_other_operation
+                 data_address    => the_locked_out_address
                 );
    begin
       register_IO_event(the_note);
    end take_note_of_store_lockout;
 
-   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
-                                          operation   : in IOC.transfer_kind := IOC.some_other_operation) is
+   procedure take_note_of_buffer_lockout (device_name : in IOC.device_name) is
       the_note : constant  IOC_FIFO_entry
                :=
                 (
@@ -241,8 +235,7 @@ package body tracing is
                  device_name     => take_note_of_buffer_lockout.device_name,
                  is_for_Director => False,
                  priority_level  => CPL,
-                 context         => the_context,
-                 operation       => take_note_of_buffer_lockout.operation
+                 context         => the_context
                 );
    begin
       register_IO_event(the_note);
@@ -267,8 +260,7 @@ package body tracing is
                  priority_level  => CPL,
                  context         => the_context,
                  Q_register      => take_note_of_test.Q_register,
-                 status          => take_note_of_test.status,
-                 operation       => IOC.some_other_operation
+                 status          => take_note_of_test.status
                 );
    begin
       register_IO_event(the_note);
@@ -285,7 +277,8 @@ package body tracing is
       memo   : String(1..max_interrupt_message_length) := (others => ' ');
    begin
       if length > max_interrupt_message_length then
-         raise emulation_failure with "interrupt message too long: '" & message & "'" & length'Image;
+         raise Program_Error
+            with "interrupt note message is too long '" & message & "'" & length'Image;
       end if;
       memo(1..length) := message;
       declare
