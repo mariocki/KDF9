@@ -11,28 +11,29 @@
 # received a copy of the GNU General Public License distributed with
 # this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 
-OS=${1:-UNIX}
+OS=${1:-macOS}
 
-./tidy
+./tidy ${OS}
 
 name=`echo V*p*`_for_${OS}
 echo
 echo Creating: ${name}.zip
 
-rm -f ../.DS_Store
-rm -f  ./.DS_Store
-rm -f ../Adjuncts/.DS_Store
-rm -f ../Documents/.DS_Store
-rm -f ../Source/.DS_Store
-rm -f ../Testing/.DS_Store
-rm -f ../Testing/Algol/.DS_Store
-rm -f ../Testing/Assembly/.DS_Store
-rm -f ../Testing/Binary/.DS_Store
-rm -f ../Testing/Kidsgrove/.DS_Store
-rm -f ../Testing/Kidsgrove/Algol/.DS_Store
-rm -f DH_source/.DS_Store
 rm -f ${name}.zip
 cd ../..
-zip -r ${name}.zip emulation
+
+case ${OS} in
+UNIX|Unix|unix|LINUX|Linux|linux)
+   gzip -r -c emulation > emulation.gz; mv emulation.gz ${name}.zip
+   ;;
+macOS|Macintosh|Mac|OSX|[Ww]indows|WINDOWS)
+   zip -q -r ${name}.zip emulation
+   ;;
+*)
+   echo Invalid target OS parameter \"$1\"!
+   exit 2
+   ;;
+esac
+
 echo
 ls -la ${name}.zip

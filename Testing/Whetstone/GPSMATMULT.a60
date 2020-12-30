@@ -1,0 +1,92 @@
+GPS|
+
+_b_e_g_i_n
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e GPS (I, N, Z, V);
+      _r_e_a_l I, N, Z, V;
+   _b_e_g_i_n
+      _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l N _d_o
+         Z := V;
+      GPS := 1
+   _e_n_d GPS;
+
+
+   _p_r_o_c_e_d_u_r_e GPS TEST 1 (m, n);
+      _v_a_l_u_e m, n; _r_e_a_l m, n;
+   _b_e_g_i_n
+   _r_e_a_l i, j;
+
+   _a_r_r_a_y A[1:m, 1:n];
+
+   writetext(30, _[GPS*TEST*CASE*1_[c_]_]);
+
+   _c_o_m_m_e_n_t set A[i,j] to (i+j)
+   ;
+   i := GPS(j, n, i, GPS(i, m, A[i,j], i+j));
+
+   writetext(30, _[A[i,j]*should*be*(i+j)_[c_]_]);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l m _d_o
+      _b_e_g_i_n
+         _f_o_r j := 1 _s_t_e_p 1 _u_n_t_i_l n _d_o
+            write(30, format(_[+d.dddddss_]), A[i,j]);
+         writetext(30, _[_[c_]_]);
+      _e_n_d;
+
+   _e_n_d GPS TEST 1;
+
+
+   _p_r_o_c_e_d_u_r_e GPS TEST 2 (m, n, p);
+       _v_a_l_u_e m, n, p; _r_e_a_l m, n, p;
+   _b_e_g_i_n
+   _r_e_a_l i, j, k;
+
+   _a_r_r_a_y A[1:m, 1:n], B[1:n, 1:p], C[1:m, 1:p];
+
+   writetext(30, _[_[c_]_[c_]GPS*TEST*CASE*2_[c_]_]);
+
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l m _d_o
+      _f_o_r k := 1 _s_t_e_p 1 _u_n_t_i_l n _d_o
+         A[i,k] := i/10.0^(k-1);
+
+   _f_o_r k := 1 _s_t_e_p 1 _u_n_t_i_l n _d_o
+      _f_o_r j := 1 _s_t_e_p 1 _u_n_t_i_l p _d_o
+         B[k,j] := k;
+
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l m _d_o
+      _f_o_r j := 1 _s_t_e_p 1 _u_n_t_i_l p _d_o
+         C[i,j] := -999999999;
+
+   _c_o_m_m_e_n_t set C to AB
+   ;
+   i := GPS(i, 1.0, C[1,1], 0.0)
+      × GPS(i,
+            (m-1) ×
+               GPS(j,
+                   (p-1) ×
+                      GPS(k, n, C[i,j], C[i,j] + A[i,k]×B[k,j]),
+                   C[i,j+1],
+                   0.0
+                  ),
+            C[i+1,1],
+            0.0
+           );
+
+   writetext(30, _[C[i,j]*should*be*1.234j_[c_]_]);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l m _d_o
+      _b_e_g_i_n
+         _f_o_r j := 1 _s_t_e_p 1 _u_n_t_i_l p _d_o
+            write(30, format(_[+d.dddddss_]), C[i,j]);
+         writetext(30, _[_[c_]_]);
+      _e_n_d;
+
+   _e_n_d  _p_r_o_c_e_d_u_r_e GPS TEST 2;
+
+open(30);
+
+   GPS TEST 1(5, 3);
+   GPS TEST 2(3, 4, 5);
+
+close(30);
+
+_e_n_d
+|

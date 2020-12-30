@@ -2,8 +2,8 @@
 --
 -- Emulation of a standard interface buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -40,7 +40,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, input_operation);
       read(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PIA;
@@ -50,7 +50,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, input_operation);
       read_to_EM(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PIB;
@@ -60,7 +60,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, input_operation);
       words_read(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PIC;
@@ -70,7 +70,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, input_operation);
       words_read_to_EM(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PID;
@@ -135,7 +135,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, output_operation);
       write(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POA;
@@ -145,7 +145,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, output_operation);
       write_to_EM(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POB;
@@ -155,7 +155,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, output_operation);
       words_write(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POC;
@@ -165,7 +165,7 @@ package body IOC.slow.shift.SI is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_SI, Q_operand, set_offline);
+      start_slow_transfer(the_SI, Q_operand, set_offline, output_operation);
       words_write_to_EM(the_SI, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POD;
@@ -206,8 +206,9 @@ package body IOC.slow.shift.SI is
 
    unit : IOC.unit_number := 0;
 
+   SI_quantum : constant := 1E6 / 50E3;  -- for 50_000 characters per second (a guess) !!
+
    procedure enable (b : in KDF9.buffer_number) is
-      SI_quantum : constant := 1E6 / 50E3;  -- for 50_000 characters per second (a guess) !!
    begin
       case unit is
          when 0 =>
@@ -223,10 +224,24 @@ package body IOC.slow.shift.SI is
                                   quantum => SI_quantum);
             SI1_number := b;
          when others =>
-            trap_operator_error("more than 2 SI units specified");
+            trap_operator_error("SI:", "more than two units specified" & unit'Image & b'Image);
       end case;
       unit := unit + 1;
    end enable;
+
+   procedure re_enable (b : in KDF9.buffer_number) is
+   begin
+      if SI0 /= null   and then
+            SI0.number = b then
+         return;
+      end if;
+      if SI1 /= null   and then
+            SI1.number = b then
+         return;
+      end if;
+      buffer(b) := null;
+      enable(b);
+   end re_enable;
 
    function SI0_is_enabled
    return Boolean

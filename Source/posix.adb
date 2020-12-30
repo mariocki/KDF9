@@ -2,8 +2,8 @@
 --
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -93,6 +93,17 @@ package body POSIX is
    is (
        verify(open(C.To_C(name, Append_Nul => True), C.int(mode)), "open file: " & name)
       );
+
+   function exists (name : String)
+   return Boolean is
+      response : C.int;
+   begin
+      response := open(C.To_C(name, Append_Nul => True), C.int(POSIX.read_mode));
+      return response >= 0;
+   exception
+      when POSIX_IO_error =>
+         return False;
+   end exists;
 
    function ftruncate (fd : C.int;  to_length : C.long)
    return C.long
@@ -239,9 +250,14 @@ package body POSIX is
 
       response := wrong_response;
 
-      if C_reply_length = 0                 or else
-            C.To_Ada(C_reply_string(1)) = LF   then
+      if C_reply_length = 0 then
+         response := quit_response;
+      elsif C.To_Ada(C_reply_string(1)) = LF then
          response := EOF_response;
+      elsif C_reply_length = 2                         and then
+               C.To_Ada(C_reply_string(2)) = LF        and then
+                  C.To_Ada(C_reply_string(1)) in 'q' | 'Q' then
+         response := quit_response;
       elsif C_reply_length = 2                  and then
                C.To_Ada(C_reply_string(2)) = LF and then
                   C.To_Ada(C_reply_string(1)) = '/' then

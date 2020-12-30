@@ -18,6 +18,7 @@ PROGRAM;                   (main program);
    V15 = B6762576445005402;  (WROTE L);
    V16 = B6245675765564402;  (REWOUND);
    V17 = B4651565163500277;  (FINISH);
+   V18 = B4562625762027777;  (ERROR);
 
    (claim tape);
    V0; SET4; OUT; V1; =Q1; =C1;
@@ -40,14 +41,15 @@ PROGRAM;                   (main program);
    MRWDQ1;
    V16; =V5; POAQ10;
 
-   (FINISH message);
-   V17; =V5; POAQ10;
-
 1;
    MFRQ1;   (read until absent data);
+   PARQ1;
+   J777TR;
    J1;      (deliberate infinite loop);
 
-   MRWDQ0;  (this should not happen);
+777;
+   V18; =V5; POAQ10; (this output should appear last);
+   ZERO; OUT;
 
 FINISH;
 |

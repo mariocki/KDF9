@@ -2,8 +2,8 @@
 --
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This program is an auxiliary of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -512,8 +512,8 @@ procedure mtp is
                end;
                print_line;
                no_header_has_been_printed := False;
-               return;
             end if;
+            return;
          end if;
 
          if the_block(9..13) = FF & "ииии"    and then

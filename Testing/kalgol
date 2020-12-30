@@ -36,14 +36,14 @@ cat > ${DATA}/kalgol_labels.txt <<++++
 00000005        |
 |
 ++++
-nine_test RLT kalgol_labels - zw
+nine_priv RLT kalgol_labels - zw
 # echo The compiler work tapes have been labelled.
 
 if [ ! -r ${DATA}/systape.txt ]
 then
    cp ${ALGOL_COMPONENTS}/systape.txt ${DATA}/systape.txt
 fi
-nine MKSYS2 systape - wz
+nine MKSYS2 systape - zw
 # echo The compiler overlay tape has been generated.; echo
 
 mkchan ${SOURCE}/$name.a60 ${ALGOL_COMPONENTS}/chan6.pt > /dev/null
@@ -71,7 +71,7 @@ if nine KAB00DH--USU ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> error_outp
 then
    if [ -s error_output ]
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.
       echo error_output:
       echo ===
       more error_output
@@ -82,7 +82,7 @@ then
 
    if fgrep FAIL LP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.
       echo LP0:
       echo ===
       more LP0
@@ -92,7 +92,7 @@ then
 
    if fgrep FAIL TP0 >/dev/null  2>/dev/null
    then
-      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo The compilation was abandoned.
       echo TP0:
       echo ===
       more TP0
@@ -107,7 +107,7 @@ mtp MT0T > ${USERCODE}/$name.k3
 
 if [ ! -s ${USERCODE}/$name.k3 ]
 then
-   echo The Usercode object program could not be retrieved.; printf "\\a\\a\\a"; echo
+   echo The Usercode object program could not be retrieved.; echo
    exit 4
 fi
 
@@ -117,7 +117,7 @@ y)
    ucc $name
    if [ ! -s ${BINARY}/$name ]
    then
-      echo An object program could not be assembled.; printf "\\a\\a\\a"; echo
+      echo An object program could not be assembled.; echo
       exit 5
    fi
    echo The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name; echo
