@@ -1,0 +1,128 @@
+FLUID|
+_b_e_g_i_n
+  _c_o_m_m_e_n_t Specimen ALGOL program from Appendix 1 of KDF9 ALGOL manual.
+                 This is a program for a practically arising problem.
+                 It illustrates the use of many of the facilities available to the
+                 ALGOL user;
+
+   _r_e_a_l alpha, lambda, Delta alpha;
+   _i_n_t_e_g_e_r i, f1, f2, f3, f4, f5;
+
+   _r_e_a_l _p_r_o_c_e_d_u_r_e erfc (z); _v_a_l_u_e z; _r_e_a_l z;
+
+       _b_e_g_i_n _c_o_m_m_e_n_t This procedure evaluates the complementary
+                                 error function of z using the trapezoidal rule.
+                                 It halves the interval until the required accuracy
+                                 is attained, but avoids repeating the evaluation of
+                                 ordinates more than once;
+
+		_r_e_a_l x, h, J0, J1;
+		_i_n_t_e_g_e_r n, i;
+
+		h := 0.1; J0 := 0; n := 0; i := 1;
+
+	   R:	J1 := J0;
+
+		_f_o_r n := n, n + i _w_h_i_l_e  n × h × (n × h + 2 × z) < 11.51 _d_o
+		   _b_e_g_i_n
+		      x := z + n × h;
+				J0 := J0 + exp(-(x^2)) × (_i_f n = 0 _t_h_e_n 0.5 _e_l_s_e 1);
+		   _e_n_d	;
+
+		_i_f abs(1 - 2 × J1/J0) > 0.00001 _t_h_e_n
+		   _b_e_g_i_n
+		      i := 2; n := 1; h := h/2;
+				_g_o_t_o R
+		   _e_n_d	;
+
+		erfc := 1.128379 × J0 × h
+
+	_e_n_d erfc;
+
+   open (20);
+
+	Delta alpha := read (20); close (20);
+
+	_c_o_m_m_e_n_t Delta alpha is the only input data item required by the program;
+
+	open (10);
+
+	write text (10,
+	            _[
+	              Propagation*of*an*Impulse*into*a*Viscous-locking*Medium
+	              _[4c4s_]
+	              Delta*alpha*=*
+	            _]
+	           );
+
+      write (10, format (_[d.ddddccc_]), Delta alpha);
+
+      write text(10,
+                 _[
+                   _[4s_]
+                   alpha
+                   _[15s_]
+                   lambda
+                   _[7s_]
+                   lambda×sqrt(2×alpha)
+                   _[9s_]
+                   g
+                   _[2c 4s_]
+                   0.0000
+                   _[13s_]
+                   INFINITY
+                   _[13s_]
+                   1.00000
+                   _[12s_]
+                   1.00000
+                   _[c_]
+                 _]
+                );
+
+      f1 := format (_[ssssd.dddd_]);
+      f2 := format (_[12sd.ddddº+nd_]);
+      f3 := format (_[12sd.ddddd_]);
+      f4 := format (_[12sd.dddddcc_]);
+      f5 := format (_[12sd.dddddc_]);
+
+      i := 1;
+
+	_f_o_r alpha := Delta alpha _s_t_e_p Delta alpha _u_n_t_i_l 1.0 _d_o
+	    _b_e_g_i_n
+	       _r_e_a_l l1, l2;
+
+			 i := i + 1;
+			 lambda := (1 - alpha)/sqrt (2 × alpha);
+			 _i_f alpha = 1 _t_h_e_n _g_o_t_o SKIP;
+
+	Repeat:
+	       l1 := lambda;
+
+		    l2 := sqrt (0.886227 × (1-alpha)/alpha × l1 × erfc (l1) × exp(+l1^2));
+			 lambda := l2 + 0.835 × alpha × (l2-l1);
+
+			 _i_f abs (1-l2/lambda)>º-5 _t_h_e_n _g_o_t_o Repeat;
+
+	  SKIP:
+	       write (10, f1, alpha);
+          write (10, f2, lambda);
+  		    write (10, f3, lambda × sqrt (2 × alpha));
+		    write (10,
+		           _i_f i - i ÷ 5 × 5 = 0 _t_h_e_n f4 _e_l_s_e f5,
+                   _i_f lambda _> .70710678
+                     _t_h_e_n 2 × lambda^2 × alpha × (1-alpha)
+			            _e_l_s_e
+			              _i_f lambda ± 0
+			                  _t_h_e_n alpha × (1 - alpha) × exp (lambda^2) / (lambda × 2.3282180)
+				               _e_l_s_e 0.48394
+				    )
+	    _e_n_d;
+
+	close (10)
+
+_e_n_d
+|
+
+0.1;
+
+|

@@ -1,0 +1,39 @@
+ACK38|
+_b_e_g_i_n
+   _i_n_t_e_g_e_r j;
+
+   _r_e_a_l t1, t2;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e Ackermann(m, n);
+      _v_a_l_u_e m, n;
+      _i_n_t_e_g_e_r m, n;
+
+      HEAD:
+         _i_f m = 0 _t_h_e_n
+            Ackermann := n + 1
+         _e_l_s_e _i_f n = 0 _t_h_e_n
+            _b_e_g_i_n
+               m := m - 1;
+               n := 1;
+               _g_o_t_o HEAD
+            _e_n_d
+         _e_l_s_e
+            _b_e_g_i_n
+               n := Ackermann(m, n - 1);
+               m := m - 1;
+               _g_o_t_o HEAD
+            _e_n_d;
+
+open(30);
+
+j : = Ackermann(3, 8);
+_i_f j ± 2045 _t_h_e_n
+   writetext(30, _[WRONG*VALUE_]);
+
+close(30);
+_e_n_d
+|
+
+
+
+

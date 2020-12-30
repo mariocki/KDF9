@@ -1,0 +1,61 @@
+export WHERE=
+export SOURCE=
+export DATA=
+export BINARY=
+export USERCODE=
+
+mode=ahipr$2
+encoding=
+case $1 in
+1DH) this_test="nine 1DTHFP 1DTHFP_data5"
+     signature=\#7671706436245512;;
+WAB) this_test="nine GPT GPT_data"
+     signature=\#6071426761537263;;
+HIG) this_test="nine HIGUYS -"
+     signature=\#6442100001003204;;
+LOG) this_test="nine LOGUYS -"
+     signature=\#2012100001003204;;
+DMP) this_test="nine DIVA -"
+     signature=\#5132117202617243;;
+FLO) this_test="nine FLOATT -"
+     signature=\#3271342634660173;;
+ACK) this_test="nine ACK38 -"
+     signature=\#4657410657321314;;
+HLT) this_test="nine LEECH LEECH_data9"
+     signature=\#6151525720423034;;
+HKT) this_test="nine LEECH LEECH_data9_KDF9"
+     encoding=kk
+     signature=\#6151525720423034;;
+MOB) this_test="whet MANORBOY"
+     signature=\#1774104411721111;;
+GPR) this_test="whet GPSPRIMES"
+     signature=\#3702427170240312;;
+FLU) this_test="whet FLUID"
+     signature=\#4337171556307416;;
+WBM) this_test="whet WHETSTONE"
+     signature=\#3226514177100542;;
+RLT) this_test="nine_test RLT RLT_data"
+     signature=\#3506450617016266;;
+TO4) this_test="nine OUT4A -"
+     signature=\#7017242374042113;;
+TOX) this_test="nine OUTX -"
+     signature=\#5346716617576440;;
+MTW) this_test="whet MTW"
+     signature=\#2551007324200157;;
+INP) this_test="whet INPUT"
+     signature=\#3046175371276175;;
+HQP) this_test="kids WEEHAAVIE -"
+     export KIDSMISC=w-
+     signature=\#4200133757004705;;
+*)   echo test case "$1"\;  UNKNOWN!
+     exit 2;;
+esac
+
+rm -f Assembly/WEEHAAVIE.k3 Assembly/WEEHAAVIE-listing.txt Binary/WEEHAAVIE
+
+if /bin/sh ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
+then
+  exit 0
+else
+  exit 1
+fi

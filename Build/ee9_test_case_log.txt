@@ -1,0 +1,296 @@
++++++++++++++++++++ BEGIN  Test Case MT +++++++++++++++++++
+The object code file Binary/RLT is absent or unreadable.
+
+TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:
+ucc: there is no file named OUT4A.k3 in the Assembly folder!
+
+TEST B - GAP in unWIPEd area - should fail "Invalid operand":
+ucc: there is no file named OUT4B.k3 in the Assembly folder!
+
+TEST C - valid WIPE at end of data - should end normally:
+ucc: there is no file named OUT4C.k3 in the Assembly folder!
+
+TEST D - reading past the end of data - should fail "Invalid operand":
+ucc: there is no file named OUT4D.k3 in the Assembly folder!
+
+TEST E - attempt to write past PET - should fail "Invalid operand":
+ucc: there is no file named OUT4E.k3 in the Assembly folder!
+
+TEST F - MW, MWE, MFRE and MBRE - should end normally:
+ucc: there is no file named OUT4F.k3 in the Assembly folder!
+
+TEST G - WIPE entire tape, leaving it unlabelled - should end normally:
+ucc: there is no file named OUT4G.k3 in the Assembly folder!
+
+TEST H - writing to ETW - should end normally:
+ucc: there is no file named OUT4H.k3 in the Assembly folder!
+
+TEST I - MBR at BTW - should LIV:
+ucc: there is no file named OUT4I.k3 in the Assembly folder!
+
+TEST J - MBSK at BTW - should LIV:
+ucc: there is no file named OUT4J.k3 in the Assembly folder!
+
+TEST K - MBR after label block, R/W 1-word blocks - should end normally:
+ucc: there is no file named OUT4K.k3 in the Assembly folder!
+
+TEST L - R/W 32K-word blocks - should end normally:
+ucc: there is no file named OUT4L.k3 in the Assembly folder!
+
+TEST T - like TEST A but for 7-track decks - should end normally:
+The object code file Binary/RLT is absent or unreadable.
+
+ucc: there is no file named OUT4T.k3 in the Assembly folder!
+
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case FD +++++++++++++++++++
+TEST TDISK - POA, PIA, PMA, PMF - should end normally:
+ucc: there is no file named TDISK.k3 in the Assembly folder!
+
+The object code file Binary/TDISK is absent or unreadable.
+
+TEST TDISK - POA, PIA, PMA, PMF done.
+TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:
+ucc: there is no file named TDISKOR.k3 in the Assembly folder!
+
+The object code file Binary/TDISKOR is absent or unreadable.
+
+TEST TDISKOR - POA, PIA, PMA, PMF done.
+TEST TDISKEM - POB, PIA, PMA - should end normally:
+ucc: there is no file named TDISKEM.k3 in the Assembly folder!
+
+The object code file Binary/TDISKEM is absent or unreadable.
+
+TEST TDISKEM - POB, PIA, PMA done.
+TEST TDISKFH - POC, PIC - should end normally:
+ucc: there is no file named TDISKFH.k3 in the Assembly folder!
+
+The object code file Binary/TDISKFH is absent or unreadable.
+
+TEST TDISKFH - POC, PIC done.
+TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:
+ucc: there is no file named TDISKFHNS.k3 in the Assembly folder!
+
+The object code file Binary/TDISKFHNS is absent or unreadable.
+
+TEST TDISKFHNS - POC, POK, PIC, PIG done.
+
+
++++++++++++++++++++ BEGIN  Test Case CR +++++++++++++++++++
+The following tests use this data:
+====
+====
+
+The output to CP0 should look like this:
+=====
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}|\ØXYZ{}|\Ø
+        .
+" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()£*,/:=()£*,/
+0123456701234567
+89_º;+-.89_º;+-.
+@ABCDEFG@ABCDEFG
+HIJKLMNOHIJKLMNO
+PQRSTUVWPQRSTUVW
+XYZ{}|
+        .
+=====
+the penultimate input line:
+XYZ{}|\Øxyz{}|\Ø
+should be punched out like this:
+XYZ{}|
+because the second set of 8 lines is read/punched to EM.
+An alphanumeric read/write omits everything after "COLUMN80".
+___________________________________________________________
+
+
+TEST PIA PIB - POA 160-column binary write:
+ucc: there is no file named CRTAB.k3 in the Assembly folder!
+
+TEST PIC PID - POC 160-column character binary write:
+ucc: there is no file named CRTCD.k3 in the Assembly folder!
+
+TEST PIE PIF - POG 80-column alphanumeric write:
+ucc: there is no file named CRTEF.k3 in the Assembly folder!
+
+TEST PIG PIH - POL 80-column alphanumeric character-per-word write:
+ucc: there is no file named CRTGH.k3 in the Assembly folder!
+
+TEST POA POB - PIA 160-column binary read:
+ucc: there is no file named CPTAB.k3 in the Assembly folder!
+
+TEST POC POD - PIC 160-column character binary read:
+ucc: there is no file named CPTCD.k3 in the Assembly folder!
+
+TEST POG POH - PIE 80-column alphanumeric read:
+ucc: there is no file named CPTGH.k3 in the Assembly folder!
+
+TEST POL POK (sic) - PIG 80-column alphanumeric character-per-word read:
+ucc: there is no file named CPTKL.k3 in the Assembly folder!
+
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case HIG +++++++++++++++++++
+The object code file Binary/HIGUYS is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case HIG: nine HIGUYS - t ahipr FAILED!
+------------------- END OF Test Case HIG -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case LOG +++++++++++++++++++
+The object code file Binary/LOGUYS is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case LOG: nine LOGUYS - t ahipr FAILED!
+------------------- END OF Test Case LOG -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case DMP +++++++++++++++++++
+The object code file Binary/DIVA is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case DMP: nine DIVA - t ahipr FAILED!
+------------------- END OF Test Case DMP -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case ACK +++++++++++++++++++
+The object code file Binary/ACK38 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case ACK: nine ACK38 - t ahipr FAILED!
+------------------- END OF Test Case ACK -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case HLT +++++++++++++++++++
+The object code file Binary/LEECH is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case HLT: nine LEECH LEECH_data9 t ahipr FAILED!
+------------------- END OF Test Case HLT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case HKT +++++++++++++++++++
+The object code file Binary/LEECH is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case HKT: nine LEECH LEECH_data9_KDF9 t ahipr kk FAILED!
+------------------- END OF Test Case HKT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case MOB +++++++++++++++++++
+The source file Whetstone/MANORBOY.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case MOB: whet MANORBOY t ahipr FAILED!
+------------------- END OF Test Case MOB -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case GPR +++++++++++++++++++
+The source file Whetstone/GPSPRIMES.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case GPR: whet GPSPRIMES t ahipr FAILED!
+------------------- END OF Test Case GPR -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case FLU +++++++++++++++++++
+The source file Whetstone/FLUID.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case FLU: whet FLUID t ahipr FAILED!
+------------------- END OF Test Case FLU -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case WBM +++++++++++++++++++
+The source file Whetstone/WHETSTONE.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case WBM: whet WHETSTONE t ahipr FAILED!
+------------------- END OF Test Case WBM -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case RLT +++++++++++++++++++
+The object code file Binary/RLT is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case RLT: nine_test RLT RLT_data t ahipr FAILED!
+------------------- END OF Test Case RLT -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case TO4 +++++++++++++++++++
+The object code file Binary/OUT4A is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case TO4: nine OUT4A - t ahipr FAILED!
+------------------- END OF Test Case TO4 -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case TOX +++++++++++++++++++
+The object code file Binary/OUTX is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case TOX: nine OUTX - t ahipr FAILED!
+------------------- END OF Test Case TOX -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case MTW +++++++++++++++++++
+The source file Whetstone/MTW.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case MTW: whet MTW t ahipr FAILED!
+------------------- END OF Test Case MTW -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case INP +++++++++++++++++++
+The source file Whetstone/INPUT.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case INP: whet INPUT t ahipr FAILED!
+------------------- END OF Test Case INP -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case HQP +++++++++++++++++++
+The file Kidsgrove/WEEHAAVIE.a60 is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case HQP: kids WEEHAAVIE - t ahipr FAILED!
+------------------- END OF Test Case HQP -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case WAB +++++++++++++++++++
+The object code file Binary/GPT is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case WAB: nine GPT GPT_data t ahiprn FAILED!
+------------------- END OF Test Case WAB -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case FLO +++++++++++++++++++
+The object code file Binary/FLOATT is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case FLO: nine FLOATT - t ahipr FAILED!
+------------------- END OF Test Case FLO -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case 1DH +++++++++++++++++++
+The object code file Binary/1DTHFP is absent or unreadable.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Test Case 1DH: nine 1DTHFP 1DTHFP_data5 t ahipr FAILED!
+------------------- END OF Test Case 1DH -------------------
+
+

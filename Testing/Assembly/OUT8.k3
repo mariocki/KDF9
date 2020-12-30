@@ -1,0 +1,95 @@
+TL 100; ST 0;
+V99; W0;
+RESTART; J666; J999;
+PROGRAM;                   (OUT8);
+   V0 = B30;               (OUT 8 stream);
+   V1 = 0;
+   V3 = P12345678;
+   V4 = P........;
+   V5 = PZYXWVUTS;
+   V6 = P........;
+   V8 = B7777777777773702;
+   V19= P.PENULT.;
+   V20= B7777777777773702;
+
+   V71= B1010101010101010;
+   V72= B1212121212121212;
+   V73= B2020202020202020;
+   V74= PXXXXXFOR;
+   V75= F1000000.0;
+   V76= B100000000;
+   V77= 0;
+
+   V91 = B 4441644167576244;  (DATAWORD);
+   V93 = Q B30/B30/B30;       (to close the stream);
+   V94 = Q 4095/-1/100;       (to write a gap);
+   V95 = B 4441644167576275;  (DATAWOR|);
+
+   V98= Q 0/AV0/AV1;          (OUT 8 gap);
+   V99= Q 0/AV0/AV8;          (OUT 8 data);
+
+   V80 = QB100000/AV81/AV85;
+   V81 = 0;
+   V82 = B0750063245325432;   ("H_e_l_" in Flexowriter code);
+   V83 = B3254325777777700;   ("_l_o " in Flexowriter code);
+   V84 = B0664065045624534;   ("there" in Flexowriter code);
+   V85 = 0;
+
+   V74; SHL+30; =V74;
+
+   JS888; SETB71; JS777; (1);
+   JS888; SETB71; JS777;
+   JS888; SETB71; JS777;
+
+   V80; SET 8; OUT;         (Use OUT 8 to access the FW);
+
+   JS888; SETB11; JS777; (4);
+   JS888; SETB11; JS777;
+   JS888; SETB11; JS777;
+   JS888; SETB30; JS777; (7);
+   JS888; SETB30; JS777;
+   JS888; SETB11; JS777; (9);
+   JS888; SETB51; JS777; (10);
+   JS888; SETB11; JS777;
+   JS888; SETB11; JS777;
+   JS888; SETB10; JS777; (13);
+   JS888; SETB10; JS777;
+
+   (close stream 10);
+   SETB10; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+
+   JS888; SETB11; JS777; (15);
+   JS888; SETB11; JS777;
+   JS888; SETB11; JS777;
+   JS888; SETB11; JS777;
+   JS888; SETB30; JS777; (19);
+
+   JS888; SETB10; JS777; (20 new xfer after previous close);
+   JS888; SETB11; JS777; (21);
+   JS888; SETB30; JS777; (22);
+
+   (close stream 30);
+   SETB30; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+
+   JS888; SETB51; JS777; (23);
+   JS888; SETB51; JS777;
+   JS888; SETB51; JS777;
+   JS888; SETB51; JS777;
+
+
+999;  ZERO; OUT;
+
+666; (close all output streams);
+   SETB10; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+   SETB11; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+   SETB30; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+   SETB71; DUP; DUP; =C1; =I1; =M1; Q1; SET 8; OUT;
+   ZERO; OUT;
+
+777; (write to the stream given in N1);
+   =V0;  V99; V71; V0; FRB; V73; OR; SHL+36; SHL-36; SETB50000; OR; V74; OR; =V1; SET 8; OUT; EXIT1;
+
+888; (generate a unique output word);
+   V77; NOT; NEG; DUP; =V77; V72; REV; FRB; V73; OR; =V3; EXIT 1;
+FINISH;
+|

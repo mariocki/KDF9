@@ -1,0 +1,12 @@
+V9; W0;
+PROGRAM;                   (main program);
+   (label data);
+   V2 = B3553576564606564; (+KOUTPUT);
+   V3 = B1720202223202024; (/0023004);
+
+   V3; V2; SET10; OUT;
+   SET 7; OUT;
+   ZERO; OUT;
+
+FINISH;
+|

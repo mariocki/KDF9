@@ -1,0 +1,24 @@
+V19; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test copy TP to SI0 in character mode);
+      V1 = Q 2/AV11/AV11;
+      V4 = Q 4/AV11/AV11;
+      V21= B0277777777777777;
+      V1; =Q1; SET B02; SET 5; OUT; =C1;
+
+      V4; =Q4; SET B21; SET 5; OUT; =C4;
+      V4; =Q4; SET B21; SET 5; OUT; =C4;
+
+*1;   PICQ1;
+      PARQ1; J999TR;
+      POCQ4;
+      J1;
+
+999;
+      C1; SET 6; OUT;
+      C4; SET 6; OUT;
+
+      ZERO; OUT;
+
+FINISH;
+|

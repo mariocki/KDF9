@@ -1,0 +1,90 @@
+TL 100; ST 0;
+V64; W0;
+RESTART; J999; J999;
+PROGRAM; (FERRANTI);
+   V0= Q 0/AV31/AV41;
+
+   V10= B4041424344454647;
+   V11= B1010101010101010;
+   V12= B1212121212121212;
+   V13= B2020202020202020;
+   V14= B1011121014101010;
+
+   V31= 0;
+   V32= 2;
+   V33= B0202010004057777;
+   (V34= B1011121314151617);
+   (V35= B2021222324252627);
+   (V36= B3031320034353637);
+   V37= B7641424344454647;
+   V38= B5051525354555657;
+   V39= B6061626364656667;
+   V40= B7071727474357600;
+   V41= B4075737503020275;
+
+   (put the virtual TP into figures case and output the gamut);
+   ZERO; NOT; SHL+6; SET B40; OR; =V32;
+   JS777;
+
+   (put the virtual TP into letters case and output the gamut again);
+   ZERO; NOT; SHL+6; SET B33; OR; =V32;
+   JS777;
+
+   (close stream 51);
+   SET B51; DUP; DUP; =C2; =I2; =M2; Q2; SET 8; OUT;
+
+   (claim physical 5-track TP);
+   SET 5; SET 5; OUT;
+   =C5; SET AV32; =I5; SET AV41; =M5;
+
+   (put the TP into figures case and output the gamut);
+   ZERO; NOT; SHL+6; SET B40; OR; =V32;
+   POAQ5;
+
+   (put the TP into letters case and output the gamut again);
+   ZERO; NOT; SHL+6; SET B33; OR; =V32;
+   POAQ5;
+
+   (put the TP into KDF9 shift case and output the gamut);
+   ZERO; NOT; SHL+6; SET B06; OR; =V32;
+   POAQ5;
+
+   (put the TP into KDF9 normal case and output the gamut again);
+   ZERO; NOT; SHL+6; SET B07; OR; =V32;
+   POAQ5;
+
+   (free the TP);
+   C5; SET 6; OUT;
+
+   (claim physical 8-track TP);
+   SET 1; SET 5; OUT;
+   =C5; SET AV32; =I5; SET AV41; =M5;
+
+   (put the TP into figures case and output the gamut);
+   ZERO; NOT; SHL+6; SET B40; OR; =V32;
+   POAQ5;
+
+   (put the TP into letters case and output the gamut again);
+   ZERO; NOT; SHL+6; SET B33; OR; =V32;
+   POAQ5;
+
+   (put the TP into KDF9 shift case and output the gamut);
+   ZERO; NOT; SHL+6; SET B06; OR; =V32;
+   POAQ5;
+
+   (put the TP into KDF9 normal case and output the gamut again);
+   ZERO; NOT; SHL+6; SET B07; OR; =V32;
+   POAQ5;
+
+   (free the TP);
+   C5; SET 6; OUT;
+
+999;  ZERO; OUT;
+
+777; (write to stream B51);
+   SET B51; =V31;
+   V0; SET 8; OUT;
+   EXIT1;
+
+FINISH;
+|

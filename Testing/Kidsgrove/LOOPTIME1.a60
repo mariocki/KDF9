@@ -1,0 +1,13 @@
+!begin
+!library A6;
+!comment
+   using the ee9 emulator
+   * with KIDSGROVE ALGOL this takes 123.0 KDF9 seconds
+     and executes  20000083 KDF9 instructions:
+     the overhead for 0 iterations is 83 KDF9 instructions,
+     so the per-loop cost is 20 KDF9 instructions per iteration.;
+!integer  i;
+!for  i := 1 !step  1 !until  1 000 000 !do
+!end
+****
+|

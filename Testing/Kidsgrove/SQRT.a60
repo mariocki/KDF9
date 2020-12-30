@@ -1,0 +1,13 @@
+'begin'
+'library' A0, A1, A4, A5, A15;
+'real' x;
+'for' x := 81, 25, 16, 9, 8, x/2 'while' x >0.0099 'do'
+   !begin
+   writetext(30, {SQRT _ OF _ });
+   write(30, format({+dd.dddddddddd}), x);
+   writetext(30, {_ IS _ });
+   write(30, format({+d.dddddddddddc}), sqrt(x));
+   !end;
+
+'end'
+|

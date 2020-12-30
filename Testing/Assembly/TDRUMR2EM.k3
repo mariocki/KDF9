@@ -1,0 +1,49 @@
+V1999; W0;
+RESTART; J999; J999;
+PROGRAM; (test DR I/O end-message logic with 1-word blocks);
+
+   V8 = Q 14/AV101/AV101;
+   V9 = Q 14/AV701/AV701;
+   V7 = B1212121212121212;
+   V6 = B0020202020202020;
+   V0 = B4142754344754546;    (AB|CD|EF);
+   V1 = B4142750000000000;    (AB|     ); (after WE, RE);
+
+   V0; =V101;
+   V1; =V702;
+   JSP1;
+
+   V0; SHL+6; DUP; =V0; =V101;
+   V1; SHL+6; DUP; =V1; =V702;
+   JSP1;
+
+   V0; SHL+6; DUP; =V0; =V101;
+   V1; SHL+6; DUP; =V1; =V702;
+   JSP1;
+
+   (done; terminate with empty NEST);
+   OUT;
+
+
+999; (fail);
+   M6;
+   MRWDQ0;
+
+P1;
+   ZERO; =V701P0;
+
+   (set drum/sector number and write);
+   V8P0; =Q8; SET 11; SHL+4;  =+C8;
+   POAQ8;
+
+   (set drum/sector number and read);
+   V9P0; =Q9; SET 11; SHL+4; =+C9;
+   PIBQ9;
+
+   (compare output and input buffers);
+   V701P0; V702P0; DUPD; NEV; J999P0NEZ;
+   ERASE; ERASE;
+   EXIT 1;
+
+FINISH;
+|

@@ -1,0 +1,85 @@
+easyread|
+_b_e_g_i_n
+_i_n_t_e_g_e_r b;
+
+   open(10);
+   open(20);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   b := inbasicsymbol(20);
+   outbasicsymbol(10, b);
+   write(10, format(_[sndddc_]), b);
+
+   close(20);
+   close(10);
+_e_n_d
+|+1903,
+-1904;+1905:
+|

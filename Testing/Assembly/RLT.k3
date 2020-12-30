@@ -1,0 +1,79 @@
+V32; W0; Y640;
+RESTART; J999; J999;
+PROGRAM;
+   V1  = Q8/AY0/AY2;
+   V2  = Q0/AY0/AY3;
+   V3  = Q0/AY0/AY3;
+   V4  = Q7/1/0;
+   V8  = Q0/AV13/AV13;
+   V9  = Q0/AV11/AV11;
+   V10 = B7500000000000000; (EM);
+   V11 = B0257375337027777; (CRLF 'O.K.'CRLF);
+   V12 = B0277777777777777; (CRLF);
+
+   V1; =Q1;           (for MT orders);
+   V2; =Q2;           (for FW orders);
+   V3; =Q3;           (for TR orders);
+   SET 2; SET 5; OUT; (allocate TR);
+   =C3;               (complete Q3 for TR);
+   V4; =Q4;           (loop counter over MT buffers);
+   V8; =Q8; C3; =C8;  (for skipping CRLF);
+
+888;
+   SET AY2; =M1;  (reset M part after possible truncation of output area);
+   (clear input buffer);
+      ZERO; =Y0; ZERO; =Y1; V12; =Y2; V12; =Y3;
+   (read label text);
+      PIBQ3;
+   (make data visible to ee9's signature check);
+      Y0; Y1; Y2; Y3; ERASE; ERASE; ERASE; ERASE;
+   (check for last line of data);
+   V10; Y0; NEV;
+J999=Z;
+   (reset Q2 to span full o/p area);
+      SET AY3; =M2;
+      V12; =Y3;
+   (check for 2-word or 3-word label);
+      V10; Y2; NEV;
+J777NEZ;
+   (two-word label, truncate o/p area);
+      ZERO; NOT; =+M2;
+      SET AY1; =M1;
+      V12; =Y2;
+      ZERO; =Y3;
+777;
+   POBQ2; (type label on FW0);
+   PICQ8; (skip over the CRLF);
+
+   PMDQ1; (rewind this MT);
+   C1; SET 15; NEV;
+J222NEZ;
+   POAQ1; (write Ampex label as normal block)
+J333;
+222;
+   POCQ1; (write label as last block);
+333;
+   Q1TOQ9; SET 542; =M9;
+   POFQ9; (wipe gap after label);
+   PMEQ1; (skip backward to the label);
+
+   (increment buffer number);
+   C1; NOT; NEG; DUP; SET 14; NEV;
+J111NEZ;
+   (skip over buffer 14 to the 7-track buffer);
+   SET 15;
+111;
+   =C1;
+  (decrement loop counter);
+   DC4;
+
+J888C4NZ;
+
+999;
+   (end with FW message);
+      V9; =Q9;
+      POAQ9;
+      ZERO;
+   OUT;
+FINISH;
+|

@@ -1,0 +1,16 @@
+!begin
+!library A6;
+!real sum;
+!integer i, j;
+!array A [1:100], B [1:100];
+!for i := 1 !step 1 !until 100 !do
+   A[i] := B[i] := 1.0/i;
+sum := 0.0;
+!for i := 1 !step 1 !until 100 !do
+   sum := sum + A[i] * B[i];
+
+output(30, sum);
+output(30, 1.634983900184892865077169498180323766683321700031263813853);
+output(30, sum/1.634983900184892865077169498180323766683321700031263813853);
+!end
+|

@@ -1,0 +1,72 @@
+V99; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+
+   V1 = B4000000000000007;
+   V2 = B2000000000000001;
+   V3 = B0000000000000007;
+   V4 = B2000000000000701;
+   V5 = B0000000000000005;
+   V6 = B0000000000000006;
+   V7 = B0400000000000000;
+   V8 = B3777777777777777;
+   V9 = B4000000000000000;
+   V0 = 338193759479;
+
+V2; V1; V7; DIVR;
+
+ZERO; V9; V7;  DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+
+V8; V8; SET512; DIVR; VR; ERASE; ZERO; REV; SET1023;  DIVR; ERASE; ERASE; VR;
+
+V8; V8; SET1023; DIVR; VR; ERASE; ZERO; REV; SET1023;  DIVR; ERASE; ERASE; VR;
+
+V6; V5; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+V6; V5; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+SET -1; ZERO; REV; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+SET -1; ZERO; REV; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+ZERO; SET -1; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+ZERO; SET -1; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+SET 1; ZERO; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+SET 1; ZERO; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+ZERO; SET 1; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+ZERO; SET 1; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+V2; V1; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+V2; V1; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+V4; V3; V7; DIVR; ERASE; ZERO; REV; V7;  DIVR; ERASE; ERASE; VR;
+V4; V3; SET -10; DIVR; ERASE; ZERO; REV; SET -10; DIVR; ERASE; ERASE; VR;
+
+V8; SET64; SET63; DIVR; ERASE; ERASE; VR;
+
+
+   V0; =Q14;
+   SET 5; =C15;              ( n in 2^(2^n - 1) - 1 );
+   ZERO; NOT; SHLC15; NOT;    ( 2^n - 1 );
+   SET47; %I; =C15;           ( C15 = first bit, N1 no of extra words );
+   ZERO; NOT;
+   SHLC15; NOT;               ( top word of number  );
+   REV; =Q15;                 ( number of divides - 1 );
+   SET1; =+C15;               ( add 1 to the counter so that it goes zero after the right count );
+   STR;                       ( convert to double length );
+
+*1;
+    Q14;        [ fetch the divisor
+    DIVR;       [ divide a double number (initially top two words of dividend)
+    ERASE;      [ throw away the quotient
+    ZERO; NOT;
+    STR;        [ leaves 47 ones in N2
+    =+Q15;      [ decrement count of how many chunks of 47 bits remain
+    REV;        [ become bottom half of dividend
+    J1C15NZS;   [ short loop jump instruction
+
+ZERO; OUT;
+
+FINISH;
+|
+338193759479

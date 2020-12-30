@@ -1,0 +1,32 @@
+LNEXPETC|
+_b_e_g_i_n
+
+_i_n_t_e_g_e_r count, layout;
+
+_r_e_a_l x;
+_i_n_t_e_g_e_r i;
+
+count := 100;
+layout := format(_[+d.ddddddddddº+ndc_]);
+
+writetext(30, _[sqrt(1.0/x)_[c_]_]);
+_f_o_r x := 9, 8, 7, 6, 5, 4, 3, 2, 1, x _s_t_e_p x _u_n_t_i_l  1048576.0 _d_o
+   write(30, layout, sqrt(1.0/x));
+
+writetext(30, _[_[c_]sqrt(x)_[c_]_]);
+_f_o_r x := 9, 8, 7, 6, 5, 4, 3, 2, 1, x _s_t_e_p x _u_n_t_i_l  1048576.0 _d_o
+   write(30, layout, sqrt(x));
+
+writetext(30, _[_[c_]ln(i),*abs(exp(ln(i)))_[c_]_]);
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l count _d_o
+_b_e_g_i_n
+   write(30, layout, ln(i));
+   write(30, layout, abs(exp(ln(i))));
+_e_n_d;
+
+writetext(30, _[_[c_]-ln(exp(1.0/i)^i_[c_]_]);
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l count _d_o
+   write(30, layout, ln(exp(1.0/i)^i));
+
+_e_n_d
+|

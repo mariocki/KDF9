@@ -1,0 +1,70 @@
+V999; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test seek and I/O logic);
+   V1 = Q 80/    1/AV100;
+   V3 = B0702023131310202; ("оо999оо"  in Flexowriter code);
+   V4 = Q0/AV3/AV3;
+   V5 = B7777777777777777;
+   V7 = Q 1044/  1/    0;  (C chosen to end at sector 94);
+   V8 = Q 14/AV100/AV179;
+   V9 = Q 14/AV200/AV279;
+   
+   V7; =Q7;
+   ZERO; =RM5; (sector number)
+
+   SETB16; =RC6; Q6 TO Q 15;
+   (reset heads on drive 0);
+   PMDQ6;
+
+   (compute a seek area number from the iteration number);
+666;
+   SET 1000; C7; -; SHL+6; DUP; SHL-2; OR; SETB52520; AND; SETB16; OR; =RC6;
+   
+   (go there);
+   PMAQ6;
+
+   (set up data to write out);
+   V1; =Q1;
+   Q6 TO Q2;
+*111;
+   Q2; =M0M1Q; DC2; M+I2; J111C1NZS;
+
+   (set up I/O parameters);
+   V8; =Q8;
+
+   (compute sector number from iteration number);
+   M5; NOT; NEG; =M5;
+   M5; SET 95; -; J333LTZ;
+   ZERO; =M5;
+333;
+   M5; SHL+4; C8; OR; =C8;
+   (write out data);
+   POAQ8;
+   
+   (read it back);
+   V9; =Q9;
+   C8 TO Q9;
+   PIAQ9;
+
+   (compare just 40 words at end of area);
+   SET 80; =RC1; PMFQ9; J222NTR;
+   SET 40; =RC1;
+
+   (compare input with output);
+*222;
+   V100M1; V200M1Q; NEV; J999NEZ; J222C1NZS;
+   (next iteration);
+   DC7; J666C7NZ;
+
+444;
+   (done);
+   ZERO; OUT;
+
+   (unequal: quit with error indicator "999");
+999;
+   SET 999;
+   V4; =Q4; POAQ4;
+   ZERO; OUT;
+FINISH;
+|
+

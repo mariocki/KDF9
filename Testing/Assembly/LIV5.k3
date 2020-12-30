@@ -1,0 +1,20 @@
+P
+TESTWFLIVUPU
+TESTING LIV ON INVALID JCqNZS|
+ST 64; TL 9;
+V0;
+PROGRAM;
+   SET 1; =C1;
+   ZERO; =C1;
+*1;
+   DUMMY;
+   *DUMMY;
+   DUMMY;
+   DUMMY;
+   DUMMY;
+   DUMMY;
+   J1C1NZS;
+   ZERO;
+   OUT;
+FINISH;
+|

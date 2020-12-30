@@ -1,0 +1,47 @@
+V999; W0;
+RESTART; J999; J999;
+PROGRAM;                   (tests FD fixed-head disc transfers);
+   V1 = Q 50/    1/AV100;
+   V7 = Q 500/   1/    0;
+   V8 = Q 14/AV100/AV149;
+   V9 = Q 14/AV200/AV249;
+
+   V7; =Q7;
+
+  (set up data to write out);
+   C1; =RC2; SET 3; =I2;
+*333;
+   Q2; =M0M1Q; DC2; M+I2; J333C1NZS;
+
+666;
+   (set up I/O parameters);
+   V8; =Q8;
+
+   (compute sector number from iteration number);
+   C7; SETB77; AND; SHL+4; =+C8;
+   V9; =Q9; C8 TO Q9;
+
+   (write out data);
+   POCQ8;
+
+   (read it back);
+   PICQ9;
+
+   (compare input with output);
+   SET 50; =RC1;
+222;
+   V100M1; V200M1Q; NEV; J999NEZ; J222C1NZ;
+   
+   (equal: next iteration);
+   V1; =Q1;
+   DC7; J333C7NZ;
+
+   (done);
+   ZERO; OUT;
+
+   (unequal: quit);
+999;
+   SET 999;
+   ZERO; OUT;
+FINISH;
+|

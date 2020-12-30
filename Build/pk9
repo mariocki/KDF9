@@ -1,0 +1,44 @@
+# This file is part of ee9 (V5), the GNU Ada emulator of the English Electric KDF9.
+# Copyright (C) 2020, W. Findlay; all rights reserved.
+#
+# The ee9 system is free software; you can redistribute it and/or
+# modify it under terms of the GNU General Public License as published
+# by the Free Software Foundation; either version 3, or (at your option)
+# any later version. This program is distributed in the hope that it
+# will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details. You should have
+# received a copy of the GNU General Public License distributed with
+# this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+
+ROOT=..
+B=${ROOT}/Build
+S=${ROOT}/Source
+T=${ROOT}/Testing
+OS=${1:-UNIX}
+
+case ${OS} in
+   UNIX|Unix|unix|LINUX|Linux|linux|macOS|Macintosh|Mac|OSX)
+      STRIP="strip ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${T}/mkchan"
+      SIZE="size   ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${T}/mkchan"
+      ;;
+   [Ww]indows|WINDOWS)
+      STRIP=": "
+      SIZE=": "
+      ;;
+   *)
+      echo Invalid target OS parameter \"$1\"
+      exit 2
+      ;;
+esac
+
+eval ${STRIP}
+eval ${SIZE}
+
+cd ${T}
+echo
+echo Assembling all Usercode files.
+for f in Assembly/*.k3; do p=`basename "${f}" .k3`; ./ucc "${p}"; done
+
+cd ${B}
+./zipup ${OS}

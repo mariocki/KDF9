@@ -1,0 +1,38 @@
+# This file is part of ee9 (V5), the GNU Ada emulator of the English Electric KDF9.
+# Copyright (C) 2020, W. Findlay; all rights reserved.
+#
+# The ee9 system is free software; you can redistribute it and/or
+# modify it under terms of the GNU General Public License as published
+# by the Free Software Foundation; either version 3, or (at your option)
+# any later version. This program is distributed in the hope that it
+# will be useful, but WITHOUT ANY WARRANTY; without even the implied
+# warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# See the GNU General Public License for more details. You should have
+# received a copy of the GNU General Public License distributed with
+# this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+
+OS=${1:-UNIX}
+
+./tidy
+
+name=`echo V*p*`_for_${OS}
+echo
+echo Creating: ${name}.zip
+
+rm -f ../.DS_Store
+rm -f  ./.DS_Store
+rm -f ../Adjuncts/.DS_Store
+rm -f ../Documents/.DS_Store
+rm -f ../Source/.DS_Store
+rm -f ../Testing/.DS_Store
+rm -f ../Testing/Algol/.DS_Store
+rm -f ../Testing/Assembly/.DS_Store
+rm -f ../Testing/Binary/.DS_Store
+rm -f ../Testing/Kidsgrove/.DS_Store
+rm -f ../Testing/Kidsgrove/Algol/.DS_Store
+rm -f DH_source/.DS_Store
+rm -f ${name}.zip
+cd ../..
+zip -r ${name}.zip emulation
+echo
+ls -la ${name}.zip

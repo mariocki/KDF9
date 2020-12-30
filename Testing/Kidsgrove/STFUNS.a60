@@ -1,0 +1,51 @@
+!begin !library A0, A1, A5, A15;
+
+!real y, half pi, two pi, pi, x;
+
+two pi := 6.283185307179588;
+pi := two pi / 2;
+half pi := two pi / 4.0;
+
+open(30);
+
+!for y := 0.0, (y + 1.0) !while y < 21 !do
+   !begin
+   x := y / 20.0;
+   writetext(30, {{c}x _ =_});
+   write(30, format({+d.dddddddddddss}), x);
+   writetext(30, { _ pi.x _ =_});
+   write(30, format({+d.dddddddddddss}), pi × x);
+   writetext(30, { _ sin(pi.x)_ =_});
+   write(30, format({+d.dddddddddddss}), sin(pi × x));
+   writetext(30, { _ cos(pi.x)_ =_});
+   write(30, format({+d.dddddddddddss}), cos(pi × x));
+   !if cos(x) !ne 0 !then
+      !begin
+      writetext(30, { _ x-arctan(sinx/cosx)_ =_});
+      write(30, format({+d.dddddddddddº+dd}),  x - arctan(sin(x)/cos(x)))
+      !end;
+   !end;
+
+writetext(30, {{cc}});
+
+!for x := 0.0, x + 0.125 !while x < 2.125, 4, x + 1.0 !while x < 10.0 !do
+   !begin
+   writetext(30, {{c}x _ =_});
+   write(30, format({+d.ddddddddddd}), x);
+   writetext(30, {{ss} _ exp(x)_ =_});
+   write(30, format({+d.ddddddddddº+dd}), exp(x));
+   !if x !ne 0 !then
+      !begin
+      writetext(30, {{ss} _ ln(x)_ =_});
+      write(30, format({+d.ddddddddddd}), ln(x));
+      writetext(30, {{ss} _ exp(ln(x))-x_ =_});
+      write(30, format({+d.ddddddddddº+dd}), exp(ln(x))-x);
+      writetext(30, {{ss} _ ln(exp(x))-x_ =_});
+      write(30, format({+d.ddddddddddº+dd}), ln(exp(x))-x);
+      !end;
+   !end;
+
+writetext(30, {{cc}});
+
+!end
+|

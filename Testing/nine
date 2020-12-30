@@ -1,0 +1,116 @@
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
+
+prog=$1
+data=$2
+
+
+cp FW0 FW0_copy
+
+if [ x"${prog}"x = xx ]
+then
+   echo You have not named a binary program to be run.
+   echo
+   exit 1
+fi
+
+program=`basename "${prog}"`
+program=${BINARY}/"$program"
+if [ ! -r "$program" ]
+then
+   echo The object code file "$program" is absent or unreadable.
+   echo
+   exit 2
+fi
+
+if [ x"${data}"x = xx -o x"${data}"x = x-x ]
+then
+   >TR0
+else
+   datatxt=${DATA}/`basename "${data}" ".txt"`.txt
+   if [ -r "$datatxt" ]
+   then
+      cp "$datatxt" TR1
+   else
+      echo The file "$datatxt" is absent or unreadable.
+      exit 3
+   fi
+fi
+
+if [ x"$3"x = xx -o x"$3"x = x-x ]
+then
+   mode=""
+else
+   mode="-d$3"
+fi
+if [ x"$4"x = xx -o x"$4"x = x-x ]
+then
+   miscellany=""
+else
+   miscellany="-m$4"
+fi
+if [ x"$5"x = xx -o x"$5"x = x-x ]
+then
+   TRmode="-TRll"
+else
+   TRmode="-TR$5"
+fi
+if [ x"$6"x = xx -o x"$6"x = x-x ]
+then
+   TPmode="-TPll"
+else
+   TPmode="-TP$6"
+fi
+if [ x"$7"x = xx -o x"$7"x = x-x ]
+then
+   state=""
+else
+   state="-s$7"
+fi
+
+if [ "$mode" = -df ]
+then
+   time ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+else
+        ee9 $state "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
+fi
+
+case $4$8 in
+   *z*)
+      ;;
+   *-*)
+      ;;
+   *)
+      if [ -s CP0 ]
+      then
+         echo
+         echo CP0:
+         echo ===
+         more CP0
+         echo ===
+      fi
+
+      if [ -s TP0 ]
+      then
+         case $TPmode in
+            -TPk*)
+               ;;
+            -TPl*)
+               echo
+               echo TP0:
+               echo ===
+               more TP0
+               echo ===
+               ;;
+         esac
+      fi
+
+      if [ -s LP0 ]
+      then
+         echo
+         echo LP0:
+         echo ===
+         more LP0
+         echo ===
+      fi
+esac

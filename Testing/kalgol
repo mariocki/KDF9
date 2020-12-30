@@ -1,0 +1,127 @@
+ALGOL_COMPONENTS=${ADJUNCTS:-../Adjuncts}
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
+SOURCE=${KIDSGROVE:-Kidsgrove}
+USERCODE=${KDF9_USERCODE:-Assembly}
+
+trap "rm -f  ${ALGOL_COMPONENTS}/chan6.pt ptp.bin mt.out ${ALGOL_COMPONENTS}/punch.txt error_output;
+      rm -f  ${DATA}/systape.txt ${DATA}/kalgol_labels.txt ${DATA}/ABS_text.txt"   \
+      0 1 2 3
+
+if [ x${KIDSMODE}x = xfx ]
+then
+   KIDSMODE=""
+fi
+
+if [ x$1x = xx ]
+then
+   echo No program name was given.; echo
+   exit 1
+elif [ ! -r ${SOURCE}/$1.a60 ]
+then
+   echo The file ${SOURCE}/$1.a60 is absent or unreadable.; echo
+   exit 1
+else
+   name=$1
+fi
+
+> settings_1.txt
+
+cat > ${DATA}/kalgol_labels.txt <<++++
+00000000        |
+00000001        |
+00000002        |
+00000003        |
+00000004        |
+00000005        |
+|
+++++
+nine_test RLT kalgol_labels - zw
+# echo The compiler work tapes have been labelled.
+
+if [ ! -r ${DATA}/systape.txt ]
+then
+   cp ${ALGOL_COMPONENTS}/systape.txt ${DATA}/systape.txt
+fi
+nine MKSYS2 systape - wz
+# echo The compiler overlay tape has been generated.; echo
+
+mkchan ${SOURCE}/$name.a60 ${ALGOL_COMPONENTS}/chan6.pt > /dev/null
+# echo The basic symbol source program tape has been made.; echo
+
+> TP0
+rm -f ${BINARY}/$name
+rm -f ${USERCODE}/$name.k3
+cp ${ALGOL_COMPONENTS}/chan6.pt ${DATA}/ABS_text.txt
+chmod 755 TR0
+
+if [ -r settings_for_kalgol.txt ]
+then
+   cp settings_for_kalgol.txt settings_1.txt
+fi
+
+shift
+if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
+then
+   shift
+fi
+kidopt with $* ${KIDSOPTS} >> settings_1.txt
+
+if nine KAB00DH--USU ABS_text ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2> error_output
+then
+   if [ -s error_output ]
+   then
+      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo error_output:
+      echo ===
+      more error_output
+      echo ===
+      exit 2
+      exit 999
+   fi
+
+   if fgrep FAIL LP0 >/dev/null  2>/dev/null
+   then
+      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo LP0:
+      echo ===
+      more LP0
+      echo ===
+      exit 2
+   fi
+
+   if fgrep FAIL TP0 >/dev/null  2>/dev/null
+   then
+      echo The compilation was abandoned.; printf "\\a\\a\\a"
+      echo TP0:
+      echo ===
+      more TP0
+      echo ===
+      exit 3
+   fi
+
+fi
+
+# a2b -p2t < TP0 > ${USERCODE}/$name.k3
+mtp MT0T > ${USERCODE}/$name.k3
+
+if [ ! -s ${USERCODE}/$name.k3 ]
+then
+   echo The Usercode object program could not be retrieved.; printf "\\a\\a\\a"; echo
+   exit 4
+fi
+
+case ${KIDSGROVE_ASSEMBLY:-y} in
+y)
+   neat $name ${ST:-24000} ${TL:-99999}
+   ucc $name
+   if [ ! -s ${BINARY}/$name ]
+   then
+      echo An object program could not be assembled.; printf "\\a\\a\\a"; echo
+      exit 5
+   fi
+   echo The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name; echo
+   ;;
+*)
+   ;;
+esac

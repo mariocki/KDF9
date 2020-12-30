@@ -1,0 +1,67 @@
+V20; W0;
+RESTART; MRWDQ0; ZERO; MRWDQ0;
+PROGRAM;                   (main program);
+
+(tests GAP in unWIPEd area - should fail);
+
+   V0 = PEFPBEAAG;         (tape label);
+   V1 = Q0/AV2/AV3;        (to read label);
+   V2 = 0;                 (for label data);
+   V3 = 0;                 (for label data);
+   V4 = Q0/AV5/AV6;        (to read label);
+   V5 = 0;                 (for label data);
+   V6 = 0;                 (for label data);
+   V7 = 0;
+   V8 = Q0/AV9/AV9;        (to write TP0 trace);
+   V9 = 0;                 (TP0 trace word);
+
+   V10 = B6445636400420277;  (TEST B);
+   V11 = B5441424554004602;  (LABEL F);
+   V12 = B5441424554004202;  (LABEL B);
+   V13 = B6762576445005402;  (WROTE L);
+   V14 = B4651565163500277;  (FINISH);
+   V15 = B4562625762027777;  (ERROR);
+
+
+   V0; SET4; OUT; V1; =Q1; =C1;
+
+
+   SET 1; SET 5; OUT; V8; =Q10; =C10;
+   V10; =V9; POAQ10;
+
+   MFRQ1; (read label);
+   V0; V3; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V11; =V9; POAQ10;
+
+   V4; =Q4; C1 TO Q4;
+   MBRQ4; (backward read same label);
+   (now compare the two results);
+   V2; V6; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V3; V5; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   V0; V5; DUPD; NEV; J777NEZ;
+   ERASE; ERASE;
+   (the two reads match);
+   V12; =V9; POAQ10;
+
+   MFRQ1; (read label);
+   V11; =V9; POAQ10;
+
+   MLWQ1; (write 2nd copy of label as last block);
+   V13; =V9; POAQ10;
+
+   Q1 TO Q4; SET 1; =M4;
+   MBSKQ4; (backward skip up 1 block);
+   V14; =V9; POAQ10; (this should be the last output);
+
+   SET100; =M4;
+   MGAPQ4; (write gap in unwiped area);
+   V15; =V9; POAQ10; (this output should not appear);
+
+777;
+   MRWDQ0; (deliberately fail);
+
+FINISH;
+|

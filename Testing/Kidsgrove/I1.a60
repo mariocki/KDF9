@@ -1,0 +1,161 @@
+!begin
+
+!library A1, A4, A5, A15;
+
+'integer' 'procedure' ICR;
+   'KDF9' 2/0/0/0;
+   SET 99; OUT; 'EXIT';
+   'ALGOL';
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2;
+!integer i1, i2, i3;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s); i1 := ICR; !end pre;
+
+!procedure post;
+   !begin i2 := ICR - i1 - i3;  write(30, layout, i2 / 12) !end post;
+
+!real  x, y, z, t;
+!real  a, b, c, d, layout;
+
+!integer  !array  e1[1:1], e2[1:1, 1:1], e3[1:1, 1:1, 1:1];
+!integer  i, j, k, l, m, n;
+x := y := z := 1.0;
+l := k := m := 1;
+
+layout := format({ndddc});
+
+pre({{c}null _ statement _ timing _ overhead _ in _ instructions _ executed{ss}});
+;
+post;
+i3 := i2;
+
+pre({{c}x :=1{ss}});
+   x :=1;x :=1;x :=1;x :=1;x :=1;x :=1;
+   x :=1;x :=1;x :=1;x :=1;x :=1;x :=1;
+post;
+
+pre({{c}x :=1.0{ss}});
+   x :=1.0;x :=1.0;x :=1.0;x :=1.0;x :=1.0;x :=1.0;
+   x :=1.0;x :=1.0;x :=1.0;x :=1.0;x :=1.0;x :=1.0;
+post;
+
+pre({{c}x := y{ss}});
+   x := y;x := y;x := y;x := y;x := y;x := y;
+   x := y;x := y;x := y;x := y;x := y;x := y;
+post;
+
+pre({{c}x := y  + z{ss}});
+   x := y  + z;x := y  + z;x := y  + z;x := y  + z;x := y  + z;x := y  + z;
+   x := y  + z;x := y  + z;x := y  + z;x := y  + z;x := y  + z;x := y  + z;
+post;
+
+pre({{c}x := y  × z{ss}});
+   x := y  × z;x := y  × z;x := y  × z;x := y  × z;x := y  × z;x := y  × z;
+   x := y  × z;x := y  × z;x := y  × z;x := y  × z;x := y  × z;x := y  × z;
+post;
+
+pre({{c}x := y  / z{ss}});
+   x := y  / z;x := y  / z;x := y  / z;x := y  / z;x := y  / z;x := y  / z;
+   x := y  / z;x := y  / z;x := y  / z;x := y  / z;x := y  / z;x := y  / z;
+post;
+
+pre({{c}k := 1{ss}});
+   k := 1;k := 1;k := 1;k := 1;k := 1;k := 1;
+   k := 1;k := 1;k := 1;k := 1;k := 1;k := 1;
+post;
+
+pre({{c}k := 1.0{ss}});
+   k := 1.0;k := 1.0;k := 1.0;k := 1.0;k := 1.0;k := 1.0;
+   k := 1.0;k := 1.0;k := 1.0;k := 1.0;k := 1.0;k := 1.0;
+post;
+
+pre({{c}k := l + m{ss}});
+   k := l + m;k := l + m;k := l + m;k := l + m;k := l + m;k := l + m;
+   k := l + m;k := l + m;k := l + m;k := l + m;k := l + m;k := l + m;
+post;
+
+pre({{c}k := l × m{ss}});
+   k := l × m;k := l × m;k := l × m;k := l × m;k := l × m;k := l × m;
+   k := l × m;k := l × m;k := l × m;k := l × m;k := l × m;k := l × m;
+post;
+
+pre({{c}k := l ÷ m{ss}});
+   k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;
+   k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;k := l ÷ m;
+post;
+
+pre({{c}k := l{ss}});
+   k := l;k := l;k := l;k := l;k := l;k := l;
+   k := l;k := l;k := l;k := l;k := l;k := l;
+post;
+
+pre({{c}x := l{ss}});
+   x := l;x := l;x := l;x := l;x := l;x := l;
+   x := l;x := l;x := l;x := l;x := l;x := l;
+post;
+
+pre({{c}l := y{ss}});
+   l := y;l := y;l := y;l := y;l := y;l := y;
+   l := y;l := y;l := y;l := y;l := y;l := y;
+post;
+
+
+pre({{c}x := y!up 2{ss}});
+   x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;
+   x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;x := y!up 2;
+post;
+
+pre({{c}x := y!up 3{ss}});
+   x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;
+   x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;x := y!up 3;
+post;
+
+pre({{c}x := y!up z{ss}});
+   x := y!up z;x := y!up z;x := y!up z;x := y!up z;x := y!up z;x := y!up z;
+   x := y!up z;x := y!up z;x := y!up z;x := y!up z;x := y!up z;x := y!up z;
+post;
+
+pre({{c}e1 [ 1 ] := 1{ss}});
+   e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;
+   e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;e1 [ 1 ] := 1;
+post;
+
+pre({{c}e2 [1,1 ] := 1{ss}});
+   e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;
+   e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;e2 [1,1 ] := 1;
+post;
+
+pre({{c}e3 [1,1,1] := 1{ss}});
+   e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;
+   e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;e3 [1,1,1] := 1;
+post;
+
+pre({{c}declare _ a{ss}});
+   !begin  !real  a;!end;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;
+   !begin  !real  a;!end;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;!begin  !real  a; !end ;
+post;
+
+pre({{c}declare _ a[1:1]{ss}});
+   !begin  !array  a[1:1]; !end;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;
+   !begin  !array  a[1:1]; !end;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;!begin  !array  a[1:1]; !end ;
+post;
+
+pre({{c}declare _ a[1:1, 1:1]{ss}});
+   !begin  !array  a[1:1, 1:1]; !end;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;
+   !begin  !array  a[1:1, 1:1]; !end;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;!begin  !array  a[1:1, 1:1]; !end ;
+post;
+
+pre({{c}declare _ a[1:1, 1:1,1:1]{ss}});
+   !begin  !array  a[1:1, 1:1,1:1]; !end;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;
+   !begin  !array  a[1:1, 1:1,1:1]; !end;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;!begin  !array  a[1:1, 1:1,1:1]; !end ;
+post;
+
+!end
+|
