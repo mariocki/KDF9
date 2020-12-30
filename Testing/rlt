@@ -1,8 +1,0 @@
->MT0
->MT1
->MT2
->MT3
->MT4
->MT5
->ST0
-nine_priv RLT ${1:-RLT_data} $2 $3 $4
