@@ -1,0 +1,40 @@
+trap "rm -f dr_regr_tests_diff.txt" 0 1 2 3
+opt=${1:-ahipr}
+
+> dr_regr_tests_log.txt
+
+echo "TEST TDRUM     POA, PIA."
+echo "TEST TDRUM     POA, PIA."        >>dr_regr_tests_log.txt
+>DR0; ucc  TDRUM;
+nine_priv  TDRUM - t ${opt}k
+fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
+
+echo "TEST TDRUMR2EM POA, PIB."
+echo "TEST TDRUMR2EM POA, PIB."        >>dr_regr_tests_log.txt
+>DR0; ucc  TDRUMR2EM;
+nine_priv  TDRUMR2EM - t ${opt}k
+fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
+
+echo "TEST TDRUMW2EM POB, PIA."
+echo "TEST TDRUMW2EM POB, PIA."   >>dr_regr_tests_log.txt
+>DR0; ucc  TDRUMW2EM;
+nine_priv  TDRUMW2EM - t ${opt}k
+fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
+
+echo "TEST TDROUTS   11, 12, 13, 14."
+echo "TEST TDROUTS   11, 12, 13, 14."  >>dr_regr_tests_log.txt
+>DR0; ucc  TDROUTS;
+nine       TDROUTS - t ${opt}k
+fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
+
+echo
+diff dr_regr_tests_log.txt dr_regr_tests_good_log.txt >dr_regr_tests_diff.txt
+if [ -s dr_regr_tests_diff.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more dr_regr_tests_diff.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi

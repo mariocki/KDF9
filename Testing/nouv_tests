@@ -1,0 +1,60 @@
+opt=${1:-ae}
+
+
+printf %s "TEST NOUV0 - Normal end of run, REV NEST depth is constant."
+ucc NOUV0; nine NOUV0 - t $opt
+echo TEST NOUV0 done.
+echo
+
+
+printf %s "TEST NOUV1      should fail: NEST lacks 1 operand for ERASE."
+ucc NOUV1; nine NOUV1 - t $opt
+echo TEST NOUV1 done.
+echo
+
+
+printf %s "TEST NOUV2      should fail: NEST too full for 2 operands of DUPD."
+ucc NOUV2; nine NOUV2 - t $opt
+echo TEST NOUV2 done.
+echo
+
+
+printf %s "TEST NOUV3      should fail: empty SJNS for LINK."
+ucc NOUV3; nine NOUV3 - t $opt
+echo TEST NOUV3 done.
+echo
+
+
+printf %s "TEST NOUV4      should fail: full SJNS for =LINK."
+ucc NOUV4; nine NOUV4 - t $opt
+echo TEST NOUV4 done.
+echo
+
+printf %s "TEST NOUV5      should fail: NEST lacks 1 operand for Jr=."
+ucc NOUV5; nine NOUV5 - t $opt
+echo TEST NOUV5 done.
+echo
+
+
+printf %s "TEST NOUV6      should fail: empty NEST for Jr=Z."
+ucc NOUV6; nine NOUV6 - t $opt
+echo TEST NOUV6 done.
+echo
+
+
+printf %s "TEST NOUV7      should fail: empty SJNS for EXIT."
+ucc NOUV7; nine NOUV7 - t $opt
+echo TEST NOUV7 done.
+echo
+
+
+printf %s "TEST NOUV8      should fail: full SJNS for JSr."
+ucc NOUV8; nine NOUV8 - t $opt
+echo TEST NOUV8 done.
+echo
+
+
+printf %s "TEST NOUV9      should fail: NEST lacks 3 operands for +D."
+ucc NOUV9; nine NOUV9 - t $opt
+echo TEST NOUV9 done.
+echo

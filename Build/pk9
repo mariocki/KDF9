@@ -15,7 +15,7 @@ ROOT=..
 B=${ROOT}/Build
 S=${ROOT}/Source
 T=${ROOT}/Testing
-OS=${1:-UNIX}
+OS=${1:-macOS}
 
 case ${OS} in
    UNIX|Unix|unix|LINUX|Linux|linux|macOS|Macintosh|Mac|OSX)

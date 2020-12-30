@@ -2,8 +2,8 @@
 --
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -56,6 +56,9 @@ package POSIX is
    read_mode  : constant POSIX.access_mode := 0;
    write_mode : constant POSIX.access_mode := 1;
    rd_wr_mode : constant POSIX.access_mode := 2;
+
+   function exists (name : String)
+   return Boolean;
 
    function open (name : String;
                   mode : POSIX.access_mode)
@@ -116,7 +119,8 @@ package POSIX is
 
    procedure input  (message  : out Character);
 
-   type response_kind is (EOF_response, name_response, at_response, here_response, wrong_response);
+   type response_kind is
+      (quit_response, EOF_response, name_response, at_response, here_response, wrong_response);
 
    -- If we are in non-interactive mode, log an error and set response to wrong_response.
    -- Display a message and read a reply, letter.
@@ -134,6 +138,7 @@ package POSIX is
    -- If it is /:             set response to name_response.
    -- If it is @:             set response to at_response.
    -- If it is =:             set response to here_response.
+   -- If it is q or Q:        set response to quit_response.
    -- If it is anything else: set response to wrong_response.
    procedure data_prompt (offline   : in  Boolean;
                           prompt    : in String;

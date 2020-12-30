@@ -7,17 +7,19 @@
 !comment THIS PROGRAM HAS A SINGLE PARAMETER N;
 !comment OUTPUT IS BY ONE WRITE STATEMENT TO STREAM 30;
 !comment SET N := 10000 FOR ABOUT ONE MINUTE ON MACHINE LIKE 360/65;
+
 !integer FIVE, I, J, N, REP, TEN, THIRTY;
-!real ACC, ACC1, DIVN, RN, ROOT, X, Y;
+!real ACC, ACC1, DIVN, ROOT, X, Y;
 !real !array A[1:30], B[1:30], C[1:30];
+
 N := 10000;
 FIVE := 5;
 TEN := 10;
 THIRTY := 30;
-RN := N;
-DIVN := 1.0 / RN;
+DIVN := 1.0 / N;
 X := 0.1;
 ACC := 0.0;
+
 !comment INITIALISE A AND B;
 Y := 1.0;
 !for I := 1 !step 1 !until 30 !do
@@ -26,6 +28,7 @@ Y := 1.0;
   B[I] := - Y;
   Y := - Y;
 !end;
+
 !comment ONE PASS OF THIS LOOP CORRESPONDS TO 300 GAMM UNITS;
 !for REP := 1 !step 1 !until N !do
      !begin

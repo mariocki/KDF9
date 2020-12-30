@@ -3,8 +3,8 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -299,7 +299,7 @@ package body KDF9.CPU is
          result.lsw := 0;
          result.msw := scale_up(P.msw, 47) or P.lsw;
          result.msw := scale_up(result.msw, Natural'Min(L, 94)-47);
-      end if;
+     end if;
       return result;
    end scale_up;
 
@@ -312,8 +312,10 @@ package body KDF9.CPU is
       -- SHAD-n does NOT round, according to the Manual.
       if L < 48 then
          result.msw := scale_down(P.msw, L);
-         crossover  := shift_word_left(P.msw, 47-L);
-         result.lsw := (shift_word_right(P.lsw, L) or crossover) and KDF9.max_word;
+         crossover  := shift_word_left(P.msw, 47-L) and KDF9.max_word;
+         -- It is not clear whether D0 of the lsw should be cleared before or after shifting.
+         -- I now clear it before shifting for compatibility with D. Holdsworth's "kdf9".
+         result.lsw := shift_word_right(P.lsw and KDF9.max_word, L) or crossover;
       else
          result.msw := scale_down(P.msw, 47);
          result.lsw := shift_word_right(P.msw, Natural'Min(L, +94)-47) and KDF9.max_word;
@@ -340,8 +342,6 @@ package body KDF9.CPU is
 
       normalizer := nr_leading_zeros(fraction);
       exponent := exponent - KDF9.word(normalizer);
-
-      validate_scaler(exponent, "normalizing F number");
 
       -- shift_word_left is used, not _arithmetic, as D[1..normalizer] = D0
       fraction := shift_word_left(fraction, normalizer);
@@ -386,17 +386,6 @@ package body KDF9.CPU is
    function scaler (F : CPU.f48)
    return KDF9.word
    is ((shift_word_right(as_word(F), 39) and 2#11_111_111#) - 128);
-
-   procedure validate_scaler (E : in KDF9.word; where : in String) is
-   begin
-      if resign(E) < -254 or resign(E) > +256 then
-         -- This is an impossible exponent - something has gone seriously wrong.
-         -- E may reach -254 in L/R from exponent(L) = -128, and exponent(R) = +128. See "/".
-         -- E may reach +256 in L*R from exponent(L) = +127, and exponent(R) = +127. See "*".
-         -- In both cases there may be adjustment of +2 for prescaling.
-         trap_invalid_operand("scaler in " & where & " = " & resign(E)'Image);
-      end if;
-   end validate_scaler;
 
    function normalized (full_fraction, scaler : KDF9.word)
    return CPU.f48 is
@@ -711,8 +700,7 @@ package body KDF9.CPU is
       the_V_bit_is_set := False;
       do_DIVD(N, D, Quotient);
       if the_V_bit_is_set then
-         raise emulation_failure
-            with "DIVR overflows in DIVD";
+         raise emulation_failure with "DIVR overflows in DIVD";
       end if;
       -- Restore the input value of the overflow register.
       the_V_bit_is_set := V;
@@ -725,8 +713,7 @@ package body KDF9.CPU is
       exit when T.msw = 0;
          correction_count := correction_count + 1;
          if correction_count > correction_count_limit then
-             raise emulation_failure
-                with "DIVR exceeds correction_count_limit A";
+             raise emulation_failure with "DIVR exceeds correction_count_limit A";
          end if;
          Quotient := Quotient + 1;
       end loop;
@@ -745,8 +732,7 @@ package body KDF9.CPU is
             Quotient := Quotient - 1;
          end if;
          if correction_count > correction_count_limit then
-             raise emulation_failure
-                with "DIVR exceeds correction_count_limit B";
+             raise emulation_failure with "DIVR exceeds correction_count_limit B";
          end if;
       end loop;
 
@@ -938,7 +924,6 @@ package body KDF9.CPU is
       if normalizer = 47 then  -- frac.msw is zero, so frac.lsw is non-zero.
          normalizer := 47 + nr_leading_zeros(frac.lsw);
       end if;
-      validate_scaler(scaler - KDF9.word(normalizer), "constructing DF number");
 
       KDF9_exponent := KDF9_exponent - KDF9.word(normalizer);
 

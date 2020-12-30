@@ -2,8 +2,8 @@
 --
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -115,7 +115,7 @@ package body IOC.slow.shift.TP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TP, Q_operand, set_offline);
+      start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
       if the_TP.is_transcribing then
          write(the_TP, Q_operand);
       else
@@ -130,7 +130,7 @@ package body IOC.slow.shift.TP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TP, Q_operand, set_offline);
+      start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
       if the_TP.is_transcribing then
          write_to_EM(the_TP, Q_operand);
       else
@@ -145,7 +145,7 @@ package body IOC.slow.shift.TP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TP, Q_operand, set_offline);
+      start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
       words_write(the_TP, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POC;
@@ -156,7 +156,7 @@ package body IOC.slow.shift.TP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TP, Q_operand, set_offline);
+      start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
       words_write_to_EM(the_TP, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POD;
@@ -233,7 +233,7 @@ package body IOC.slow.shift.TP is
             TP1_number := b;
             GP0_number := b;
          when others =>
-            trap_operator_error("more than 2 TP units specified, buffer" & b'Image);
+            trap_operator_error("TP:", "more than two units specified");
       end case;
       unit := unit + 1;
    end enable;

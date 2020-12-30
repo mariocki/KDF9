@@ -2,8 +2,8 @@
 --
 -- Emulation of a card reader buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -144,7 +144,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       read_card(the_CR, Q_operand, max_words => 20);
       lock_out_relative_addresses(Q_operand);
    end PIA;
@@ -154,7 +154,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       read_card(the_CR, Q_operand, max_words => 20, reading_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end PIB;
@@ -164,7 +164,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       words_read_card(the_CR, Q_operand, max_words => 160);
       lock_out_relative_addresses(Q_operand);
    end PIC;
@@ -174,7 +174,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       words_read_card(the_CR, Q_operand, max_words => 160, reading_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end PID;
@@ -184,7 +184,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       read_card(the_CR, Q_operand, max_words => 10);
       lock_out_relative_addresses(Q_operand);
    end PIE;
@@ -194,7 +194,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       read_card(the_CR, Q_operand, max_words => 10, reading_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end PIF;
@@ -204,7 +204,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       words_read_card(the_CR, Q_operand, max_words => 80);
       lock_out_relative_addresses(Q_operand);
    end PIG;
@@ -214,7 +214,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_CR, Q_operand, set_offline);
+      start_slow_transfer(the_CR, Q_operand, set_offline, input_operation);
       words_read_card(the_CR, Q_operand, max_words => 80, reading_to_EM => True);
       lock_out_relative_addresses(Q_operand);
    end PIH;
@@ -268,7 +268,7 @@ package body IOC.slow.unit.CR is
                                   quantum => CR_quantum);
             CR1_number := b;
          when others =>
-            trap_operator_error("more than 2 CR units specified");
+            trap_operator_error("CR:", "more than two units specified");
       end case;
       unit := unit + 1;
    end enable;

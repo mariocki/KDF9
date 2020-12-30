@@ -2,8 +2,8 @@
 --
 -- Convert ICT 1934 plotter code to KDF9 plotter code.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -59,8 +59,7 @@ procedure to_9_from_1934 is
       zero : constant Natural := Character'Pos('0');
    begin
       if code / 8 /= 30 then
-         raise Constraint_Error
-               with "invalid plotter type code " & Natural'Image(code);
+         raise Constraint_Error with "invalid plotter type code " & Natural'Image(code);
       end if;
       return Character'Val(code mod 8 + zero);
    end plotter_type;
@@ -104,10 +103,7 @@ procedure to_9_from_1934 is
          return;
       else
          raise Constraint_Error
-            with "get_1900_command: invalid 1900 plotter command #"
-               & octal(command)
-               & " at character"
-               & p'Image;
+            with "invalid 1900 plotter command #" & octal(command) & " at character" & p'Image;
       end if;
    end get_1900_command;
 
@@ -139,11 +135,10 @@ procedure to_9_from_1934 is
          when plot_1900.go_NE      => put_command(KDF9.go_pXnY);
          when plot_1900.pen_up     => put_command(KDF9.pen_up);
          when others               => raise Constraint_Error
-                                         with "put_KDF9_command: invalid 1900 plotter command #"
+                                         with "invalid 1900 plotter command #"
                                             & octal(command)
                                             & " at character"
-                                            & p'Image
-                                            & " of the input file";
+                                            & p'Image;
       end case;
    end put_KDF9_command;
 
