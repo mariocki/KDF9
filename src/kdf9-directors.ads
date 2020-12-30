@@ -1,9 +1,9 @@
 -- kdf9.directors.ads
 --
--- Implement the APIs  (OUTs) of the supported KDF9 Directors.
+-- Implement the APIs (OUTs) of KDF9 Directors.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -21,11 +21,14 @@ package KDF9.Directors is
    -- Emulate a subset of the EGDON Director's OUT API.
    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word);
 
-   -- Implement a subset of the Time Sharing Director's OUT 8 API.
-   procedure do_an_OUT_8;
-
    -- Emulate a subset of the Time Sharing Director's OUT API.
    procedure do_a_TSD_OUT (OUT_number : in KDF9.word);
+
+   -- Effect a Time Sharing Director OUT 2 restart.
+   procedure complete_TSD_OUT_2 (time_limit : in KDF9.word);
+
+   -- Emulate a subset of some other Director's OUT API.
+   procedure do_some_other_OUT (OUT_number : in KDF9.word);
 
    -- Set the base for virtual elapsed time reckoning.
    procedure set_the_time_of_loading (the_time : in KDF9.us);

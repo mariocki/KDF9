@@ -2,8 +2,8 @@
 --
 -- Emulation of a drum store buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -93,46 +93,56 @@ package IOC.fast.DR is
 
    procedure enable (b : in KDF9.buffer_number);
 
+   procedure re_enable (b : in KDF9.buffer_number);
+
+   is_enabled         : Boolean := False;
+
+   DR0_number         : KDF9.buffer_number;
+
+   function as_DR_command (Q_operand : KDF9.Q_register; for_OUT : Boolean := False)
+   return String;
+
 private
 
    -- For what little we know from EE of the drum geometry, see the Manual, App. 6, ß4.
-   -- This has been augmented here by some educated guesses (??) by WF.
-
-   -- These have been informed by the specification of the contemporary Philco 2000's drum,
-   --    which is consistent with the Manual, if we can assume 10 'bands' per drum instead 8,
-   --       and, in effect, two interleaved 'tracks' per 'band'.
-   -- See <bitsavers.trailing-edge.com/pdf/philco/2000/IO_System/TM-16C_212_IOsystem_Nov66.pdf>
-   --    which says that the device has spare bands in addition to the used 8.
+   -- An additional and more helpful source is the SRLM, ù103, Appendix 2, p.10-59-0,
+   --   which describes the drum used with the non-Time Sharing Director.
+   -- It says:
+   --   Drum revolution time     = 20.4   ms
+   --   Transfer time per sector =  2.15  ms
+   --   Short gap time           =  0.034 ms between successive sectors
+   --   Long gap time            =  2.97  ms after every 8th sector
+   -- Hence: Mean time per sector = revolution time/8 - short gap time - long gap time/8
+   --                             = 20.4 ms / 8       - 0.034          - 2.970 / 8
+   --                             = 2.145 ms, rounding correctly to 2.15 ms
+   -- This confirms 8 sectors per track, or 8192 characters per track, for 40 tracks per drum.
 
    bytes_per_sector   : constant := 1024;
    subtype byte_range is KDF9.word range 0 .. bytes_per_sector - 1;
    subtype sector     is String(1..bytes_per_sector);
 
-   sectors_per_track  : constant := 16;             -- ??
+   sectors_per_track  : constant := 8;
    subtype sector_range is KDF9.word range 0 .. sectors_per_track - 1;
 
    sectors_per_drum   : constant := 320;
    drums_per_system   : constant := 4;
    sectors_per_system : constant := sectors_per_drum * drums_per_system;
-   subtype drum_range is KDF9.word range 0 .. sectors_per_system - 1;
+   subtype drum_index is KDF9.word range 0 .. sectors_per_system - 1;
 
    tracks_per_system   : constant := sectors_per_system / sectors_per_track;
    subtype track_range is KDF9.word range 0 .. tracks_per_system - 1;
 
-   data_rate    : constant := 500_000;  -- chars/s
-   us_per_char  : constant := 1E6 / data_rate;
-
-   -- Hypotheses: tracks are interleaved in pairs within one 'band';
-   --    both tracks can be accessed without further penalty once the band is selected;
-   --       but selecting another band incurs a switching time delay.
+   data_rate      : constant := 477_445;         -- chars/s
+   us_per_char    : constant := 1E6 / data_rate; -- ~2.1 ùs/char
 
    -- The following times are in microseconds.
-   sector_time  : constant := bytes_per_sector * us_per_char;
-   gap_time     : constant := 0;                      -- ?? words interleave, so no inter-block gaps
-   track_time   : constant := sector_time * sectors_per_track; -- ?? see gap_time
-   switch_delay : constant := 8_000;                  -- ??
+   short_gap_time : constant := 34;
+   sector_time    : constant := bytes_per_sector * us_per_char + short_gap_time;
+   long_gap_time  : constant := 2_970;
+   track_time     : constant := sector_time * sectors_per_track + long_gap_time;
+   critical_time  : constant := sector_time * (sectors_per_track-1) - short_gap_time;
 
-   type drum is array (drum_range) of DR.sector;
+   type drum is array (drum_index) of DR.sector;
 
    type device is new IOC.fast.device with null record;
 

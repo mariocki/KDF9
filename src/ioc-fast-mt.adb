@@ -2,8 +2,8 @@
 --
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -28,7 +28,9 @@ use  tracing;
 
 package body IOC.fast.MT is
 
+   --
    -- Ada direct-access file management.
+   --
 
    procedure open_RO (the_tape : in out MT.file; name : in String) is
    begin
@@ -36,7 +38,7 @@ package body IOC.fast.MT is
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
-         trap_operator_error(name & " cannot be opened for reading or writing");
+         trap_operator_error(name, "cannot be opened for reading or writing");
    end open_RO;
 
    procedure open_RW (the_tape : in out MT.file; name : in String) is
@@ -48,13 +50,9 @@ package body IOC.fast.MT is
          the_tape.has_a_WP_ring := False;
          open_RO(the_tape, name);
       when Ada.IO_Exceptions.Name_Error =>
-         trap_operator_error(name & " cannot be found");
+         trap_operator_error(name, "cannot be found");
       when error : others =>
-         trap_operator_error(
-                             name
-                           & " failed to open because of "
-                           &  Ada.Exceptions.Exception_Message(error)
-                            );
+         trap_operator_error(name, "failed to open: " &  Ada.Exceptions.Exception_Message(error));
    end open_RW;
 
    procedure close (the_tape : in out MT.file) is
@@ -83,7 +81,7 @@ package body IOC.fast.MT is
       end if;
    exception
       when End_Error =>
-         raise end_of_tape with "End_Error writing MT slice number" & the_tape.position'Image;
+         raise emulation_failure with "End_Error writing MT slice" & the_tape.position'Image;
    end write_slice;
 
    procedure read_next_slice (the_tape : in out MT.file;
@@ -97,7 +95,7 @@ package body IOC.fast.MT is
       end if;
     exception
        when End_Error =>
-          raise end_of_tape with "End_Error reading MT slice number" & the_tape.position'Image;
+          raise emulation_failure with "End_Error reading MT slice" & the_tape.position'Image;
    end read_next_slice;
 
    procedure read_prev_slice (the_tape : in out MT.file;
@@ -187,7 +185,7 @@ package body IOC.fast.MT is
    return Boolean
    is (the_deck.is_open and then the_deck.tape.position = 0);
 
-   function is_loaded (the_deck : MT.deck)
+   function holds_data (the_deck : MT.deck)
    return Boolean
    is (the_deck.is_open and then the_deck.tape.last_data_index > 0);
 
@@ -199,14 +197,13 @@ package body IOC.fast.MT is
    return Boolean
    is (the_deck.is_open and then the_deck.unwound_frames >= the_deck.PET_position);
 
-   procedure check_for_writing_past_PET (the_deck : in out MT.deck;
-                                         do_this  : String) is
+   procedure deal_with_trying_to_pass_PET (the_deck : in out MT.deck;
+                                           do_this  : String) is
    begin
       if is_at_PET (the_deck) then
-         the_deck.is_abnormal := True;
-         trap_invalid_operand("attempt to " & do_this & " on " & the_deck.device_name);
+         trap_failing_IO_operation(the_deck, "an attempt was made to " & do_this & " past PET");
       end if;
-   end check_for_writing_past_PET;
+   end deal_with_trying_to_pass_PET;
 
    -- There are cases that are invalid iff the tape is positioned beyond the last written block.
    function is_at_EOD (the_deck : MT.deck)
@@ -294,10 +291,6 @@ package body IOC.fast.MT is
       exit when the_deck.is_at_BTW or else the_slice.kind not in tape_gap_kind;
          crossed := crossed + the_slice.size;
       end loop;
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         raise end_of_tape with "skip_back_over_erasure";
    end skip_back_over_erasure;
 
    -- Skip forward over erased tape, leaving the_slice containing the next following data.
@@ -364,11 +357,10 @@ package body IOC.fast.MT is
 
       -- Ensure that we are not beyond the end of valid data.
       if the_deck.is_at_EOD then
-         trap_invalid_operand("there is no data to be read past slice"
-                            & the_deck.tape.position'Image
-                            & " of "
-                            & the_deck.device_name
-                             );
+         trap_failing_IO_operation(
+                                   the_deck,
+                                   "there is no data past slice" & the_deck.tape.position'Image
+                                  );
       end if;
 
       if the_slice.kind in MT.tape_mark_kind then
@@ -402,14 +394,9 @@ package body IOC.fast.MT is
                         crossed + the_deck.inter_block_gap, bytes_moved => the_size);
 
      if not is_last and block_size = max_block_size then
-         raise emulation_failure
-            with "size =" & block_size'Image & " > max_block_size in MT read_block";
+         raise emulation_failure with block_size'Image & " > max_block_size in MT read_block";
       end if;
       handle_any_abnormality(the_deck, block_size);
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         raise end_of_tape with "read_block";
    end read_block;
 
    procedure increment (word_address : in out KDF9.address;
@@ -465,7 +452,7 @@ package body IOC.fast.MT is
       end if;
    exception
       when end_of_tape =>
-         the_deck.is_abnormal := True;
+         deal_with_trying_to_pass_PET(the_deck, "reading");
    end read;
 
    procedure find_start_of_earlier_block (the_deck : in out MT.deck;
@@ -483,15 +470,14 @@ package body IOC.fast.MT is
 
       if the_deck.is_at_BTW and the_slice.kind in tape_gap_kind then
          the_deck.is_abnormal := True;
-         crossed := 0;
          -- This cannot happen if the tape has (at least) a label.
-         trap_invalid_instruction("a backward skip was attempted at BTW");
+         raise emulation_failure with "no earlier block, at BTW on " & the_deck.device_name;
       end if;
 
       if not the_slice.is_last then
          raise emulation_failure
             with "find_start_of_earlier_block at slice "
-               & Positive_Count'Image(the_deck.tape.position)
+               & the_deck.tape.position'Image
                & " of "
                & the_deck.device_name
                & " failed to locate the last slice of a block";
@@ -511,10 +497,6 @@ package body IOC.fast.MT is
       end if;
 
       crossed := crossed + block_size;
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         raise end_of_tape with "find_start_of_earlier_block";
    end find_start_of_earlier_block;
 
    procedure decrement (word_address : in out KDF9.address;
@@ -582,8 +564,9 @@ package body IOC.fast.MT is
    procedure PIA (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read(the_deck, Q_operand, to_terminator => False);
       lock_out_relative_addresses(Q_operand);
    end PIA;
@@ -593,8 +576,9 @@ package body IOC.fast.MT is
    procedure PIB (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read(the_deck, Q_operand, to_terminator => True);
       lock_out_relative_addresses(Q_operand);
    end PIB;
@@ -622,11 +606,12 @@ package body IOC.fast.MT is
    procedure PIE (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.is_at_BTW then
-         trap_invalid_instruction("tried MBRQq at BTW");
+         trap_illegal_instruction("MBRQq at BTW on " & the_deck.device_name);
       end if;
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read_backwards(the_deck, Q_operand, to_terminator => False);
       if the_deck.kind = ST_kind then
          the_deck.is_LBM_flagged := False;
@@ -639,11 +624,12 @@ package body IOC.fast.MT is
    procedure PIF (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.is_at_BTW then
-         trap_invalid_instruction("attempt to read MT backwards to End_Message at BTW");
+         trap_illegal_instruction("MBREQq at BTW on " & the_deck.device_name);
       end if;
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read_backwards(the_deck, Q_operand, to_terminator => True);
       if the_deck.kind = ST_kind then
          the_deck.is_LBM_flagged := False;
@@ -681,7 +667,7 @@ package body IOC.fast.MT is
       if not the_slice.is_first then
          raise emulation_failure
             with "find_start_of_later_block at slice"
-               & Positive_Count'Image(the_deck.tape.position)
+               & the_deck.tape.position'Image
                & " of "
                & the_deck.device_name
                & " failed to locate the first slice of a block";
@@ -729,7 +715,7 @@ package body IOC.fast.MT is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 19, is_DMAing => False);
+      start_data_transfer(the_deck, Q_operand, set_offline, 19);
       if Q_operand.M = 0 then
          skip_forwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
       else
@@ -747,7 +733,7 @@ package body IOC.fast.MT is
       validate_device(the_deck, Q_operand);
       validate_parity(the_deck);
       deal_with_a_busy_device(the_deck, 14, set_offline);
-      the_T_bit_is_set := the_deck.is_at_BTW and the_deck.is_loaded;
+      the_T_bit_is_set := the_deck.is_at_BTW and the_deck.holds_data;
       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
    end PMB;
 
@@ -790,8 +776,7 @@ package body IOC.fast.MT is
       the_slice   : MT.slice;
    begin  -- PMD
       the_deck.is_abnormal := False;  -- See Manual §22.1.9, p.189, ¶-2.
-      start_data_transfer(the_deck, Q_operand, set_offline, 19, is_DMAing => False);
-      take_note_of_test(the_deck.device_name, Q_operand, the_deck.is_at_BTW);
+      start_data_transfer(the_deck, Q_operand, set_offline, 19);
       -- No motion takes place if the tape is at BTW; see Manual §22.1.9, p.190, ¶1.
       if the_deck.tape.position > 0 then
          -- Make sure we dont try to read past the end of data.
@@ -818,13 +803,6 @@ package body IOC.fast.MT is
 
       update_statistics(the_deck, tape_length + byte_count, bytes_moved => 0);
 
-      if not the_deck.is_at_BTW then
-         raise emulation_failure
-            with "not at BTW after rewinding "
-               & the_deck.device_name
-               & " at slice"
-               & the_deck.tape.position'Image;
-      end if;
       reset(the_deck);
    end PMD;
 
@@ -835,9 +813,9 @@ package body IOC.fast.MT is
                   set_offline : in Boolean) is
    begin
       if the_deck.is_at_BTW then
-         trap_invalid_instruction("tried MBSKQq at BTW");
+         trap_illegal_instruction("MBSKQq at BTW on " & the_deck.device_name);
       end if;
-      start_data_transfer(the_deck, Q_operand, set_offline, 19, is_DMAing => False);
+      start_data_transfer(the_deck, Q_operand, set_offline, 19);
       if Q_operand.M = 0 then
          skip_backwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
       else
@@ -866,7 +844,7 @@ package body IOC.fast.MT is
                   set_offline : in Boolean) is
    begin
       if the_deck.kind = MT_kind then
-         trap_invalid_instruction("a 7-track forward skip was attempted on a 1081 deck");
+         trap_illegal_instruction("PMKQq on 1081 deck " & the_deck.device_name);
       else
          the_deck.PMA(Q_operand, set_offline);
       end if;
@@ -879,7 +857,7 @@ package body IOC.fast.MT is
                   set_offline : in Boolean) is
    begin
       if the_deck.kind = MT_kind then
-         trap_invalid_instruction("a 7-track backward skip was attempted on a 1081 deck");
+         trap_illegal_instruction("PMLQq on 1081 deck " & the_deck.device_name);
       else
          the_deck.PMB(Q_operand, set_offline);
       end if;
@@ -905,7 +883,7 @@ package body IOC.fast.MT is
       write_slice(the_deck.tape, the_slice);
    exception
       when end_of_tape =>
-         trap_invalid_operand("attempt to write past the PET on " & the_deck.device_name);
+         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end put_data_slice;
 
    procedure write_block (the_deck       : in out MT.deck;
@@ -916,12 +894,10 @@ package body IOC.fast.MT is
       the_size : length_in_frames;
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error("attempt to write to "
-                           & the_deck.device_name
-                           & " without a Write Permit Ring");
+         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
       end if;
 
-      check_for_writing_past_PET(the_deck, "write");
+      deal_with_trying_to_pass_PET(the_deck, "write");
 
       the_deck.is_LBM_flagged := False;
 
@@ -940,7 +916,7 @@ package body IOC.fast.MT is
 
       -- Write any full slices, the last of which may be final.
       while remnant >= slice_size_limit loop
-         check_for_writing_past_PET(the_deck, "write");
+         deal_with_trying_to_pass_PET(the_deck, "write");
          remnant := remnant - slice_size_limit;
          from := from + slice_size_limit;
          put_data_slice (
@@ -972,7 +948,7 @@ package body IOC.fast.MT is
 
    exception
       when end_of_tape =>
-         trap_invalid_operand("attempt to write past the PET on " & the_deck.device_name);
+         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end write_block;
 
    procedure write (the_deck       : in out MT.deck;
@@ -1037,8 +1013,9 @@ package body IOC.fast.MT is
    procedure POA (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
       write(the_deck, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POA;
@@ -1048,8 +1025,9 @@ package body IOC.fast.MT is
    procedure POB (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
       write_to_terminator(the_deck, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end POB;
@@ -1058,13 +1036,13 @@ package body IOC.fast.MT is
                                     Q_operand   : in KDF9.Q_register;
                                     set_offline : in Boolean;
                                     the_slice   : in MT.slice) is
-      timing_Q : constant KDF9.Q_register := (Q_operand.C, 0, 0);
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, (Q_operand.C, 0, 0));
    begin
-      start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, timing_Q));
+      start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
       write_slice(the_deck.tape, the_slice);
    exception
       when end_of_tape =>
-         trap_invalid_operand("attempt to write past the PET on " & the_deck.device_name);
+         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end put_ST_tapemark_slice;
 
    -- MLWQq
@@ -1072,9 +1050,10 @@ package body IOC.fast.MT is
    procedure POC (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.kind = MT_kind then
-         start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+         start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
          write(the_deck, Q_operand, is_LBM_flagged => True);
          lock_out_relative_addresses(Q_operand);
       else
@@ -1087,9 +1066,10 @@ package body IOC.fast.MT is
    procedure POD (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.kind = MT_kind then
-         start_data_transfer(the_deck, Q_operand, set_offline, 22 + MT_IO_time(the_deck, Q_operand));
+         start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
          write_to_terminator(the_deck, Q_operand, is_LBM_flagged => True);
          lock_out_relative_addresses(Q_operand);
       else
@@ -1107,7 +1087,7 @@ package body IOC.fast.MT is
       the_size  : length_in_frames;
    begin
       loop
-         check_for_writing_past_PET(the_deck, "erase");
+         deal_with_trying_to_pass_PET(the_deck, "erase");
          the_size := length_in_frames'Min(remnant, slice_size_limit);
          remnant  := remnant - the_size;
 
@@ -1118,13 +1098,13 @@ package body IOC.fast.MT is
             -- Safety rules apply to erasing gaps; see the Manual, Appendix 6.8, p.314.
             read_next_slice(the_deck.tape, old_slice);
             if old_slice.kind /= WIPE_slice then
-               trap_invalid_operand("a GAP of length"
-                                  & the_length'Image
-                                  & " words would overwrite data at slice"
-                                  & the_deck.tape.position'Image
-                                  & " of "
-                                  & the_deck.device_name
-                                   );
+               trap_failing_IO_operation(
+                                         the_deck,
+                                         "a GAP of length"
+                                       & the_length'Image
+                                       & " words would overwrite data at slice"
+                                       & the_deck.tape.position'Image
+                                        );
             end if;
             -- Restore the writing position.
             read_prev_slice(the_deck.tape, old_slice);
@@ -1139,7 +1119,7 @@ package body IOC.fast.MT is
       update_statistics(the_deck, crossing, bytes_moved => 0);
    exception
       when end_of_tape =>
-         trap_invalid_operand("attempt to WIPE/GAP past the PET on" & the_deck.device_name);
+         deal_with_trying_to_pass_PET(the_deck, "WIPE/GAP " & the_deck.device_name);
    end erase_tape_gap;
 
    -- MGAPQq
@@ -1147,16 +1127,13 @@ package body IOC.fast.MT is
    procedure POE (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error("attempt to GAP "
-                           & the_deck.device_name
-                           & " without a Write Permit Ring");
+         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
-      start_data_transfer(the_deck, Q_operand, set_offline,
-                          19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M)),
-                          is_DMAing => False);
+      start_data_transfer(the_deck, Q_operand, set_offline, time);
       erase_tape_gap(the_deck, Q_operand.M, gap_kind => GAP_slice);
    end POE;
 
@@ -1165,20 +1142,82 @@ package body IOC.fast.MT is
    procedure POF (the_deck    : in out MT.deck;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error("attempt to WIPE "
-                           & the_deck.device_name
-                           & " without a Write Permit Ring");
+         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
-      start_data_transfer(the_deck, Q_operand, set_offline,
-                          19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M)),
-                          is_DMAing => False);
+      start_data_transfer(the_deck, Q_operand, set_offline, time);
       erase_tape_gap(the_deck, Q_operand.M, gap_kind => WIPE_slice);
    end POF;
 
-   -- The following procedures support the TSD Director OUT4/OUT10 API emulations.
+   overriding
+   procedure Finalize (the_deck : in out MT.deck) is
+      the_deck_was_used : constant Boolean := the_deck.bytes_moved /= 0 or not the_deck.is_at_BTW;
+      buffer            : constant String  := oct_of(KDF9.Q_part(the_deck.number), 2);
+   begin
+      if the_deck.is_open then
+         if (the_final_state_is_wanted and the_log_is_wanted) and then
+               the_deck_was_used                                  then
+            log_line(
+                     the_deck.device_name
+                   & " on buffer #"
+                   & buffer
+                   & " transferred"
+                   & the_deck.bytes_moved'Image
+                   & " characters"
+                   & (
+                      if    the_deck.is_at_PET then ", and is now at PET."
+                      elsif the_deck.is_at_ETW then ", and is now at ETW."
+                      else                          "."
+                     )
+                   );
+         end if;
+         close(the_deck.tape);
+      end if;
+   exception
+      when error : others =>
+         raise emulation_failure
+            with "Finalizing MT buffer #" & buffer & "; " & Ada.Exceptions.Exception_Message(error);
+   end Finalize;
+
+   MT_quantum : constant := 1E6 / 40E3;  -- for 40_000 characters per second.
+   ST_quantum : constant := 1E6 / 15E3;  -- for 15_000 characters per second.
+
+   type MT_access is access MT.deck;
+   MT_deck         : array (IOC.unit_number range 0..8) of MT_access with Warnings => Off;
+
+   MT_units : IOC.unit_number := 0;
+   ST_units : IOC.unit_number := 0;
+
+   procedure enable_MT_deck (b : in KDF9.buffer_number) is
+   begin
+      if MT_units+ST_units > MT_deck'Last then
+         trap_operator_error("MT:", "too many tape decks specified");
+      end if;
+      MT_deck(MT_units) := new deck (number  => b,
+                                     kind    => MT_kind,
+                                     unit    => MT_units,
+                                     quantum => MT_quantum);
+      MT_units := MT_units + 1;
+   end enable_MT_deck;
+
+   procedure enable_ST_deck (b : in KDF9.buffer_number) is
+   begin
+      if ST_units >= 2 then
+         trap_operator_error("MT:", "more than 2 ST decks specified");
+      end if;
+      if MT_units+ST_units > MT_deck'Last then
+         trap_operator_error("MT:", "too many tape decks specified");
+      end if;
+      MT_deck(MT_units) := new deck (number  => b,
+                                     kind    => ST_kind,
+                                     unit    => ST_units,
+                                     quantum => ST_quantum);
+      ST_units := ST_units + 1;
+      MT_units := MT_units + 1;
+   end enable_ST_deck;
 
    procedure find_tape (the_label  : in  MT.data_storage;
                         its_number : out KDF9.buffer_number;
@@ -1200,7 +1239,7 @@ package body IOC.fast.MT is
 
    begin -- find_tape
       if the_label'Length < 1 then
-         trap_invalid_operand("given a null label by " & requestor);
+         raise emulation_failure with "find_tape was given a null label by " & requestor;
       end if;
       for t in KDF9.buffer_number loop
          if buffer(t) /= null                      and then
@@ -1209,11 +1248,11 @@ package body IOC.fast.MT is
             declare
                the_deck : MT.deck renames MT.deck(buffer(t).all);
             begin
-               if the_deck.is_loaded and then
+               if the_deck.holds_data  and then
                      the_deck.is_at_BTW    then
                   -- Read the label.
                   -- After reading the label the tape must be set back to BTW,
-                  -- as is required to emulate Director; see the Manual, §22.1, Ex. 1.
+                  -- as is required to emulate Director; see the Manual, ï¿½22.1, Ex. 1.
                   read_block(the_deck, the_block, the_size);
                   reset(the_deck);
                   if the_size >= 8+the_label'Length                and then
@@ -1226,108 +1265,8 @@ package body IOC.fast.MT is
             end;
          end if;
       end loop;
-      trap_operator_error("the MT labelled '" & String(the_label) & "' has not been mounted");
+      trap_operator_error("the MT labelled '" & String(the_label) & "'",  "has not been mounted");
    end find_tape;
 
-   procedure find_tape_labelled (the_label  : in  MT.long_label;
-                                 its_number : out KDF9.buffer_number;
-                                 its_serial : out KDF9.word) is
-   begin
-      find_tape(MT.data_storage(the_label), its_number, its_serial, "OUT 10");
-   end find_tape_labelled;
-
-   procedure find_tape_labelled (the_label  : in  MT.short_label;
-                                 its_number : out KDF9.buffer_number;
-                                 its_serial : out KDF9.word) is
-   begin
-      find_tape(MT.data_storage(the_label), its_number, its_serial, "OUT 4");
-   end find_tape_labelled;
-
-   -- Rewind decks, on problem program termination, as would happen under Director.
-   procedure dispose_all_allocated_tapes is
-   begin
-      for b in KDF9.buffer_number loop
-         if buffer(b) /= null                      and then
-               buffer(b).kind in MT_kind | ST_kind and then
-                   not is_unallocated(buffer(b))       then
-            declare
-               the_deck : MT.deck renames MT.deck(buffer(b).all);
-            begin
-               if the_deck.is_loaded then
-                  PMD(the_deck, (b, 0, 0), set_offline => False);
-               end if;
-            end;
-         end if;
-      end loop;
-   end dispose_all_allocated_tapes;
-
-   overriding
-   procedure Finalize (the_deck : in out MT.deck) is
-      the_deck_was_used : constant Boolean   := the_deck.bytes_moved /= 0 or not the_deck.is_at_BTW;
-   begin
-      if the_deck.is_open then
-         if (the_final_state_is_wanted and the_log_is_wanted) and then
-               the_deck_was_used                                  then
-            log_line(
-                     the_deck.device_name
-                   & " on buffer #"
-                   & oct_of(KDF9.Q_part(the_deck.number), 2)
-                   & " transferred"
-                   & the_deck.bytes_moved'Image
-                   & " characters"
-                   & (
-                      if    the_deck.is_at_PET then ", and is now at PET."
-                      elsif the_deck.is_at_ETW then ", and is now at ETW."
-                      else                          "."
-                     )
-                   );
-         end if;
-         close(the_deck.tape);
-      end if;
-   exception
-      when error : others =>
-         raise emulation_failure
-            with "Finalize error for MT buffer #"
-               & oct_of(KDF9.Q_part(the_deck.number), 2)
-               & Ada.Exceptions.Exception_Message(error);
-   end Finalize;
-
-
-   MT_quantum : constant := 1E6 / 40E3;  -- for 40_000 characters per second.
-   ST_quantum : constant := 1E6 / 15E3;  -- for 15_000 characters per second.
-
-   type MT_access is access MT.deck;
-   MT_deck         : array (IOC.unit_number range 0..7) of MT_access with Warnings => Off;
-
-   MT_units : IOC.unit_number := 0;
-   ST_units : IOC.unit_number := 0;
-
-   procedure enable_MT_deck (b : in KDF9.buffer_number) is
-   begin
-      if MT_units+ST_units > MT_deck'Last then
-         trap_operator_error("too many tape decks specified");
-      end if;
-      MT_deck(MT_units) := new deck (number  => b,
-                                     kind    => MT_kind,
-                                     unit    => MT_units,
-                                     quantum => MT_quantum);
-      MT_units := MT_units + 1;
-   end enable_MT_deck;
-
-   procedure enable_ST_deck (b : in KDF9.buffer_number) is
-   begin
-      if ST_units >= 2 then
-         trap_operator_error("more than 2 ST decks specified");
-      end if;
-      if MT_units+ST_units > MT_deck'Last then
-         trap_operator_error("too many tape decks specified");
-      end if;
-      MT_deck(MT_units) := new deck (number  => b,
-                                     kind    => ST_kind,
-                                     unit    => ST_units,
-                                     quantum => ST_quantum);
-      ST_units := ST_units + 1;
-      MT_units := MT_units + 1;
-   end enable_ST_deck;
 
 end IOC.fast.MT;

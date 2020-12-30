@@ -54,14 +54,18 @@ PROGRAM;                   (main program);
 
    Q1 TO Q4; SET 1; =M4;
    MBSKQ4; (backward skip up 1 block);
-   V14; =V9; POAQ10; (this should be the last output);
 
    SET100; =M4;
    MGAPQ4; (write gap in unwiped area);
-   V15; =V9; POAQ10; (this output should not appear);
+   PARQ4;
+   J777TR;
+
+   V14; =V9; POAQ10; (this should not be the last output);
+   ZERO; OUT;
 
 777;
-   MRWDQ0; (deliberately fail);
+   V15; =V9; POAQ10; (this output should appear last);
+   ZERO; OUT;
 
 FINISH;
 |

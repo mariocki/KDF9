@@ -2,8 +2,8 @@
 --
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,8 +18,7 @@
 
 with HCI;
 with OS_specifics;
-with value_of;
-with get_runtime_paths;
+with environmental_value_of;
 
 use HCI;
 
@@ -82,62 +81,68 @@ package body IOC.slow is
    procedure deal_with_end_of_data (the_buffer : in out slow.device) is
       BEL      : constant String := (1 => Character'Val(7));   -- Audible prompt
       response : response_kind;
+
+      procedure reattach_the_text_file (name : in String) is
+      begin
+         if name = "" then
+            the_buffer.is_abnormal := True;
+            raise end_of_stream;
+         elsif exists(name) then
+            reattach(the_buffer, name);
+            return;
+         elsif exists(name & ".txt") then
+            reattach(the_buffer, name & ".txt");
+            return;
+         else
+            the_buffer.is_abnormal := True;
+            raise end_of_stream;
+         end if;
+      end reattach_the_text_file;
+
    begin
       output_line(BEL & "");
       output_line("ee9: End of given data for " & the_buffer.device_name & ".");
       loop
          POSIX.data_prompt(
                            noninteractive_usage_is_enabled,
-                           "Type @ or / to name a file, = to type in the data, or ENTER key for EOF",
+                           "Type @ or / to name a file, = to type the data, ENTER key for EOF, Q or q to quit",
                            response
                           );
          if response = wrong_response then
             null;  -- repeat the prompt
+         elsif response = quit_response then
+            trap_failing_IO_operation(the_buffer, "end of data indicated");
          elsif response = EOF_response then
             the_buffer.is_abnormal := True;
             raise end_of_stream;
          elsif response = here_response then
-            output_line(BEL & "ee9: Type the data for " & the_buffer.device_name & ":");
             reattach(the_buffer, OS_specifics.UI_in_name);
             return;
          elsif response = at_response then
             declare
-               here : constant String := get_runtime_paths & "Data/";
+               here : constant String := environmental_value_of("KDF9_DATA", default => "Data") & "/";
                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
             begin
-               if next = "" then
-                  the_buffer.is_abnormal := True;
-                  raise end_of_stream;
-               else
-                  reattach(the_buffer, here & next);
-                  return;
-               end if;
+               reattach_the_text_file(here & next);
+               return;
             end;
          elsif response = name_response then
-            declare
-               next : constant String := next_file_name(BEL & "Give the pathname of the file");
-            begin
-               if next = "" then
-                  the_buffer.is_abnormal := True;
-                  raise end_of_stream;
-               else
-                  reattach(the_buffer, next);
-                  return;
-               end if;
-            end;
+            reattach_the_text_file(next_file_name(BEL & "Give the pathname of the file"));
+            return;
          end if;
       end loop;
    end deal_with_end_of_data;
 
    procedure start_slow_transfer (the_buffer   : in out slow.device;
                                   Q_operand    : in KDF9.Q_register;
-                                  set_offline  : in Boolean) is
+                                  set_offline  : in Boolean;
+                                  operation    : in IOC.transfer_kind := some_other_operation) is
       atomic_items : constant KDF9.word := atomic_item_count(the_buffer, Q_operand);
       time_needed  : constant KDF9.us := IO_elapsed_time(the_buffer, atomic_items);
    begin
       start_data_transfer(the_buffer, Q_operand, set_offline,
                           busy_time => time_needed,
-                          is_DMAing => True);
+                          operation => start_slow_transfer.operation);
    end start_slow_transfer;
 
    procedure get_byte_from_stream (byte       : out Character;

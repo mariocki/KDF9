@@ -1,0 +1,134 @@
+WEEHAAVIE|
+_b_e_g_i_n
+
+   _c_o_m_m_e_n_t  HAVIE INTEGRATOR. ALGORITHM 257, Robert N. Kubik, CACM 8 (1965) 381;
+
+_r_e_a_l  a,b,eps,mask,y,answer; _i_n_t_e_g_e_r m max, count;
+
+_r_e_a_l  _p_r_o_c_e_d_u_r_e  havieintegrator(y,a,b,eps,integrand,m);
+_v_a_l_u_e  a,b,eps,m;
+_i_n_t_e_g_e_r  m;
+_r_e_a_l  integrand,y,a,b,eps;
+   _c_o_m_m_e_n_t  This algorithm performs numerical integration of definite
+   integrals using an equidistant sampling of the function and repeated halving of
+   the sampling interval. Each halving allows the calculation of a trapezium and a
+   tangent formula on a finer grid, but also the calculation of several higher
+   order formulas which are defined implicitly. The two families of approximate
+   solutions will normally bracket the value of the integral and from these
+   convergence is tested on each of the several orders of approximation. The
+   algorithm is based on a private communication from F. Haavie of the Institutt
+   for Atom-energi Kjeller Research Establishment, Norway. A Fortran version is in
+   use on the Philco-2000. ...;
+_b_e_g_i_n
+_r_e_a_l  h,endpts,sumt,sumu,d;
+_i_n_t_e_g_e_r  i,j,k,n;
+_r_e_a_l  _a_r_r_a_y  t,u,tprev,uprev[1:m];
+   count := 0;
+   y := a; endpts := integrand;
+   y := b; endpts := 0.5 × (integrand + endpts);
+   sumt := 0.0; i := n := 1; h := b - a;
+estimate:
+   count := count + 1;
+   t[1] := h × (endpts + sumt); sumu := 0.0;
+      _c_o_m_m_e_n_t  t[1] = h×(0.5×f[0]+f[1]+f[2]+...+0.5×f[2 ^ (i-1)]);
+   y := a - h/2.0;
+   _f_o_r  j := 1 _s_t_e_p  1 _u_n_t_i_l  n _d_o
+      _b_e_g_i_n
+      y := y + h; sumu := sumu + integrand;
+      _e_n_d ;
+   u[1] := h × sumu; k := 1;
+      _c_o_m_m_e_n_t  u[1] = h×(f[1/2]+f[3/2]+...f[(2 ^ i-1)/2],
+      k corresponds to approximate solution with truncation
+      error term of order 2k;
+test:
+   _i_f  abs(t[k]-u[k])  _<  eps _t_h_e_n
+      _b_e_g_i_n
+      havieintegrator := 0.5 × (t[k] + u[k]);
+      _g_o_t_o  exit
+      _e_n_d ;
+   _i_f  k  ±  i _t_h_e_n
+      _b_e_g_i_n
+      d := 2  ^  (2×k);
+      t[k+1] := (d × t[k] - tprev[k]) / (d - 1.0);
+      tprev[k] := t[k];
+      u[k+1] := (d × u[k] - uprev[k]) / (d - 1.0);
+      uprev[k] := u[k];
+         _c_o_m_m_e_n_t  This implicit formulation of the higher-order
+            integration formulas is given in [ROMBERG, W. ...];
+      k := k + 1;
+      _i_f  k = m _t_h_e_n
+         _b_e_g_i_n
+          havieintegrator := 0.5 × (t[k] + u[k]);
+         _g_o_t_o  exit
+         _e_n_d ;
+      _g_o_t_o  test
+      _e_n_d ;
+   h := h / 2.0; sumt := sumt + sumu;
+   tprev[k] := t[k]; uprev[k] := u[k];
+   i := i + 1; n := 2 × n;
+   _g_o_t_o  estimate;
+exit:
+_e_n_d  havieintegrator;
+
+
+eps  := 1.0º-10;
+writetext(30, _[epsilon*=*_]);
+write(30, format(_[d.dddddddddddº-ddc_]), eps);
+
+m max  := 20;
+writetext(30, _[m max*=*_]);
+write(30, format(_[nddc_]), m max);
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,1.0/(1.0+y×y),m max);
+writetext(30, _[count*=*_]);
+write(30, format(_[nddddddddc_]), count);
+write(30, format(_[+d.dddddddddddº-dd_]), answer);
+writetext(30, _[*approximates*+7.85398163397º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.785398163397448)/0.785398163397448);
+
+a := eps; b := 1;
+answer := havieintegrator(y,eps,b,eps,(y ^ (-y)),m max);
+writetext(30, _[count*=*_]);
+write(30, format(_[nddddddddc_]), count);
+write(30, format(_[+d.dddddddddddº-dd_]), answer);
+writetext(30, _[*approximates*_]);
+write(30, format(_[+d.dddddddddddº-dd_]), 1.29128599706266);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 1.29128599706266)/1.29128599706266);
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,ln(1.0+y)/(1.0 + y^2),m max);
+writetext(30, _[count*=*_]);
+write(30, format(_[nddddddddc_]), count);
+write(30, format(_[+d.dddddddddddº-dd_]), answer);
+writetext(30, _[*approximates*+2.72198261288º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.27219826128795)/0.27219826128795);
+
+
+a := 0; b := 1;
+answer := havieintegrator(y,0,b,eps,(y+y)/(1.0+y×y),m max);
+writetext(30, _[count*=*_]);
+write(30, format(_[nddddddddc_]), count);
+write(30, format(_[+d.dddddddddddº-dd_]), answer);
+writetext(30, _[*approximates*+6.93147180560º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.6931471805599453)/0.6931471805599453);
+
+
+a:= 0.0; b:= 4.3;
+answer := havieintegrator(y, a, b, eps, exp(-y×y), m max);
+writetext(30, _[count*=*_]);
+write(30, format(_[nddddddddc_]), count);
+write(30, format(_[+d.dddddddddddº-dd_]), answer);
+writetext(30, _[*approximates*+8.86226924395º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.8862269243951)/0.8862269243951);
+
+FINISH:
+
+_e_n_d
+|
+

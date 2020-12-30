@@ -2,8 +2,8 @@
 --
 -- Emulation of a (fixed-platter) disc drive.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -135,7 +135,20 @@ package IOC.fast.FD is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean);
 
+   is_enabled : Boolean := False;
+
    procedure enable (b : in KDF9.buffer_number);
+
+   procedure re_enable (b : in KDF9.buffer_number);
+
+   FD0_number : KDF9.buffer_number;
+
+   main_discs_per_drive    : constant := 16;
+   seek_areas_per_platter  : constant := 64;
+   the_fixed_head_platter  : constant := 16;
+
+   function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
+   return String;
 
 private
 
@@ -145,8 +158,8 @@ private
    type sector_data      is array (KDF9.address range 0 .. bytes_per_sector-1)
                          of KDF9_char_sets.symbol;
 
-   sectors_per_seek_area : constant := 96;
-   sectors_in_outer_zone : constant := 64;
+   sectors_per_seek_area  : constant := 96;
+   sectors_in_outer_zone  : constant := 64;
 
    subtype sector_range  is KDF9.Q_part range 0 .. sectors_per_seek_area-1;
 
@@ -174,12 +187,9 @@ private
          inner_zone : FD.inner_data;
       end record;
 
-   seek_areas_per_platter  : constant := 64;
-
    subtype seek_area_range is KDF9.Q_part range 0 .. seek_areas_per_platter-1;
 
-   the_fixed_head_platter  : constant := 16;
-   platters_per_drive      : constant := the_fixed_head_platter + 1;
+   platters_per_drive      : constant := main_discs_per_drive + 1;
 
    subtype platter_range   is KDF9.Q_part range 0 .. platters_per_drive-1;
 
@@ -204,12 +214,11 @@ private
    -- They are used to derive a file address from the position established
    --    by seek and transfer operations.
 
-   type comb_data is array (FD.platter_range) of FD.seek_area_range;
-   type disc_data is array (FD.platter_range, FD.seek_area_range) of FD.track_set;
+   type comb_data is array (FD.drive_range, FD.platter_range) of FD.seek_area_range;
 
    type device is new IOC.fast.device with
       record
-         comb         : FD.comb_data := (others => 0);
+         comb         : FD.comb_data := (others => (others => 0));
          locus,
          target       : FD.locus;
          data_time,
