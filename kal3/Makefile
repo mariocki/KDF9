@@ -17,7 +17,7 @@
 CC=gcc
 YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=--debug
+YFLAGS=-vtd
 
 prefix?=/usr/local
 
@@ -25,12 +25,13 @@ kal3: kal3.c kal3.tab.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 kal3.tab.c: kal3.y
-	$(YACC) --defines=kal3.tab.h $^ $(YFLAGS)
+	$(YACC) $^ $(YFLAGS)
 
 .PHONY: clean
 clean:
 	$(RM) kal3
 	$(RM) *.tab.[ch] y.output
+	$(RM) *.output
 
 .PHONY: install
 install: kal3
@@ -42,6 +43,6 @@ uninstall:
 
 .PHONY: update
 update:
-	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
-	-git apply fixpaths.diff
-	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since
+#	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
+#	-git apply fixpaths.diff
+#	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since
