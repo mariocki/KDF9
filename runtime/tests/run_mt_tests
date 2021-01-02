@@ -29,7 +29,7 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-#trap "rm -f ${KDF9RUNTIME}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff chmod 644 ${KDF9RUNTIME}/ST0"  0 1 2 3
+trap "rm -f ${KDF9RUNTIME}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff chmod 644 ${KDF9RUNTIME}/ST0"  0 1 2 3
 
 opt="-d=t -m=ahpr"
 
