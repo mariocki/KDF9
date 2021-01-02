@@ -41,7 +41,7 @@ K 14 FD
 
 echo "TEST TDISC     POA, PIA, PMA, PMF."
 echo "TEST TDISC     POA, PIA, PMA, PMF." >> ${LOGS}/fd_test.log
->${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISC $opt >> ${LOGS}/fd_test.log
+>${KDF9RUNTIME}/FD0; ucc TDISC; nine_test TDISC $opt >> ${LOGS}/fd_test.log
 fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
@@ -52,7 +52,7 @@ esac
 
 echo "TEST TDISCOR   POA, PIA, PMA, PMF."
 echo "TEST TDISCOR   POA, PIA, PMA, PMF." >> ${LOGS}/fd_test.log
- >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISCOR $opt >> ${LOGS}/fd_test.log
+ >${KDF9RUNTIME}/FD0; ucc TDISCOR; nine_test TDISCOR $opt >> ${LOGS}/fd_test.log
 fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
@@ -63,7 +63,7 @@ esac
 
 echo "TEST TDISCEM   POB, PIA, PMA."
 echo "TEST TDISCEM   POB, PIA, PMA." >> ${LOGS}/fd_test.log
->${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISCEM $opt >> ${LOGS}/fd_test.log
+>${KDF9RUNTIME}/FD0; ucc TDISCEM; nine_test TDISCEM $opt >> ${LOGS}/fd_test.log
 fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
@@ -74,7 +74,7 @@ esac
 
 echo "TEST TDISCFH   POC, PIC done."
 echo "TEST TDISCFH   POC, PIC done." >> ${LOGS}/fd_test.log
->${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISCFH $opt >> ${LOGS}/fd_test.log
+>${KDF9RUNTIME}/FD0; ucc TDISCFH; nine_test TDISCFH $opt >> ${LOGS}/fd_test.log
 fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
@@ -85,7 +85,7 @@ esac
 
 echo "TEST TDISCFHNS POC, POK, PIC, PIG."
 echo "TEST TDISCFHNS POC, POK, PIC, PIG." >> ${LOGS}/fd_test.log
->${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISCFHNS $opt >> ${LOGS}/fd_test.log
+>${KDF9RUNTIME}/FD0; ucc TDISCFHNS; nine_test TDISCFHNS $opt >> ${LOGS}/fd_test.log
 fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
