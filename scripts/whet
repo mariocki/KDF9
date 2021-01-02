@@ -92,4 +92,9 @@ else
     ee9 -sp "$mode" "$miscellany" +Binary/KMW0201--UPU;
 fi
 
-printoutput
+case $miscellany in
+   *z*)
+      ;;
+   *)
+    printoutput
+esac

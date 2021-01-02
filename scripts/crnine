@@ -107,4 +107,9 @@ else
     ee9 "$state" "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 fi
 
-printoutput
+case $miscellany in
+   *z*)
+      ;;
+   *)
+    printoutput
+esac
