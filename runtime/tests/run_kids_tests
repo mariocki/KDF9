@@ -34,56 +34,56 @@ BINARY=${KDF9RUNTIME}/Binary
 
 trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt" 0 1 2 3
 
-opts="-d=t -m=ahipr"
+opts="-d=t -m=prh -nc"
 
 >${LOGS}/kids_test.log
 
-kids FLUID FLUID_data "$opts"         >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/FLUID.k3 ${Binary}/FLUID ${SOURCE}/FLUID-listing.txt
+kids FLUID FLUID_data $opts         >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/FLUID.k3 ${Binary}/FLUID ${SOURCE}/FLUID-listing.txt
 
-kids HAAVIE "$opts"                 >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/HAAVIE.k3 ${Binary}/HAAVIE ${SOURCE}/HAAVIE-listing.txt
+kids HAAVIE $opts                 >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/HAAVIE.k3 ${Binary}/HAAVIE ${SOURCE}/HAAVIE-listing.txt
 
-kids HANOI HANOI_data "$opts"         >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/HANOI.k3 ${Binary}/HANOI ${SOURCE}/HANOI-listing.txt
+kids HANOI HANOI_data $opts         >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/HANOI.k3 ${Binary}/HANOI ${SOURCE}/HANOI-listing.txt
 
-kids INPUT INPUT_data "$opts"         >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/INPUT.k3 ${Binary}/INPUT ${SOURCE}/INPUT-listing.txt
+kids INPUT INPUT_data $opts         >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/INPUT.k3 ${Binary}/INPUT ${SOURCE}/INPUT-listing.txt
 
-kids MANORBOYX "$opts"              >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/MANORBOYX.k3 ${Binary}/MANORBOYX ${SOURCE}/MANORBOYX-listing.txt
+kids MANORBOYX $opts              >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/MANORBOYX.k3 ${Binary}/MANORBOYX ${SOURCE}/MANORBOYX-listing.txt
 
-kids MATMULT "$opts"                >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/MATMULT.k3   ${Binary}/MATMULT   ${SOURCE}/MATMULT-listing.txt
+kids MATMULT $opts                >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/MATMULT.k3   ${Binary}/MATMULT   ${SOURCE}/MATMULT-listing.txt
 
-kids PALSQR "$opts"                 >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/PALSQR.k3    ${Binary}/PALSQR    ${SOURCE}/PALSQR-listing.txt
+kids PALSQR $opts                 >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/PALSQR.k3    ${Binary}/PALSQR    ${SOURCE}/PALSQR-listing.txt
 
-kids PENTOMINO PENTOMINO_data "$opts" >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/PENTOMINO.k3 ${Binary}/PENTOMINO ${SOURCE}/PENTOMINO-listing.txt
+kids PENTOMINO PENTOMINO_data $opts >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/PENTOMINO.k3 ${Binary}/PENTOMINO ${SOURCE}/PENTOMINO-listing.txt
 
-kids QSORT "$opts"                  >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/QSORT.k3 ${Binary}/QSORT  ${SOURCE}/QSORT-listing.txt
+kids QSORT $opts                  >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/QSORT.k3 ${Binary}/QSORT  ${SOURCE}/QSORT-listing.txt
 
-kids WHETSTONE "$opts"              >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/WHETSTONE.k3 ${Binary}/WHETSTONE ${SOURCE}/WHETSTONE-listing.txt
+kids WHETSTONE $opts              >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/WHETSTONE.k3 ${Binary}/WHETSTONE ${SOURCE}/WHETSTONE-listing.txt
 
-kids ZELLER ZELLER_data "$opts"       >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/ZELLER.k3    ${Binary}/ZELLER    ${SOURCE}/ZELLER-listing.txt
+kids ZELLER ZELLER_data $opts       >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log;
+rm -f ${SOURCE}/ZELLER.k3    ${Binary}/ZELLER    ${SOURCE}/ZELLER-listing.txt
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log ${LOGS}/kids_regr_tests_good.log >${LOGS}/kids_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log kids_regr_tests_good.log >${LOGS}/kids_test.diff
 if [ -s ${LOGS}/kids_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
