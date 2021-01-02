@@ -31,15 +31,18 @@ export EE9REGTEST=1
 
 #trap "rm -f ${LOGS}/fd_test.log ${LOGS}/fd_test.diff ${KDF9RUNTIME}/settings_1.txt" 0 1 2 3
 
-opt="-m=ahipr"
+opt="-d=t -m=ahipr"
 
 cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 14 FD
 ++++
 
-echo "TEST TDISK - POA, PIA, PMA, PMF - should end normally:"
+> ${LOGS}/fd_test.log
+
+echo "TEST TDISC     POA, PIA, PMA, PMF."
+echo "TEST TDISC     POA, PIA, PMA, PMF." >> ${LOGS}/fd_test.log
 >${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISC $opt >> ${LOGS}/fd_test.log
-echo "TEST TDISK - POA, PIA, PMA, PMF done."
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
    cat ${KDF9RUNTIME}/TP0; echo "======"; echo
@@ -47,9 +50,10 @@ z)
 *) ;;
 esac
 
-echo "TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:"
+echo "TEST TDISCOR   POA, PIA, PMA, PMF."
+echo "TEST TDISCOR   POA, PIA, PMA, PMF." >> ${LOGS}/fd_test.log
  >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISCOR $opt >> ${LOGS}/fd_test.log
-echo "TEST TDISKOR - POA, PIA, PMA, PMF done."
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
    cat ${KDF9RUNTIME}/TP0; echo "======"; echo
@@ -57,9 +61,10 @@ z)
 *) ;;
 esac
 
-echo "TEST TDISKEM - POB, PIA, PMA - should end normally:"
+echo "TEST TDISCEM   POB, PIA, PMA."
+echo "TEST TDISCEM   POB, PIA, PMA." >> ${LOGS}/fd_test.log
 >${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISCEM $opt >> ${LOGS}/fd_test.log
-echo "TEST TDISKEM - POB, PIA, PMA done."
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
    cat ${KDF9RUNTIME}/TP0; echo "======"; echo
@@ -67,9 +72,10 @@ z)
 *) ;;
 esac
 
-echo "TEST TDISKFH - POC, PIC - should end normally:"
+echo "TEST TDISCFH   POC, PIC done."
+echo "TEST TDISCFH   POC, PIC done." >> ${LOGS}/fd_test.log
 >${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISCFH $opt >> ${LOGS}/fd_test.log
-echo "TEST TDISKFH - POC, PIC done."
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
    cat ${KDF9RUNTIME}/TP0; echo "======"; echo
@@ -77,9 +83,21 @@ z)
 *) ;;
 esac
 
-echo "TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:"
+echo "TEST TDISCFHNS POC, POK, PIC, PIG."
+echo "TEST TDISCFHNS POC, POK, PIC, PIG." >> ${LOGS}/fd_test.log
 >${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISCFHNS $opt >> ${LOGS}/fd_test.log
-echo "TEST TDISKFHNS - POC, POK, PIC, PIG done."
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
+case $1 in
+z)
+   cat ${KDF9RUNTIME}/TP0; echo "======"; echo
+   od -c ${KDF9RUNTIME}/FD0 | more; echo "======"; echo;;
+*) ;;
+esac
+
+echo "TEST TFDOUTS 41, 42, 43, 44, 45."
+echo "TEST TFDOUTS 41, 42, 43, 44, 45." >> ${LOGS}/fd_test.log
+>${KDF9RUNTIME}/FD0; ucc TFDOUTS; nine_test TFDOUTS $opt >> ${LOGS}/fd_test.log
+fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/fd_test.log
 case $1 in
 z)
    cat ${KDF9RUNTIME}/TP0; echo "======"; echo
