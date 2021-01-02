@@ -15,11 +15,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-
 if [ -z $KDF9RUNTIME ]
 then
-    KDF9RUNTIME="$HOME/.kdf9"
+    export KDF9RUNTIME="$HOME/.kdf9"
 fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
 
 trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/cr_test.log ${LOGS}/cr_test.diff" 0 1 2 3
 
@@ -46,44 +54,6 @@ HIJKLMNOhijklmno
 PQRSTUVWpqrstuvw
 XYZ{}|\Øxyz{}|\Ø
         .
-++++
-
-echo "The following tests use this data:"
-echo "===="
-cat $data
-echo "===="
-cat <<++++
-
-The output to CP0 should look like this:
-=====
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
-0123456701234567
-89_º;+-.89_º;+-.
-@ABCDEFG@ABCDEFG
-HIJKLMNOHIJKLMNO
-PQRSTUVWPQRSTUVW
-XYZ{}|\ØXYZ{}|\Ø
-        .
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
-0123456701234567
-89_º;+-.89_º;+-.
-@ABCDEFG@ABCDEFG
-HIJKLMNOHIJKLMNO
-PQRSTUVWPQRSTUVW
-XYZ{}|
-        .
-=====
-the penultimate input line:
-XYZ{}|\Øxyz{}|\Ø
-should be punched out like this:
-XYZ{}|
-because the second set of 8 lines is read/punched to EM.
-An alphanumeric read/write omits everything after "COLUMN80".
-___________________________________________________________
-
-
 ++++
 
 > ${LOGS}/cr_test.log
@@ -153,7 +123,7 @@ z)
 esac
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_good_test.log > ${LOGS}/cr_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_regr_tests_good.log > ${LOGS}/cr_test.diff
 if [ -s ${LOGS}/cr_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

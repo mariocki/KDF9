@@ -15,15 +15,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
+
+trap "rm -f ${LOGS}/dr_test.log ${LOGS}/dr_test.diff ${KDF9RUNTIME}/settings_1.txt" 0 1 2 3
 
 opt="-d=t -m=ahipr"
 
-cat >settings_1.txt <<++++
+cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 14 DR
 ++++
 
 echo "TEST TDRUM - POA, PIA - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUM; nine_test TDRUM $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUM; nine_test TDRUM $opt >> ${LOGS}/dr_test.log
 echo "TEST TDRUM - POA, PIA done."
 case $1 in
 z)
@@ -33,7 +48,7 @@ z)
 esac
 
 echo "TEST TDRUMEOF - POA, PIA - should fail  \"Invalid operand\":"
->${KDF9RUNTIME}/DR0; ucc TDRUMEOF; nine_test TDRUMEOF $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMEOF; nine_test TDRUMEOF $opt >> ${LOGS}/dr_test.log
 echo "TEST TDRUMEOF - POA, PIA done."
 case $1 in
 z)
@@ -43,7 +58,7 @@ z)
 esac
 
 echo "TEST TDRUMR2EM - POA, PIB - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUMR2EM; nine_test TDRUMR2EM $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMR2EM; nine_test TDRUMR2EM $opt >> ${LOGS}/dr_test.log
 echo "TEST  TDRUMR2EM - POA, PIB done."
 case $1 in
 z)
@@ -53,7 +68,7 @@ z)
 esac
 
 echo "TEST TDRUMW2EM - POB, PIA - should end normally:"
->${KDF9RUNTIME}/DR0; ucc TDRUMW2EM; nine_test TDRUMW2EM $opt
+>${KDF9RUNTIME}/DR0; ucc TDRUMW2EM; nine_test TDRUMW2EM $opt >> ${LOGS}/dr_test.log
 echo "TEST TDRUMW2EM - POB, PIA done."
 case $1 in
 z)
@@ -61,3 +76,15 @@ z)
    od -c ${KDF9RUNTIME}/DR0 | more; echo "======"; echo;;
 *) ;;
 esac
+
+echo
+diff -diwB --strip-trailing-cr ${LOGS}/dr_test.log ${TESTS}/dr_regr_tests_good.log > ${LOGS}/dr_test.diff
+if [ -s ${LOGS}/dr_test.diff ]
+then
+   echo "These are the unexpected variances for this run:"
+   echo "==="
+   more ${LOGS}/dr_test.diff
+   echo "==="
+else
+   echo "These tests ran as expected."
+fi

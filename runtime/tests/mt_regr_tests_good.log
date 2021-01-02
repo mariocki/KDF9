@@ -38,7 +38,7 @@ MLB OK
 GAP OK
 FINISH
 ===
-Digital signature of traced orders = #7017242374042113.
+Digital signature of traced orders = #3257037520362447.
 
 TP0:
 ===
@@ -47,9 +47,8 @@ LABEL F
 LABEL B
 LABEL F
 WROTE L
-FINISH
 ===
-Digital signature of traced orders = #6742215724101674.
+Digital signature of traced orders = #3550356125556205.
 
 TP0:
 ===
@@ -67,17 +66,15 @@ TEST D
 LABEL F
 WROTE L
 REWOUND
-FINISH
 ===
-Digital signature of traced orders = #6251525626227702.
+Digital signature of traced orders = #5377302210023531.
 
 TP0:
 ===
 TEST E
 LABEL F
-FINISH
 ===
-Digital signature of traced orders = #3103542242245670.
+Digital signature of traced orders = #7737432362633342.
 
 TP0:
 ===
@@ -94,7 +91,7 @@ MFRE OK
 MBRE OK
 FINISH
 ===
-Digital signature of traced orders = #0152766531520304.
+Digital signature of traced orders = #7271151243733523.
 
 TP0:
 ===
@@ -107,7 +104,7 @@ REWOUND
 WIPE OK
 FINISH
 ===
-Digital signature of traced orders = #5746753443314616.
+Digital signature of traced orders = #4342071455474400.
 
 TP0:
 ===
@@ -148,7 +145,7 @@ MFRE OK
 MBRE OK
 FINISH
 ===
-Digital signature of traced orders = #2753050660323616.
+Digital signature of traced orders = #3753561037763543.
 
 TP0:
 ===
@@ -159,7 +156,7 @@ BSKP OK
 MFR  OK
 FINISH
 ===
-Digital signature of traced orders = #4056205431765170.
+Digital signature of traced orders = #1603150445764331.
 
 TP0:
 ===
@@ -207,4 +204,20 @@ MLB OK
 OPTM OK
 FINISH
 ===
-Digital signature of traced orders = #1021507263614570.
+Digital signature of traced orders = #7547645014673533.
+
+TP0:
+===
+TEST T
+LABEL F
+MLB OK
+LABEL B
+MLB OK
+REWOUND
+MLB OK
+LABEL F
+===
+Digital signature of traced orders = #1455452340447466.
+
+TEST OUT 2 - should end normally:
+Digital signature of traced orders = #1226022135555573.

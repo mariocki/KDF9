@@ -29,8 +29,7 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/error_output"  \
-      0 1 2 3
+trap "rm -f ${LOGS}/error_output" 0 1 2 3
 
 function resetOutputFiles {
 >${KDF9RUNTIME}/CP0
@@ -68,6 +67,14 @@ resetOutputFiles
 rm -f ${LOGS}/*
 
 echo; echo
+echo "Running CR emulation tests:"
+echo "=========================="
+echo
+${TESTS}/ee9_test_run CR "run_cr_tests"      >> ${LOGS}/ee9_test_case.log; echo
+
+resetOutputFiles
+
+echo; echo
 echo "Running MT emulation tests:"
 echo "=========================="
 echo
@@ -76,18 +83,18 @@ ${TESTS}/ee9_test_run MT "run_mt_tests"      >> ${LOGS}/ee9_test_case.log; echo
 resetOutputFiles
 
 echo; echo
-echo "Running FD emulation tests:"
+echo "Running DR emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run FD "run_fd_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run DR "run_dr_tests"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
 echo; echo
-echo "Running CR emulation tests:"
+echo "Running FD emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run CR "run_cr_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run FD "run_fd_tests"      >> ${LOGS}/ee9_test_case.log; echo
 
 resetOutputFiles
 
@@ -118,7 +125,7 @@ ${TESTS}/ee9_test_case WAB n >> ${LOGS}/ee9_test_case.log; echo
 ${TESTS}/ee9_test_case FLO >> ${LOGS}/ee9_test_case.log; echo
 ${TESTS}/ee9_test_case 1DH >> ${LOGS}/ee9_test_case.log; echo
 
-diff -diwB --strip-trailing-cr -I 'The Usercode*' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_good_test_case.log > ${LOGS}/ee9_test_case.diff
+diff -diwB --strip-trailing-cr -I 'The Usercode*' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log > ${LOGS}/ee9_test_case.diff
 
 if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]
 then

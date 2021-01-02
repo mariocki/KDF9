@@ -15,9 +15,22 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-SOURCE=${KDF9_USERCODE:-Assembly}
-BINARY=${KDF9_BINARY:-Binary}
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
+
+SOURCE=${KDF9RUNTIME}/Assembly
+BINARY=${KDF9RUNTIME}/Binary
 
 trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt" 0 1 2 3
 
@@ -27,50 +40,50 @@ opts="-d=t -m=ahipr"
 
 kids FLUID FLUID_data "$opts"         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/FLUID.k3 Binary/FLUID ${SOURCE}/FLUID-listing.txt
+rm ${SOURCE}/FLUID.k3 ${Binary}/FLUID ${SOURCE}/FLUID-listing.txt
 
 kids HAAVIE "$opts"                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/HAAVIE.k3 Binary/HAAVIE ${SOURCE}/HAAVIE-listing.txt
+rm ${SOURCE}/HAAVIE.k3 ${Binary}/HAAVIE ${SOURCE}/HAAVIE-listing.txt
 
 kids HANOI HANOI_data "$opts"         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/HANOI.k3 Binary/HANOI ${SOURCE}/HANOI-listing.txt
+rm ${SOURCE}/HANOI.k3 ${Binary}/HANOI ${SOURCE}/HANOI-listing.txt
 
 kids INPUT INPUT_data "$opts"         >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/INPUT.k3 Binary/INPUT ${SOURCE}/INPUT-listing.txt
+rm ${SOURCE}/INPUT.k3 ${Binary}/INPUT ${SOURCE}/INPUT-listing.txt
 
 kids MANORBOYX "$opts"              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/MANORBOYX.k3 Binary/MANORBOYX ${SOURCE}/MANORBOYX-listing.txt
+rm ${SOURCE}/MANORBOYX.k3 ${Binary}/MANORBOYX ${SOURCE}/MANORBOYX-listing.txt
 
 kids MATMULT "$opts"                >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/MATMULT.k3   Binary/MATMULT   ${SOURCE}/MATMULT-listing.txt
+rm ${SOURCE}/MATMULT.k3   ${Binary}/MATMULT   ${SOURCE}/MATMULT-listing.txt
 
 kids PALSQR "$opts"                 >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/PALSQR.k3    Binary/PALSQR    ${SOURCE}/PALSQR-listing.txt
+rm ${SOURCE}/PALSQR.k3    ${Binary}/PALSQR    ${SOURCE}/PALSQR-listing.txt
 
 kids PENTOMINO PENTOMINO_data "$opts" >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/PENTOMINO.k3 Binary/PENTOMINO ${SOURCE}/PENTOMINO-listing.txt
+rm ${SOURCE}/PENTOMINO.k3 ${Binary}/PENTOMINO ${SOURCE}/PENTOMINO-listing.txt
 
 kids QSORT "$opts"                  >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/QSORT.k3 Binary/QSORT  ${SOURCE}/QSORT-listing.txt
+rm ${SOURCE}/QSORT.k3 ${Binary}/QSORT  ${SOURCE}/QSORT-listing.txt
 
 kids WHETSTONE "$opts"              >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/WHETSTONE.k3 Binary/WHETSTONE ${SOURCE}/WHETSTONE-listing.txt
+rm ${SOURCE}/WHETSTONE.k3 ${Binary}/WHETSTONE ${SOURCE}/WHETSTONE-listing.txt
 
 kids ZELLER ZELLER_data "$opts"       >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " KDF9.log >>${LOGS}/kids_test.log;
-rm ${SOURCE}/ZELLER.k3    Binary/ZELLER    ${SOURCE}/ZELLER-listing.txt
+rm ${SOURCE}/ZELLER.k3    ${Binary}/ZELLER    ${SOURCE}/ZELLER-listing.txt
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log ${LOGS}/kids_good_test.log >${LOGS}/kids_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log ${LOGS}/kids_regr_tests_good.log >${LOGS}/kids_test.diff
 if [ -s ${LOGS}/kids_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

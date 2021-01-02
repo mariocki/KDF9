@@ -1,72 +1,41 @@
-+++++++++++++++++++ BEGIN  Test Case MT +++++++++++++++++++
-TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:
-TEST B - GAP in unWIPEd area - should fail "Invalid operand":
-TEST C - valid WIPE at end of data - should end normally:
-TEST D - reading past the end of data - should fail "Invalid operand":
-TEST E - attempt to write past PET - should fail "Invalid operand":
-TEST F - MW, MWE, MFRE and MBRE - should end normally:
-TEST G - WIPE entire tape, leaving it unlabelled - should end normally:
-TEST H - writing to ETW - should end normally:
-TEST I - MBR at BTW - should LIV:
-TEST J - MBSK at BTW - should LIV:
-TEST K - MBR after label block, R/W 1-word blocks - should end normally:
-TEST L - R/W 32K-word blocks - should end normally:
-TEST T - like TEST A but for 7-track decks - should end normally:
-
-These tests ran as expected.
-
-
-+++++++++++++++++++ BEGIN  Test Case FD +++++++++++++++++++
-TEST TDISK - POA, PIA, PMA, PMF - should end normally:
-TEST TDISK - POA, PIA, PMA, PMF done.
-TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:
-TEST TDISKOR - POA, PIA, PMA, PMF done.
-TEST TDISKEM - POB, PIA, PMA - should end normally:
-TEST TDISKEM - POB, PIA, PMA done.
-TEST TDISKFH - POC, PIC - should end normally:
-TEST TDISKFH - POC, PIC done.
-TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:
-TEST TDISKFHNS - POC, POK, PIC, PIG done.
-
-
 +++++++++++++++++++ BEGIN  Test Case CR +++++++++++++++++++
 The following tests use this data:
 ====
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
+" Â®Â©Â¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()Â£*,/:=()Â£*,/
 0123456701234567
-89_º;+-.89_º;+-.
+89_Âº;+-.89_Âº;+-.
 @ABCDEFG@abcdefg
 HIJKLMNOhijklmno
 PQRSTUVWpqrstuvw
-XYZ{}|\Øxyz{}|\Ø
+XYZ{}|\Ã˜xyz{}|\Ã˜
         .
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
+" Â®Â©Â¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()Â£*,/:=()Â£*,/
 0123456701234567
-89_º;+-.89_º;+-.
+89_Âº;+-.89_Âº;+-.
 @ABCDEFG@abcdefg
 HIJKLMNOhijklmno
 PQRSTUVWpqrstuvw
-XYZ{}|\Øxyz{}|\Ø
+XYZ{}|\Ã˜xyz{}|\Ã˜
         .
 ====
 
 The output to CP0 should look like this:
 =====
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
+" Â®Â©Â¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()Â£*,/:=()Â£*,/
 0123456701234567
-89_º;+-.89_º;+-.
+89_Âº;+-.89_Âº;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
-XYZ{}|\ØXYZ{}|\Ø
+XYZ{}|\Ã˜XYZ{}|\Ã˜
         .
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
+" Â®Â©Â¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
+:=()Â£*,/:=()Â£*,/
 0123456701234567
-89_º;+-.89_º;+-.
+89_Âº;+-.89_Âº;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -74,7 +43,7 @@ XYZ{}|
         .
 =====
 the penultimate input line:
-XYZ{}|\Øxyz{}|\Ø
+XYZ{}|\Ã˜xyz{}|\Ã˜
 should be punched out like this:
 XYZ{}|
 because the second set of 8 lines is read/punched to EM.
@@ -90,6 +59,46 @@ TEST POA POB - PIA 160-column binary read:
 TEST POC POD - PIC 160-column character binary read:
 TEST POG POH - PIE 80-column alphanumeric read:
 TEST POL POK (sic) - PIG 80-column alphanumeric character-per-word read:
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case MT +++++++++++++++++++
+TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:
+TEST B - GAP in unWIPEd area - should fail "Impossible I/O operation":
+TEST C - valid WIPE at end of data - should end normally:
+TEST D - reading past the end of data - should fail "Impossible I/O operation":
+TEST E - attempt to write past PET - should fail "Impossible I/O operation":
+TEST F - MW, MWE, MFRE and MBRE - should end normally:
+TEST G - WIPE entire tape, leaving it unlabelled - should end normally:
+TEST H - writing to ETW - should end normally:
+TEST I - MBR at BTW - should LIV:
+TEST J - MBSK at BTW - should LIV:
+TEST K - MBR after label block, R/W 1-word blocks - should end normally:
+TEST L - R/W 32K-word blocks - should end normally:
+TEST T - like TEST A but for 7-track decks - should end normally:
+TEST TRO - like TEST T but without WPR - should fail:
+TEST OUT 2 - should end normally:
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case DR +++++++++++++++++++
+TEST TDRUM     POA, PIA.
+TEST TDRUMR2EM POA, PIB.
+TEST TDRUMW2EM POB, PIA.
+TEST TDROUTS   11, 12, 13, 14.
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case FD +++++++++++++++++++
+TEST TDISC     POA, PIA, PMA, PMF.
+TEST TDISCOR   POA, PIA, PMA, PMF.
+TEST TDISCEM   POB, PIA, PMA.
+TEST TDISCFH   POC, PIC done.
+TEST TDISCFHNS POC, POK, PIC, PIG.
+TEST TFDOUTS 41, 42, 43, 44, 45.
 
 These tests ran as expected.
 
@@ -185,8 +194,8 @@ LP0:
 
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67 -138
 RAN/EL/000M46S/000M48S===
-The signature of this test should be #1774104411721111. It was as follows:
-Digital signature of traced orders = #1774104411721111.
+The signature of this test should be #1407535531421151. It was as follows:
+Digital signature of traced orders = #1407535531421151.
 ------------------- END OF Test Case MOB -------------------
 
 
@@ -195,7 +204,7 @@ Digital signature of traced orders = #1774104411721111.
 TP0:
 ===
 
-RAN/EL/000M02S/000M04S  SIZE    155
+RAN/EL/000M02S/000M05S  SIZE    155
 
 The  1st prime is   2
 The  2nd prime is   3
@@ -233,8 +242,8 @@ LP0:
 ===
 
 RAN/EL/021M43S/021M47S===
-The signature of this test should be #3702427170240312. It was as follows:
-Digital signature of traced orders = #3702427170240312.
+The signature of this test should be #2462534671215633. It was as follows:
+Digital signature of traced orders = #2462534671215633.
 ------------------- END OF Test Case GPR -------------------
 
 
@@ -252,19 +261,19 @@ Propagation of an Impulse into a Viscous-locking Medium
     Delta alpha = 0.1000
 
 
-    alpha               lambda       lambda×sqrt(2×alpha)         g
+    alpha               lambda       lambdaÃ—sqrt(2Ã—alpha)         g
 
     0.0000             INFINITY             1.00000            1.00000
-    0.1000            2.0201º +0            0.90340            0.73452
-    0.2000            1.2812º +0            0.81029            0.52525
-    0.3000            9.2712º -1            0.71814            0.36101
-    0.4000            6.9943º -1            0.62559            0.24038
+    0.1000            2.0201Âº +0            0.90340            0.73452
+    0.2000            1.2812Âº +0            0.81029            0.52525
+    0.3000            9.2712Âº -1            0.71814            0.36101
+    0.4000            6.9943Âº -1            0.62559            0.24038
 
-    0.5000            5.3160º -1            0.53160            0.26796
-    0.6000            3.9727º -1            0.43519            0.30384
-    0.7000            2.8340º -1            0.33532            0.34489
-    0.8000            1.8242º -1            0.23075            0.38947
-    0.9000            8.9284º -2            0.11979            0.43642
+    0.5000            5.3160Âº -1            0.53160            0.26796
+    0.6000            3.9727Âº -1            0.43519            0.30384
+    0.7000            2.8340Âº -1            0.33532            0.34489
+    0.8000            1.8242Âº -1            0.23075            0.38947
+    0.9000            8.9284Âº -2            0.11979            0.43642
 
     1.0000            0.0000                0.00000            0.48394
 ===
@@ -272,9 +281,9 @@ Propagation of an Impulse into a Viscous-locking Medium
 LP0:
 ===
 
-RAN/EL/008M50S/008M55S===
-The signature of this test should be #4337171556307416. It was as follows:
-Digital signature of traced orders = #4337171556307416.
+RAN/EL/008M50S/008M56S===
+The signature of this test should be #3755315062014254. It was as follows:
+Digital signature of traced orders = #3755315062014254.
 ------------------- END OF Test Case FLU -------------------
 
 
@@ -314,9 +323,9 @@ N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
 N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
-RAN/EL/006M57S/006M58S===
-The signature of this test should be #3226514177100542. It was as follows:
-Digital signature of traced orders = #3226514177100542.
+RAN/EL/006M57S/006M59S===
+The signature of this test should be #7636155453113124. It was as follows:
+Digital signature of traced orders = #7636155453113124.
 ------------------- END OF Test Case WBM -------------------
 
 
@@ -368,7 +377,7 @@ GAP OK
 FINISH
 ===
 The signature of this test should be #7017242374042113. It was as follows:
-Digital signature of traced orders = #7017242374042113.
+Digital signature of traced orders = #3257037520362447.
 ------------------- END OF Test Case TO4 -------------------
 
 
@@ -397,15 +406,15 @@ IDENTIFIER b NOT USED
 DECLARED ON LINE   2
 IDENTIFIER c NOT USED
 DECLARED ON LINE   2
-RAN/EL/000M05S/000M15S  SIZE    613
+RAN/EL/000M05S/000M16S  SIZE    613
 ===
 
 LP0:
 ===
 
-RAN/EL/006M57S/007M03S===
-The signature of this test should be #2551007324200157. It was as follows:
-Digital signature of traced orders = #2551007324200157.
+RAN/EL/006M57S/007M04S===
+The signature of this test should be #1610433227767503. It was as follows:
+Digital signature of traced orders = #1610433227767503.
 ------------------- END OF Test Case MTW -------------------
 
 
@@ -416,36 +425,36 @@ TP0:
 
 IDENTIFIER j NOT USED
 DECLARED ON LINE   2
-RAN/EL/000M01S/000M02S  SIZE     82
+RAN/EL/000M01S/000M03S  SIZE     82
 
 Hello World.
-   111111111  1.111111111º +4
-  -222222222 -2.222222222º +3
-   333333333  3.333333333º +2
-   444444444  4.444444444º +1
-  -555555555 -5.555555555º +0
-   666666666  6.666666666º -1
-   123456789  1.234567890º +8
-   111111111  1.111111111º +1
-  -222222222 -2.222222222º -1
-   333333333  3.333333333º +1
-   444444444  4.444444444º+11
-  -555555555 -5.555555555º-11
-   666666666  6.666666666º+11
-  -987654321 -9.876543210º +8
-   111111111  1.000000000º +1
-  -222222222 -2.000000000º -1
-   333333333  3.000000000º +1
-   444444444  4.000000000º+11
-  -555555555 -5.000000000º-11
-   666666666  6.000000000º+11
-   987654321 -9.876543210º +8
-   111111111  1.000000000º +1
-  -222222222 -1.000000000º -2
-   333333333  1.000000000º +3
-   444444444  1.000000000º +4
-  -555555555 -1.000000000º -5
-   666666666  1.000000000º +6
+   111111111  1.111111111Âº +4
+  -222222222 -2.222222222Âº +3
+   333333333  3.333333333Âº +2
+   444444444  4.444444444Âº +1
+  -555555555 -5.555555555Âº +0
+   666666666  6.666666666Âº -1
+   123456789  1.234567890Âº +8
+   111111111  1.111111111Âº +1
+  -222222222 -2.222222222Âº -1
+   333333333  3.333333333Âº +1
+   444444444  4.444444444Âº+11
+  -555555555 -5.555555555Âº-11
+   666666666  6.666666666Âº+11
+  -987654321 -9.876543210Âº +8
+   111111111  1.000000000Âº +1
+  -222222222 -2.000000000Âº -1
+   333333333  3.000000000Âº +1
+   444444444  4.000000000Âº+11
+  -555555555 -5.000000000Âº-11
+   666666666  6.000000000Âº+11
+   987654321 -9.876543210Âº +8
+   111111111  1.000000000Âº +1
+  -222222222 -1.000000000Âº -2
+   333333333  1.000000000Âº +3
+   444444444  1.000000000Âº +4
+  -555555555 -1.000000000Âº -5
+   666666666  1.000000000Âº +6
            0  0.000000000    
 Farewell, Cruel World.
 ===
@@ -453,9 +462,9 @@ Farewell, Cruel World.
 LP0:
 ===
 
-RAN/EL/000M03S/000M12S===
-The signature of this test should be #3046175371276175. It was as follows:
-Digital signature of traced orders = #3046175371276175.
+RAN/EL/000M03S/000M13S===
+The signature of this test should be #3301160711524477. It was as follows:
+Digital signature of traced orders = #3301160711524477.
 ------------------- END OF Test Case INP -------------------
 
 
@@ -465,22 +474,22 @@ The Usercode is in Assembly/WEEHAAVIE.k3 and the KDF9 executable is in Binary/WE
 
 LP0:
 ===
-EPSILON = 1.00000000000º-10
+EPSILON = 1.00000000000Âº-10
 MMAX =  20
 COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
++7.85398163400Âº -1 APPROXIMATES +7.85398163397Âº -1, RELATIVE ERROR +2.31600924005Âº-12
 COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
++1.29128599746Âº  0 APPROXIMATES +1.29128599706Âº  0, RELATIVE ERROR +3.04271642424Âº-10
 COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
++2.72198261288Âº -1 APPROXIMATES +2.72198261288Âº -1, RELATIVE ERROR +3.34129504528Âº-12
 COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
++6.93147180560Âº -1 APPROXIMATES +6.93147180560Âº -1, RELATIVE ERROR +0.00000000000    
 COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
++8.86226924400Âº -1 APPROXIMATES +8.86226924395Âº -1, RELATIVE ERROR +6.15752925174Âº-12
 FINISHED ENDS 0
 ===
 The signature of this test should be #4200133757004705. It was as follows:
-Digital signature of traced orders = #4200133757004705.
+Digital signature of traced orders = #4230330426172712.
 ------------------- END OF Test Case HQP -------------------
 
 

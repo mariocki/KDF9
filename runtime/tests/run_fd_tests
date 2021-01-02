@@ -15,6 +15,21 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
+
+#trap "rm -f ${LOGS}/fd_test.log ${LOGS}/fd_test.diff ${KDF9RUNTIME}/settings_1.txt" 0 1 2 3
 
 opt="-m=ahipr"
 
@@ -23,7 +38,7 @@ K 14 FD
 ++++
 
 echo "TEST TDISK - POA, PIA, PMA, PMF - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISK $opt
+>${KDF9RUNTIME}/FD0; ucc TDISK; nine_test TDISC $opt >> ${LOGS}/fd_test.log
 echo "TEST TDISK - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -33,7 +48,7 @@ z)
 esac
 
 echo "TEST TDISKOR - POA, PIA, PMA, PMF - should end normally:"
- >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISKOR $opt
+ >${KDF9RUNTIME}/FD0; ucc TDISKOR; nine_test TDISCOR $opt >> ${LOGS}/fd_test.log
 echo "TEST TDISKOR - POA, PIA, PMA, PMF done."
 case $1 in
 z)
@@ -43,7 +58,7 @@ z)
 esac
 
 echo "TEST TDISKEM - POB, PIA, PMA - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISKEM $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKEM; nine_test TDISCEM $opt >> ${LOGS}/fd_test.log
 echo "TEST TDISKEM - POB, PIA, PMA done."
 case $1 in
 z)
@@ -53,7 +68,7 @@ z)
 esac
 
 echo "TEST TDISKFH - POC, PIC - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISKFH $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKFH; nine_test TDISCFH $opt >> ${LOGS}/fd_test.log
 echo "TEST TDISKFH - POC, PIC done."
 case $1 in
 z)
@@ -63,7 +78,7 @@ z)
 esac
 
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG - should end normally:"
->${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISKFHNS $opt
+>${KDF9RUNTIME}/FD0; ucc TDISKFHNS; nine_test TDISCFHNS $opt >> ${LOGS}/fd_test.log
 echo "TEST TDISKFHNS - POC, POK, PIC, PIG done."
 case $1 in
 z)
@@ -71,3 +86,15 @@ z)
    od -c ${KDF9RUNTIME}/FD0 | more; echo "======"; echo;;
 *) ;;
 esac
+
+echo
+diff -diwB --strip-trailing-cr ${LOGS}/fd_test.log ${TESTS}/fd_regr_tests_good.log > ${LOGS}/fd_test.diff
+if [ -s ${LOGS}/fd_test.diff ]
+then
+   echo "These are the unexpected variances for this run:"
+   echo "==="
+   more ${LOGS}/fd_test.diff
+   echo "==="
+else
+   echo "These tests ran as expected."
+fi

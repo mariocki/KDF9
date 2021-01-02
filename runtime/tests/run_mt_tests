@@ -15,6 +15,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
 
 trap "rm -f ${KDF9RUNTIME}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff"  0 1 2 3
 
@@ -141,7 +154,7 @@ case $opt in
 esac
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/mt_test.log ${TESTS}/mt_good_test.log >${LOGS}/mt_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/mt_test.log ${TESTS}/mt_regr_tests_good.log >${LOGS}/mt_test.diff
 if [ -s mt_test.diff ]
 then
    echo "These are the unexpected variances for this run:"

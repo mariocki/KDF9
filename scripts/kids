@@ -50,7 +50,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "  -TP TPMODE                  define the TP mode";
             echo "  -TR TRMODE                  define the TR mode";
             echo;
-            echo "Note: SOURCEFILE must exist in ${KDF9RUNTIME}/Kidsgrove/"
+            echo "Note: SOURCEFILE must exist in ${SOURCE}"
             echo "      DATAFILE must exist in ${DATA}"
             echo;
             exit 0;;

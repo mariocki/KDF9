@@ -15,6 +15,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
 
 trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log" 0 1 2 3
 
@@ -32,7 +45,7 @@ whet WHETSTONE -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" 
 whet ZELLER    -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_good_test.log >${LOGS}/whet_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/whet_test.diff
 if [ -s ${LOGS}/whet_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
