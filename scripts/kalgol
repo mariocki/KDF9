@@ -101,7 +101,7 @@ mkchan ${SOURCE}/$prog.a60 /tmp/chan6.pt > /dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
 > ${KDF9RUNTIME}/TP0
-rm -f Binary/$prog
+rm -f ${KDF9RUNTIME}/Binary/$prog
 rm -f ${USERCODE}/$prog.k3
 cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
 
@@ -133,7 +133,7 @@ then
    if grep -q FAIL ${KDF9RUNTIME}/LP0 || grep -q FAIL ${KDF9RUNTIME}/TP0
    then
       echo -e "${RED}**********************************************";
-      echo "The compilation was abandoned for ${prog}."; 
+      echo "The compilation failed for ${prog}."; 
       echo -e "**********************************************${NC}";
       cat ${KDF9RUNTIME}/LP0;
       echo;
@@ -170,10 +170,10 @@ y)
       exit 5
    fi
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in ${USERCODE}/$prog.k3 and the KDF9 executable is in Binary/$prog";
+   echo "The Usercode is in Assembly/$prog.k3 and the KDF9 executable is in Binary/$prog";
    ;;
 *)
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in ${USERCODE}/$prog.k3.";
+   echo "The Usercode is in Assembly/$prog.k3.";
    ;;
 esac
