@@ -29,22 +29,30 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log" 0 1 2 3
+trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log /tmp/whetoutput" 0 1 2 3
+
+function runtest () {
+   whet $1 -d=t -m=prh >>${LOGS}/whet_test.log;
+   fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log;
+   echo $1 DONE >>${LOGS}/whet_test.log;
+}
 
 >${LOGS}/whet_test.log
 
-whet FLUID     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet GPSPRIMES -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet HAAVIE    -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet HANOI     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet INPUT     -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet MANORBOYX -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet MATMULT   -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet PENTOMINO -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet WHETSTONE -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-whet ZELLER    -d=t -m=ahipr >>${LOGS}/whet_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+runtest FLUID
+runtest GPSPRIMES
+runtest HANOI
+runtest INPUT
+runtest MANORBOY
+runtest MATMULT
+runtest PENTOMINO
+runtest WEEHAAVIE
+runtest WHETSTONE
+runtest ZELLER
 
 echo
+iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 < ${LOGS}/whet_test.log > /tmp/whetoutput;
+cat /tmp/whetoutput > ${LOGS}/whet_test.log;
 diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/whet_test.diff
 if [ -s ${LOGS}/whet_test.diff ]
 then
