@@ -376,7 +376,7 @@ MLB OK
 GAP OK
 FINISH
 ===
-The signature of this test should be #7017242374042113. It was as follows:
+The signature of this test should be #3257037520362447. It was as follows:
 Digital signature of traced orders = #3257037520362447.
 ------------------- END OF Test Case TO4 -------------------
 
@@ -488,7 +488,7 @@ COUNT =         6
 +8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
 FINISHED ENDS 0
 ===
-The signature of this test should be #4200133757004705. It was as follows:
+The signature of this test should be #4230330426172712. It was as follows:
 Digital signature of traced orders = #4230330426172712.
 ------------------- END OF Test Case HQP -------------------
 

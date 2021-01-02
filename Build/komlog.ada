@@ -1,4 +1,4 @@
-Version V5p2b of ee9 for macOS, built on Wed 30 Dec 2020 00:11:18 GMT.
+Version V5p2b of ee9 for macOS, built on Thu 31 Dec 2020 00:05:31 GMT.
 mk9 'ee9' build: optimised and with full language checks, using configuration options:
 
 pragma Unsuppress(All_Checks);
@@ -21,7 +21,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ee9.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:18
+Compiled at: 2020-12-31 00:05:31
 
      1. -- ee9.adb
      2. --
@@ -324,7 +324,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/exceptions.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:31
 
      1. -- exceptions.ads
      2. --
@@ -396,7 +396,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/execute.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:32
 
      1. -- execute.adb
      2. --
@@ -604,7 +604,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/hci.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:32
 
      1. -- HCI.adb
      2. --
@@ -815,7 +815,7 @@ Compiled at: 2020-12-30 00:11:19
 
 Compiling: ../Source/hci.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:32
 
      1. -- HCI.ads
      2. --
@@ -922,7 +922,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:32
 
      1. -- ioc.adb
      2. --
@@ -1944,7 +1944,7 @@ Compiled at: 2020-12-30 00:11:19
 
 Compiling: ../Source/ioc.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:19
+Compiled at: 2020-12-31 00:05:32
 
      1. -- ioc.ads
      2. --
@@ -2443,7 +2443,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-equipment.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:20
+Compiled at: 2020-12-31 00:05:33
 
      1. -- IOC.equipment.adb
      2. --
@@ -2542,7 +2542,7 @@ Compiled at: 2020-12-30 00:11:20
 
 Compiling: ../Source/ioc-equipment.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:20
+Compiled at: 2020-12-31 00:05:33
 
      1. -- IOC.equipment.ads
      2. --
@@ -2650,7 +2650,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:20
+Compiled at: 2020-12-31 00:05:33
 
      1. -- ioc-slow_devices.adb
      2. --
@@ -2831,7 +2831,7 @@ Compiled at: 2020-12-30 00:11:20
 
 Compiling: ../Source/ioc-slow.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:20
+Compiled at: 2020-12-31 00:05:33
 
      1. -- ioc-slow.ads
      2. --
@@ -2916,7 +2916,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:33
 
      1. -- ioc-slow-shift.adb
      2. --
@@ -3195,7 +3195,7 @@ Compiled at: 2020-12-30 00:11:21
 
 Compiling: ../Source/ioc-slow-shift.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:33
 
      1. -- ioc-slow-shift.ads
      2. --
@@ -3293,7 +3293,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift-tp.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:34
 
      1. -- ioc-slow-shift-tp.ads
      2. --
@@ -3559,7 +3559,7 @@ Compiled at: 2020-12-30 00:11:21
 
 Compiling: ../Source/ioc-slow-shift-tp.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:34
 
      1. -- ioc-slow-shift-tp.ads
      2. --
@@ -3654,7 +3654,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift-tr.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:34
 
      1. -- ioc-slow-shift-tr.adb
      2. --
@@ -4112,7 +4112,7 @@ Compiled at: 2020-12-30 00:11:21
 
 Compiling: ../Source/ioc-slow-shift-tr.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:34
 
      1. -- ioc-slow-shift-tr.ads
      2. --
@@ -4226,7 +4226,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/say_goodbye.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:21
+Compiled at: 2020-12-31 00:05:34
 
      1. -- say_goodbye.adb
      2. --
@@ -4299,7 +4299,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/settings.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:34
 
      1. -- settings.adb
      2. --
@@ -5347,7 +5347,7 @@ Compiled at: 2020-12-30 00:11:22
 
 Compiling: ../Source/settings.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:34
 
      1. -- settings.ads
      2. --
@@ -5524,7 +5524,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/break_in.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:35
 
      1. -- break_in.adb
      2. --
@@ -5596,7 +5596,7 @@ Compiled at: 2020-12-30 00:11:22
 
 Compiling: ../Source/break_in.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:35
 
      1. -- break_in.ads
      2. --
@@ -5636,7 +5636,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/dumping.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:35
 
      1. -- dumping.adb
      2. --
@@ -5915,7 +5915,7 @@ Compiled at: 2020-12-30 00:11:22
 
 Compiling: ../Source/dumping.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:22
+Compiled at: 2020-12-31 00:05:35
 
      1. -- dumping.ads
      2. --
@@ -6054,7 +6054,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:23
+Compiled at: 2020-12-31 00:05:36
 
      1. -- kdf9.adb
      2. --
@@ -7075,7 +7075,7 @@ Compiled at: 2020-12-30 00:11:23
 
 Compiling: ../Source/kdf9.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:23
+Compiled at: 2020-12-31 00:05:36
 
      1. -- kdf9.ads
      2. --
@@ -7816,7 +7816,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-microcode.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:23
+Compiled at: 2020-12-31 00:05:36
 
      1. -- kdf9-microcode.adb
      2. --
@@ -9454,7 +9454,7 @@ Compiled at: 2020-12-30 00:11:23
 
 Compiling: ../Source/kdf9-microcode.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:23
+Compiled at: 2020-12-31 00:05:36
 
      1. -- kdf9-microcode.ads
      2. --
@@ -9490,7 +9490,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/state_display.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:24
+Compiled at: 2020-12-31 00:05:37
 
      1. -- state_display.adb
      2. --
@@ -11712,7 +11712,7 @@ Compiled at: 2020-12-30 00:11:24
 
 Compiling: ../Source/state_display.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:24
+Compiled at: 2020-12-31 00:05:37
 
      1. -- state_display.ads
      2. --
@@ -11825,7 +11825,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/formatting.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:25
+Compiled at: 2020-12-31 00:05:38
 
      1. -- formatting.adb
      2. --
@@ -12083,7 +12083,7 @@ Compiled at: 2020-12-30 00:11:25
 
 Compiling: ../Source/formatting.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:25
+Compiled at: 2020-12-31 00:05:38
 
      1. -- formatting.ads
      2. --
@@ -12232,7 +12232,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/generic_logger.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- generic_logger.adb
      2. --
@@ -12341,7 +12341,7 @@ Compiled at: 2020-12-30 00:11:26
 
 Compiling: ../Source/generic_logger.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- generic_logger.ads
      2. --
@@ -12433,7 +12433,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/logging.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- logging.ads
      2. --
@@ -12493,7 +12493,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/logging-file.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- file.adb
      2. --
@@ -12608,7 +12608,7 @@ Compiled at: 2020-12-30 00:11:26
 
 Compiling: ../Source/logging-file.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- logging-file.ads
      2. --
@@ -12688,7 +12688,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/logging-panel.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- logging-panel.adb
      2. --
@@ -12840,7 +12840,7 @@ Compiled at: 2020-12-30 00:11:26
 
 Compiling: ../Source/logging-panel.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- logging-panel.ads
      2. --
@@ -12928,7 +12928,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-the_locker_of.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- ioc-the_locker_of.adb
      2. --
@@ -12984,7 +12984,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-cpu.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- kdf9-cpu.adb
      2. --
@@ -14081,7 +14081,7 @@ Compiled at: 2020-12-30 00:11:26
 
 Compiling: ../Source/kdf9-cpu.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:26
+Compiled at: 2020-12-31 00:05:39
 
      1. -- kdf9-cpu.ads
      2. --
@@ -14559,7 +14559,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-phu_store.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:40
 
      1. -- kdf9-PHU_store.adb
      2. --
@@ -14629,7 +14629,7 @@ Compiled at: 2020-12-30 00:11:27
 
 Compiling: ../Source/kdf9-phu_store.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:40
 
      1. -- kdf9-PHU_store.ads
      2. --
@@ -14721,7 +14721,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/tracing.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:41
 
      1. -- tracing.adb
      2. --
@@ -15327,7 +15327,7 @@ Compiled at: 2020-12-30 00:11:27
 
 Compiling: ../Source/tracing.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:41
 
      1. -- tracing.ads
      2. --
@@ -15565,7 +15565,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/host_io.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:41
 
      1. -- host_IO.adb
      2. --
@@ -16085,7 +16085,7 @@ Compiled at: 2020-12-30 00:11:27
 
 Compiling: ../Source/host_io.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:27
+Compiled at: 2020-12-31 00:05:41
 
      1. -- host_IO.ads
      2. --
@@ -16285,7 +16285,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-store.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:28
+Compiled at: 2020-12-31 00:05:41
 
      1. -- kdf9-store.adb
      2. --
@@ -16534,7 +16534,7 @@ Compiled at: 2020-12-30 00:11:28
 
 Compiling: ../Source/kdf9-store.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:28
+Compiled at: 2020-12-31 00:05:41
 
      1. -- kdf9-store.ads
      2. --
@@ -16696,7 +16696,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-absent.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:28
+Compiled at: 2020-12-31 00:05:42
 
      1. -- ioc-absent.adb
      2. --
@@ -16910,7 +16910,7 @@ Compiled at: 2020-12-30 00:11:28
 
 Compiling: ../Source/ioc-absent.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:28
+Compiled at: 2020-12-31 00:05:42
 
      1. -- ioc-absent.ads
      2. --
@@ -17083,7 +17083,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:28
+Compiled at: 2020-12-31 00:05:42
 
      1. -- ioc-fast.ads
      2. --
@@ -17133,7 +17133,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-dr.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:29
+Compiled at: 2020-12-31 00:05:42
 
      1. -- ioc-fast-dr.adb
      2. --
@@ -17706,7 +17706,7 @@ Compiled at: 2020-12-30 00:11:29
 
 Compiling: ../Source/ioc-fast-dr.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:29
+Compiled at: 2020-12-31 00:05:42
 
      1. -- ioc-fast-dr.ads
      2. --
@@ -17872,7 +17872,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-fd.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:29
+Compiled at: 2020-12-31 00:05:43
 
      1. -- ioc-fast-fd.adb
      2. --
@@ -18773,7 +18773,7 @@ Compiled at: 2020-12-30 00:11:29
 
 Compiling: ../Source/ioc-fast-fd.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:29
+Compiled at: 2020-12-31 00:05:43
 
      1. -- ioc-fast-fd.ads
      2. --
@@ -19020,7 +19020,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-mt.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:30
+Compiled at: 2020-12-31 00:05:43
 
      1. -- ioc-fast-MT.adb
      2. --
@@ -20296,7 +20296,7 @@ Compiled at: 2020-12-30 00:11:30
 
 Compiling: ../Source/ioc-fast-mt.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:30
+Compiled at: 2020-12-31 00:05:43
 
      1. -- ioc-fast-MT.ads
      2. --
@@ -20693,7 +20693,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift-fw.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:44
 
      1. -- ioc-slow-shift-fw.adb
      2. --
@@ -21375,7 +21375,7 @@ Compiled at: 2020-12-30 00:11:31
 
 Compiling: ../Source/ioc-slow-shift-fw.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:44
 
      1. -- ioc-slow-shift-fw.ads
      2. --
@@ -21533,7 +21533,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift-gp.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:44
 
      1. -- ioc-slow-shift-gp.ads
      2. --
@@ -21753,7 +21753,7 @@ Compiled at: 2020-12-30 00:11:31
 
 Compiling: ../Source/ioc-slow-shift-gp.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:44
 
      1. -- ioc-slow-shift-gp.ads
      2. --
@@ -21832,7 +21832,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-shift-si.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-slow-shift-si.adb
      2. --
@@ -22087,7 +22087,7 @@ Compiled at: 2020-12-30 00:11:31
 
 Compiling: ../Source/ioc-slow-shift-si.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:31
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-slow-shift-si.ads
      2. --
@@ -22240,7 +22240,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-unit.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-slow-unit.adb
      2. --
@@ -22283,7 +22283,7 @@ Compiled at: 2020-12-30 00:11:32
 
 Compiling: ../Source/ioc-slow-unit.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-slow-unit.ads
      2. --
@@ -22337,7 +22337,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-unit-cp.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-unit-cp.adb
      2. --
@@ -22572,7 +22572,7 @@ Compiled at: 2020-12-30 00:11:32
 
 Compiling: ../Source/ioc-slow-unit-cp.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-unit-cp.ads
      2. --
@@ -22679,7 +22679,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-unit-cr.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-unit-cr.adb
      2. --
@@ -22960,7 +22960,7 @@ Compiled at: 2020-12-30 00:11:32
 
 Compiling: ../Source/ioc-slow-unit-cr.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:45
 
      1. -- ioc-slow-unit-cr.ads
      2. --
@@ -23066,7 +23066,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-slow-unit-lp.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:46
 
      1. -- ioc-slow-unit-lp.adb
      2. --
@@ -23274,7 +23274,7 @@ Compiled at: 2020-12-30 00:11:32
 
 Compiling: ../Source/ioc-slow-unit-lp.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:32
+Compiled at: 2020-12-31 00:05:46
 
      1. -- ioc-slow-unit-lp.ads
      2. --
@@ -23345,7 +23345,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/environmental_value_of.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- environmental_value_of.adb
      2. --
@@ -23381,8 +23381,8 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 
 Compiling: /Users/wf/KDF9/emulation/Source/os_specifics.adb
-Source file time stamp: 2020-12-30 00:11:18
-Compiled at: 2020-12-30 00:11:33
+Source file time stamp: 2020-12-31 00:05:31
+Compiled at: 2020-12-31 00:05:46
 
      1. -- OS_specifics.adb
      2. --
@@ -23423,7 +23423,7 @@ Compiled at: 2020-12-30 00:11:33
 
 Compiling: ../Source/os_specifics.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- OS_specifics.ads
      2. --
@@ -23477,8 +23477,8 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-directors.adb
-Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Source file time stamp: 2020-12-30 21:45:37
+Compiled at: 2020-12-31 00:05:46
 
      1. -- kdf9.directors.adb
      2. --
@@ -23504,662 +23504,512 @@ Compiled at: 2020-12-30 00:11:33
     22. with HCI;
     23. with host_IO;
     24. with IOC;
-    25. with IOC.dispatcher;
-    26. with IOC.equipment;
-    27. with IOC.fast.DR.OUTs;
-    28. with IOC.fast.FD.OUTs;
-    29. with IOC.fast.MT.OUTs;
-    30. with IOC.slow.shift.FW;
-    31. with IOC.slow.shift.SI;
-    32. with IOC.slow.shift.TR;
-    33. with KDF9_char_sets;
-    34. with KDF9.CPU;
-    35. with KDF9.store;
-    36. with logging.file;
-    37. with settings;
-    38. with state_display;
-    39. with tracing;
-    40.
-    41. with environmental_value_of;
-    42.
-    43. use  dumping;
-    44. use  exceptions;
-    45. use  formatting;
-    46. use  HCI;
-    47. use  host_IO;
-    48. use  IOC;
-    49. use  IOC.dispatcher;
-    50. use  IOC.equipment;
-    51. use  IOC.fast.DR.OUTs;
-    52. use  IOC.fast.FD.OUTs;
-    53. use  IOC.fast.MT.OUTs;
-    54. use  IOC.slow.shift.FW;
-    55. use  IOC.slow.shift.SI;
-    56. use  IOC.slow.shift.TR;
-    57. use  KDF9_char_sets;
-    58. use  KDF9.store;
-    59. use  logging.file;
-    60. use  settings;
-    61. use  state_display;
-    62. use  tracing;
-    63.
-    64. package body KDF9.Directors is
-    65.
-    66.    -- This is the actual wall clock time at which the program was loaded.
-    67.    -- If signature hashing is enabled, it stays at zero to get a repeatable hash.
-    68.    the_time_of_loading : KDF9.us := 0;
-    69.
-    70.    -- Set the base for virtual elapsed time reckoning.
-    71.    procedure set_the_time_of_loading (the_time : in KDF9.us) is
-    72.    begin
-    73.       the_time_of_loading := the_time;
-    74.    end set_the_time_of_loading;
-    75.
-    76.    function destination_device_for (the_stream : KDF9.word)
-    77.    return IOC.device_number is
-    78.    begin
-    79.       case the_stream is
-    80.          when 8#00# =>
-    81.             return 0;
-    82.          when 8#10# |8#12# |8#14# | 8#16# =>
-    83.             return TP0_number;
-    84.          when 8#11# |8#13# |8#15# | 8#17# =>
-    85.             return TP1_number;
-    86.          when 8#30#..8#37# =>
-    87.             return LP0_number;
-    88.          when 8#50#..8#57# =>
-    89.             return TP1_number;
-    90.          when 8#70#..8#77# =>
-    91.             return LP0_number;
-    92.          when others =>
-    93.             fail_OUT(8, "invalid stream #" & oct_of(the_stream));
-    94.       end case;
-    95.    end destination_device_for;
-    96.
-    97.    -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
-    98.    procedure do_TSD_IO (this_OUT : in KDF9.word) is
-    99.
-   100.       the_stream : KDF9.word;
-   101.       Q, G       : KDF9.Q_register;
+    25. with IOC.equipment;
+    26. with IOC.fast.DR.OUTs;
+    27. with IOC.fast.FD.OUTs;
+    28. with IOC.fast.MT.OUTs;
+    29. with IOC.slow.shift.SI;
+    30. with IOC.slow.shift.TR;
+    31. with KDF9_char_sets;
+    32. with KDF9.CPU;
+    33. with KDF9.store;
+    34. with logging.file;
+    35. with settings;
+    36. with state_display;
+    37. with tracing;
+    38.
+    39. with environmental_value_of;
+    40. with KDF9.Directors.do_TSD_IO;
+    41.
+    42. use  dumping;
+    43. use  exceptions;
+    44. use  formatting;
+    45. use  HCI;
+    46. use  host_IO;
+    47. use  IOC;
+    48. use  IOC.equipment;
+    49. use  IOC.fast.DR.OUTs;
+    50. use  IOC.fast.FD.OUTs;
+    51. use  IOC.fast.MT.OUTs;
+    52. use  IOC.slow.shift.SI;
+    53. use  IOC.slow.shift.TR;
+    54. use  KDF9_char_sets;
+    55. use  KDF9.store;
+    56. use  logging.file;
+    57. use  settings;
+    58. use  state_display;
+    59. use  tracing;
+    60.
+    61. package body KDF9.Directors is
+    62.
+    63.    -- This is the actual wall clock time at which the program was loaded.
+    64.    -- If signature hashing is enabled, it stays at zero to get a repeatable hash.
+    65.    the_time_of_loading : KDF9.us := 0;
+    66.
+    67.    -- Set the base for virtual elapsed time reckoning.
+    68.    procedure set_the_time_of_loading (the_time : in KDF9.us) is
+    69.    begin
+    70.       the_time_of_loading := the_time;
+    71.    end set_the_time_of_loading;
+    72.
+    73.    -- is_free_for_explicit_allocation keepa a note of explicitly requested allocations by OUT 5.
+    74.    -- Allocations by OUT 8 emulation prevent LIVs on the the pseudo-spooled devices.
+    75.    -- These internal allocations by OUT 8 must not cause a reservation by OUT 5 to fail.
+    76.
+    77.    is_free_for_explicit_allocation : array(KDF9.buffer_number) of Boolean := (others => True);
+    78.
+    79.    procedure set_ancestor_to_rest (OUT_number : in KDF9.word) is
+    80.    begin
+    81.       if the_log_is_wanted and pre_overlay_state_is_enabled then
+    82.          show_final_state("before overlay by OUT" & OUT_number'Image);
+    83.       end if;
+    84.
+    85.       if the_log_is_wanted and nr_of_post_dumping_areas /= 0 then
+    86.          log_new_line;
+    87.          log_rule;
+    88.          log_title("Post-run Dump:");
+    89.          print_postrun_dump_areas;
+    90.       end if;
+    91.
+    92.       remove_prerun_dump_areas;
+    93.       remove_postrun_dump_areas;
+    94.
+    95.       clear_retro_FIFO;
+    96.       clear_IOC_FIFO;
+    97.       clear_the_histogram;
+    98.       clear_the_profile;
+    99.       the_profile_is_wanted := False;
+   100.       the_INS_plot_is_wanted := False;
+   101.    end set_ancestor_to_rest;
    102.
-   103.       procedure prepare_output_to_FW0 is
-   104.          message_prefix  : constant KDF9.word := 8#02_06_21_55_22_00_07_77#; -- LS CS [ m ] SP CN Ø
-   105.          prompt_prefix   : constant KDF9.word := 8#02_06_21_61_22_00_07_77#; -- LS CS [ q ] SP CN Ø
-   106.          OUT_16_prefix   : constant KDF9.word := 8#02_07_56_33_00_77_77_77#; -- LS CN N º SP Ø  Ø Ø
-   107.          filler_in_D0_D5 : constant KDF9.word := 8#77_00_00_00_00_00_00_00#; -- Ø
-   108.          s               : KDF9_char_sets.symbol := KDF9_char_sets.Word_Filler;
-   109.          the_prefix      : KDF9.word;
-   110.       begin  -- prepare_output_to_FW0
-   111.          -- The logic of FW streams is rather complex, to preserve the layout of the typescript.
-   112.          -- There are three significant aspects.
-   113.
-   114.          -- 1. The message is truncated if longer than 8 words.
-   115.          if Q.M - Q.I > 8 then
-   116.             Q.M := Q.I + 8;
-   117.          end if;
-   118.
-   119.          -- 2. It must not contain LS or HT;
-   120.          --       nor ';' in the last word;
-   121.          --          nor ';' other than in character 7;
-   122.          --    but anything after an End Message can safely be ignored.
-   123.          word_loop: for w in Q.I+1 .. Q.M loop
-   124.              for c in KDF9_char_sets.symbol_index'Range loop
-   125.                 s := fetch_symbol(w, c);
-   126.                 if s = KDF9_char_sets.Line_Shift                                 or else
-   127.                       s = KDF9_char_sets.Tabulation                              or else
-   128.                          ((s = KDF9_char_sets.Semi_Colon) and (c /= 7 or  w = Q.M)) then
-   129.                    fail_OUT(this_OUT, "invalid data for OUT 8 to FW");
-   130.                 end if;
-   131.          exit word_loop when s = KDF9_char_sets.Semi_Colon or s = KDF9_char_sets.End_Message;
-   132.              end loop;
-   133.          end loop word_loop;
-   134.
-   135.          the_prefix := (if s = KDF9_char_sets.Semi_Colon then prompt_prefix else message_prefix);
-   136.          the_prefix := (if this_OUT = 16                 then OUT_16_prefix else the_prefix);
-   137.
-   138.          -- 3. The Director takes a new line for each OUT 8 message to the FW.
-   139.          -- It sets up the format effector(s) in the first word of the OUT 8 area.
-   140.          declare
-   141.             package FW renames IOC.slow.shift.FW;
-   142.             the_FW : FW.device renames FW.device(buffer(0).all);
-   143.          begin
-   144.             if a_LF_was_just_read(the_FW) then
-   145.                -- Replace the redundant Line Shift with a Word Filler character.
-   146.                store_word(the_prefix or filler_in_D0_D5, Q.I);
-   147.             else
-   148.                -- The initial Line Shift is needed.
-   149.                store_word(the_prefix, Q.I);
-   150.             end if;
-   151.          end;
-   152.       end prepare_output_to_FW0;
-   153.
-   154.       page_change : constant := 8#77_77_77_77_77_77_77_03#;  --  LP Page Change character
-   155.
-   156.    begin  -- do_TSD_IO
-   157.       ensure_that_the_nest_holds_an_operand;
-   158.       Q := as_Q(pop);  -- the N2 parameter
-   159.       the_trace_operand := as_word(Q);
-   160.
-   161.       -- A FW query has D0 of the control word set.
-   162.       if (Q.C and 8#1_00000#) /= 0 then
-   163.          Q.C := 0;
-   164.       end if;
-   165.
-   166.       --
-   167.          -- OUT 8 'output spooling'.
-   168.       --
-   169.
-   170.       if Q.C = Q.I and Q.I = Q.M then
-   171.          -- The N2 parameter specifies stream closure.
-   172.          flush(buffer(destination_device_for(KDF9.word(Q.C))).all);
-   173.          return;
-   174.       end if;
-   175.
-   176.       -- The Q = N2 parameter specifies a block starting with the stream number.
-   177.       check_address_and_lockout(Q.I);
-   178.       the_stream := fetch_word(Q.I);
-   179.       Q.C := destination_device_for(the_stream);
-   180.       set_state_of(buffer(Q.C), allocated => True);
-   181.       check_address_and_lockout(Q.I+1);
-   182.       G := as_Q(fetch_word(Q.I+1));
+   103.    procedure prepare_successor is
+   104.    begin
+   105.       poke_all_amendments;
+   106.       save_the_initial_jump;
+   107.
+   108.       the_program_has_been_analysed := False;
+   109.       show_all_prerun_dump_areas;
+   110.
+   111.       -- Setting NIA must follow loading, as it fetches E0 into the IWBs.
+   112.       set_NIA_to((0, 0));
+   113.       the_V_bit_is_set := False;
+   114.       the_T_bit_is_set := False;
+   115.    end prepare_successor;
+   116.
+   117.    procedure complete_TSD_OUT_2 (time_limit : in KDF9.word) is
+   118.    begin
+   119.       set_ancestor_to_rest(OUT_number => 2);
+   120.       log_API_message("OUT 2: ICR ="
+   121.                     & ICR'Image
+   122.                     & "; RAN/EL ="
+   123.                     & the_CPU_time'Image
+   124.                     & " /"
+   125.                     & KDF9.us'Image(the_clock_time)
+   126.                     & " KDF9 us"
+   127.                     & "; new time limit = "
+   128.                     & KDF9.word'Image(time_limit/2**24) &"s"
+   129.                      );
+   130.
+   131.       get_settings_from_file("2");
+   132.       install_GP0;
+   133.       prepare_successor;
+   134.       store_halfword(time_limit, 1, 0);
+   135.       store_halfword((KDF9.word'(max_address)) * 2**24, 1, 1);
+   136.
+   137.       log_new_line;
+   138.       display_execution_modes;
+   139.       reset_the_program_state;
+   140.    end complete_TSD_OUT_2;
+   141.
+   142.    procedure overlay_a_new_program (program_name : in String) is
+   143.       overlay : constant String := environmental_value_of("KDF9_BINARY", default => "Binary")
+   144.                                  & "/"
+   145.                                  & program_name;
+   146.       W : KDF9.word;
+   147.    begin
+   148.       if program_name = "" then
+   149.          fail_OUT(1, "the given program name is an empty string");
+   150.       end if;
+   151.
+   152.       if program_name = "KMW0201--UPU" then
+   153.          -- The Whetstone Controller is trying to overlay itself with the Translator.
+   154.          -- This is so inconvenient in practice that I simply prevent it.
+   155.          notify_termination;
+   156.          log_API_message("OUT 1: ee9 will not return to the Whetstone Translator",
+   157.                          skip => 2
+   158.                         );
+   159.          raise program_exit;
+   160.       end if;
+   161.
+   162.       complete_all_extant_transfers;  -- To get an accurate elapsed time.
+   163.       is_free_for_explicit_allocation := (others => True);
+   164.       set_ancestor_to_rest(OUT_number => 1);
+   165.       log_API_message("OUT 1: ICR ="
+   166.                     & ICR'Image
+   167.                     & "; RAN/EL ="
+   168.                     & the_CPU_time'Image
+   169.                     & " /"
+   170.                     & KDF9.us'Image(the_clock_time)
+   171.                     & " KDF9 us"
+   172.                      );
+   173.
+   174.       if the_external_trace_is_enabled then
+   175.          log_new_line(the_external_trace_file);
+   176.          log(the_external_trace_file, "ee9: Running overlay " & overlay);
+   177.          log_new_line(the_external_trace_file);
+   178.          log_an_external_trace_header;
+   179.       end if;
+   180.
+   181.       get_settings_from_file("2");
+   182.       install_GP0;
    183.
-   184.       -- See the Manual, §12.6.1.
-   185.       if G.C = 4095 and then G.I = 8#177777# then
-   186.          -- The G parameter specifies output of a 'gap' suitable for the device.
-   187.          the_trace_operand := as_word(G);
-   188.          if G.M = 0 then
-   189.             return;
-   190.          end if;
-   191.          G.M := (if G.M in 1 .. 511 then G.M else 120);
-   192.          if destination_device_for(the_stream) = 0 then
-   193.             null;  -- What else could be done; fail?
-   194.          elsif destination_device_for(the_stream) in TP0_number | TP1_number then
-   195.             POE((Q.C, 0, G.M), False);   -- Write gap.
-   196.          elsif destination_device_for(the_stream) = LP0_number then
-   197.             store_word(page_change, Q.I);
-   198.             POA((Q.C, Q.I, Q.I), False); -- Write PC.
-   199.          else
-   200.             fail_OUT(8, "cannot gap on device #" & oct_of(destination_device_for(the_stream)));
-   201.          end if;
-   202.          return;
-   203.       end if;
-   204.
-   205.       if Q.M <= Q.I then
-   206.          fail_OUT(8, "invalid M-part #" & oct_of(Q.M));
-   207.       end if;
-   208.
-   209.       if Q.C /= 0 then
-   210.          -- For non-FW streams, the first word of the OUT 8 area is not transferred.
-   211.          Q.I := Q.I + 1;
-   212.       else
-   213.          -- The logic for FW streams is more complex, to preserve the layout of the typescript.
-   214.          prepare_output_to_FW0;
-   215.       end if;
-   216.       POB(Q, False);
-   217.
-   218.    exception
-   219.       when host_IO.end_of_stream =>
-   220.          fail_OUT(8, "unexpected end of file for stream #" & oct_of(KDF9.Q_part(the_stream)));
-   221.    end do_TSD_IO;
-   222.
-   223.    -- is_free_for_explicit_allocation keepa a note of explicitly requested allocations by OUT 5.
-   224.    -- Allocations by OUT 8 emulation prevent LIVs on the the pseudo-spooled devices.
-   225.    -- These internal allocations by OUT 8 must not cause a reservation by OUT 5 to fail.
-   226.
-   227.    is_free_for_explicit_allocation : array(KDF9.buffer_number) of Boolean := (others => True);
-   228.
-   229.    procedure set_ancestor_to_rest (OUT_number : in KDF9.word) is
-   230.    begin
-   231.       if the_log_is_wanted and pre_overlay_state_is_enabled then
-   232.          show_final_state("before overlay by OUT" & OUT_number'Image);
-   233.       end if;
-   234.
-   235.       if the_log_is_wanted and nr_of_post_dumping_areas /= 0 then
-   236.          log_new_line;
-   237.          log_rule;
-   238.          log_title("Post-run Dump:");
-   239.          print_postrun_dump_areas;
-   240.       end if;
-   241.
-   242.       remove_prerun_dump_areas;
-   243.       remove_postrun_dump_areas;
-   244.
-   245.       clear_retro_FIFO;
-   246.       clear_IOC_FIFO;
-   247.       clear_the_histogram;
-   248.       clear_the_profile;
-   249.       the_profile_is_wanted := False;
-   250.       the_INS_plot_is_wanted := False;
-   251.    end set_ancestor_to_rest;
-   252.
-   253.    procedure prepare_successor is
-   254.    begin
-   255.       poke_all_amendments;
-   256.       save_the_initial_jump;
-   257.
-   258.       the_program_has_been_analysed := False;
-   259.       show_all_prerun_dump_areas;
-   260.
-   261.       -- Setting NIA must follow loading, as it fetches E0 into the IWBs.
-   262.       set_NIA_to((0, 0));
-   263.       the_V_bit_is_set := False;
-   264.       the_T_bit_is_set := False;
-   265.    end prepare_successor;
-   266.
-   267.    procedure complete_TSD_OUT_2 (time_limit : in KDF9.word) is
-   268.    begin
-   269.       set_ancestor_to_rest(OUT_number => 2);
-   270.       log_API_message("OUT 2: ICR ="
-   271.                     & ICR'Image
-   272.                     & "; RAN/EL ="
-   273.                     & the_CPU_time'Image
-   274.                     & " /"
-   275.                     & KDF9.us'Image(the_clock_time)
-   276.                     & " KDF9 us"
-   277.                     & "; new time limit = "
-   278.                     & KDF9.word'Image(time_limit/2**24) &"s"
-   279.                      );
-   280.
-   281.       get_settings_from_file("2");
-   282.       install_GP0;
-   283.       prepare_successor;
-   284.       store_halfword(time_limit, 1, 0);
-   285.       store_halfword((KDF9.word'(max_address)) * 2**24, 1, 1);
-   286.
-   287.       log_new_line;
-   288.       display_execution_modes;
-   289.       reset_the_program_state;
-   290.    end complete_TSD_OUT_2;
-   291.
-   292.    procedure overlay_a_new_program (program_name : in String) is
-   293.       overlay : constant String := environmental_value_of("KDF9_BINARY", default => "Binary")
-   294.                                  & "/"
-   295.                                  & program_name;
-   296.       W : KDF9.word;
-   297.    begin
-   298.       if program_name = "" then
-   299.          fail_OUT(1, "the given program name is an empty string");
-   300.       end if;
-   301.
-   302.       if program_name = "KMW0201--UPU" then
-   303.          -- The Whetstone Controller is trying to overlay itself with the Translator.
-   304.          -- This is so inconvenient in practice that I simply prevent it.
-   305.          notify_termination;
-   306.          log_API_message("OUT 1: ee9 will not return to the Whetstone Translator",
-   307.                          skip => 2
-   308.                         );
-   309.          raise program_exit;
-   310.       end if;
-   311.
-   312.       complete_all_extant_transfers;  -- To get an accurate elapsed time.
-   313.       is_free_for_explicit_allocation := (others => True);
-   314.       set_ancestor_to_rest(OUT_number => 1);
-   315.       log_API_message("OUT 1: ICR ="
-   316.                     & ICR'Image
-   317.                     & "; RAN/EL ="
-   318.                     & the_CPU_time'Image
-   319.                     & " /"
-   320.                     & KDF9.us'Image(the_clock_time)
-   321.                     & " KDF9 us"
-   322.                      );
-   323.
-   324.       if the_external_trace_is_enabled then
-   325.          log_new_line(the_external_trace_file);
-   326.          log(the_external_trace_file, "ee9: Running overlay " & overlay);
-   327.          log_new_line(the_external_trace_file);
-   328.          log_an_external_trace_header;
-   329.       end if;
-   330.
-   331.       get_settings_from_file("2");
-   332.       install_GP0;
-   333.
-   334.       log_new_line;
-   335.       display_execution_modes(overlay);
-   336.
-   337.       W := fetch_word(1);
-   338.       load_a_program(program_file_name => overlay);
-   339.       store_word(W, 1);
-   340.
-   341.       prepare_successor;
-   342.       raise mode_change_request;
-   343.    end overlay_a_new_program;
-   344.
-   345.
-   346.    -- These are the device-type codes to be given when requesting
-   347.    --    the allocation of a peripheral with TSD OUT 5,
-   348.    --       according to the Manual and the document:
-   349.    --          "Service Routine Library Manual" §22.13, p22-28-0.
-   350.
-   351.    FW_OUT5_code : constant := 0;
-   352.    TP_OUT5_code : constant := 1;
-   353.    TR_OUT5_code : constant := 2;
-   354.    LP_OUT5_code : constant := 3;
-   355.    CR_OUT5_code : constant := 4;
-   356.    FP_OUT5_code : constant := 5;      -- Ferranti 5-channel Tape punch
-   357.    CP_OUT5_code : constant := 7;
-   358.    GP_OUT5_code : constant := 8#20#;
-   359.    SI_OUT5_code : constant := 8#21#;  -- Standard Interface, "Data Link, N.P.L. Special Buffer"
-   360.    FE_OUT5_code : constant := 8#65#;  -- Tape buffer link for PDP-8 on Eldon2, and perhaps COTAN
-   361.    UT_OUT5_code : constant := 8#67#;  -- Unlabelled Tape
-   362.
-   363.    procedure select_the_next_device_from_among
-   364.       (device_A, device_B : in  KDF9.buffer_number;
-   365.        wanted_device_type : in  KDF9.word;
-   366.        chosen_device      : out KDF9.buffer_number) is
-   367.    begin
-   368.       if device_A /= 0                            and then
-   369.             is_free_for_explicit_allocation(device_A) then
-   370.          chosen_device := device_A;
-   371.          is_free_for_explicit_allocation(device_A) := False;
-   372.       elsif device_B /= 0                         and then
-   373.             is_free_for_explicit_allocation(device_B) then
-   374.          chosen_device := device_B;
-   375.          is_free_for_explicit_allocation(device_B) := False;
-   376.       else
-   377.          fail_OUT(5, "there is no available device of type #" & oct_of(wanted_device_type));
-   378.       end if;
-   379.    end select_the_next_device_from_among;
+   184.       log_new_line;
+   185.       display_execution_modes(overlay);
+   186.
+   187.       W := fetch_word(1);
+   188.       load_a_program(program_file_name => overlay);
+   189.       store_word(W, 1);
+   190.
+   191.       prepare_successor;
+   192.       raise mode_change_request;
+   193.    end overlay_a_new_program;
+   194.
+   195.
+   196.    -- These are the device-type codes to be given when requesting
+   197.    --    the allocation of a peripheral with TSD OUT 5,
+   198.    --       according to the Manual and the document:
+   199.    --          "Service Routine Library Manual" §22.13, p22-28-0.
+   200.
+   201.    FW_OUT5_code : constant := 0;
+   202.    TP_OUT5_code : constant := 1;
+   203.    TR_OUT5_code : constant := 2;
+   204.    LP_OUT5_code : constant := 3;
+   205.    CR_OUT5_code : constant := 4;
+   206.    FP_OUT5_code : constant := 5;      -- Ferranti 5-channel Tape punch
+   207.    CP_OUT5_code : constant := 7;
+   208.    GP_OUT5_code : constant := 8#20#;
+   209.    SI_OUT5_code : constant := 8#21#;  -- Standard Interface, "Data Link, N.P.L. Special Buffer"
+   210.    FE_OUT5_code : constant := 8#65#;  -- Tape buffer link for PDP-8 on Eldon2, and perhaps COTAN
+   211.    UT_OUT5_code : constant := 8#67#;  -- Unlabelled Tape
+   212.
+   213.    procedure select_the_next_device_from_among
+   214.       (device_A, device_B : in  KDF9.buffer_number;
+   215.        wanted_device_type : in  KDF9.word;
+   216.        chosen_device      : out KDF9.buffer_number) is
+   217.    begin
+   218.       if device_A /= 0                            and then
+   219.             is_free_for_explicit_allocation(device_A) then
+   220.          chosen_device := device_A;
+   221.          is_free_for_explicit_allocation(device_A) := False;
+   222.       elsif device_B /= 0                         and then
+   223.             is_free_for_explicit_allocation(device_B) then
+   224.          chosen_device := device_B;
+   225.          is_free_for_explicit_allocation(device_B) := False;
+   226.       else
+   227.          fail_OUT(5, "there is no available device of type #" & oct_of(wanted_device_type));
+   228.       end if;
+   229.    end select_the_next_device_from_among;
+   230.
+   231.    procedure allocate_a_device is
+   232.       B : KDF9.buffer_number;
+   233.       W : KDF9.word;
+   234.    begin
+   235.       ensure_that_the_nest_holds_an_operand;
+   236.       W := read_top;
+   237.
+   238.       case W is
+   239.          -- 8 was added to the code to pre-allocate a device.
+   240.          -- I treat pre-allocating and allocating the same way here.
+   241.          when FW_OUT5_code
+   242.             | FW_OUT5_code+8 =>
+   243.             B := 0;  -- Always allowed, no checking performed.
+   244.          when TP_OUT5_code
+   245.             | TP_OUT5_code+8
+   246.             | FP_OUT5_code
+   247.             | FP_OUT5_code+8 =>
+   248.             select_the_next_device_from_among(TP0_number, TP1_number, W, B);
+   249.          when TR_OUT5_code
+   250.             | TR_OUT5_code+8 =>
+   251.             -- N.B. the TR devices must appear in this order.
+   252.             -- TR0 is used for reading the bootstrap/problem program in KDF9 code.
+   253.             -- When there is Latin-1 data it therefore needs to go in via TR1.
+   254.             select_the_next_device_from_among(TR1_number, TR0_number, W, B);
+   255.             set_case(IOC.slow.shift.TR.device(buffer(B).all));
+   256.          when LP_OUT5_code
+   257.             | LP_OUT5_code+8 =>
+   258.             select_the_next_device_from_among(LP0_number, LP1_number, W, B);
+   259.          when CR_OUT5_code
+   260.             | CR_OUT5_code+8 =>
+   261.             select_the_next_device_from_among(CR0_number, CR1_number, W, B);
+   262.          when CP_OUT5_code
+   263.             | CP_OUT5_code+8 =>
+   264.             select_the_next_device_from_among(CP0_number, CP1_number, W, B);
+   265.          when GP_OUT5_code
+   266.             | GP_OUT5_code+8 =>
+   267.             -- There is only 1 graph plotter.
+   268.             the_graph_plotter_is_enabled := True;
+   269.             install_GP0;
+   270.             select_the_next_device_from_among(GP0_number, GP0_number, W, B);
+   271.          when SI_OUT5_code =>
+   272.             if SI0_is_enabled then
+   273.                select_the_next_device_from_among(SI0_number, SI1_number, W, B);
+   274.             else
+   275.                fail_OUT(5, "the SI buffer has not been enabled");
+   276.             end if;
+   277.          when FE_OUT5_code =>
+   278.             trap_unimplemented_feature("PDP-8 Front End Tape buffers");
+   279.          when UT_OUT5_code =>
+   280.             trap_unimplemented_feature("Unlabelled Tape buffers");
+   281.          when others =>
+   282.             fail_OUT(5, "unknown device type" & W'Image);
+   283.       end case;
+   284.
+   285.       pop;
+   286.       push(KDF9.word(B));
+   287.       the_trace_operand := KDF9.word(B);
+   288.       set_state_of(buffer(B), allocated => True);
+   289.
+   290.       if buffer(B).all in IOC.slow.shift.device'Class and then
+   291.             buffer(B).kind /= GP_kind                     then
+   292.          log_API_message("OUT 5: requested a device of type #"
+   293.                        & oct_of(KDF9.Q_part(W), 2)
+   294.                        & " and got "
+   295.                        & device_name_of(buffer(B).all)
+   296.                        & " on buffer #"
+   297.                        & oct_of(B, 2)
+   298.                        & ", using "
+   299.                        & (
+   300.                           if IOC.slow.shift.device(buffer(B).all).uses_Latin_1 then
+   301.                              "Latin-1"
+   302.                           else
+   303.                              "KDF9"
+   304.                          )
+   305.                        & " code"
+   306.                         );
+   307.       else
+   308.          log_API_message("OUT 5: requested a device of type #"
+   309.                        & oct_of(KDF9.Q_part(W), 2)
+   310.                        & " and got "
+   311.                        & device_name_of(buffer(B).all)
+   312.                        & " on buffer #"
+   313.                        & oct_of(B, 2)
+   314.                         );
+   315.       end if;
+   316.    end allocate_a_device;
+   317.
+   318.    procedure deallocate_a_verified_device (OUT_number : in KDF9.word; B : in KDF9.buffer_number) is
+   319.    begin
+   320.       if buffer(B).kind in MT_kind | ST_kind then
+   321.          if needs_rewinding(b) then
+   322.             PMD(buffer(B).all, KDF9.Q_register'(B, 0, 0), set_offline => (OUT_number = 6));
+   323.          end if;
+   324.       elsif OUT_number = 7 then
+   325.          fail_OUT(7, "device #" & oct_of(B, 2) & ", is not a tape deck");
+   326.       end if;
+   327.       set_state_of(buffer(B), allocated => False);
+   328.       is_free_for_explicit_allocation(B) := True;
+   329.       log_API_message("OUT" & OUT_number'Image & ": released " & device_name_of(buffer(B).all));
+   330.    end deallocate_a_verified_device;
+   331.
+   332.    procedure deallocate_a_device (OUT_number : in KDF9.word) is
+   333.       B : KDF9.Q_part;
+   334.    begin
+   335.       ensure_that_the_nest_holds_an_operand;
+   336.       the_trace_operand := pop;
+   337.       if the_trace_operand > 15 then
+   338.          notify_termination;
+   339.          fail_OUT(OUT_number, "#" & oct_of(the_trace_operand) & " is not a valid buffer number");
+   340.       end if;
+   341.       B := KDF9.buffer_number(the_trace_operand);
+   342.       if is_unallocated(buffer(B)) then
+   343.          fail_OUT(OUT_number, "device #" & oct_of(B, 2) & " is not allocated to this program");
+   344.       end if;
+   345.       deallocate_a_verified_device(OUT_number, B);
+   346.    end deallocate_a_device;
+   347.
+   348.    procedure dispose_all_allocated_tapes (OUT_number : in KDF9.word) is
+   349.    begin
+   350.       for b in KDF9.buffer_number loop
+   351.          if buffer(b) /= null                      and then
+   352.                buffer(b).kind in MT_kind | ST_kind and then
+   353.                   is_allocated(buffer(b))              then
+   354.             deallocate_a_verified_device(OUT_number, b);
+   355.          end if;
+   356.       end loop;
+   357.    end dispose_all_allocated_tapes;
+   358.
+   359.    -- Return a time in µs as 48-bit seconds to 23 integral places.
+   360.    function OUT_time (microseconds : KDF9.us)
+   361.    return KDF9.word is
+   362.       -- The time was recorded by the hardware in units of 32 us, not 1 us.
+   363.       truncated_time : constant KDF9.us := microseconds and not 31;
+   364.    begin
+   365.       if truncated_time < 2**23 * 1E6 then
+   366.          -- 2**18 / 15625 = 2**24 / 1E6, with no risk of overflow in 64 bits.
+   367.          return KDF9.word(truncated_time * 2**18 / 15625);
+   368.       else
+   369.          -- The virtual elapsed time overflows the 23-bit seconds field.
+   370.          -- This would never have happened to a real KDF9, as 2**23 seconds is over three months.
+   371.          -- No KDF9 could stay up that long!
+   372.          -- However 2**23 KDF9 seconds pass in about 5 hours of ee9 real time,
+   373.          --    so precautions have to be taken.
+   374.          raise emulation_failure with "the KDF9 has been running too long, time > 2**23 seconds";
+   375.       end if;
+   376.    end OUT_time;
+   377.
+   378.    -- Emulate a subset of the Time Sharing Director's OUT API.
+   379.    procedure do_a_TSD_OUT (OUT_number : in KDF9.word) is
    380.
-   381.    procedure allocate_a_device is
-   382.       B : KDF9.buffer_number;
-   383.       W : KDF9.word;
+   381.       P : KDF9.pair;
+   382.       W : KDF9.word;
+   383.
    384.    begin
-   385.       ensure_that_the_nest_holds_an_operand;
-   386.       W := read_top;
-   387.
-   388.       case W is
-   389.          -- 8 was added to the code to pre-allocate a device.
-   390.          -- I treat pre-allocating and allocating the same way here.
-   391.          when FW_OUT5_code
-   392.             | FW_OUT5_code+8 =>
-   393.             B := 0;  -- Always allowed, no checking performed.
-   394.          when TP_OUT5_code
-   395.             | TP_OUT5_code+8
-   396.             | FP_OUT5_code
-   397.             | FP_OUT5_code+8 =>
-   398.             select_the_next_device_from_among(TP0_number, TP1_number, W, B);
-   399.          when TR_OUT5_code
-   400.             | TR_OUT5_code+8 =>
-   401.             -- N.B. the TR devices must appear in this order.
-   402.             -- TR0 is used for reading the bootstrap/problem program in KDF9 code.
-   403.             -- When there is Latin-1 data it therefore needs to go in via TR1.
-   404.             select_the_next_device_from_among(TR1_number, TR0_number, W, B);
-   405.             set_case(IOC.slow.shift.TR.device(buffer(B).all));
-   406.          when LP_OUT5_code
-   407.             | LP_OUT5_code+8 =>
-   408.             select_the_next_device_from_among(LP0_number, LP1_number, W, B);
-   409.          when CR_OUT5_code
-   410.             | CR_OUT5_code+8 =>
-   411.             select_the_next_device_from_among(CR0_number, CR1_number, W, B);
-   412.          when CP_OUT5_code
-   413.             | CP_OUT5_code+8 =>
-   414.             select_the_next_device_from_among(CP0_number, CP1_number, W, B);
-   415.          when GP_OUT5_code
-   416.             | GP_OUT5_code+8 =>
-   417.             -- There is only 1 graph plotter.
-   418.             the_graph_plotter_is_enabled := True;
-   419.             install_GP0;
-   420.             select_the_next_device_from_among(GP0_number, GP0_number, W, B);
-   421.          when SI_OUT5_code =>
-   422.             if SI0_is_enabled then
-   423.                select_the_next_device_from_among(SI0_number, SI1_number, W, B);
-   424.             else
-   425.                fail_OUT(5, "the SI buffer has not been enabled");
-   426.             end if;
-   427.          when FE_OUT5_code =>
-   428.             trap_unimplemented_feature("PDP-8 Front End Tape buffers");
-   429.          when UT_OUT5_code =>
-   430.             trap_unimplemented_feature("Unlabelled Tape buffers");
-   431.          when others =>
-   432.             fail_OUT(5, "unknown device type" & W'Image);
-   433.       end case;
-   434.
-   435.       pop;
-   436.       push(KDF9.word(B));
-   437.       the_trace_operand := KDF9.word(B);
-   438.       set_state_of(buffer(B), allocated => True);
-   439.
-   440.       if buffer(B).all in IOC.slow.shift.device'Class and then
-   441.             buffer(B).kind /= GP_kind                     then
-   442.          log_API_message("OUT 5: requested a device of type #"
-   443.                        & oct_of(KDF9.Q_part(W), 2)
-   444.                        & " and got "
-   445.                        & device_name_of(buffer(B).all)
-   446.                        & " on buffer #"
-   447.                        & oct_of(B, 2)
-   448.                        & ", using "
-   449.                        & (
-   450.                           if IOC.slow.shift.device(buffer(B).all).uses_Latin_1 then
-   451.                              "Latin-1"
-   452.                           else
-   453.                              "KDF9"
-   454.                          )
-   455.                        & " code"
-   456.                         );
-   457.       else
-   458.          log_API_message("OUT 5: requested a device of type #"
-   459.                        & oct_of(KDF9.Q_part(W), 2)
-   460.                        & " and got "
-   461.                        & device_name_of(buffer(B).all)
-   462.                        & " on buffer #"
-   463.                        & oct_of(B, 2)
-   464.                         );
-   465.       end if;
-   466.    end allocate_a_device;
-   467.
-   468.    procedure deallocate_a_verified_device (OUT_number : in KDF9.word; B : in KDF9.buffer_number) is
-   469.    begin
-   470.       if buffer(B).kind in MT_kind | ST_kind then
-   471.          if needs_rewinding(b) then
-   472.             PMD(buffer(B).all, KDF9.Q_register'(B, 0, 0), set_offline => (OUT_number = 6));
-   473.          end if;
-   474.       elsif OUT_number = 7 then
-   475.          fail_OUT(7, "device #" & oct_of(B, 2) & ", is not a tape deck");
-   476.       end if;
-   477.       set_state_of(buffer(B), allocated => False);
-   478.       is_free_for_explicit_allocation(B) := True;
-   479.       log_API_message("OUT" & OUT_number'Image & ": released " & device_name_of(buffer(B).all));
-   480.    end deallocate_a_verified_device;
+   385.       -- Dismiss the OUT number in N1, allowing for an empty NEST, treated as OUT 0.
+   386.       if the_nest_depth > 0 then
+   387.          pop;
+   388.       end if;
+   389.
+   390.       case OUT_number is
+   391.
+   392.          when 0 =>
+   393.             -- Terminate program.
+   394.             dispose_all_allocated_tapes(OUT_number => 0);
+   395.             notify_termination;
+   396.             log_API_message("OUT 0: end of run");
+   397.             raise program_exit;
+   398.
+   399.          when 1 =>
+   400.             -- Overlay a nominated program, retaining allocated I/O devices.
+   401.             ensure_that_the_nest_holds_2_operands;
+   402.             P := pop;
+   403.             P := CPU.shift_logical(P, 24);
+   404.             overlay_a_new_program(program_name => trimmed(to_string(P)));
+   405.
+   406.          when 2 =>
+   407.             -- Resume a program with a new time limit.
+   408.             ensure_that_the_nest_holds_an_operand;
+   409.             W := pop;
+   410.             the_trace_operand := W;
+   411.             dispose_all_allocated_tapes(OUT_number => 2);
+   412.             notify_termination;
+   413.             raise program_restart;
+   414.             -- complete_TSD_OUT_2 is called by KDF9.microcode
+   415.             --    after it has finalized the execution of the OUT instruction.
+   416.
+   417.          when 3 =>
+   418.             -- Get the virtual CPU time used, allowing for previous overlays.
+   419.             W := OUT_time(the_CPU_time);
+   420.             push(W);
+   421.             the_trace_operand := W;
+   422.
+   423.          when 4 =>
+   424.             do_TSD_OUT_4;
+   425.
+   426.          when 5 =>
+   427.             allocate_a_device;
+   428.
+   429.          when 6
+   430.             | 7 =>
+   431.             deallocate_a_device(OUT_number);
+   432.
+   433.          when 8 =>
+   434.             do_TSD_IO(this_OUT => 8);
+   435.
+   436.          when 9 =>
+   437.             -- Get the time of day, in seconds since midnight to 23 integral places.
+   438.             -- A TOD clock is simulated using the real TOD at which the program was
+   439.             --    loaded, and the virtual time that has elapsed since.
+   440.             W := OUT_time(the_time_of_loading + the_clock_time);
+   441.             push(W);
+   442.             the_trace_operand := W;
+   443.
+   444.          when 10 =>
+   445.             do_TSD_OUT_10;
+   446.
+   447.          when 11 =>
+   448.             do_TSD_OUT_11;
+   449.
+   450.          when 12 =>
+   451.             do_TSD_OUT_12;
+   452.
+   453.          when 13 =>
+   454.             do_TSD_OUT_13;
+   455.
+   456.          when 14 =>
+   457.             do_TSD_OUT_14;
+   458.
+   459.          when 16 =>
+   460.             do_TSD_IO(this_OUT => 16);
+   461.
+   462.          when 17 =>
+   463.             -- In program mode, the Notional Elapsed Time is the same thing as the_clock_time.
+   464.             ensure_that_the_nest_has_room_for_2_results;
+   465.             W := OUT_time(the_CPU_time);
+   466.             push(OUT_time(the_clock_time));
+   467.             push(W);
+   468.             the_trace_operand := W;
+   469.
+   470.          when 41 =>
+   471.             do_TSD_OUT_41;
+   472.
+   473.          when 42 =>
+   474.             do_TSD_OUT_42;
+   475.
+   476.          when 43 =>
+   477.             do_TSD_OUT_43;
+   478.
+   479.          when 44 =>
+   480.             do_TSD_OUT_44;
    481.
-   482.    procedure deallocate_a_device (OUT_number : in KDF9.word) is
-   483.       B : KDF9.Q_part;
-   484.    begin
-   485.       ensure_that_the_nest_holds_an_operand;
-   486.       the_trace_operand := pop;
-   487.       if the_trace_operand > 15 then
-   488.          notify_termination;
-   489.          fail_OUT(OUT_number, "#" & oct_of(the_trace_operand) & " is not a valid buffer number");
-   490.       end if;
-   491.       B := KDF9.buffer_number(the_trace_operand);
-   492.       if is_unallocated(buffer(B)) then
-   493.          fail_OUT(OUT_number, "device #" & oct_of(B, 2) & " is not allocated to this program");
-   494.       end if;
-   495.       deallocate_a_verified_device(OUT_number, B);
-   496.    end deallocate_a_device;
-   497.
-   498.    procedure dispose_all_allocated_tapes (OUT_number : in KDF9.word) is
-   499.    begin
-   500.       for b in KDF9.buffer_number loop
-   501.          if buffer(b) /= null                      and then
-   502.                buffer(b).kind in MT_kind | ST_kind and then
-   503.                   is_allocated(buffer(b))              then
-   504.             deallocate_a_verified_device(OUT_number, b);
-   505.          end if;
-   506.       end loop;
-   507.    end dispose_all_allocated_tapes;
-   508.
-   509.    -- Return a time in µs as 48-bit seconds to 23 integral places.
-   510.    function OUT_time (microseconds : KDF9.us)
-   511.    return KDF9.word is
-   512.       -- The time was recorded by the hardware in units of 32 us, not 1 us.
-   513.       truncated_time : constant KDF9.us := microseconds and not 31;
-   514.    begin
-   515.       if truncated_time < 2**23 * 1E6 then
-   516.          -- 2**18 / 15625 = 2**24 / 1E6, with no risk of overflow in 64 bits.
-   517.          return KDF9.word(truncated_time * 2**18 / 15625);
-   518.       else
-   519.          -- The virtual elapsed time overflows the 23-bit seconds field.
-   520.          -- This would never have happened to a real KDF9, as 2**23 seconds is over three months.
-   521.          -- No KDF9 could stay up that long!
-   522.          -- However 2**23 KDF9 seconds pass in about 5 hours of ee9 real time,
-   523.          --    so precautions have to be taken.
-   524.          raise emulation_failure with "the KDF9 has been running too long, time > 2**23 seconds";
-   525.       end if;
-   526.    end OUT_time;
-   527.
-   528.    -- Emulate a subset of the Time Sharing Director's OUT API.
-   529.    procedure do_a_TSD_OUT (OUT_number : in KDF9.word) is
-   530.
-   531.       P : KDF9.pair;
-   532.       W : KDF9.word;
-   533.
-   534.    begin
-   535.       -- Dismiss the OUT number in N1, allowing for an empty NEST, treated as OUT 0.
-   536.       if the_nest_depth > 0 then
-   537.          pop;
-   538.       end if;
-   539.
-   540.       case OUT_number is
-   541.
-   542.          when 0 =>
-   543.             -- Terminate program.
-   544.             dispose_all_allocated_tapes(OUT_number => 0);
-   545.             notify_termination;
-   546.             log_API_message("OUT 0: end of run");
-   547.             raise program_exit;
-   548.
-   549.          when 1 =>
-   550.             -- Overlay a nominated program, retaining allocated I/O devices.
-   551.             ensure_that_the_nest_holds_2_operands;
-   552.             P := pop;
-   553.             P := CPU.shift_logical(P, 24);
-   554.             overlay_a_new_program(program_name => trimmed(to_string(P)));
-   555.
-   556.          when 2 =>
-   557.             -- Resume a program with a new time limit.
-   558.             ensure_that_the_nest_holds_an_operand;
-   559.             W := pop;
-   560.             the_trace_operand := W;
-   561.             dispose_all_allocated_tapes(OUT_number => 2);
-   562.             notify_termination;
-   563.             raise program_restart;
-   564.             -- complete_TSD_OUT_2 is called by KDF9.microcode
-   565.             --    after it has finalized the execution of the OUT instruction.
-   566.
-   567.          when 3 =>
-   568.             -- Get the virtual CPU time used, allowing for previous overlays.
-   569.             W := OUT_time(the_CPU_time);
-   570.             push(W);
-   571.             the_trace_operand := W;
-   572.
-   573.          when 4 =>
-   574.             do_TSD_OUT_4;
-   575.
-   576.          when 5 =>
-   577.             allocate_a_device;
-   578.
-   579.          when 6
-   580.             | 7 =>
-   581.             deallocate_a_device(OUT_number);
-   582.
-   583.          when 8 =>
-   584.             do_TSD_IO(this_OUT => 8);
-   585.
-   586.          when 9 =>
-   587.             -- Get the time of day, in seconds since midnight to 23 integral places.
-   588.             -- A TOD clock is simulated using the real TOD at which the program was
-   589.             --    loaded, and the virtual time that has elapsed since.
-   590.             W := OUT_time(the_time_of_loading + the_clock_time);
-   591.             push(W);
-   592.             the_trace_operand := W;
-   593.
-   594.          when 10 =>
-   595.             do_TSD_OUT_10;
-   596.
-   597.          when 11 =>
-   598.             do_TSD_OUT_11;
-   599.
-   600.          when 12 =>
-   601.             do_TSD_OUT_12;
-   602.
-   603.          when 13 =>
-   604.             do_TSD_OUT_13;
-   605.
-   606.          when 14 =>
-   607.             do_TSD_OUT_14;
-   608.
-   609.          when 16 =>
-   610.             do_TSD_IO(this_OUT => 16);
-   611.
-   612.          when 17 =>
-   613.             -- In program mode, the Notional Elapsed Time is the same thing as the_clock_time.
-   614.             ensure_that_the_nest_has_room_for_2_results;
-   615.             W := OUT_time(the_CPU_time);
-   616.             push(OUT_time(the_clock_time));
-   617.             push(W);
-   618.             the_trace_operand := W;
-   619.
-   620.          when 41 =>
-   621.             do_TSD_OUT_41;
-   622.
-   623.          when 42 =>
-   624.             do_TSD_OUT_42;
-   625.
-   626.          when 43 =>
-   627.             do_TSD_OUT_43;
-   628.
-   629.          when 44 =>
-   630.             do_TSD_OUT_44;
-   631.
-   632.          when 45 =>
-   633.             do_TSD_OUT_45;
-   634.
-   635.          when 70 =>
-   636.             -- This is not a genuine TSD OUT, it is an expedient for debugging KAlgol,
-   637.             --   so ee9 simply erases its parameters from N1 and N2.
-   638.             ensure_that_the_nest_holds_2_operands;
-   639.             W := pop;
-   640.             the_trace_operand := W;
-   641.             W := pop;
-   642.
-   643.          when 98 =>
-   644.             -- This is not a genuine TSD OUT, it is an ee9 'OUT' for setting FW output format.
-   645.             ensure_that_the_nest_holds_an_operand;
-   646.             W := pop;
-   647.             the_trace_operand := W;
-   648.             realistic_FW_output_is_wanted := the_trace_operand /= 0;
-   649.
-   650.          when 99 =>
-   651.             -- This is not a genuine TSD OUT, it is an ee9 'OUT' for program instrumentation.
-   652.             -- Get present value of the Instruction Count Register (ICR) from within ee9.
-   653.             W := KDF9.word(ICR);
-   654.             push(W);
-   655.             the_trace_operand := W;
-   656.
-   657.          when others =>
-   658.             trap_unimplemented_feature("OUT" & OUT_number'Image);
-   659.
-   660.       end case;
-   661.
-   662.    end do_a_TSD_OUT;
-   663.
-   664.    -- Emulate a subset of the EGDON Director's OUT API.
-   665.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word) is
-   666.    begin
-   667.       trap_unimplemented_feature("EGDON OUTs are not yet supported");
-   668.    end do_an_EGDON_OUT;
-   669.
-   670.    -- Emulate a subset of some other Director's OUT API.
-   671.    procedure do_some_other_OUT (OUT_number : in KDF9.word) is
-   672.    begin
-   673.       trap_unimplemented_feature("this OUT is not yet supported");
-   674.    end do_some_other_OUT;
-   675.
-   676. end KDF9.Directors;
+   482.          when 45 =>
+   483.             do_TSD_OUT_45;
+   484.
+   485.          when 70 =>
+   486.             -- This is not a genuine TSD OUT, it is an expedient for debugging KAlgol,
+   487.             --   so ee9 simply erases its parameters from N1 and N2.
+   488.             ensure_that_the_nest_holds_2_operands;
+   489.             W := pop;
+   490.             the_trace_operand := W;
+   491.             W := pop;
+   492.
+   493.          when 98 =>
+   494.             -- This is not a genuine TSD OUT, it is an ee9 'OUT' for setting FW output format.
+   495.             ensure_that_the_nest_holds_an_operand;
+   496.             W := pop;
+   497.             the_trace_operand := W;
+   498.             realistic_FW_output_is_wanted := the_trace_operand /= 0;
+   499.
+   500.          when 99 =>
+   501.             -- This is not a genuine TSD OUT, it is an ee9 'OUT' for program instrumentation.
+   502.             -- Get present value of the Instruction Count Register (ICR) from within ee9.
+   503.             W := KDF9.word(ICR);
+   504.             push(W);
+   505.             the_trace_operand := W;
+   506.
+   507.          when others =>
+   508.             trap_unimplemented_feature("OUT" & OUT_number'Image);
+   509.
+   510.       end case;
+   511.
+   512.    end do_a_TSD_OUT;
+   513.
+   514.    -- Emulate a subset of the EGDON Director's OUT API.
+   515.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word) is
+   516.    begin
+   517.       trap_unimplemented_feature("this EGDON OUT is not yet supported");
+   518.    end do_an_EGDON_OUT;
+   519.
+   520.    -- Emulate a subset of some other Director's OUT API.
+   521.    procedure do_some_other_OUT (OUT_number : in KDF9.word) is
+   522.    begin
+   523.       trap_unimplemented_feature("this non-TSD OUT is not yet supported");
+   524.    end do_some_other_OUT;
+   525.
+   526. end KDF9.Directors;
 
 Compiling: ../Source/kdf9-directors.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- kdf9.directors.ads
      2. --
@@ -24198,7 +24048,7 @@ Compiled at: 2020-12-30 00:11:33
     35.
     36. end KDF9.Directors;
 
- 676 lines: No errors
+ 526 lines: No errors
 
 GNAT Community 2020 (20200429-84)
 Copyright 1992-2020, Free Software Foundation, Inc.
@@ -24206,7 +24056,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-tod_clock.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- kdf9-tod_clock.adb
      2. --
@@ -24292,7 +24142,7 @@ Compiled at: 2020-12-30 00:11:33
 
 Compiling: ../Source/kdf9-tod_clock.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- kdf9-tod_clock.ads
      2. --
@@ -24336,7 +24186,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/finalize_ee9.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:33
+Compiled at: 2020-12-31 00:05:46
 
      1. -- finalize_ee9.adb
      2. --
@@ -24383,7 +24233,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/postscript.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- postscript.adb
      2. --
@@ -24653,7 +24503,7 @@ Compiled at: 2020-12-30 00:11:34
 
 Compiling: ../Source/postscript.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- postscript.ads
      2. --
@@ -24746,7 +24596,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/settings-io.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- settings-IO.ads
      2. --
@@ -24958,7 +24808,7 @@ Compiled at: 2020-12-30 00:11:34
 
 Compiling: ../Source/settings-io.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- settings.IO.ads
      2. --
@@ -25032,7 +24882,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/generic_sets.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- generic_sets.adb
      2. --
@@ -25116,7 +24966,7 @@ Compiled at: 2020-12-30 00:11:34
 
 Compiling: ../Source/generic_sets.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- generic_sets.ads
      2. --
@@ -25187,7 +25037,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/kdf9-decoding.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- kdf9-decoding.ads
      2. --
@@ -25491,7 +25341,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-dispatcher.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- ioc-dispatcher.adb
      2. --
@@ -25766,7 +25616,7 @@ Compiled at: 2020-12-30 00:11:34
 
 Compiling: ../Source/ioc-dispatcher.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- ioc-dispatcher.ads
      2. --
@@ -25903,7 +25753,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/disassembly.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- disassembly.adb
      2. --
@@ -26536,7 +26386,7 @@ Compiled at: 2020-12-30 00:11:34
 
 Compiling: ../Source/disassembly.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:34
+Compiled at: 2020-12-31 00:05:47
 
      1. -- disassembly.ads
      2. --
@@ -26583,7 +26433,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-diagnostics.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- ioc-diagnostics.adb
      2. --
@@ -26676,7 +26526,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/file_interfacing.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- file_IO_interface.adb
      2. --
@@ -26723,7 +26573,7 @@ Compiled at: 2020-12-30 00:11:36
 
 Compiling: ../Source/file_interfacing.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- file_interfacing.ads
      2. --
@@ -26766,7 +26616,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/plotter.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- plotter.adb
      2. --
@@ -26975,7 +26825,7 @@ Compiled at: 2020-12-30 00:11:36
 
 Compiling: ../Source/plotter.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- plotter.ads
      2. --
@@ -27061,7 +26911,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-dr-outs.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- ioc-fast-dr-outs.adb
      2. --
@@ -27167,7 +27017,7 @@ Compiled at: 2020-12-30 00:11:36
 
 Compiling: ../Source/ioc-fast-dr-outs.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:36
+Compiled at: 2020-12-31 00:05:49
 
      1. -- ioc-fast-dr-outs.ads
      2. --
@@ -27207,7 +27057,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-fd-outs.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:37
+Compiled at: 2020-12-31 00:05:49
 
      1. -- ioc.fast-fd-outs.adb
      2. --
@@ -27429,7 +27279,7 @@ Compiled at: 2020-12-30 00:11:37
 
 Compiling: ../Source/ioc-fast-fd-outs.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:37
+Compiled at: 2020-12-31 00:05:49
 
      1. -- ioc.fast-fd-outs.ads
      2. --
@@ -27473,7 +27323,7 @@ Copyright 1992-2020, Free Software Foundation, Inc.
 
 Compiling: /Users/wf/KDF9/emulation/Source/ioc-fast-mt-outs.adb
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:37
+Compiled at: 2020-12-31 00:05:50
 
      1. -- ioc-fast-mt-outs.adb
      2. --
@@ -27574,7 +27424,7 @@ Compiled at: 2020-12-30 00:11:37
 
 Compiling: ../Source/ioc-fast-mt-outs.ads
 Source file time stamp: 2020-12-29 23:49:43
-Compiled at: 2020-12-30 00:11:37
+Compiled at: 2020-12-31 00:05:50
 
      1. -- ioc-fast-mt-outs.ads
      2. --
@@ -27606,3 +27456,225 @@ Compiled at: 2020-12-30 00:11:37
     28. end IOC.fast.MT.OUTs;
 
  96 lines: No errors
+
+GNAT Community 2020 (20200429-84)
+Copyright 1992-2020, Free Software Foundation, Inc.
+
+
+Compiling: /Users/wf/KDF9/emulation/Source/kdf9-directors-do_tsd_io.adb
+Source file time stamp: 2020-12-30 21:36:24
+Compiled at: 2020-12-31 00:05:50
+
+     1. -- kdf9-directors-do_tsd_io.adb
+     2. --
+     3. -- Implement the OUT 8 API of the EE Time Sharing Directors.
+     4. --
+     5. -- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+     6. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     7. --
+     8. -- The ee9 program is free software; you can redistribute it and/or
+     9. -- modify it under terms of the GNU General Public License as published
+    10. -- by the Free Software Foundation; either version 3, or (at your option)
+    11. -- any later version. This program is distributed in the hope that it
+    12. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    13. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    14. -- See the GNU General Public License for more details. You should have
+    15. -- received a copy of the GNU General Public License distributed with
+    16. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    17. --
+    18.
+    19. with exceptions;
+    20. with formatting;
+    21. with host_IO;
+    22. with IOC;
+    23. with IOC.dispatcher;
+    24. with IOC.equipment;
+    25. with IOC.slow.shift.FW;
+    26. with KDF9_char_sets;
+    27. with KDF9.store;
+    28. with settings;
+    29. with tracing;
+    30.
+    31. use  exceptions;
+    32. use  formatting;
+    33. use  host_IO;
+    34. use  IOC;
+    35. use  IOC.dispatcher;
+    36. use  IOC.equipment;
+    37. use  IOC.slow.shift.FW;
+    38. use  KDF9_char_sets;
+    39. use  KDF9.store;
+    40. use  settings;
+    41. use  tracing;
+    42.
+    43.    procedure KDF9.Directors.do_TSD_IO (this_OUT : in KDF9.word) is
+    44.
+    45.       function destination_device_for (the_stream : KDF9.word)
+    46.       return IOC.device_number is
+    47.       begin
+    48.          case the_stream is
+    49.             when 8#00# =>
+    50.                return 0;
+    51.             when 8#10# |8#12# |8#14# | 8#16# =>
+    52.                return TP0_number;
+    53.             when 8#11# |8#13# |8#15# | 8#17# =>
+    54.                return TP1_number;
+    55.             when 8#30#..8#37# =>
+    56.                return LP0_number;
+    57.             when 8#50#..8#57# =>
+    58.                return TP1_number;
+    59.             when 8#70#..8#77# =>
+    60.                return LP0_number;
+    61.             when others =>
+    62.                fail_OUT(8, "invalid stream #" & oct_of(the_stream));
+    63.          end case;
+    64.       end destination_device_for;
+    65.
+    66.       the_stream : KDF9.word;
+    67.       Q, G       : KDF9.Q_register;
+    68.
+    69.       procedure prepare_output_to_FW0 is
+    70.          message_prefix  : constant KDF9.word := 8#02_06_21_55_22_00_07_77#; -- LS CS [ m ] SP CN Ø
+    71.          prompt_prefix   : constant KDF9.word := 8#02_06_21_61_22_00_07_77#; -- LS CS [ q ] SP CN Ø
+    72.          OUT_16_prefix   : constant KDF9.word := 8#02_07_56_33_00_77_77_77#; -- LS CN N º SP Ø  Ø Ø
+    73.          filler_in_D0_D5 : constant KDF9.word := 8#77_00_00_00_00_00_00_00#; -- Ø
+    74.          s               : KDF9_char_sets.symbol := KDF9_char_sets.Word_Filler;
+    75.          the_prefix      : KDF9.word;
+    76.       begin  -- prepare_output_to_FW0
+    77.          -- The logic of FW streams is rather complex, to preserve the layout of the typescript.
+    78.          -- There are three significant aspects.
+    79.
+    80.          -- 1. The message is truncated if longer than 8 words.
+    81.          if Q.M - Q.I > 8 then
+    82.             Q.M := Q.I + 8;
+    83.          end if;
+    84.
+    85.          -- 2. It must not contain LS or HT;
+    86.          --       nor ';' in the last word;
+    87.          --          nor ';' other than in character 7;
+    88.          --    but anything after an End Message can safely be ignored.
+    89.          word_loop: for w in Q.I+1 .. Q.M loop
+    90.              for c in KDF9_char_sets.symbol_index'Range loop
+    91.                 s := fetch_symbol(w, c);
+    92.                 if s = KDF9_char_sets.Line_Shift                                 or else
+    93.                       s = KDF9_char_sets.Tabulation                              or else
+    94.                          ((s = KDF9_char_sets.Semi_Colon) and (c /= 7 or  w = Q.M)) then
+    95.                    fail_OUT(this_OUT, "invalid data for OUT 8 to FW");
+    96.                 end if;
+    97.          exit word_loop when s = KDF9_char_sets.Semi_Colon or s = KDF9_char_sets.End_Message;
+    98.              end loop;
+    99.          end loop word_loop;
+   100.
+   101.          the_prefix := (if s = KDF9_char_sets.Semi_Colon then prompt_prefix else message_prefix);
+   102.          the_prefix := (if this_OUT = 16                 then OUT_16_prefix else the_prefix);
+   103.
+   104.          -- 3. The Director takes a new line for each OUT 8 message to the FW.
+   105.          -- It sets up the format effector(s) in the first word of the OUT 8 area.
+   106.          declare
+   107.             package FW renames IOC.slow.shift.FW;
+   108.             the_FW : FW.device renames FW.device(buffer(0).all);
+   109.          begin
+   110.             if a_LF_was_just_read(the_FW) then
+   111.                -- Replace the redundant Line Shift with a Word Filler character.
+   112.                store_word(the_prefix or filler_in_D0_D5, Q.I);
+   113.             else
+   114.                -- The initial Line Shift is needed.
+   115.                store_word(the_prefix, Q.I);
+   116.             end if;
+   117.          end;
+   118.       end prepare_output_to_FW0;
+   119.
+   120.       page_change : constant := 8#77_77_77_77_77_77_77_03#;  --  LP Page Change character
+   121.
+   122.    begin  -- do_TSD_IO
+   123.       ensure_that_the_nest_holds_an_operand;
+   124.       Q := as_Q(pop);  -- the N2 parameter
+   125.       the_trace_operand := as_word(Q);
+   126.
+   127.       -- A FW query has D0 of the control word set.
+   128.       if (Q.C and 8#1_00000#) /= 0 then
+   129.          Q.C := 0;
+   130.       end if;
+   131.
+   132.       --
+   133.          -- OUT 8 'output spooling'.
+   134.       --
+   135.
+   136.       if Q.C = Q.I and Q.I = Q.M then
+   137.          -- The N2 parameter specifies stream closure.
+   138.          flush(buffer(destination_device_for(KDF9.word(Q.C))).all);
+   139.          return;
+   140.       end if;
+   141.
+   142.       -- The Q = N2 parameter specifies a block starting with the stream number.
+   143.       check_address_and_lockout(Q.I);
+   144.       the_stream := fetch_word(Q.I);
+   145.       Q.C := destination_device_for(the_stream);
+   146.       set_state_of(buffer(Q.C), allocated => True);
+   147.       check_address_and_lockout(Q.I+1);
+   148.       G := as_Q(fetch_word(Q.I+1));
+   149.
+   150.       -- See the Manual, §12.6.1.
+   151.       if G.C = 4095 and then G.I = 8#177777# then
+   152.          -- The G parameter specifies output of a 'gap' suitable for the device.
+   153.          the_trace_operand := as_word(G);
+   154.          if G.M = 0 then
+   155.             return;
+   156.          end if;
+   157.          G.M := (if G.M in 1 .. 511 then G.M else 120);
+   158.          if destination_device_for(the_stream) = 0 then
+   159.             null;  -- What else could be done; fail?
+   160.          elsif destination_device_for(the_stream) in TP0_number | TP1_number then
+   161.             POE((Q.C, 0, G.M), False);   -- Write gap.
+   162.          elsif destination_device_for(the_stream) = LP0_number then
+   163.             store_word(page_change, Q.I);
+   164.             POA((Q.C, Q.I, Q.I), False); -- Write PC.
+   165.          else
+   166.             fail_OUT(8, "cannot gap on device #" & oct_of(destination_device_for(the_stream)));
+   167.          end if;
+   168.          return;
+   169.       end if;
+   170.
+   171.       if Q.M <= Q.I then
+   172.          fail_OUT(8, "invalid M-part #" & oct_of(Q.M));
+   173.       end if;
+   174.
+   175.       if Q.C /= 0 then
+   176.          -- For non-FW streams, the first word of the OUT 8 area is not transferred.
+   177.          Q.I := Q.I + 1;
+   178.       else
+   179.          -- The logic for FW streams is more complex, to preserve the layout of the typescript.
+   180.          prepare_output_to_FW0;
+   181.       end if;
+   182.       POB(Q, False);
+   183.
+   184.    exception
+   185.       when host_IO.end_of_stream =>
+   186.          fail_OUT(8, "unexpected end of file for stream #" & oct_of(KDF9.Q_part(the_stream)));
+   187.    end KDF9.Directors.do_TSD_IO;
+
+Compiling: ../Source/kdf9-directors-do_tsd_io.ads
+Source file time stamp: 2020-12-30 21:37:04
+Compiled at: 2020-12-31 00:05:50
+
+     1. -- kdf9-directors-do_tsd_io.ads
+     2. --
+     3. -- Implement the OUT 8 API of EE Time Sharing Directors.
+     4. --
+     5. -- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+     6. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     7. --
+     8. -- The ee9 program is free software; you can redistribute it and/or
+     9. -- modify it under terms of the GNU General Public License as published
+    10. -- by the Free Software Foundation; either version 3, or (at your option)
+    11. -- any later version. This program is distributed in the hope that it
+    12. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    13. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    14. -- See the GNU General Public License for more details. You should have
+    15. -- received a copy of the GNU General Public License distributed with
+    16. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    17. --
+    18. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
+    19. procedure KDF9.Directors.do_TSD_IO (this_OUT : in KDF9.word);
+
+ 187 lines: No errors

@@ -37,7 +37,7 @@ WBM) this_test="whet WHETSTONE"
 RLT) this_test="nine_priv RLT RLT_data"
      signature=\#3506450617016266;;
 TO4) this_test="nine OUT4A -"
-     signature=\#7017242374042113;;
+     signature=\#3257037520362447;;
 TOX) this_test="nine OUTX -"
      signature=\#5346716617576440;;
 MTW) this_test="whet MTW"
@@ -46,7 +46,7 @@ INP) this_test="whet INPUT"
      signature=\#3301160711524477;;
 HQP) this_test="kids WEEHAAVIE -"
      export KIDSMISC=w-
-     signature=\#4200133757004705;;
+     signature=\#4230330426172712;;
 *)   echo test case "$1"\;  UNKNOWN!
      exit 2;;
 esac
