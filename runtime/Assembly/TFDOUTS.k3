@@ -1,0 +1,66 @@
+V999; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test seek and I/O logic);
+   V1 = 0;
+   V3 = B0702023131310202; ("®®999®®"  in Flexowriter code);
+   V4 = Q0/AV3/AV3;
+   V5 = B7777777777777777;
+   V7 = Q 1044/  1/    0;  (C chosen to end at sector 94);
+   V8 = Q 0/AV100/AV179;
+   V9 = Q 0/AV200/AV279;
+   V100 = P100-----;
+   V139 = P179+++++;
+
+   SET+6; SET 44; OUT;
+   SET+1; SET 44; OUT;
+
+   ZERO; SET 43;  OUT;
+
+   ZERO;   ZERO;  JS777;
+   SET 1;  SET 1; JS777;
+   SET 6;  SET 2; JS777;
+   SET 12; SET 3; JS777;
+   SET 35; SET 4; JS777;
+   SET 71; SET 5; JS777;
+   SET 383; SET 6; JS777;
+
+   ZERO; NOT; SET 43;  OUT;
+
+   ZERO;  ZERO;  JS777;
+   SET 1; SET 1; JS777;
+   SET 5; SET 2; JS777;
+   SET 6; SET 5; JS777;
+   SET 6; SET 6; JS777;
+   SET 6; SET 7; JS777;
+
+444;
+   (done);
+   ZERO; SET 45; OUT;
+
+   ZERO; SET 43; OUT;
+   ZERO; ZERO;   JS777;
+
+   ZERO; SET 45;  OUT;
+
+   ZERO; OUT;
+
+777;
+   (xfer);
+   REV; SHL+4; OR; =C15;
+   V8; =Q8; C15 TO Q8;
+   Q8; =V100;
+   Q8; SHC+16; =V179;
+   Q8; SET 41; OUT;
+   V9; =Q9; C15 TO Q9;
+   Q9; SET 42; OUT;
+   V200; V100; J999±; ERASE;
+   V279; V179; J999±; ERASE;
+   EXIT 1;
+
+999;
+   (unequal: quit with error indicator "999");
+   SET 999;
+   V4; =Q4; POAQ4;
+   ZERO; OUT;
+FINISH;
+|

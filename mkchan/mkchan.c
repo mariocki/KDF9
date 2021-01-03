@@ -1,12 +1,12 @@
 // Under development -- always
 
-// Currently all rights are reserved, but this will be made available under the GNU Public License.
+// June 2020 -- new facility for producing standard from of ABSes on paper tape
 
 // Usage: mkchan [switches] input_file output_file
 
 // The type of output is defined by the output_file extension (i.e. bit after the dot)
 //     .mt       // POST format data in MT form for DH's emulator
-//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81 or mksys0.k4
+//     .pt       // POST format data in paper tape that can be uploaded to MT by KAB81
 //     .dsk      // PROMPT format data in emulated disk blocks -- mainly for KAL4
 //     .txt      // Paper tape Latin-1 representation of KDF9 input chars 1 for 1
 
@@ -20,10 +20,6 @@
 //     -s           // star specified as asterisk - special for KAL4 bootstrap
 //     -k           // KDF9 program ID specified for inclusion in PROMPT blocks
 //     -l           // this is a library file for incorporation in the system tape
-
-// November 2020 -- a single space allowed inside := and also goto
-
-// June 2020 -- new facility for producing standard form of ABSes on paper tape
 
 // new facility May 2019, -l parameter to deal with library material
 
@@ -55,31 +51,19 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #include <ctype.h>
 
-// see if it is a Microsoft compiler
-
-#ifdef WIN32
-#include <io.h>
-#else
-#include <unistd.h>
-#endif
-
 #ifndef O_BINARY
-#define O_BINARY   0
+#define O_BINARY  0
 #endif
-
-// stop grumbles from Visual studio
-#define _CRT_SECURE_NO_WARNINGS
-
 
 #define NSYM  2000
 
 unsigned char symval[NSYM];        // the value of the ABS
 char *symchars[NSYM];              // the same symbol in characters
-unsigned char symlen[NSYM];        // the length of the symbol
-int topix[256];                    // thw top index to start with for each possible character
-unsigned char *pttab[256];         // character form of each basic symbol when output as paper tape
+
+unsigned char *pttab[256];         // character form of each basic symbol
 
 int ulform = 1;          // compound symbols have embedded underlines
 int excform = 1;         // compound symbols have initial exclamation mark
@@ -96,7 +80,6 @@ FILE *diag;
 
 char buff[3846];
 char opbuff[20];
-char ch2[3];             // used for really UTF-8 nasties
 
 unsigned char store[640*6 + 6 + 900];        // 640 words in case of PROMPT output + 1 word for MT header
 
@@ -113,15 +96,12 @@ void ulsym(int s, char *chs)
    if  ( excform != 0 )        // exclamation mark in front of compound symbol (Eldon2 TTY style)
    {  symval[nsyms] = s;
       buff[0] = '!';
-      symlen[nsyms] = strlen(buff);
       symchars[nsyms++] = strdup(buff);
    }
    if  ( strform != 0 )        // single quote as strop mark
    {  symval[nsyms] = s;
       buff[0] = '\'';
       strcat(buff+3, "'");     // buff contains stropped form of ABS
-      symlen[nsyms] = strlen(buff);
-// printf("%03o  len = %d  chars = %s  index = %d\n", symval[nsyms], symlen[nsyms], buff, nsyms);
       symchars[nsyms++] = strdup(buff);
    }
    if  ( ulform != 0 )         // underline chars before every character
@@ -133,16 +113,13 @@ void ulsym(int s, char *chs)
          buff[i++] = *chs;
       }
       buff[i] = 0;     // terminate string
-      symlen[nsyms] = strlen(buff);
       pttab[s] = symchars[nsyms++] = strdup(buff);
    }
 }
 
 void abs2char(char *chs, int abs)
-// makes entry for ABS that is 2 or more characters
-// Also it will work for any length string and is used for colon space equals
+// makes entry for ABS that is 2 characters
 {  symval[nsyms] = abs;
-   symlen[nsyms] = strlen(chs);
    pttab[abs] = symchars[nsyms++] = chs;
 }
 
@@ -151,7 +128,6 @@ void abs8bit(unsigned char ch, int abs)
 {  symval[nsyms] = abs;
    buff[0] = ch;
    buff[1] = 0;
-   symlen[nsyms] = 1;
    pttab[abs] = symchars[nsyms++] = strdup(buff);
 }
 
@@ -165,10 +141,8 @@ int convline(char *dataline, int loc)
    unsigned char wc, wwc;
 
    while  ( (wc = dataline[p]) != 0 )
-   {  i = topix[wc&255];
-      while  ( --i > 0  &&  memcmp(dataline + p, symchars[i], symlen[i]) != 0 ) ;
-
-// printf("i = %d  chars = %s  len = %d  p = %d  ch = %c  abs = %03o\n", i,  symchars[i], symlen[i], p, dataline[p], symval[i]);
+   {  i = nsyms;
+      while  ( --i > 0  &&  memcmp(dataline + p, symchars[i], strlen(symchars[i])) != 0 ) ;
 
       if  ( (wc = symval[i]) < 255 )
          store[++j] = wc;
@@ -177,7 +151,7 @@ int convline(char *dataline, int loc)
 
 //    fprintf(stdout, "i = %d  symval = %03o symchars = %s\n", i, symval[i], symchars[i]);
 //    fprintf(stdout, "recognised %03o %s\n", wc&255, dataline+p);
-      p += symlen[i];
+      p += strlen(symchars[i]);
 
    }
 
@@ -195,7 +169,7 @@ int convline(char *dataline, int loc)
 
 void settables(int starval)
 // create the conversion tables
-{  int i, j, diff;
+{  int i, j;
    char *ws, wc;
 
    abs8bit('?', 0377);          // unrcognised chars deliver a dummy
@@ -208,16 +182,6 @@ void settables(int starval)
    for  ( i = '0'; i<='9'; i++ )
       abs8bit(i, i - '0');
 
-// real UTF-8 nasties which can appear from on-line forms in data from web pages
-// These need to be first so that they do not become the paper tape version
-   ch2[2] = 0;             // string terminator
-   ch2[0] = 0xC2;
-   ch2[1] = 0xB1;  abs2char(strdup(ch2), 0322);  // Bill Findlay's not-equals ±
-   ch2[1] = 0xBA;  abs2char(strdup(ch2), 012);   // Bill Findlay's subscript-10 º
-   ch2[0] = 0xC3;
-   ch2[1] = 0xB7;  abs2char(strdup(ch2), 0221);  // Bill Findlay's integer divide ÷
-   ch2[1] = 0x97;  abs2char(ch2, 0261);          // Bill Findlay's multiply ×
-
    abs8bit('*', starval);        // * is multiply by default
    abs8bit('_', 0216);           // _ is star
    abs8bit('$', 0216);           // $ is star
@@ -228,7 +192,6 @@ void settables(int starval)
    abs8bit('\t', 0256);       // tab
    abs8bit('\n', 0240);       // newline
 
-   abs2char(": =", 0265);     // := do this first so that printouts do not have a space in
    abs2char(":=", 0265);      // :=
    abs2char(">=", 0262);      // >= for greater than or equals
    abs2char("<=", 0222);      // <= for less than or equals
@@ -250,8 +213,6 @@ void settables(int starval)
    ulsym(0303, "eqv");
    ulsym(0315, "false");
    ulsym(0206, "for");
-   ulsym(0210, "go to");      // do this first so that printouts do not have a space in
-   abs2char("_g_o _t_o", 0210);    // kludge to allow non-underlined space in goto
    ulsym(0210, "goto");
    ulsym(0302, "gt");
    ulsym(0205, "if");
@@ -279,7 +240,7 @@ void settables(int starval)
    ulsym(0226, "while");
 
 // Many (all?) of the following symbols have synonyms
-// For output, only the last one counts
+// For output only the last one counts
 
    abs2char("!=", 0322);      // != for not equals
    abs8bit('#', 0322);        // not equals
@@ -330,33 +291,21 @@ void settables(int starval)
    abs8bit(0xBA, 012);     // subscript 10 - masculine ordinal indicator
    abs8bit('|', 0276);     // end message
 
-
 // now to sort so that we search the longest first
 // simple exchange sort
    i = nsyms;
    while  ( --i >= 2 )              // leave location 0 alone
    {  j = i;
       while  ( --j >= 1 )
-      {  if  ( (diff = *(symchars[i]) - *(symchars[j])) == 0 )
-            diff = symlen[i] - symlen[j];
-         if  ( diff < 0 )
+         if  ( strlen(symchars[i]) < strlen(symchars[j]) )
          {  ws = symchars[i];
             symchars[i] = symchars[j];
             symchars[j] = ws;
             wc = symval[i];
             symval[i] = symval[j];
             symval[j] = wc;
-            wc = symlen[i];
-            symlen[i] = symlen[j];
-            symlen[j] = wc;
          }
-      }
    }
-   printf("Table length = %d\n", nsyms);
-   for  ( i = 0; i<256; i++ )
-      topix[i] = 1;                 // any unknown character will not screw the conversion
-   for  ( i = 0; i<nsyms; i++ )
-      topix[*(symchars[i])] = i+1;
 }
 
 unsigned char emword[] = { 1,0377,0377,0377,0276,0240 };     // end message word at end of program
@@ -490,7 +439,7 @@ int main(int argc, char **argv)
                progid[i] = wc&037 | 040;
 
          i = sz = 12;
-         while  ( i > 0 )
+         while  ( i >= 0 )
          {  i -= 4;
             wc = (progid[i]<<18) + (progid[i+1]<<12) + (progid[i+2]<<6) + progid[i+3];
             progid[--sz] = wc;
@@ -618,9 +567,7 @@ int main(int argc, char **argv)
       }
       memcpy(store + sz*6, emword, 6);
       prepBlock(bsz, ++sz, blknum, progid, 0);   // noc = 0 marks end of chain of file blocks
-      if  ( blknum >= -1000000 )                 // if not writing real paper tape
-         mtwrite(dvout, sz, bsz, blknum);        // write final output block, adding in word for em
-
+      mtwrite(dvout, sz, bsz, blknum);           // write final output block, adding in word for em
       if  ( blknum >= 0 )                        // writing MT format
          close(dvout);
       else if  ( libid != NULL  &&  heading == NULL )
@@ -629,13 +576,12 @@ int main(int argc, char **argv)
             sprintf((libid = buff), "%c%04d", *fnout, atoi(fnout+1));
          sprintf(buff+10, "R %s %d blocks %s\n\n", libid, blknum + 1000001, fnin);
          heading = strdup(buff+10);
-      // printf("Second pass for %s\n", heading);
+      // printf("Second pas for %s\n", heading);
          main(argc, argv);                       // second pass
       }
       else
       {  write(dvout, ";;;;@|@|\n", 9);          // terminator on paper tape
-         if  ( blknum + 1000001 >= 0 )           // may not even need this now that we have -l switch
-            printf("%d blocks written\n", blknum + 1000001);
+         printf("%d blocks written\n", blknum + 1000001);
          close(dvout);
       }
 

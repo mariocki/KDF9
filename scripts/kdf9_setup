@@ -29,7 +29,7 @@ echo "Setting up KDF9 runtime in ${KDF9RUNTIME}"
 # Copy everything down
 install -d ${KDF9RUNTIME}
 install -d ${KDF9RUNTIME}/logs
-cp -aR %prefix%/share/kdf9/runtime/* ${KDF9RUNTIME}/
+cp -aR %prefix%/share/kdf9/* ${KDF9RUNTIME}/
 
 cd ${KDF9RUNTIME}
 
@@ -70,5 +70,5 @@ a2b -r2p < Data/mksys2.bin > Binary/MKSYS2;
 a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU;
 
 echo "Compiling Binaries.";
-for f in Assembly/[A-Z]*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
+for f in Assembly/[1A-Z]*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
 echo "Done.";

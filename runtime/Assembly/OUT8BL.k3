@@ -1,0 +1,43 @@
+TL 100; ST 0;
+V119; W0; Y64;
+RESTART; J999; J999;
+PROGRAM;                   (OUT8 test of buffer lockouts);
+   V0 = B30;               (OUT 8 stream);
+   V1 = 0;
+   V2 = PV0 - V4.;
+   V3 = P........;
+   V4 = B02;
+   V5 = Q 0/AV0/AV4;
+
+   V100 = B30;
+   V101 = 0;
+   V102 = PV100-104;
+   V103 = P........;
+   V104 = B02;
+   V105 = Q 0/AV100/AV104;
+
+   V5; =Q5; POBQ5;
+   V5; =Q5; POBQ5;
+   V5; =Q5; POBQ5;
+
+   V5;   SET 8; OUT;
+   V105; SET 8; OUT;
+   V5;   SET 8; OUT;
+   V105; SET 8; OUT;
+
+   V5;   SHC+1; SET1; OR; SHC-1; =V5;
+   ZERO; =V0;   SET B75; =V4;
+
+   V105; SHC+1; SET1; OR; SHC-1; =V105;
+   ZERO; =V100; SET B75; =V104;
+
+
+   V5;   SET 8; OUT; ZERO; =V0;
+   V105; SET 8; OUT; ZERO; =V100;
+   V5;   SET 8; OUT; ZERO; =V0;
+   V105; SET 8; OUT; ZERO; =V100;
+
+999;  ZERO; OUT;
+
+FINISH;
+|

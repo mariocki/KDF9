@@ -81,7 +81,7 @@ then
 fi
 
 # Set up a set of labelled tapes, including at least one ZERO (scratch) tape.
-cat > ${DATA}/TSD_tape_labels.txt <<++++
+cat > ${DATA}/tape_labels_for_TSD.txt <<++++
 -00-1478        |
 -66-1909EXAMTIME|
 -00-0552EFPBEAAG|
@@ -92,7 +92,7 @@ cat > ${DATA}/TSD_tape_labels.txt <<++++
 |
 ++++
 
-rlt TSD_tape_labels.txt - z
+rlt tape_labels_for_TSD.txt - z
 
 # Create a call tape from the binary program.
 a2b -p2c P < ${KDF9RUNTIME}/Binary/${prog}  > /tmp/${prog}.pblk

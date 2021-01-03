@@ -3,8 +3,8 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -126,7 +126,22 @@ package IOC is
    function mnemonic (order : in String; class : in IOC.device_name)
    return String;
 
-   procedure trap_invalid_IO_operation (order : in String; buffer : in IOC.device);
+   -- An I/O operation may fail for two distict reasons:
+   -- 1. the order is illegal per se
+   -- 2. the order is legal, but is attempting an impossible effect.
+
+   -- trap_illegal_IO_operation fails the run because of an attempt to use an I/O order
+   --   that is illegal or undefined for the device concerned.
+   procedure trap_illegal_IO_operation (order : in String; buffer : in IOC.device);
+
+   -- trap_failing_IO_operation fails the run iff either:
+   -- 1. ee9 is running in a non-boot mode, because nothing more can usefully be done
+   -- OR
+   -- 2. Director is running, because an impossible operation implies a serious failure in Director.
+   --
+   -- In boot mode, when Director is not running, it sets the buffer abnormal and abandons the order.
+   -- It is then up to the problem program to act accordingly.  Failure to do so may LIV.
+   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String);
 
    -- The elapsed time for the I/O of the given number of atomic_items
    --    which may be, e.g., bytes, or card images, or printer lines.
@@ -319,6 +334,9 @@ package IOC is
    procedure set_state_of (the_buffer : in device_class_access;
                            allocated  : in Boolean);
 
+   function is_allocated (the_buffer : device_class_access)  -- N.B. IS_allocated.
+   return Boolean;
+
    function is_unallocated (the_buffer : device_class_access)  -- N.B. is_UNallocated.
    return Boolean;
 
@@ -347,6 +365,11 @@ package IOC is
    --    for the_locked_out_address, then act on pending interrupts.
    procedure handle_a_main_store_lockout;
 
+   type transfer_kind  is (input_operation,
+                           output_operation,
+                           control_operation,
+                           some_other_operation);
+
    -- Take note of the start of a transfer.
    -- For I/O operations that do not entail an actual data transfer,
    --    such as testing a buffer for a graph plotter,
@@ -358,15 +381,15 @@ package IOC is
                                   Q_operand   : in KDF9.Q_register;
                                   set_offline : in Boolean;
                                   busy_time   : in KDF9.us;
-                                  is_DMAing   : in Boolean := True);
+                                  operation   : in IOC.transfer_kind := IOC.some_other_operation);
+
+   -- True iff the buffer is busy and the current operation is reading oe writing.
+   function is_DMAing (the_buffer  : in IOC.device'Class)
+   return Boolean;
 
    -- Gives a short summary of the buffer state, showing some transfer parameters.
    function image (the_buffer : in IOC.device'Class)
    return String;
-
-   -- Show the state of IOC for diagnostic purposes,
-   --    with complete information on each non-idle buffer.
-   procedure diagnosis;
 
 private
 
@@ -390,10 +413,10 @@ private
                record
                   is_abnormal,
                   is_busy,
-                  is_DMAing,
                   is_offline,
                   is_allocated,
                   is_for_Director : Boolean := False;
+                  operation       : IOC.transfer_kind := IOC.some_other_operation;
                   initiation_time : KDF9.us := KDF9.us'Last;
                   transfer_time   : KDF9.us := KDF9.us'Last;
                   completion_time : KDF9.us := KDF9.us'Last;

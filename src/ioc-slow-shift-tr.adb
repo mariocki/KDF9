@@ -2,8 +2,8 @@
 --
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -15,7 +15,7 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-with message;
+
 with Ada.Exceptions;
 --
 with IOC.equipment;
@@ -86,7 +86,6 @@ package body IOC.slow.shift.TR is
          if has_even_parity(octet) then
             symbol := symbol_from(octet);
          else
-            message("octet read was" & octet'Image & " = " & Character'Val(Natural(octet)));
             trap_invalid_paper_tape("probably not in KDF9 code (parity error detected)");
          end if;
          store_symbol(symbol, w, c);
@@ -128,7 +127,7 @@ package body IOC.slow.shift.TR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TR, Q_operand, set_offline);
+      start_slow_transfer(the_TR, Q_operand, set_offline, input_operation);
       if the_TR.is_transcribing then
          read(the_TR, Q_operand);
       else
@@ -143,7 +142,7 @@ package body IOC.slow.shift.TR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TR, Q_operand, set_offline);
+      start_slow_transfer(the_TR, Q_operand, set_offline, input_operation);
       if the_TR.is_transcribing then
          read_to_EM(the_TR, Q_operand);
       else
@@ -158,7 +157,7 @@ package body IOC.slow.shift.TR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TR, Q_operand, set_offline);
+      start_slow_transfer(the_TR, Q_operand, set_offline, input_operation);
       words_read(the_TR, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PIC;
@@ -169,7 +168,7 @@ package body IOC.slow.shift.TR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      start_slow_transfer(the_TR, Q_operand, set_offline);
+      start_slow_transfer(the_TR, Q_operand, set_offline, input_operation);
       words_read_to_EM(the_TR, Q_operand);
       lock_out_relative_addresses(Q_operand);
    end PID;
@@ -265,7 +264,7 @@ package body IOC.slow.shift.TR is
                                   quantum => TR_quantum);
             TR1_number := b;
          when others =>
-            trap_operator_error("more than 2 TR units specified");
+            trap_operator_error("TR:", "more than two units specified");
       end case;
       unit := unit + 1;
    end enable;
@@ -291,7 +290,7 @@ package body IOC.slow.shift.TR is
       if the_reader.is_open then
          the_reader.current_case := KDF9_char_sets.Case_Normal;
       else
-         trap_operator_error("the file '" & next_file_name & "' cannot be found");
+         trap_operator_error("'" & next_file_name & "'",  "cannot be found");
       end if;
    end reattach;
 
@@ -421,20 +420,16 @@ package body IOC.slow.shift.TR is
       reattach(0, "TR0");
       clear_IOC_FIFO;
       reset_loader_usage(0);
-
    exception
-
       when invalid_paper_tape_file
          | operator_error =>
          raise;
       when error : others =>
-         raise emulation_failure
-            with Ada.Exceptions.Exception_Message(error);
-
+         raise emulation_failure with "in load_a_program: " & Ada.Exceptions.Exception_Message(error);
    end load_a_program;
 
    -- TR0 is the hardware bootstrap device for reading initial orders.
-   procedure bootstrap_the_KDF9 (program_file_name : in String) is
+   procedure boot_the_KDF9 (program_file_name : in String) is
       boot_descriptor : constant KDF9.Q_register := (C => TR0.number, I => 0, M => 8);
    begin
       loading_was_successful := False;
@@ -452,8 +447,7 @@ package body IOC.slow.shift.TR is
       when invalid_paper_tape_file =>
          raise;
       when error : others =>
-         raise emulation_failure
-               with Ada.Exceptions.Exception_Message(error);
-   end bootstrap_the_KDF9;
+         raise emulation_failure with "in boot_the_KDF9: " & Ada.Exceptions.Exception_Message(error);
+   end boot_the_KDF9;
 
 end IOC.slow.shift.TR;

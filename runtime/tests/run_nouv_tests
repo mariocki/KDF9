@@ -15,6 +15,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
+
+export EE9REGTEST=1
 
 opt="-d=t -m=ahipr"
 
@@ -22,38 +35,38 @@ echo "TEST NOUV0 - REV should end normally, as the NEST depth is constant"
 ucc NOUV0; nine NOUV0 $opt
 echo "TEST NOUV0 done."
 
-echo "TEST NOUV1 - ERASE empty NEST"
+echo "TEST NOUV1 - should fail: NEST lacks 1 operand for ERASE."
 ucc NOUV1; nine NOUV1 $opt
 echo "TEST NOUV1 done."
 
-echo "TEST NOUV2 - DUPD overfills NEST"
+echo "TEST NOUV2 - should fail: NEST too full for 2 operands of DUPD."
 ucc NOUV2; nine NOUV2 $opt
 echo "TEST NOUV2 done."
 
-echo "TEST NOUV3 - LINK with empty SJNS"
+echo "TEST NOUV3 - should fail: empty SJNS for LINK."
 ucc NOUV3; nine NOUV3 $opt
 echo "TEST NOUV3 done."
 
-echo "TEST NOUV4 - =LINK loop overfills SJNS"
+echo "TEST NOUV4 - should fail: full SJNS for =LINK."
 ucc NOUV4; nine NOUV4 $opt
 echo "TEST NOUV4 done."
 
-echo "TEST NOUV5 - Jr= with 1 word in NEST"
+echo "TEST NOUV5 - should fail: NEST lacks 1 operand for Jr=."
 ucc NOUV5; nine NOUV5 $opt
 echo "TEST NOUV5 done."
 
-echo "TEST NOUV6 - Jr=Z with empty NEST"
+echo "TEST NOUV6 - should fail: empty NEST for Jr=Z."
 ucc NOUV6; nine NOUV6 $opt
 echo "TEST NOUV6 done."
 
-echo "TEST NOUV7 - EXIT with empty SJNS"
+echo "TEST NOUV7 - should fail: empty SJNS for EXIT."
 ucc NOUV7; nine NOUV7 $opt
 echo "TEST NOUV7 done."
 
-echo "TEST NOUV8 - JSr loop overfills SJNS"
+echo "TEST NOUV8 - should fail: full SJNS for JSr."
 ucc NOUV8; nine NOUV8 $opt
 echo "TEST NOUV8 done."
 
-echo "TEST NOUV9 - +D with only 1 word in NEST"
+echo "TEST NOUV9 - should fail: NEST lacks 3 operands for +D."
 ucc NOUV9; nine NOUV9 $opt
 echo "TEST NOUV9 done.""

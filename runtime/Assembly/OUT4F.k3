@@ -167,7 +167,7 @@ PROGRAM;                   (main program);
    V133; =V5; POAQ10;
 
    (release MT);
-   C1; SET 7; OUT;
+   C1; SET 6; OUT;
 
    (FINISH message);
    V135; =V5; POAQ10;

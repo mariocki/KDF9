@@ -2,8 +2,8 @@
 --
 -- Emulation of a (fixed-platter) disc drive.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,48 +16,37 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with Ada.Exceptions;
+--
+with formatting;
 with HCI;
 with tracing;
 
+use formatting;
 use  HCI;
 use  tracing;
 
 package body IOC.fast.FD is
 
-   function image_of (the_FD : in out FD.device;
-                      caption    : String := "")
-   return String
-   is (if the_FD.stream.is_open then
-          caption
-        & ":"
-        & NL
-        & "FD parameters: "
-        & NL
-        & "seek_count"
-        & the_FD.seek_count'Image
-        & NL
-        & "sector_count"
-        & the_FD.sector_count'Image
-        & NL
-        & "sector_number"
-        & the_FD.locus.sector_number'Image
-        & NL
-        & "seek_area_number"
-        & the_FD.locus.seek_area_number'Image
-        & NL
-        & "platter_number"
-        & the_FD.locus.platter_number'Image
-        & NL
-        & "drive_number"
-        & the_FD.locus.drive_number'Image
-        & NL
-        & image_of(the_FD.stream, "the_FD.stream")
-       else
-          caption
-      );
-   pragma Unreferenced(image_of);
-
    use KDF9_char_sets;
+
+   function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
+   return String is
+      parameter : constant KDF9.Q_part := Q_operand.C / 16;
+      cylinder  : constant KDF9.Q_part := parameter mod seek_areas_per_platter;
+      residue   : constant KDF9.Q_part := parameter  /  seek_areas_per_platter;
+      platter   : constant KDF9.Q_part := residue mod main_discs_per_drive;
+      drive     : constant KDF9.Q_part := residue  /  main_discs_per_drive;
+   begin
+      -- The disc geometry and I/O command bits are as defined in the FD package.
+      if for_seek then
+         return "D" & dec_of(drive)
+              & "P" & dec_of(if for_FH then KDF9.Q_part'(the_fixed_head_platter) else platter)
+              & "C" & dec_of(cylinder);
+      else -- for data transfer, parameter is sector #, with maximum 96 sectors per track.
+         return " S" & (if parameter < 10 then "0" else "") & dec_of(parameter);
+      end if;
+   end as_FD_command;
 
    overriding
    procedure Initialize (the_FD : in out FD.device) is
@@ -65,7 +54,7 @@ package body IOC.fast.FD is
       open(the_FD, rd_wr_mode);
    exception
       when others =>
-         trap_operator_error(the_FD.device_name & " cannot be opened for reading and writing");
+         trap_operator_error(the_FD.device_name, "cannot be opened for reading and writing");
    end Initialize;
 
    -- Hypothesis:
@@ -100,9 +89,6 @@ package body IOC.fast.FD is
       drive     : constant KDF9.Q_part
                 := parameter / seek_areas_per_platter / platters_per_drive;
    begin
-      if drive > FD.drive_range'Last then
-         trap_invalid_operand("invalid FD drive number");
-      end if;
       -- Hypothesis:
       -- Seeking to a new locus zeroizes the sector number and clears the end-of-area flag.
       return (
@@ -225,6 +211,7 @@ package body IOC.fast.FD is
    max_seek_time  : constant :=  321E3;
    per_track_time : constant KDF9.us
                   := KDF9.us(max_seek_time - min_seek_time) / seek_areas_per_platter;
+
    -- A seek distance of 1 takes the minimum seek time: zero_seek_time + per_track_time.
    zero_seek_time : constant KDF9.us := min_seek_time - per_track_time;
 
@@ -232,12 +219,14 @@ package body IOC.fast.FD is
 
    function arm_seek_time (the_FD : FD.device)
    return seek_time_range is
-      this : constant FD.seek_area_range := the_FD.comb(the_FD.target.platter_number);
-      next : constant FD.seek_area_range := the_FD.target.seek_area_number;
-      span : constant FD.seek_area_range := (if next > this then next - this else this - next);
-      cost : constant KDF9.us := KDF9.us(span) * per_track_time;
+      next   : FD.locus renames the_FD.target;
+      drive  : FD.drive_range renames next.drive_number;
+      here   : constant FD.seek_area_range := the_FD.comb(drive, next.platter_number);
+      there  : constant FD.seek_area_range := next.seek_area_number;
+      span   : constant FD.seek_area_range := (if here > there then here - there else there - here);
+      cost   : constant KDF9.us := KDF9.us(span) * per_track_time;
    begin
-      if cost > 0 then
+      if cost > 0 and next.platter_number /= the_fixed_head_platter then
          -- Hypothesis:
          return KDF9.us'Min(zero_seek_time + cost, max_seek_time) + checking_time;
       else
@@ -273,22 +262,34 @@ package body IOC.fast.FD is
       end if;
    end platter_switch_time;
 
-   procedure set_seek_target (the_FD    : in out FD.device;
-                              Q_operand : in KDF9.Q_register) is
+   procedure set_seek_target (the_FD       : in out FD.device;
+                              Q_operand    : in KDF9.Q_register;
+                              it_will_seek : out Boolean) is
+      here : FD.locus renames the_FD.locus;
+      next : FD.locus renames the_FD.target;
    begin
-      the_FD.target := locus_from(Q_operand);
-      the_FD.target.has_fixed_heads := False;
-      if the_FD.target.platter_number /= the_FD.locus.platter_number then
+      it_will_seek := False;
+      next := locus_from(Q_operand);
+      next.has_fixed_heads := False;
+      if next.platter_number /= here.platter_number then
          the_FD.switch_count := the_FD.switch_count +1;
       end if;
-      if the_FD.comb(the_FD.locus.platter_number) /= the_FD.target.seek_area_number then
+      if the_FD.comb(next.drive_number, here.platter_number) /= next.seek_area_number then
          the_FD.seek_count := the_FD.seek_count + 1;
+         it_will_seek := True;
       end if;
     end set_seek_target;
 
-   procedure seek_to_the_target_area (the_FD : in out FD.device) is
+   procedure seek_to_the_target_area (the_FD      : in out FD.device;
+                                      seek_time,
+                                      switch_time : out seek_time_range) is
+      here : FD.locus renames the_FD.locus;
+      next : FD.locus renames the_FD.target;
    begin
-      the_FD.locus := the_FD.target;
+      seek_time := arm_seek_time(the_FD);
+      switch_time := platter_switch_time(the_FD);
+      here := the_FD.target;
+      the_FD.comb(here.drive_number, here.platter_number) := next.seek_area_number;
     end seek_to_the_target_area;
 
    subtype sector_image is String(1 .. bytes_per_sector);
@@ -301,14 +302,12 @@ package body IOC.fast.FD is
       byte_count   : Integer;
    begin
       if seek(fd_of(the_FD.stream), byte_address) /= byte_address then
-         raise emulation_failure
-            with "POSIX seek failure in FD.get_next_sector";
+         raise emulation_failure with "POSIX seek failure in FD.get_next_sector";
       end if;
       byte_count := read(fd_of(the_FD.stream), this_sector, bytes_per_sector);
       if byte_count /= bytes_per_sector and then  -- A short transfer ..
             byte_count /= 0                 then  -- ... is OK at EOF with a 0 count.
-         raise emulation_failure
-            with "POSIX read failure in FD.get_next_sector";
+         raise emulation_failure with "POSIX read failure in FD.get_next_sector";
       end if;
       the_FD.sector_count := the_FD.sector_count + 1;
       advance_the_sector_number(the_FD);
@@ -384,16 +383,14 @@ package body IOC.fast.FD is
    begin
       validate_device(the_FD, Q_operand);
       validate_parity(the_FD);
-      switch_duration := platter_switch_time(the_FD);
-      seek_to_the_target_area(the_FD);
-      seek_duration := arm_seek_time(the_FD);
+      seek_to_the_target_area(the_FD, seek_duration, switch_duration);
       set_the_new_sector_number(the_FD, Q_operand);
       latency_start_time := the_present_time + seek_duration + switch_duration;
       latency_duration := latent_time(the_FD, latency_start_time);
 
       if the_FD.locus.is_at_end_of_area then
          -- Cannot transfer past the last sector in a seek area.
-         trap_invalid_operand("attempt to read FD at the end of a seek area");
+         trap_failing_IO_operation(the_FD, "attempt to read FD at the end of a seek area");
       end if;
 
       -- Read from the newly established position.
@@ -405,7 +402,7 @@ package body IOC.fast.FD is
           );
 
       total_duration := seek_duration + switch_duration + latency_duration + data_duration;
-      start_data_transfer(the_FD, Q_operand, False, total_duration);
+      start_data_transfer(the_FD, Q_operand, False, total_duration, input_operation);
       lock_out_relative_addresses(Q_operand);
       update_statistics(
                         the_FD,
@@ -538,15 +535,18 @@ package body IOC.fast.FD is
    -- Set up, but do not yet effect, a seek to the locus specified by the Q_operand.
    -- This follows advice from David Holdsworth that seeks were not effected
    --    until a data transfer operation was obeyed.
+   -- PMA does not lockout for a busy device.  This may not be authentic.
    overriding
    procedure PMA (the_FD      : in out FD.device;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      a_seek_is_needed : Boolean := False;
    begin
       validate_device(the_FD, Q_operand);
       validate_parity(the_FD);
-      set_seek_target(the_FD, Q_operand);
-      deal_with_a_busy_device(the_FD, 16, set_offline);
+      set_seek_target(the_FD, Q_operand, a_seek_is_needed);
+      deal_with_a_busy_device(the_FD, 19, set_offline);
+      take_note_of_test(the_FD.device_name, Q_operand, a_seek_is_needed);
    end PMA;
 
    overriding
@@ -576,8 +576,11 @@ package body IOC.fast.FD is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
       -- clear out seek area # and platter #, leaving buffer # and drive #
-      platter_0 : constant KDF9.Q_part := Q_operand.C and 16#C00F#;
-      control_word             : KDF9.Q_register;
+      platter_0        : constant KDF9.Q_part := Q_operand.C and 16#C00F#;
+      control_word     : KDF9.Q_register;
+      a_seek_is_needed : Boolean;
+      seek_duration,
+      switch_duration  : KDF9.us;
    begin
       validate_device(the_FD, Q_operand);
       -- Hypothesis: drive reset clears the parity flag.
@@ -585,12 +588,12 @@ package body IOC.fast.FD is
       -- In effect, do 16 PMA operations, but treat them as a single operation.
       for p in KDF9.Q_part range 0..15 loop -- p is platter #
          control_word := (platter_0 + p*16#400#, Q_operand.I, Q_operand.M);
-         set_seek_target(the_FD, control_word);
-         seek_to_the_target_area(the_FD);
+         set_seek_target(the_FD, control_word, a_seek_is_needed);
+         seek_to_the_target_area(the_FD, seek_duration, switch_duration);
          update_statistics(
                            the_FD,
-                           switch_time  => platter_switch_time(the_FD),
-                           seek_time    => arm_seek_time(the_FD)
+                           switch_time  => switch_duration,
+                           seek_time    => seek_duration
                           );
       end loop;
       deal_with_a_busy_device(the_FD, 16, set_offline);
@@ -612,12 +615,10 @@ package body IOC.fast.FD is
       byte_address : constant POSIX.file_position := file_offset(the_FD.locus);
    begin
       if seek(fd_of(the_FD.stream), byte_address) /= byte_address then
-         raise emulation_failure
-            with "POSIX seek failure in FD.put_next_sector";
+         raise emulation_failure with "POSIX seek failure in FD.put_next_sector";
       end if;
       if write(fd_of(the_FD.stream), this_sector, bytes_per_sector) /= bytes_per_sector then
-         raise emulation_failure
-            with "POSIX write failure in FD.put_next_sector";
+         raise emulation_failure with "POSIX write failure in FD.put_next_sector";
       end if;
       the_FD.sector_count := the_FD.sector_count + 1;
       advance_the_sector_number(the_FD);
@@ -676,16 +677,14 @@ package body IOC.fast.FD is
    begin
       validate_device(the_FD, Q_operand);
       validate_parity(the_FD);
-      switch_duration := platter_switch_time(the_FD);
-      seek_to_the_target_area(the_FD);
-      seek_duration := arm_seek_time(the_FD);
+      seek_to_the_target_area(the_FD, seek_duration, switch_duration);
       set_the_new_sector_number(the_FD, Q_operand);
       latency_start_time := the_present_time + seek_duration + switch_duration;
       latency_duration := latent_time(the_FD, latency_start_time);
 
       if the_FD.locus.is_at_end_of_area then
          -- Cannot transfer past the last sector in a seek area.
-         trap_invalid_operand("attempt to read FD at the end of a seek area");
+         trap_failing_IO_operation(the_FD, "attempt to read FD at the end of a seek area");
       end if;
 
       -- Write to the newly established position.
@@ -697,7 +696,7 @@ package body IOC.fast.FD is
            );
 
       total_duration := seek_duration + switch_duration + latency_duration + data_duration;
-      start_data_transfer(the_FD, Q_operand, False, total_duration);
+      start_data_transfer(the_FD, Q_operand, False, total_duration, output_operation);
       lock_out_relative_addresses(Q_operand);
       update_statistics(
                         the_FD,
@@ -806,6 +805,7 @@ package body IOC.fast.FD is
 
    overriding
    procedure Finalize (the_FD : in out FD.device) is
+      buffer : constant String := oct_of(KDF9.Q_part(the_FD.number), 2);
    begin
       if the_FD.is_open then
          if (the_final_state_is_wanted and the_log_is_wanted)    and then
@@ -815,7 +815,7 @@ package body IOC.fast.FD is
                    (
                     the_FD.device_name
                   & " on buffer #"
-                  & oct_of(KDF9.Q_part(the_FD.number), 2)
+                  & buffer
                   & " spent:"
                    );
             log_line
@@ -861,10 +861,9 @@ package body IOC.fast.FD is
          close(the_FD);
       end if;
    exception
-      when others =>
+      when error : others =>
          raise emulation_failure
-            with "Finalize error for FD buffer #"
-               & oct_of(KDF9.Q_part(the_FD.number), 2);
+            with "Finalizing FD buffer #" & buffer & "; " & Ada.Exceptions.Exception_Message(error);
    end Finalize;
 
    FD_quantum : constant := (1E6 + outer_rate - 1) / outer_rate;
@@ -873,16 +872,25 @@ package body IOC.fast.FD is
 
    FD0 : FD_access with Warnings => Off;
 
-   already_enabled : Boolean := False;
-
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if already_enabled then trap_operator_error("more than 1 FD unit specified"); end if;
+      if is_enabled then trap_operator_error("FD:", "more than one unit specified"); end if;
       FD0 := new FD.device (number  => b,
                             kind    => FD_kind,
                             unit    => 0,
                             quantum => FD_quantum);
-      already_enabled := True;
+      is_enabled := True;
+      FD0_number := b;
    end enable;
+
+   procedure re_enable (b : in KDF9.buffer_number) is
+   begin
+      if is_enabled and then
+         b = FD0.number then
+         return;
+      end if;
+      buffer(b) := null;
+      enable(b);
+   end re_enable;
 
 end IOC.fast.FD;

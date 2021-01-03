@@ -1,0 +1,483 @@
+
+TP0:
+===
+
+RAN/EL/000M03S/000M07S  SIZE    275
+
+Propagation of an Impulse into a Viscous-locking Medium
+
+
+
+    Delta alpha = 0.1000
+
+
+    alpha               lambda       lambda×sqrt(2×alpha)         g
+
+    0.0000             INFINITY             1.00000            1.00000
+    0.1000            2.0201º +0            0.90340            0.73452
+    0.2000            1.2812º +0            0.81029            0.52525
+    0.3000            9.2712º -1            0.71814            0.36101
+    0.4000            6.9943º -1            0.62559            0.24038
+
+    0.5000            5.3160º -1            0.53160            0.26796
+    0.6000            3.9727º -1            0.43519            0.30384
+    0.7000            2.8340º -1            0.33532            0.34489
+    0.8000            1.8242º -1            0.23075            0.38947
+    0.9000            8.9284º -2            0.11979            0.43642
+
+    1.0000            0.0000                0.00000            0.48394
+===
+
+LP0:
+===
+
+RAN/EL/008M50S/008M56S===
+Digital signature of traced orders = #3755315062014254.
+FLUID DONE
+
+TP0:
+===
+
+RAN/EL/000M02S/000M05S  SIZE    155
+
+The  1st prime is   2
+The  2nd prime is   3
+The  3rd prime is   5
+The  4th prime is   7
+The  5th prime is  11
+The  6th prime is  13
+The  7th prime is  17
+The  8th prime is  19
+The  9th prime is  23
+The 10th prime is  29
+The 11th prime is  31
+The 12th prime is  37
+The 13th prime is  41
+The 14th prime is  43
+The 15th prime is  47
+The 16th prime is  53
+The 17th prime is  59
+The 18th prime is  61
+The 19th prime is  67
+The 20th prime is  71
+The 21st prime is  73
+The 22nd prime is  79
+The 23rd prime is  83
+The 24th prime is  89
+The 25th prime is  97
+The 26th prime is 101
+The 27th prime is 103
+The 28th prime is 107
+The 29th prime is 109
+The 30th prime is 113
+===
+
+LP0:
+===
+
+RAN/EL/021M43S/021M47S===
+Digital signature of traced orders = #2462534671215633.
+GPSPRIMES DONE
+
+TP0:
+===
+
+RAN/EL/000M02S/000M04S  SIZE    154
+===
+
+LP0:
+===
+
+THE TOWERS OF HANOI.
+MOVE 3 DISCS FROM TOWER A TO TOWER C VIA TOWER B
+MOVE A DISC FROM A TO C
+MOVE A DISC FROM A TO B
+MOVE A DISC FROM C TO B
+MOVE A DISC FROM A TO C
+MOVE A DISC FROM B TO A
+MOVE A DISC FROM B TO C
+MOVE A DISC FROM A TO C
+
+RAN/EL/000M01S/000M06S===
+Digital signature of traced orders = #6733571075644332.
+HANOI DONE
+
+TP0:
+===
+
+IDENTIFIER j NOT USED
+DECLARED ON LINE   2
+RAN/EL/000M01S/000M03S  SIZE     82
+
+Hello World.
+   111111111  1.111111111º +4
+  -222222222 -2.222222222º +3
+   333333333  3.333333333º +2
+   444444444  4.444444444º +1
+  -555555555 -5.555555555º +0
+   666666666  6.666666666º -1
+   123456789  1.234567890º +8
+   111111111  1.111111111º +1
+  -222222222 -2.222222222º -1
+   333333333  3.333333333º +1
+   444444444  4.444444444º+11
+  -555555555 -5.555555555º-11
+   666666666  6.666666666º+11
+  -987654321 -9.876543210º +8
+   111111111  1.000000000º +1
+  -222222222 -2.000000000º -1
+   333333333  3.000000000º +1
+   444444444  4.000000000º+11
+  -555555555 -5.000000000º-11
+   666666666  6.000000000º+11
+   987654321 -9.876543210º +8
+   111111111  1.000000000º +1
+  -222222222 -1.000000000º -2
+   333333333  1.000000000º +3
+   444444444  1.000000000º +4
+  -555555555 -1.000000000º -5
+   666666666  1.000000000º +6
+           0  0.000000000    
+Farewell, Cruel World.
+===
+
+LP0:
+===
+
+RAN/EL/000M03S/000M13S===
+Digital signature of traced orders = #3301160711524477.
+INPUT DONE
+
+TP0:
+===
+
+RAN/EL/000M01S/000M03S  SIZE     60
+===
+
+LP0:
+===
+
+   +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67 -138
+RAN/EL/000M46S/000M48S===
+Digital signature of traced orders = #1407535531421151.
+MANORBOY DONE
+
+TP0:
+===
+
+RAN/EL/000M02S/000M05S  SIZE    217
+===
+
+LP0:
+===
+
+
+SET C TO AB(10,20,10)
+
+
+ROW  1 SHOULD BE 1.23456789º +0
+ 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0
+ 1.23456790º +0 1.23456790º +0
+
+ROW  2 SHOULD BE 2.46913578º +0
+ 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0
+ 2.46913580º +0 2.46913580º +0
+
+ROW  3 SHOULD BE 3.70370367º +0
+ 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0
+ 3.70370370º +0 3.70370370º +0
+
+ROW  4 SHOULD BE 4.93827156º +0
+ 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0
+ 4.93827160º +0 4.93827160º +0
+
+ROW  5 SHOULD BE 6.17283945º +0
+ 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0
+ 6.17283951º +0 6.17283951º +0
+
+ROW  6 SHOULD BE 7.40740734º +0
+ 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0
+ 7.40740741º +0 7.40740741º +0
+
+ROW  7 SHOULD BE 8.64197523º +0
+ 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0
+ 8.64197531º +0 8.64197531º +0
+
+ROW  8 SHOULD BE 9.87654312º +0
+ 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0
+ 9.87654321º +0 9.87654321º +0
+
+ROW  9 SHOULD BE 1.11111110º +1
+ 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1
+ 1.11111111º +1 1.11111111º +1
+
+ROW 10 SHOULD BE 1.23456789º +1
+ 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1
+ 1.23456790º +1 1.23456790º +1
+
+
+RAN/EL/000M32S/000M35S===
+Digital signature of traced orders = #7606563365674365.
+MATMULT DONE
+
+TP0:
+===
+
+RAN/EL/000M04S/000M10S  SIZE    422
+===
+
+LP0:
+===
+
+RAN/EL/186M43S/186M55S===
+Digital signature of traced orders = #4255204233365116.
+TP1:
+===
+
+The first 7 solutions:
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - - - -     
+I       I   I       I   I           I   I
+     - -     - -         - - - - - -     
+I   I           I   I       I       I   I
+     - -     - -     - -     - -     - - 
+I       I   I   I       I       I       I
+ - - - - - -     - - - - - - - -     - - 
+I           I   I               I   I   I
+         - -     - -     - - - - - -     
+I       I           I   I               I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I   I       I       I
+ - - - - - - - - - -     - -     - -     
+I   I           I           I       I   I
+     - - - -     - -     - - - -         
+I           I   I   I   I       I   I   I
+ - - - -             - -         - -     
+I       I   I   I   I           I   I   I
+     - - - - - -     - - - - - -     - - 
+I   I       I           I   I           I
+     - -     - - - - - -     - - - -     
+I       I           I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -     - - - - - -     
+I   I           I           I       I   I
+     - - - -     - -     - - - -     - - 
+I           I   I   I   I       I       I
+ - - - -             - -         - -     
+I       I   I   I   I           I   I   I
+     - - - - - -     - - - - - -     - - 
+I   I       I           I   I           I
+     - -     - - - - - -     - - - -     
+I       I           I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -         - - - - - - 
+I   I           I       I   I           I
+     - - - -     - -     - - - -         
+I           I       I   I       I       I
+ - - - -     - - - -     - -     - - - - 
+I       I   I   I   I   I   I       I   I
+     - - - -         - -     - -         
+I   I           I   I           I   I   I
+     - -     - -     - -     - - - -     
+I       I   I           I   I           I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -     - - - -     - - 
+I   I           I           I   I   I   I
+     - - - -     - -     - -     - -     
+I           I   I   I   I   I           I
+ - - - -             - -     - - - - - - 
+I   I   I   I   I       I           I   I
+         - - - - - -     - -     - -     
+I   I   I           I       I   I   I   I
+ - -     - -         - - - - - -         
+I           I       I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I       I   I       I
+ - - - - - - - - - -     - -             
+I   I               I   I       I       I
+     - - - -     - -     - -     - -     
+I           I   I   I       I       I   I
+ - - - -     - -     - - - - - - - - - - 
+I   I   I   I   I       I           I   I
+         - -     - -     - - - -         
+I   I   I           I       I   I   I   I
+ - -     - -     - - - - - -             
+I           I   I               I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+ - - - - - - - - - - - - - - - - - - - - 
+I                   I       I   I       I
+ - - - - - - - - - -             - -     
+I   I               I       I       I   I
+     - - - -     - -     - -     - -     
+I           I   I   I   I       I       I
+ - - - -     - -     - - - - - - - - - - 
+I   I   I   I   I       I           I   I
+         - -     - -     - - - -         
+I   I   I           I       I   I   I   I
+ - -     - -     - - - - - -             
+I           I   I               I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+===
+PENTOMINO DONE
+
+TP0:
+===
+
+IDENTIFIER mask NOT USED
+DECLARED ON LINE   3
+RAN/EL/000M05S/000M11S  SIZE    542
+===
+
+LP0:
+===
+
+EPSILON = 1.00000000000º-10
+MMAX =  20
+COUNT =         6
++7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +1.15800462004º-11
+COUNT =        20
++1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.07088972447º-10
+COUNT =         6
++2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
+COUNT =         6
++6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +1.31212349598º-11
+COUNT =         6
++8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +1.02625487529º-11
+
+RAN/EL/198M14S/198M14S===
+Digital signature of traced orders = #3402651640546021.
+WEEHAAVIE DONE
+
+TP0:
+===
+
+LINE  18 REL LINE   8 POSITION IDENTIFIER lab
+END COMMENT
+LINE  24 REL LINE   5 POSITION IDENTIFIER p0
+END COMMENT
+LINE  32 REL LINE   7 POSITION IDENTIFIER p3
+END COMMENT
+LINE  46 REL LINE  13 POSITION IDENTIFIER pout
+END COMMENT
+IDENTIFIER a NOT USED
+DECLARED ON LINE   2
+IDENTIFIER b NOT USED
+DECLARED ON LINE   2
+IDENTIFIER c NOT USED
+DECLARED ON LINE   2
+RAN/EL/000M05S/000M15S  SIZE    603
+===
+
+LP0:
+===
+
+N=   0 J=   0 K=   0 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N= 120 J= 140 K= 120 X1=-0.06834220 X2=-0.46263766 X3=-0.72971839 X4=-1.12397907
+N= 140 J= 120 K= 120 X1=-0.05533645 X2=-0.44743656 X3=-0.71097339 X4=-1.10309806
+N=3450 J=   1 K=   1 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N=2100 J=   1 K=   2 X1=+6.00000000 X2=+6.00000000 X3=-0.71097339 X4=-1.10309806
+N= 320 J=   1 K=   2 X1=+0.49040732 X2=+0.49040732 X3=+0.49039250 X4=+0.49039250
+N=8990 J=   1 K=   2 X1=+1.00000000 X2=+1.00000000 X3=+0.99993750 X4=+0.99993750
+N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
+N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
+N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
+
+RAN/EL/006M57S/006M59S===
+Digital signature of traced orders = #7636155453113124.
+WHETSTONE DONE
+
+TP0:
+===
+
+RAN/EL/000M02S/000M06S  SIZE    263
+===
+
+LP0:
+===
+
+THESE ARE THE 21 YEARS OF KDF9:
+IN 1960 EASTER SUNDAY IS ON 17/04 AND KDF9 IS  -4 YEARS OLD
+IN 1961 EASTER SUNDAY IS ON 02/04 AND KDF9 IS  -3 YEARS OLD
+IN 1962 EASTER SUNDAY IS ON 22/04 AND KDF9 IS  -2 YEARS OLD
+IN 1963 EASTER SUNDAY IS ON 14/04 AND KDF9 IS  -1 YEARS OLD
+IN 1964 EASTER SUNDAY IS ON 29/03 AND KDF9 IS   0 YEARS OLD
+IN 1965 EASTER SUNDAY IS ON 18/04 AND KDF9 IS   1 YEARS OLD
+IN 1966 EASTER SUNDAY IS ON 10/04 AND KDF9 IS   2 YEARS OLD
+IN 1967 EASTER SUNDAY IS ON 26/03 AND KDF9 IS   3 YEARS OLD
+IN 1968 EASTER SUNDAY IS ON 14/04 AND KDF9 IS   4 YEARS OLD
+IN 1969 EASTER SUNDAY IS ON 06/04 AND KDF9 IS   5 YEARS OLD
+IN 1970 EASTER SUNDAY IS ON 29/03 AND KDF9 IS   6 YEARS OLD
+IN 1971 EASTER SUNDAY IS ON 11/04 AND KDF9 IS   7 YEARS OLD
+IN 1972 EASTER SUNDAY IS ON 02/04 AND KDF9 IS   8 YEARS OLD
+IN 1973 EASTER SUNDAY IS ON 22/04 AND KDF9 IS   9 YEARS OLD
+IN 1974 EASTER SUNDAY IS ON 14/04 AND KDF9 IS  10 YEARS OLD
+IN 1975 EASTER SUNDAY IS ON 30/03 AND KDF9 IS  11 YEARS OLD
+IN 1976 EASTER SUNDAY IS ON 18/04 AND KDF9 IS  12 YEARS OLD
+IN 1977 EASTER SUNDAY IS ON 10/04 AND KDF9 IS  13 YEARS OLD
+IN 1978 EASTER SUNDAY IS ON 26/03 AND KDF9 IS  14 YEARS OLD
+IN 1979 EASTER SUNDAY IS ON 15/04 AND KDF9 IS  15 YEARS OLD
+IN 1980 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  16 YEARS OLD
+THESE ARE THE YEARS OF EE9:
+IN 2009 EASTER SUNDAY IS ON 12/04 AND KDF9 IS  45 YEARS OLD
+IN 2010 EASTER SUNDAY IS ON 04/04 AND KDF9 IS  46 YEARS OLD
+IN 2011 EASTER SUNDAY IS ON 24/04 AND KDF9 IS  47 YEARS OLD
+IN 2012 EASTER SUNDAY IS ON 08/04 AND KDF9 IS  48 YEARS OLD
+IN 2013 EASTER SUNDAY IS ON 31/03 AND KDF9 IS  49 YEARS OLD
+IN 2014 EASTER SUNDAY IS ON 20/04 AND KDF9 IS  50 YEARS OLD
+IN 2015 EASTER SUNDAY IS ON 05/04 AND KDF9 IS  51 YEARS OLD
+IN 2016 EASTER SUNDAY IS ON 27/03 AND KDF9 IS  52 YEARS OLD
+IN 2017 EASTER SUNDAY IS ON 16/04 AND KDF9 IS  53 YEARS OLD
+IN 2018 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  54 YEARS OLD
+IN 2019 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  55 YEARS OLD
+IN 2020 EASTER SUNDAY IS ON 12/04 AND KDF9 IS  56 YEARS OLD
+THESE ARE THE NEXT 21 YEARS (MAKING OPTIMISTIC ASSUMPTIONS)
+IN 2021 EASTER SUNDAY IS ON 04/04 AND KDF9 IS  57 YEARS OLD
+IN 2022 EASTER SUNDAY IS ON 17/04 AND KDF9 IS  58 YEARS OLD
+IN 2023 EASTER SUNDAY IS ON 09/04 AND KDF9 IS  59 YEARS OLD
+IN 2024 EASTER SUNDAY IS ON 31/03 AND KDF9 IS  60 YEARS OLD
+IN 2025 EASTER SUNDAY IS ON 20/04 AND KDF9 IS  61 YEARS OLD
+IN 2026 EASTER SUNDAY IS ON 05/04 AND KDF9 IS  62 YEARS OLD
+IN 2027 EASTER SUNDAY IS ON 28/03 AND KDF9 IS  63 YEARS OLD
+IN 2028 EASTER SUNDAY IS ON 16/04 AND KDF9 IS  64 YEARS OLD
+IN 2029 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  65 YEARS OLD
+IN 2030 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  66 YEARS OLD
+IN 2031 EASTER SUNDAY IS ON 13/04 AND KDF9 IS  67 YEARS OLD
+IN 2032 EASTER SUNDAY IS ON 28/03 AND KDF9 IS  68 YEARS OLD
+IN 2033 EASTER SUNDAY IS ON 17/04 AND KDF9 IS  69 YEARS OLD
+IN 2034 EASTER SUNDAY IS ON 09/04 AND KDF9 IS  70 YEARS OLD
+IN 2035 EASTER SUNDAY IS ON 25/03 AND KDF9 IS  71 YEARS OLD
+IN 2036 EASTER SUNDAY IS ON 13/04 AND KDF9 IS  72 YEARS OLD
+IN 2037 EASTER SUNDAY IS ON 05/04 AND KDF9 IS  73 YEARS OLD
+IN 2038 EASTER SUNDAY IS ON 25/04 AND KDF9 IS  74 YEARS OLD
+IN 2039 EASTER SUNDAY IS ON 10/04 AND KDF9 IS  75 YEARS OLD
+IN 2040 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  76 YEARS OLD
+IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
+
+RAN/EL/000M15S/000M20S===
+Digital signature of traced orders = #2761045716715240.
+ZELLER DONE

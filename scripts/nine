@@ -97,7 +97,7 @@ fi
 
 if [ x"${datafile}"x = xx ]
 then
-    >${KDF9RUNTIME}/TR0
+    >${KDF9RUNTIME}/TR1
 else
     datatxt=${DATA}/`basename "${datafile}" ".txt"`.txt
     if [ -r "$datatxt" ]

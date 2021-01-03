@@ -2,8 +2,8 @@
 --
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -554,7 +554,7 @@ package body KDF9 is
 
    -- The %  prepended to the_message aids parsing of exception error messages in failure shutdown.
 
-   procedure trap_invalid_instruction (the_message : in String := "invalid opcode") is
+   procedure trap_illegal_instruction (the_message : in String := "invalid opcode") is
    begin
       -- The program has failed in a manner that could cause a LIV interrupt.
       case the_execution_mode is
@@ -572,31 +572,13 @@ package body KDF9 is
                raise Director_failure with "%" & the_message;
             end if;
       end case;
-   end trap_invalid_instruction;
+   end trap_illegal_instruction;
 
-   procedure trap_invalid_operand (the_message : in String := "invalid operand") is
-   begin
-      -- The program has failed in a manner that does not cause a LIV interrupt,
-      --    but needs to be handled in a similar manner by ee9.
-      case the_execution_mode is
-         when program_mode
-            | test_program_mode =>
-            raise operand_error with "%" & the_message;
-         when boot_mode =>
-            if the_CPU_state = program_state then
-               raise operand_error with "%" & the_message;
-            else
-               -- The Director itself has gone seriously wrong.
-               raise Director_operand_error with "%" & the_message;
-            end if;
-      end case;
-   end trap_invalid_operand;
-
-   procedure trap_operator_error (the_message : in String) is
+   procedure trap_operator_error (the_device, the_message : in String) is
    begin
       -- The program has failed for a reason, such as a misconfigured environment,
       --    that is beyond its control and prevents further execution.
-      raise operator_error with "%" & the_message;
+      raise operator_error with "%" & the_device & " " & the_message;
    end trap_operator_error;
 
    procedure trap_unimplemented_feature (the_message : in String) is
@@ -604,6 +586,12 @@ package body KDF9 is
       -- The program has attempted to use something that ee9 does not (yet) support.
       raise not_yet_implemented with "%" & the_message;
    end trap_unimplemented_feature;
+
+   procedure fail_OUT (OUT_number : in KDF9.word; the_message : in String) is
+      OUT_name : constant String := "%OUT" & OUT_number'Image & ": ";
+   begin
+      raise IO_error with OUT_name & the_message;
+   end fail_OUT;
 
    procedure trap_invalid_paper_tape (the_message : in String) is
    begin

@@ -15,10 +15,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-trap "rm -f ${KDF9RUNTIME}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff"  0 1 2 3
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
 
-opt="-d=t -m=ahipr"
+export EE9REGTEST=1
+
+trap "rm -f ${KDF9RUNTIME}/MTx ${DATA}/mt_test_labels.txt ${LOGS}/mt_test.log ${LOGS}/mt_test.diff; chmod 644 ${KDF9RUNTIME}/ST0"  0 1 2 3
+
+opt="-d=t -m=ahpr"
 
 >${KDF9RUNTIME}/MT0
 >${KDF9RUNTIME}/MT1
@@ -53,13 +66,15 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
-echo "TEST B - GAP in unWIPEd area - should fail \"Invalid operand\":"
+
+echo "TEST B - GAP in unWIPEd area - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4B; nine OUT4B $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST C - valid WIPE at end of data - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4C; nine OUT4C $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -67,20 +82,23 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
-echo "TEST D - reading past the end of data - should fail \"Invalid operand\":"
+
+echo "TEST D - reading past the end of data - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4D; nine OUT4D $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
-echo "TEST E - attempt to write past PET - should fail \"Invalid operand\":"
+
+echo "TEST E - attempt to write past PET - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4E; nine OUT4E $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST F - MW, MWE, MFRE and MBRE - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4F; nine OUT4F $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -88,6 +106,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST G - WIPE entire tape, leaving it unlabelled - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4G; nine OUT4G $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -95,6 +114,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST H - writing to ETW - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4H; nine OUT4H $opt >>${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -102,6 +122,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST I - MBR at BTW - should LIV:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4I; nine OUT4I $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -109,6 +130,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST J - MBSK at BTW - should LIV:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4J; nine OUT4J $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -116,6 +138,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST K - MBR after label block, R/W 1-word blocks - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4K; nine OUT4K $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
@@ -123,6 +146,7 @@ case $opt in
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
+
 echo "TEST L - R/W 32K-word blocks - should end normally:"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4L; nine OUT4L $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 
@@ -133,15 +157,28 @@ case $opt in
 esac
 
 echo "TEST T - like TEST A but for 7-track decks - should end normally:"
-rlt mt_test_labels - zw; ucc OUT4T; nine OUT4T $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+rlt mt_test_labels -m=zw; ucc OUT4T; nine OUT4T $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
       echo "======"; cat ${KDF9RUNTIME}/TP0; echo "======"; echo;;
    *) ;;
 esac
 
+echo "TEST TRO - like TEST T but without WPR - should fail:"
+chmod 444 ${KDF9RUNTIME}/ST0
+rlt mt_test_labels -m=zw; ucc OUT4T; nine OUT4T $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+chmod 644 ${KDF9RUNTIME}/ST0
+case $opt in
+   z)
+      echo ======; cat TP0; echo ======; echo;;
+   *) ;;
+esac
+
+echo "TEST OUT 2 - should end normally:" 
+rlt mt_test_labels -m=zw; ucc OUT2; nine OUT2 $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
+
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/mt_test.log ${TESTS}/mt_good_test.log >${LOGS}/mt_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/mt_test.log ${TESTS}/mt_regr_tests_good.log >${LOGS}/mt_test.diff
 if [ -s mt_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
@@ -151,5 +188,3 @@ then
 else
    echo "These tests ran as expected."
 fi
-
-

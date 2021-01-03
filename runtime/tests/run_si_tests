@@ -15,13 +15,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]
+then
+    export KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; >settings_1.txt" 0 1 2 3
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
 
-opt="-d=t -m=ahipr"
-data=${DATA}/SI0_data.txt
+export EE9REGTEST=1
 
-cat  > $data <<++++
+trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; ${KDF9RUNTIME}/settings_1.txt /tmp/sioutput" 0 1 2 3
+
+opt="-d=t -m=aenz"
+si0data=${DATA}/SI0_data.txt
+
+cat  > $si0data <<++++
 0123456701234567
 89_º;+-.89_º;+-.
 @ABCDEFG@ABCDEFG
@@ -43,52 +56,57 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 ++++
+
+>${LOGS}/si_test.log
+>${KDF9RUNTIME}/settings_1.txt 
+>${KDF9RUNTIME}/SI0
+>${KDF9RUNTIME}/SI1
+>${KDF9RUNTIME}/TP0
+>${KDF9RUNTIME}/TP1
 
 cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 15 SI 14 SI
 ++++
 
->${LOGS}/si_test.log
->${KDF9RUNTIME}/SI0
->${KDF9RUNTIME}/SI1
-
-echo; echo "TEST PIB/POB from SI0 to TP:; echo TEST PIB/POB from SI0 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9RUNTIME}/SI0
+echo "TEST PIB/POB from SI0 to TP:" >>${LOGS}/si_test.log
+cat $si0data > ${KDF9RUNTIME}/SI0
 ucc SI2TP; nine SI2TP $opt
 cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
-echo; echo "TEST PIC/POC from SI0 to TP:; echo TEST PIC/POC from SI0 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9RUNTIME}/SI0
+echo "TEST PIC/POC from SI0 to TP:" >>${LOGS}/si_test.log
+cat $si0data > ${KDF9RUNTIME}/SI0
 ucc SI2TPC; nine SI2TPC $opt
 cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
-echo; echo "TEST PIB/POB from TR to SI0:; echo TEST PIB/POB from TR to SI0:" >>${LOGS}/si_test.log
+echo "TEST PIB/POB from TR to SI0:" >>${LOGS}/si_test.log
 >${KDF9RUNTIME}/SI0
 ucc TR2SI; nine TR2SI SI0_data $opt
 cat ${KDF9RUNTIME}/SI0 >>${LOGS}/si_test.log
 
-echo; echo "TEST PIC/POC from TR to SI0:; echo TEST PIC/POC from TR to SI0:" >>${LOGS}/si_test.log
+echo "TEST PIC/POC from TR to SI0:" >>${LOGS}/si_test.log
 >${KDF9RUNTIME}/SI0
 ucc TR2SIC; nine TR2SIC SI0_data $opt
 cat ${KDF9RUNTIME}/SI0 >>${LOGS}/si_test.log
 
-echo; echo "TEST PIC/POC from TR to SI1:; echo TEST PIC/POC from TR to SI1:" >>${LOGS}/si_test.log
+echo "TEST PIC/POC from TR to SI1:" >>${LOGS}/si_test.log
 >${KDF9RUNTIME}/SI1
-ucc TR2SI1C; nine ${KDF9RUNTIME}/TR2SI1C SI0_data $opt
-cat SI1 >>${LOGS}/si_test.log
+ucc TR2SI1C; nine TR2SI1C SI0_data $opt
+cat ${KDF9RUNTIME}/SI1 >>${LOGS}/si_test.log
 
-echo; echo "TEST PIC/POC from SI1 to TP:; echo TEST PIC/POC from SI1 to TP:" >>${LOGS}/si_test.log
-cat $data > ${KDF9RUNTIME}/SI1
+echo "TEST PIC/POC from SI1 to TP:" >>${LOGS}/si_test.log
+cat $si0data > ${KDF9RUNTIME}/SI1
 ucc SI12TPC; nine SI12TPC $opt
 cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_good_test.log >${LOGS}/si_test.diff
-if [ -s ${LOGS}/si_test_diffs.txt ]
+iconv -f $(file -b --mime-encoding ${LOGS}/si_test.log) -t UTF8 < ${LOGS}/si_test.log > /tmp/sioutput;
+cat /tmp/sioutput > ${LOGS}/si_test.log;
+diff -diwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_regr_tests_good.log >${LOGS}/si_test.diff
+if [ -s ${LOGS}/si_test.diff ]
 then
    echo "These are the unexpected variances for this run:"
    echo "==="
-   more ${LOGS}/si_test_diffs.txt
+   more ${LOGS}/si_test.diff
    echo "==="
 else
    echo "These tests ran as expected."

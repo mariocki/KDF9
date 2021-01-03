@@ -113,7 +113,23 @@ install: all
 	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
 	install -d $(DESTDIR)$(prefix)/bin/
 	install -d $(DESTDIR)$(prefix)/share/kdf9/
-	cp -aR runtime $(DESTDIR)$(prefix)/share/kdf9/
+	install -d $(DESTDIR)$(prefix)/share/kdf9/Assembly
+	install -m 644 runtime/Assembly/* $(DESTDIR)$(prefix)/share/kdf9/Assembly
+	install -d $(DESTDIR)$(prefix)/share/kdf9/Binary
+	install -m 644 runtime/Binary/* $(DESTDIR)$(prefix)/share/kdf9/Binary
+	install -d $(DESTDIR)$(prefix)/share/kdf9/Data
+	install -m 644 runtime/Data/* $(DESTDIR)$(prefix)/share/kdf9/Data
+	install -d $(DESTDIR)$(prefix)/share/kdf9/FW0Files
+	install -m 644 runtime/FW0Files/* $(DESTDIR)$(prefix)/share/kdf9/FW0Files
+	install -d $(DESTDIR)$(prefix)/share/kdf9/Kidsgrove
+	install -m 644 runtime/Kidsgrove/* $(DESTDIR)$(prefix)/share/kdf9/Kidsgrove
+	install -d $(DESTDIR)$(prefix)/share/kdf9/settings
+	install -m 644 runtime/settings/* $(DESTDIR)$(prefix)/share/kdf9/settings
+	install -d $(DESTDIR)$(prefix)/share/kdf9/tests
+	install -m 755 runtime/tests/* $(DESTDIR)$(prefix)/share/kdf9/tests
+	install -m 644 runtime/tests/*.log $(DESTDIR)$(prefix)/share/kdf9/tests
+	install -d $(DESTDIR)$(prefix)/share/kdf9/Whetstone
+	install -m 644 runtime/Whetstone/* $(DESTDIR)$(prefix)/share/kdf9/Whetstone
 	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 $(DESTDIR)$(prefix)/bin/
 	install -m 755 scripts/* $(DESTDIR)$(prefix)/bin/
 	sed "s|%prefix%|$(prefix)|g" < scripts/kdf9_setup > $(DESTDIR)$(prefix)/bin/kdf9_setup

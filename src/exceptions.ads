@@ -2,8 +2,8 @@
 --
 -- Declare the exceptions used in emulation-mode control.
 --
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -21,6 +21,9 @@ package exceptions is
    -- program_exit is raised when a KDF9 program terminates normally.
    program_exit : exception;
 
+  -- program_restart is raised when a KDF9 program executes OUT 2.
+   program_restart : exception;
+
    -- time_expired is raised when a KDF9 program executes too many instructions.
    time_expired : exception;
 
@@ -34,11 +37,11 @@ package exceptions is
    -- operator_error is raised when the operating context is invalid; e.g. labelled tape not mounted.
    operator_error : exception;
 
-   -- operand_error is raised when an instruction has an invalid operand in problem program state.
-   operand_error : exception;
+   -- IO_error is raised when an impossible I/O operation is attempted in problem program state.
+   IO_error : exception;
 
-   -- Director_operand_error is raised for an operand error happening in Director state.
-   Director_operand_error : exception;
+   -- Director_IO_error when an impossible I/O operation is attempted in Director state.
+   Director_IO_error : exception;
 
    -- Director_failure is raised for an instruction that would LIV in problem program state.
    Director_failure : exception;
