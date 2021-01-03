@@ -67,7 +67,7 @@ case $opt in
    *) ;;
 esac
 
-echo "TEST B - GAP in unWIPEd area - should fail \"Invalid operand\":"
+echo "TEST B - GAP in unWIPEd area - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4B; nine OUT4B $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
@@ -83,7 +83,7 @@ case $opt in
    *) ;;
 esac
 
-echo "TEST D - reading past the end of data - should fail \"Invalid operand\":"
+echo "TEST D - reading past the end of data - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4D; nine OUT4D $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)
@@ -91,7 +91,7 @@ case $opt in
    *) ;;
 esac
 
-echo "TEST E - attempt to write past PET - should fail \"Invalid operand\":"
+echo "TEST E - attempt to write past PET - should fail \"Impossible I/O operation\":"
 cat ${KDF9RUNTIME}/MTx > ${KDF9RUNTIME}/MT2; ucc OUT4E; nine OUT4E $opt >> ${LOGS}/mt_test.log; fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/mt_test.log
 case $opt in
    z)

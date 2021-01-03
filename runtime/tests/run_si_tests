@@ -29,7 +29,7 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-#trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; ${KDF9RUNTIME}/settings_1.txt /tmp/sioutput" 0 1 2 3
+trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; ${KDF9RUNTIME}/settings_1.txt /tmp/sioutput" 0 1 2 3
 
 opt="-d=t -m=aenz"
 si0data=${DATA}/SI0_data.txt

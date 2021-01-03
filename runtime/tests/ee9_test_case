@@ -44,25 +44,25 @@ HKT) this_test="nine Leech LEECH_data9_KDF9"
      encoding=-TR=kk
      signature=\#6151525720423034;;
 MOB) this_test="whet MANORBOY"
-     signature=\#1774104411721111;;
+     signature=\#1407535531421151;;
 GPR) this_test="whet GPSPRIMES"
-     signature=\#3702427170240312;;
+     signature=\#2462534671215633;;
 FLU) this_test="whet FLUID"
-     signature=\#4337171556307416;;
+     signature=\#3755315062014254;;
 WBM) this_test="whet WHETSTONE"
-     signature=\#3226514177100542;;
+     signature=\#7636155453113124;;
 RLT) this_test="rlt RLT_data"
      signature=\#3506450617016266;;
 TO4) this_test="nine OUT4A"
-     signature=\#7017242374042113;;
+     signature=\#3257037520362447;;
 TOX) this_test="nine OUTX"
      signature=\#5346716617576440;;
 MTW) this_test="whet MTW"
-     signature=\#2551007324200157;;
+     signature=\#1610433227767503;;
 INP) this_test="whet INPUT"
-     signature=\#3046175371276175;;
+     signature=\#3301160711524477;;
 HQP) this_test="kids WEEHAAVIE"
-     signature=\#4200133757004705;;
+     signature=\#4230330426172712;;
 *)   echo "test case '$1'\;  UNKNOWN!"
      exit 2;;
 esac
