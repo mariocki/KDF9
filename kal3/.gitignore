@@ -1,4 +1,5 @@
 kal3
 kal3syntax.c
 kal3.output
-*.tab.[ch]
+*.tab.[ch]*
+

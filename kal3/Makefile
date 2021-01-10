@@ -17,7 +17,7 @@
 CC=gcc
 YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-vtd
+YFLAGS=-td
 
 prefix?=/usr/local
 
@@ -25,7 +25,7 @@ kal3: kal3.c kal3.tab.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
 kal3.tab.c: kal3.y
-	$(YACC) $^ $(YFLAGS)
+	$(YACC) $(YFLAGS) $^
 
 .PHONY: clean
 clean:
