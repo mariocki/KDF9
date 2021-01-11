@@ -30,7 +30,7 @@ kal3.tab.c: kal3.y
 .PHONY: clean
 clean:
 	$(RM) kal3
-	$(RM) *.tab.[ch] y.output
+	$(RM) *.tab.[ch]* y.output
 	$(RM) *.output
 
 .PHONY: install
