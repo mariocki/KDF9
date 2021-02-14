@@ -1,5 +1,5 @@
-# This file is part of ee9 (V5), the GNU Ada emulator of the English Electric KDF9.
-# Copyright (C) 2020, W. Findlay; all rights reserved.
+# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
 # modify it under terms of the GNU General Public License as published
@@ -24,16 +24,15 @@ cd ../..
 
 case ${OS} in
 UNIX|Unix|unix|LINUX|Linux|linux)
-   gzip -r -c emulation > emulation.gz; mv emulation.gz ${name}.zip
+   tar -c -f ${name}.tar emulation; gzip -c ${name}.tar > ${name}.tar.gz;
+   echo; ls -la ${name}.tar*
    ;;
 macOS|Macintosh|Mac|OSX|[Ww]indows|WINDOWS)
    zip -q -r ${name}.zip emulation
+   echo; ls -la ${name}.zip
    ;;
 *)
    echo Invalid target OS parameter \"$1\"!
    exit 2
    ;;
 esac
-
-echo
-ls -la ${name}.zip

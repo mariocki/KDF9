@@ -1,8 +1,6 @@
--- settings.ads
---
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -80,7 +78,6 @@ package settings is
    debugging_is_enabled,
    the_signature_is_enabled,
    the_histogram_is_enabled,
-   the_graph_plotter_is_enabled,
    pre_overlay_state_is_enabled,
    the_external_trace_is_enabled,
    the_interrupt_trace_is_enabled,

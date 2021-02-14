@@ -44,9 +44,6 @@ MTW) this_test="whet MTW"
      signature=\#1610433227767503;;
 INP) this_test="whet INPUT"
      signature=\#3301160711524477;;
-HQP) this_test="kids WEEHAAVIE -"
-     export KIDSMISC=w-
-     signature=\#4230330426172712;;
 *)   echo test case "$1"\;  UNKNOWN!
      exit 2;;
 esac

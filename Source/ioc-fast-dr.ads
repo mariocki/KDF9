@@ -1,8 +1,6 @@
--- ioc-fast-dr.ads
---
 -- Emulation of a drum store buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -95,9 +93,9 @@ package IOC.fast.DR is
 
    procedure re_enable (b : in KDF9.buffer_number);
 
-   is_enabled         : Boolean := False;
+   procedure disable (b : in KDF9.buffer_number);
 
-   DR0_number         : KDF9.buffer_number;
+   DR0_is_enabled : Boolean := False;
 
    function as_DR_command (Q_operand : KDF9.Q_register; for_OUT : Boolean := False)
    return String;
@@ -151,5 +149,7 @@ private
 
    overriding
    procedure Finalize (the_DR : in out DR.device);
+
+   DR0_number : KDF9.buffer_number := 0;
 
 end IOC.fast.DR;

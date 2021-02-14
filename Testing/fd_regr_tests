@@ -39,6 +39,18 @@ echo "TEST TFDOUTS 41, 42, 43, 44, 45."   >>fd_regr_tests_log.txt
 nine       TFDOUTS - t ${opt}
 fgrep "Digital signature"  KDF9_log.txt   >>fd_regr_tests_log.txt
 
+echo "TEST TFDOUTFAILS 41 with no discs reserved."
+echo "TEST TFDOUTFAILS 41 with no discs reserved." >>fd_regr_tests_log.txt
+>FD0; ucc  TFDOUTFAILS
+VARIABLE=8 nine       TFDOUTFAILS - t ${opt}
+fgrep "Digital signature"  KDF9_log.txt            >>fd_regr_tests_log.txt
+
+echo "TEST TFDOUTFAILS 44, 45 too many 45s."
+echo "TEST TFDOUTFAILS 44, 45 too many 45s."       >>fd_regr_tests_log.txt
+>FD0; ucc  TFDOUTFAILS
+VARIABLE=4 nine       TFDOUTFAILS - t ${opt}
+fgrep "Digital signature"  KDF9_log.txt            >>fd_regr_tests_log.txt
+
 echo
 diff fd_regr_tests_log.txt fd_regr_tests_good_log.txt >fd_regr_tests_diff.txt
 if [ -s fd_regr_tests_diff.txt ]

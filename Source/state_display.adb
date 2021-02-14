@@ -1,8 +1,6 @@
--- state_display.adb
---
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -389,8 +387,13 @@ package body state_display is
       log_new_line(the_external_trace_file);
    end log_to_external_trace;
 
-   procedure log_an_external_trace_header is
+   procedure log_an_external_trace_header (caption : in String := "") is
    begin
+      if caption /= "" then
+         log_new_line(the_external_trace_file);
+         log(the_external_trace_file, caption);
+         log_new_line(the_external_trace_file);
+      end if;
       log(the_external_trace_file, "LOCATION");
       tab_log_to(the_external_trace_file, 11);
       log(the_external_trace_file, "ICR");
@@ -1005,10 +1008,10 @@ package body state_display is
 
    the_final_ICR : KDF9.order_counter := 0;
 
-   procedure notify_termination is
+   procedure notify_state_display_of_final_ICR is
    begin
       the_final_ICR := ICR;
-   end notify_termination;
+   end notify_state_display_of_final_ICR;
 
    procedure show_IOC_FIFO is
    begin
@@ -1280,12 +1283,6 @@ package body state_display is
                end if;
             end if;
 
-            if the_peripheral_trace_is_enabled       or else
-                  the_interrupt_trace_is_enabled     or else
-                     the_retrospective_trace_is_enabled then
-               log_title("Traces:");
-            end if;
-
             show_retrospective_traces;
 
             if the_signature_is_enabled then
@@ -1294,7 +1291,7 @@ package body state_display is
                        & ".");
             end if;
          else
-            log_line("ee9 cannot run: " & because & ".");
+            log_line("ee9: " & because & ".");
             show_all_prerun_dump_areas;
             return;
          end if;

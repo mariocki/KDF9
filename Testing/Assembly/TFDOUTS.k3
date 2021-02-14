@@ -1,15 +1,15 @@
-V999; W0;
+V299; W0;
 RESTART; J999; J999;
-PROGRAM;                   (test seek and I/O logic);
+PROGRAM;                   (test TSD FD OUT seek and I/O logic);
    V1 = 0;
    V3 = B0702023131310202; ("оо999оо"  in Flexowriter code);
    V4 = Q0/AV3/AV3;
-   V5 = B7777777777777777;
-   V7 = Q 1044/  1/    0;  (C chosen to end at sector 94);
+
    V8 = Q 0/AV100/AV179;
    V9 = Q 0/AV200/AV279;
+
    V100 = P100-----;
-   V139 = P179+++++;
+   V179 = P179+++++;
 
    SET+6; SET 44; OUT;
    SET+1; SET 44; OUT;
@@ -61,6 +61,6 @@ PROGRAM;                   (test seek and I/O logic);
    (unequal: quit with error indicator "999");
    SET 999;
    V4; =Q4; POAQ4;
-   ZERO; OUT;
+   MRWDQ0;
 FINISH;
 |

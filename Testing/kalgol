@@ -61,7 +61,7 @@ then
 fi
 
 shift
-if [ x"$1"x == "xwithx" -o x"$1"x == "xWITHx" ]
+if [ x"$1"x = "xwithx" -o x"$1"x = "xWITHx" ]
 then
    shift
 fi

@@ -1,8 +1,6 @@
--- ee9.adb
---
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -260,10 +258,9 @@ begin -- ee9
       IOC.equipment.configure;
       impose_all_flag_settings;
       IOC.equipment.re_configure;
-      IOC.equipment.install_GP0;
       if the_log_is_wanted then
          log_line(
-                  "This is ee9 V5.2b, compiled by "
+                  "This is ee9 6.0a, compiled by "
                 & Standard'Compiler_Version
                 & " on "
                 & GNAT.Source_Info.Compilation_ISO_Date
@@ -284,7 +281,7 @@ exception
       tidy_up("Invalid command line");
 
    when diagnostic : operator_error =>
-      say_goodbye("The KDF9 operator has made a mistake: ", Exception_Message(diagnostic));
+      say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
 
    when error : others =>
       tidy_up("Failure in ee9; unexpected exception: " & Exception_Information(error));

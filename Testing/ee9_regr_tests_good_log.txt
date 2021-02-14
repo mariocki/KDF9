@@ -88,6 +88,8 @@ TEST TDRUM     POA, PIA.
 TEST TDRUMR2EM POA, PIB.
 TEST TDRUMW2EM POB, PIA.
 TEST TDROUTS   11, 12, 13, 14.
+TEST TDROUTFAILS   13.
+TEST TDROUTFAILS   11, 13.
 
 These tests ran as expected.
 
@@ -99,6 +101,8 @@ TEST TDISCEM   POB, PIA, PMA.
 TEST TDISCFH   POC, PIC done.
 TEST TDISCFHNS POC, POK, PIC, PIG.
 TEST TFDOUTS 41, 42, 43, 44, 45.
+TEST TFDOUTFAILS 41 with no discs reserved.
+TEST TFDOUTFAILS 44, 45 too many 45s.
 
 These tests ran as expected.
 
@@ -466,31 +470,6 @@ RAN/EL/000M03S/000M13S===
 The signature of this test should be #3301160711524477. It was as follows:
 Digital signature of traced orders = #3301160711524477.
 ------------------- END OF Test Case INP -------------------
-
-
-+++++++++++++++++++ BEGIN  Test Case HQP +++++++++++++++++++
-The Usercode is in Assembly/WEEHAAVIE.k3 and the KDF9 executable is in Binary/WEEHAAVIE
-
-
-LP0:
-===
-EPSILON = 1.00000000000º-10
-MMAX =  20
-COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
-COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
-COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
-COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
-COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
-FINISHED ENDS 0
-===
-The signature of this test should be #4230330426172712. It was as follows:
-Digital signature of traced orders = #4230330426172712.
-------------------- END OF Test Case HQP -------------------
 
 
 +++++++++++++++++++ BEGIN  Test Case WAB +++++++++++++++++++
@@ -1481,5 +1460,21 @@ NODE-RADII
 The signature of this test should be #7671706436245512. It was as follows:
 Digital signature of traced orders = #7671706436245512.
 ------------------- END OF Test Case 1DH -------------------
+
+
++++++++++++++++++++ BEGIN  Test Case KAlgol +++++++++++++++++++
+TEST kids FLUID
+TEST kids HANOI
+TEST kids INPUT
+TEST kids MANORBOYX
+TEST kids MATMULT
+TEST kids PALSQR
+TEST kids PENTOMINO
+TEST kids QSORT
+TEST kids WEEHAAVIE
+TEST kids WHETSTONE
+TEST kids ZELLER
+
+These tests ran as expected.
 
 

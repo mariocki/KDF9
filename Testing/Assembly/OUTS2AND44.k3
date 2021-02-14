@@ -1,0 +1,17 @@
+V9; W0;
+PROGRAM;                   (main program);
+
+   V9 = 0;     (count of number of self-invocations);
+
+   SET+6; SET 44; OUT;
+   SET+1; SET 44; OUT;
+
+   V9; J9NEZ;
+
+   V9; SET 1; +; =V9;
+
+   ZERO; NOT; NEG; SET 2; OUT;
+
+9; ZERO; OUT;
+FINISH;
+|

@@ -1,8 +1,6 @@
--- mtp.adb
---
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This program is an auxiliary of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or

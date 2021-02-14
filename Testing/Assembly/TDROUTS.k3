@@ -38,10 +38,7 @@ PROGRAM; (test DR I/O logic);
    (next iteration);
    M+I7; DC7; J1C7NZ;
 
-   (fail deliberately);
-   C7;
-   SET 14; OUT;
-   SET 0; SET 13; OUT;
+   ZERO; OUT;
 
 999;
    SET 9999; DUP; OUT;

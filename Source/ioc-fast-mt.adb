@@ -1,8 +1,6 @@
--- ioc-fast-MT.adb
---
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -37,7 +35,7 @@ package body IOC.fast.MT is
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
-         trap_operator_error(name, "cannot be opened for reading or writing");
+         trap_operator_error("'" & name & "' cannot be opened for reading or writing");
    end open_RO;
 
    procedure open_RW (the_tape : in out MT.file; name : in String) is
@@ -49,9 +47,9 @@ package body IOC.fast.MT is
          the_tape.has_a_WP_ring := False;
          open_RO(the_tape, name);
       when Ada.IO_Exceptions.Name_Error =>
-         trap_operator_error(name, "cannot be found");
+         trap_operator_error("'" & name & "' cannot be found");
       when error : others =>
-         trap_operator_error(name, "failed to open: " &  Ada.Exceptions.Exception_Message(error));
+         trap_operator_error("'" & name & "' open failed: " &  Ada.Exceptions.Exception_Message(error));
    end open_RW;
 
    procedure close (the_tape : in out MT.file) is
@@ -80,7 +78,7 @@ package body IOC.fast.MT is
       end if;
    exception
       when End_Error =>
-         raise emulation_failure with "End_Error writing MT slice" & the_tape.position'Image;
+         raise emulation_failure with "End_Error writing MT slice";
    end write_slice;
 
    procedure read_next_slice (the_tape : in out MT.file;
@@ -94,7 +92,7 @@ package body IOC.fast.MT is
       end if;
     exception
        when End_Error =>
-          raise emulation_failure with "End_Error reading MT slice" & the_tape.position'Image;
+          raise emulation_failure with "End_Error reading MT slice";
    end read_next_slice;
 
    procedure read_prev_slice (the_tape : in out MT.file;
@@ -108,7 +106,7 @@ package body IOC.fast.MT is
       end if;
     exception
        when End_Error =>
-          raise end_of_tape with "End_Error reading MT slice number" & the_tape.position'Image;
+          raise end_of_tape with "End_Error reading MT slice number";
    end read_prev_slice;
 
    procedure bound_the_written_data (the_tape : in out MT.file) is
@@ -296,8 +294,7 @@ package body IOC.fast.MT is
    -- Postcondition: the_deck.is_at_EOD or else the_slice.kind not in tape_gap_kind
    procedure skip_forward_over_erasure (the_deck  : in out MT.deck;
                                         the_slice : in out MT.slice;
-                                        crossed   : in out length_in_frames;
-                                        caller    : in String := "") is
+                                        crossed   : in out length_in_frames) is
    begin
       if the_slice.kind in data_slice then
          return;
@@ -310,7 +307,7 @@ package body IOC.fast.MT is
    exception
       when end_of_tape =>
          the_deck.is_abnormal := True;
-         raise end_of_tape with "in skip_forward_over_erasure for " & caller;
+         raise end_of_tape with "in skip_forward_over_erasure";
    end skip_forward_over_erasure;
 
    -- Deal with blocks of invalid sizes.
@@ -352,7 +349,7 @@ package body IOC.fast.MT is
    begin
       the_deck.is_LBM_flagged := False;
 
-      skip_forward_over_erasure(the_deck, the_slice, crossed, caller => "read_block");
+      skip_forward_over_erasure(the_deck, the_slice, crossed);
 
       -- Ensure that we are not beyond the end of valid data.
       if the_deck.is_at_EOD then
@@ -660,7 +657,7 @@ package body IOC.fast.MT is
       block_size : length_in_frames := 0;
    begin
       -- Skip over any erasures or tape marks.
-      skip_forward_over_erasure(the_deck, the_slice, crossed, caller => "find_start_of_later_block");
+      skip_forward_over_erasure(the_deck, the_slice, crossed);
       crossed := crossed + the_deck.inter_block_gap;
 
       if not the_slice.is_first then
@@ -893,7 +890,7 @@ package body IOC.fast.MT is
       the_size : length_in_frames;
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
       end if;
 
       deal_with_trying_to_pass_PET(the_deck, "write");
@@ -1129,7 +1126,7 @@ package body IOC.fast.MT is
       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
@@ -1144,7 +1141,7 @@ package body IOC.fast.MT is
       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name, "does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
@@ -1193,7 +1190,7 @@ package body IOC.fast.MT is
    procedure enable_MT_deck (b : in KDF9.buffer_number) is
    begin
       if MT_units+ST_units > MT_deck'Last then
-         trap_operator_error("MT:", "too many tape decks specified");
+         trap_operator_error("too many tape decks specified");
       end if;
       MT_deck(MT_units) := new deck (number  => b,
                                      kind    => MT_kind,
@@ -1205,10 +1202,10 @@ package body IOC.fast.MT is
    procedure enable_ST_deck (b : in KDF9.buffer_number) is
    begin
       if ST_units >= 2 then
-         trap_operator_error("MT:", "more than 2 ST decks specified");
+         trap_operator_error("more than 2 ST decks specified");
       end if;
       if MT_units+ST_units > MT_deck'Last then
-         trap_operator_error("MT:", "too many tape decks specified");
+         trap_operator_error("too many tape decks specified");
       end if;
       MT_deck(MT_units) := new deck (number  => b,
                                      kind    => ST_kind,
@@ -1220,8 +1217,7 @@ package body IOC.fast.MT is
 
    procedure find_tape (the_label  : in  MT.data_storage;
                         its_number : out KDF9.buffer_number;
-                        its_serial : out KDF9.word;
-                        requestor  : in  String) is
+                        its_serial : out KDF9.word) is
 
       function as_word (the_serial : MT.data_storage)
       return KDF9.word is
@@ -1237,9 +1233,6 @@ package body IOC.fast.MT is
       the_size  : length_in_frames;
 
    begin -- find_tape
-      if the_label'Length < 1 then
-         raise emulation_failure with "find_tape was given a null label by " & requestor;
-      end if;
       for t in KDF9.buffer_number loop
          if buffer(t) /= null                      and then
                buffer(t).kind in MT_kind | ST_kind and then
@@ -1264,7 +1257,7 @@ package body IOC.fast.MT is
             end;
          end if;
       end loop;
-      trap_operator_error("the MT labelled '" & String(the_label) & "'",  "has not been mounted");
+      trap_operator_error("'" & String(the_label) & "' has not been mounted");
    end find_tape;
 
 

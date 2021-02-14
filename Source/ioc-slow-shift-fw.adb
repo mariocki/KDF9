@@ -1,8 +1,6 @@
--- ioc-slow-shift-fw.adb
---
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -664,8 +662,12 @@ package body IOC.slow.shift.FW is
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if already_enabled then trap_operator_error("FW:", "more than one unit specified"); end if;
-      if b /= 0 then trap_operator_error("FW0", "must be on buffer 0"); end if;
+      if already_enabled then
+         trap_operator_error("more than one FW unit has been configured");
+      end if;
+      if b /= 0 then
+         trap_operator_error("FW0 must be on buffer 0");
+      end if;
       FW0 := new FW.device (number  => b,
                             kind    => FW_kind,
                             unit    => 0,

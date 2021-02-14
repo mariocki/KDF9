@@ -1,5 +1,5 @@
-# This file is part of ee9 (V5), the GNU Ada emulator of the English Electric KDF9.
-# Copyright (C) 2020, W. Findlay; all rights reserved.
+# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
 # modify it under terms of the GNU General Public License as published
@@ -67,7 +67,7 @@ esac
 
 # Set the options list for old and new versions of GNAT
 BASE_GNAT_OPTIONS="-gnatl12j96  -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatyO -gnatw.Y -gnatw.N"
-WARN_GNAT_OPTIONS="-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.Y -gnatw_A"
+WARN_GNAT_OPTIONS="-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.Y"
 
 case `uname -s` in
 Darwin)
@@ -311,9 +311,9 @@ KAlgol|kalgol)
 	fi
 	mk9 kal3 ${OS}
 	echo; echo Converting mksys2.bin to MKSYS2 for ee9.
-	a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${BINARY}/MKSYS2
+	${TESTING}/a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${BINARY}/MKSYS2
    echo; echo Converting KAB00.bin to KAB00DH--USU for ee9.
-   a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${BINARY}/KAB00DH--USU
+   ${TESTING}/a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${BINARY}/KAB00DH--USU
    ;;
 
 

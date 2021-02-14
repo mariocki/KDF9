@@ -1,8 +1,6 @@
--- ioc-fast-fd.adb
+-- Emulation of a fixed disc drive.
 --
--- Emulation of a (fixed-platter) disc drive.
---
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -54,7 +52,7 @@ package body IOC.fast.FD is
       open(the_FD, rd_wr_mode);
    exception
       when others =>
-         trap_operator_error(the_FD.device_name, "cannot be opened for reading and writing");
+         trap_operator_error(the_FD.device_name & " cannot be opened for reading and writing");
    end Initialize;
 
    -- Hypothesis:
@@ -874,23 +872,39 @@ package body IOC.fast.FD is
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if is_enabled then trap_operator_error("FD:", "more than one unit specified"); end if;
+      if FD0_is_enabled then
+         trap_operator_error("more than one FD control unit has been configured");
+      end if;
       FD0 := new FD.device (number  => b,
                             kind    => FD_kind,
                             unit    => 0,
                             quantum => FD_quantum);
-      is_enabled := True;
+      FD0_is_enabled := True;
       FD0_number := b;
    end enable;
 
    procedure re_enable (b : in KDF9.buffer_number) is
    begin
-      if is_enabled and then
-         b = FD0.number then
+      if FD0 /= null    and then
+            b = FD0.number  then
          return;
       end if;
       buffer(b) := null;
+      FD0 := null;
+      FD0_number := 0;
+      FD0_is_enabled := False;
       enable(b);
    end re_enable;
+
+   procedure disable (b : in KDF9.buffer_number) is
+   begin
+      if FD0 /= null    and then
+            b = FD0.number  then
+         buffer(b) := null;
+         FD0 := null;
+         FD0_number := 0;
+         FD0_is_enabled := False;
+      end if;
+   end disable;
 
 end IOC.fast.FD;

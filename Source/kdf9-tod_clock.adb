@@ -1,8 +1,6 @@
--- kdf9-tod_clock.adb
---
 -- functions that implement timing for Director emulation.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -29,13 +27,13 @@ package body KDF9.TOD_clock is
    function todays_date_28n_years_ago
    return KDF9.word is
 
-      zero  : constant KDF9.word := 8#20#;
-      slash : constant KDF9.word := 8#17#;
+      zero  : constant KDF9.word := 8#20#;  -- in KDF9 internal code
+      slash : constant KDF9.word := 8#17#;  -- in KDF9 internal code
       today : constant Ada.Calendar.Time := Ada.Calendar.Clock;
 
       year, month, day, hour, minute, second, sub_second : KDF9.word;
 
-      -- For values of i in 0..99, return two 6-bit KDF9 decimal digits.
+      -- For values of i in 0..99, return two 6-bit decimal digits in KDF9 internal code.
       function as_2_digits (i : KDF9.word)
       return KDF9.word
       is ((i/10 + zero)*64 or (i mod 10 + zero));

@@ -1,3 +1,4 @@
+ST 1024; TL 63;
 V9; W0;
 PROGRAM;                   (main program);
 
@@ -6,8 +7,7 @@ PROGRAM;                   (main program);
    V2 = B3553576564606564; (+KOUTPUT);
    V3 = B1720202223202024; (/0023004);
 
-   V9 = 0;     (count of numner of self-invocations);
-
+   V9 = 0;     (count of number of self-invocations);
 
    V0; SET4; OUT; =C1;
    V3; V2; SET10; OUT; =C2;
@@ -24,7 +24,7 @@ PROGRAM;                   (main program);
 
    V9; SET 1; +; =V9;
 
-   ZERO; NOT; SHL-1; SET 2; OUT;
+   SET 12345; SET 2; OUT;
 
 9; ZERO; OUT;
 FINISH;

@@ -1,8 +1,6 @@
--- ioc-fast-MT.ads
---
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -380,7 +378,6 @@ private
 
    procedure find_tape (the_label  : in  MT.data_storage;
                         its_number : out KDF9.buffer_number;
-                        its_serial : out KDF9.word;
-                        requestor  : in  String);
+                        its_serial : out KDF9.word);
 
 end IOC.fast.MT;

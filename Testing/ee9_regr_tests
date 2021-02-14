@@ -102,10 +102,16 @@ echo
 /bin/sh ee9_test_case TOX $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case MTW $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case INP $1 >> ee9_regr_tests_log.txt; echo
-/bin/sh ee9_test_case HQP $1 >> ee9_regr_tests_log.txt; echo
-/bin/sh ee9_test_case WAB n  >> ee9_regr_tests_log.txt; echo
+/bin/sh ee9_test_case WAB gn  >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case FLO $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case 1DH $1 >> ee9_regr_tests_log.txt; echo
+
+
+echo; echo
+echo Running Kidsgrove compiler and runtime tests:
+echo ============================================
+echo
+ee9_test_run KAlgol "kids_tests ahipr a" >> ee9_regr_tests_log.txt; echo
 
 cp settings_1.copy settings_1.txt
 cp settings_2.copy settings_2.txt
