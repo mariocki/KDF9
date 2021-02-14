@@ -1,6 +1,8 @@
+-- ioc-the_locker_of.adb
+--
 -- Identify the buffer that caused a store lockout.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,8 +18,9 @@
 
 function IOC.the_locker_of (address : KDF9.Q_part)
 return KDF9.Q_part is
-   candidate_time   : KDF9.us     := KDF9.us'Last;
-   candidate_number : KDF9.Q_part := 16;
+   candidate_found  : Boolean := False;
+   candidate_time   : KDF9.us := KDF9.us'Last;
+   candidate_number : KDF9.buffer_number;
 begin
    -- Select the buffer actively doing DMA in the_group;
    --    if there is more than one, choose the buffer with the earliest completion time.
@@ -31,7 +34,12 @@ begin
                                     .. group(buffer(b).control_word.M)       then
          candidate_number := b;
          candidate_time   := buffer(b).completion_time;
+         candidate_found  := True;
       end if;
    end loop;
-   return candidate_number;
+   if candidate_found then
+      return candidate_number;
+   else
+      return 16;
+   end if;
 end IOC.the_locker_of;

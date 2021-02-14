@@ -18,7 +18,7 @@
 
 package IOC.fast.FD.OUTs is
 
-   -- See the Manual, Appendix 6, §2 for the TSD FD OUTs.
+   -- See the Manual, Appendix 6, ï¿½2 for the TSD FD OUTs.
 
    procedure do_TSD_OUT_41;
 

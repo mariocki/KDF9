@@ -1,6 +1,8 @@
+-- ioc-slow-shift-tp.ads
+--
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -49,6 +51,7 @@ package IOC.slow.shift.TP is
                   set_offline : in Boolean);
 
    -- This is called "word gap" in the Manual, but never defined.
+   -- Assume this acts exactly like POE. ??
    overriding
    procedure POF (the_TP      : in out TP.device;
                   Q_operand   : in KDF9.Q_register;
@@ -62,8 +65,8 @@ package IOC.slow.shift.TP is
 
    procedure enable (b : in KDF9.buffer_number);
 
-   -- Finalize TP1 if necessary and remove it from the configuration, to allow GP0 to be attached.
-   procedure remove_TP1 (b : in KDF9.buffer_number);
+   -- Finalize TP1 if necessary and yield its buffer number for use by GP0.
+   procedure disable_TP1 (b : out KDF9.buffer_number);
 
    -- Set the character code to be used by the TP unit.
    procedure set_unit_code(unit : in Natural; is_transcribing : in Boolean);

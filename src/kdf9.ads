@@ -1,6 +1,8 @@
+-- kdf9.ads
+--
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -233,11 +235,11 @@ package KDF9 is
    procedure ensure_that_the_nest_holds_2_operands
       with Inline;
 
-   function operand_words_needed (need : KDF9.nest_depth)
+   function words_needed (need : KDF9.nest_depth)
    return String
       with Inline => False;
 
-   function result_space_needed (need : KDF9.nest_depth)
+   function space_needed (need : KDF9.nest_depth)
    return String
       with Inline => False;
 
@@ -255,11 +257,9 @@ package KDF9 is
    return KDF9.word
       with Inline;
 
+
    function pop
    return KDF9.pair
-      with Inline;
-
-   procedure pop_pair
       with Inline;
 
    procedure write_top (the_pair : in KDF9.pair)
@@ -545,15 +545,13 @@ package KDF9 is
 
    the_CPU_state : KDF9.CPU_state;
 
-   procedure reset_V_and_T;
-
    procedure reset_the_CPU_state;
 
    procedure reset_the_internal_registers (the_new_state : in CPU_state);
 
    procedure fail_in_problem_program_state;
 
-   procedure LOV_if_user_mode (cause : in String);
+   procedure LOV_if_user_mode (device_name : in String);
 
    procedure return_from_Director_to (new_IAR : in KDF9.syllable_address);
 
@@ -566,13 +564,13 @@ package KDF9 is
    procedure trap_illegal_instruction (the_message : in String := "invalid opcode")
       with Inline => False;
 
-   procedure trap_operator_error (the_message : in String)
+   procedure trap_operator_error (the_device, the_message : in String)
       with Inline => False, No_Return;
 
    procedure trap_unimplemented_feature (the_message : in String)
       with Inline => False, No_Return;
 
-   procedure trap_failing_OUT (OUT_number : in KDF9.word; the_message : in String)
+   procedure fail_OUT (OUT_number : in KDF9.word; the_message : in String)
       with Inline => False, No_Return;
 
    procedure trap_invalid_paper_tape (the_message : in String)

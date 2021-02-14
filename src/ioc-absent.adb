@@ -1,6 +1,8 @@
--- Handle attempted usage of a buffer with No Device attached.
+-- ioc-absent.adb
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- Handle attempted usage of a buffer with No Attached device.
+--
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,7 +28,7 @@ package body IOC.absent is
       pragma Unreferenced(the_device);
       pragma Unreferenced(set_offline);
    begin
-      trap_operator_error("buffer #" & oct_of(Q_operand.C and 8#17#, 2) & " has no I/O device");
+      trap_operator_error("buffer #" & oct_of(Q_operand.C, 2), "has no I/O device");
    end disavow;
 
    overriding
@@ -192,14 +194,14 @@ package body IOC.absent is
    begin disavow(the_device, Q_operand, set_offline); end POL;
 
 
-   type AD_access is access absent.device;
-   AD_list         : array (IOC.unit_number) of AD_access with Warnings => Off;
+   type ND_access is access absent.device;
+   ND_list         : array (IOC.unit_number) of ND_access with Warnings => Off;
 
    unit : IOC.unit_number := 0;
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      AD_list(unit) := new absent.device (number => b, kind => AD_kind, unit => unit, quantum => 0);
+      ND_list(unit) := new absent.device (number => b, kind =>ND_kind, unit => unit, quantum => 0);
       unit := unit + 1;
    end enable;
 

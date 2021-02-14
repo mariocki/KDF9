@@ -1,6 +1,8 @@
+-- ioc-slow-shift-tp.ads
+--
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -229,31 +231,30 @@ package body IOC.slow.shift.TP is
                                   unit    => 1,
                                   quantum => TP_quantum);
             TP1_number := b;
+            GP0_number := b;
          when others =>
-            trap_operator_error("more than two TP units have been configured");
+            trap_operator_error("TP:", "more than two units specified");
       end case;
       unit := unit + 1;
    end enable;
 
-   procedure remove_TP1 (b : in KDF9.buffer_number) is
+   procedure disable_TP1 (b : out KDF9.buffer_number) is
    begin
       if TP1 /= null then
-         if TP1.number = b then
-            Finalize(TP1.all);
-            TP1 := null;
-         else
-            trap_operator_error("TP1 is not on buffer #" & oct_of(b));
-         end if;
+         Finalize(TP1.all);
       end if;
-   end remove_TP1;
+      b := GP0_number;
+   end disable_TP1;
 
    -- Set the character code to be used by the designated TP.
    procedure set_unit_code (unit : in Natural; is_transcribing : in Boolean) is
    begin
-      if unit = 0 and then TP0 /= null then
-         TP0.is_transcribing := set_unit_code.is_transcribing;
-      elsif unit = 1 and then TP1 /= null then
-         TP1.is_transcribing := set_unit_code.is_transcribing;
+      if set_unit_code.unit < Natural(IOC.slow.shift.TP.unit) then
+         if unit = 0 then
+            TP0.is_transcribing := set_unit_code.is_transcribing;
+         else
+            TP1.is_transcribing := set_unit_code.is_transcribing;
+         end if;
       end if;
    end set_unit_code;
 

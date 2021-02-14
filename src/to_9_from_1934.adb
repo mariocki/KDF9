@@ -22,6 +22,7 @@ with HCI;
 with host_IO;
 with POSIX;
 with plotter;
+with get_runtime_paths;
 
 use  HCI;
 use  host_IO;
@@ -147,8 +148,8 @@ procedure to_9_from_1934 is
 
 begin -- to_9_from_1934
 
-   open(the_1900_stream, "Assembly/wabbit_data_1900", read_mode);
-   open(the_KDF9_stream, "Assembly/wabbit_data_kdf9", write_mode);
+   open(the_1900_stream, get_runtime_paths & "Assembly/wabbit_data_1900", read_mode);
+   open(the_KDF9_stream, get_runtime_paths & "Assembly/wabbit_data_kdf9", write_mode);
    truncate(the_KDF9_stream, to_length => 0);
 
    get_byte(t, the_1900_stream);

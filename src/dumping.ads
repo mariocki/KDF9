@@ -1,6 +1,8 @@
+-- dumping.ads
+--
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -38,6 +40,7 @@ package dumping is
    tape_code_flag : constant dumping.flag := 'T';
    Usercode_flag  : constant dumping.flag := 'U';
    word_flag      : constant dumping.flag := 'W';
+   expunge_flag   : constant dumping.flag := 'X';
 
    function dumping_flag (c : Character)
    return dumping.flag;
@@ -73,7 +76,7 @@ package dumping is
    is_dumping_flag  : constant dumping.format_set
                     := is_parameter_flag or is_epoch_flag;
 
-   no_dumping_flags : constant dumping.format_set
+   no_dumping_flag  : constant dumping.format_set
                     := flag_support.empty_set;
 
    nr_of_dumping_areas : constant := 100;
@@ -83,6 +86,9 @@ package dumping is
    procedure request_a_dumping_area (format_set  : in dumping.format_set;
                                      first, last : in KDF9.address;
                                      was_stored  : out Boolean);
+
+   procedure remove_specified_areas (format_set  : in dumping.format_set;
+                                     first, last : in KDF9.address);
 
    procedure print_prerun_dump_areas;
 
@@ -100,7 +106,16 @@ package dumping is
 
    no_specification : constant String := "";
 
+   -- area_image returns no_specification if area(d) is undefined or empty.
+   function area_image (d : dumping.area_number)
+   return String;
+
+   -- format_image returns blanks if format_set is empty.
+   function format_image (format_set : dumping.format_set)
+   return String;
+
    -- poke support is in dumping because it is needed at the same time during initialization.
+   -- was_stored := (the requested poke could not be saved); because the list is full.
    procedure add_to_poke_list (address    : in KDF9.address;
                                sub_word   : in Character;
                                position   : in KDF9.address;

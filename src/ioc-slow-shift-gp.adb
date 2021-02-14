@@ -1,6 +1,8 @@
+-- ioc-slow-shift-gp.ads
+--
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -48,21 +50,23 @@ package body IOC.slow.shift.GP is
    overriding
    procedure Finalize (the_GP : in out GP.device) is
    begin
-      if the_GP.is_open           and then
-            the_GP.byte_count /= 0    then
-         if the_final_state_is_wanted then
-            log_line(
-                     the_GP.device_name
-                   & " on buffer #"
-                   & oct_of(KDF9.Q_part(the_GP.number), 2)
-                   & " made"
-                   & the_GP.byte_count'Image
-                   & " plotting steps."
-                    );
+      if the_graph_plotter_is_enabled then
+         if the_GP.is_open           and then
+               the_GP.byte_count /= 0    then
+            if the_final_state_is_wanted then
+               log_line(
+                        the_GP.device_name
+                      & " on buffer #"
+                      & oct_of(KDF9.Q_part(the_GP.number), 2)
+                      & " made"
+                      & the_GP.byte_count'Image
+                      & " plotting steps."
+                       );
+            end if;
+            the_GP.byte_count := 0;
+            close_the_plot_file(the_GP.stream);
+            finalize_PS_output(the_GP.stream);
          end if;
-         the_GP.byte_count := 0;
-         close_the_plot_file(the_GP.stream);
-         finalize_PS_output(the_GP.stream);
       end if;
    end Finalize;
 
@@ -189,6 +193,7 @@ package body IOC.slow.shift.GP is
                             unit    => 0,
                             quantum => GP_quantum);
       GP0_number := b;
+      the_graph_plotter_is_enabled := True;
    end enable;
 
    procedure notify_invalid_movement (from_x, from_y, step_x, step_y : in Integer) is

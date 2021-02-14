@@ -1,6 +1,8 @@
+-- ioc-slow-shift-fw.adb
+--
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,6 +21,7 @@ with Ada.Text_IO;
 --
 with HCI;
 with host_IO;
+with get_runtime_paths;
 
 use  Ada.Text_IO;
 --
@@ -57,7 +60,7 @@ package body IOC.slow.shift.FW is
 
    -- These are the ANSI SGR terminal escape codes for styling FW output.
    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-   black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
+   black_font_code : constant String := ESC & "[0m" & ESC & "[39m";
    underline_code  : constant String := ESC & "[4m";
    plain_font_code : constant String := ESC & "[0m";
 
@@ -99,7 +102,7 @@ package body IOC.slow.shift.FW is
       if the_FW.device_name = "FW0" then
          -- Attempt to open the command file for the console the_FW.
          begin
-            Open(interaction_file, In_File, "FW0");
+            Open(interaction_file, In_File, get_runtime_paths & "FW0");
          response_list_loop:
             while not End_of_file(interaction_file) loop
                if last_interaction = max_interactions then
@@ -155,8 +158,8 @@ package body IOC.slow.shift.FW is
                log_line("The file FW0 exists, but cannot be read!");
          end;
       end if;
-      open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
-      open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
+      open(the_FW.stream, get_runtime_paths & the_FW.device_name, read_mode, UI_in_FD);
+      open(the_FW.output, get_runtime_paths & the_FW.device_name, write_mode, UI_out_FD);
       IOC.device(the_FW).Initialize;
       the_FW.current_case := KDF9_char_sets.Case_Normal;
    end Initialize;
@@ -662,12 +665,8 @@ package body IOC.slow.shift.FW is
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if already_enabled then
-         trap_operator_error("more than one FW unit has been configured");
-      end if;
-      if b /= 0 then
-         trap_operator_error("FW0 must be on buffer 0");
-      end if;
+      if already_enabled then trap_operator_error("FW:", "more than one unit specified"); end if;
+      if b /= 0 then trap_operator_error("FW0", "must be on buffer 0"); end if;
       FW0 := new FW.device (number  => b,
                             kind    => FW_kind,
                             unit    => 0,

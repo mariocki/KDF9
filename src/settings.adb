@@ -1,6 +1,8 @@
+-- settings.adb
+--
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -85,13 +87,13 @@ package body settings is
          when 'f' | 'F' =>
             the_final_state_is_wanted := False;
          when 'g' | 'G' =>
-            choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
+            the_graph_plotter_is_enabled := True;
          when 'h' | 'H' =>
             any_histogram_is_wanted := False;
          when 'i' | 'I' =>
             interrupt_tracing_is_wanted := False;
          when 'k' | 'K' =>
-            choice(DR0_default) := DR;
+            choice(KDF9.buffer_number'(14)) := DR;
          when 'm' | 'M' =>
             the_terminal_is_ANSI_compatible := False;
          when 'n' | 'N' =>
@@ -124,7 +126,7 @@ package body settings is
             peripheral_tracing_is_wanted := False;
             retrospective_tracing_is_wanted := False;
          when others =>
-            raise emulation_failure with "previously undectected invalid miscellany flag";
+            raise emulation_failure with "invalid miscellany flag not previously failed";
       end case;
       set_diagnostic_mode(the_diagnostic_mode);
    end set_this_miscellany_flag;
@@ -149,7 +151,6 @@ package body settings is
 
    begin -- display_execution_modes
       if not the_log_is_wanted then return; end if;
-      log_new_line;
       if for_this_run = "" then
          log("Resuming the run");
       else
@@ -263,7 +264,7 @@ package body settings is
 
    package authenticity_mode_IO is new Ada.Text_IO.Enumeration_IO(KDF9.authenticity_mode);
 
-   package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.kind);
+   package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.device_kinds);
 
    procedure get_settings_from_file (version : in String) is
 
@@ -424,8 +425,7 @@ package body settings is
 
       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
          use dumping.flag_support;
-         epoch_flag   : constant Character := (if epoch = initial_flag then 'I' else 'F');
-         format       : dumping.format_set := no_dumping_flags or epoch;
+         format       : dumping.format_set := no_dumping_flag or epoch;
          first_address,
          last_address : KDF9.address := 0;
          bad_range    : Boolean := False;
@@ -433,22 +433,21 @@ package body settings is
          c            : Character;
          OK           : Boolean;
       begin
-         log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
          while not End_Of_Line(settings_file) loop
             get(settings_file, c);
-            log(c, iff => the_log_is_wanted);
          exit when c = ' ';
             if is_parameter_flag/dumping_flag(to_upper(c)) then
                format := format or dumping_flag(to_upper(c));
             else
                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
                log_new_line;
-               log_line("***** Error: '" & c & "' is not a valid dump type.");
+               log_line("***** Error: '" & c & "' is not a valid dump type");
                return;
             end if;
          end loop;
          log_new_line;
-         if (format and is_parameter_flag) /= no_dumping_flags then
+         log_line("Dump: format " & format_image(format), iff => the_log_is_wanted);
+         if (format and is_parameter_flag) /= no_dumping_flag then
             get_word(settings_file, data);
             if data > max_address                     or else
                   (format/Usercode_flag and data > 8191) then
@@ -456,7 +455,7 @@ package body settings is
                         "***** Error: Lower dump address  = #"
                       & oct_of(data)
                       & " =" & data'Image
-                      & " is too large for this option."
+                      & " is too large for this option"
                        );
                bad_range := True;
             else
@@ -481,7 +480,7 @@ package body settings is
                            "***** Error: Upper dump address: #"
                          & oct_of(data)
                          & " =" & data'Image
-                         & " is too large for this option."
+                         & " is too large for this option"
                           );
                   bad_range := True;
                else
@@ -497,19 +496,6 @@ package body settings is
                end if;
             end if;
 
-            if first_address > last_address then
-               log_line(
-                        "***** Error: Upper dump address: #"
-                      & oct_of(last_address)
-                      & " =" & last_address'Image
-                      & " is less than lower dump address: #"
-                      & oct_of(first_address)
-                      & " =" & first_address'Image
-                      & "."
-                       );
-               bad_range := True;
-            end if;
-
             if format/Usercode_flag then
               if not end_of_line(settings_file) then
                   get_word(settings_file, data);
@@ -519,7 +505,7 @@ package body settings is
                             & oct_of(data)
                             & " ="
                             & data'Image
-                            & " > 8190, ignored."
+                            & " > 8190, ignored"
                              );
                   else
                      nominated_address := KDF9.order_word_number(data);
@@ -537,19 +523,33 @@ package body settings is
 
          end if;
 
-         if not bad_range then
+         if bad_range then
+            log_line("***** Error: No dump specification set.");
+         else
             request_a_dumping_area(format, first_address, last_address, OK);
-            if not OK then
-               log_line("***** Error: Too many dump specifications (ignored).");
-            end if;
+         if not OK then
+            log_line("***** Error: Too many dump specifications (ignored).");
          end if;
-
+         end if;
          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
       exception
          when others =>
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             log_new_line;
-            log_line("***** Error in a dump area specification (ignored)." );
+            log_line(
+                     "***** Error in a dump area specification: format "
+                   & format_image(format)
+                   & "; Lower dump address = #"
+                   & oct_of(first_address)
+                   & " ("
+                   & dec_of(first_address)
+                   & ")"
+                   & "; Upper dump address = #"
+                   & oct_of(last_address)
+                   & " ("
+                   & dec_of(last_address)
+                   & ")"
+                    );
       end set_specified_dumping_ranges;
 
       procedure set_initial_dumping_ranges is
@@ -631,7 +631,7 @@ package body settings is
          show_counts;
          if low_count > high_count then
             log_new_line;
-            log_line("***** Error: Low count > high count.");
+            log_line("***** Error: Low count > high count");
             raise Data_Error;
          end if;
          counts_are_set := True;
@@ -672,7 +672,7 @@ package body settings is
          get_word(settings_file, KDF9.word(high_bound));
          if low_bound > high_bound then
             log_new_line;
-            log_line("***** Error: Low bound > high bound.");
+            log_line("***** Error: Low bound > high bound");
             raise Data_Error;
          end if;
          show_range;
@@ -758,6 +758,7 @@ package body settings is
          end configure_the_plotter;
 
       begin  -- set_graph_plotting_pen
+         the_graph_plotter_is_enabled := True;
          ensure_not_at_end_of_line(settings_file);
          begin
             Get(settings_file, the_colour);
@@ -886,16 +887,19 @@ package body settings is
       procedure set_KDF9_configuration is
          use equipment_IO;
          use IOC.equipment;
-         d : IOC.equipment.kind := AD;
+         d : IOC.equipment.device_kinds := NA;
          b : KDF9.buffer_number;
       begin
          if version = "1" then
-            for i in IOC.equipment.setup'Range loop
+            for c in choices'Range loop
             exit when end_of_line(settings_file);
                get_word(settings_file, KDF9.word(b));
                ensure_not_at_end_of_line(settings_file);
                get(settings_file, d);
-               IOC.equipment.choice(b) := d;
+               if d = GP then
+                  the_graph_plotter_is_enabled := True;
+               end if;
+               choice(KDF9.buffer_number'(b)) := d;
             end loop;
          else
             log_new_line;
@@ -905,7 +909,7 @@ package body settings is
       exception
          when others =>
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-            IOC.equipment.choice := IOC.equipment.default;
+            choice := default;
             log_new_line;
             log_line("***** Error in the device configuration; defaults used.");
       end set_KDF9_configuration;

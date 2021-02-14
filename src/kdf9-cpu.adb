@@ -1,7 +1,9 @@
+-- kdf9-cpu.adb
+--
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or

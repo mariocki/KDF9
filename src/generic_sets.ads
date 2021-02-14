@@ -1,6 +1,8 @@
+-- generic_sets.ads
+--
 -- Powersets of a discrete member type.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -27,17 +29,31 @@ package generic_sets is
    type set is array (generic_sets.member) of Boolean
       with Component_Size => 1, Convention => C;
 
+   universe  : constant generic_sets.set := (others => True);
+
    empty_set : constant generic_sets.set := (others => False);
+
+   function "abs" (set : generic_sets.set)
+   return Natural;
 
    -- Test for membership of the set.
    function "/" (set : generic_sets.set; member : generic_sets.member)
-   return Boolean with Inline;
+   return Boolean;
 
-   -- Union of a set and a singleton.
-   function "or"  (set : generic_sets.set; member : generic_sets.member)
+   function "/" (member : generic_sets.member; set : generic_sets.set)
+   return Boolean;
+
+    function "or"  (member : generic_sets.member; set : generic_sets.set)
+    return generic_sets.set;
+
+    function "or"  (set : generic_sets.set; member : generic_sets.member)
+    return generic_sets.set;
+
+-- "or"  (set1, set2 : generic_sets.set) is predefined
+
+   function "-" (set : generic_sets.set; member : generic_sets.member)
    return generic_sets.set;
 
-   -- Computes (set1 and not set2).
    function "-" (set1, set2 : generic_sets.set)
    return generic_sets.set;
 

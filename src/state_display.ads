@@ -1,6 +1,8 @@
+-- state_display.ads
+--
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -51,7 +53,7 @@ package state_display is
 
    procedure short_witness;
 
-   procedure log_an_external_trace_header (caption : in String := "");
+   procedure log_an_external_trace_header;
 
    procedure log_to_external_trace;
 
@@ -95,6 +97,6 @@ package state_display is
                    value      : in KDF9.word);
 
    -- Take note that an OUT 2 or OUT 0 has been obeyed.
-   procedure notify_state_display_of_final_ICR;
+   procedure notify_termination;
 
 end state_display;

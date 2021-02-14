@@ -1,6 +1,8 @@
+-- ioc-fast-dr.adb
+--
 -- Emulation of a drum store.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -38,7 +40,7 @@ package body IOC.fast.DR is
       drive := C mod drums_per_system;
       C := C  /  drums_per_system;
       sector := C mod sectors_per_track;
-      track  := C mod sectors_per_drum / sectors_per_track;
+      track := C mod sectors_per_drum;
       return "D"
            & dec_of(drive)
            & "T"
@@ -61,12 +63,12 @@ package body IOC.fast.DR is
       result := seek(fd_of(the_DR.stream), file_offset(the_index));
       if result /= byte_address then
          raise emulation_failure
-            with "POSIX seek failure in DR.get";
+            with "POSIX seek failure in DR.get at sector" & the_index'Image & ", new position =" & result'Image;
       end if;
       result := POSIX.file_position(read(fd_of(the_DR.stream), s, bytes_per_sector));
       if result /= bytes_per_sector then
          raise emulation_failure
-            with "POSIX read failure in DR.get";
+            with "POSIX read failure in DR.get at sector" & the_index'Image & ", bytes read =" & result'Image;
       end if;
    end get;
 
@@ -77,12 +79,12 @@ package body IOC.fast.DR is
       result := seek(fd_of(the_DR.stream), file_offset(the_index));
       if result /= byte_address then
          raise emulation_failure
-            with "POSIX seek failure in DR.put";
+            with "POSIX seek failure in DR.put at" & the_index'Image & ", new position =" & result'Image;
       end if;
       result := POSIX.file_position(write(fd_of(the_DR.stream), s, bytes_per_sector));
       if result /= bytes_per_sector then
          raise emulation_failure
-            with "POSIX write failure in DR.put";
+            with "POSIX write failure in DR.put at" & the_index'Image & ", bytes written =" & result'Image;
       end if;
    end put;
 
@@ -92,7 +94,7 @@ package body IOC.fast.DR is
       open(IOC.device(the_DR), rd_wr_mode);
    exception
       when others =>
-         trap_operator_error(the_DR.device_name & " cannot be opened for reading and writing");
+         trap_operator_error(the_DR.device_name, "cannot be opened for reading and writing");
    end Initialize;
 
    procedure keep_house (the_DR        : in out DR.device;
@@ -544,33 +546,23 @@ package body IOC.fast.DR is
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      if DR0_is_enabled then
-         trap_operator_error("more than one DR control unit has been configured");
-      end if;
+      if is_enabled then trap_operator_error("DR:", "more than one unit specified"); end if;
       DR0 := new DR.device (number  => b,
                             kind    => DR_kind,
                             unit    => 0,
                             quantum => DR_quantum);
-      DR0_is_enabled := True;
+      is_enabled := True;
       DR0_number := b;
    end enable;
 
    procedure re_enable (b : in KDF9.buffer_number) is
    begin
-      if DR0_is_enabled and then
-         b = DR0.number     then
+      if is_enabled and then
+         b = DR0.number then
          return;
       end if;
       buffer(b) := null;
       enable(b);
    end re_enable;
-
-   procedure disable (b : in KDF9.buffer_number) is
-   begin
-      if DR0_is_enabled and DR0_number = b then
-         buffer(b) := null;
-         DR0_is_enabled := False;
-      end if;
-   end disable;
 
 end IOC.fast.DR;

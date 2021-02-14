@@ -1,7 +1,9 @@
+-- IOC.equipment.adb
+--
 -- Data supporting the definition of a KDF9 I/O equipment configuration.
 --
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -35,16 +37,15 @@ package body IOC.equipment is
    begin
       for b in KDF9.buffer_number loop
          case equipment.choice(b) is
-            when AD => IOC.absent.enable(b);
             when CP => IOC.slow.unit.CP.enable(b);
             when CR => IOC.slow.unit.CR.enable(b);
             when DR => IOC.fast.DR.enable(b);
             when FD => IOC.fast.FD.enable(b);
             when FW => IOC.slow.shift.FW.enable(b);
-            when GP => IOC.slow.shift.TP.remove_TP1(b);
-                       IOC.slow.shift.GP.enable(b);
+            when GP => IOC.slow.shift.GP.enable(b);
             when LP => IOC.slow.unit.LP.enable(b);
             when MT => IOC.fast.MT.enable_MT_deck(b);
+            when NA => IOC.absent.enable(b);
             when SI => IOC.slow.shift.SI.enable(b);
             when ST => IOC.fast.MT.enable_ST_deck(b);
             when TP => IOC.slow.shift.TP.enable(b);
@@ -53,13 +54,16 @@ package body IOC.equipment is
       end loop;
       if IOC.buffer(0) = null              or else
             IOC.buffer(0).kind /= IOC.FW_kind then
-         trap_operator_error("buffer #00 must be a FW");
+         trap_operator_error("buffer #00", "is not a FW");
       end if;
       if IOC.buffer(1) = null              or else
             IOC.buffer(1).kind /= IOC.TR_kind then
-         trap_operator_error("buffer #01 must be a TR");
+         trap_operator_error("buffer #01", "is not a TR");
       end if;
-      for b in IOC.equipment.setup'Range loop
+      if the_graph_plotter_is_enabled then
+         install_GP0;
+      end if;
+      for b in IOC.equipment.choices'Range loop
          if IOC.buffer(b) = null then
             IOC.absent.enable(b);
          end if;
@@ -70,16 +74,21 @@ package body IOC.equipment is
    begin
       for b in KDF9.buffer_number loop
          case equipment.choice(b) is
-            when DR => IOC.fast.FD.disable(b);
-                       IOC.fast.DR.re_enable(b);
-            when FD => IOC.fast.DR.disable(b);
-                       IOC.fast.FD.re_enable(b);
-            when GP => IOC.slow.shift.TP.remove_TP1(b);
-                       IOC.slow.shift.GP.enable(b);
+            when DR => IOC.fast.DR.re_enable(b);
+            when FD => IOC.fast.FD.re_enable(b);
             when SI => IOC.slow.shift.SI.re_enable(b);
             when others => null;
          end case;
       end loop;
    end re_configure;
+
+   procedure install_GP0 is
+      b : KDF9.buffer_number;
+   begin
+      if the_graph_plotter_is_enabled then
+         IOC.slow.shift.TP.disable_TP1(b);
+         IOC.slow.shift.GP.enable(b);
+      end if;
+   end install_GP0;
 
 end IOC.equipment;
