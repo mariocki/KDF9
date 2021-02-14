@@ -1,7 +1,8 @@
+-- adc-warn.adc
 --
 -- Ada 2012 global configuration pragmas for a build with copious checking and warnings.
 --
--- For ee9 (V6), (C) 2021, W. Findlay.
+-- For ee9 (V5), (C) 2020, W. Findlay.
 -- Released under the terms of the GNU General Public License.
 --
 
