@@ -1,8 +1,6 @@
--- mtp.adb
---
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This program is an auxiliary of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or
@@ -26,8 +24,6 @@ with KDF9_char_sets;
 with magtape_data;
 with OS_specifics;
 with POSIX;
-with value_of;
-with get_runtime_paths;
 
 use  Ada.Characters.Handling;
 use  Ada.Characters.Latin_1;
@@ -192,15 +188,14 @@ procedure mtp is
 
    procedure open_the_tape_file is
       fd : Integer with Warnings => Off;  -- only written, never read!
-      argument : Constant String := get_runtime_paths & CLI.Argument(1)(1..3);
    begin
       fd := close(fd => 0);
       begin
-         fd := open(argument, read_mode);
+         fd := open(CLI.Argument(1)(1..3), read_mode);
       exception
          when POSIX_IO_error =>
             report_line;
-            report_line(argument & " cannot be opened for reading!");
+            report_line(CLI.Argument(1)(1..3) & " cannot be opened for reading!");
             raise command_error;
       end;
    end open_the_tape_file;

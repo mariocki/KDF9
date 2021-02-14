@@ -1,8 +1,6 @@
--- say_goodbye.adb
---
 -- Finalize emulation with a helpful message derived from exception information.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -50,11 +48,20 @@ procedure say_goodbye (
       else
          R := cause'Last;
       end if;
-      return ": " & cause(L .. R);
+      return cause(L .. R);
    end explanation;
 
 begin  -- say_goodbye
-   finalize_ee9(reason & explanation);
+   if reason = "" then
+      finalize_ee9("Normal end of run");
+   elsif reason'Length > 2 and then
+         reason(reason'Last-2..reason'Last) = "OUT" then
+      finalize_ee9(reason & " " & explanation);
+   elsif reason'Length = 0 then
+      finalize_ee9(explanation);
+   else
+      finalize_ee9(reason & ": " & explanation);
+   end if;
    if the_log_is_wanted then
       log_new_line;
    end if;

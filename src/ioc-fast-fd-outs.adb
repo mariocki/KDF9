@@ -26,7 +26,7 @@ use  tracing;
 
 package body IOC.fast.FD.OUTs is
 
-   -- See the Manual, Appendix 6, ï¿½2 for the TSD FD OUTs.
+   -- See the Manual, Appendix 6, §2 for the TSD FD OUTs.
 
    claimable_discs              : constant := 8;
    sectors_per_logical_block    : constant := 16;

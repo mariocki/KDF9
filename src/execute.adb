@@ -1,8 +1,6 @@
--- execute.adb
---
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -132,7 +130,7 @@ execution_loop:
             IOC.handle_a_main_store_lockout;
 
          when program_exit =>
-            say_goodbye("Normal end of run", status => Success);
+            say_goodbye("", status => Success);
             exit execution_loop;
 
          when quit_request =>
@@ -165,6 +163,10 @@ execution_loop:
 
          when diagnostic : Director_failure =>
             say_goodbye("Invalid operation in Director", Exception_Message(diagnostic));
+            exit execution_loop;
+
+         when diagnostic : OUT_error =>
+            say_goodbye("Failure in OUT", Exception_Message(diagnostic));
             exit execution_loop;
 
          when diagnostic : IO_error =>

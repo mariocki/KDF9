@@ -1,9 +1,7 @@
--- ioc.ads
---
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -44,7 +42,7 @@ package IOC is
    --    its (attached-device) kind, and
    --    its unit (the number of that device within its kind).
 
-   -- A device of ND_kind is attached to a buffer with No Device connected.
+   -- A device of AD_kind is attached to a buffer with No Device connected.
    -- If commanded, it performs a basic default action,
    --    which is to cause a LIV interrupt in the case of transfers,
    --       but is both benign and appropriate for all other operations.
@@ -62,7 +60,7 @@ package IOC is
        ST_kind,  -- Seven Track (IBM) magnetic Tape
        TP_kind,  -- Tape Punch
        TR_kind,  -- Tape Reader
-       ND_kind   -- No Device
+       AD_kind   -- Absent Device
       );
 
    -- An absent device has number 16 (not a valid buffer number).
@@ -423,7 +421,7 @@ private
                   priority_level  : KDF9.priority := 0;
                   control_word    : KDF9.Q_register;
                   decoded_order   : KDF9.decoded_order;
-                  device_name     : IOC.device_name;
+                  device_name     : IOC.device_name := "AD0";
                   order_address   : KDF9.syllable_address := (0, 0);
                   order_count     : KDF9.order_counter;
                   stream          : host_IO.stream;

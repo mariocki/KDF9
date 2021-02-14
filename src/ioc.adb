@@ -1,9 +1,7 @@
--- ioc.adb
---
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -91,7 +89,7 @@ package body IOC is
             truncate(the_buffer.stream, to_length => 0);
          end if;
       else
-         trap_operator_error(the_buffer.device_name, "cannot be found");
+         trap_operator_error(the_buffer.device_name & " cannot be found");
       end if;
       IOC.device(the_buffer).Initialize;
    end open;
@@ -107,7 +105,7 @@ package body IOC is
    exception
       when error : others =>
          raise emulation_failure
-            with "Finalizing buffer #" & buffer & "; " & Ada.Exceptions.Exception_Information(error);
+            with "Finalizing buffer #" & buffer & ": " & Ada.Exceptions.Exception_Information(error);
    end Finalize;
 
    function is_open (the_buffer : IOC.device)
@@ -184,13 +182,16 @@ package body IOC is
    procedure install (the_device : in out IOC.device'Class) is
    begin
       if buffer(the_device.number) /= null then
-         raise emulation_failure
-            with "attempt to install a second device, namely "
-               & the_device.device_name
-               & ", on buffer #"
-               & oct_of(the_device.number)
-               & " which already has "
-               & buffer(the_device.number).device_name;
+         if buffer(the_device.number).kind /= AD_kind                      and then
+               buffer(the_device.number).device_name /= the_device.device_name then
+            raise emulation_failure
+               with "attempt to install a second device, namely "
+                  & the_device.device_name
+                  & ", on buffer #"
+                  & oct_of(the_device.number)
+                  & " which already has "
+                  & buffer(the_device.number).device_name;
+         end if;
       end if;
       buffer(the_device.number) := the_device'Unchecked_Access;
    end install;
@@ -205,10 +206,7 @@ package body IOC is
       Q : constant KDF9.Q_register := canonical(Q_operand);
    begin
       if not the_buffer.is_open then
-         trap_operator_error(the_buffer.device_name,
-                             " on buffer #"
-                           & oct_of(KDF9.Q_part(the_buffer.number), 2)
-                           & " is offline");
+         trap_operator_error("buffer #" & oct_of(the_buffer.number, 2) & " is not configured");
       end if;
       if KDF9.Q_part(the_buffer.number) /= Q.C then
          raise emulation_failure
@@ -539,7 +537,7 @@ package body IOC is
       last_time      : KDF9.us := 0;
       next_time      : KDF9.us;
    begin
-      -- At least one transfer is terminated each time around outer_loop,
+      -- At least one transfer should be terminated each time around outer_loop,
       --    if not, outer_loop is exited.
    outer_loop:
       for c in buffer'Range loop
@@ -575,20 +573,20 @@ package body IOC is
    end complete_all_extant_transfers;
 
    procedure handle_a_main_store_lockout is
-      the_buffer : KDF9.buffer_number;
+      the_locker : KDF9.buffer_number;
    begin
       PHU(CPL) := (
                    is_held_up => True,
                    blockage   => (locked_core, group_address(group(the_locked_out_address)))
                   );
       -- Store access LOV interrupts invoke instruction restart outside Director.
-      the_buffer := the_locker_of(the_locked_out_address);
-      take_note_of_store_lockout(device_name_of(buffer(the_buffer).all));
+      the_locker := the_locker_of(the_locked_out_address);
+      take_note_of_store_lockout(device_name_of(buffer(the_locker).all));
       if the_execution_mode = boot_mode then
          if_user_mode_then_LOV(the_locked_out_address);
       else
          set_NIA_to(CIA);
-         advance_the_clock(buffer(the_buffer).completion_time);
+         advance_the_clock(buffer(the_locker).completion_time);
          act_on_pending_interrupts;
       end if;
       ICR := ICR + 1;
@@ -730,7 +728,7 @@ package body IOC is
          -- These orders do not necessarily involve a device.
          return order;
       end if;
-      if XY in "CP" | "CR" | "DR" | "FD" | "GP" | "ST" | "SI" | "??" then
+      if XY in "AD" | "CP" | "CR" | "DR" | "FD" | "GP" | "ST" | "SI" then
          return order;
       elsif XY = "FW" then -- FlexoWriter
          return choose(FW_synonyms);
@@ -743,7 +741,7 @@ package body IOC is
       elsif XY = "TR" then -- Tape Reader
          return choose(TR_synonyms);
       else
-         raise emulation_failure with "in IOC.mnemonic for '" & order & "' on " & class;
+         return "??";
       end if;
    end mnemonic;
 
@@ -765,6 +763,11 @@ package body IOC is
    begin
       trap_illegal_instruction(order & " cannot be used on " & buffer.device_name);
    end trap_illegal_IO_operation;
+
+   --
+   -- The following bodies provide inheritable default actions for
+   -- operations that are not implemented by specific device types.
+   --
 
    procedure PIA (the_buffer  : in out IOC.device;
                   Q_operand   : in KDF9.Q_register;

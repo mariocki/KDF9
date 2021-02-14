@@ -1,8 +1,6 @@
--- kdf9.adb
---
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,16 +17,16 @@
 with Ada.Unchecked_Conversion;
 --
 with exceptions;
-with KDF9.decoding;
 with KDF9.CPU;
+with KDF9.decoding;
 with KDF9.PHU_store;
 with KDF9.store;
 with settings;
 with tracing;
 
 use  exceptions;
-use  KDF9.decoding;
 use  KDF9.CPU;
+use  KDF9.decoding;
 use  KDF9.PHU_store;
 use  KDF9.store;
 use  settings;
@@ -105,7 +103,7 @@ package body KDF9 is
    return KDF9.sjns_link
    is (the_sjns(the_sjns_depth-1));
 
-   function words_needed (need : KDF9.nest_depth)
+   function operand_words_needed (need : KDF9.nest_depth)
    return String
    is ("NEST lacks" & need'Image & " operand" & (if need > 1 then "s" else ""));
 
@@ -115,7 +113,7 @@ package body KDF9 is
             the_CPU_state = Director_state      then
          return;
       end if;
-      effect(NOUV_interrupt, words_needed(need => at_least-the_nest_depth));
+      effect(NOUV_interrupt, operand_words_needed(need => at_least-the_nest_depth));
    end ensure_that_the_nest_holds;
 
    procedure ensure_that_the_nest_holds_an_operand is
@@ -128,7 +126,7 @@ package body KDF9 is
       ensure_that_the_nest_holds (at_least => 2);
    end ensure_that_the_nest_holds_2_operands;
 
-   function space_needed (need : KDF9.nest_depth)
+   function result_space_needed (need : KDF9.nest_depth)
    return String
    is (if need = 1 then "full NEST" else "NEST too full for" & need'Image & " operands");
 
@@ -138,7 +136,7 @@ package body KDF9 is
             the_CPU_state = Director_state    then
          return;
       end if;
-      effect(NOUV_interrupt, space_needed(need => at_least - (16-the_nest_depth)));
+      effect(NOUV_interrupt, result_space_needed(need => at_least - (16-the_nest_depth)));
    end ensure_that_the_nest_has_room_for;
 
    procedure ensure_that_the_nest_has_room_for_a_result is
@@ -198,6 +196,13 @@ package body KDF9 is
          the_nest_depth := the_nest_depth - 2;
       end return;
    end pop;
+
+   procedure pop_pair is
+   begin
+      the_nest(the_nest_depth-1) := 0;
+      the_nest(the_nest_depth-2) := 0;
+      the_nest_depth := the_nest_depth - 2;
+   end pop_pair;
 
    function read_top
    return KDF9.pair
@@ -374,11 +379,16 @@ package body KDF9 is
        (KDF9.word(the_sjns_depth) * 2**36)
       );
 
+   procedure reset_V_and_T is
+   begin
+      the_V_bit_is_set := False;
+      the_T_bit_is_set := False;
+   end reset_V_and_T;
+
    procedure reset_the_internal_registers (the_new_state : in CPU_state) is
    begin
       -- Set the state of a newly bootstrapped CPU.
-      the_V_bit_is_set := False;
-      the_T_bit_is_set := False;
+      reset_V_and_T;
       CIA := (0, 0);
       CPL := 0;
       BA  := 0;
@@ -422,9 +432,8 @@ package body KDF9 is
       the_nest_depth := 0;
       the_nest       := empty_nest;
       the_sjns_depth := 0;
-      the_sjns := empty_sjns;
-      the_V_bit_is_set := False;
-      the_T_bit_is_set := False;
+      the_sjns       := empty_sjns;
+      reset_V_and_T;
       the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.
       -- Setting NIA must follow program loading, as it fetches E0 into the IWBs.
       set_NIA_to((0, 0));
@@ -543,12 +552,12 @@ package body KDF9 is
       end case;
    end fail_in_problem_program_state;
 
-   procedure LOV_if_user_mode (device_name : in String) is
+   procedure LOV_if_user_mode (cause : in String) is
    begin
       -- LOV was TOTALLY suppressed in Director state.
       if the_CPU_state /= Director_state then
          set_NIA_to(CIA);
-         effect(LOV_interrupt, device_name);
+         effect(LOV_interrupt, cause);
       end if;
    end LOV_if_user_mode;
 
@@ -574,11 +583,11 @@ package body KDF9 is
       end case;
    end trap_illegal_instruction;
 
-   procedure trap_operator_error (the_device, the_message : in String) is
+   procedure trap_operator_error (the_message : in String) is
    begin
       -- The program has failed for a reason, such as a misconfigured environment,
       --    that is beyond its control and prevents further execution.
-      raise operator_error with "%" & the_device & " " & the_message;
+      raise operator_error with "%" & the_message;
    end trap_operator_error;
 
    procedure trap_unimplemented_feature (the_message : in String) is
@@ -587,11 +596,12 @@ package body KDF9 is
       raise not_yet_implemented with "%" & the_message;
    end trap_unimplemented_feature;
 
-   procedure fail_OUT (OUT_number : in KDF9.word; the_message : in String) is
-      OUT_name : constant String := "%OUT" & OUT_number'Image & ": ";
+   procedure trap_failing_OUT (OUT_number : in KDF9.word; the_message : in String) is
+      OUT_name : constant String := OUT_number'Image;
    begin
-      raise IO_error with OUT_name & the_message;
-   end fail_OUT;
+      -- The program has issued an invalid OUT.
+      raise OUT_error with "%" & OUT_name(2..OUT_name'Last) & ": " & the_message;
+   end trap_failing_OUT;
 
    procedure trap_invalid_paper_tape (the_message : in String) is
    begin

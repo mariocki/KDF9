@@ -1,8 +1,6 @@
--- dumping.adb
---
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -44,11 +42,11 @@ package body dumping is
 
    type area is
       record
-         format_set  : dumping.format_set := no_dumping_flag;
+         format_set  : dumping.format_set := no_dumping_flags;
          first, last : KDF9.address;
       end record;
 
-   no_dumping_area : constant dumping.area := (no_dumping_flag, 0, 0);
+   no_dumping_area : constant dumping.area := (no_dumping_flags, 0, 0);
 
    dumping_areas : array (dumping.area_number) of dumping.area := (others => no_dumping_area);
 
@@ -77,87 +75,20 @@ package body dumping is
             return;
          end if;
       end loop;
-      if format_set/expunge_flag then
-         remove_specified_areas(format_set - expunge_flag, first, last);
-      end if;
       for d of dumping_areas loop
-         if d.format_set = no_dumping_flag then
+         if d.format_set = no_dumping_flags then
             d := (format_set, first, last);
             was_stored := True;
-            if initial_flag/format_set then
+            if format_set/initial_flag then
                pre_dumping_area_count := pre_dumping_area_count + 1;
             end if;
-            if final_flag/format_set then
+            if format_set/final_flag then
                post_dumping_area_count := post_dumping_area_count + 1;
             end if;
             return;
          end if;
       end loop;
    end request_a_dumping_area;
-
-   max_types : constant Positive := abs is_dumping_flag - 1; -- P XOR Q
-
-   function format_image (format_set : dumping.format_set)
-   return String is
-      image_set  : dumping.format_set := format_set;
-      result     : String(1 .. max_types) := (others => ' ');
-      p          : Positive range 2 .. max_types := 2;
-   begin
-      if image_set = no_dumping_flag then
-         return result;
-      elsif image_set/initial_flag then
-          image_set := image_set - initial_flag;
-          result(1) := Character(initial_flag);
-      else
-          image_set := image_set - final_flag;
-          result(1) := Character(final_flag);
-      end if;
-      for f in dumping.flag loop
-         if image_set/f then
-            result(p) := Character(f);
-            p := p + 1;
-         end if;
-      end loop;
-      return trimmed(result);
-   end format_image;
-
-   function area_image (d : dumping.area_number)
-   return String is
-      first       : constant KDF9.address := dumping_areas(d).first;
-      last        : constant KDF9.address := dumping_areas(d).last;
-      format_set  : constant dumping.format_set := dumping_areas(d).format_set;
-      result      : String(1 .. max_types+2*(7)) := (others => ' ');
-   begin
-      if pre_dumping_area_count+post_dumping_area_count = 0 then
-         return no_specification;
-      end if;
-      result(1 .. max_types)             := format_image(format_set);
-      result(max_types+2 .. max_types+7) := oct_of(first);
-      result(max_types+9 .. result'Last) := oct_of(last);
-      return result;
-   end area_image;
-
-   procedure remove_specified_areas (format_set  : in dumping.format_set;
-                                     first, last : in KDF9.address) is
-   begin
-      if pre_dumping_area_count+post_dumping_area_count = 0 then
-         return;
-      end if;
-      for d of dumping_areas loop
-         if d.first >= first and d.last <= last then
-            d.format_set := d.format_set - format_set;
-            if d.format_set-initial_flag-final_flag = no_dumping_flag then
-               d := no_dumping_area;
-            end if;
-            if initial_flag/d.format_set then
-               pre_dumping_area_count := Integer'Max(pre_dumping_area_count - 1, 0);
-            end if;
-            if final_flag/d.format_set then
-               post_dumping_area_count := Integer'Max(post_dumping_area_count - 1, 0);
-            end if;
-         end if;
-      end loop;
-   end remove_specified_areas;
 
    procedure print_formatted_area (d : in dumping.area) is
       format_set  : constant dumping.format_set := d.format_set;
@@ -232,7 +163,7 @@ package body dumping is
       end if;
       for d of dumping_areas loop
          if d.format_set/flag then
-            d := (no_dumping_flag, 0, 0);
+            d := no_dumping_area;
          end if;
       end loop;
       count := 0;

@@ -1,8 +1,6 @@
--- ioc-slow-shift-tr.adb
---
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,14 +17,14 @@
 with Ada.Exceptions;
 --
 with IOC.equipment;
-with KDF9.Directors;
-with KDF9.TOD_clock;
 with KDF9_char_sets;
+with KDF9.TOD_clock;
+with KDF9.TSD.timing;
 with tracing;
 
 use  IOC.equipment;
-use  KDF9.TOD_clock;
 use  KDF9_char_sets;
+use  KDF9.TOD_clock;
 use  tracing;
 
 package body IOC.slow.shift.TR is
@@ -264,7 +262,7 @@ package body IOC.slow.shift.TR is
                                   quantum => TR_quantum);
             TR1_number := b;
          when others =>
-            trap_operator_error("TR:", "more than two units specified");
+            trap_operator_error("more than two TR units have been configured");
       end case;
       unit := unit + 1;
    end enable;
@@ -274,7 +272,7 @@ package body IOC.slow.shift.TR is
    begin
       if unit = 0 then
          TR0.is_transcribing := set_unit_code.is_transcribing;
-      else
+      elsif TR1 /= null then
          TR1.is_transcribing := set_unit_code.is_transcribing;
       end if;
    end set_unit_code;
@@ -290,7 +288,7 @@ package body IOC.slow.shift.TR is
       if the_reader.is_open then
          the_reader.current_case := KDF9_char_sets.Case_Normal;
       else
-         trap_operator_error("'" & next_file_name & "'",  "cannot be found");
+         trap_operator_error("'" & next_file_name & "' cannot be found");
       end if;
    end reattach;
 
@@ -411,7 +409,7 @@ package body IOC.slow.shift.TR is
 
       -- Do not set the time if we are computing a signature, so as to get a repeatable hash.
       if not the_signature_is_enabled then
-         KDF9.Directors.set_the_time_of_loading(the_time_of_day);
+         KDF9.TSD.timing.set_the_time_of_loading(the_time_of_day);
       end if;
 
       loading_was_successful := True;

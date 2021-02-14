@@ -1,8 +1,6 @@
--- kdf9-microcode.adb
---
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -21,9 +19,11 @@ with exceptions;
 with IOC;
 with IOC.dispatcher;
 with KDF9.CPU;
-with KDF9.Directors;
 with KDF9.decoding;
+with KDF9.EGDON;
 with KDF9.store;
+with KDF9.TSD;
+with KDF9.TSD.processes;
 with POSIX;
 with settings;
 with state_display;
@@ -33,9 +33,11 @@ use  exceptions;
 use  IOC;
 use  IOC.dispatcher;
 use  KDF9.CPU;
-use  KDF9.Directors;
 use  KDF9.decoding;
+use  KDF9.EGDON;
 use  KDF9.store;
+use  KDF9.TSD;
+use  KDF9.TSD.processes;
 use  POSIX;
 use  settings;
 use  state_display;
@@ -1184,7 +1186,7 @@ package body KDF9.microcode is
                   the_CPU_delta := the_CPU_delta + 5;
                end if;
             else
-               effect(NOUV_interrupt, words_needed(need => 2-the_nest_depth));
+               effect(NOUV_interrupt, operand_words_needed(need => 2-the_nest_depth));
             end if;
 
          when JrNE =>
@@ -1197,7 +1199,7 @@ package body KDF9.microcode is
                   the_CPU_delta := the_CPU_delta + 5;
                end if;
             else
-               effect(NOUV_interrupt, words_needed(need => 2-the_nest_depth));
+               effect(NOUV_interrupt, operand_words_needed(need => 2-the_nest_depth));
             end if;
 
          when JrGTZ =>
@@ -1398,7 +1400,7 @@ package body KDF9.microcode is
                elsif A < 200 then
                   do_an_EGDON_OUT(OUT_number => A);
                else
-                  do_some_other_OUT(OUT_number => A);
+                  trap_unimplemented_feature("OUT" & A'Image);
                end if;
             else
                effect(NOUV_interrupt, "full SJNS in OUT");
@@ -1515,11 +1517,11 @@ package body KDF9.microcode is
          synchronize_the_real_and_virtual_times;
          raise;
 
-      when program_restart =>
+      when OUT_2_restart =>
          complete_all_extant_transfers;
          update_the_virtual_clocks;
          synchronize_the_real_and_virtual_times;
-         complete_TSD_OUT_2(the_trace_operand);
+         complete_TSD_OUT_2;
 
    end do_a_fast_time_slice;
 
@@ -1595,7 +1597,7 @@ package body KDF9.microcode is
          raise time_expired;
       end if;
 
-      if (NIA_word_number / breakpoints      and then
+      if (breakpoints/NIA_word_number        and then
              ICR in low_count .. high_count)  or else
                 the_diagnostic_mode = pause_mode then
          handle_breakpoint;
@@ -1623,10 +1625,10 @@ package body KDF9.microcode is
          finalize_the_traced_instruction_execution;
          raise;
 
-      when program_restart =>
+      when OUT_2_restart =>
          complete_all_extant_transfers;
          finalize_the_traced_instruction_execution;
-         complete_TSD_OUT_2(the_trace_operand);
+         complete_TSD_OUT_2;
 
    end do_a_traced_instruction_cycle;
 

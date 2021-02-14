@@ -1,8 +1,6 @@
--- ioc-slow-unit-lp.adb
---
 -- Emulation of a lineprinter buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -195,7 +193,7 @@ package body IOC.slow.unit.LP is
                                   quantum => LP_quantum);
             LP1_number := b;
          when others =>
-            trap_operator_error("LP:", "more than two units specified");
+            trap_operator_error("more than two LP units have been configured");
       end case;
       unit := unit + 1;
    end enable;

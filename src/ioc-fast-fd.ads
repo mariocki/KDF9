@@ -1,8 +1,6 @@
--- ioc-fast-fd.ads
+-- Emulation of a fixed disc drive.
 --
--- Emulation of a (fixed-platter) disc drive.
---
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -135,17 +133,13 @@ package IOC.fast.FD is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean);
 
-   is_enabled : Boolean := False;
+   FD0_is_enabled : Boolean := False;
 
    procedure enable (b : in KDF9.buffer_number);
 
    procedure re_enable (b : in KDF9.buffer_number);
 
-   FD0_number : KDF9.buffer_number;
-
-   main_discs_per_drive    : constant := 16;
-   seek_areas_per_platter  : constant := 64;
-   the_fixed_head_platter  : constant := 16;
+   procedure disable (b : in KDF9.buffer_number);
 
    function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
    return String;
@@ -187,8 +181,11 @@ private
          inner_zone : FD.inner_data;
       end record;
 
+   seek_areas_per_platter  : constant := 64;
    subtype seek_area_range is KDF9.Q_part range 0 .. seek_areas_per_platter-1;
 
+   main_discs_per_drive    : constant := 16;
+   the_fixed_head_platter  : constant := 16;
    platters_per_drive      : constant := main_discs_per_drive + 1;
 
    subtype platter_range   is KDF9.Q_part range 0 .. platters_per_drive-1;
@@ -232,5 +229,7 @@ private
 
    overriding
    procedure Finalize (the_FD : in out FD.device);
+
+   FD0_number : KDF9.buffer_number := 0;
 
 end IOC.fast.FD;
