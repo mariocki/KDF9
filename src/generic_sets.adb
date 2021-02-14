@@ -1,8 +1,6 @@
--- generic_sets.adb
---
 -- Powersets of a discrete member type.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -20,33 +18,9 @@
 --    type member is (<>);
 package body generic_sets is
 
-   function "abs" (set : generic_sets.set)
-   return Natural is
-      result : Natural := 0;
-   begin
-      for member in generic_sets.member loop
-         if set/member then
-            result := result + 1;
-         end if;
-      end loop;
-      return result;
-   end "abs";
-
-   function "/" (member : generic_sets.member; set : generic_sets.set)
-   return Boolean
-   is (set(member));
-
    function "/" (set : generic_sets.set; member : generic_sets.member)
    return Boolean
    is (set(member));
-
-   function "or" (member : generic_sets.member; set : generic_sets.set)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := set do
-         result(member) := True;
-      end return;
-   end "or";
 
    function "or" (set : generic_sets.set; member : generic_sets.member)
    return generic_sets.set is
@@ -56,17 +30,9 @@ package body generic_sets is
       end return;
    end "or";
 
-   function "-" (set : generic_sets.set; member : generic_sets.member)
-   return generic_sets.set is
-   begin
-      return result : generic_sets.set := set do
-         result(member) := False;
-      end return;
-   end "-";
-
    function "-" (set1, set2 : generic_sets.set)
    return generic_sets.set is
-   begin -- (set1 and not set2), avoiding need for large statically allocated workspace
+   begin -- Compute (set1 and not set2), avoiding need for a potentially large workspace.
       return result : generic_sets.set := set1 do
          for m in generic_sets.member loop
             if set2(m) then

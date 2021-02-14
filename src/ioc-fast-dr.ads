@@ -1,8 +1,6 @@
--- ioc-fast-dr.ads
---
 -- Emulation of a drum store buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -95,9 +93,9 @@ package IOC.fast.DR is
 
    procedure re_enable (b : in KDF9.buffer_number);
 
-   is_enabled         : Boolean := False;
+   procedure disable (b : in KDF9.buffer_number);
 
-   DR0_number         : KDF9.buffer_number;
+   DR0_is_enabled : Boolean := False;
 
    function as_DR_command (Q_operand : KDF9.Q_register; for_OUT : Boolean := False)
    return String;
@@ -105,7 +103,7 @@ package IOC.fast.DR is
 private
 
    -- For what little we know from EE of the drum geometry, see the Manual, App. 6, ß4.
-   -- An additional and more helpful source is the SRLM, ù103, Appendix 2, p.10-59-0,
+   -- An additional and more helpful source is the SRLM, ß103, Appendix 2, p.10-59-0,
    --   which describes the drum used with the non-Time Sharing Director.
    -- It says:
    --   Drum revolution time     = 20.4   ms
@@ -133,7 +131,7 @@ private
    subtype track_range is KDF9.word range 0 .. tracks_per_system - 1;
 
    data_rate      : constant := 477_445;         -- chars/s
-   us_per_char    : constant := 1E6 / data_rate; -- ~2.1 ùs/char
+   us_per_char    : constant := 1E6 / data_rate; -- ~2.1 µs/char
 
    -- The following times are in microseconds.
    short_gap_time : constant := 34;
@@ -151,5 +149,7 @@ private
 
    overriding
    procedure Finalize (the_DR : in out DR.device);
+
+   DR0_number : KDF9.buffer_number := 0;
 
 end IOC.fast.DR;

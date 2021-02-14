@@ -1,9 +1,7 @@
--- IOC.equipment.ads
---
 -- Enable the devices included in the chosen KDF9 I/O configuration.
 --
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -40,9 +38,9 @@ package IOC.equipment is
    TR0_number  : KDF9.buffer_number := 0;
    TR1_number  : KDF9.buffer_number := 0;
 
-   type device_kinds is (CP, CR, DR, FD, FW, GP, LP, MT, NA, SI, ST, TP, TR);
+   type kind   is (AD, CP, CR, DR, FD, FW, GP, LP, MT, SI, ST, TP, TR);
 
-   type choices      is array (KDF9.buffer_number) of equipment.device_kinds;
+   type setup  is array (KDF9.buffer_number) of equipment.kind;
 
    -- These are the buffer numbers for the devices in the default configuration.
    -- The Fixed Disc drive was on buffer 14 (#16) of Eldon 2 KDF9s, so I adopt that here.
@@ -61,37 +59,36 @@ package IOC.equipment is
    MT3_default : constant KDF9.buffer_number := 11;
    MT4_default : constant KDF9.buffer_number := 12;
    MT5_default : constant KDF9.buffer_number := 13;
+   DR0_default : constant KDF9.buffer_number := 14;
    FD0_default : constant KDF9.buffer_number := 14;
    ST0_default : constant KDF9.buffer_number := 15;
 
-   default     : constant equipment.choices
-               := (
-                   CP0_default => CP,
-                   CR0_default => CR,
-                   FD0_default => FD,
-                   FW0_default => FW,
-                   LP0_default => LP,
-                   MT0_default => MT,
-                   MT1_default => MT,
-                   MT2_default => MT,
-                   MT3_default => MT,
-                   MT4_default => MT,
-                   MT5_default => MT,
-                   ST0_default => ST,
-                   TP0_default => TP,
-                   TP1_default => TP,
-                   TR0_default => TR,
-                   TR1_default => TR
-                  );
+   default : constant equipment.setup
+           := (
+               CP0_default => CP,
+               CR0_default => CR,
+               FD0_default => FD,
+               FW0_default => FW,
+               LP0_default => LP,
+               MT0_default => MT,
+               MT1_default => MT,
+               MT2_default => MT,
+               MT3_default => MT,
+               MT4_default => MT,
+               MT5_default => MT,
+               ST0_default => ST,
+               TP0_default => TP,
+               TP1_default => TP,
+               TR0_default => TR,
+               TR1_default => TR
+              );
 
-   choice      : equipment.choices := default;
+   choice  : equipment.setup := default;
 
    -- Attach the chosen devices to their buffers.
    procedure configure;
 
-   -- If a drum or disc has been enabled, replace it on the buffer used by the other.
+   -- If a drum, disc or BSI has been enabled on the command line, make sure it is installed.
    procedure re_configure;
-
-   procedure install_GP0;
 
 end IOC.equipment;

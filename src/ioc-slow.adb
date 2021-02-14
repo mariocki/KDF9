@@ -1,8 +1,6 @@
--- ioc-slow_devices.adb
---
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -94,8 +92,7 @@ package body IOC.slow is
             reattach(the_buffer, name & ".txt");
             return;
          else
-            the_buffer.is_abnormal := True;
-            raise end_of_stream;
+            raise operator_error;
          end if;
       end reattach_the_text_file;
 
@@ -111,7 +108,7 @@ package body IOC.slow is
          if response = wrong_response then
             null;  -- repeat the prompt
          elsif response = quit_response then
-            trap_failing_IO_operation(the_buffer, "end of data indicated");
+            trap_failing_IO_operation(the_buffer, "quit requested by the user");
          elsif response = EOF_response then
             the_buffer.is_abnormal := True;
             raise end_of_stream;
@@ -125,10 +122,20 @@ package body IOC.slow is
             begin
                reattach_the_text_file(here & next);
                return;
+            exception
+               when operator_error =>
+                  output_line(BEL & "ee9: The file '" & here & next & "' could not be found");
             end;
          elsif response = name_response then
-            reattach_the_text_file(next_file_name(BEL & "Give the pathname of the file"));
-            return;
+            declare
+               next : constant String := next_file_name(BEL & "Give the pathname of the file");
+            begin
+               reattach_the_text_file(next);
+               return;
+            exception
+               when operator_error =>
+                  output_line(BEL & "ee9: The file '" & next & "' could not be found");
+            end;
          end if;
       end loop;
    end deal_with_end_of_data;

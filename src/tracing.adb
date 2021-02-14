@@ -1,8 +1,6 @@
--- tracing.adb
---
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -531,7 +529,7 @@ package body tracing is
    procedure act_on_any_fetchpoint is
       use type watch_flags.set;
    begin
-      if the_trace_address/fetchpoints then
+      if fetchpoints/the_trace_address then
          log_new_line;
          log("Fetch watchhpoint: N1 := [#" & oct_of(the_trace_address) & "]");
          short_witness;
@@ -544,7 +542,7 @@ package body tracing is
    procedure act_on_any_storepoint is
       use type watch_flags.set;
    begin
-      if the_trace_address/storepoints then
+      if storepoints/the_trace_address then
          log_new_line;
          log(
              "Store watchpoint: #"

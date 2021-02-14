@@ -1,8 +1,6 @@
--- ioc-slow-shift-si.adb
---
 -- Emulation of a standard interface buffer.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -224,7 +222,7 @@ package body IOC.slow.shift.SI is
                                   quantum => SI_quantum);
             SI1_number := b;
          when others =>
-            trap_operator_error("SI:", "more than two units specified" & unit'Image & b'Image);
+            trap_operator_error("more than two SI units have been configured");
       end case;
       unit := unit + 1;
    end enable;

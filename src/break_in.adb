@@ -1,8 +1,6 @@
--- break_in.adb
---
 -- This communicates a break-in to the microcode.
 --
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -37,7 +35,6 @@ package body break_in is
 
    procedure note_user_interrupt is
    begin
-      if requested then return; end if;  -- The handler is already running.
       requested := True;
    end note_user_interrupt;
 
