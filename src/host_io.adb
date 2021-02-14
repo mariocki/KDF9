@@ -115,13 +115,7 @@ package body host_IO is
       open(the_stream, file_name, mode, fd);
    exception
       when POSIX_IO_error =>
-         trap_operator_error(file_name,
-                             " cannot be "
-                           & (case mode is
-                                 when read_mode  => "read",
-                                 when write_mode => "written",
-                                 when rd_wr_mode => "read or written")
-                            );
+         trap_operator_error("'" & file_name & "' cannot be opened in " & mode'Image);
    end open;
 
    procedure truncate (the_stream : in out host_IO.stream;

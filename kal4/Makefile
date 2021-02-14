@@ -17,15 +17,18 @@
 CC=gcc
 YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=--debug
+YFLAGS=--debug --defines=kal4.tab.h
 
 prefix?=/usr/local
+
+%.c: %.y
+%.c: %.l
 
 kal4: kal4.c kal4.tab.c kal4tab.c 
 	$(CC) -o $@ $^ $(CFLAGS)
 
 kal4.tab.c: kal4.y
-	$(YACC) --defines=kal4.tab.h $^ $(YFLAGS)
+	$(YACC) $^ $(YFLAGS)
 
 .PHONY: clean
 clean:
