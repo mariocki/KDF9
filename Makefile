@@ -97,6 +97,7 @@ clean:
 	$(MAKE) -e -C ${KAL4} clean
 	$(MAKE) -e -C ${KALGOL}	clean
 	$(MAKE) -e -C ${MKCHAN}	clean
+	$(RM) build.log
 	$(RM) ${SRC:%=%/*.ali}
 	$(RM) ${SRC:%=%/*.o}
 	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc
