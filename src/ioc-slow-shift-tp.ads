@@ -1,6 +1,6 @@
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -63,7 +63,7 @@ package IOC.slow.shift.TP is
    procedure enable (b : in KDF9.buffer_number);
 
    -- Finalize TP1 if necessary and remove it from the configuration, to allow GP0 to be attached.
-   procedure remove_TP1 (b : in KDF9.buffer_number);
+   procedure remove_from_buffer (b : in KDF9.buffer_number);
 
    -- Set the character code to be used by the TP unit.
    procedure set_unit_code(unit : in Natural; is_transcribing : in Boolean);
@@ -77,5 +77,15 @@ private
 
    overriding
    procedure Finalize (the_TP : in out TP.device);
+
+   overriding
+   function kind (the_TP : TP.device)
+   return IOC.device_kind
+   is (TP_kind);
+
+   overriding
+   function quantum (the_TP : TP.device)
+   return KDF9.us
+   is (1E6 / 110);
 
 end IOC.slow.shift.TP;

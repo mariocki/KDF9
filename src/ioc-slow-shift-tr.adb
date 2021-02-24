@@ -1,6 +1,6 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,18 +14,12 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Exceptions;
---
-with IOC.equipment;
 with KDF9_char_sets;
 with KDF9.TOD_clock;
 with KDF9.TSD.timing;
-with tracing;
 
-use  IOC.equipment;
 use  KDF9_char_sets;
 use  KDF9.TOD_clock;
-use  tracing;
 
 package body IOC.slow.shift.TR is
 
@@ -214,14 +208,12 @@ package body IOC.slow.shift.TR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      validate_device(the_TR, Q_operand);
+      validate_device(the_TR);
       validate_parity(the_TR);
       deal_with_a_busy_device(the_TR, 13, set_offline);
       the_T_bit_is_set := True;
       take_note_of_test(the_TR.device_name, Q_operand, the_T_bit_is_set);
    end PMB;
-
-
 
    overriding
    procedure Finalize (the_TR : in out TR.device) is
@@ -242,24 +234,16 @@ package body IOC.slow.shift.TR is
    TR0  : TR_access with Warnings => Off;
    TR1  : TR_access with Warnings => Off;
 
-   TR_quantum : constant := 1E6 / 1_000;  -- 1000 characters per second.
-
    unit : IOC.unit_number := 0;
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
       case unit is
          when 0 =>
-            TR0 := new TR.device (number  => b,
-                                  kind    => TR_kind,
-                                  unit    => 0,
-                                  quantum => TR_quantum);
+            TR0 := new TR.device (number => b, unit => 0);
             TR0_number := b;
          when 1 =>
-            TR1 := new TR.device (number  => b,
-                                  kind    => TR_kind,
-                                  unit    => 1,
-                                  quantum => TR_quantum);
+            TR1 := new TR.device (number => b, unit => 1);
             TR1_number := b;
          when others =>
             trap_operator_error("more than two TR units have been configured");
@@ -418,12 +402,6 @@ package body IOC.slow.shift.TR is
       reattach(0, "TR0");
       clear_IOC_FIFO;
       reset_loader_usage(0);
-   exception
-      when invalid_paper_tape_file
-         | operator_error =>
-         raise;
-      when error : others =>
-         raise emulation_failure with "in load_a_program: " & Ada.Exceptions.Exception_Message(error);
    end load_a_program;
 
    -- TR0 is the hardware bootstrap device for reading initial orders.
@@ -441,11 +419,6 @@ package body IOC.slow.shift.TR is
       clear_IOC_FIFO;
       reset_loader_usage(0);
       loading_was_successful := True;
-   exception
-      when invalid_paper_tape_file =>
-         raise;
-      when error : others =>
-         raise emulation_failure with "in boot_the_KDF9: " & Ada.Exceptions.Exception_Message(error);
    end boot_the_KDF9;
 
 end IOC.slow.shift.TR;

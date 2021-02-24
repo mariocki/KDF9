@@ -1,6 +1,6 @@
 -- Implement the API (OUTs) of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@
 
 with IOC.fast.DR.TSD_OUTs;
 with IOC.fast.FD.TSD_OUTs;
-with IOC.fast.MT.TSD_OUTs;
+with IOC.fast.tape.TSD_OUTs;
 with KDF9.TSD.peripherals;
 with KDF9.TSD.processes;
 with KDF9.TSD.spooling;
@@ -26,7 +26,7 @@ with tracing;
 
 use  IOC.fast.DR.TSD_OUTs;
 use  IOC.fast.FD.TSD_OUTs;
-use  IOC.fast.MT.TSD_OUTs;
+use  IOC.fast.tape.TSD_OUTs;
 use  KDF9.TSD.peripherals;
 use  KDF9.TSD.processes;
 use  KDF9.TSD.spooling;
@@ -48,7 +48,7 @@ package body KDF9.TSD is
    procedure do_a_TSD_OUT (OUT_number : in KDF9.word) is
    begin
       -- Dismiss the OUT number in N1, allowing for an empty NEST, treated as OUT 0.
-      if the_nest_depth > 0 then
+      if the_NEST_depth > 0 then
          pop;
       end if;
 
@@ -126,19 +126,19 @@ package body KDF9.TSD is
          when 70 =>
             -- This is not a genuine TSD OUT, it is an expedient for debugging KAlgol,
             --   so ee9 simply erases its parameters from N1 and N2.
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             pop_pair;
 
          when 97 =>
             -- This is not a genuine TSD OUT, it gets an integer value from the command line.
             -- The operand is the name of an environment variable.
             -- The result is the numerical value of that variable.
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             do_OUT_97;
 
          when 98 =>
             -- This is not a genuine TSD OUT, it is an ee9 'OUT' for setting FW output format.
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             realistic_FW_output_is_wanted := the_trace_operand /= 0;
 
@@ -150,7 +150,7 @@ package body KDF9.TSD is
 
          when others =>
             push(OUT_number);
-            trap_failing_OUT(OUT_number, "is not yet implemented");
+            trap_failing_OUT(OUT_number, "is unknown, or not yet implemented");
 
       end case;
    end do_a_TSD_OUT;

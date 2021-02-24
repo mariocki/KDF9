@@ -1,7 +1,7 @@
 -- Enable the devices included in the chosen KDF9 I/O configuration.
 --
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@ with KDF9;
 package IOC.equipment is
 
    -- These variables are used in the emulation of OUT 5.
-   -- They are set to the device buffer number at the start of each run by configure.
+   -- They are set to the device buffer number at the start of each run by configure_the_IOC.
    -- A value of 0 indicates that the device is not included in the configuration for the run.
    -- Fast devices are not allocated by this mechanism and so do not appear here.
 
@@ -86,9 +86,9 @@ package IOC.equipment is
    choice  : equipment.setup := default;
 
    -- Attach the chosen devices to their buffers.
-   procedure configure;
+   procedure configure_the_IOC;
 
    -- If a drum, disc or BSI has been enabled on the command line, make sure it is installed.
-   procedure re_configure;
+   procedure revise_the_configuration;
 
 end IOC.equipment;

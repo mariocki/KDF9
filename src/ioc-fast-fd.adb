@@ -1,6 +1,6 @@
 -- Emulation of a fixed disc drive.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,16 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with Ada.Exceptions;
---
-with formatting;
-with HCI;
-with tracing;
-
-use formatting;
-use  HCI;
-use  tracing;
 
 package body IOC.fast.FD is
 
@@ -296,20 +286,12 @@ package body IOC.fast.FD is
    this_sector  : sector_image;
 
    procedure get_next_sector (the_FD : in out FD.device) is
-      byte_address : constant POSIX.file_position := file_offset(the_FD.locus);
-      byte_count   : Integer;
+      result : POSIX.file_position with Unreferenced;
    begin
-      if seek(fd_of(the_FD.stream), byte_address) /= byte_address then
-         raise emulation_failure with "POSIX seek failure in FD.get_next_sector";
-      end if;
-      byte_count := read(fd_of(the_FD.stream), this_sector, bytes_per_sector);
-      if byte_count /= bytes_per_sector and then  -- A short transfer ..
-            byte_count /= 0                 then  -- ... is OK at EOF with a 0 count.
-         raise emulation_failure with "POSIX read failure in FD.get_next_sector";
-      end if;
+      result := seek(fd_of(the_FD.stream), file_offset(the_FD.locus));
+      result := POSIX.file_position(read(fd_of(the_FD.stream), this_sector, bytes_per_sector));
       the_FD.sector_count := the_FD.sector_count + 1;
       advance_the_sector_number(the_FD);
-
    end get_next_sector;
 
    procedure keep_house (the_FD        : in out FD.device;
@@ -379,7 +361,7 @@ package body IOC.fast.FD is
       data_duration,
       total_duration     : KDF9.us;
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       seek_to_the_target_area(the_FD, seek_duration, switch_duration);
       set_the_new_sector_number(the_FD, Q_operand);
@@ -540,7 +522,7 @@ package body IOC.fast.FD is
                   set_offline : in Boolean) is
       a_seek_is_needed : Boolean := False;
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       set_seek_target(the_FD, Q_operand, a_seek_is_needed);
       deal_with_a_busy_device(the_FD, 19, set_offline);
@@ -551,9 +533,10 @@ package body IOC.fast.FD is
    procedure PMB (the_FD      : in out FD.device;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       null;
    end PMB;
@@ -562,9 +545,10 @@ package body IOC.fast.FD is
    procedure PMC (the_FD      : in out FD.device;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       null;
    end PMC;
@@ -580,7 +564,7 @@ package body IOC.fast.FD is
       seek_duration,
       switch_duration  : KDF9.us;
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       -- Hypothesis: drive reset clears the parity flag.
       the_FD.is_abnormal := False;
       -- In effect, do 16 PMA operations, but treat them as a single operation.
@@ -602,7 +586,7 @@ package body IOC.fast.FD is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       deal_with_a_busy_device(the_FD, 13, set_offline);
       the_T_bit_is_set := the_FD.locus.is_at_end_of_area;
@@ -610,14 +594,10 @@ package body IOC.fast.FD is
    end PMF;
 
    procedure put_next_sector (the_FD : in out FD.device) is
-      byte_address : constant POSIX.file_position := file_offset(the_FD.locus);
+      result : POSIX.file_position with Unreferenced;
    begin
-      if seek(fd_of(the_FD.stream), byte_address) /= byte_address then
-         raise emulation_failure with "POSIX seek failure in FD.put_next_sector";
-      end if;
-      if write(fd_of(the_FD.stream), this_sector, bytes_per_sector) /= bytes_per_sector then
-         raise emulation_failure with "POSIX write failure in FD.put_next_sector";
-      end if;
+      result := seek(fd_of(the_FD.stream), file_offset(the_FD.locus));
+      result := POSIX.file_position(write(fd_of(the_FD.stream), this_sector, bytes_per_sector));
       the_FD.sector_count := the_FD.sector_count + 1;
       advance_the_sector_number(the_FD);
       this_sector := empty_sector;
@@ -673,7 +653,7 @@ package body IOC.fast.FD is
       total_duration     : KDF9.us;
       latency_start_time : KDF9.us;
    begin
-      validate_device(the_FD, Q_operand);
+      validate_device(the_FD);
       validate_parity(the_FD);
       seek_to_the_target_area(the_FD, seek_duration, switch_duration);
       set_the_new_sector_number(the_FD, Q_operand);
@@ -682,7 +662,7 @@ package body IOC.fast.FD is
 
       if the_FD.locus.is_at_end_of_area then
          -- Cannot transfer past the last sector in a seek area.
-         trap_failing_IO_operation(the_FD, "attempt to read FD at the end of a seek area");
+         trap_failing_IO_operation(the_FD, "attempt to write FD at the end of a seek area");
       end if;
 
       -- Write to the newly established position.
@@ -834,7 +814,7 @@ package body IOC.fast.FD is
                   & just_right(KDF9.us'Image(the_FD.switch_time / 1_000), 6)
                   & " ms in"
                   & the_FD.switch_count'Image
-                  & plurality(the_FD.switch_count, " platter switch", " platter switches")
+                  & " platter switch" & plurality(the_FD.switch_count, "", "es")
                   & ","
                    );
             log_line
@@ -843,7 +823,7 @@ package body IOC.fast.FD is
                   & just_right(KDF9.us'Image(the_FD.latency_time / 1_000), 6)
                   & " ms in"
                   & the_FD.latency_count'Image
-                  & plurality(the_FD.latency_count, " rotational latency", " rotational latencies")
+                  & " rotational latenc" & plurality(the_FD.latency_count, "y", "ies")
                   & ", and"
                    );
             log_line
@@ -858,13 +838,7 @@ package body IOC.fast.FD is
          IOC.device(the_FD).Finalize;
          close(the_FD);
       end if;
-   exception
-      when error : others =>
-         raise emulation_failure
-            with "Finalizing FD buffer #" & buffer & "; " & Ada.Exceptions.Exception_Message(error);
    end Finalize;
-
-   FD_quantum : constant := (1E6 + outer_rate - 1) / outer_rate;
 
    type FD_access is access FD.device;
 
@@ -875,15 +849,12 @@ package body IOC.fast.FD is
       if FD0_is_enabled then
          trap_operator_error("more than one FD control unit has been configured");
       end if;
-      FD0 := new FD.device (number  => b,
-                            kind    => FD_kind,
-                            unit    => 0,
-                            quantum => FD_quantum);
+      FD0 := new FD.device (number => b, unit => 0);
       FD0_is_enabled := True;
       FD0_number := b;
    end enable;
 
-   procedure re_enable (b : in KDF9.buffer_number) is
+   procedure replace_on_buffer (b : in KDF9.buffer_number) is
    begin
       if FD0 /= null    and then
             b = FD0.number  then
@@ -894,9 +865,9 @@ package body IOC.fast.FD is
       FD0_number := 0;
       FD0_is_enabled := False;
       enable(b);
-   end re_enable;
+   end replace_on_buffer;
 
-   procedure disable (b : in KDF9.buffer_number) is
+   procedure remove_from_buffer (b : in KDF9.buffer_number) is
    begin
       if FD0 /= null    and then
             b = FD0.number  then
@@ -905,6 +876,6 @@ package body IOC.fast.FD is
          FD0_number := 0;
          FD0_is_enabled := False;
       end if;
-   end disable;
+   end remove_from_buffer;
 
 end IOC.fast.FD;

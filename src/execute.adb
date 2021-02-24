@@ -1,6 +1,6 @@
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -33,7 +33,6 @@ with say_goodbye;
 
 use  Ada.Command_Line;
 use  Ada.Exceptions;
-
 --
 use  dumping;
 use  exceptions;
@@ -126,7 +125,7 @@ execution_loop:
          when abandon_this_order =>
             null;  -- Just get on with it after an interrupt or nullified order.
 
-         when LOV_trap =>
+         when LOV_exception =>
             IOC.handle_a_main_store_lockout;
 
          when program_exit =>
@@ -141,7 +140,7 @@ execution_loop:
             say_goodbye("Infinite loop? Run failed by exceeding the time limit");
             exit execution_loop;
 
-         when diagnostic : NOUV_trap =>
+         when diagnostic : NOUV_exception =>
             say_goodbye("NOUV interrupt", Exception_Message(diagnostic));
             exit execution_loop;
 
@@ -153,11 +152,11 @@ execution_loop:
             say_goodbye("Not yet implemented", Exception_Message(diagnostic));
             exit execution_loop;
 
-         when diagnostic : RESET_trap =>
+         when diagnostic : RESET_exception =>
             say_goodbye("RESET interrupt", Exception_Message(diagnostic));
             exit execution_loop;
 
-         when diagnostic : LIV_trap =>
+         when diagnostic : LIV_exception =>
             say_goodbye( "LIV interrupt", Exception_Message(diagnostic));
             exit execution_loop;
 

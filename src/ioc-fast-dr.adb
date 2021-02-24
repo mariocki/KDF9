@@ -1,6 +1,6 @@
 -- Emulation of a drum store.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,12 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with formatting;
-with HCI;
-
-use  formatting;
-use  HCI;
 
 package body IOC.fast.DR is
 
@@ -55,35 +49,17 @@ package body IOC.fast.DR is
    is (bytes_per_sector * POSIX.file_position(sector_number));
 
    procedure get (the_DR : in out DR.device; s : out sector; the_index : in KDF9.word) is
-      byte_address : constant POSIX.file_position := file_offset(the_index);
-      result       : POSIX.file_position;
+      result : POSIX.file_position with Unreferenced;
    begin
       result := seek(fd_of(the_DR.stream), file_offset(the_index));
-      if result /= byte_address then
-         raise emulation_failure
-            with "POSIX seek failure in DR.get";
-      end if;
       result := POSIX.file_position(read(fd_of(the_DR.stream), s, bytes_per_sector));
-      if result /= bytes_per_sector then
-         raise emulation_failure
-            with "POSIX read failure in DR.get";
-      end if;
    end get;
 
    procedure put (the_DR : in out DR.device; s : in sector; the_index : in KDF9.word) is
-      byte_address : constant POSIX.file_position := file_offset(the_index);
-      result       : POSIX.file_position;
+      result : POSIX.file_position with Unreferenced;
    begin
       result := seek(fd_of(the_DR.stream), file_offset(the_index));
-      if result /= byte_address then
-         raise emulation_failure
-            with "POSIX seek failure in DR.put";
-      end if;
       result := POSIX.file_position(write(fd_of(the_DR.stream), s, bytes_per_sector));
-      if result /= bytes_per_sector then
-         raise emulation_failure
-            with "POSIX write failure in DR.put";
-      end if;
    end put;
 
    overriding
@@ -102,15 +78,15 @@ package body IOC.fast.DR is
       full_sectors  : constant KDF9.word := transfer_size / bytes_per_sector;
       residue       : constant KDF9.word := transfer_size mod bytes_per_sector;
       total_sectors : constant KDF9.word := (if residue /= 0 then 1 else 0) + full_sectors;
-      gapping_time  : constant KDF9.word := short_gap_time * (total_sectors-1)
-                                          + long_gap_time  * (total_sectors/sectors_per_track);
+      gapping_time  : constant KDF9.us   := short_gap_time * KDF9.us(total_sectors-1)
+                                          + long_gap_time  * KDF9.us(total_sectors/sectors_per_track);
    begin
       the_DR.latency_count := the_DR.latency_count + 1;
       the_DR.word_count := the_DR.word_count + transfer_size / 8;
       if from_core then
          add_in_the_IO_CPU_time(the_DR, bytes_moved => transfer_size);
       end if;
-      busy_time :=  KDF9.us(gapping_time +transfer_size * us_per_char);
+      busy_time :=  gapping_time + KDF9.us(transfer_size) * the_DR.quantum;
    end keep_house;
 
    procedure update_statistics (the_DR       : in out DR.device;
@@ -497,7 +473,7 @@ package body IOC.fast.DR is
 
    overriding
    procedure Finalize (the_DR : in out DR.device) is
-      transfer_time : constant KDF9.us := KDF9.us(the_DR.word_count * 8 * us_per_char);
+      transfer_time : constant KDF9.us := KDF9.us(the_DR.word_count) * 8 * the_DR.quantum;
    begin
       if the_DR.is_open then
 
@@ -528,15 +504,13 @@ package body IOC.fast.DR is
                & just_right(KDF9.us'Image(the_DR.latency_time / 1_000), 6)
                & " ms in"
                & the_DR.latency_count'Image
-               & plurality(the_DR.latency_count, " rotational latency.", " rotational latencies.")
+               & " rotational latenc" & plurality(the_DR.latency_count, "y.", "ies.")
                 );
          end if;
 
          close(IOC.device(the_DR));
       end if;
    end Finalize;
-
-   DR_quantum : constant := us_per_char;
 
    type DR_access is access DR.device;
 
@@ -547,30 +521,27 @@ package body IOC.fast.DR is
       if DR0_is_enabled then
          trap_operator_error("more than one DR control unit has been configured");
       end if;
-      DR0 := new DR.device (number  => b,
-                            kind    => DR_kind,
-                            unit    => 0,
-                            quantum => DR_quantum);
+      DR0 := new DR.device (number => b, unit => 0);
       DR0_is_enabled := True;
       DR0_number := b;
    end enable;
 
-   procedure re_enable (b : in KDF9.buffer_number) is
+   procedure replace_on_buffer (b : in KDF9.buffer_number) is
    begin
       if DR0_is_enabled and then
-         b = DR0.number     then
+            b = DR0.number  then
          return;
       end if;
       buffer(b) := null;
       enable(b);
-   end re_enable;
+   end replace_on_buffer;
 
-   procedure disable (b : in KDF9.buffer_number) is
+   procedure remove_from_buffer (b : in KDF9.buffer_number) is
    begin
       if DR0_is_enabled and DR0_number = b then
          buffer(b) := null;
          DR0_is_enabled := False;
       end if;
-   end disable;
+   end remove_from_buffer;
 
 end IOC.fast.DR;

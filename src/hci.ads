@@ -6,7 +6,7 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -20,11 +20,9 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with KDF9;
 with logging.file;
 with logging.panel;
 
-use  KDF9;
 use  logging.file;
 use  logging.panel;
 
@@ -48,13 +46,6 @@ package HCI is
 
    procedure log_line (text : in String;
                        iff  : in Boolean := True);
-
-   -- Log in octal with initial '#'.
-   procedure log_octal (number : in KDF9.word;
-                        width  : in Positive := 1);
-
-   procedure log_octal (number : in KDF9.field_of_16_bits;
-                        width  : in Positive := 1);
 
    procedure log_new_line (iff : in Boolean := True);
 

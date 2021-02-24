@@ -1,4 +1,4 @@
--- Provide an Ada.Text_IO interface to the file system of the real OS.
+-- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
 --
 -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
@@ -14,17 +14,19 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Text_IO;
+package body IOC.fast is
 
-use  Ada.Text_IO;
+   overriding
+   function is_open (the_buffer : fast.device)
+   return Boolean
+   is (the_buffer.stream.is_open);
 
-package file_interfacing is
+   overriding
+   procedure add_in_the_IO_CPU_time (the_buffer  : in fast.device;
+                                     bytes_moved : in KDF9.word) is
+      pragma Unreferenced(the_buffer);
+   begin
+      the_CPU_delta := the_CPU_delta + KDF9.us(bytes_moved + 7) / 8 * 6; -- 6µs/word
+   end add_in_the_IO_CPU_time;
 
-   procedure initialize (some_file : in out File_Type;
-                         mode      : in File_Mode;
-                         file_name : in String);
-
-   procedure finalize (some_file : in out File_Type;
-                       file_name : in String);
-
-end file_interfacing;
+end IOC.fast;

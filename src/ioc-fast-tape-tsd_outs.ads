@@ -1,4 +1,4 @@
--- Provide an Ada.Text_IO interface to the file system of the real OS.
+-- Implement the magnetic tape API (OUTs) of the EE Time Sharing Director.
 --
 -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
@@ -14,17 +14,13 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Text_IO;
+package IOC.fast.tape.TSD_OUTs is
 
-use  Ada.Text_IO;
+   procedure do_OUT_4;
 
-package file_interfacing is
+   procedure do_OUT_10;
 
-   procedure initialize (some_file : in out File_Type;
-                         mode      : in File_Mode;
-                         file_name : in String);
+   function needs_rewinding (b : KDF9.buffer_number)
+   return Boolean;
 
-   procedure finalize (some_file : in out File_Type;
-                       file_name : in String);
-
-end file_interfacing;
+end IOC.fast.tape.TSD_OUTs;

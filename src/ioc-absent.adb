@@ -1,6 +1,6 @@
 -- Handle attempted usage of a buffer with No Device attached.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,19 +14,15 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with formatting;
-
-use formatting;
-
 package body IOC.absent is
 
    procedure disavow (the_device  : in out absent.device;
                       Q_operand   : in KDF9.Q_register;
                       set_offline : in Boolean) is
-      pragma Unreferenced(the_device);
+      pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_operator_error("buffer #" & oct_of(Q_operand.C and 8#17#, 2) & " has no I/O device");
+      trap_operator_error("there is no device on buffer #" & oct_of(the_device.number, 2));
    end disavow;
 
    overriding
@@ -191,16 +187,22 @@ package body IOC.absent is
                   set_offline : in Boolean) is
    begin disavow(the_device, Q_operand, set_offline); end POL;
 
+   overriding
+   procedure Initialize (the_device : in out absent.device) is
+   begin
+      install(the_device);
+   end Initialize;
 
    type AD_access is access absent.device;
-   AD_list         : array (IOC.unit_number) of AD_access with Warnings => Off;
+   AD_list : array (IOC.unit_number range 0..14) of AD_access with Warnings => Off;
 
+    -- This cannot overflow, because there must be at least 2 non-AD buffers: FW0 and TR0.
    unit : IOC.unit_number := 0;
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      AD_list(unit) := new absent.device (number => b, kind => AD_kind, unit => unit, quantum => 0);
-      unit := unit + 1;
+      AD_list(unit) := new absent.device(number => b, unit => unit);
+       unit := unit + 1;
    end enable;
 
 end IOC.absent;

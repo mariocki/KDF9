@@ -1,6 +1,6 @@
 -- Emulation of a drum store buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@
 
 package IOC.fast.DR is
 
-   type device is new IOC.fast.device with private;
+   type device is new fast.device with private;
 
    overriding
    procedure PIA (the_DR      : in out DR.device;
@@ -91,9 +91,9 @@ package IOC.fast.DR is
 
    procedure enable (b : in KDF9.buffer_number);
 
-   procedure re_enable (b : in KDF9.buffer_number);
+   procedure replace_on_buffer (b : in KDF9.buffer_number);
 
-   procedure disable (b : in KDF9.buffer_number);
+   procedure remove_from_buffer (b : in KDF9.buffer_number);
 
    DR0_is_enabled : Boolean := False;
 
@@ -142,13 +142,23 @@ private
 
    type drum is array (drum_index) of DR.sector;
 
-   type device is new IOC.fast.device with null record;
+   type device is new fast.device with null record;
 
    overriding
    procedure Initialize (the_DR : in out DR.device);
 
    overriding
    procedure Finalize (the_DR : in out DR.device);
+
+   overriding
+   function kind (the_DR : DR.device)
+   return IOC.device_kind
+   is (DR_kind);
+
+   overriding
+   function quantum (the_DR : DR.device)
+   return KDF9.us
+   is (us_per_char);
 
    DR0_number : KDF9.buffer_number := 0;
 

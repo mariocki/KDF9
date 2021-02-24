@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,10 +19,12 @@ with Ada.Finalization;
 --
 with KDF9;
 
+private with Ada.Exceptions;
 private with Ada.Characters.Latin_1;
 --
 private with exceptions;
 private with formatting;
+private with HCI;
 private with host_IO;
 private with KDF9_char_sets;
 private with KDF9.store;
@@ -63,15 +65,14 @@ package IOC is
        AD_kind   -- Absent Device
       );
 
-   -- An absent device has number 16 (not a valid buffer number).
-   subtype device_number is KDF9.Q_part range 0 .. 16;
+   -- This is the number of the buffer a device is connected to.
+   subtype device_number is KDF9.Q_part range 0 .. 15;
 
-   -- There are at most 10 devices of a type (this is an ee9 limit, not imposed by KDF9 hardware).
-   subtype unit_number is KDF9.Q_part range 0 .. 9;
+   -- This is the index of a device within devices of the type in the configuration.
+   subtype unit_number   is KDF9.Q_part range 0 .. 15;
 
-   -- An IOC.device_name is of the form XYu, where XY is a two-letter device-type
-   --    code (e.g., "LP" or "CR"); and u is the one-digit logical unit number
-   --       of a device within its category.
+   -- An IOC.device_name is of the form XYu, where XY is a two-letter device-type code
+   --    and u is the logical unit number, in the range 0..F, of the device within its type.
 
    subtype device_name is String(1..3);
 
@@ -81,22 +82,30 @@ package IOC is
 --
 --
 
-   -- The quantum is the time, in µs, taken to transfer a basic datum.
-   -- For unit-record devices (CR, CP, LP) this is the card/line, respectively.
-   -- For other devices it is the KDF9 character.
-   -- A device is slow if it transfers data byte-by-byte; fast devices transfer whole words.
-
-   type device (
-                number  : IOC.device_number;
-                kind    : IOC.device_kind;
-                unit    : IOC.unit_number;
-                quantum : KDF9.us
-               )
+   type device (number : IOC.device_number; unit : IOC.unit_number)
    is abstract new Limited_Controlled with private;
 
+   -- The quantum is the time, in µs, taken to transfer a basic datum.
+   -- For unit-record devices (CR, CP, LP) this is the card/line.
+   -- For other devices it is the KDF9 character.
+   function quantum (the_buffer : IOC.device)
+   return KDF9.us
+   is abstract;
+
+   function kind (the_buffer : IOC.device)
+   return IOC.device_kind
+   is abstract;
+
+   -- This is overridden separately for fast and slow devices.
+   procedure add_in_the_IO_CPU_time (the_buffer  : in IOC.device;
+                                     bytes_moved : in KDF9.word)
+   is abstract;
+
    -- True iff the_buffer has been opened but not yet closed.
+   -- It is overridden separately for magnetic tapes and all other devices.
    function is_open (the_buffer : IOC.device)
-   return Boolean;
+   return Boolean
+   is abstract;
 
    -- A measure of the I/O volume transferred by the_buffer, so far.
    function usage (the_buffer : IOC.device)
@@ -130,7 +139,11 @@ package IOC is
 
    -- trap_illegal_IO_operation fails the run because of an attempt to use an I/O order
    --   that is illegal or undefined for the device concerned.
-   procedure trap_illegal_IO_operation (order : in String; buffer : in IOC.device);
+   procedure trap_illegal_IO_operation (order       : in String;
+                                        buffer      : in IOC.device;
+                                        Q_operand   : in KDF9.Q_register;
+                                        set_offline : in Boolean)
+      with Inline => False;
 
    -- trap_failing_IO_operation fails the run iff either:
    -- 1. ee9 is running in a non-boot mode, because nothing more can usefully be done
@@ -139,7 +152,8 @@ package IOC is
    --
    -- In boot mode, when Director is not running, it sets the buffer abnormal and abandons the order.
    -- It is then up to the problem program to act accordingly.  Failure to do so may LIV.
-   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String);
+   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String)
+      with Inline => False;
 
    -- The elapsed time for the I/O of the given number of atomic_items
    --    which may be, e.g., bytes, or card images, or printer lines.
@@ -381,51 +395,40 @@ package IOC is
                                   busy_time   : in KDF9.us;
                                   operation   : in IOC.transfer_kind := IOC.some_other_operation);
 
-   -- True iff the buffer is busy and the current operation is reading oe writing.
-   function is_DMAing (the_buffer  : in IOC.device'Class)
-   return Boolean;
-
-   -- Gives a short summary of the buffer state, showing some transfer parameters.
-   function image (the_buffer : in IOC.device'Class)
-   return String;
-
 private
 
-   -- The following packages are hereby made available to all children of IOC.
+   use Ada.Exceptions; pragma Warnings(Off, Ada.Exceptions);
+   --
+   use exceptions;     pragma Warnings(Off, exceptions);
+   use formatting;     pragma Warnings(Off, formatting);
+   use HCI;            pragma Warnings(Off, HCI);
+   use host_IO;        pragma Warnings(Off, host_IO);
+   use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
+   use KDF9.store;     pragma Warnings(Off, KDF9.store);
+   use settings;       pragma Warnings(Off, settings);
 
-   use exceptions;             pragma Warnings(Off, exceptions);
-   use formatting;             pragma Warnings(Off, formatting);
-   use host_IO;                pragma Warnings(Off, host_IO);
-   use KDF9_char_sets;         pragma Warnings(Off, KDF9_char_sets);
-   use KDF9.store;             pragma Warnings(Off, KDF9.store);
-   use settings;               pragma Warnings(Off, settings);
-   use POSIX;                  -- Used here, so no need to suppress warnings.
+   use POSIX;          -- Used here, so no need to suppress warnings.
 
-   type device (
-                number  : IOC.device_number;
-                kind    : IOC.device_kind;
-                unit    : IOC.unit_number;
-                quantum : KDF9.us
-               )
+   type device (number : IOC.device_number; unit : IOC.unit_number)
    is abstract new Limited_Controlled with
-               record
-                  is_abnormal,
-                  is_busy,
-                  is_offline,
-                  is_allocated,
-                  is_for_Director : Boolean := False;
-                  operation       : IOC.transfer_kind := IOC.some_other_operation;
-                  initiation_time : KDF9.us := KDF9.us'Last;
-                  transfer_time   : KDF9.us := KDF9.us'Last;
-                  completion_time : KDF9.us := KDF9.us'Last;
-                  priority_level  : KDF9.priority := 0;
-                  control_word    : KDF9.Q_register;
-                  decoded_order   : KDF9.decoded_order;
-                  device_name     : IOC.device_name := "AD0";
-                  order_address   : KDF9.syllable_address := (0, 0);
-                  order_count     : KDF9.order_counter;
-                  stream          : host_IO.stream;
-               end record;
+      record
+         is_abnormal,
+         is_busy,
+         is_offline,
+         is_allocated,
+         is_for_Director : Boolean := False;
+         operation       : IOC.transfer_kind := IOC.some_other_operation;
+         initiation_time : KDF9.us := KDF9.us'Last;
+         transfer_time   : KDF9.us := KDF9.us'Last;
+         completion_time : KDF9.us := KDF9.us'Last;
+         priority_level  : KDF9.priority;
+         control_word    : KDF9.Q_register;
+         decoded_order   : KDF9.decoded_order;
+         device_name     : IOC.device_name;
+         order_address   : KDF9.syllable_address;
+         order_count     : KDF9.order_counter;
+         stream          : host_IO.stream;
+      end record;
 
    overriding
    procedure Initialize (the_buffer : in out IOC.device);
@@ -434,7 +437,8 @@ private
                    the_mode   : in POSIX.access_mode);
 
    overriding
-   procedure Finalize (the_buffer : in out IOC.device);
+   procedure Finalize (the_buffer : in out IOC.device)
+      with Inline => False;
 
    -- Operations, used only within the IOC hierarchy, that apply to all device types.
 
@@ -442,13 +446,12 @@ private
    procedure install (the_device : in out IOC.device'Class);
 
    -- LIV if the_buffer is in the abnormal state.
-   procedure validate_parity (the_buffer : in IOC.device'Class);
+   procedure validate_parity (the_buffer : in IOC.device'Class)
+      with Inline => False;
 
-   -- Check that the_buffer is online, validly identified by the Q_operand,
-   --    and that access to it is permitted by the (perhaps simulated) Director;
-   --       LIV if not.
-   procedure validate_device (the_buffer : in IOC.device'Class;
-                              Q_operand  : in KDF9.Q_register);
+   -- Check that the_buffer is online, and that access to it is permitted; LIV if not.
+   procedure validate_device (the_buffer : in IOC.device'Class)
+      with Inline => False;
 
    -- Check that the device and the transfer address bounds are valid;
    --    LIV if not.
@@ -463,12 +466,6 @@ private
 
    procedure correct_transfer_time (the_buffer    : in out IOC.device'Class;
                                     actual_length : in KDF9.word);
-
-   -- Account for the CPU (i.e., core store) time taken by the buffer's DMA cycles.
-   procedure add_in_the_IO_CPU_time (IO_CPU_time : in KDF9.us);
-
-   procedure add_in_the_IO_CPU_time (the_buffer  : in IOC.device'Class;
-                                     bytes_moved : in KDF9.word);
 
    -- LIV if the repetition count is negative.
    procedure require_nonnegative_count (count : in KDF9.Q_part);

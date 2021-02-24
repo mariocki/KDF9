@@ -1,6 +1,6 @@
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -136,20 +136,20 @@ package KDF9 is
    -- An instruction address, in the packed format of a hardware (SJNS) link.
    --
 
-   type sjns_link is new KDF9.syllable_address
+   type SJNS_link is new KDF9.syllable_address
       with Size => 16;
-   for sjns_link'Bit_Order use System.Low_Order_First;
-   for sjns_link use
+   for SJNS_link'Bit_Order use System.Low_Order_First;
+   for SJNS_link use
       record
          order_word_number at 0 range  0 .. 12;
          syllable_index    at 0 range 13 .. 15;
       end record;
 
-   function as_word (the_link : KDF9.sjns_link)
+   function as_word (the_link : KDF9.SJNS_link)
    return KDF9.word;
 
    function as_link (the_word : KDF9.word)
-   return KDF9.sjns_link;
+   return KDF9.SJNS_link;
 
    procedure increment_by_1 (the_link : in out KDF9.syllable_address)
       with Inline;
@@ -199,7 +199,7 @@ package KDF9 is
    --
    --
    --
-   -- The following variables (the_nest, the_sjns and the_Q_store) constitute
+   -- The following variables (the_NEST, the_SJNS and the_Q_store) constitute
    --    the emulation microcode's fixed working set of registers.
    -- ee9 (unlike the real KDF9) swaps them with register_bank(the_context)
    --    when a context switch is made by the =K3 instruction.
@@ -214,30 +214,26 @@ package KDF9 is
    -- The NEST.
    --
 
-   type nest_depth is mod 19;
+   type NEST_depth is mod 19;
 
-   type NEST is array (KDF9.nest_depth) of KDF9.word;
+   type NEST is array (KDF9.NEST_depth) of KDF9.word;
 
-   the_nest       : KDF9.NEST;
-   the_nest_depth : KDF9.nest_depth  := 0;
+   the_NEST       : KDF9.NEST;
+   the_NEST_depth : KDF9.NEST_depth  := 0;
 
-   -- The ensure_that_the_nest_holds* procedures trap NOUV.
+   -- The ensure_that_the_NEST_holds* procedures trap NOUV.
    -- They are used to validate operations that reduce the NEST depth.
 
-   procedure ensure_that_the_nest_holds (at_least : in KDF9.nest_depth)
+   procedure ensure_that_the_NEST_holds (at_least : in KDF9.NEST_depth)
       with Inline;
 
-   procedure ensure_that_the_nest_holds_an_operand
+   procedure ensure_that_the_NEST_holds_an_operand
       with Inline;
 
-   procedure ensure_that_the_nest_holds_2_operands
+   procedure ensure_that_the_NEST_holds_2_operands
       with Inline;
 
-   function operand_words_needed (need : KDF9.nest_depth)
-   return String
-      with Inline => False;
-
-   function result_space_needed (need : KDF9.nest_depth)
+   function operand_words_needed (need : KDF9.NEST_depth)
    return String
       with Inline => False;
 
@@ -269,19 +265,19 @@ package KDF9 is
    return KDF9.pair
       with Inline;
 
-   -- The ensure_that_the_nest_has_room_for* procedures trap NOUV.
+   -- The ensure_that_the_NEST_has_room_for* procedures trap NOUV.
    -- They are used to validate operations that increase the NEST depth.
 
-   procedure ensure_that_the_nest_has_room_for (at_least : in KDF9.nest_depth)
+   procedure ensure_that_the_NEST_has_room_for (at_least : in KDF9.NEST_depth)
       with Inline;
 
-   procedure ensure_that_the_nest_has_room_for_a_result
+   procedure ensure_that_the_NEST_has_room_for_a_result
       with Inline;
 
    procedure push (the_word : in KDF9.word)
       with Inline;
 
-   procedure ensure_that_the_nest_has_room_for_2_results
+   procedure ensure_that_the_NEST_has_room_for_2_results
       with Inline;
 
    procedure push (the_pair : in KDF9.pair)
@@ -292,26 +288,26 @@ package KDF9 is
    -- The SJNS.
    --
 
-   type sjns_depth is mod 17;
+   type SJNS_depth is mod 17;
 
-   type SJNS is array (KDF9.sjns_depth) of KDF9.sjns_link;
+   type SJNS is array (KDF9.SJNS_depth) of KDF9.SJNS_link;
 
-   the_sjns       : KDF9.SJNS;
-   JB             : KDF9.sjns_link renames the_sjns(16);
-   the_sjns_depth : KDF9.sjns_depth := 0;
+   the_SJNS       : KDF9.SJNS;
+   JB             : KDF9.SJNS_link renames the_SJNS(16);
+   the_SJNS_depth : KDF9.SJNS_depth := 0;
 
-   procedure ensure_that_the_sjns_is_not_empty
+   procedure ensure_that_the_SJNS_is_not_empty
       with Inline;
 
    function pop
    return KDF9.syllable_address
       with Inline;
 
-   function sjns_top
-   return KDF9.sjns_link
+   function SJNS_top
+   return KDF9.SJNS_link
       with Inline;
 
-   procedure ensure_that_the_sjns_is_not_full
+   procedure ensure_that_the_SJNS_is_not_full
       with Inline;
 
    procedure push (the_link : in KDF9.syllable_address)
@@ -447,11 +443,11 @@ package KDF9 is
 
    -- KDF9 actually indexed the register bank with the value of the_context,
    --   but the emulator swaps register sets between register_bank and
-   --      the_nest, the_sjns, and the_Q_store (q.v.).
+   --      the_NEST, the_SJNS, and the_Q_store (q.v.).
 
    the_context : KDF9.context := 0;
 
-   -- Set context (bits D46:47), nest_depth (D41:45) and sjns_depth (D36:41).
+   -- Set context (bits D46:47), NEST_depth (D41:45) and SJNS_depth (D36:41).
 
    procedure set_K3_register (setting : in KDF9.word);
 
@@ -468,36 +464,36 @@ package KDF9 is
    type interrupt_number is range 22 .. 31;
 
    -- higher PRiority PRogram unblocked by end of I/O, or INTQq on busy device
-   PR_interrupt    : constant KDF9.interrupt_number := 22;
-   PR_trap         : exception;
+   caused_by_PR    : constant KDF9.interrupt_number := 22;
+   PR_exception    : exception;
 
    -- FLEXowriter interrupt from operator
-   FLEX_interrupt  : constant KDF9.interrupt_number := 23;
-   FLEX_trap       : exception;
+   caused_by_FLEX  : constant KDF9.interrupt_number := 23;
+   FLEX_exception  : exception;
 
    -- Lock-In Violation (attempt at a disallowed operation)
-   LIV_interrupt   : constant KDF9.interrupt_number := 24;
-   LIV_trap        : exception;
+   caused_by_LIV   : constant KDF9.interrupt_number := 24;
+   LIV_exception   : exception;
 
    -- Nest (or SJNS) Over/Underflow Violation
-   NOUV_interrupt  : constant KDF9.interrupt_number := 25;
-   NOUV_trap       : exception;
+   caused_by_NOUV  : constant KDF9.interrupt_number := 25;
+   NOUV_exception  : exception;
 
    -- End of Director Transfer, or I/O priority inversion
-   EDT_interrupt   : constant KDF9.interrupt_number := 26;
-   EDT_trap        : exception;
+   caused_by_EDT   : constant KDF9.interrupt_number := 26;
+   EDT_exception   : exception;
 
    -- OUT system call
-   OUT_interrupt   : constant KDF9.interrupt_number := 27;
-   OUT_trap        : exception;
+   caused_by_OUT   : constant KDF9.interrupt_number := 27;
+   OUT_exception   : exception;
 
    -- Lock-Out Violation
-   LOV_interrupt   : constant KDF9.interrupt_number := 28;
-   LOV_trap        : exception;
+   caused_by_LOV   : constant KDF9.interrupt_number := 28;
+   LOV_exception   : exception;
 
    -- invalid syllable number or 'double-clock'
-   RESET_interrupt : constant KDF9.interrupt_number := 29;
-   RESET_trap      : exception;
+   caused_by_RESET : constant KDF9.interrupt_number := 29;
+   RESET_exception : exception;
 
    type RFIR is array (KDF9.interrupt_number) of Boolean;
 
@@ -508,12 +504,13 @@ package KDF9 is
 
    -- Get clock (bits D0:15) and RFIR (D16:31), clearing both.
    function get_K4_operand
-   return KDF9.word;
+   return KDF9.word
+      with Inline => False;
 
    -- An interrupt is raised when 1 second expires outside Director;
    --    the flag does not correspond to any RFIR bit.
-   CLOCK_interrupt : constant KDF9.interrupt_number := 31;
-   CLOCK_trap      : exception;
+   caused_by_CLOCK : constant KDF9.interrupt_number := 31;
+   CLOCK_exception : exception;
 
    -- This is for tracing a return from Director;
    --    the flag does not correspond to any RFIR bit.
@@ -557,7 +554,7 @@ package KDF9 is
 
    procedure return_from_Director_to (new_IAR : in KDF9.syllable_address);
 
-   procedure effect (this_interrupt : in KDF9.interrupt_number; message : in String := "")
+   procedure effect_interrupt (caused_by_this : in KDF9.interrupt_number; message : in String)
       with Inline => False;
 
    procedure check_for_a_clock_interrupt

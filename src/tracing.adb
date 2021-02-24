@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -95,8 +95,8 @@ package body tracing is
                          parameter  => the_value,
                          ICR_value  => ICR,
                          CPU_time   => the_CPU_time,
-                         nested     => the_nest_depth,
-                         called     => the_sjns_depth,
+                         nested     => the_NEST_depth,
+                         called     => the_SJNS_depth,
                          V          => the_V_bit_is_set,
                          T          => the_T_bit_is_set,
                          D          => the_CPU_state = Director_state,
@@ -279,13 +279,10 @@ package body tracing is
 
    procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
    is
-      length : constant Natural := message'Length;
-      memo   : String(1..max_interrupt_message_length) := (others => ' ');
+      length  : constant Natural  := Natural'Min(message'Length, max_interrupt_message_length);
+      content : constant String   := message(message'First .. message'First+length-1);
+      padding : constant String   := (1 .. max_interrupt_message_length-length => ' ');
    begin
-      if length > max_interrupt_message_length then
-         raise emulation_failure with "interrupt message too long: '" & message & "'" & length'Image;
-      end if;
-      memo(1..length) := message;
       declare
          the_note : constant interrupt_FIFO_entry
                   :=
@@ -296,7 +293,7 @@ package body tracing is
                     busy_time      => the_clock_time,
                     priority_level => CPL,
                     context        => the_context,
-                    message        => memo
+                    message        => content & padding
                    );
       begin
          if the_interrupt_trace_is_enabled               and then
@@ -363,19 +360,19 @@ package body tracing is
             | JrGEZ
             | JrNEZ
             | OS_OUT =>
-            if the_nest_depth > 0 then
+            if the_NEST_depth > 0 then
                the_trace_operand := read_top;
             end if;
          when JrEN
             | JrNEN =>
-            the_trace_operand := KDF9.word(the_nest_depth);
+            the_trace_operand := KDF9.word(the_NEST_depth);
          when JrEJ
             | JrNEJ =>
-            the_trace_operand := KDF9.word(the_sjns_depth);
+            the_trace_operand := KDF9.word(the_SJNS_depth);
          when EXIT_n
             | EXITD =>
-            if the_sjns_depth > 0 then
-               the_trace_operand := as_word(sjns_top);
+            if the_SJNS_depth > 0 then
+               the_trace_operand := as_word(SJNS_top);
             else
                the_trace_operand := -1;
             end if;
@@ -430,7 +427,7 @@ package body tracing is
             AB := read_top;
             the_trace_operand := AB.msw;
          when others =>
-            if the_nest_depth > 0 then
+            if the_NEST_depth > 0 then
                the_trace_operand := read_top;
             end if;
       end case;
@@ -492,7 +489,7 @@ package body tracing is
             AB := read_top;
             the_trace_operand := AB.msw;
          when TO_LINK =>
-            the_trace_operand := as_word(sjns_top);
+            the_trace_operand := as_word(SJNS_top);
          when others =>
             look_back_at_an_IO_order;
       end case;
@@ -504,9 +501,9 @@ package body tracing is
    begin
       case INS.compressed_opcode is
          when Jr =>
-            the_trace_operand := as_word(sjns_link(NIA));
+            the_trace_operand := as_word(SJNS_link(NIA));
          when JSr =>
-            the_trace_operand := as_word(sjns_top);
+            the_trace_operand := as_word(SJNS_top);
          when EXITD =>
             take_note_of_interrupt(EXITD_flag, BA_image & " " & NOL_image & " @ " & oct_of(NIA));
          when others =>

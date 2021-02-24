@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,8 +14,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with dumping;
 with KDF9;
 
+use  dumping;
 use  KDF9;
 
 package state_display is
@@ -26,9 +28,9 @@ package state_display is
 
    procedure show_V_and_T;
 
-   procedure show_nest (when_empty : Boolean := True);
+   procedure show_NEST (when_empty : Boolean := True);
 
-   procedure show_sjns (when_empty : Boolean := True);
+   procedure show_SJNS (when_empty : Boolean := True);
 
    procedure show_IO_register (the_Q_register : in KDF9.Q_register;
                                width          : in Positive := 8;
@@ -53,7 +55,8 @@ package state_display is
 
    procedure log_an_external_trace_header (caption : in String := "");
 
-   procedure log_to_external_trace;
+   procedure log_to_external_trace
+      with Inline => False;
 
    procedure show_progress;
 
@@ -90,7 +93,7 @@ package state_display is
 
    -- poke is included here as it has the same relationship to dumping as show_core_*.
    procedure poke (address    : in KDF9.address;
-                   sub_word   : in Character;
+                   sub_word   : in sub_word_flag;
                    position   : in KDF9.address;
                    value      : in KDF9.word);
 

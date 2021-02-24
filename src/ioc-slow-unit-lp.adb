@@ -1,6 +1,6 @@
 -- Emulation of a lineprinter buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,10 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with IOC.equipment;
-
-use  IOC.equipment;
 
 package body IOC.slow.unit.LP is
 
@@ -168,8 +164,6 @@ package body IOC.slow.unit.LP is
            );
    end Finalize;
 
-   LP_quantum : constant := 1E6 / (900 / 60);  -- 900 lines per minute.
-
    type LP_access is access LP.device;
 
    LP0 : LP_access with Warnings => Off;
@@ -181,16 +175,10 @@ package body IOC.slow.unit.LP is
    begin
       case unit is
          when 0 =>
-            LP0 := new LP.device (number  => b,
-                                  kind    => LP_kind,
-                                  unit    => 0,
-                                  quantum => LP_quantum);
+            LP0 := new LP.device (number => b, unit => 0);
             LP0_number := b;
          when 1 =>
-            LP1 := new LP.device (number  => b,
-                                  kind    => LP_kind,
-                                  unit    => 1,
-                                  quantum => LP_quantum);
+            LP1 := new LP.device (number => b, unit => 1);
             LP1_number := b;
          when others =>
             trap_operator_error("more than two LP units have been configured");

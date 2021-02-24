@@ -1,6 +1,6 @@
 -- Handle attempted usage of a buffer with No Device attached.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -156,5 +156,30 @@ package IOC.absent is
 
    -- Register the absence of a device in case of future attempted access to buffer b.
    procedure enable (b : in KDF9.buffer_number);
+
+private
+
+   overriding
+   procedure Initialize (the_device : in out absent.device);
+
+   overriding
+   function is_open (the_device : absent.device)
+   return Boolean
+   is (False);
+
+   overriding
+   function kind (the_device : absent.device)
+   return IOC.device_kind
+   is (AD_kind);
+
+   overriding
+   function quantum (the_device : absent.device)
+   return KDF9.us
+   is (0);
+
+   overriding
+   procedure add_in_the_IO_CPU_time (the_device  : in absent.device;
+                                     bytes_moved : in KDF9.word)
+   is null;
 
 end IOC.absent;

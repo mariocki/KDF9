@@ -1,6 +1,6 @@
 -- Emulation of a standard interface buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -122,7 +122,7 @@ package IOC.slow.shift.SI is
 
    procedure enable (b : in KDF9.buffer_number);
 
-   procedure re_enable (b : in KDF9.buffer_number);
+   procedure replace_on_buffer (b : in KDF9.buffer_number);
 
    function SI0_is_enabled
    return Boolean;
@@ -136,5 +136,15 @@ private
 
    overriding
    procedure Finalize (the_SI : in out SI.device);
+
+   overriding
+   function kind (the_SI : SI.device)
+   return IOC.device_kind
+   is (SI_kind);
+
+   overriding
+   function quantum (the_SI : SI.device)
+   return KDF9.us
+   is (1E6 / 50E3); -- I am guessing 50_000 characters per second.
 
 end IOC.slow.shift.SI;

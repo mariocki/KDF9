@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -116,7 +116,7 @@ package body formatting is
    end oct_of;
 
    -- Return N as #wwwww/s, where w and s are octal digits.
-   function oct_of (N : KDF9.sjns_link)
+   function oct_of (N : KDF9.SJNS_link)
    return String
    is (
        "#"
@@ -128,7 +128,7 @@ package body formatting is
    -- Return N as #wwwww/s, where w and s are octal digits.
    function oct_of (N : KDF9.syllable_address)
    return String
-   is (oct_of(KDF9.sjns_link(N)));
+   is (oct_of(KDF9.SJNS_link(N)));
 
    -- Return N as dddd/d, where d is a decimal digit.
    function dec_of (N : KDF9.syllable_address)

@@ -1,7 +1,7 @@
 -- Emulation of a lineprinter buffer.
 -- Lineprinters are "unit record" devices: they cannot transfer less than a whole line.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -54,5 +54,15 @@ private
 
    overriding
    procedure Finalize (the_LP : in out LP.device);
+
+   overriding
+   function kind (the_LP : LP.device)
+   return IOC.device_kind
+   is (LP_kind);
+
+   overriding
+   function quantum (the_LP : LP.device)
+   return KDF9.us
+   is (1E6 / (900 / 60)); -- 900 lines per minute.
 
 end IOC.slow.unit.LP;

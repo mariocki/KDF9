@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -328,7 +328,7 @@ package KDF9.CPU is
 
    procedure push (DF : in CPU.f96)
       with Inline,
-           Pre => the_nest_depth < 15
+           Pre => the_NEST_depth < 15
                or else the_CPU_state = Director_state;
 
    function pop

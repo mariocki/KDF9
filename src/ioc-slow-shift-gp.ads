@@ -1,6 +1,6 @@
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -46,6 +46,8 @@ package IOC.slow.shift.GP is
 
    procedure enable (b : in KDF9.buffer_number);
 
+   procedure replace_on_buffer (b : in KDF9.buffer_number);
+
    procedure notify_invalid_movement (from_x, from_y, step_x, step_y : in Integer)
       with Inline => False;
 
@@ -58,6 +60,16 @@ private
 
    overriding
    procedure Finalize (the_GP : in out GP.device);
+
+   overriding
+   function kind (the_GP : GP.device)
+   return IOC.device_kind
+   is (GP_kind);
+
+   overriding
+   function quantum (the_GP : GP.device)
+   return KDF9.us
+   is (1E6 / 200);
 
    overriding
    procedure do_output_housekeeping (the_GP      : in out GP.device;

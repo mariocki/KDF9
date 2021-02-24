@@ -1,6 +1,6 @@
 -- Emulation of a FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -121,6 +121,16 @@ private
 
    overriding
    procedure Finalize (the_FW : in out FW.device);
+
+   overriding
+   function kind (the_FW : FW.device)
+   return IOC.device_kind
+   is (FW_kind);
+
+   overriding
+   function quantum (the_FW : FW.device)
+   return KDF9.us
+   is (1E6 / 10);
 
    overriding
    procedure write (the_FW    : in out FW.device;

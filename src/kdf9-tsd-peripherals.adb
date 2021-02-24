@@ -1,6 +1,6 @@
 -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,33 +14,19 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with exceptions;
-with formatting;
-with HCI;
 with IOC;
-with IOC.equipment;
-with IOC.fast.MT.TSD_OUTs;
+with IOC.fast.tape.TSD_OUTs;
 with IOC.slow.shift.SI;
 with IOC.slow.shift.TR;
 with KDF9_char_sets;
 with KDF9.store;
-with settings;
-with state_display;
-with tracing;
 
-use  exceptions;
-use  formatting;
-use  HCI;
 use  IOC;
-use  IOC.equipment;
-use  IOC.fast.MT.TSD_OUTs;
+use  IOC.fast.tape.TSD_OUTs;
 use  IOC.slow.shift.SI;
 use  IOC.slow.shift.TR;
 use  KDF9_char_sets;
 use  KDF9.store;
-use  settings;
-use  state_display;
-use  tracing;
 
 package body KDF9.TSD.peripherals is
 
@@ -88,7 +74,7 @@ package body KDF9.TSD.peripherals is
    procedure select_the_next_device_from_among
       (device_A, device_B : in  KDF9.buffer_number;
        chosen_device      : out KDF9.buffer_number;
-       wanted_type        : in String := "") is
+       wanted_type        : in String) is
    begin
       if device_A /= 0                            and then
             is_free_for_explicit_allocation(device_A) then
@@ -105,7 +91,7 @@ package body KDF9.TSD.peripherals is
       B : KDF9.buffer_number;
       W : KDF9.word;
    begin
-      ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds_an_operand;
       W := read_top;
 
       case W is
@@ -162,28 +148,22 @@ package body KDF9.TSD.peripherals is
 
       if buffer(B).all in IOC.slow.shift.device'Class and then
             buffer(B).kind /= GP_kind                     then
-         log_API_message("OUT 5: requested a device of type #"
+         log_API_message("OUT 5: requested a #"
                        & oct_of(KDF9.Q_part(W), 2)
-                       & " and got "
+                       & " device and got "
                        & device_name_of(buffer(B).all)
-                       & " on buffer #"
-                       & oct_of(B, 2)
-                       & ", using "
                        & (
                           if IOC.slow.shift.device(buffer(B).all).uses_Latin_1 then
-                             "Latin-1"
+                             " in Latin-1 mode"
                           else
-                             "KDF9"
+                             " in KDF9 mode"
                          )
-                       & " code"
                         );
       else
-         log_API_message("OUT 5: requested a device of type #"
+         log_API_message("OUT 5: requested a #"
                        & oct_of(KDF9.Q_part(W), 2)
-                       & " and got "
+                       & " device and got "
                        & device_name_of(buffer(B).all)
-                       & " on buffer #"
-                       & oct_of(B, 2)
                         );
       end if;
    end allocate_a_device;
@@ -205,7 +185,7 @@ package body KDF9.TSD.peripherals is
    procedure deallocate_a_device (OUT_number : in KDF9.word) is
       B : KDF9.Q_part;
    begin
-      ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds_an_operand;
       the_trace_operand := pop;
       if the_trace_operand > 15 then
          notify_state_display_of_final_ICR;

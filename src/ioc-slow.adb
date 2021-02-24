@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -21,6 +21,19 @@ with environmental_value_of;
 use HCI;
 
 package body IOC.slow is
+
+   overriding
+   function is_open (the_buffer : slow.device)
+   return Boolean
+   is (the_buffer.stream.is_open);
+
+   overriding
+   procedure add_in_the_IO_CPU_time (the_buffer  : in slow.device;
+                                     bytes_moved : in KDF9.word) is
+      pragma Unreferenced(the_buffer);
+   begin
+      the_CPU_delta := the_CPU_delta + KDF9.us(bytes_moved) * 6; -- 6µs/char
+   end add_in_the_IO_CPU_time;
 
    procedure display_device_usage (the_buffer  : in slow.device;
                                    the_action  : in String;

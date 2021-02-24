@@ -1,6 +1,6 @@
 -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,25 +14,19 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with formatting;
 with IOC;
 with IOC.dispatcher;
-with IOC.equipment;
 with IOC.slow.shift.FW;
 with KDF9_char_sets;
 with KDF9.store;
 with KDF9.TSD.peripherals;
-with tracing;
 
-use  formatting;
 use  IOC;
 use  IOC.dispatcher;
-use  IOC.equipment;
 use  IOC.slow.shift.FW;
 use  KDF9_char_sets;
 use  KDF9.store;
 use  KDF9.TSD.peripherals;
-use  tracing;
 
 package body KDF9.TSD.spooling is
 
@@ -123,7 +117,7 @@ package body KDF9.TSD.spooling is
       page_change : constant := 8#77_77_77_77_77_77_77_03#;  --  LP Page Change character
 
    begin  -- do_IO
-      ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds_an_operand;
       W := pop;
       Q := as_Q(W);
       the_trace_operand := W;

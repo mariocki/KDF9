@@ -1,6 +1,6 @@
 -- Buffered I/O streams to support KDF9 device I/O.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -22,14 +22,9 @@ use  POSIX;
 
 package host_IO is
 
-   stream_IO_error, end_of_stream : exception;
+   end_of_stream : exception;
 
    type stream is tagged limited private;
-
-   function image_of (the_stream : host_IO.stream;
-                      caption    : String := "")
-   return String
-      with Inline => False;
 
    function fd_of (the_stream : host_IO.stream)
    return Natural;
@@ -43,10 +38,10 @@ package host_IO is
    -- Open a base file then use its fd to open a stream.
    procedure open (the_stream : in out host_IO.stream;
                    file_name  : in String;
-                   mode       : in POSIX.access_mode);
+                   mode       : in POSIX.access_mode)
+      with Inline => False;
 
-   procedure truncate (the_stream : in out host_IO.stream;
-                       to_length  : in KDF9.word := 0);
+   procedure truncate (the_stream : in out host_IO.stream);
 
    procedure close (the_stream : in out host_IO.stream);
 
@@ -58,14 +53,11 @@ package host_IO is
                        file_name  : in String;
                        mode       : in POSIX.access_mode);
 
-   function is_open(the_stream : host_IO.stream)
+   function is_open (the_stream : host_IO.stream)
    return Boolean;
 
-   function bytes_moved(the_stream : host_IO.stream)
+   function bytes_moved (the_stream : host_IO.stream)
    return KDF9.word;
-
-   function file_size (the_stream : host_IO.stream)
-   return Natural;
 
    function column (the_stream : host_IO.stream)
    return Natural;
@@ -81,6 +73,7 @@ package host_IO is
 
    procedure reset (the_stream : in out host_IO.stream);
 
+   -- Arrange for the last-read byte to be read again.
    procedure back_off (the_stream : in out host_IO.stream)
       with Inline;
 
@@ -163,8 +156,8 @@ private
    -- N.B. in host_IO the term 'buffer' is used conventionally.
    -- It does NOT refer to a KDF9 DMA channel.
 
-   -- IO_buffer_size is enough for a complete FD sector, lacking any better criterion.
-   IO_buffer_size : constant Positive := 320;
+   -- IO_buffer_size is enough for a full LP line, lacking any better criterion.
+   IO_buffer_size : constant Positive := 161;
 
    type stream is tagged limited
       record

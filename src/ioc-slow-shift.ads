@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -52,29 +52,29 @@ private
                                      written,
                                      fetched    : in KDF9.word);
 
-    procedure write (the_device : in out shift.device;
-                     Q_operand  : in KDF9.Q_register);
-
-    procedure read (the_device : in out shift.device;
+   procedure write (the_device : in out shift.device;
                     Q_operand  : in KDF9.Q_register);
 
-    procedure write_to_EM (the_device : in out shift.device;
-                           Q_operand  : in KDF9.Q_register);
+   procedure read (the_device : in out shift.device;
+                   Q_operand  : in KDF9.Q_register);
 
-    procedure read_to_EM (the_device : in out shift.device;
+   procedure write_to_EM (the_device : in out shift.device;
                           Q_operand  : in KDF9.Q_register);
 
-    procedure words_write (the_device : in out shift.device;
-                           Q_operand  : in KDF9.Q_register);
+   procedure read_to_EM (the_device : in out shift.device;
+                         Q_operand  : in KDF9.Q_register);
 
-    procedure words_read (the_device : in out shift.device;
+   procedure words_write (the_device : in out shift.device;
                           Q_operand  : in KDF9.Q_register);
 
-    procedure words_write_to_EM (the_device : in out shift.device;
-                                 Q_operand  : in KDF9.Q_register);
+   procedure words_read (the_device : in out shift.device;
+                         Q_operand  : in KDF9.Q_register);
 
-    procedure words_read_to_EM (the_device : in out shift.device;
+   procedure words_write_to_EM (the_device : in out shift.device;
                                 Q_operand  : in KDF9.Q_register);
+
+   procedure words_read_to_EM (the_device : in out shift.device;
+                               Q_operand  : in KDF9.Q_register);
 
    procedure output_a_gap (the_device   : in out shift.device;
                            Q_operand    : in KDF9.Q_register;
