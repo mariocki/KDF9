@@ -150,7 +150,7 @@ begin -- to_9_from_1934
 
    open(the_1900_stream, get_runtime_paths & "Assembly/wabbit_data_1900", read_mode);
    open(the_KDF9_stream, get_runtime_paths & "Assembly/wabbit_data_kdf9", write_mode);
-   truncate(the_KDF9_stream, to_length => 0);
+   truncate(the_KDF9_stream);
 
    get_byte(t, the_1900_stream);
    log_line("The input is for an ICT 1900 Series plotter type 1934/" & plotter_type(t));
