@@ -8,6 +8,7 @@ PROGRAM;
 *9; DUMMY;
 *8; DUMMY;
 *1; MRWDQ0; (this will LIV if executed);
-*2; ZERO; OUT;
+*2;
+   ZERO; OUT;
 FINISH;
 |
