@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -38,7 +38,6 @@ use  KDF9.EGDON;
 use  KDF9.store;
 use  KDF9.TSD;
 use  KDF9.TSD.processes;
-use  POSIX;
 use  settings;
 use  state_display;
 use  tracing;
@@ -65,7 +64,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 1;
 
          when TO_TR =>
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             if resign(pop) < 0 then
                the_T_bit_is_set := True;
             end if;
@@ -76,21 +75,21 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 27;
 
          when XF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             X := pop;
             Y := read_top;
             write_top(CPU.f48'(Y * X));
             the_CPU_delta := the_CPU_delta + 15;
 
          when XDF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             XY := read_top;
             ZT := XY.lsw * XY.msw;
             write_top(ZT);
             the_CPU_delta := the_CPU_delta + 16;
 
          when XPLUSF =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             XY := pop;
             ZT := XY.lsw * XY.msw;
             XY := read_top;
@@ -103,7 +102,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when OR_9 =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             write_top(read_top or A);
             the_CPU_delta := the_CPU_delta + 1;
@@ -116,7 +115,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when TOB =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;      -- the value
             bit_count := cardinality(A);
             B := read_top; -- the radixes
@@ -138,13 +137,13 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 22;
 
          when NEV =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             write_top(read_top xor A);
             the_CPU_delta := the_CPU_delta + 2;
 
          when ROUND =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             write_top(resign(A) + resign(shift_word_right(read_top, 46) and 1));
             the_CPU_delta := the_CPU_delta + 1;
@@ -153,7 +152,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 1;
 
          when ROUNDF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             XY := pop;
             ZT := XY;
             push(narrowed(XY));
@@ -165,21 +164,21 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 3;
 
          when MINUSDF =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             XY := pop;
             ZT := read_top;
             write_top(ZT - XY);
             the_CPU_delta := the_CPU_delta + 12;
 
          when PLUSDF =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             XY := pop;
             ZT := read_top;
             write_top(ZT + XY);
             the_CPU_delta := the_CPU_delta + 12;
 
          when FLOAT_9 =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             -- There is great uncertainty as to how the FLOAT/FLOATD orders handled scale factors
             --   in N1 that lie outside the range allowed by the Manual, namely -128 <= N1 <= +127.
             -- ee9 here takes a safety-first approach which is consistent with the
@@ -189,7 +188,7 @@ package body KDF9.microcode is
             write_top(KDF9.word(normalized(full_fraction => B, scaler => A)));
 
          when FLOATD =>
-            ensure_that_the_nest_holds(at_least => 3);
+            ensure_that_the_NEST_holds(at_least => 3);
             A := shift_arithmetic(shift_logical(pop, +40), -40);
             CD := read_top;
             -- See §3.4 of Report K/GD.y.83, dated 6/12/1962.  It would seem to require this:
@@ -242,20 +241,20 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 14;
 
          when X_frac =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             write_top(as_word(CPU.fraction'(read_top * A)));
             the_CPU_delta := the_CPU_delta + 15;
 
          when MINUS =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             B := read_top;
             write_top(resign(B) - resign(A));
             the_CPU_delta := the_CPU_delta + 1;
 
          when SIGN =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             B := read_top;
             if B = A then
@@ -268,18 +267,18 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 3;
 
          when ZERO =>
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             push(all_zero_bits);
             the_CPU_delta := the_CPU_delta + 2;
 
          when DUP =>
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             A := read_top;
             push(A);
             the_CPU_delta := the_CPU_delta + 2;
 
          when DUPD =>
-            ensure_that_the_nest_has_room_for_2_results;
+            ensure_that_the_NEST_has_room_for_2_results;
             AB := read_top;
             push(AB);
             the_CPU_delta := the_CPU_delta + 4;
@@ -294,15 +293,15 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 36;
 
          when FIX =>
-            ensure_that_the_nest_holds_an_operand;
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_holds_an_operand;
+            ensure_that_the_NEST_has_room_for_a_result;
             X := read_top;
             write_top(fraction_word(X));
             push(scaler(X));
             the_CPU_delta := the_CPU_delta + 6;
 
          when STR =>
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             A := read_top;
             if resign(A) < 0 then
                write_top(A and not_sign_bit);
@@ -313,7 +312,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 3;
 
          when CONT =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             B := read_top;
             write_top(contracted(msw => A, lsw => B));
@@ -327,45 +326,45 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 4;
 
          when ERASE =>
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             pop;
             the_CPU_delta := the_CPU_delta + 1;
 
          when MINUSD =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             AB := pop;
             CD := read_top;
             write_top(CD - AB);
             the_CPU_delta := the_CPU_delta + 3;
 
          when AND_9 =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             write_top(read_top and A);
             the_CPU_delta := the_CPU_delta + 1;
 
          when PLUS =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;
             B := read_top;
             write_top(resign(B) + resign(A));
             the_CPU_delta := the_CPU_delta + 1;
 
          when PLUSD =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             AB := pop;
             CD := read_top;
             write_top(CD + AB);
             the_CPU_delta := the_CPU_delta + 3;
 
          when DIV =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             AB := pop;
             push(as_word(CPU.fraction'(AB.lsw / AB.msw)));
             the_CPU_delta := the_CPU_delta + 36;
 
          when DIVD =>
-            ensure_that_the_nest_holds(at_least => 3);
+            ensure_that_the_NEST_holds(at_least => 3);
             A := pop;
             CD := pop;
             do_DIVD(L => CD,
@@ -381,14 +380,14 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 36;
 
          when DIVDF =>
-            ensure_that_the_nest_holds(at_least => 3);
+            ensure_that_the_NEST_holds(at_least => 3);
             Y := pop;
             XY := pop;
             push(XY / Y);
             the_CPU_delta := the_CPU_delta + 35;
 
          when DIVR =>
-            ensure_that_the_nest_holds(at_least => 3);
+            ensure_that_the_NEST_holds(at_least => 3);
             A := pop;
             CD := read_top;
             do_DIVR(L => CD,
@@ -411,7 +410,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when FRB =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             A := pop;      -- the value
             bit_count := cardinality(A);
             B := read_top; -- the radixes
@@ -455,21 +454,21 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 6;
 
          when PLUSF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             X := pop;
             Y := read_top;
             write_top(Y + X);
             the_CPU_delta := the_CPU_delta + 7;
 
          when MINUSF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             X := pop;
             Y := read_top;
             write_top(Y - X);
             the_CPU_delta := the_CPU_delta + 7;
 
          when SIGNF =>
-            ensure_that_the_nest_holds_2_operands;
+            ensure_that_the_NEST_holds_2_operands;
             XY := pop;
             if KDF9.word(XY.lsw) = KDF9.word(XY.msw) then
                push(all_zero_bits);
@@ -761,7 +760,7 @@ package body KDF9.microcode is
          when MkMq =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
@@ -769,7 +768,7 @@ package body KDF9.microcode is
          when MkMqQ =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             auto_increment;
@@ -779,7 +778,7 @@ package body KDF9.microcode is
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
@@ -787,7 +786,7 @@ package body KDF9.microcode is
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             push(the_trace_operand);
             auto_increment;
             the_CPU_delta := the_CPU_delta + 8;
@@ -795,7 +794,7 @@ package body KDF9.microcode is
          when MkMqN =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
@@ -803,7 +802,7 @@ package body KDF9.microcode is
          when MkMqQN =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             auto_increment;
@@ -813,7 +812,7 @@ package body KDF9.microcode is
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 7;
 
@@ -821,7 +820,7 @@ package body KDF9.microcode is
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             push(the_trace_operand);
             auto_increment;
             the_CPU_delta := the_CPU_delta + 8;
@@ -829,7 +828,7 @@ package body KDF9.microcode is
          when TO_MkMq =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 7;
@@ -837,7 +836,7 @@ package body KDF9.microcode is
          when TO_MkMqQ =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             auto_increment;
@@ -846,7 +845,7 @@ package body KDF9.microcode is
          when TO_MkMqH =>
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             the_CPU_delta := the_CPU_delta + 7;
@@ -854,7 +853,7 @@ package body KDF9.microcode is
          when TO_MkMqQH =>
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             auto_increment;
@@ -863,7 +862,7 @@ package body KDF9.microcode is
          when TO_MkMqN =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 7;
@@ -871,7 +870,7 @@ package body KDF9.microcode is
          when TO_MkMqQN =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             auto_increment;
@@ -880,7 +879,7 @@ package body KDF9.microcode is
          when TO_MkMqHN =>
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             the_CPU_delta := the_CPU_delta + 7;
@@ -888,7 +887,7 @@ package body KDF9.microcode is
          when TO_MkMqQHN =>
             the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_halfword(the_trace_operand, the_trace_address, the_Q_store(INS.Qq).M mod 2);
             auto_increment;
@@ -982,7 +981,7 @@ package body KDF9.microcode is
             end if;
 
          when QCIMq =>
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             if (INS.Qk and all_Q_choice) = all_Q_choice then -- Qq
                push(as_word(the_Q_store(INS.Qq)));
                the_CPU_delta := the_CPU_delta + 4;
@@ -1000,7 +999,7 @@ package body KDF9.microcode is
             end if;
 
          when TO_RCIMq =>
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             if (INS.Qk and all_Q_choice) = all_Q_choice then -- =Qq
                the_Q_store(INS.Qq) := as_Q(pop);
                the_CPU_delta := the_CPU_delta + 2;
@@ -1037,8 +1036,8 @@ package body KDF9.microcode is
             ensure_that_Q0_contains_zero(suspect => INS.Qq);
 
          when ADD_TO_QCIMq =>
-            ensure_that_the_nest_has_room_for_a_result;
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_has_room_for_a_result;
+            ensure_that_the_NEST_holds_an_operand;
 
             -- Because the following does not push the Q operand on to the NEST,
             --   it will not leave an authentic bit pattern in the NEST core stack,
@@ -1076,7 +1075,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2 + shift_time(Natural(abs shift_count));
 
          when MACC =>
-            ensure_that_the_nest_holds(at_least => 4);
+            ensure_that_the_NEST_holds(at_least => 4);
             AB := pop;
             AB := AB.msw * AB.lsw;
             CD := read_top;
@@ -1118,7 +1117,7 @@ package body KDF9.microcode is
 
          when Kk =>
             fail_in_problem_program_state;
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             case INS.Qk is
                when K4 =>
                   push(get_K4_operand);
@@ -1133,19 +1132,19 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 3;
 
          when LINK =>
-            if the_CPU_state = Director_state and the_sjns_depth = 0 then -- clear out JB
+            if the_CPU_state = Director_state and the_SJNS_depth = 0 then -- clear out JB
                push(all_zero_bits);
-               the_sjns_depth := 0 - 1;
+               the_SJNS_depth := 0 - 1;
             else
-               ensure_that_the_nest_has_room_for_a_result;
-               ensure_that_the_sjns_is_not_empty;
-               push(as_word(KDF9.sjns_link(KDF9.syllable_address'(pop))));
+               ensure_that_the_NEST_has_room_for_a_result;
+               ensure_that_the_SJNS_is_not_empty;
+               push(as_word(KDF9.SJNS_link(KDF9.syllable_address'(pop))));
             end if;
             the_CPU_delta := the_CPU_delta + 4;
 
          when TO_LINK =>
-            ensure_that_the_sjns_is_not_full;
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_SJNS_is_not_full;
+            ensure_that_the_NEST_holds_an_operand;
             push(KDF9.syllable_address(as_link(pop)));
             the_CPU_delta := the_CPU_delta + 3;
 
@@ -1168,111 +1167,84 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when JSr =>
-            if the_sjns_depth < 16 or else the_CPU_state = Director_state  then
-               push(CIA);
-               set_NIA_to_the_INS_target_address;
-               the_CPU_delta := the_CPU_delta + 11;
-            else
-               effect(NOUV_interrupt, "full SJNS");
-            end if;
+            ensure_that_the_SJNS_is_not_full;
+            push(CIA);
+            set_NIA_to_the_INS_target_address;
+            the_CPU_delta := the_CPU_delta + 11;
 
          when JrEQ =>
-            if the_nest_depth >= 2 or else the_CPU_state = Director_state then
-               A := pop;
-               if A = read_top then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 12;
-               else
-                  the_CPU_delta := the_CPU_delta + 5;
-               end if;
+            ensure_that_the_NEST_holds_2_operands;
+            A := pop;
+            if A = read_top then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 12;
             else
-               effect(NOUV_interrupt, operand_words_needed(need => 2-the_nest_depth));
+               the_CPU_delta := the_CPU_delta + 5;
             end if;
 
          when JrNE =>
-            if the_nest_depth >= 2 or else the_CPU_state = Director_state then
-               A := pop;
-               if A /= read_top then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 12;
-               else
-                  the_CPU_delta := the_CPU_delta + 5;
-               end if;
+            ensure_that_the_NEST_holds_2_operands;
+            A := pop;
+            if A /= read_top then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 12;
             else
-               effect(NOUV_interrupt, operand_words_needed(need => 2-the_nest_depth));
+               the_CPU_delta := the_CPU_delta + 5;
             end if;
 
          when JrGTZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-               if resign(pop) > 0 then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+            if resign(pop) > 0 then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrLTZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-               A := pop;
-               if resign(A) < 0 then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+            A := pop;
+            if resign(A) < 0 then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrEQZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-                if pop = all_zero_bits then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+             if pop = all_zero_bits then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrLEZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-               if resign(pop) <= 0 then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+            if resign(pop) <= 0 then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrGEZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-               if resign(pop) >= 0 then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+            if resign(pop) >= 0 then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrNEZ =>
-            if the_nest_depth >= 1 or else the_CPU_state = Director_state then
-               if pop /= all_zero_bits then
-                  set_NIA_to_the_INS_target_address;
-                  the_CPU_delta := the_CPU_delta + 11;
-               else
-                  the_CPU_delta := the_CPU_delta + 4;
-               end if;
+            ensure_that_the_NEST_holds_an_operand;
+            if pop /= all_zero_bits then
+               set_NIA_to_the_INS_target_address;
+               the_CPU_delta := the_CPU_delta + 11;
             else
-               effect(NOUV_interrupt, "empty NEST");
+               the_CPU_delta := the_CPU_delta + 4;
             end if;
 
          when JrV =>
@@ -1294,8 +1266,8 @@ package body KDF9.microcode is
             end if;
 
          when JrEN =>
-            the_trace_operand := KDF9.word(the_nest_depth);
-            if the_nest_depth = 0 then
+            the_trace_operand := KDF9.word(the_NEST_depth);
+            if the_NEST_depth = 0 then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 10;
             else
@@ -1303,8 +1275,8 @@ package body KDF9.microcode is
             end if;
 
          when JrNEN =>
-            the_trace_operand := KDF9.word(the_nest_depth);
-            if the_nest_depth /= 0 then
+            the_trace_operand := KDF9.word(the_NEST_depth);
+            if the_NEST_depth /= 0 then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 10;
             else
@@ -1312,16 +1284,16 @@ package body KDF9.microcode is
             end if;
 
          when JrEJ =>
-            the_trace_operand := KDF9.word(the_sjns_depth);
-            if the_sjns_depth = 0 then
+            the_trace_operand := KDF9.word(the_SJNS_depth);
+            if the_SJNS_depth = 0 then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 10;
             end if;
             the_CPU_delta := the_CPU_delta + 3;
 
          when JrNEJ =>
-            the_trace_operand := KDF9.word(the_sjns_depth);
-            if the_sjns_depth /= 0 then
+            the_trace_operand := KDF9.word(the_SJNS_depth);
+            if the_SJNS_depth /= 0 then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 10;
             end if;
@@ -1346,21 +1318,18 @@ package body KDF9.microcode is
             end if;
 
          when EXIT_n =>
-            if the_sjns_depth > 0 or else the_CPU_state = Director_state then
-               RA := pop;
-               if INS.target.syllable_index = 3 then  -- c.f. decode_a_jump_order.
-                  increment_by_3(RA);
-               end if;
-               RA.order_word_number := RA.order_word_number+INS.target.order_word_number;
-               set_NIA_to(RA);
-               the_CPU_delta := the_CPU_delta + 12 + KDF9.us(INS.target.syllable_index mod 2);
-            else
-               effect(NOUV_interrupt, "empty SJNS");
+            ensure_that_the_SJNS_is_not_empty;
+            RA := pop;
+            if INS.target.syllable_index = 3 then  -- c.f. decode_a_jump_order.
+               increment_by_3(RA);
             end if;
+            RA.order_word_number := RA.order_word_number+INS.target.order_word_number;
+            set_NIA_to(RA);
+            the_CPU_delta := the_CPU_delta + 12 + KDF9.us(INS.target.syllable_index mod 2);
 
          when EXITD =>
             fail_in_problem_program_state;
-            if the_sjns_depth = 0 then
+            if the_SJNS_depth = 0 then
                -- This indicates a serious failure in Director; best to abandon it at once.
                trap_illegal_instruction("empty SJNS in Director");
             end if;
@@ -1386,24 +1355,21 @@ package body KDF9.microcode is
 
          when OS_OUT =>
             the_CPU_delta := the_CPU_delta + 13;
-            if the_sjns_depth < 16 or else the_CPU_state = Director_state then
-               A := (if the_nest_depth = 0 then 0 else read_top);
-               if the_execution_mode = boot_mode then
-                  effect(OUT_interrupt, A'Image);
-                  -- We get here only in Director state, when the OUT does not interrupt.
-                  -- Arguably, this should be notified as an error.
-                  return; -- OUT has the effect of a no-op in Director state.
-               end if;
-               -- Emulate a subset of the appropriate Director's API.
-               if A < 100 then
-                  do_a_TSD_OUT(OUT_number => A);
-               elsif A < 200 then
-                  do_an_EGDON_OUT(OUT_number => A);
-               else
-                  trap_unimplemented_feature("OUT" & A'Image);
-               end if;
+            ensure_that_the_SJNS_is_not_full;
+            A := (if the_NEST_depth = 0 then 0 else read_top);
+            if the_execution_mode = boot_mode then
+               effect_interrupt(caused_by_OUT, A'Image);
+               -- We get here only in Director state, when the OUT does not interrupt.
+               -- Arguably, this should be notified as an error.
+               return; -- OUT has the effect of a no-op in Director state.
+            end if;
+            -- Emulate a subset of the appropriate Director's API.
+            if A < 100 then
+               do_a_TSD_OUT(OUT_number => A);
+            elsif A < 200 then
+               do_an_EGDON_OUT(OUT_number => A);
             else
-               effect(NOUV_interrupt, "full SJNS in OUT");
+               trap_failing_OUT(A, "is unknown, or not yet implemented");
             end if;
 
          when others =>
@@ -1419,7 +1385,7 @@ package body KDF9.microcode is
          when EaMq =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 6;
@@ -1427,7 +1393,7 @@ package body KDF9.microcode is
          when TO_EaMq =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             the_CPU_delta := the_CPU_delta + 6;
@@ -1435,7 +1401,7 @@ package body KDF9.microcode is
          when EaMqQ =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
             push(the_trace_operand);
             auto_increment;
@@ -1444,14 +1410,14 @@ package body KDF9.microcode is
          when TO_EaMqQ =>
             the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
-            ensure_that_the_nest_holds_an_operand;
+            ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
             store_word(the_trace_operand, the_trace_address);
             auto_increment;
             the_CPU_delta := the_CPU_delta + 7;
 
          when SET =>
-            ensure_that_the_nest_has_room_for_a_result;
+            ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := sign_extended(INS.operand);
             push(the_trace_operand);
             the_CPU_delta := the_CPU_delta + 4;

@@ -1,7 +1,7 @@
 -- Specific feature values and operation for the console terminal streams.
 -- This is the Windows (i.e., somewhat crippled) version.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or

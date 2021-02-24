@@ -1,7 +1,7 @@
 -- Emulation of a card reader buffer.
 -- Card readers are "unit record" devices: they cannot transfer less than a whole card.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -89,5 +89,15 @@ private
 
    overriding
    procedure Finalize (the_CR : in out CR.device);
+
+   overriding
+   function kind (the_CR : CR.device)
+   return IOC.device_kind
+   is (CR_kind);
+
+   overriding
+   function quantum (the_CR : CR.device)
+   return KDF9.us
+   is (1E6 / (600 / 60)); -- 600 cards per minute.
 
 end IOC.slow.unit.CR;

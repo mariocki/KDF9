@@ -1,6 +1,6 @@
 -- Implement the drum API (OUTs) of the EE Time Sharing Director.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,15 +14,11 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with HCI;
 with IOC.dispatcher;
 with KDF9.TSD;
-with tracing;
 
-use  HCI;
 use  IOC.dispatcher;
 use  KDF9.TSD;
-use  tracing;
 
 package body IOC.fast.DR.TSD_OUTs is
 
@@ -40,7 +36,7 @@ package body IOC.fast.DR.TSD_OUTs is
 
    procedure access_the_OUT_operand is
    begin
-      ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds_an_operand;
       W := pop;
       Q := as_Q(W);
       the_trace_operand := W;

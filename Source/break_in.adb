@@ -1,6 +1,6 @@
 -- This communicates a break-in to the microcode.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -50,7 +50,7 @@ package body break_in is
       interact("Break-in");
       quit_if_requested;
       if the_execution_mode = boot_mode then
-         effect(FLEX_interrupt);
+         effect_interrupt(caused_by_FLEX, "the operator interrupts");
       else
          show_current_state;
       end if;

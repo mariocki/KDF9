@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,7 +14,6 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Exceptions;
 with Ada.Text_IO;
 --
 with HCI;
@@ -101,7 +100,7 @@ package body IOC.slow.shift.FW is
          begin
             Open(interaction_file, In_File, "FW0");
          response_list_loop:
-            while not End_of_file(interaction_file) loop
+            while not End_of_File(interaction_file) loop
                if last_interaction = max_interactions then
                   log_line("The file FW0 contains too many interactions!");
                   raise Ada.Text_IO.Data_Error;
@@ -467,9 +466,7 @@ package body IOC.slow.shift.FW is
       set_text_colour_to_black(the_FW.output);
       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
       flush(the_FW.output);
-
    exception
-
       when end_of_stream =>
          flush(the_FW.output);
          set_text_colour_to_black(the_FW.output);
@@ -592,9 +589,7 @@ package body IOC.slow.shift.FW is
       set_text_colour_to_black(the_FW.output);
       set_text_style_to_plain(the_FW.output);
       do_output_housekeeping(the_FW, written => size, fetched => size);
-
    exception
-
       when end_of_stream =>
          flush(the_FW.output);
          set_text_colour_to_black(the_FW.output);
@@ -652,8 +647,6 @@ package body IOC.slow.shift.FW is
 
    -- This is the monitor console Flexowriter.
 
-   FW_quantum : constant := 1E6 / 10;  -- 10 characters per second.
-
    type FW_access is access FW.device;
 
    FW0 : FW_access with Warnings => Off;
@@ -668,10 +661,7 @@ package body IOC.slow.shift.FW is
       if b /= 0 then
          trap_operator_error("FW0 must be on buffer 0");
       end if;
-      FW0 := new FW.device (number  => b,
-                            kind    => FW_kind,
-                            unit    => 0,
-                            quantum => FW_quantum);
+      FW0 := new FW.device (number => b, unit => 0);
       already_enabled := True;
    end enable;
 

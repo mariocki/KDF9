@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,71 +26,20 @@ package body POSIX is
    --      It does NOT refer to a KDF9 DMA channel.
 
    use type C.int;
-   use type C.long;
-
-   procedure verify (IO_status : in Integer; what : in String := "") is
-   begin
-      if IO_status < 0 then
-         put_error_message("POSIX operation failed in " & what);
-         raise POSIX_IO_error with what;
-      end if;
-   end verify;
-
-   procedure verify (IO_status : in C.long; what : in String := "") is
-   begin
-      if IO_status < 0 then
-         put_error_message("POSIX operation failed in " & what);
-         raise POSIX_IO_error with what;
-      end if;
-   end verify;
-
-   procedure verify (IO_status : in C.int; what : in String := "") is
-   begin
-      if IO_status < 0 then
-         put_error_message("POSIX operation failed in " & what);
-         raise POSIX_IO_error with what;
-      end if;
-   end verify;
-
-   function verify (IO_status : C.long; what : String := "")
-   return POSIX.file_position
-   is (
-       if IO_status < 0 then
-          raise POSIX_IO_error with what
-       else
-          POSIX.file_position(IO_status)
-      );
-
-   function verify (IO_status : C.int; what : String := "")
-   return Integer
-   is (
-       if IO_status < 0 then
-          raise POSIX_IO_error with what
-       else
-          Integer(IO_status)
-      );
-
-   function creat (name : C.char_array;  permissions : C.int)
-   return C.int
-      with Import, Convention => C;
-
-   function create (name : String;  permissions : POSIX.permission_set)
-   return Integer is
-      fd : constant C.int := creat(C.To_C(name, Append_Nul => True), C.int(permissions));
-   begin
-       verify(fd, "create: " & name);
-       return Integer(fd);
-   end create;
 
    function open (name : C.char_array;  mode : C.int)
    return C.int
       with Import, Convention => C;
 
    function open (name : String;  mode : POSIX.access_mode)
-   return Integer
-   is (
-       verify(open(C.To_C(name, Append_Nul => True), C.int(mode)), "open file: " & name)
-      );
+   return Integer is
+      fd : constant C.int := open(C.To_C(name, Append_Nul => True), C.int(mode));
+   begin
+      if fd < 0 then
+         raise POSIX_IO_error;
+      end if;
+      return Integer(fd);
+   end open;
 
    function exists (name : String)
    return Boolean is
@@ -98,18 +47,16 @@ package body POSIX is
    begin
       response := open(C.To_C(name, Append_Nul => True), C.int(POSIX.read_mode));
       return response >= 0;
-   exception
-      when POSIX_IO_error =>
-         return False;
    end exists;
 
    function ftruncate (fd : C.int;  to_length : C.long)
    return C.long
       with Import, Convention => C;
 
-   procedure truncate (fd : Natural;  to_length : POSIX.file_position := 0) is
+   procedure truncate (fd : Natural) is
+      result : C.long with Unreferenced;
    begin
-      verify(ftruncate(C.int(fd), C.long(to_length)), "truncate fd: " & fd'Image);
+      result := ftruncate(C.int(fd), 0);
    end truncate;
 
    function lseek (fd : C.int;  to_offset : C.long;  whence : C.int)
@@ -120,10 +67,7 @@ package body POSIX is
                   to_offset : POSIX.file_position;
                   whence    : POSIX.seek_origin := from_start)
    return POSIX.file_position
-   is (
-       verify(lseek(C.int(fd), C.long(to_offset), C.int(whence)),
-              "seek fd: " & fd'Image)
-      );
+   is (POSIX.file_position(lseek(C.int(fd), C.long(to_offset), C.int(whence))));
 
    function read (fd : C.int;  buffer : System.Address;  count : C.int)
    return C.int
@@ -135,7 +79,6 @@ package body POSIX is
       status : C.int;
    begin
        status := read(C.int(fd), buffer'Address, size);
-       verify(status, "read fd: " & fd'Image);
        return Integer(status);
    end read;
 
@@ -149,7 +92,6 @@ package body POSIX is
       status : C.int;
    begin
        status := write(C.int(fd), buffer'Address, size);
-       verify(status, "write fd: " & fd'Image);
        return Integer(status);
    end write;
 
@@ -158,10 +100,10 @@ package body POSIX is
       with Import, Convention => C;
 
    function close (fd : Natural)
-   return Integer
-   is (
-       verify(close(C.int(fd)), "close fd: " & fd'Image)
-      );
+   return Integer is
+   begin
+       return Integer(close(C.int(fd)));
+   end close;
 
    function get_errno
    return C.int
@@ -192,9 +134,7 @@ package body POSIX is
    procedure open_UI is
    begin
       UI_in_FD := open(UI_in_name, read_mode);
-      verify(UI_in_FD, UI_in_name);
       UI_out_FD := open(UI_out_name, write_mode);
-      verify(UI_out_FD, UI_out_name);
       UI_is_open := True;
    end open_UI;
 
@@ -211,11 +151,10 @@ package body POSIX is
    return String is
       C_prompt        : constant C.char_array
                       := C.To_C(NL & "ee9: " & prompt & ": ", Append_Nul => False);
-      C_reply_length : C.Int;
+      C_reply_length : C.Int with Warnings => Off;
    begin
       ensure_UI_is_open;
-      verify(write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length),
-             "prompt: for file name");
+      C_reply_length := write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length);
       C_reply_string := (256 => Interfaces.C.char(NUL), others => '?');
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, C_reply_string'Length);
       if C_reply_length < 2 then
@@ -231,7 +170,7 @@ package body POSIX is
                           response  : out response_kind) is
       message  : constant String := "ee9: " & prompt & ": ";
       C_prompt : constant C.char_array := C.To_C(NL & message, Append_Nul => True);
-      C_reply_length : C.Int;
+      C_reply_length : C.Int with Warnings => Off;
    begin
       if offline then
          output_line("ee9: Running in the non-interactive mode: EOF signalled.");
@@ -239,12 +178,10 @@ package body POSIX is
          return;
       end if;
       ensure_UI_is_open;
-      verify(write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length-1),
-             "prompt: " & message);
+      C_reply_length := write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length-1);
       C_reply_string := (others => '?');
       C_reply_string(256) := C.char(NUL);
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 2);
-      verify(C_reply_length, "prompt: reply");
 
       response := wrong_response;
 
@@ -271,7 +208,6 @@ package body POSIX is
       elsif C_reply_length > 0 then
          while C.To_Ada(C_reply_string(Interfaces.C.size_t(C_reply_length))) /= LF loop
             C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 1);
-            verify(C_reply_length, "LF");
          end loop;
       end if;
    end data_prompt;
@@ -283,7 +219,7 @@ package body POSIX is
       prompt       : constant String
                    := "ee9: " & reason & ": (d:ebug | f:ast | t:race | p:ause or q:uit)? ";
       UNIX_prompt  : constant C.char_array := C.To_C(NL & prompt, Append_Nul => True);
-      C_reply_length : C.Int;
+      C_reply_length : C.Int with Warnings => Off;
    begin
       if offline then
          output_line("ee9: Running in the non-interactive mode: EOF signalled.");
@@ -292,12 +228,10 @@ package body POSIX is
          return;
       end if;
       ensure_UI_is_open;
-      verify(write(C.int(UI_out_FD), UNIX_prompt'Address, UNIX_prompt'Length-1),
-             "prompt: " & prompt);
+      C_reply_length := write(C.int(UI_out_FD), UNIX_prompt'Address, UNIX_prompt'Length-1);
       C_reply_string := (others => '?');
       C_reply_string(256) := C.char(NUL);
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 2);
-      verify(C_reply_length, "prompt: reply");
 
       response := wrong_response;
 
@@ -313,20 +247,19 @@ package body POSIX is
       elsif C_reply_length > 0 then
          while C.To_Ada(C_reply_string(Interfaces.C.size_t(C_reply_length))) /= LF loop
             C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 1);
-            verify(C_reply_length, "LF");
          end loop;
       end if;
    end debug_prompt;
 
    procedure output (message : in String) is
       UNIX_message : constant C.char_array := C.To_C(message, Append_Nul => False);
+      result       : C.int with Unreferenced;
    begin
       if message = "" then
          return;
       end if;
       ensure_UI_is_open;
-      verify(write(C.int(UI_out_FD), UNIX_message'Address, UNIX_message'Length),
-             "output: " & message);
+      result := write(C.int(UI_out_FD), UNIX_message'Address, UNIX_message'Length);
    end output;
 
    procedure output_line (message : in String) is
@@ -336,9 +269,10 @@ package body POSIX is
    end output_line;
 
    procedure output (message  : in Character) is
+      result : C.int with Unreferenced;
    begin
       ensure_UI_is_open;
-      verify(write(C.int(UI_out_FD), message'Address, 1), "output: " & message);
+      result := write(C.int(UI_out_FD), message'Address, 1);
    end output;
 
    procedure output_line is
@@ -347,9 +281,10 @@ package body POSIX is
    end output_line;
 
    procedure input  (message : out Character) is
+      result : C.int with Unreferenced;
    begin
       ensure_UI_is_open;
-      verify(read(C.int(UI_in_FD), message'Address, 1), "input");
+      result := read(C.int(UI_in_FD), message'Address, 1);
    end input;
 
    procedure POSIX_exit (status : in C.int)

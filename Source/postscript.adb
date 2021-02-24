@@ -1,6 +1,6 @@
 -- Elementary Encapsulated PostScript (EPS) line drawing.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,14 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with Ada.Exceptions;
---
-with exceptions;
-
-use  Ada.Exceptions;
---
-use  exceptions;
 
 package body postscript is
 
@@ -121,10 +113,6 @@ package body postscript is
          there_is_an_open_path := True;
       end if;
       the_last_point_in_the_path := final;
-   exception
-      when error : others =>
-         close(stream);
-         raise emulation_failure with "drawing a PostScript vector: " & Exception_Information(error);
    end draw_a_PS_vector;
 
    subtype RGB is String(1..11);
@@ -191,8 +179,8 @@ package body postscript is
       -- Note the file offset of the bounding box placeholders.
       get_position(the_position_of_the_placeholders, stream);
 
-      -- Write the 10-column placeholders.
-      put_line(stream, "xxxxxxxxxx|yyyyyyyyyy");
+      -- Write the 12-column placeholders.
+      put_line(stream, "xxxxxxxxxxxx|yyyyyyyyyyyy");
 
       put_line(stream, "% This graph was plotted by ee9, the GNU Ada KDF9 emulator.");
       put_line(stream, "% For more information, see <http://www.findlayw.plus.com/KDF9>.");
@@ -214,27 +202,19 @@ package body postscript is
       put_line(stream, "/s { stroke } bind def");
 
       put_line(stream, "save");
-   exception
-      when error : others =>
-         close(stream);
-         raise emulation_failure with "initializing PostScript: " & Exception_Information(error);
    end initialize_PS_output;
 
    procedure finalize_PS_output (stream : in out host_IO.Stream) is
 
-      subtype bound_string is String(1..10);
+      subtype bound_string is String(1..12);
 
       function bound_image (n : in Natural)
       return bound_string is
          n_image : constant String := n'Image;
-         b : bound_string := (others => ' ');
       begin
-         if n_image'Length > bound_string'Length then
-            raise emulation_failure with "infeasible PostScript bounding box size: " & n_image;
-         else
-            b(b'Last-n_image'Length+b'First .. b'Last) := n_image;
-            return b;
-         end if;
+         return b : bound_string := (others => ' ') do
+            b(b'Last-n_image'Length+1 .. b'Last) := n_image;
+         end return;
       end bound_image;
 
    begin -- finalize_PS_output
@@ -253,10 +233,6 @@ package body postscript is
       put(stream, bound_image(maximum_offset.y));
 
       close(stream);
-   exception
-      when error : others =>
-         close(stream);
-         raise emulation_failure with "closing PostScript output: " & Exception_Information(error);
    end finalize_PS_output;
 
 end postscript;

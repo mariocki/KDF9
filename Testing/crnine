@@ -1,12 +1,21 @@
-if [ x"$1"x = xx ]
+BINARY=${KDF9_BINARY:-Binary}
+DATA=${KDF9_DATA:-Data}
+
+prog=$1
+data=$2
+
+
+cp FW0 FW0_copy
+
+if [ x"${prog}"x = xx ]
 then
    echo You have not named a binary program to be run.
    echo
    exit 1
 fi
 
-program=`basename "$1"`
-program=${KDF9_BINARY:-Binary}/"$program"
+program=`basename "${prog}"`
+program=${BINARY}/"$program"
 if [ ! -r "$program" ]
 then
    echo The object code file "$program" is absent or unreadable.
@@ -14,18 +23,23 @@ then
    exit 2
 fi
 
-if [ x"$2"x = xx -o x"$2"x = x-x ]
+if [ x"${data}"x = xx -o x"${data}"x = x-x ]
 then
    >CR0
 else
-   data=${KDF9_DATA:-Data}/`basename "$2" .txt`.txt
-   if [ -r "$data" ]
+   datatxt=${DATA}/`basename "${data}" ".txt"`.txt
+   if [ -r "$datatxt" ]
    then
-      cp "$data" CR0
+      cp "$datatxt" CR0
    else
-      echo The data file "$data" is absent or unreadable.
-      echo
-      exit 3
+      datatxt=${DATA}/`basename "${data}"`
+      if [ -r "$datatxt" ]
+      then
+         cp "$datatxt" CR0
+      else
+         echo The file "$datatxt" is absent or unreadable.
+         exit 3
+      fi
    fi
 fi
 

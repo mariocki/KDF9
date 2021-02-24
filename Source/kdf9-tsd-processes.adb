@@ -1,6 +1,6 @@
 -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -15,9 +15,6 @@
 --
 
 with dumping;
-with exceptions;
-with formatting;
-with HCI;
 with IOC;
 with IOC.fast.DR.TSD_OUTs;
 with IOC.fast.FD.TSD_OUTs;
@@ -26,16 +23,10 @@ with KDF9_char_sets;
 with KDF9.CPU;
 with KDF9.store;
 with KDF9.TSD.peripherals;
-with settings;
-with state_display;
-with tracing;
 
 with environmental_value_of;
 
 use  dumping;
-use  exceptions;
-use  formatting;
-use  HCI;
 use  IOC;
 use  IOC.fast.DR.TSD_OUTs;
 use  IOC.fast.FD.TSD_OUTs;
@@ -43,9 +34,6 @@ use  IOC.slow.shift.TR;
 use  KDF9_char_sets;
 use  KDF9.store;
 use  KDF9.TSD.peripherals;
-use  settings;
-use  state_display;
-use  tracing;
 
 package body KDF9.TSD.processes is
 
@@ -135,7 +123,7 @@ package body KDF9.TSD.processes is
       W : KDF9.word;
    begin
       -- Get the program name.
-      ensure_that_the_nest_holds_2_operands;
+      ensure_that_the_NEST_holds_2_operands;
       P := pop;
       P := KDF9.CPU.shift_logical(P, 24);
 
@@ -190,7 +178,7 @@ package body KDF9.TSD.processes is
 
    procedure do_OUT_2 is
    begin
-      ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds_an_operand;
       time_limit := pop;
       the_trace_operand := time_limit;
 

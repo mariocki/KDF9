@@ -1,6 +1,6 @@
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -35,6 +35,7 @@ use  Ada.Exceptions;
 --
 use  exceptions;
 use  HCI;
+use  IOC.equipment;
 use  settings;
 
 procedure ee9 is
@@ -255,12 +256,12 @@ begin -- ee9
 
    if the_program_name_position /= 0 then
       get_settings_from_file("1");
-      IOC.equipment.configure;
+      configure_the_IOC;
       impose_all_flag_settings;
-      IOC.equipment.re_configure;
+      revise_the_configuration;
       if the_log_is_wanted then
          log_line(
-                  "This is ee9 6.0a, compiled by "
+                  "This is ee9 6.1a, compiled by "
                 & Standard'Compiler_Version
                 & " on "
                 & GNAT.Source_Info.Compilation_ISO_Date

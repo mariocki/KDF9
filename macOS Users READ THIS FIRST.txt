@@ -1,15 +1,16 @@
-If you are using macOS and have System Integrity Protection (SIP) enabled, macOS will try
-to prevent you from running the programs included in this distribution, which it puts in
-"quarantine" after download because they have not been cryptographically code-signed.
+If you are using macOS and have Apple's Gatekeeper anti-malware protection enabled,
+macOS may try to prevent you from running the programs included in this distribution,
+which may be put in "quarantine" after download because it is not cryptographically signed.
 
 You can handle this in one of three ways:
 
-1. Switch off Syetem Integrity Protection.  I strongly recommend that you do NOT do this!
+1. Switch off Gatekeeper.  I strongly recommend that you do NOT do this!
 
-2. Each time SIP blocks a program, go to the Security&Privacy/General option in System Preferences
-   and confirm that it is OK to run it.  You will have to do this for each of the several programs
-   needed to run all the KDF9 software: not just ee9 but a2b, kidopt, mkchan, mtp etc.
-   This is tedious, but it needs to be done just the once for each program.
+2. Each time Gatekeeper blocks a program, go to the Security&Privacy/General option
+   in System Preferences and confirm that it is OK to run it.  You will have to do this
+   for each of the several ancilllary programs needed to run all the KDF9 software:
+      not just ee9 but a2b, kal3, kidopt, mkchan, and mtp.
+   This is tedious, but it needs to be done just the once for each of these programs.
 
 3. The easy way: in the distributed Build directory, issue these Terminal commands,
    which remove the quarantine flag:
@@ -23,4 +24,4 @@ You can handle this in one of three ways:
    sudo /usr/bin/xattr -r -d com.apple.quarantine de40ine
    sudo ./de40ine
 
- If you are wary about this -- as you should be -- read de40ine and read the manual page for xattr.
+ If you are wary about this - as you perhaps should be - read de40ine and the xattr manual page.

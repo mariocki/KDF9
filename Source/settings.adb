@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -124,7 +124,7 @@ package body settings is
             peripheral_tracing_is_wanted := False;
             retrospective_tracing_is_wanted := False;
          when others =>
-            raise emulation_failure with "previously undectected invalid miscellany flag";
+            null;
       end case;
       set_diagnostic_mode(the_diagnostic_mode);
    end set_this_miscellany_flag;
@@ -915,7 +915,7 @@ package body settings is
       do_not_execute := False;
       high_count := time_limit;
       open_options_file(settings_file, the_settings_file_name);
-      if end_of_file(settings_file) then
+      if End_of_File(settings_file) then
          raise End_Error;
       end if;
 
@@ -978,7 +978,7 @@ package body settings is
                       & Ada.Text_IO.Count'Image(Col(settings_file))
                       & " of the settings file!"
                        );
-               log_line(" ...  the valid flags are A,B,C,D,F,G,I,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
+               log_line(" ...  the valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
                Skip_Line(settings_file);
          end case;
       end loop;
@@ -986,7 +986,8 @@ package body settings is
    exception
 
       when Status_Error =>
-         null;
+         log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
+         log_new_line;
 
       when End_Error =>
          close_options_file(settings_file, the_settings_file_name);
@@ -998,9 +999,9 @@ package body settings is
          log_line(
                   "Reading of settings abandoned at line "
                 & line_number'Image
-                & " of '"
+                & " of "
                 & the_settings_file_name
-                & "'."
+                & "."
                  );
 
       when quit_request =>
@@ -1009,9 +1010,9 @@ package body settings is
          log_line(
                   "Quit requested at line "
                 & line_number'Image
-                & " of '"
+                & " of "
                 & the_settings_file_name
-                & "'."
+                & "."
                  );
          log_rule;
          raise;
@@ -1022,17 +1023,17 @@ package body settings is
          log_line(
                   "Failure in ee9; unexpected exception: "
                 & Exception_Information(error)
-                & " in 'get_settings_from_file'!"
+                & " in get_settings_from_file!"
                  );
          log_line(
                   "Reading of settings abandoned at line "
                 & line_number'Image
-                & " of '"
+                & " of "
                 & the_settings_file_name
-                & "'!"
+                & "!"
                  );
          log_rule;
-         raise emulation_failure with "reading settings from file";
+         raise;
 
    end get_settings_from_file;
 

@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,6 +13,9 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
+
+private with IOC.equipment;
+private with tracing;
 
 package IOC.slow is
 
@@ -34,11 +37,22 @@ package IOC.slow is
 
 private
 
+   use IOC.equipment; pragma Warnings(Off, IOC.equipment);
+   use tracing;       pragma Warnings(Off, tracing);
+
    type device is abstract new IOC.device with
       record
          is_transcribing : Boolean := True;
          byte_count      : KDF9.word := 0;
       end record;
+
+   overriding
+   function is_open (the_buffer : slow.device)
+   return Boolean;
+
+   overriding
+   procedure add_in_the_IO_CPU_time (the_buffer  : in slow.device;
+                                     bytes_moved : in KDF9.word);
 
    -- Optionally log an activity message for the device; close its I/O stream.
    procedure close (the_buffer  : in out slow.device;
@@ -68,5 +82,4 @@ private
    -- Read a raw byte from the stream and deal with any input file concatenation.
    procedure get_byte_from_stream (byte       : out Character;
                                    the_buffer : in out slow.device);
-
 end IOC.slow;

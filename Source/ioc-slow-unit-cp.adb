@@ -1,6 +1,6 @@
 -- Emulation of a card punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,10 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with IOC.equipment;
-
-use  IOC.equipment;
 
 package body IOC.slow.unit.CP is
 
@@ -31,7 +27,6 @@ package body IOC.slow.unit.CP is
    procedure do_output_housekeeping (the_CP     : in out CP.device;
                                      fetched    : in KDF9.word) is
    begin
-      flush(the_CP.stream);
       correct_transfer_time(the_CP, actual_length => 1);
       add_in_the_IO_CPU_time(the_CP, fetched);
    end do_output_housekeeping;
@@ -195,8 +190,6 @@ package body IOC.slow.unit.CP is
            );
    end Finalize;
 
-   CP_quantum : constant := 1E6 / (300 / 60); -- 300 cards per minute.
-
    type CP_access is access CP.device;
 
    CP0 : CP_access with Warnings => Off;
@@ -208,16 +201,10 @@ package body IOC.slow.unit.CP is
    begin
       case unit is
          when 0 =>
-            CP0 := new CP.device (number  => b,
-                                  kind    => CP_kind,
-                                  unit    => 0,
-                                  quantum => CP_quantum);
+            CP0 := new CP.device (number => b, unit => 0);
             CP0_number := b;
          when 1 =>
-            CP1 := new CP.device (number  => b,
-                                  kind    => CP_kind,
-                                  unit    => 1,
-                                  quantum => CP_quantum);
+            CP1 := new CP.device (number => b, unit => 1);
             CP1_number := b;
          when others =>
             trap_operator_error("more than two CP units have been configured");

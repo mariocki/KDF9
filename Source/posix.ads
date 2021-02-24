@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -45,10 +45,6 @@ package POSIX is
    owner_write_permission : constant permission_set := 8 * group_write_permission;
    owner_exec_permission  : constant permission_set := 8 * group_exec_permission;
 
-   function create (name        : String;
-                    permissions : POSIX.permission_set)
-   return Integer;
-
    type access_mode is mod 3;
 
    read_mode  : constant POSIX.access_mode := 0;
@@ -64,8 +60,7 @@ package POSIX is
 
    type file_position is new C.long;
 
-   procedure truncate (fd        : Natural;
-                       to_length : POSIX.file_position := 0);
+   procedure truncate (fd : Natural);
 
    type seek_origin is mod 3;
 
@@ -97,8 +92,6 @@ package POSIX is
    procedure put_error_message (error_message : in String); -- and set the errno error number
 
    procedure exit_program (status : in Natural);
-
-   procedure verify (IO_status : in Integer; what : in String := "");
 
    -- The following all act on the interactive UI.
 

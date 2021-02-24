@@ -1,6 +1,6 @@
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This program is an auxiliary of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or
@@ -20,16 +20,16 @@ with Ada.Characters.Latin_1;
 with Ada.Exceptions;
 --
 with from_5_hole;
+with IOC_tape_data;
 with KDF9_char_sets;
-with magtape_data;
 with OS_specifics;
 with POSIX;
 
 use  Ada.Characters.Handling;
 use  Ada.Characters.Latin_1;
 --
+use  IOC_tape_data;
 use  KDF9_char_sets;
-use  magtape_data;
 use  OS_specifics;
 use  POSIX;
 

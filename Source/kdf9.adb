@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -54,164 +54,168 @@ package body KDF9 is
    return KDF9.word
    is (unsign(CPU.signed(resign(Q))));
 
-   function as_word (the_link : KDF9.sjns_link)
+   function as_word (the_link : KDF9.SJNS_link)
    return KDF9.word is
-      function link_Q_part is new Ada.Unchecked_Conversion(KDF9.sjns_link, KDF9.Q_part);
+      function link_Q_part is new Ada.Unchecked_Conversion(KDF9.SJNS_link, KDF9.Q_part);
    begin
       return KDF9.word(link_Q_part(the_link));
    end as_word;
 
    function as_link (the_word : KDF9.word)
-   return KDF9.sjns_link is
-      function Q_part_link is new Ada.Unchecked_Conversion(KDF9.Q_part, KDF9.sjns_link);
+   return KDF9.SJNS_link is
+      function Q_part_link is new Ada.Unchecked_Conversion(KDF9.Q_part, KDF9.SJNS_link);
    begin
       return Q_part_link(KDF9.Q_part(the_word and Q_part_mask));
    end as_link;
 
-   procedure ensure_that_the_sjns_is_not_empty is
+   procedure ensure_that_the_SJNS_is_not_empty is
    begin
-      if the_sjns_depth > 0             or else
+      if the_SJNS_depth > 0             or else
             the_CPU_state = Director_state then
          return;
       end if;
-      effect(NOUV_interrupt, "empty SJNS");
-   end ensure_that_the_sjns_is_not_empty;
+      effect_interrupt(caused_by_NOUV, "empty SJNS");
+   end ensure_that_the_SJNS_is_not_empty;
 
-   procedure ensure_that_the_sjns_is_not_full is
+   procedure ensure_that_the_SJNS_is_not_full is
    begin
-      if the_sjns_depth < 16             or else
+      if the_SJNS_depth < 16             or else
             the_CPU_state = Director_state  then
          return;
       end if;
-      effect(NOUV_interrupt, "full SJNS");
-   end ensure_that_the_sjns_is_not_full;
+      effect_interrupt(caused_by_NOUV, "full SJNS");
+   end ensure_that_the_SJNS_is_not_full;
 
    procedure push (the_link : in KDF9.syllable_address) is
    begin
-      the_sjns(the_sjns_depth) := KDF9.sjns_link(the_link);
-      the_sjns_depth := the_sjns_depth + 1;
+      the_SJNS(the_SJNS_depth) := KDF9.SJNS_link(the_link);
+      the_SJNS_depth := the_SJNS_depth + 1;
    end push;
 
    function pop
    return KDF9.syllable_address is
    begin
-      the_sjns_depth := the_sjns_depth - 1;
-      return KDF9.syllable_address(the_sjns(the_sjns_depth));
+      the_SJNS_depth := the_SJNS_depth - 1;
+      return KDF9.syllable_address(the_SJNS(the_SJNS_depth));
    end pop;
 
-   function sjns_top
-   return KDF9.sjns_link
-   is (the_sjns(the_sjns_depth-1));
+   function SJNS_top
+   return KDF9.SJNS_link
+   is (the_SJNS(the_SJNS_depth-1));
 
-   function operand_words_needed (need : KDF9.nest_depth)
+   function operand_words_needed (need : KDF9.NEST_depth)
    return String
    is ("NEST lacks" & need'Image & " operand" & (if need > 1 then "s" else ""));
 
-   procedure ensure_that_the_nest_holds (at_least : in KDF9.nest_depth) is
+   procedure ensure_that_the_NEST_holds (at_least : in KDF9.NEST_depth) is
    begin
-      if the_nest_depth >= at_least          or else
+      if the_NEST_depth >= at_least          or else
             the_CPU_state = Director_state      then
          return;
       end if;
-      effect(NOUV_interrupt, operand_words_needed(need => at_least-the_nest_depth));
-   end ensure_that_the_nest_holds;
+      effect_interrupt(caused_by_NOUV, operand_words_needed(need => at_least-the_NEST_depth));
+   end ensure_that_the_NEST_holds;
 
-   procedure ensure_that_the_nest_holds_an_operand is
+   procedure ensure_that_the_NEST_holds_an_operand is
    begin
-      ensure_that_the_nest_holds (at_least => 1);
-   end ensure_that_the_nest_holds_an_operand;
+      ensure_that_the_NEST_holds (at_least => 1);
+   end ensure_that_the_NEST_holds_an_operand;
 
-   procedure ensure_that_the_nest_holds_2_operands is
+   procedure ensure_that_the_NEST_holds_2_operands is
    begin
-      ensure_that_the_nest_holds (at_least => 2);
-   end ensure_that_the_nest_holds_2_operands;
+      ensure_that_the_NEST_holds (at_least => 2);
+   end ensure_that_the_NEST_holds_2_operands;
 
-   function result_space_needed (need : KDF9.nest_depth)
+   function result_space_needed (need : KDF9.NEST_depth)
+   return String
+      with Inline => False;
+
+   function result_space_needed (need : KDF9.NEST_depth)
    return String
    is (if need = 1 then "full NEST" else "NEST too full for" & need'Image & " operands");
 
-   procedure ensure_that_the_nest_has_room_for (at_least : in KDF9.nest_depth) is
+   procedure ensure_that_the_NEST_has_room_for (at_least : in KDF9.NEST_depth) is
    begin
-      if the_nest_depth <= 16-at_least     or else
+      if the_NEST_depth <= 16-at_least     or else
             the_CPU_state = Director_state    then
          return;
       end if;
-      effect(NOUV_interrupt, result_space_needed(need => at_least - (16-the_nest_depth)));
-   end ensure_that_the_nest_has_room_for;
+      effect_interrupt(caused_by_NOUV, result_space_needed(need => at_least - (16-the_NEST_depth)));
+   end ensure_that_the_NEST_has_room_for;
 
-   procedure ensure_that_the_nest_has_room_for_a_result is
+   procedure ensure_that_the_NEST_has_room_for_a_result is
    begin
-      ensure_that_the_nest_has_room_for (at_least => 1);
-   end ensure_that_the_nest_has_room_for_a_result;
+      ensure_that_the_NEST_has_room_for (at_least => 1);
+   end ensure_that_the_NEST_has_room_for_a_result;
 
-   procedure ensure_that_the_nest_has_room_for_2_results is
+   procedure ensure_that_the_NEST_has_room_for_2_results is
    begin
-      ensure_that_the_nest_has_room_for (at_least => 2);
-   end ensure_that_the_nest_has_room_for_2_results;
+      ensure_that_the_NEST_has_room_for (at_least => 2);
+   end ensure_that_the_NEST_has_room_for_2_results;
 
    procedure push (the_word : in KDF9.word) is
    begin
-      the_nest(the_nest_depth) := the_word;
-      the_nest_depth := the_nest_depth + 1;
+      the_NEST(the_NEST_depth) := the_word;
+      the_NEST_depth := the_NEST_depth + 1;
    end push;
 
    function pop
    return KDF9.word is
    begin
-      return result : constant KDF9.word := the_nest(the_nest_depth - 1) do
-         the_nest(the_nest_depth - 1) := 0;
-         the_nest_depth := the_nest_depth - 1;
+      return result : constant KDF9.word := the_NEST(the_NEST_depth - 1) do
+         the_NEST(the_NEST_depth - 1) := 0;
+         the_NEST_depth := the_NEST_depth - 1;
       end return;
    end pop;
 
    procedure pop is
    begin
-      the_nest(the_nest_depth - 1) := 0;
-      the_nest_depth := the_nest_depth - 1;
+      the_NEST(the_NEST_depth - 1) := 0;
+      the_NEST_depth := the_NEST_depth - 1;
    end pop;
 
    function read_top
    return KDF9.word
-   is (the_nest(the_nest_depth-1));
+   is (the_NEST(the_NEST_depth-1));
 
    procedure write_top (the_word : in KDF9.word) is
    begin
-      the_nest(the_nest_depth-1) := the_word;
+      the_NEST(the_NEST_depth-1) := the_word;
    end write_top;
 
    procedure push (the_pair : in KDF9.pair) is
    begin
-      the_nest(the_nest_depth+0) := the_pair.lsw;
-      the_nest(the_nest_depth+1) := the_pair.msw;
-      the_nest_depth := the_nest_depth + 2;
+      the_NEST(the_NEST_depth+0) := the_pair.lsw;
+      the_NEST(the_NEST_depth+1) := the_pair.msw;
+      the_NEST_depth := the_NEST_depth + 2;
    end push;
 
    function pop
    return KDF9.pair is
    begin
-      return result : constant KDF9.pair := (msw => the_nest(the_nest_depth-1),
-                                             lsw => the_nest(the_nest_depth-2)) do
-         the_nest(the_nest_depth-1) := 0;
-         the_nest(the_nest_depth-2) := 0;
-         the_nest_depth := the_nest_depth - 2;
+      return result : constant KDF9.pair := (msw => the_NEST(the_NEST_depth-1),
+                                             lsw => the_NEST(the_NEST_depth-2)) do
+         the_NEST(the_NEST_depth-1) := 0;
+         the_NEST(the_NEST_depth-2) := 0;
+         the_NEST_depth := the_NEST_depth - 2;
       end return;
    end pop;
 
    procedure pop_pair is
    begin
-      the_nest(the_nest_depth-1) := 0;
-      the_nest(the_nest_depth-2) := 0;
-      the_nest_depth := the_nest_depth - 2;
+      the_NEST(the_NEST_depth-1) := 0;
+      the_NEST(the_NEST_depth-2) := 0;
+      the_NEST_depth := the_NEST_depth - 2;
    end pop_pair;
 
    function read_top
    return KDF9.pair
-   is ((msw => the_nest(the_nest_depth-1), lsw => the_nest(the_nest_depth-2)));
+   is ((msw => the_NEST(the_NEST_depth-1), lsw => the_NEST(the_NEST_depth-2)));
 
    procedure write_top (the_pair : in KDF9.pair) is
    begin
-      the_nest(the_nest_depth-1) := the_pair.msw;
-      the_nest(the_nest_depth-2) := the_pair.lsw;
+      the_NEST(the_NEST_depth-1) := the_pair.msw;
+      the_NEST(the_NEST_depth-2) := the_pair.lsw;
    end write_top;
 
 
@@ -239,41 +243,41 @@ package body KDF9 is
       end loop;
    end set_K2_register;
 
-   -- Set context (bits D0:1), nest_depth (D2:6) and sjns_depth (D7:11).
+   -- Set context (bits D0:1), NEST_depth (D2:6) and SJNS_depth (D7:11).
 
    procedure set_K3_register (setting : in KDF9.word) is
    begin
       -- Save the current register values in the register bank.
-      register_bank(the_context).NEST := the_nest;
-      register_bank(the_context).SJNS := the_sjns;
+      register_bank(the_context).NEST := the_NEST;
+      register_bank(the_context).SJNS := the_SJNS;
       register_bank(the_context).Q_store := the_Q_store;
       -- Set the new context.
       the_context := KDF9.context(KDF9.word'(setting / 2**46));
-      the_nest_depth := KDF9.nest_depth(setting / 2**41 mod 2**5);
-      the_sjns_depth := KDF9.sjns_depth(setting / 2**36 mod 2**5);
+      the_NEST_depth := KDF9.NEST_depth(setting / 2**41 mod 2**5);
+      the_SJNS_depth := KDF9.SJNS_depth(setting / 2**36 mod 2**5);
       -- Restore the register values for the new context.
-      the_nest := register_bank(the_context).NEST;
-      the_sjns := register_bank(the_context).SJNS;
+      the_NEST := register_bank(the_context).NEST;
+      the_SJNS := register_bank(the_context).SJNS;
       the_Q_store := register_bank(the_context).Q_store;
    end set_K3_register;
 
-   a_jiffy : constant := 1.0 / 2.0**20;  -- a bit less than a microsecond
+   a_microsecond : constant := 1.0 / 2.0**20;
 
-   type seconds is delta a_jiffy range 0.0 .. 1000.0*366.0*24.0*3600.0;  -- 1000 leap years!
+   type seconds is delta a_microsecond range 0.0 .. 1000.0*365.2425*24.0*3600.0;  -- 1000 years!
 
    procedure update_the_elapsed_time;
 
    -- Let the real elapsed time catch up with the_real_time virtual seconds.
 
    procedure delay_until (the_real_time : in KDF9.us) is
-      quantum : constant seconds := seconds(2**10) * a_jiffy;  -- ca. TR character-read time of 1ms
+      a_jiffy : constant seconds := seconds(2**10) * a_microsecond;  -- ca. TR character-read time of 1ms
       the_lag : seconds;
    begin
        if the_real_time < the_last_delay_time then
           the_last_delay_time := the_real_time;
        end if;
-      the_lag := seconds(the_real_time - the_last_delay_time) * a_jiffy;
-      if the_lag >= quantum then  -- More than a quantum of virtual elapsed time has passed.
+      the_lag := seconds(the_real_time - the_last_delay_time) * a_microsecond;
+      if the_lag >= a_jiffy then  -- More than a a_jiffy of virtual elapsed time has passed.
          delay Duration(the_lag);
          the_last_delay_time := the_real_time;
       end if;
@@ -354,11 +358,11 @@ package body KDF9 is
    begin
       the_last_K4_time := time_now;
       if interval / 32 >= 2**16 then
-         effect(RESET_interrupt, "double clock");
-         the_RFIR(RESET_interrupt) := True;
+         effect_interrupt(caused_by_RESET, "double clock");
+         the_RFIR(caused_by_RESET ) := True;
       elsif interval / 32 >= 2**15 then
-         effect(CLOCK_interrupt, "time since a K4" & interval'Image & "us");
-         the_RFIR(CLOCK_interrupt) := True;  --?? why is this needed?
+         effect_interrupt(caused_by_CLOCK, "time since a K4" & interval'Image & "us");
+         the_RFIR(caused_by_CLOCK ) := True;  --?? why is this needed?
       end if;
       return (KDF9.word(interval / 32) * 2**32) or (RFIR_in_a_word * 2**16);
    end get_K4_operand;
@@ -369,14 +373,14 @@ package body KDF9 is
    return KDF9.word
    is (K5_operand);
 
-   -- Get context (bits D0:1), nest_depth (D2:6) and sjns_depth (D7:11).
+   -- Get context (bits D0:1), NEST_depth (D2:6) and SJNS_depth (D7:11).
 
    function get_K7_operand
    return KDF9.word
    is (
        (KDF9.word(the_context)    * 2**46) or
-       (KDF9.word(the_nest_depth) * 2**41) or
-       (KDF9.word(the_sjns_depth) * 2**36)
+       (KDF9.word(the_NEST_depth) * 2**41) or
+       (KDF9.word(the_SJNS_depth) * 2**36)
       );
 
    procedure reset_V_and_T is
@@ -403,20 +407,20 @@ package body KDF9 is
       the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.
    end reset_the_internal_registers;
 
-   empty_nest : constant NEST := (others => 0);
-   empty_sjns : constant SJNS := (others => (0, 0));
+   empty_NEST : constant NEST := (others => 0);
+   empty_SJNS : constant SJNS := (others => (0, 0));
    empty_Q_s  : constant Q_store := (others => (0, 0, 0));
 
    procedure reset_the_CPU_state is
    begin
       the_context := 0;
       for bank of register_bank loop
-         bank := (NEST => empty_nest, SJNS => empty_sjns, Q_store => empty_Q_s);
+         bank := (NEST => empty_NEST, SJNS => empty_SJNS, Q_store => empty_Q_s);
       end loop;
-      the_nest_depth := 0;
-      the_nest       := empty_nest;
-      the_sjns_depth := 0;
-      the_sjns       := empty_sjns;
+      the_NEST_depth := 0;
+      the_NEST       := empty_NEST;
+      the_SJNS_depth := 0;
+      the_SJNS       := empty_SJNS;
       the_Q_store    := empty_Q_s;
       if the_execution_mode = program_mode then
          reset_the_internal_registers(program_state);
@@ -429,35 +433,35 @@ package body KDF9 is
 
    procedure reset_the_program_state is
    begin
-      the_nest_depth := 0;
-      the_nest       := empty_nest;
-      the_sjns_depth := 0;
-      the_sjns       := empty_sjns;
+      the_NEST_depth := 0;
+      the_NEST       := empty_NEST;
+      the_SJNS_depth := 0;
+      the_SJNS       := empty_SJNS;
       reset_V_and_T;
       the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.
       -- Setting NIA must follow program loading, as it fetches E0 into the IWBs.
       set_NIA_to((0, 0));
    end reset_the_program_state;
 
-   procedure effect (this_interrupt : in KDF9.interrupt_number; message : in String := "") is
+   procedure effect_interrupt (caused_by_this : in KDF9.interrupt_number; message : in String) is
       return_address : KDF9.syllable_address;
    begin
-      take_note_of_interrupt(this_interrupt, message);
-      the_RFIR(this_interrupt) := True;
+      take_note_of_interrupt(caused_by_this, message);
+      the_RFIR(caused_by_this) := True;
       case the_execution_mode is
          when boot_mode =>
-            -- Interrupts are either effected or deferred to Director.
-            if the_CPU_state = program_state or else this_interrupt = RESET_interrupt then
-               -- Effect an actual interrupt into Director.
-               if this_interrupt in LOV_interrupt | OUT_interrupt then
+            -- Interrupts are either actioned or deferred to Director.
+            if the_CPU_state = program_state or else caused_by_this = caused_by_RESET  then
+               -- Action an actual interrupt into Director.
+               if caused_by_this in caused_by_LOV  | caused_by_OUT then
                   return_address := CIA;  -- Restart the interrupted instruction.
                else
                   return_address := NIA;  -- Proceed after the interrupted instruction.
                end if;
-               if the_sjns_depth < 16 then
+               if the_SJNS_depth < 16 then
                   push(return_address);                  -- The program link fits into the SJNS.
                else
-                  JB := KDF9.sjns_link(return_address);  -- The program link overwrites JB.
+                  JB := KDF9.SJNS_link(return_address);  -- The program link overwrites JB.
                end if;
                BA := 0;
                fetching_normally := True;
@@ -467,17 +471,17 @@ package body KDF9 is
             else
                -- Defer: Director will eventually find any request left in the_RFIR.
                -- NOUV is completely suppressed in Director state.
-               the_RFIR(NOUV_interrupt) := False;
+               the_RFIR(caused_by_NOUV) := False;
             end if;
 
          when test_program_mode =>
             -- Interrupts other than LOV and RESET are ignored.
             -- There is no need to accurately emulate the address placed by the hardware in JB.
-            case this_interrupt is
-               when LOV_interrupt =>
-                  raise LOV_trap with message;
-               when RESET_interrupt =>
-                  raise RESET_trap with message;
+            case caused_by_this is
+               when caused_by_LOV  =>
+                  raise LOV_exception with message;
+               when caused_by_RESET  =>
+                  raise RESET_exception with message;
                when others =>
                   null;
             end case;
@@ -485,35 +489,35 @@ package body KDF9 is
          when program_mode =>
             -- Interrupts other than LOV are treated as failures.
             -- There is no need to accurately emulate the address placed by the hardware in JB.
-            case this_interrupt is
-               when PR_interrupt =>
-                  raise PR_trap with message;
-               when FLEX_interrupt =>
-                  raise FLEX_trap with message;
-               when LIV_interrupt =>
-                  raise LIV_trap with message;
-               when NOUV_interrupt =>
-                  raise NOUV_trap with message;
-               when EDT_interrupt =>
-                  raise EDT_trap with message;
-               when OUT_interrupt =>
-                  raise OUT_trap with message;
-               when LOV_interrupt =>
-                  raise LOV_trap with message;
-               when RESET_interrupt =>
-                  raise RESET_trap with message;
+            case caused_by_this is
+               when caused_by_PR =>
+                  raise PR_exception with message;
+               when caused_by_FLEX =>
+                  raise FLEX_exception with message;
+               when caused_by_LIV =>
+                  raise LIV_exception with message;
+               when caused_by_NOUV =>
+                  raise NOUV_exception with message;
+               when caused_by_EDT =>
+                  raise EDT_exception with message;
+               when caused_by_OUT =>
+                  raise OUT_exception with message;
+               when caused_by_LOV  =>
+                  raise LOV_exception with message;
+               when caused_by_RESET  =>
+                  raise RESET_exception with message;
                when others =>
-                  raise emulation_failure with "invalid RFI in KDF9.effect";
+                  raise emulation_failure with "invalid RFI in effect_interrupt";
             end case;
       end case;
-   end effect;
+   end effect_interrupt;
 
    procedure effect_clock_interrupt (interval : in KDF9.us)
       with Inline => False;
 
    procedure effect_clock_interrupt (interval : in KDF9.us) is
    begin
-      effect(CLOCK_interrupt, interval'Image & " KDF9 us");
+      effect_interrupt(caused_by_CLOCK, interval'Image & " KDF9 us");
    end effect_clock_interrupt;
 
    procedure check_for_a_clock_interrupt is
@@ -537,14 +541,14 @@ package body KDF9 is
       case the_execution_mode is
          when program_mode =>
             -- The unprivileged program has attempted a privileged operation.
-            raise LIV_trap with "%Director-only instruction";
+            raise LIV_exception with "%Director-only instruction";
          when test_program_mode =>
             -- The privileged program is allowed to use privileged instructions.
             return;
          when boot_mode =>
             if the_CPU_state = program_state then
                -- Punt the error to Director.
-               effect(LIV_interrupt);
+               effect_interrupt(caused_by_LIV, "Director-only instruction");
             else
                -- All privileged operations are permitted to Director.
                return;
@@ -557,7 +561,7 @@ package body KDF9 is
       -- LOV was TOTALLY suppressed in Director state.
       if the_CPU_state /= Director_state then
          set_NIA_to(CIA);
-         effect(LOV_interrupt, cause);
+         effect_interrupt(caused_by_LOV, cause);
       end if;
    end LOV_if_user_mode;
 
@@ -569,11 +573,11 @@ package body KDF9 is
       case the_execution_mode is
          when program_mode
             | test_program_mode =>
-            raise LIV_trap with "%" & the_message;
+            raise LIV_exception with "%" & the_message;
          when boot_mode =>
             if the_CPU_state = program_state then
                -- Punt the problem to Director.
-               effect(LIV_interrupt, the_message);
+               effect_interrupt(caused_by_LIV, the_message);
             else
                -- The Director itself has gone seriously wrong.
                -- LIV is impossible in Director, so ee9 takes responsibility for stopping the run
@@ -673,11 +677,11 @@ package body KDF9 is
    procedure trap_an_invalid_order_address (new_NIA : in KDF9.syllable_address) is
    begin
       if new_NIA.syllable_index = 6 then
-         effect(RESET_interrupt, "syllable number = 6");
+         effect_interrupt(caused_by_RESET, "syllable number = 6");
       elsif new_NIA.syllable_index = 7 then
-         effect(RESET_interrupt, "syllable number = 7");
+         effect_interrupt(caused_by_RESET, "syllable number = 7");
       else
-         effect(LIV_interrupt, "jump to 8191");  -- See EE Report K/GD y 82.
+         effect_interrupt(caused_by_LIV, "jump to 8191");  -- See EE Report K/GD y 82.
       end if;
    end trap_an_invalid_order_address;
 
@@ -1005,14 +1009,14 @@ package body KDF9 is
       hash := rotate_word_right(the_signature_hash, 1) xor KDF9.word(ICR);
       hash := rotate_word_right(hash, 1) xor as_word(the_Q_store(INS.Qq));
       hash := rotate_word_right(hash, 1) xor as_word(the_Q_store(INS.Qk));
-      if the_sjns_depth > 0 then
-         for s in reverse KDF9.sjns_depth range 0 .. the_sjns_depth-1 loop
-               hash := rotate_word_right(hash, 1) xor as_word(the_sjns(s));
+      if the_SJNS_depth > 0 then
+         for s in reverse KDF9.SJNS_depth range 0 .. the_SJNS_depth-1 loop
+               hash := rotate_word_right(hash, 1) xor as_word(the_SJNS(s));
          end loop;
       end if;
-      if the_nest_depth > 0 then
-         for n in reverse KDF9.nest_depth range 0 .. the_nest_depth-1 loop
-               hash := rotate_word_right(hash, 1) xor the_nest(n);
+      if the_NEST_depth > 0 then
+         for n in reverse KDF9.NEST_depth range 0 .. the_NEST_depth-1 loop
+               hash := rotate_word_right(hash, 1) xor the_NEST(n);
          end loop;
       end if;
       return hash;

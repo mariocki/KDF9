@@ -1,6 +1,6 @@
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -35,7 +35,7 @@ package body KDF9.store is
 
    -- Check that EA, EA+BA are valid; LIV if invalid.
    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part)
-      with Inline;
+      with Inline => True;
 
    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part) is
       PA : constant KDF9.word := (KDF9.word(EA) + KDF9.word(BA)) and Q_part_mask;
@@ -55,7 +55,7 @@ package body KDF9.store is
       LOV_if_user_mode(
                        if solo
                        then "at #" & oct_of(address_1) & " (E" & dec_of(address_1) & ")"
-                       else "in #" & oct_of(address_1) & "/#" & oct_of(address_2)
+                       else "in #" & oct_of(address_1) & "..#" & oct_of(address_2)
                       );
    end if_user_mode_then_LOV;
 
@@ -77,11 +77,11 @@ package body KDF9.store is
 
    procedure validate_address_range (EA1, EA2 : in KDF9.Q_part) is
    begin
-      validate_virtual_and_real_addresses(EA1);
-      validate_virtual_and_real_addresses(EA2);
       if EA1 > EA2 then
          diagnose_invalid_address("initial address > final address", KDF9.word(EA2));
       end if;
+      validate_virtual_and_real_addresses(EA1);
+      validate_virtual_and_real_addresses(EA2);
    end validate_address_range;
 
    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part) is
@@ -89,7 +89,6 @@ package body KDF9.store is
        PA2 : constant KDF9.Q_part := EA2 + BA;
    begin
       validate_address_range (EA1, EA2);
-
       if there_are_locks_in_physical_addresses(KDF9.Q_register'(C => 0, I => PA1, M => PA2)) then
          if the_CPU_state /= Director_state then
             if_user_mode_then_LOV(PA1, PA2, solo => False);

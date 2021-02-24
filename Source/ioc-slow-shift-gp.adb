@@ -1,6 +1,6 @@
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,21 +13,11 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-with formatting;
-with HCI;
-with IOC.equipment;
 with plotter;
 with postscript;
-with settings;
-with tracing;
 
-use  formatting;
-use  HCI;
-use  IOC.equipment;
 use  plotter;
 use  postscript;
-use  settings;
-use  tracing;
 
 package body IOC.slow.shift.GP is
 
@@ -39,7 +29,7 @@ package body IOC.slow.shift.GP is
       open(the_GP.stream, the_GP.device_name, write_mode);
       IOC.device(the_GP).Initialize;
       if the_GP.is_open then
-         truncate(the_GP.stream, to_length => 0);
+         truncate(the_GP.stream);
          initialize_PS_output(the_GP.stream);
          open_the_plot_file(the_GP.stream);
       end if;
@@ -57,7 +47,7 @@ package body IOC.slow.shift.GP is
                    & oct_of(KDF9.Q_part(the_GP.number), 2)
                    & " made"
                    & the_GP.byte_count'Image
-                   & " plotting steps."
+                   & plurality(the_GP.byte_count, " plotting step.", " plotting steps.")
                     );
          end if;
          the_GP.byte_count := 0;
@@ -72,16 +62,15 @@ package body IOC.slow.shift.GP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      validate_device(the_GP, Q_operand);
+      validate_device(the_GP);
       validate_parity(the_GP);
       deal_with_a_busy_device(the_GP, 13, set_offline);
       the_T_bit_is_set := True;
       take_note_of_test(the_GP.device_name, Q_operand, the_T_bit_is_set);
    end PMB;
 
-   GP_quantum   : constant := 1E6 / 200;  -- 200 plotting movements per second.
-   GP_lift_time : constant := 1E6 /  10;  -- 10 pen up/down movements per second.
-   lift_ratio   : constant := GP_lift_time / GP_quantum;
+   GP_lift_time : constant := 1E6 /  10;           -- 10 pen up/down movements per second.
+   lift_ratio   : constant := GP_lift_time / 200;  -- the number of steps made in a lift time
 
    overriding
    procedure do_output_housekeeping (the_GP      : in out GP.device;
@@ -177,19 +166,25 @@ package body IOC.slow.shift.GP is
       POC(the_GP, Q_operand, set_offline);
    end POD;
 
-
    type GP_access is access GP.device;
 
    GP0 : GP_access with Warnings => Off;
 
    procedure enable (b : in KDF9.buffer_number) is
    begin
-      GP0 := new GP.device (number  => b,
-                            kind    => GP_kind,
-                            unit    => 0,
-                            quantum => GP_quantum);
+      GP0 := new GP.device (number => b, unit => 0);
       GP0_number := b;
    end enable;
+
+   procedure replace_on_buffer (b : in KDF9.buffer_number) is
+   begin
+      if GP0 /= null and then
+            b = GP0_number then
+         return;
+      end if;
+      buffer(b) := null;
+      enable(b);
+   end replace_on_buffer;
 
    procedure notify_invalid_movement (from_x, from_y, step_x, step_y : in Integer) is
    begin
@@ -197,12 +192,12 @@ package body IOC.slow.shift.GP is
                                 GP0.all,
                                 "cannot move from <"
                               & trimmed(from_x'Image)
-                              & ", "
-                              & trimmed(from_y'Image)
+                              & ","
+                              & from_y'Image
                               & "> by <"
                               & trimmed(step_x'Image)
-                              & ", "
-                              & trimmed(step_y'Image)
+                              & ","
+                              & step_y'Image
                               & ">"
                                );
    end notify_invalid_movement;

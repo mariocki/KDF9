@@ -32,12 +32,22 @@ mv /tmp/$1.pblk TR1
 #ucc PLT
 #nine PLT $1 - z kk
 
-if [ x"$2"x = xx -o x"$2"x = x-x ]
+if [ "x$2x" != xx -a "x$2x" != x-x ]
 then
-   : no data file
-else
-   # Add the data file to the end of the paper tape.
-   a2b -L2p < ${DATA}/$2.txt >> TR1
+   datatxt=${DATA}/`basename "$2" ".txt"`.txt
+   if [ -r "$datatxt" ]
+   then
+      a2b -L2p < ${DATA}/$2.txt >> TR1
+   else
+      datatxt=${DATA}/`basename "$2"`
+      if [ -r "$datatxt" ]
+      then
+         cat "$datatxt" >>TR1
+      else
+         echo The file "$datatxt" is absent or unreadable.
+         exit 3
+      fi
+   fi
 fi
 
 # Run Director.

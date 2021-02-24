@@ -1,6 +1,6 @@
 -- Emulation of a card reader buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,12 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with IOC.equipment;
-with tracing;
-
-use  IOC.equipment;
-use  tracing;
 
 package body IOC.slow.unit.CR is
 
@@ -223,7 +217,7 @@ package body IOC.slow.unit.CR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      validate_device(the_CR, Q_operand);
+      validate_device(the_CR);
       validate_parity(the_CR);
       deal_with_a_busy_device(the_CR, 13, set_offline);
       the_T_bit_is_set := True;
@@ -241,8 +235,6 @@ package body IOC.slow.unit.CR is
            );
    end Finalize;
 
-   CR_quantum : constant := 1E6 / (600 / 60); -- 600 cards per minute.
-
    type CR_access is access CR.device;
 
    CR0 : CR_access with Warnings => Off;
@@ -254,16 +246,10 @@ package body IOC.slow.unit.CR is
    begin
       case unit is
          when 0 =>
-            CR0 := new CR.device (number  => b,
-                                  kind    => CR_kind,
-                                  unit    => 0,
-                                  quantum => CR_quantum);
+            CR0 := new CR.device (number => b, unit => 0);
             CR0_number := b;
          when 1 =>
-            CR1 := new CR.device (number  => b,
-                                  kind    => CR_kind,
-                                  unit    => 1,
-                                  quantum => CR_quantum);
+            CR1 := new CR.device (number => b, unit => 1);
             CR1_number := b;
          when others =>
             trap_operator_error("more than two CR units have been configured");

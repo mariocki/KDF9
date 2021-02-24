@@ -1,6 +1,6 @@
 -- Implement OUTs 0.. 2 and 5..7 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,15 +16,19 @@
 
 package KDF9.TSD.processes is
 
-   procedure do_OUT_0 with No_Return;
+   procedure do_OUT_0
+      with No_Return, Inline => False;
 
-   procedure do_OUT_1 with No_Return;
+   procedure do_OUT_1
+      with No_Return, Inline => False;
 
-   procedure do_OUT_2 with No_Return;
+   procedure do_OUT_2
+      with No_Return, Inline => False;
 
-   procedure complete_TSD_OUT_2;
+   procedure complete_TSD_OUT_2
+      with Inline => False;
 
-   procedure do_OUT_97;
-
+   procedure do_OUT_97
+      with Inline => False;
 
 end KDF9.TSD.processes;

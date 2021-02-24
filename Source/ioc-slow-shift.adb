@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -266,7 +266,12 @@ package body IOC.slow.shift is
    overriding
    procedure Finalize (the_device : in out shift.device) is
    begin
-      close(the_device, "transferred", the_device.byte_count, "character(s)");
+      close(
+            the_device,
+            "transferred",
+            the_device.byte_count,
+            "character" & plurality(the_device.byte_count)
+           );
    end Finalize;
 
 end IOC.slow.shift;

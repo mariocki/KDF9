@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -40,7 +40,8 @@ package tracing is
 
    procedure look_back_at_a_two_syllable_order;
 
-   procedure look_back_at_a_jump_order;
+   procedure look_back_at_a_jump_order
+      with Inline => False;
 
    procedure look_back_at_a_data_access_order;
 
@@ -68,10 +69,10 @@ package tracing is
    procedure set_store_points (first, last : in KDF9.address);
 
    procedure act_on_any_two_syllable_order_watchpoints
-      with Pre => the_diagnostic_mode /= fast_mode;
+      with Inline => False;
 
    procedure act_on_any_data_access_order_watchpoints
-      with Pre => the_diagnostic_mode /= fast_mode;
+      with Inline => False;
 
 
    --
@@ -91,8 +92,8 @@ package tracing is
          parameter : KDF9.word;
          ICR_value : KDF9.order_counter;
          CPU_time  : KDF9.us;
-         nested    : KDF9.nest_depth;
-         called    : KDF9.sjns_depth;
+         nested    : KDF9.NEST_depth;
+         called    : KDF9.SJNS_depth;
          V, T, D   : Boolean;
          level     : KDF9.priority;
       end record;
@@ -203,7 +204,8 @@ package tracing is
 
    procedure clear_interrupt_FIFO;
 
-   procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String);
+   procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
+      with Inline => False;
 
 
    -- Support for the instruction-type and instruction-word frequency histograms.

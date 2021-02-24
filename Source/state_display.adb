@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,7 +19,6 @@ with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 --
 with disassembly;
-with dumping;
 with exceptions;
 with formatting;
 with generic_sets;
@@ -43,7 +42,6 @@ use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 --
 use  disassembly;
-use  dumping;
 use  exceptions;
 use  formatting;
 use  HCI;
@@ -133,6 +131,27 @@ package body state_display is
       log(data);
    end show_as_characters;
 
+   procedure log_padded_string (text  : in String;
+                                width : in Positive := 1) is
+      pad_width   : constant Natural := Integer'Max (0, width - text'Length);
+      padding     : constant String (1 .. pad_width) := (others => ' ');
+      padded_text : constant String := padding & text;
+   begin
+      log(padded_text);
+   end log_padded_string;
+
+   procedure log_octal (number : in KDF9.field_of_16_bits;
+                        width  : in Positive := 1) is
+   begin
+      log_padded_string("#" & oct_of(number), width);
+   end log_octal;
+
+   procedure log_octal (number : in KDF9.word;
+                        width  : in Positive := 1) is
+   begin
+      log_padded_string("#" & oct_of(number), width);
+   end log_octal;
+
   procedure show_in_various_formats (the_word : in KDF9.word;
                                      column   : in Positive := 5) is
       image : String(1 .. 21);
@@ -171,8 +190,8 @@ package body state_display is
               else  " about" & t_plus_5E5'Image & " sec" );
       end readable;
 
-      CPU : constant String := " KDF9 us. (RAN)" & readable(the_CPU_time);
-      EL  : constant String := " KDF9 us. (EL) " & readable(the_clock_time);
+      CPU : constant String := " KDF9 us  (RAN)" & readable(the_CPU_time);
+      EL  : constant String := " KDF9 us  (EL) " & readable(the_clock_time);
 
    begin
       log_line("ORDERS:     " & just_right(ICR'Image, 10) & " executed (ICR)");
@@ -215,22 +234,17 @@ package body state_display is
          log_new_line;
       end loop;
       log_new_line;
-      log_line("RFIR (Interrupt Flags):");
-      log_line(
-               "CLOCK:    "
-             & Boolean'Image(interval >= 2**20)
-             & "; time since last CLOCK interrupt ="
-             & KDF9.us'Image(interval)
-             & " KDF9 us."
-              );
-      log_line("PR:       " & Boolean'Image(the_RFIR(PR_interrupt)));
-      log_line("FLEX:     " & Boolean'Image(the_RFIR(FLEX_interrupt)));
-      log_line("LIV:      " & Boolean'Image(the_RFIR(LIV_interrupt)));
-      log_line("NOUV:     " & Boolean'Image(the_RFIR(NOUV_interrupt)));
-      log_line("EDT:      " & Boolean'Image(the_RFIR(EDT_interrupt)));
-      log_line("OUT:      " & Boolean'Image(the_RFIR(OUT_interrupt)));
-      log_line("LOV:      " & Boolean'Image(the_RFIR(LOV_interrupt)));
-      log_line("RESET:    " & Boolean'Image(the_RFIR(RESET_interrupt)));
+      log("RFIR: ");
+      if the_RFIR(caused_by_PR)     then log("PR, ");    end if;
+      if the_RFIR(caused_by_FLEX)   then log("FLEX, ");  end if;
+      if the_RFIR(caused_by_LIV)    then log("LIV, ");   end if;
+      if the_RFIR(caused_by_NOUV)   then log("NOUV, ");  end if;
+      if the_RFIR(caused_by_EDT)    then log("EDT, ");   end if;
+      if the_RFIR(caused_by_OUT)    then log("OUT, ");   end if;
+      if the_RFIR(caused_by_LOV)    then log("LOV, ");   end if;
+      if the_RFIR(caused_by_RESET)  then log("RESET, "); end if;
+      if interval >= 2**20          then log("CLOCK, "); end if;
+      log_line(trimmed(KDF9.us'Image(interval/32*32)) & " KDF9 us since last CLOCK");
    end show_Director_registers;
 
    procedure show_V_and_T is
@@ -251,41 +265,41 @@ package body state_display is
       end if;
    end show_V_and_T;
 
-   procedure show_nest (when_empty : Boolean := True) is
+   procedure show_NEST (when_empty : Boolean := True) is
    begin
-      if the_nest_depth = 0 then
+      if the_NEST_depth = 0 then
          if when_empty then
             log_line("The NEST is empty.");
          end if;
       else
          log_line("NEST:");
-         for i in reverse KDF9.nest_depth loop
-            if i < the_nest_depth then
-               log(just_right("N" & trimmed(KDF9.nest_depth'Image(the_nest_depth-i)), 3) & ": ");
+         for i in reverse KDF9.NEST_depth loop
+            if i < the_NEST_depth then
+               log(just_right("N" & trimmed(KDF9.NEST_depth'Image(the_NEST_depth-i)), 3) & ": ");
                log_new_line;
-               show_in_various_formats(the_nest(i));
+               show_in_various_formats(the_NEST(i));
                log_new_line;
             end if;
          end loop;
       end if;
-   end show_nest;
+   end show_NEST;
 
-   procedure show_sjns (when_empty : Boolean := True) is
+   procedure show_SJNS (when_empty : Boolean := True) is
    begin
-      if the_sjns_depth = 0 then
+      if the_SJNS_depth = 0 then
          if when_empty then
             log_line("The SJNS is empty.");
          end if;
       else
          log_line("SJNS:");
       end if;
-      for i in reverse KDF9.sjns_depth loop
-         if i < the_sjns_depth then
-            log(just_right("S" & trimmed(KDF9.sjns_depth'Image(the_sjns_depth-i)), 3) & ": ");
-            log_line(oct_of(the_sjns(i)) & " (" & dec_of(KDF9.syllable_address(the_sjns(i))) & ")");
+      for i in reverse KDF9.SJNS_depth loop
+         if i < the_SJNS_depth then
+            log(just_right("S" & trimmed(KDF9.SJNS_depth'Image(the_SJNS_depth-i)), 3) & ": ");
+            log_line(oct_of(the_SJNS(i)) & " (" & dec_of(KDF9.syllable_address(the_SJNS(i))) & ")");
          end if;
       end loop;
-   end show_sjns;
+   end show_SJNS;
 
    procedure show_Q_store is
       Q_bits  : KDF9.word := 0;
@@ -318,12 +332,12 @@ package body state_display is
          show_Director_registers;
          log_new_line;
       end if;
-      show_sjns;
+      show_SJNS;
       log_new_line;
       show_Q_store;
       show_V_and_T;
       log_new_line;
-      show_nest;
+      show_NEST;
    end show_registers;
 
    procedure show_order is
@@ -362,21 +376,21 @@ package body state_display is
            & (if the_T_bit_is_set then "T" else " ")
             );
          tab_log_to(the_external_trace_file, 40);
-         if the_nest_depth > 0 then
+         if the_NEST_depth > 0 then
             log(the_external_trace_file, "#" & oct_of(read_top));
          end if;
          tab_log_to(the_external_trace_file, 58);
       else
          log(the_external_trace_file, the_CPU_time'Image);
          tab_log_to(the_external_trace_file, 40);
-         log(the_external_trace_file, the_nest_depth'Image);
+         log(the_external_trace_file, the_NEST_depth'Image);
          tab_log_to(the_external_trace_file, 43);
-         log(the_external_trace_file, the_sjns_depth'Image);
+         log(the_external_trace_file, the_SJNS_depth'Image);
          tab_log_to(the_external_trace_file, 46);
          log(the_external_trace_file, (if the_V_bit_is_set then "V" else " "));
          log(the_external_trace_file, (if the_T_bit_is_set then "T" else " "));
          tab_log_to(the_external_trace_file, 50);
-         if the_nest_depth > 0 then
+         if the_NEST_depth > 0 then
             log(the_external_trace_file, "#" & oct_of(read_top));
          end if;
          tab_log_to(the_external_trace_file, 68);
@@ -576,11 +590,11 @@ package body state_display is
       end if;
       if it_uses_JB(INS.compressed_opcode)                     and then
             INS.kind in two_syllable_order | normal_jump_order and then
-               the_sjns_depth > 0                                  then
+               the_SJNS_depth > 0                                  then
          log_line(
                   " JB: "
-                & oct_of(the_sjns(the_sjns_depth-1))
-                & "; SJNS depth: " & just_right(the_sjns_depth'Image, 3)
+                & oct_of(the_SJNS(the_SJNS_depth-1))
+                & "; SJNS depth: " & just_right(the_SJNS_depth'Image, 3)
                  );
       end if;
       if INS.Qq /= 0 and then
@@ -603,7 +617,7 @@ package body state_display is
          log_new_line;
       end if;
       show_V_and_T;
-      show_nest(when_empty => False);
+      show_NEST(when_empty => False);
       log_rule;
    end short_witness;
 
@@ -913,8 +927,7 @@ package body state_display is
                            when K5 | K7 =>
                               log_octal(this.parameter);
                            when others =>
-                              raise emulation_failure
-                                 with "invalid K order: #" & oct_of(decoded.compressed_opcode);
+                              log("invalid K order: #" & oct_of(decoded.compressed_opcode));
                         end case;
                      when TO_LINK =>
                         log(oct_of(as_link(this.parameter)));
@@ -1066,8 +1079,7 @@ package body state_display is
                                       for_OUT  => show_transfer.for_OUT
                                      );
                   when others =>
-                     raise emulation_failure
-                        with "invalid IO order: #" & oct_of(decoded.compressed_opcode);
+                     log("invalid IO order: #" & oct_of(decoded.compressed_opcode));
                end case;
             end show_transfer;
 
@@ -1198,15 +1210,15 @@ package body state_display is
             log(oct_of(this.order_address) & ": ");
             tab_log_to(first_col);
             log(case this.interrupt_code is
-                   when PR_interrupt     => "PR   ",
-                   when FLEX_interrupt   => "FLEX ",
-                   when LIV_interrupt    => "LIV  ",
-                   when NOUV_interrupt   => "NOUV ",
-                   when EDT_interrupt    => "EDT  ",
-                   when OUT_interrupt    => "OUT  ",
-                   when LOV_interrupt    => "LOV  ",
-                   when RESET_interrupt  => "RESET",
-                   when CLOCK_interrupt  => "CLOCK",
+                   when caused_by_PR     => "PR   ",
+                   when caused_by_FLEX   => "FLEX ",
+                   when caused_by_LIV    => "LIV  ",
+                   when caused_by_NOUV   => "NOUV ",
+                   when caused_by_EDT    => "EDT  ",
+                   when caused_by_OUT    => "OUT  ",
+                   when caused_by_LOV     => "LOV  ",
+                   when caused_by_RESET   => "RESET",
+                   when caused_by_CLOCK   => "CLOCK",
                    when EXITD_flag       => "EXITD"
                );
             tab_log_to(event_col-4);
@@ -1307,7 +1319,7 @@ package body state_display is
       end if;
    end show_all_prerun_dump_areas;
 
-   quantum     : constant := 8;
+   increment   : constant := 8;
    jump_tab    : constant := 12;
    first_tab   : constant := 16;
    last_column : constant := 80;
@@ -1316,7 +1328,7 @@ package body state_display is
    return Boolean is
       result : Boolean := False;
    begin
-      for address in first .. first+quantum-1 loop
+      for address in first .. first+increment-1 loop
          result := result or (fetch_word(address) /= 0);
       end loop;
       return result;
@@ -1334,7 +1346,7 @@ package body state_display is
       procedure show_group (first : in KDF9.address) is
          address : KDF9.address := first;
       begin
-         while address <= first+quantum-1 loop
+         while address <= first+increment-1 loop
             log(converted(address));
             address := address + 1;
             exit when address < first;
@@ -1362,8 +1374,8 @@ package body state_display is
          else
             log_line("========  blank  ========");
          end if;
-      exit when address >= KDF9.address'Last - quantum;
-         address := address + quantum;
+      exit when address >= KDF9.address'Last - increment;
+         address := address + increment;
       end loop;
       log_new_line;
    end show_core;
@@ -2187,7 +2199,7 @@ package body state_display is
    end show_core_as_syllables;
 
    procedure poke (address    : in KDF9.address;
-                   sub_word   : in Character;
+                   sub_word   : in sub_word_flag;
                    position   : in KDF9.address;
                    value      : in KDF9.word) is
    begin
@@ -2202,13 +2214,7 @@ package body state_display is
             store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
          when 'C' | 'c' =>
             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
-         when others =>
-            raise emulation_failure with "invalid poke position " & sub_word & ".";
       end case;
-   exception
-      when error : others =>
-         raise emulation_failure
-            with "invalid poke operation: " & Ada.Exceptions.Exception_Information(error);
    end poke;
 
 end state_display;

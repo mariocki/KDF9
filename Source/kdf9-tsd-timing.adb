@@ -1,6 +1,6 @@
 -- Implement the timing OUTs of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,12 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with exceptions;
-with tracing;
-
-use exceptions;
-use tracing;
 
 package body KDF9.TSD.timing is
 
@@ -67,7 +61,7 @@ package body KDF9.TSD.timing is
 
    procedure do_OUT_17 is
    begin
-      ensure_that_the_nest_has_room_for_2_results;
+      ensure_that_the_NEST_has_room_for_2_results;
       -- In program mode, the Elapsed Time is the same thing as the_clock_time.
       push(OUT_time(the_clock_time));
       push(OUT_time(the_CPU_time));

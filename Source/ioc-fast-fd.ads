@@ -1,6 +1,6 @@
 -- Emulation of a fixed disc drive.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@
 
 package IOC.fast.FD is
 
-   type device is new IOC.fast.device with private;
+   type device is new fast.device with private;
 
    overriding
    procedure PIA (the_FD      : in out FD.device;
@@ -137,9 +137,9 @@ package IOC.fast.FD is
 
    procedure enable (b : in KDF9.buffer_number);
 
-   procedure re_enable (b : in KDF9.buffer_number);
+   procedure replace_on_buffer (b : in KDF9.buffer_number);
 
-   procedure disable (b : in KDF9.buffer_number);
+   procedure remove_from_buffer (b : in KDF9.buffer_number);
 
    function as_FD_command (Q_operand : KDF9.Q_register; for_seek, for_FH : Boolean := False)
    return String;
@@ -213,7 +213,7 @@ private
 
    type comb_data is array (FD.drive_range, FD.platter_range) of FD.seek_area_range;
 
-   type device is new IOC.fast.device with
+   type device is new fast.device with
       record
          comb         : FD.comb_data := (others => (others => 0));
          locus,
@@ -229,6 +229,16 @@ private
 
    overriding
    procedure Finalize (the_FD : in out FD.device);
+
+   overriding
+   function kind (the_FD : FD.device)
+   return IOC.device_kind
+   is (FD_kind);
+
+   overriding
+   function quantum (the_FD : FD.device)
+   return KDF9.us
+   is ((1E6 + outer_rate - 1) / outer_rate);
 
    FD0_number : KDF9.buffer_number := 0;
 

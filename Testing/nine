@@ -32,8 +32,14 @@ else
    then
       cp "$datatxt" TR1
    else
-      echo The file "$datatxt" is absent or unreadable.
-      exit 3
+      datatxt=${DATA}/`basename "${data}"`
+      if [ -r "$datatxt" ]
+      then
+         cp "$datatxt" TR1
+      else
+         echo The file "$datatxt" is absent or unreadable.
+         exit 3
+      fi
    fi
 fi
 

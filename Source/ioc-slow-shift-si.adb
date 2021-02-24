@@ -1,6 +1,6 @@
 -- Emulation of a standard interface buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,14 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with Ada.Exceptions;
---
-with IOC.equipment;
-with tracing;
-
-use  IOC.equipment;
-use  tracing;
 
 package body IOC.slow.shift.SI is
 
@@ -113,7 +105,7 @@ package body IOC.slow.shift.SI is
                   set_offline : in Boolean) is
    begin
       -- ee9's SI0 always asserts 8 channel mode.
-      validate_device(the_SI, Q_operand);
+      validate_device(the_SI);
       validate_parity(the_SI);
       deal_with_a_busy_device(the_SI, 13, set_offline);
       the_T_bit_is_set := True;
@@ -204,22 +196,14 @@ package body IOC.slow.shift.SI is
 
    unit : IOC.unit_number := 0;
 
-   SI_quantum : constant := 1E6 / 50E3;  -- for 50_000 characters per second (a guess) !!
-
    procedure enable (b : in KDF9.buffer_number) is
    begin
       case unit is
          when 0 =>
-            SI0 := new SI.device (number  => b,
-                                  kind    => SI_kind,
-                                  unit    => 0,
-                                  quantum => SI_quantum);
+            SI0 := new SI.device (number => b, unit => 0);
             SI0_number := b;
          when 1 =>
-            SI1 := new SI.device (number  => b,
-                                  kind    => SI_kind,
-                                  unit    => 1,
-                                  quantum => SI_quantum);
+            SI1 := new SI.device (number => b, unit => 1);
             SI1_number := b;
          when others =>
             trap_operator_error("more than two SI units have been configured");
@@ -227,7 +211,7 @@ package body IOC.slow.shift.SI is
       unit := unit + 1;
    end enable;
 
-   procedure re_enable (b : in KDF9.buffer_number) is
+   procedure replace_on_buffer (b : in KDF9.buffer_number) is
    begin
       if SI0 /= null   and then
             SI0.number = b then
@@ -239,7 +223,7 @@ package body IOC.slow.shift.SI is
       end if;
       buffer(b) := null;
       enable(b);
-   end re_enable;
+   end replace_on_buffer;
 
    function SI0_is_enabled
    return Boolean

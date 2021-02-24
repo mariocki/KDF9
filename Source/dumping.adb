@@ -1,6 +1,6 @@
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@ package body dumping is
    type poke_list_entry is
       record
          address  : KDF9.address;
-         sub_word : Character;
+         sub_word : sub_word_flag;
          position : KDF9.address;
          value    : KDF9.word;
       end record;
@@ -180,7 +180,7 @@ package body dumping is
    end remove_postrun_dump_areas;
 
    procedure add_to_poke_list (address    : in KDF9.address;
-                               sub_word   : in Character;
+                               sub_word   : in sub_word_flag;
                                position   : in KDF9.address;
                                value      : in KDF9.word;
                                was_stored : out Boolean) is

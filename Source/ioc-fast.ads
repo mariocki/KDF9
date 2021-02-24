@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,6 +14,8 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+private with tracing;
+
 package IOC.fast is
 
    --
@@ -24,6 +26,8 @@ package IOC.fast is
 
 private
 
+   use tracing; pragma Warnings(Off, tracing);
+
    type device is abstract new IOC.device with
       record
          switch_time,
@@ -33,5 +37,13 @@ private
          switch_count,
          latency_count : KDF9.word := 0;
       end record;
+
+   overriding
+   function is_open (the_buffer : fast.device)
+   return Boolean;
+
+   overriding
+   procedure add_in_the_IO_CPU_time (the_buffer  : in fast.device;
+                                     bytes_moved : in KDF9.word);
 
 end IOC.fast;

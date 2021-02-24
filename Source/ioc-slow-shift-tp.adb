@@ -1,6 +1,6 @@
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (6.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,12 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
-with IOC.equipment;
-with tracing;
-
-use  IOC.equipment;
-use  tracing;
 
 package body IOC.slow.shift.TP is
 
@@ -36,7 +30,7 @@ package body IOC.slow.shift.TP is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      validate_device(the_TP, Q_operand);
+      validate_device(the_TP);
       validate_parity(the_TP);
       deal_with_a_busy_device(the_TP, 13, set_offline);
       the_T_bit_is_set := False;  -- We never get here if GP0 is enabled.
@@ -205,8 +199,6 @@ package body IOC.slow.shift.TP is
            );
    end Finalize;
 
-   TP_quantum : constant := 1E6 / 110;  -- 110 characters per second.
-
    type TP_access is access TP.device;
 
    TP0  : TP_access with Warnings => Off;
@@ -218,16 +210,10 @@ package body IOC.slow.shift.TP is
    begin
       case unit is
          when 0 =>
-            TP0 := new TP.device (number  => b,
-                                  kind    => TP_kind,
-                                  unit    => 0,
-                                  quantum => TP_quantum);
+            TP0 := new TP.device (number => b, unit => 0);
             TP0_number := b;
          when 1 =>
-            TP1 := new TP.device (number  => b,
-                                  kind    => TP_kind,
-                                  unit    => 1,
-                                  quantum => TP_quantum);
+            TP1 := new TP.device (number => b, unit => 1);
             TP1_number := b;
          when others =>
             trap_operator_error("more than two TP units have been configured");
@@ -235,17 +221,16 @@ package body IOC.slow.shift.TP is
       unit := unit + 1;
    end enable;
 
-   procedure remove_TP1 (b : in KDF9.buffer_number) is
+   procedure remove_from_buffer (b : in KDF9.buffer_number) is
    begin
-      if TP1 /= null then
-         if TP1.number = b then
-            Finalize(TP1.all);
-            TP1 := null;
-         else
-            trap_operator_error("TP1 is not on buffer #" & oct_of(b));
-         end if;
+      if TP1 /= null   and then
+            TP1.number = b then
+         Finalize(TP1.all);
+         TP1 := null;
+      else
+         trap_operator_error("GP0 cannot be configured. TP1 is not on buffer #" & oct_of(b, 2));
       end if;
-   end remove_TP1;
+   end remove_from_buffer;
 
    -- Set the character code to be used by the designated TP.
    procedure set_unit_code (unit : in Natural; is_transcribing : in Boolean) is
