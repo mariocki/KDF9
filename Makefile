@@ -53,25 +53,25 @@ builddefs:
 
 .PHONY: a2b
 a2b: 
-	gnatmake -j4 -c -i ${SRC}/a2b.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatmake -j4 -c -i ${SRC}/a2b.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/a2b.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/a2b.ali -o ${SRC}/a2b
 
 .PHONY: kidopt
 kidopt:
-	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/kidopt.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/kidopt.ali -o ${SRC}/kidopt
 
 .PHONY: mtp
 mtp:
-	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/mtp.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
 
 .PHONY: to_9_from_1934
 to_9_from_1934:
-	gnatmake -j4 -c -i ${SRC}/to_9_from_1934.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >/dev/null
+	gnatmake -j4 -c -i ${SRC}/to_9_from_1934.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/to_9_from_1934.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/to_9_from_1934.ali -o ${SRC}/to_9_from_1934
 
