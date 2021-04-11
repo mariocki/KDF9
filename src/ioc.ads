@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -20,7 +20,6 @@ with Ada.Finalization;
 with KDF9;
 
 private with Ada.Exceptions;
-private with Ada.Characters.Latin_1;
 --
 private with exceptions;
 private with formatting;
@@ -117,9 +116,9 @@ package IOC is
    -- Make the_buffer unavailable for further I/O use, after flushing if necessary.
    procedure close (the_buffer : in out IOC.device);
 
-   -- A IOC.device_name is of the form XYu, where XY is a two-letter device-type
-   --    code (e.g., "LP" or "CR"); and u is the one-digit logical unit number
-   --       of a device within its category.
+   -- A IOC.device_name is of the form XYn, where XY is a two-letter device-type
+   --    code (e.g., "LP" or "CR"); and n is the one-digit logical unit number
+   --       of a device within its category (n may be in hexadecimal).
 
    function device_name_of (the_buffer : IOC.device)
    return IOC.device_name;
@@ -130,6 +129,7 @@ package IOC is
    function device_kind_of (the_number : IOC.device_number)
    return IOC.device_kind;
 
+   -- Get the device-specific name of the I/O order, or the generic name if there isn't one.
    function mnemonic (order : in String; class : in IOC.device_name)
    return String;
 
@@ -152,7 +152,11 @@ package IOC is
    --
    -- In boot mode, when Director is not running, it sets the buffer abnormal and abandons the order.
    -- It is then up to the problem program to act accordingly.  Failure to do so may LIV.
+
    procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String)
+      with Inline => False;
+
+   procedure trap_failing_IO_operation (the_culprit : in String; the_message : in String)
       with Inline => False;
 
    -- The elapsed time for the I/O of the given number of atomic_items
@@ -265,6 +269,7 @@ package IOC is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean);
 
+   -- This is the mysterious "read C store" order.
    procedure PMG (the_buffer  : in out IOC.device;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean);
@@ -476,8 +481,14 @@ private
    -- Account for the CPU time taken by the buffer in setting store lockouts.
    procedure add_in_the_IO_lockout_CPU_time (Q_operand : in KDF9.Q_register);
 
-   -- These are handy, and also prevent a unreferenced warning for Ada.Characters.Latin_1.
-   LF : constant Character := Ada.Characters.Latin_1.LF;
-   SP : constant Character := Ada.Characters.Latin_1.Space;
+   -- These are handy to have in the child packages.
+   NUL : constant Character := Character'Val(0);
+   BEL : constant Character := Character'Val(7);
+   HT  : constant Character := Character'Val(9);
+   LF  : constant Character := Character'Val (10);
+   FF  : constant Character := Character'Val (12);
+   ESC : constant Character := Character'Val (27);
+   SP  : constant Character := ' ';
+   DEL : constant Character := Character'Val (127);
 
 end IOC;

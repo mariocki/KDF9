@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -42,6 +42,28 @@ use  tracing;
 
 package body settings is
 
+   procedure reset_default_visibility_options is
+   begin
+      API_logging_is_wanted            := True;
+      flexowriter_output_is_wanted     := True;
+      histogramming_is_wanted          := True;
+      interrupt_tracing_is_wanted      := True;
+      peripheral_tracing_is_wanted     := True;
+      realistic_FW_output_is_wanted    := True;
+      retrospective_tracing_is_wanted  := True;
+      the_final_state_is_wanted        := True;
+      the_log_is_wanted                := True;
+      the_signature_is_wanted          := True;
+      the_terminal_is_ANSI_compatible  := True;
+      authentic_timing_is_enabled      := False;
+      debugging_is_enabled             := False;
+      histogramming_is_enabled         := False;
+      interrupt_tracing_is_enabled     := False;
+      peripheral_tracing_is_enabled    := False;
+      retrospective_tracing_is_enabled := False;
+      the_signature_is_enabled         := False;
+   end reset_default_visibility_options;
+
    function is_invalid_miscellany_flag (option : in Character)
    return Boolean is
    begin
@@ -61,9 +83,9 @@ package body settings is
    begin
       if is_invalid_miscellany_flag(option) then
          log_line(
-                  "***** Error in a miscellany specification: '"
+                  "***** Error in a miscellany specification: «"
                 & option
-                & "'."
+                & "»."
                  );
          return;
       end if;
@@ -87,7 +109,7 @@ package body settings is
          when 'g' | 'G' =>
             choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
          when 'h' | 'H' =>
-            any_histogram_is_wanted := False;
+            histogramming_is_wanted := False;
          when 'i' | 'I' =>
             interrupt_tracing_is_wanted := False;
          when 'k' | 'K' =>
@@ -113,23 +135,25 @@ package body settings is
             flexowriter_output_is_wanted := False;
          when 'x' | 'X' =>
             only_signature_tracing := True;
+         when 'y' | 'Y' =>
+            this_is_a_bare_Director := True;
          when 'z' | 'Z' =>
-            the_log_is_wanted := False;
-            debugging_is_enabled := False;
-            API_logging_is_wanted := False;
-            any_histogram_is_wanted := False;
-            the_signature_is_wanted := False;
-            the_final_state_is_wanted := False;
-            interrupt_tracing_is_wanted := False;
-            peripheral_tracing_is_wanted := False;
+            API_logging_is_wanted           := False;
+            debugging_is_enabled            := False;
+            histogramming_is_wanted         := False;
+            interrupt_tracing_is_wanted     := False;
+            peripheral_tracing_is_wanted    := False;
             retrospective_tracing_is_wanted := False;
+            the_final_state_is_wanted       := False;
+            the_log_is_wanted               := False;
+            the_signature_is_wanted         := False;
          when others =>
             null;
       end case;
       set_diagnostic_mode(the_diagnostic_mode);
    end set_this_miscellany_flag;
 
-   procedure display_execution_modes (for_this_run : in String := "") is
+   procedure display_execution_modes (for_this : in String := "") is
       needs_comma : Boolean := False;
 
       procedure append_option (flag : in Boolean; name : in String) is
@@ -143,21 +167,25 @@ package body settings is
          end if;
       end append_option;
 
-      function description_of (type_of_run, name_of_code : String)
+      function run_type (type_of_run : String)
       return String
-      is (if name_of_code = "" then type_of_run else type_of_run & " " & name_of_code);
+      is (if for_this = "" then type_of_run else type_of_run & " " & for_this);
 
    begin -- display_execution_modes
       if not the_log_is_wanted then return; end if;
       log_new_line;
-      if for_this_run = "" then
+      if for_this = "" then
          log("Resuming the run");
       else
          log(
              case the_execution_mode is
-               when boot_mode         => "Booting the KDF9 " & description_of("Director", for_this_run),
-               when program_mode      => "Running the KDF9 " & description_of("problem program", for_this_run),
-               when test_program_mode => "Running the KDF9 " & description_of("privileged program", for_this_run)
+               when boot_mode        => (if this_is_a_bare_Director then
+                                            "Running the bare " & run_type("Director")
+                                         else
+                                            "Booting the KDF9 " & run_type("Director")
+                                        ),
+               when program_mode     => "Running the KDF9 " & run_type("problem program"),
+               when privileged_mode  => "Running the KDF9 " & run_type("privileged program")
             );
       end if;
       log(" in ");
@@ -169,26 +197,33 @@ package body settings is
              when pause_mode    => "pause mode",
              when external_mode => "external trace mode"
          );
-      if the_histogram_is_enabled           or else
-         the_interrupt_trace_is_enabled     or else
-         the_peripheral_trace_is_enabled    or else
-         the_retrospective_trace_is_enabled or else
-         the_signature_is_enabled           or else
-         the_external_trace_is_enabled      or else
-         authentic_timing_is_enabled        or else
-         debugging_is_enabled               or else
-         noninteractive_usage_is_enabled       then
+      if the_diagnostic_mode = fast_mode then
+         log_line(".");
+         log_rule;
+         return;
+      end if;
+
+      if authentic_timing_is_enabled      or else
+         debugging_is_enabled             or else
+         histogramming_is_enabled         or else
+         interrupt_tracing_is_enabled     or else
+         noninteractive_usage_is_enabled  or else
+         peripheral_tracing_is_enabled    or else
+         retrospective_tracing_is_enabled or else
+         the_external_trace_is_enabled    or else
+         the_signature_is_enabled            then
 
          log_line(", with option(s):");
          log("   ");
-         append_option(authentic_timing_is_enabled,        "authentic timing");
-         append_option(debugging_is_enabled,               "debugging output");
-         append_option(the_histogram_is_enabled,           "histogram(s)");
-         append_option(the_interrupt_trace_is_enabled,     "interrupt trace");
-         append_option(noninteractive_usage_is_enabled,    "noninteractive");
-         append_option(the_peripheral_trace_is_enabled,    "peripheral trace");
-         append_option(the_retrospective_trace_is_enabled, "retro trace");
-         append_option(the_signature_is_enabled,           "signature hash");
+         append_option(authentic_timing_is_enabled,      "authentic timing");
+         append_option(debugging_is_enabled,             "debugging output");
+         append_option(histogramming_is_enabled,         "histogram(s)");
+         append_option(interrupt_tracing_is_enabled,     "interrupt trace");
+         append_option(noninteractive_usage_is_enabled,  "noninteractive");
+         append_option(peripheral_tracing_is_enabled,    "peripheral trace");
+         append_option(retrospective_tracing_is_enabled, "retro trace");
+         append_option(the_external_trace_is_enabled,    "external trace");
+         append_option(the_signature_is_enabled,         "signature hash");
       end if;
       log_line(".");
       log_rule;
@@ -210,11 +245,8 @@ package body settings is
    end change_diagnostic_mode_if_requested;
 
    procedure set_diagnostic_mode (a_diagnostic_mode : in settings.diagnostic_mode) is
-      the_signature_is_appropriate,
-      the_histogram_is_appropriate,
-      retrospective_tracing_is_appropriate,
-      peripheral_tracing_is_appropriate,
-      interrupt_tracing_is_appropriate : Boolean;
+      tracing_is_allowed    : constant Boolean := a_diagnostic_mode /= fast_mode;
+      interrupts_can_happen : constant Boolean := the_execution_mode = boot_mode and tracing_is_allowed;
    begin
       if a_diagnostic_mode = external_mode then
          if (the_diagnostic_mode /= external_mode) and (not the_external_trace_is_enabled) then
@@ -225,31 +257,11 @@ package body settings is
       else
          the_diagnostic_mode := a_diagnostic_mode;
       end if;
-      case a_diagnostic_mode is
-         when fast_mode =>
-            debugging_is_enabled := False;
-            the_signature_is_appropriate := False;
-            the_histogram_is_appropriate := False;
-            retrospective_tracing_is_appropriate := False;
-            peripheral_tracing_is_appropriate := False;
-            interrupt_tracing_is_appropriate := False;
-         when trace_mode | external_mode | pause_mode =>
-            the_signature_is_appropriate := True;
-            the_histogram_is_appropriate := True;
-            retrospective_tracing_is_appropriate := True;
-            peripheral_tracing_is_appropriate := True;
-            interrupt_tracing_is_appropriate := (the_execution_mode = boot_mode);
-      end case;
-      the_signature_is_enabled :=
-         the_signature_is_wanted and the_signature_is_appropriate;
-      the_histogram_is_enabled :=
-         any_histogram_is_wanted and the_histogram_is_appropriate;
-      the_retrospective_trace_is_enabled :=
-         retrospective_tracing_is_wanted and retrospective_tracing_is_appropriate;
-      the_peripheral_trace_is_enabled :=
-         peripheral_tracing_is_wanted and peripheral_tracing_is_appropriate;
-      the_interrupt_trace_is_enabled :=
-         interrupt_tracing_is_wanted and interrupt_tracing_is_appropriate;
+      histogramming_is_enabled         := histogramming_is_wanted         and tracing_is_allowed;
+      interrupt_tracing_is_enabled     := interrupt_tracing_is_wanted     and interrupts_can_happen;
+      peripheral_tracing_is_enabled    := peripheral_tracing_is_wanted    and tracing_is_allowed;
+      retrospective_tracing_is_enabled := retrospective_tracing_is_wanted and tracing_is_allowed;
+      the_signature_is_enabled         := the_signature_is_wanted         and tracing_is_allowed;
    end set_diagnostic_mode;
 
    procedure set_execution_mode (an_execution_mode : in settings.execution_mode) is
@@ -273,28 +285,34 @@ package body settings is
       flag           : Character;
 
       procedure set_the_miscellany_flags is
-         option : Character;
+         HT : constant Character := Character'Val(9);
+         c  : Character := ' ';
       begin
+         skip_to_next_non_blank(settings_file);
+         if End_Of_Line(settings_file) then
+            reset_default_visibility_options;
+            return;
+         end if;
          loop
-            get(settings_file, option);
-            if is_invalid_miscellany_flag(option) then
-               raise Data_Error;
+            get(settings_file, c);
+            if is_invalid_miscellany_flag(c) then
+               if c not in  ' ' | HT  then
+                  raise Data_Error;
+               end if;
             else
-               set_this_miscellany_flag(option);
+               set_this_miscellany_flag(c);
             end if;
          exit when End_Of_Line(settings_file);
          end loop;
       exception
-         when error : others =>
+         when Data_Error =>
             if not End_Of_Line(settings_file) then
                Skip_Line(settings_file);
             end if;
             log_new_line;
             log_line(
-                     "***** Error in a miscellany specification: '"
-                   & option
-                   & "' at "
-                   & Exception_Message(error)
+                     "***** Error in a miscellany specification: "
+                   & (if c = ' ' then "no option was given." else "invalid data «"& c & "».")
                     );
       end set_the_miscellany_flags;
 
@@ -443,7 +461,7 @@ package body settings is
             else
                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
                log_new_line;
-               log_line("***** Error: '" & c & "' is not a valid dump type.");
+               log_line("***** Error: «"& c & "» is not a valid dump type.");
                return;
             end if;
          end loop;
@@ -522,12 +540,12 @@ package body settings is
                             & " > 8190, ignored."
                              );
                   else
-                     nominated_address := KDF9.order_word_number(data);
+                     root_address := KDF9.order_word_number(data);
                      log_line(
                               "      Scan start address: #"
-                            & oct_of(nominated_address)
+                            & oct_of(root_address)
                             & " ("
-                            & dec_of(nominated_address)
+                            & dec_of(root_address)
                             & ")",
                               iff => the_log_is_wanted
                              );
@@ -965,6 +983,8 @@ package body settings is
                set_watchpoints;
             when 'X' | 'x' =>
                only_signature_tracing := True;
+            when 'Y' | 'y' =>
+               this_is_a_bare_Director := True;
             when '-' | '/' =>
                Skip_Line(settings_file);
             when others =>

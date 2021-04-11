@@ -19,8 +19,7 @@
 # tsp : Runs the KDF9 director.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
@@ -28,36 +27,46 @@ FW0FILES=${KDF9RUNTIME}/FW0Files
 
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in
-        -h|--help) 
-            echo "TSD - Runs the director.";
-            echo;
-            echo "Usage: tsd [OPTION]..."
-            echo;
-            echo "  -d, --diag [f|p|t]          define the diagnostic mode";
-            echo "  -m, --misc MISC             define the miscellaneous options";
-            echo;
-            exit 0;;
-        -d=*|--diag=*)
-            mode=-d${1#*=};
-            ;;
-        -m=*|--misc=*)
-            miscellany=-m${1#*=};
-            ;;
-        *)
-            ;;
+    -h | --help)
+        echo "TSD - Runs the director."
+        echo
+        echo "Usage: tsd [OPTION]..."
+        echo
+        echo "  -d, --diag [f|p|t]          define the diagnostic mode"
+        echo "  -m, --misc MISC             define the miscellaneous options"
+        echo
+        exit 0
+        ;;
+    -d=* | --diag=*)
+        mode=-d${1#*=}
+        ;;
+    -m=* | --misc=*)
+        miscellany=-m${1#*=}
+        ;;
+    *)
+        if [ -z ${director} ]; then
+            director="$1"
+        fi
+        ;;
     esac
-    shift;
+    shift
 done
+
+if [ x"${director}"x = xx ]; then
+    echo
+    echo No director was specified .
+    echo
+    exit 1
+fi
 
 trap ">${KDF9RUNTIME}/FW0" 0 1 2 3
 
-cat ${FW0FILES}/FW0_for_Director > ${KDF9RUNTIME}/FW0
+cat ${FW0FILES}/FW0_for_Director >${KDF9RUNTIME}/FW0
 
-if [ $mode = -df ]
-then
-    time ee9 -sb "$mode" "$miscellany" -TRkk -TPll  +Binary/KKT40E007UPU;
+if [ $mode = -df ]; then
+    time ee9 -sb "$mode" "$miscellany" -TRkk -TPll "${director}"
 else
-    ee9 -sb "$mode" "$miscellany" -TRkk -TPll +Binary/KKT40E007UPU;
+    ee9 -sb "$mode" "$miscellany" -TRkk -TPll "${director}"
 fi
 
 printoutput

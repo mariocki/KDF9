@@ -1,6 +1,6 @@
 -- Provide diagnostic output of the state of all the buffers.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -37,11 +37,7 @@ begin
          the_buffer.initiation_time /= KDF9.us'Last    then
          output_line;
          output_line("Current state of buffer #" & oct_of(the_buffer.number, 2));
-         output_line(
-                     "   device: " & the_buffer.device_name
-                   & "     kind: " & the_buffer.kind'Image
-                   & "     unit:"  & the_buffer.unit'Image
-                    );
+         output_line("   device: " & the_buffer.device_name);
          output_line("  is_busy: " & the_buffer.is_busy'Image);
          output_line("operation: " & the_buffer.operation'Image);
          output_line(" off_line: " & the_buffer.is_offline'Image);

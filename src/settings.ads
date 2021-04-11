@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -59,49 +59,55 @@ package settings is
    --    they are both requested, and offered by the_diagnostic_mode.
    -- These requests may be set by the miscellany and visibilty options.
 
-   miscellany_flags  : constant String := "abdefghikmnopqrstwxz.0123456789ABDEFGHIKMNOPQRSTWXZ";
+   miscellany_flags  : constant String := "abdefghikmnopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
    miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|m|n|o|p|q|r|s|t|w|x|z|.|0..9}";
 
-   the_log_is_wanted,
+   -- *_is_wanted  iff the facility is provided by default.
+   -- *_is_enabled iff the facility is wanted and not suppressed by other considerations,
+   --    such as the diagnostic mode (e.g. fast mode suppresses all tracing).
+
    API_logging_is_wanted,
-   the_signature_is_wanted,
-   any_histogram_is_wanted,
-   the_final_state_is_wanted,
+   flexowriter_output_is_wanted,
+   histogramming_is_wanted,
    interrupt_tracing_is_wanted,
    peripheral_tracing_is_wanted,
-   flexowriter_output_is_wanted,
    realistic_FW_output_is_wanted,
-   the_terminal_is_ANSI_compatible,
-   retrospective_tracing_is_wanted    : Boolean := True;
+   retrospective_tracing_is_wanted,
+   the_final_state_is_wanted,
+   the_log_is_wanted,
+   the_signature_is_wanted,
+   the_terminal_is_ANSI_compatible : Boolean := True;
 
-   do_not_execute,
+   authentic_timing_is_enabled,
    debugging_is_enabled,
-   the_signature_is_enabled,
-   the_histogram_is_enabled,
-   pre_overlay_state_is_enabled,
-   the_external_trace_is_enabled,
-   the_interrupt_trace_is_enabled,
+   do_not_execute,
+   histogramming_is_enabled,
+   interrupt_tracing_is_enabled,
    noninteractive_usage_is_enabled,
-   the_peripheral_trace_is_enabled,
-   the_retrospective_trace_is_enabled : Boolean := False;
+   peripheral_tracing_is_enabled,
+   pre_overlay_state_is_enabled,
+   retrospective_tracing_is_enabled,
+   the_external_trace_is_enabled,
+   the_signature_is_enabled        : Boolean := False;
 
-   -- This option may also be set by an authenticity option (see KDF9).
-   authentic_timing_is_enabled : Boolean := False;
+   procedure reset_default_visibility_options;
 
    -- In boot_mode: a Director program is read from TR0 and executed
    --    in Director state, with full use of the emulated hardware.
    -- In program_mode: a user program is read from TR0 and executed
    --    in program state, with basic OUTs implemented by the emulator.
-   -- In test_program_mode: a user program is read from TR0 and executed
-   --    in Director state, with basic OUTs implemented by the emulator,
+   -- In privileged_mode: a user program is read from TR0 and executed
+   --    as in program state, but allowing orders that should LIV to succeed,
    --    this being useful for executing "hardware test" programs.
 
-   type execution_mode is (boot_mode, program_mode, test_program_mode);
+   type execution_mode is (boot_mode, program_mode, privileged_mode);
 
    procedure set_execution_mode (an_execution_mode : in settings.execution_mode);
 
-   the_execution_default : constant settings.execution_mode := program_mode;
-   the_execution_mode    :          settings.execution_mode := the_execution_default;
+   the_execution_default   : constant settings.execution_mode := program_mode;
+   the_execution_mode      :          settings.execution_mode := the_execution_default;
+
+   this_is_a_bare_Director : Boolean := False;
 
    --
    -- Tracing bound settings.
@@ -122,9 +128,8 @@ package settings is
    low_bound          :          KDF9.order_word_number := low_bound_default;
    high_bound         :          KDF9.order_word_number := high_bound_default;
 
-   -- nominated_address sets a flow analysis starting point for Usercode format dumps.
-   invalid_address    :          KDF9.order_word_number := 8191;
-   nominated_address  :          KDF9.order_word_number := invalid_address;
+   -- root_address sets a flow analysis starting point for Usercode format dumps.
+   root_address       :          KDF9.order_word_number := 8191;
 
    -- low_count and high_count bound the dynamic scope of tracing.
 
@@ -148,7 +153,7 @@ package settings is
    -- The K option is not actioned unless version = "1".
    procedure get_settings_from_file (version : in String);
 
-   procedure display_execution_modes (for_this_run : in String := "");
+   procedure display_execution_modes (for_this : in String := "");
 
    procedure quit_if_requested;
 

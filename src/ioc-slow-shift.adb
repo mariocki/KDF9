@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,6 +13,8 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
+
+with KDF9_char_sets.framed;
 
 package body IOC.slow.shift is
 
@@ -33,6 +35,35 @@ package body IOC.slow.shift is
       correct_transfer_time(the_device, read_in);
       the_device.byte_count := the_device.byte_count + read_in;
    end do_input_housekeeping;
+
+   procedure get_byte_from_stream (byte       : out Character;
+                                   the_device : in out shift.device) is
+   begin
+      loop
+         begin
+            get_byte(byte, the_device.stream);
+            if the_device.is_reading_a_file then
+               -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
+               return;
+            end if;
+            -- Reading from the terminal, the byte is in Latin-1 and must be converted.
+            -- This may entail interpolating shift characters.
+            if case_of(byte) not in both | the_device.current_case then
+               byte := framed(CN_TR(next_case(the_device.current_case)));
+               the_device.current_case := the_device.current_case xor 1;
+               back_off(the_device.stream);
+            elsif the_device.current_case = KDF9_char_sets.Case_Normal then
+               byte := framed(CN_TR(byte));
+            else
+               byte := framed(CS_TR(byte));
+            end if;
+            return;
+         exception
+            when end_of_stream =>
+               deal_with_end_of_data(the_device);
+         end;
+      end loop;
+   end get_byte_from_stream;
 
    procedure get_symbols (the_device    : in out shift.device;
                           Q_operand     : in KDF9.Q_register;

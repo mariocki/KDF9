@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -676,18 +676,24 @@ package body IOC is
       end if;
    end mnemonic;
 
-   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String) is
-      the_diagnostic : constant String := "%" & the_message & " on " & the_buffer.device_name;
+   procedure trap_failing_IO_operation (the_culprit : in String; the_message : in String) is
+      the_diagnostic : constant String := "%" & the_message & " on " & the_culprit;
    begin
-      if the_execution_mode in program_mode | test_program_mode then
+      if the_execution_mode in program_mode | privileged_mode then
          raise IO_error with the_diagnostic;
       elsif the_CPU_state = program_state then
-         the_buffer.is_abnormal := True;
          raise abandon_this_order with the_diagnostic;
       else
-         -- The Director itself has gone seriously wrong.
          raise Director_IO_error with the_diagnostic;
       end if;
+   end trap_failing_IO_operation;
+
+   procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String) is
+   begin
+      if the_CPU_state = program_state then
+         the_buffer.is_abnormal := True;
+      end if;
+      trap_failing_IO_operation(the_buffer.device_name, the_message);
    end trap_failing_IO_operation;
 
    procedure trap_illegal_IO_operation (order       : in String;

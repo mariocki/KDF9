@@ -1,0 +1,29 @@
+V40; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test TP to SI0);
+      V1 = Q 0/AV8/AV8;
+      V2 = Q 0/AV3/AV3;
+      V3 = B0264600057531102;
+      V4 = Q 0/AV8/AV8;
+
+      V1; =Q1; SET B02; SET 5; OUT; =C1;
+      V4; =Q4; SET B01; SET 5; OUT; =C4;
+
+1;    PIAQ1;
+      POAQ4;
+      PARQ1;
+      J1NTR;
+
+
+999;  V2; =Q2; C4 TO Q2;
+      POAQ2;
+      SET 120; =M2;
+      PGAPQ2;
+
+      C1; SET 6; OUT;
+      C4; SET 6; OUT;
+
+      ZERO; OUT;
+
+FINISH;
+|

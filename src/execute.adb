@@ -1,6 +1,6 @@
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -71,13 +71,34 @@ begin  -- execute
    case the_execution_mode is
       when boot_mode =>
          reset_the_internal_registers(Director_state);
-         boot_the_KDF9(program_name);
-      when test_program_mode=>
+      when privileged_mode=>
          reset_the_internal_registers(Director_state);
-         load_a_program(program_name);
       when program_mode =>
          reset_the_internal_registers(program_state);
+   end case;
+
+   case the_execution_mode is
+      when boot_mode =>
+         if this_is_a_bare_Director then
+            load_a_bare_Director(program_name);
+         else
+            boot_the_KDF9(program_name);
+         end if;
+      when privileged_mode=>
          load_a_program(program_name);
+      when program_mode =>
+         load_a_program(program_name);
+   end case;
+
+   case the_execution_mode is
+      when boot_mode =>
+         if this_is_a_bare_Director then
+            reset_the_CPU_state((4, 0));
+         else
+            reset_the_CPU_state((0, 0));
+         end if;
+      when others =>
+         reset_the_CPU_state((0, 0));
    end case;
 
    if not loading_was_successful then
@@ -93,8 +114,6 @@ begin  -- execute
       log_line("Run abandoned as requested.");
       return;
    end if;
-
-   reset_the_CPU_state;
 
 execution_loop:
    loop
@@ -115,9 +134,6 @@ execution_loop:
          end if;
 
       exception  -- handler for execution_loop
-
-         when debugging_stop =>
-            null;
 
          when mode_change_request =>
             quit_if_requested;
@@ -145,7 +161,7 @@ execution_loop:
             exit execution_loop;
 
          when input_is_impossible =>
-            say_goodbye("Noninteractive mode cannot handle a prompt");
+            say_goodbye("Noninteractive mode; cannot respond to a prompt");
             exit execution_loop;
 
          when diagnostic : not_yet_implemented =>
@@ -161,7 +177,7 @@ execution_loop:
             exit execution_loop;
 
          when diagnostic : Director_failure =>
-            say_goodbye("Invalid operation in Director", Exception_Message(diagnostic));
+            say_goodbye("LIV interrupt in Director", Exception_Message(diagnostic));
             exit execution_loop;
 
          when diagnostic : OUT_error =>
@@ -177,7 +193,7 @@ execution_loop:
             exit execution_loop;
 
          when diagnostic : operator_error =>
-            say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
+            say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
             exit execution_loop;
 
       end;
@@ -186,11 +202,14 @@ execution_loop:
 
 exception  -- handler for execute
 
+   when diagnostic : debugging_stop =>
+      say_goodbye("Debugging stop requested", Exception_Message(diagnostic));
+
    when diagnostic : invalid_paper_tape_file =>
       say_goodbye("Invalid paper tape file supplied", Exception_Message(diagnostic));
 
    when diagnostic : operator_error =>
-      say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
+      say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
 
    when diagnostic : others =>
       say_goodbye("Apologies for this dismal failure", Exception_Message(diagnostic));

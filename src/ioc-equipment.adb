@@ -1,7 +1,7 @@
 -- Data supporting the definition of a KDF9 I/O equipment configuration.
 --
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -63,9 +63,9 @@ package body IOC.equipment is
       end if;
    end configure_the_IOC;
 
-   procedure revise_the_configuration is
+   procedure revise_the_IOC_configuration is
    begin
-      -- By this point every buffer has a device which must be removed before it is replaced.
+      -- By this point every buffer has a device which should be removed before it is replaced.
       for b in equipment.choice'Range loop
          case equipment.choice(b) is
             when DR => IOC.fast.FD.remove_from_buffer(b);
@@ -80,6 +80,6 @@ package body IOC.equipment is
             when others => null;
          end case;
       end loop;
-   end revise_the_configuration;
+   end revise_the_IOC_configuration;
 
 end IOC.equipment;

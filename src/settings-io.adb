@@ -1,6 +1,6 @@
 -- Settings-reader I/O support.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -45,8 +45,7 @@ package body settings.IO is
    begin
       loop
         look_ahead(file, next_char, end_line);
-      exit when end_line or else
-                  (next_char /= ' ' and next_char /= HT);
+      exit when end_line or else (next_char not in ' ' | HT);
          get(file, next_char);
       end loop;
       if next_char = comment_flag_character then

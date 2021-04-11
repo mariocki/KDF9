@@ -1,0 +1,3353 @@
+V29;
+RESTART; JP200; JP200;
+PROGRAM;
+
+
+(== Typed from a photocopy of a lineprinter listing at the NAHC
+    First unverified version 1 June 2005
+    Corrections based on first generation assembler output : 2 June 2005
+
+    Differences from listing :
+        1. Lower case characters used in comments
+   2. character * used in place of pound sterling symbol
+
+    Hans B PUFAL, May 2005);
+
+[ == Various corrections by David Holdsworth, who wrote much of the code around 1967-71 - Feb 2009
+[ == Comments introduced by [ and continued to end of line are "21st century comments" inserted from recollections
+
+(TITLE: OUT20 ETC)
+
+[ at the end of P45 is a string of erases followed by EXIT1
+[ These are used for obeying conditional exits and discarding nesting store data
+
+   V5=1.048576/23;
+   [ V7 is currently executing program priority
+   V8=Q4/-453/0; (Increment .027 Msec)
+   V10=1/35;
+   V11=2/35;
+   V12=3/25;
+   V14=1;
+   V15=B0207464151546300;               [ "FAILS " for use in console error messages
+   [ V16-22 are the reason for interrupt markers
+   V23=B1010101010101010;               [ radix word for octal conversions
+   V24=B0204777777072000;               [ four tabbing words for the user program columns on the console
+   V25=B0204047777072100;
+   V26=B0204040477072200;
+   V27=B0204040404072300;
+   (V28=Director/Program marker)
+(V29 is easily OUT11 accessable marker, current bits in set are
+D0 - SET1 if on line M/C
+D35-44 - Number of words of user space(mod 32)
+D45-47 - Data number Sunday=0,Monday=1 etc);          [ surely it means day number
+
+   V28; J35=Z;                                        [ This means that an interrupt occurred even though still in director
+   ZERO; =V28; K4; Q5; =V2;                           [ get RFI and preserve programmer's Q5 -- hooter comes on if K4 not obeyed frequently
+   V7; =M5; SET3; J11NTR;
+   SHC-2;
+11;   J12NV;
+   SHC-1;
+12;   =V1P104M5; DUP; SHL-22; STR; REV;
+   ERASE; V0P13; AND; OR;
+51;   DUP; SETB101; SHL+19;
+   REV; SHC+1; SHL+21; J2!=Z;
+   OR; (No RFIS so insert D22,28); ZERO;
+2;   NOT; AND; (Remove D22,28)
+   DUP; SHC+1; SHL+21; J1!=Z;
+   (Jump if any RFI other than PR or LOV)             [ this is where the long path is chosen
+   V5; x; DUP; =V6; V5P104M5; +;                      [ short path continues here
+   DUP; =V5P104M5; M5; REV;
+   V9M5; SHL+5; =M5; M5M0HN; SIGN;
+   J4>Z; (Jump if time limit exceeded)
+   SET-109891; (Basic SP 0.655 Msec)
+32;   V8; =Q5; =M5; V0P104; K5;OR; SHL-1;
+*5;   SHL+6; DUP; J6>=Z; (Jump if hold-up
+    digit not present); DC5; M+I5; J5C5NZS;           [ find the highest priority program that is not held up
+   (No program can be entered); =V14; (d0=1)
+   ERASE; JSP1; J23;                                  [ main idle loop in long path
+
+6;   =LINK; (Plant dummy link)
+   SET4; C5; -; M5; PERM; (N1= new priority,
+    N2= old priority, N3= path correction)
+30;   REV; =M5; K7; SHC+7; NOT; NEG; SHC-7;
+   =V13P104M5; (Preserve adjusted NS counters)
+   DUP; =V7; =M5; (New priority number)
+   V5P104M5; +; V6; -; =V5P104M5; (Run time)
+   VR; V1P104M5; SHA+1; =TR;                          [ clever code to reinstate VR and TR
+   V17P104M5; =K2; ERASE; (CPDAR);                    [ current peripheral device allocation register
+   V9M5; V13P104M5; V2; =Q5; DUP; =K3;                [ switches to new register stack
+
+(==  2 ==)
+   DUMMY; DUMMY; DUMMY; DUMMY; DUMMY;
+   DUMMY; (Allow new set to settle down)
+   =V28; LINK; ERASE; (Remove dummy link)
+   =V28; (Store twice in case of reset)
+   *=K1; ERASE; EXITD; (return to program)
+
+35;   (Director failure);
+   SET-9; DUP; =M5; =V7;
+   ZERO; NOT; =V1P6; JSP1; JSP12;
+36;   K4; ERASE; JSP59; J36;
+4;   =M5; JSP1; ZERO; DUP; NOT; J9;
+
+1;   DUP; SHL+25; REV;                            [ long path entry - don't know why it does not do DUP; = Q5; SHLD+25; J...
+   =Q5; J10<Z; (Jump if nouv); JSP1;          [ J if there is a nesting store failure else preserve programmer's nest
+   J17;
+10;   Q6; =V3; Q7; =V4; Q4;                   [ might be dangerous to do a JS here, as the SJNS may be in a serious mess
+   =V1; LINK; =V34P1; K7; SHL+2; ZERO;        [ so nesting store failure is best dealt with in-line
+   SHLD+5; =V32P1; SHL-43; SET16; =RC6;
+   M-I6; ZERO; NOT; =V6P12;
+34;   NOT; NEG; =V33P1;
+   ZERO; =RC7; (N.B. Loop cannot go more than 32);
+14;   =V0P1M7Q; J14NEN; (so that V32,33,34 cannot be overwritten);
+15;   ERASE; J15NEN;
+*13;   J17EJ;
+   LINK; =V17P1M6Q; J13C6NZS;
+16;   LINK; ERASE; J16NEJ;
+
+17;   Q5; V7; =M5; DUP; SHL-32; SHL+31; V5;    [ get here with programmer's nest safely stored in V-storea of P1
+   x; SHA+1; V5P104M5; +;DUP;                   [ correct programs run time
+   =V5P104M5; V9M5; SHL+5; =M6;
+   M6M0HN; SIGN; SHA-1; NEG;
+   V5P104M5; V97P104M5; SIGN; SHA-1; NEG; OR; (Check OUT15 time);
+9;   =V13; ZERO; NOT; =V14; JSP30;                [ JSP30 enters subprogram mode, i.e. sets Q4 so that P10 can be used for suspension
+   SET7; =RC6;
+*19;   ZERO; =V16M6Q; *J19C6NZS;                 [ clear RFI (reason for interrupt) markers
+   JS2P60; ERASE;                               [ sets markers using copy of K4 in N1
+   V17; SHA+2; V18; SHA+1; +;
+   V13; x; NEG; V22; SETB76277;
+   AND; OR; V21; SETB763771; AND;
+   OR; DUP; ZERO; =V0P2; J20=Z;
+   ZERO; =V13; JSP2; (Program fails); ZERO;     [ such things as FAILS 00L
+20;   ERASE; V20; J21=Z; JSP3; (OUT);
+   DUMMY;DUMMY; DUMMY; (OUT40 does EX2);
+   V4P23; J21!=Z; JSP155;                      [ deal with any OUT8 request
+21;   V16; J22=Z; JSP4; (FLEX);
+22;   V19; J23=Z; JSP5; (EDT);                  [ = end director transfer -- e.g. disc, OUT8 tape
+23;   JS1000; V0P0; V0P5; -; SHL-28; J997=Z;
+   ZERO; NOT; =V19P0; (Assures EDT at least very 16 secs);
+997;   JSP60; J21!=Z;                           [ J if another event has occurred
+   V32P1; DUP; =C6; =M6; I6=-1;
+   SET-14865; (Basic LP 0.886 Msec); J25;
+*24;   V-1P1M6Q; REV; SET302; (.018 Msec); -;    [ putting the programmer's nest back
+25;   J24C6NZS;
+   V33P1; DUP; =C6; =M6; J27;
+*26;   V15P1M6Q; =LINK; SET352; (.21 Msec); -;   [ putting the programmer's SJNS back
+27;   J26C6NZS;
+   V1; =Q4; V3; =Q6; V4; =Q7;                   [ putting the programmer's Q-stores back
+   V7; V14; J28<Z;                            [ J if no program has been preselected
+   V14; JS30; (To plant dummy
+   link and enter specified priority)
+
+28;   REV; SET-1761; (Path difference 0.105 Msec)
+   +; J32; (To choose return priority)
+   (End of inner loop of long path)
+
+*998;   Q0; SHL+63; =+Q0;                         [ looking for corruption on word 0 -- why?
+1000;   J1001NEN; M0M0; R998; NEV; J4P45=Z; R998; =M0M0;
+(==  3 ==)
+   V7P0; =M5; JSP30; SETB77277; JP2;
+1001;   ERASE; J1001NEN;
+1002;   ERASE; J1002NEN;
+   V15; SET1; JP6;
+
+P1V34;   (Dump Q4, Q6, Q7 and both nests);
+   Q6; =V3P0; Q7; =V4P0; Q4;
+   =V1P0; ZERO; =RC6; J2EN;
+1;   =V0M6Q; J1NEN;
+2;   ERASE; J2NEN;
+   M6; =V32; CM0TOQ6; LINK;
+   =Q7; J4EJ;
+3;   LINK; =V16M6Q; J3NEJ;
+4;   M6; =V33; Q7; =LINK; EXIT1;
+
+P2V13;   (Program failure-entered from subprogram,
+   Failure indicator in N1. If
+   no react option, ending number in V0)
+   V1=B4641515463;            [ FAILS
+   V3=B6000624541436434;    [ P REACT;
+        V6=B6100624541436434;    [ Q REACT;
+   V7=B6200624541436434;    [ R REACT;
+   V12=B6300624541436434;    [ S REACT;
+   ZERO; =V20P0;
+   V77P104M5; SHC+9; STR; J20<Z;               [ silent fail allowed a program to restart on failure without cluttering up the console
+29;   SHC-3; J30>=Z; (Prog is silent so skip output ident);
+   V41P104M5; V37P104M5; SHLD24; V24P0M5; SET3; JS4P6;
+30;   DUP; SHL-12; J6!=Z;
+   ZERO; SHLD-45; V23P0;
+   DUP; CAB; FRB; REV; SHL+1;
+   +; SHL+36; SHL-12; REV; V23P0;
+   SHL-2; REV; SHL-45; FRB; DUP;
+   SHL+6; -; -; SETB131355; SHL+2;
+   AND;
+6;   V1; JSP55; SHC-6; OR;
+   V24P0M5; SET3; JS4P6;
+2;   JSP12; JS4P29; DUMMY; DUMMY; DUMMY;
+   JS7P29; DUMMY; DUMMY; DUMMY;
+   V0; DUP; J1P15!=Z;
+   V26P101; SHL1; J4>=Z; (J if no react query);          [ when prog fails operator is asked query REACT;
+5;   SETB20; =V29P104M5; (Stop tint a while react query);   [ e.g. TINT A abandons a program, which might interfere
+   V24P0M5; JS3; =M0M6;
+   M6; DUP; SET2; +; JSP8;
+   ZERO; =V29P104M5;
+   JS3; E2M6; SHL-42;
+   SETB41; REV; J1!=Z;
+9;   SET7; J1P15;
+4;   V77P104M5; SHL6; J5>=Z; (J if loud); ERASE; J9;
+*10;   JSE4;
+3;   V13P104M5; SHL-46; DUP; SHL+1; +;
+   SETAV2; +; =M6; EXIT1;
+1;   (Even restart)
+   V9P0M5; SHL5; =M6; E4M6; R10; NEV; SHL-24;J9=Z;
+   V97P104M5; SET4; DUP; SHL24; +; +; =V97P104M5;
+   (JS142P195; Clear OUT40 if set);
+   SET4; DUP; JS6P29; J35P0;
+   SHL+24; V5P104M5; +; V9P0M5;
+   SHL+5; =M6; =M6M0HN; EXIT1;
+
+20;   V21P0; J29!=Z; (Not if fail S); SHC-9; =V77P104M5;  [ cancel the right to a silent fail - stops looping
+   =RC7; V6P12; J21=Z; V64P1;
+   V33P1; SHL+43; V32P1; SHLD+5; =I7; =V6P12;
+   SET15; DUP; =V32P1; =V33P1; J22;
+21;   JS5P29; JS35P0;                                      [ EXIT1 should never happen - so fail director if it ever does
+(==  4 ==)
+22;   =M7; JS1; Q7; =E6M6; EXIT1;
+
+
+P3V0;   (OUT subroutine)
+V0=B 77 77 77 77 77 76 67 55;                            [ bit for each valid OUT 0-34 36 37 39-42 44 45 47
+   ZERO; =V20P0; (Clear out marker);
+   V19P0; =Q7;
+   V16P1; SETB57777; -; DUP; J1>=Z;                     [ top cell of program's SJNS
+   SETB120000; SHC+1; -;
+1;   =V16P1; (Link has 3 syllables added);                 [ so as to resume at the next instruction
+   ZERO; NOT; =V19P0;                                    [ force EDT routine to deal with all sorts of things
+   V32P1; J4=Z; V0P1; =C6; V0; ZERO; SHLDC6; BITS;
+   REV; J3>=Z; SHC-1; STR; SETB60000; AND; +;
+6;   =LINK; ( C6; SETB77; AND; SETAV0P6000U; +; =M6;        [ supresses incrementing of out counter
+   M0M6H; SHL-24; NOT; NEG; SHL24; =M0M6H; ); EXITAR2;
+3;   ERASE; C6; SET50; JP65=; SET51; JP66=;                [ OUT 50 etc -- NPL specials ??
+   SET52; J52P2939=; SET53; J53P2939=;
+   SET54; J54P2939=;
+   DUP; NOT; J100=Z; (J if OUT -1 for clear transfer);
+   SETB12345; NEV; J5!=Z;                               [ originally (DH) just set silent fail
+(Alter bit in V77P104M5);                                [ generalised by NPL to define other program properties
+   V0P1; STR; REV;=Q6; DUP; V77P104M5; NEV;
+   SETB2000; SHLC6; SETB3520; AND; SHL+2; OR; NEV;
+   =V77P104M5; EXIT1; (Allow D5,6,7,9);                  [ see comment on P104
+100;   NEG; SHLC1; V17P104M5; AND; J5=Z;
+   Q7; =V19P0; I1; =RM7; JSP128; M0M7; DUP; =V0P1;
+   J101!=Z; CTQ1;
+101;   EXIT1;
+15;   ERASE; (Used by P195 in OUT54);
+5;   SETB10; JP2; (Illegal out number);
+4;   ZERO; J6;                                             [ OUT with empty nest is same as OUT 0
+
+*2;   JP15; JP16; JP17; JP18; JP19;                      [ OUT 0 1 2 3 4
+   JP20; JP21; JP21; JP23; JP24; JP61;                   [  5 6 7 8 9 10
+   J11P193; J12P193; JP2939; J14P66; J15P66; JP23;       [ 11 12 13 14 15 16
+   JP64; J18P105; J19P66; JP192;                         [ 17 18 19 20
+   J21P196; J22P196; J23P196;                            [ 21 22 23
+   J24P195; J25P130; J26P195;                            [ 24 25 26
+   J27P194; J28P194;                                     [ 27 28
+   J29P195;                                              [ 29
+   J30P196; J31P196; J32P196;                            [ 30 31 32
+   J33P196; J34P196; J36P196;                            [ 33 34 36
+   J37P195;                                              [ 37
+   J39P130; J40P195;                                     [ 39 40
+   J41P196; J42P196;                                     [ 41 42
+   J44P195; J45P195; J47P196;                            [ 44 45 47
+
+
+P4V5;     (Instant TINT)    [ Typewriter (= Flexowriter) interrupt -- instant because DH made it jump the Flex output queue
+   V0=B0207414741515677;  [ cr cn AGAIN
+   V1=B0207645156647734;  [ cr cn TINT;
+   (V2 and V3 contain answer to TINT query);
+   V4=B2777547752/29;      (D3=A,D4=B etc
+   Permitted TINTS A=JLMPR-XZ .EM is same as F);
+   V5=0; (TINT params);
+
+   ZERO; NOT; =V19P0; V1P11; J4P45!=Z;          [ TINT supressed if subprogram 0 is active
+   ZERO; =V16P0; (Clear TINT RFI); ZERO; SETAV1;
+2;   V0P11; =Q4; SHL+16; SETAV3; OR; ZERO;         [ uses subprogram 0 to ask the query
+   ZERO; NOT; =V19P0;
+   NOT; CONT; =V5; JS51P10; SETAV2;
+   =Q6;
+5;   JSP31; J3; J3; J3;                            [ P31 fetches and classifies characters
+   SET-30; =+C7; V4; ZERO; SHLDC7;
+   BITS; REV; J4>=Z; (Validity check)
+   SHC-1; STR; SETB60000; AND; +;
+   JS1;
+(==  5 ==)
+   (TINT subroutine fails); J3;
+   (Exit 2 from TINT subroutine);
+   V0P11; =Q4; EXIT1;
+4;   ERASE;
+3;   ZERO; SETAV0; J2;                             [ invalid input, say AGAIN TINT;
+1;   =LINK; EXITAR6;
+*6;   EXIT2; JP33; JP34; JP35; JP35;
+   JP37; EXIT2; JP39; JP40; JP41;
+   JP42; JP44; JP45;
+   JP48;JP49;
+   JP50; JP51; JP52; JP53; JP54;
+   JP76;
+   JP72;
+
+P5V0;   (EDT subroutine);                           [ called when V19 is set, eithr by real EDT or internally
+   V0P0; =V0; (Time of last EDT);
+   ZERO; =V0P13; (Clear marker to give EDT on fpr RFI);
+   ZERO; =V19P0; (Clear EDT indicator)
+   JSP100; (Deal with W magnetic tapes)
+   JSP105; (Consolidate store etc.)
+   JSP59; (Deal with flex queue)
+   JSP155; (Deal with OUT8 queue)
+   JS3P199; (Enables disc access if appropriate);
+   JSP11; (Deal with subprograms)
+   ZERO; =V0P101; (Clear new identifier marker)
+   V4P23; (Look for OUT8); J7!=Z; JSP155;
+7;   JSP193; (Attend to JO);
+   K5; M0TOQ5;
+2;   ZERO; SHLD+4; =C5; DUP; SHL+1; J3>=Z;
+   DUP; =TR; J9NTR;
+   BUSYQ5; J3TR; J1;
+9;   V9P0M5; JS107P300; J3;
+1;   (Clear PHU);
+   V13P104M5; ZERO; NOT; NEG; OR;
+   =V13P104M5; M5; SHL+123; SETB140000; OR;
+   =K1; ERASE; CLOQ0; SETB140000; =K1; ERASE;
+3;   SHL+2; M5; SET3; J4=;
+   NOT; NEG; =M5; J2;
+4;   =C6; ERASE; V7P0;
+5;   NOT; NEG;SET3; AND; DUP;
+   =M5; V13P104M5; SHC-1; J6<Z;
+   DC6; J5C6NZ;
+   J1P45;
+6;   DUP; SHA+1; DUP; SHA+1; +; =C6;
+   V0P104; SHL+5; SHLC6; J8>=Z;
+   ERASE; ZERO; NOT;
+8;   =V14P0; EXIT1;
+
+P6V64;   (Put N2=NX in FLEX queue, X=1 given
+   in N1, if flex queue overlows enter P59;
+   to make room);
+   V1=-1;
+   V56=-1; (For benefit of the OUT8 system);
+   M5; SHL-2; J4>=Z;
+5;   REV; ERASE; NEG; NOT; DUP; J5!=Z; J1P45;
+4;
+   SETAP6; SETAV1P6; -; =RC7;
+1;   V1M7Q; NOT; J1!=Z;
+3;   J2C7Z;
+   (Queue not full)
+   REV; =V0M7; ZERO; NOT;=V1M7Q;
+   NEG; NOT; DUP; J3!=Z;
+   NOT; =V19P0; EXIT1;
+
+(==  6 ==)
+2;   (Queue full); JSP59; JSP60; ERASE; J4P6;
+
+P8;   (Put query parameters in FLEX queue
+   and enter 2P10);
+   REV; SHL+16; OR; ZERO; NOT;
+   CONT; C4;SHL+32; OR; DUP;
+   SET1; JS4P6; ZERO; REV; J2P10;
+
+P9V1;   (Convert cell count from binary to
+        signed decimal characters, used in P12);
+   V0=B1212121212010101;
+   V1=B0707434554546300;
+   DUP; SHA-4; SHL-1; (Non-zero if count
+   >=24); J1=Z; SET132;-; NEG;
+1;   V0; REV; FRB;SETB35202; SHL+21;
+   +; V1;V24P0M5; SET3; J4P6;
+
+
+P10;   (Normal entry test BUSYQ7. If busy or if
+   entry at 2, put SHUL, SHUP, and SHUL*
+   into SHU list. Exit to level X+1 lower,
+   X given in N1 (or N3 for entry 2));   [ P10 is the routine called from within a subprogram
+                                         [ when it is necessary to wait for things to happen elsewhere e.g. transfer, tape load
+                                         [ on entry: M5 = priority number, Q4 = subprog number / 1 / AV1P11Msubprogno -- see P30
+   ZERO; =TR; J1C7Z;                     [ normal entry waits if device in C7 is busy
+   BUSYQ7;
+1;   TLOQ7; J1P45NTR;
+3;   ZERO; Q7; I4; SHC-27; =V0P13; (Next PR causes EDT);  [ definitely decided to hold up
+2;   =E10M4; LINK; OR; =M0M4;              [ E0M4 has return address and marker, E10M4 has transfer params = SHUP
+   C4; SHC-1; J5<=Z;                     [ jump for secondary subprogram belonging to a user program
+   SET1;JS113P300;                       [ set program hold-up
+5;   DUP; STR; NEV; =C7;                   [ count is ones comp if EXIT2 is needed
+   ZERO; J7C7Z;
+*6;   SHL+16; LINK; OR; DC7; J6C7NZS;    [ preserve specified number of SJNS cells
+7;   =E30M4; J4P45>=Z;                     [ SHUL* i.e. extra SJNS levels saved
+   EXIT2;
+4;   ZERO;                                 [ hold-up but always come back next time, i.e. EDT
+14;   ZERO; ZERO; J2;                    [ and do EXIT1 to the caller
+50;   ZERO;
+51;   ZERO; ZERO; ZERO; NOT;CONT; J2;    [ ditto but do EXIT2
+
+(P6000V23; (OUT COUNTS););
+P104V116;
+[ P104 is only V-stores
+[ V0 is a hold-up word in the same format as the hardware equivalent obtained from K5
+[ V1-117 are in quartets, addressed by instructions such as V25P104M5
+[ V5P104M5 = program CPU time used so far
+[ V13P104M5 = nesting store counters for use with =K3
+(The various bits in V77P104M5 have the following significance
+D 0 = Prog read in by TINT X
+D 1 = TINIT X in progress
+D 2 = Last disc transfer parittied
+D 3 = Disc repeat in progress after parity
+D 4 = Not used (David thinks)
+D 5 = Auxiliary systems program
+D 6 = FLEX suppression
+D 7 = Job initiated by OUT39
+D 8 = OUT 40 on by this level
+D 9 = Silent fail
+D10 = OUT 50 done by this level
+D11 = This level will print OUT8 tapes
+D12 = Shows TINT;TLM has been done
+D13 = OUT20 done by this level....Different bit from Leeds
+);
+(The various bits of V25P104M5 have the following significance
+D47 = Main subprogram active
+D46 = No program to run
+D45 = TINT S
+D44 = HU due to OUT8 subprogram
+D43 = Store move/priority change
+D42 = Rolled out
+D41 = OUT 19
+(==  7 ==)
+);
+V0=B01010101/23;
+V13=B0141/11;
+V14=B2141/11;
+V15=B4141/11;
+V16=B6141/11;
+V17=1; V18=1; V19=1; V20=1;
+V25=2; V26=2; V27=2; V21=2;
+V29=5; V30=5; V31=5; V32=5;
+V97=B 20 00 00 00 20 00 00 00; V98=B 20 00 00 00 20 00 00 00;
+V99=B 20 00 00 00 20 00 00 00; V100=B 20 00 00 00 20 00 00 00;
+(V101 to V113 are all for use of controllers when running ROGS);
+
+
+P11V40; (Deal with hold-ups in SHU list in
+   due order);
+   V0=Q0/1/AV1;
+15;   V0; =Q4;
+3;   M0M4; DUP; J1!=Z; (Jump if this SHU
+   is in use);
+11;   ERASE;
+7;   M+I4; C4; DUP; SET9; SIGN;
+   J1P45>=Z;
+   NOT; NEG; =C4; J3;               [ loop back to try the next one up
+1;   E10M4; REV; J4<Z;                [ J if not awaiting peripheral transfer
+   DUP; =TR; J11TR;                 [ top bit of SHU holds up for ever - i.e. awaits clearing by some other process
+   =Q7; J6C7Z; BUSYQ7;
+6;   TLOQ7; J13TR;                    [ J if transfer still active
+8;   JS2; (To enter subprogram)
+   J7; J7; (After leaving subprogram)
+2;   C4; DUP; SHL-1; NEG; NOT;        [ set M5 = user program priority
+   =M5; SHC-1; J14<=Z;              [ only for main subprogram do we ....
+   SET1; JS114P300;                 [ ... clear the user program hold up
+14;   E30M4;                        [ put the SJNS back together
+5;   DUP; J12=Z;
+   DUP; =LINK; SHL-16; J5;
+12;   M0M4; =LINK; =M0M4; EXIT1;    [ and go back to where the subprogram obeyed JSP10
+4;   DUP; SHL-42; SETB40; NEV; J10=Z; [ J if not awaiting mag tape
+   V0P101; J11=Z;                   [ don't bother if no new tapes available
+   E20M4; REV; J8;
+10;   SHL+9; SETB654; OR; JS1P26; J7; [ waiting to claim a non-MT peripheral
+   ERASE; J8;
+13;   I4; SHC-27; =V0P13; (Set V0P13 to give EDT on PR);
+      J7;
+
+P12V7;   (Type SJNS and top 2 cells of nest with
+   cell count where necessary);
+   V0=B07076352566300000;
+   V1=B0707545156530000;
+   V2=B4354454162454400;
+   V3=B0707563722/29;
+   V4=B0707563721/29;
+   V5=B0101100210101010;
+   ZERO; NOT; =V7;
+   V6; SET1; =M7; J3!=Z;
+9;   SET16;
+1;   JS5P29; J2; V7; J4!=Z; SET4; J4!=; ERASE; J5;
+4;   ZERO; NOT; =V7; JS13;
+5;   NEG; NOT; DUP; J1!=Z;
+2;
+   ERASE;
+6;   SET1;
+7;   DUP; =M7; JS1P29; J8; ZERO;
+   SHLD+24; V23P0; DUP; SHL+1;
+   PERM; REV; SHL-24; FRB; +; REV;
+
+(==  8 ==)
+   V3M7; V24P0M5; SET4; JS4P6; NEG; NOT;
+   DUP; J7>=Z;
+   M5; V7P0; NEV; J10=Z; V13P10M5;
+   SHL+2; SHL-43; NEG; NOT; J11;
+10;   V32P1; SET2; +;
+11;   JSP9; J12;
+8;   V2; V3M7; V24P0M5; SET3; JS4P6;
+12;   ERASE; EXIT1;
+3;   ZERO; =V6; V34P1; DUP; SET4; -; =V7; JS13; V33P1; SHL+43;
+   J9!=Z; SETB37; JSP9; J6;
+13;   V5; REV; FRB; V23P0; SHL-11; +; V0M7;
+   V24P0M5; SET3; JS4P6; M0TOQ7; EXIT1;
+
+P13V0;   (Set program HU bit in V0P104);
+   SET1; M5; V14P0; NEV; J1!=Z;
+   ZERO; NOT; =V14P0;
+1;   M5; NOT; SHA+1; DUP; SHA+1;
+   +; =C5; SHCC5; V0P104; REV;
+   DUP; J2<Z; OR; J3;
+2;   AND;
+3;   =V0P104; EXIT1;
+
+P15V2;   (OUT 0);       [ OUT 0 is normal program termination
+   V0=B0700455644630020;
+   V1=B0707624156174554;
+   V2=B 20 00 00 00 20 00 00 00;
+   ZERO;
+1;   SET5;
+2;   ZERO; NOT; CONT; DUP; =V29P104M5;
+   SHC-1; J3>=Z;
+   ZERO; =V21P104M5;
+3;   V65P104M5; ZERO; NOT;
+   SIGN; ABS; DUP; SHL+4; OR; SHL+6; OR; (Add 10 if OUT8 used);
+   =V1P104M5; JS4P29; DUMMY; DUMMY; DUMMY;
+   JS7P29; DUMMY; DUMMY;DUMMY;
+   SET1; =V17P104M5;
+   SET2; JS113P300; V0P26; =Q6;
+4;   M0M6Q; ERASE; J5C6Z;
+   JSP125; J4;
+   CTQ6; PARQ6; ZERO; =TR; V0P26M6; SHL+17; J6>=Z;
+   SETB52000; JS10P100; J4;
+6;   V21P104M5; JSP27; J4;
+5;   M0M4N; J10!=Z;
+   SETAP23; =M0M4N; ZERO; =E11M4; ZERO; =E31M4;
+10;   JS4P10;
+   V29P104M5; J10<Z;
+   JS3P193; J41;
+   V105P104M5; J70<=Z; SET5; JS3P65;
+   (Output stats block for controllered prog);
+70;
+   SET3; JS3P65; (Output stats and FLEX message);
+41;   JS142P195; (Clear down any outstanding OUT 40);
+   V29P104M5; SHC-4; J45P195>=Z; V9P0M5; DUP;
+   SHC+24; SHL+10; V89P14M5; OR; SHC+14; JSP136; J44P120; (OUT 2);
+91;   (Deal with disc);
+   ZERO; =V61P104M5;
+   ZERO; =V105P104M5;
+   V2; =V97P104M5;
+   V85P104M5; SHL-24; DUP; J8=Z;
+   V9P0M5; SHL+5; =M6; SET31; REV;
+15;   JS10P130; (Bit of a botch, see P198, DDES read);
+   V9P0M5; SHL5; =M6; ZERO; NOT; =M0M6; (Put -1 in progs ED);
+   SET31; V85P104M5; SHL-24; JS10P130; ZERO;
+   (Write -1 on global disc);
+(==  9 ==)
+8;   =V85P104M5; ZERO; NOT; JS255P60; (Restart any OUT19);
+   JS3P193; J10P121; (End if J0);
+   ZERO; NOT; =V0P193; J10P121;(Set J0 flag);
+90;   (Output stats and FLEX message, entered from P155);
+   M-I5;
+   V3P120; =M0M6N; V93P104M5;
+74;   =E4M6; V0P0; V53P104M5; -; (Elapsed); JSP57;
+   V5P104M5; DUP; V9P104M5; +; (N E T);       [ notional elapsed time
+   DUP; SHA-24; JS1P161; =E8M6; JSP57;
+   REV; ZERO; =V5P104M5; DUP; (Run time);
+   SHA24; JS1P161; =E7M6; JSP57;
+   V1; V24P0M5; SETB33; OR;
+   V0; V1P104M5; (Ending no); OR;
+   V41P104M5; V37P104M5; (Ident); DUPD;
+   JS71; SHLD+24; V24P0M5;
+   V77P104M5; SHL10; J75<Z; (No end if OUT50);
+   JS52P155; (Stats to OUT8);
+75;   SET9; JP6; (To FLEX);
+72;   M-I5; V4P120; =M0M6N; V10P105M5; =E4M6;
+   JS1P2939; SHA-24; JS1P161; =E8M6;
+   SHA-24; JS1P161; =E7M6;
+   V113P104M5; V109P104M5; JS71;
+   JS52P155; EXIT1; (The S is to keepP10 happy);
+71;
+   =E2M6; DUP; =E3M6; SETB77; SHL+12; AND;
+   SHL+18; V1P65; OR; =E5M6; (Job descriptor);
+   V9P0M5; SHL+24; SHL-38; NOT; NEG; SHL+5; (N.O.L.);
+   JS1P161; =E6M6; EXIT1;
+
+P16; (OUT 1)
+   C6TOQ5; (Keep out number);
+   V77P104M5; SHL+8; J5P3<Z; (Not with OUT40 on);
+   JS3P29;
+   J35P0;
+   V32P1; SHL-1; J2!=Z;
+   SETB50; JP2;
+2;   V0P1; JSP119;
+3;   SETB60; JP2;
+   SETB44; J1=; SETB55; J1=; ERASE; J3;
+1;   ERASE;
+6;   V2P1; =V89P104M5; (FOC of binary);
+   V0P1; =V45P104M5; V1P1; =V49P104M5;
+   C5; DUP; SHL+38; J8<Z; SETB2000; AND;
+   SET3; OR; =V29P104M5; SET2;JS113P300;
+   V9P0M5; JS106P300;
+5;   JSP139; V45P104M5; SHL-30; SETB70255; NEV; J7!=Z; (Allow OUT1 from D);
+   V0P52; J5>=Z;M5; =V0P52; (Mag tape input waits for level);
+7;   V9P0M5; SHL+24; SHL-36; NOT; NEG;
+   SHL+5; =V1P104M5; J22P120;
+8;   ERASE; JSP194; J9;
+   JS102P29; J10; V2P194; =V1P1; J132P194;
+10;   ERASE; REV; ERASE; V2P194; REV; JS101P29; J132P194;
+9;   ZERO; J132P194;
+
+P17;   (OUT2)       [ enter a new program that is already in store, i.e. load and go
+   JSP62; J2;                                      [ check existence of NS info
+   V9P0M5; SHL+5; =RM6; M0M6Q; =V33P104M5;         [ picks up word 0 of object program
+   =M6M0H; J2<=Z;                                  [ stores time limit in word 1 if positive
+   M0M6N; JSP119;                                  [ check OK program name in word 2
+   SETB200; J3;
+   ERASE; V9P0M5; SHC+24; ZERO; SHLD+10;
+   M0M6; SHL+24; DUP; J5!=Z;
+   ERASE; DUP; NOT;
+   NEG; SHL+5; M0M6; OR;
+(== 10 ==)
+   =M0M6; J6;
+5;   NEG;NOT;SHL-29;
+   VR; MAX; ERASE; J6V;
+   ERASE; ERASE; SETB220; J3;
+6;   =V89P104M5; ERASE; (SHC14; JS115P300;);
+   SET2;SET9; ( V0P104; SHLC6;
+
+   SHL+2; J2P15<Z;
+   NEG; NOT; ); J2P15;
+2;   SETB210;
+3;   SET6; =V0P2; JP2;
+
+P18;   (OUT3)    [ query time use so far
+   V5P10M5; J1P24;     [ put run time in program's nest
+
+P19;   (OUT 4);
+   JSP62; J6;
+   JSP132; J3;
+4;   ERASE;
+6;   SETB70; JP2;
+3;   DUP; JSP122; J5;
+   J4!=Z;
+5;   ZERO; NOT; =V45P104M5; J7P61;
+
+P20V1;   (OUT5)
+   V0=B416741516463;
+   V1=B64716045002020;
+
+   JSP62; J2;
+   SHL-6; J1!=Z;
+   SHC-4; STR; =Q7; SHC+4; DUP; J1=Z;
+   DUP; ZERO; SHLD+44; SHAD+3; -; =C5;
+   (B program); V21P104M5; SHCC5;NC5; DUP;
+   Q7; CONT; SHCC5; =V21P104M5; J1<Z;
+3;   JSP28; J4;
+   (P unit found); ERASE;
+5;   JSP138;V0P26M6;SET1;JSP6;
+   C6;JS3P29;JS35P0;
+   J10P61;
+4;   (No P units);
+   (B program); DUP; SHL+9; SETB654; OR;
+   JS1P26; J7;
+   ERASE; ERASE;
+6;   (U unit found); V0P26M6; SETB24; SHL+15;
+   -; JSP55; OR; =V0P26M6; J5;
+7;   (No U units); DUP; ZERO; SHLD+45; SHL+3;
+   SHLD+3; V1; OR; V0; JSP55; SHC-6; OR;
+   V24P0M5; SET3; JS4P6;
+   NOT;STR; NEV; DUP; PERM; OR;
+   ZERO; PERM;JS2P10; J6;
+1;   ERASE;
+2;   SETB20; JP2;
+
+P21;   (OUT 6);
+   JSP62; J2;
+   SHL-4; J1!=Z;
+   DUP; J1=Z;
+   DUP; =C7; =M6;
+   V17P104M5; SET1; SHLC7; AND; J2=Z;
+   V0P26M6; SHL+17; J3>=Z;
+   (Mag tape); SETB32000; JS10P100; C7TOQ6;
+7;   JSP138;
+6;   JS3P29; J35P0;
+
+(== 11 ==)
+   EXIT1;
+3;   (Not mag tape); IM0TOQ7;
+   ZERO; JSP10;
+   PARQ7; ZERO;=TR; C7; =M6;
+   (B program); V0P26M6; SHL-24; SETB607;
+   AND; ZERO;SHLD+45; SHL-4; SHLD+3;
+   -; =C6; V21P104M5; SHCC6; NC6; STR;
+   REV; SHCC6; =V21P104M5;
+5;   C7TOQ6; JSP27; J7;
+1;   ERASE;
+2;   SETB30; JP2;
+
+[ ---------- replace
+P23V4;   (OUT8);
+      V0=0;  V1=AV0;  (L queue);
+      V2=0;   V3=AV2;   (N queue);
+      V4=-1;  (Marker to initiate p155);
+
+      J1;
+
+99;   V29P104M5;  J98>=Z;  (Check for termination);
+
+82;   V57P104M5; DUP;  J86=Z;
+      STR; ERASE;
+83;   SET45; FLOAT; FIX; ROUND; JS80; J82;   (close streams);
+86;   ERASE;  (No more streams open);
+87;   SETB10; JS114P300; (Clear holdup, probably unnecessary);
+      V29P104M5; STR; ERASE; =V29P104M5; (clear termination marker);
+
+98;   M-I4; DC4; M-I4; DC4; EXIT1; (Retrurn to main subprog);
+
+80;   (Close stream, coded str no in N1);
+      DUP; SETAV65P104; M5; +; SHL+16; SET4; OR;
+      REV; JS157; =C7; V57P104M5; SETB177776; SHCC7; AND; DUP; STR; ERASE;
+      ZERO; SIGN; NEG; AND; =V57P104M5; J50P10;
+
+156;  (Add to Q);  C5;
+157;  SHL4; C4; OR; SHC-16; OR;
+      V57P104M5; STR; SHL1; =M6; ERASE;   [ top bit of V57P104M5 indicates which tape is used by this prog
+      V2M6; V4; ZERO; MAX; SIGN; AND; =V4; (Sets V4=0 if queue needs processing);
+      DUP; V3M6; DUP; CAB; SHL-16;
+      SHLD-16; ERASE; SHC16; DUP;
+      =V3M6; =M6; ZERO; =M0M6; =M6; =M0M6; EXIT1;
+
+158;  (Check str no and put coded stream in N1);
+      C7; DUP; SETB177710; AND; SHL-3; NEG; NOT; J1P45#Z; (invalid); [ output streams are   10-17, 30-37, 50-57, 70-77
+      SHC-4; ZERO; SHAD+3; OR; EXIT2;                                [ coded stream nos are 00-07, 10-17, 20-27, 30,37
+
+
+
+15;   ERASE;
+16;   SETB770; JP2; (Invalid parameters in N1);
+
+18;   SETB740; JP2; (Invalid stream number);
+19;   M0M7; V2P155; NEV; SHL-16; J21=Z;
+      M-I4; DC4; SETB720; JP2; (Invalid last char);
+
+1;    Q7; =V19P0; (Restore EDT);
+      JSP62; J16; =Q7;
+      M7; I7; J27#; C7; NEV; J15#Z; ERASE; (Close stream);
+      JS158; J16; =Q7;
+      JS1P139; M7; DUP; NOT; =C7; (Wait for second subprog);
+      JS8P196; (Remove progs N2);
+      V57P104M5; SHCC7; J1P45>=Z; M+I4; I4; =+C4; (Check str open);
+      JS80; J99;
+
+27;   ERASE; JSP133; J16; (Check parametrs);
+29;   C0TOQ7; JS1P139; JSP102; (Wait for previous transfer or P105, set CPL);
+      I7; =RM6; M0M6; =C7; J13C7Z; (J if FLEX);
+      V61P104M5; NEG; NOT; DUP; =V61P104M5; J71=Z; (Check access O/P);
+      JS158; J18; DUP; =C5; I4; DUP; =+C4; M+I4; (Switch to second subprog);
+      SHLC5; V57P104M5; DUPD; OR; =V57P104M5; AND; J28#Z; (Stream not yet open); [ V57P104M5 is the bit pattern of open streams
+      SETAV65P104; M5; +; SHL+16; JS156; (Open);
+
+28;   SHC-4; J21>=Z; (jump if punch str);      [ J if stream < 50
+      M0M7; SHL42; ABS; SHL-43; NEG; NOT; J19#Z; (Check last char);
+
+21;   C0TOQ7; ZERO; ZERO; Q7; ZERO; NOT; CONT; DUP; JS156; JS3P29; JS35P0;
+      PMHQ7; (Lock out transfer area); JS2P10; J99;
+
+14;   ZERO; JS3P10; I7; =RM6;
+13;   V56P6; NOT; J14!=Z; (Wait if transfer will fill FLEX queue);
+      M7; I7; -; SET8; MAX; ERASE; =C6; (Truncate if more than 8 words);
+3;    J4C6Z; SET-42; =C5; M0M6QN;
+5;    SHLC5; SETB77; AND;
+      SET2; J6=; SET4; J6=; (Check not 02 or 04);
+      SETB75; J7#; (EM); ERASE;
+4;    V45P104M5; J8<Z; (Fail if query);
+      I6=-1; M6; I7; -; =C6; C6TOQ5;
+2;    J12C6Z; M0M6Q; SET8; =C7;
+11;   JSP127; J10; J2;
+10;   SHC6; DC7; J11C7NZ; ERASE; DC5; J2;
+
+12;   V24P0M5; SETB17; OR;
+24;   JS3P29;JS35P0;
+      C5; NOT; NEG; J4P6;
+
+7;    SETB34; NEV; J9=Z; J3C5Z;
+      SET6; =+C5; M0M6; J5;
+
+6;    ERASE;
+
+8;    SETB730; JP2;
+70;   ERASE; M-I4; DC4; SETB750; JP2;
+71;   SETB760; JP2;
+9;    V45P104M5; J8>=Z; J8C5NZ; J8C6Z;
+      V77P104M5; SHL6; V26P101; SHL1; NOT; AND; J8<Z;
+      I7; =M6; V24P0M5; SETB17; OR; =M0M6; JS3P29; JS35P0;
+      M+I4; I4; =+C4; SET810; JS113P300; (Hold up);
+      ZERO; I7; M7; JSP8; SETB10; JS114P300; J99;
+
+
+(== 13 ==)
+P24;   (OUT 9);
+   V0P0; V6P0; +;
+1;   =V0P1; EXIT1;
+
+P26V15; (Look for unit of given type, status
+   and prog. letter);
+   V0=Q16/-1/16;
+   V1=-1; V2=-1; V3=-1; V4=-1; V5=-1;
+   V6=-1; V7=-1; V8=-1; V9=-1; V10=-1;
+   V11=-1; V12=-1; V13=-1; V14=-1; V1=-1;
+
+1;   V0; =Q6;
+2;   SHC-3; DUP; J3<Z; SET6; SHLD+6;
+   SHL-3; OR; J4;
+3;   SHL+6;
+4;   V-1M6Q; J3P45C6Z;
+   ZERO; SHLD+21; SHL-3; SHLD+21; SHL-12;
+   SHLD-12; ERASE; SHL-30; J4!=;
+   EXIT2;
+
+P27;   (Given allocated unit number IN C6, M6, change
+   status to U if N1=0, otherwise to P)
+   J1=Z;
+3;   V0P26M6; SHC-24; SHL+6; SETB60; OR;
+   SHC+18; DUP; SHL+12; V24P0M5; SET2; J2;
+1;   MANUALQ6; V0P26M6; SHL-6; SHC-18; SHL+6;
+   SETB65; OR; SHC+18; DUP; SET1;
+2;   JSP6; =V0P26M6; EXIT1;
+
+P28;   (Look for unit of given type pre-allocated
+   to given program. If found, change state to A);
+   DUP; SHL+9; SETB600;OR; V13P104M5; SHL-46;
+   OR; JS1P26; EXIT1; V0P26M6; SETB17; SHL+18;
+   -; (P becomes A); =V0P26M6; ERASE;
+   EXIT2;
+
+
+
+P29;   (Super new nest dealer);              [ manipulate user program's nest
+1;   JS102; J11; (Fetch N1); V0P1; (N1);
+   V32P1; DUP; J3P45=Z; (Nest empty);
+63;   NEG; NOT; DUP; =RC6; J65C6Z;
+*66;   V1P1M6; =V0P1M6Q; J66C6NZS; (Shift nest up);
+65;   =V32P1; EXIT2; (Adjust nest count);
+
+2;   =E5; (Store value to be planted); JS102; J12; (Store);
+   ZERO; NOT; =R16; (M6 zero for nest);
+
+60;   V32P1M6; DUP; SHL-4; J1P45!=Z; (Too full)
+   DUP; DUP; NOT; NEG; =V32P1M6; =C6;
+   M6; SHL4; +; =M6; (M6 now 16 OR 0); J19C6Z;
+
+*20;   V-1P1M6;   =V0P1M6Q; J20C6NZS;
+19;   E5; =V0P1M6; EXIT2; (Store in SJNS);
+3;   JS102; J13; (erase);                     [ entry to ERASE from program's nest
+   V32P1; DUP; J1P45=Z; J63;
+
+4;   JS102; J14; (Clear); ZERO; J65;          [ completely empty the program's nest
+5;   JS102; J15; (Fetch J); V16P1; (J1);      [ fetch top cell of program's SJNS
+   V33P1; DUP; J3P45=Z; (SJNS empty);
+   NEG; NOT; DUP; SET15; MAX; ERASE; VR; =RC6; J24C6Z;
+*25;   V17P1M6; =V16P1M6Q; J25C6NZS; (Shift up SJNS);
+24;   =V33P1; EXIT2; (Adjust SJNS count);
+6;   =E5; (Store value to be planted); JS102; J16; (StoreJ);  [ store in SJNS
+(== 14 ==)
+   ZERO; NOT; =R16; M-I6; (M6 is 1 for SJNS); J60;
+7;   JS102; J17; (Clear J); ZERO; J24;        [ completely empty the program's SJNS
+11;   SHL2; SHL-45; J29=Z; (Nest empty);
+32;   =E5; (Store value fetched); JS101; E5; EXIT2; (ZERO; NOT; NEG;);
+12;   SHL2; SHL-43; SET18; -; J29>Z; (Nest too full); E5;
+50;   JS101; EXIT2;(ZERO);
+
+13;   SHL2; SHL-45; J29=Z; (Next empty); ERASE;J50;
+14;   ERASE; J14NEN; J50;
+15;   SHL7; SHL-44; J29=Z; (SJNS empty); LINK; J32;
+
+16;   SHL7; SHL-43; SET16; -; J29>Z; (SJNS TOO FULL);
+   E5; =LINK; J50;
+
+40;   LINK;
+17;   ERASE; J40NEJ; J50;
+29;   JS101; EXIT1; (ZERO; NOT;);
+
+102;   M5; V7P0; NEV; J1P127=Z; (Exit 2 if nest in core);
+   LINK; JS100; REV; =LINK; EXIT1; (EXIT1 if in nest stack);
+   (N1=stack count on exit);
+
+100;   (Swap to programmers nest);
+   SET1; SHL41; K7; +; =E3; V13P104M5; DUP; =K3;
+   DUMMY; DUMMY; DUMMY; DUMMY; DUMMY; DUMMY;
+   DUMMY; DUMMY; DUMMY; DUMMY;
+   J1P45;
+101;   (Swap to director's nest);
+   ZERO; SET1; SHL41; K7; +; E3; =K3;
+   DUMMY; DUMMY; DUMMY; DUMMY; DUMMY; DUMMY;
+   DUMMY; DUMMY; DUMMY; DUMMY;
+   ERASE; DUP; V13P104M5; NEV;
+   V7P0; =M6; K7; V13P104M6; NEV; OR;
+   SHL-46; J35P0!=Z; =V13P104M5; J1P45;
+
+P30;   (Set Q4 = 2P+2/1/AV1P11+2P+2, for
+   entry to P10);
+   M5; NOT; NEG; SHA+1; DUP;
+   =RC4; SETAV1P11; +; =M4; EXIT1;
+
+P31;   (Fetch character, result in C7);
+[ on entry M6 points at word and C6 = char number, 0 for most sig
+8;   M0M6;   SHLC6; SHL-42; =C7; SET6;
+   =+C6; ZERO; NOT; SHLC6; J2!=Z;
+   C0TOQ6; SET1; =+M6;
+2;   V1P122; ZERO; SHLDC7; SHLD-15; ERASE;
+   J3>=Z; I6; J4!=Z; EXIT4;
+5;   ERASE;
+4;   EXIT3;
+3;   C7; SET4; J5=; SETB32; J5=;
+   SETB34; J5=; SETB75; J5=; SET2;
+   J6!=;ERASE; EXIT2;
+6;   SET6; -; DUP;J7!=Z;I6=-1;
+7;   NEG; NOT; J1!=Z; I0TOQ6;
+1;   J8C7NZ; EXIT1;
+
+P32;   (Fetch number. Result in N1);
+   SETB77600;
+1;   =Q7; ZERO;
+5;   DUP; J3<Z; M7; BITS; xD;
+   CONT; SETB20; -;
+3;   C7; +;
+4;   JSP31; J6; J6; J2; M7;
+   SHL+17; SHLC7; J5<Z;
+   C7; SET10; SIGN; J6>=Z;
+(== 15 ==)
+   ERASE; ZERO; NOT;EXIT1;
+2;   C7; SETB75; NEV; J4P45=Z;
+6;   DUP; J4<Z;
+   EXIT2;
+
+P33V3;   (TINT A = terminate program)
+V1=P *CHECK[DQ];
+V3=QB100000/AV0/AV2;
+
+   JSP38; JSP55; =E20M4; (Keep prog letter);
+   V77P104M5; DUP; SHL6; OR;J2>=Z; (Dont J if TINT X or quiet)
+   V24P0M5; =V0; V3; =V5P4;
+   ZERO; NOT; DUP; =V19P0; JS51P10; (Await reply);
+   V2; SHL-36; SETB7137; NEV; J4P45!=Z; (Ignore if not Y.);
+2;   E20M4; =C7; JSP56; JS35P0;
+7;   V29P10M5; DUP; J1!=Z;  (J  if TINT A suppressed);
+   V0P130; C7; NEV; J3!=Z; DUP; NOT;=V0P130; (Clear if dumped);
+3;   SETB144; JS114P300; (Clear possible OUT19, TINT S and rollout);
+   Q4; JSP30; REV; ZERO; V2P4; SHL12; SHL-42; JS8;
+   =Q4; EXIT2; (Keeps Q4 in case in director subprogram
+   when just overwriting it cases subprogentrys to be lost
+   which is catasrophic if thos levels are in disc Q)
+1;   DUP; I4; SHL45; AND; SHL1; OR; =V29P104M5; EXIT2;
+8;   JS2P10; (Now in priority subprogram)
+   SET4; M7; SETB35; NEV; J1P15!=Z;
+   =V0P2; J2P2;
+
+P34;   (TINT B - read integer to E0);
+   JSP38;
+   JSP32; J1P45;
+   V9P0M5; DUP; SHL+36; J3P45=Z;
+   SHL+6; NOT; NEG; =M6;
+   V29P104M5; SETB177376; SHC-3; AND; (Mask out disc Q markers);
+   =V33P104M5;EXIT2;
+1;   SHL+24; =M0M6H; EXIT2;
+
+
+P35V0; (Reset max number of dumpable levels);
+V0=4; (Initial value =4);
+   JSP32; J1P45; DUP; SHL-2; J1P45!=Z; (Check <4);
+   NOT; NEG; =V0; EXIT2;
+P37;   (TINT E - nominate program tape)
+   JSP32;
+   J1P45;
+   DUP; =M7; DUP; SET7; SIGN; J1P45<Z;
+   SHL-4; J4P45!=Z;
+   SETB12054; V0P26M7; SHL+15; SHL-33;
+   NEV; J4P45!=Z;
+2;   M7; =V1P52; V0P52;
+3;   DUP; =M7;J4<Z;
+   V29P104M7; DUP;NOT; SHL-46; SHL+47;
+   SHL-2; NOT; AND; SHC+3;
+   STR; ERASE; SHC-3; =V29P104M7;
+4;   EXIT2;
+
+P38;  (Fetch prog letter for TINT routine, AGAIN TINT if nogo);
+   JSP31; J1; J1; J1; JSP56;       [ this is very tricky code so that EXIT1 form P56 goes to AGAIN TINT
+1;   LINK; ERASE; EXIT1;             [ EXIT2 from P56 then does EXIT1 from this routine
+
+P39V0;   (TINT G - type unit list);
+   V0=B3272324532623257;
+   JSP32;J1P45;
+   DUP; DUP; NEG; NOT;REV;SET16;-;NEV; J1P45>=Z;
+
+(== 16 ==)
+   JSP32; J15;(Reading D2);
+   DUPD;-; J3P45>Z;
+   DUP; SET15;-; J3P45>Z;
+16;   REV; DUP; PERM;-; SET1;DUP; PERM;+;=RC6;-;
+   =M6;  (Q6=D2-D1+1/1/D1=1);
+1;   V1P26M6Q; DUP; J4<Z; DUP; SHL+24;
+   SHL-42; SETB54; NEV; J3!=Z; (Jump if
+   status not L); M6; JSP131; =M6;
+   V-16P101M6; V-17P101M6; CAB; =M6; DUP;
+   J2!=Z; ERASE; V0;
+2;   CAB; SET3; J5;
+3;   SET1;
+5;   JSP6;ZERO;
+4;   ERASE; J1C6NZ; EXIT2;
+15;   ERASE; DUP; J16;
+
+P40;   (TINT H - type wanted list);
+   ZERO; NOT; DUP; =V0P101; =V19P0;
+   EXIT2;
+
+P41;   (TINT I - even and od restarts);
+   JSP38;
+   V29P104M5; J4P45!=Z;
+   JSP31; EXIT1; EXIT1; EXIT1;
+   C7; DUP; SHL-3; SET2; NEV;
+   J1P45!=Z; (Check octal integer)
+41;   SHL+47; DUP; V25P104M5; SHC-6; OR; J2<Z; (Jif odd rst or roll)
+   JSP30; ZERO; =M0M4; (Clear SHUL)
+   SETB101; JS114P300; (Clear HUR)
+   JS142P195; (Clear disc inhibit if there is one);
+   V0P26; =Q6; (Now clear transfer on devices);
+4;   M0M6Q; ERASE; J2C6Z; JSP125; J4; CTQ6; J4;
+2;   SHA-1; SHL-33; SET4; OR; (4/0 or 4/3)
+   J6P29; (Store in SJNS);
+
+P42;   (TINT J, modified for output well);
+   SETB77740; JS1P32; J2;
+1;   =V4P155; EXIT2;
+2;   ERASE; V3P23; SHL-32; J4P45=Z;
+   ZERO; NOT; DUP; =V19P0; J1;
+
+
+P44V0;   (TINT L - change type of unit);
+   V0=B0206520200002072; (Skeleton
+   descriptor shiftwed cyclically down 33);
+
+   JSP32; J1P45;
+   SETB16; J1P45=; (Fail if disc);
+   DUP; J1P45=Z;
+   DUP; SHL-4; J1P45!=Z;
+   DUP; =M5; V0P26M5; DUP; J2<Z;
+   DUP; SHL+42; J3P45!=Z;
+   SHL+45; SHL-42; SETB45; J6!=;
+   (L); ERASE; V1P52; J8!=;
+   ZERO; =V1P52;
+8;   J7;
+6;   SETB65; J3P45!=;
+2;   ERASE;
+7;   SHC-6; JSP32; J3P45;
+   DUP; SHC-4; J4>=Z;
+   SETB10; J3P45!=;
+   M5; SET7; SIGN; J3P45!=Z;
+4;   DUP; J3P45<Z; DUP; SHL-6; J3P45!=Z;
+   DUP; J5!=Z; ERASE; ERASE; ZERO;
+(== 17 ==)
+   NOT; =V0P26M5; EXIT2;
+5;   SHC-6; V0; SHLD+3; SHC+3; SHLD+3;
+   REV; ERASE; SHC+9; SHLD+3; SHC+3;
+   SHLD+3; SHC+6; DUP; =V0P26M5; SET1;
+   JSP6; ERASE; EXIT2;
+
+P45V13; (TINT M - post-mortem);
+   V3=B0207645156640055;
+   V4=B0050455444006560;
+   V5=B3656570060646037;
+   V6=B0057656460656400;
+   V9=B2020200020202000;
+   (Output is assembled in V11-13 and punched from
+   v0-2. V10 is machine size, i.e. no. of words);
+   JSP32; J1; JSP56; J2; V9P0M5; SHL+38; SHL-33; +;
+2;   DUP; =RM5; JSP32; J3;
+   DUP; =C5; +; V10; -;
+   J4>Z; (Jump if top of machine passed);
+   SETAV2P11; =RM4; I4; =C4; SETB3654;
+   JS1P26; J5;
+   ERASE;
+6;   V0P26M6; SETB24; SHL+18; -;
+   SETB44; OR; DUP; =V0P26M6; SET1;
+   JSP6; (Type new descriptor); C6TOQ7; SETAV0;
+   =I7; SETAV2; =M7; ZERO; M5; SET2;
+   =RM6; V3; =V11; V6; =V12;
+7;   V8; REV; FRB; V9; +;
+   J8C6Z; =V11M6Q;
+10;   ZERO;SHLD+16; J7;
+8;   SET2; OR; =V11M6; ERASE; ZERO; NOT; Q5;
+   =V7; JSP10; SET3; =RC6;
+*11;   V11M6; =V0M6Q; J11C6NZS; PWQ7; V7;
+   =Q5; J9C5Z; M0M5Q; SET2; =RC6;
+   J10;
+9;   C7; =M6; V0P26M6;SHL-6;SHL+6;
+   SETB24; SHL+18; +; DUP; =V0P26M6;
+   SET1; JSP6; EXIT2;
+5;   V5; V4; V3; SET3; JSP6; ZERO; NOT;
+   DUP; STR; NEV; DUP; SET3;
+   OR; Q5; =V7; JS2P10; V7;
+   =Q5; J6;
+13;   ERASE;
+12;   ERASE;
+3;   ERASE;
+1;   ERASE;
+4;   EXIT1;
+
+P48;   (TINT P
+P60  switch on job organiser
+P61  switch off jo
+P62  dont as react on on-line jobs
+P63  ask react always
+P64  switch on jo message
+P65  switch off jo message
+);
+   JSP32; J1P45; SETB60; -; DUP; J1P45<Z; SHC-1; STR; REV;
+   =C7; V26P101; SHCC7; STR; ERASE; REV; CONT; NC7;
+   SHCC7; =V26P101; EXIT2; (Set or clear D0 for 60/1,D1 for 62/63 etc);
+
+P49V0;   (TINT Q - prints core available - added 25/1/67);
+V0=P [S] WORDS [DD];
+
+   V0; JSP117;ZERO;DUMMY;DUMMY;SHL-32;JS1P161;SHL18;
+
+(== 18 ==)
+   SETB020777; OR; SHC-18; SET2; J26P52;
+
+P50;   (TINT R - resume program);
+   JSP38; SETB4; JS114P300; EXIT2;
+
+P51;   (TINT S - suspend program);
+   JSP38; SETB4; JS113P300; EXIT2;
+
+
+P254V17; (Proglist);
+
+V16=P [C]EA3P0L0;
+V17=P [C]EDNJ0GN;
+
+P52V8;       (TINT T - B prog input);
+   V0=-1; (B input priority no.)
+   (V1=B program tape number
+   V2=B PIU)
+   V4=B565742605165/35; (NOBPIU)
+   V5=P [cn]LATER;
+   V6=B3636363636;
+   (V7/8 hold stored TINT T);
+
+   ZERO;
+1;   JSP32; J3P45; DUP; SHL-2; J3P45!=Z;
+2;   V0; J20>=Z; DUP; =RM5;SET4;REV; -; =C5;
+   JS15;J11;SHL+46; =V77P104M5;
+   V7; STR; ERASE; =V7; (Cleared stored TINT T marker);
+   C7; SETB54; J12=; SETB55; J117=; SETB60; NEV;
+13;   =V3;
+   C7; SETB56; NEV; J115=Z;
+116;
+   V10P45; V0P117; -;
+   SETB77740; JS1P32; J3P45;
+   DUP; J3P45=Z;
+   NEG; NOT; SHL-5; NOT; NEG;SHL+5;
+   VR; MAX; ERASE; DUP; SHL-32; REVD;
+   PERM; -; J25<Z; (J if not enuf store); ERASE;
+   SHL+16; SHL-37; JSP118;
+   JSP30; ZERO; NOT;
+7;   =V3;
+3;   SET-2; ZERO; ZERO; JSP134;
+   (Now in priority subprogram); J5;
+   V77P104M5; SHL+1; V0P76; AND; J9<Z;
+8;   V2; DUP; J14<Z; ERASE;
+   SETB2654; JS1P26; J6;
+   (Ptr obtained); ERASE;
+   V0P26M6; JSP55; OR; V2; J4!=Z;
+   SET5; SHL+18; -;
+4;   =V0P26M6; C6;=V2;ZERO; J11P120;              [ entry to general program input routine
+5;   ZERO; =V2; ZERO;JP121;
+6;   V3; J3=Z;
+   V4; JSP55; OR; V24P0M5; SET2;
+   JSP6; ZERO; J7;
+117;   ERASE; ZERO;NOT; =V2;
+115;   SETB77740; JS1P32; J1P45;
+   ZERO; NOT; CONT; =V4P120; J116;
+9;   (TInt X modded by DH to read all IDRP at one go);
+   SET31; =Q7; JSP128; JSP102; ZERO; JSP199;
+10;   SETB16; =C7; JS14P199; PICQ7; (Read block of IDRP);
+   ZERO; JS5P199; J78P120; J10;
+   JSP126; (Reset to B-block adresses for P120);
+   I7; =M6; E3M6; =V49P104M5; E2M6; DUP; =V45P104M5; JSP119;
+
+(== 19 ==)
+   SET2; JP121; SETB44; NEV; J16P120!=Z; V29P104M5; SHL3;
+   V2P65; =V93P104M5;
+   SHL-3; =V29P104M5; J32P120;
+
+25;   REV; ERASE; J23;
+20;   ERASE;
+11;   ERASE; M6;
+23;   V7; ZERO; NOT; CONT; =V7; (Put back flag);
+   SHL-9; J1P127!=Z; (J if store in V7);
+   V2P4; =V7; V3P4; =V8; (Remember TINT reply);
+   V5; SET1;
+26;   JS4P6; EXIT2;
+12;   ERASE; JSP32; J1P45; DUP; SHL-4; J1P45!=Z;
+   NOT; J13;
+14;   NOT;
+19;   DUP; =M7; J27!=Z; V77P104M5; SETB101; SHC-12; OR;
+   =V77P104M5; (Show LP done and silent);
+27;   V0P254M7; STR; SETB11;
+   AND; SETB 70244; +;
+   SHLD+30; =V45P104M5; V6; OR; =V49P104M5;
+   V2P65; =V93P104M5; ZERO; =V21P104M5; J22P120;
+18;   SET4; =RC5;
+15;   M-I5;
+17;   V10P0M5Q; SHC+3; SHL+35; J1P127=Z; (EXIT2);
+   J17C5NZ; EXIT1;
+
+
+P53;   (TINT U - as in Oxford Director);
+
+   JS2; SET4; SETB60; =RM6; =C6;
+1;   ZERO; M6; =RC7; JSP56;J3; (Not present);
+   V29P104M5; NOT; V25P104M5; AND; SHC-2;
+   J2<Z; (J if input but not OUT1); ERASE;
+   M7; =C5; M5TOQ7; (Keep M7); V29P104M5; SHC-2; J6<Z;
+   V105P104M5; J4>Z;
+7;   V5P104M5; DUP; V9P104M5; +;
+5;   JSP57; REV; JSP57;
+   V23P0; DUP; V9P0M5; SHL+38; SHL-33;
+   FRB; REV; SHL-17; OR; SHL+12; (BA);
+   V41P104M7; DUP; PERM; SHLD-12; ERASE; REV;
+   V37P104M7; SHL24;SHL-24; SHLD-12;
+   C5; =M7;
+   SET4; =+M7;
+3;   M5; SETB20; OR; SHL+10; OR; (Priority);
+   V25P104M5; SHC-6; J8<Z; (J if rolled out);
+9;   SETB20700; M6; OR; SHL+30; OR; M+I7; (Letter);
+   M7; JS4P6; M+I6; DC6; J1C6NZ; EXIT2;
+2;   JSP38; SET1; JSP55; EXIT3;
+4;   JS1P2939; SET72; =+M7; J5;
+6;   (OUT 1); SET8; =+M7; J7;
+8;   (Rolled out); SETB17; SHL24; OR; J9;
+
+
+P54;   (TINT V - force priority swop)
+   JSP32; J1P45;
+   JSP32; ERASE; ZERO; NOT;
+1;   DUP; =M6; DUP; SHL-2; J3P45!=Z;
+   J1P45=; DUP; SHL-2; J1P45!=Z;
+   =M7; V9P0M6; V9P0M7; OR;
+   SHL-45; J4P45!=Z;
+2;   JS111P300; ZERO; NOT; =V19P0; EXIT2;
+
+P55;   (Given priority, put corresponding prog.
+
+(== 20 ==)
+   letter in N1);
+   V13P104M5; SHL-46; SETB60; OR; EXIT1;
+
+P56;   (Given prog, letter in C7, put corresponding
+   priority in M5);
+   C7;
+1;   SETB60; -; DUP; J5<Z;
+   DUP; SHL-2; J1P45!=Z; SET4; =RC5;
+   M-I5;
+*2;   V14P104M5Q; SHL-46; J3=; J2C5NZS; J1P45;
+4;   ERASE;
+3;   ERASE; EXIT2;
+5;   SETB40; +; DUP; SHL-2; J1P45!=Z; =M5; EXIT2; (Allow
+   ops to give prior number or level letter);
+
+P57V1;   (Given the time is seconds to 23 i.p. put time
+   in characters, /---M---S, in N1)
+   V0=B0612121201061201;
+   V1=B1720202055202063;
+   SHA-24; V0; REV;FRB; V1;
+   OR; EXIT1;
+
+P58V7;   (Look for tape with given identifier,
+   If not found, type wanted query);
+   V0=B0207674156644544;
+   V1=B0042710000062307;
+   V4=B0624077777777734;
+   JS4; EXIT1;
+2;   (Required tape not present)
+   M5; V25P104M5; SHC-2; OR; J3<Z;
+   (Wanted by program)
+   JSP30; DUPD; V4; SETB77; OR; PERM;
+   JSP55; JS14; V0; SET5; JSP6;
+15;   REV;
+5;   =E20M4; SET1; ZERO; NOT; STR; NEV;
+   CAB; JS2P10; JP58;
+3;   (Wanted by Director)
+   V7; J15!=Z; (Stops 2 subprogs at once);
+   =V6; =V7;
+6;   V7; V6; SETB44; JS14; =V1; =V2; =V3;
+   SET1; SETAV0; SETAV5; JSP8;
+   V7; ZERO; =V7;
+   V5; SHL-42; SETB56; NEV; J8!=Z;
+   C0TOQ6; J1P45;
+8;   V6;JS4; EXIT1; J15;
+14;   V1; SHC+24; SHL+6; OR; SHC+18;
+   REV; DUP; J9!=Z;
+   ERASE; V0P39;
+9;   REV; EXIT1;
+4;   V0P26; =Q6;
+1;   SETB10544; JSP26; J10;ERASE; DUPD;
+   M6;JSP131; =M6; V-16P101M6; V-17P101M6;
+   CAB; =M6; CAB; NEV;PERM;
+   NEV; OR; J1!=Z; ERASE; ERASE;
+22;   M5;
+23;   V0P26M6; SET9; SHL+18; -; REV; J11<Z;
+   JSP55; OR;
+13;   (Entry fromP120);
+   DUP;SET1;
+12;   JSP6; =V0P26M6; EXIT1;
+11;   SETB44; OR; J13;
+10;   EXIT2;
+
+P59;   (Check top item in FLEX queue. If query,
+(== 21 ==)
+   check answer ends corretly. If so, or
+   if not query, remove top item from FLEX queue.
+   Type top item of FLEX queue);
+   BUSYQ0; J4P45TR;
+1;   V0P6; ZERO; SHLD+12; SETB4000;NEV;
+   J7!=Z; PARQ0; J6TR; ZERO; SHLD+4;
+   REV; =Q7; I7; C7; DUP;
+   NOT; NEG;=RM7; -; =C7;
+2;   SET8; J3C7NZ; =TR;
+6;   ERASE; J10;
+3;   =C5; M0M7Q;
+4;   ZERO; SHLD+6; SETB75; J5=; DC5;
+   SETB37; SIGN; SHC-1; NOT; =TR;
+   J4C5NZ; ERASE; J2;
+5;   ERASE; ERASE; J6NTR; =M7;
+   ZERO; =V11P11M7; ZERO;
+7;   ERASE; V5P4; DUP; J16=Z; (J if no TINT);
+   ZERO; V1P6; SHAD-43; REV; ERASE;
+   ABS; NEG; NOT; J17=Z; (J if newline in FLEX queue);
+16;   ERASE; SETAV0P6; =RM7;
+8;   M0M7N; DUP; NOT; J9=Z;
+   =M0M7Q; J8;
+9;   J15C7Z; =M0M7;
+10;   V0P6; (New top word); JSP127; J11;
+   ERASE; ZERO; SETAV0P6; DUP; SHL+16; OR;
+12;   =Q7; POBQ7; J4P45!=Z; CLOQ7; EXIT1;
+11;   SHL+16; SHL-16; Q6; REV; JSP103;
+   J13; REV; =Q6; ZERO; NOT; REV; J12;
+13;   ERASE; =Q6; EXIT1;
+15;   NOT; =V0P6; EXIT1;
+17;   (Instant TINT);
+   DUP; =V0P6; ZERO; =V5P4; J11;
+
+P60V1;   (Deal with RFIR, real time, N.E.T.,
+   and tape loading/unloading)
+V1=P [NC]RESET;
+   K4; SHC29; STR; J10=Z; V1; SET1; JS4P6;
+10;    SHC-29;
+2;   DUP; SET1; SHC-23; AND; J9=Z;
+   V0P13; OR;
+9;   DUP; SHL-32; SHL+32; STR; V5P0; DUP;
+   PERM; AND; DUP; =V0; V0P0; +;
+   =V0P0; x; =V6P0; DUP; SHL+23; DUP;
+   Q6; =E7; SET7; =RC6;
+*1;   STR; V16P0M6; OR; =V16P0M6Q;
+   SHL+1; J1C6NZS;
+   ERASE; OR; =TR; J8NTR;
+   ZERO; JS255; (Clear any OUT 19'S);
+   (FLEX OR clock); ZERO; NOT;
+   K5; SHL-1; SET4; =RC6;
+7;   SHL+6; STR; V0; AND; V9P104M6;
+   +; DUP; =V9P104M6Q; V96P104M6; SHL24; -; J11>Z;
+12;   J7C6NZ;
+   ERASE; V0P26; =Q6;
+3;   SETB10544; JS2P26;
+   J4;
+   ERASE; PMBQ6; J3TR;
+   (L, not on BT); SETB4000; JS10P100; J3;
+4;   V0P26; =Q6;
+5;   SETB10654; JS2P26;                         [ This line was missing in Hans P's version
+   J6;
+   ERASE; PMBQ6; J5NTR;
+   (U, on BT); SETB32000; JS10P100; J5;
+8;   V16P0;
+
+(== 22 ==)
+6;   V19P0; OR; E7; =Q6; EXIT1;
+11;   (Fail this for exessive time); Q6; Q5; Q4; M-I6;
+   Q6TOQ5; V97P104M5; SET5; +; =V97P104M5; (Allow time for restart);
+   ZERO; JS41P41; DUMMY; DUMMY; DUMMY; =Q4; =Q5; =Q6; J12;
+255;   (Restart any OUT19 suspended progs,
+   J1!=0 if start to be forced); Q5; REV; SET4; =RC5;
+254;   V25P104M5; SHC-7; J253>=Z; JSP30;
+   E20M4; DUP; =Q7; J250=Z; ZERO; =TR;BUSYQ7;
+   JSP128; TLOQ7; J252NTR; (Go if no lockout);
+251;   E10M4; V0P0; -; J253>=Z; Q7; J252=Z; CTQ7; (Kill); JS247P196;
+252;   Q5; SETB100; JS114P300; =Q5; (Release prog);
+   V0P0; E30M4; -; V9P104M5; +; =V9P104M5;
+253;   M0M5Q; ERASE; J254C5NZ; ERASE; =Q5; JP30;
+250;   DUP; J251=Z; J252; (First J if not forced);
+
+P61;   (OUT 10);
+   ZERO; =V45P104M5; JS3P29; J4;
+   V32P1; SHL-1; J4=Z;
+   V0P1; V3P155; J11=; DUP; J2=Z;
+   DUP; JSP122; J5; J3!=Z;
+5;   DUP; JSP132; J3; V1P1; DUP;
+   JSP122; J6; ERASE; J3!=Z;
+2;   V1P1; J3!=Z;
+7;   ZERO; NOT; SHL-3;
+6;   REV; JSP58;
+   JSP138;
+   C6; JSP131; =M6; V-18P101M6;
+   JS3P29; J35P0;
+   V45P104M5; J8!=Z;
+   JS3P29; J35P0;
+   J10;
+8;   ERASE;
+10;   JS2P29; J35P0;
+   EXIT1;
+3;   ERASE;
+4;   SETB110; JP2;
+11;   V25P101; JS1P161; V1P1; NEV; SHL6; J5!=Z; ZERO; =V25P101; J5;
+
+P62;   (Initial housekeeping for OUTS 2,4,8.
+   Erase out no., check at least 1 other item
+   in programs nest);
+   JS3P29; J35P0;
+   V32P1; J4P45<=Z;
+   V0P1; DUP; EXIT2;
+
+P64;   (OUT 17);
+   V5P104M5; DUP; V9P104M5; +;
+2;   =V0P1; JS2P29; J1; EXIT1;
+1;   SETB40; JP2; (Fail nest full when OUT17 obeyed);
+
+
+
+P65V2;   (OUT 50  and related topics);
+   V0=B2020212077770064; (Header word for stats block, used in P155);
+   V1=P /X*E; (Skeleton job descriptor, used in P15);
+   V2=P *SYSTEM; (Used in P52);
+
+   I4; SHC-11; V77P104M5; OR; =V77P104M5; (Show OUT50 done);
+   ERASE; (Erases the out number, see P3);
+   JSP62; J10; ERASE; JSP133; J10;
+   I7; =M7; M0M7; V3P120; NEV; SHA-1; J10!=Z;
+   SET7; =M7; M+I7;
+
+
+(== 23 ==);
+   JSP139; JSP102; (Wait, see ref 29P23);
+   JS3P29; JS35P0; (Remove N2);
+   M+I4; (Put Transfer in OUT8 queue);
+   J99P23; (End of OUT1);
+2;   PMHQ7; I7;
+3;   SETAV65P104; M5; +; SHL+16;
+   OR; ZERO; JS157P23; (Put item in OUT8 queue);
+   J50P10; (Await end of transfer);
+10;   (Invalid or wrong date); SETB700; JP2;
+
+
+
+P66;   (OUT51- overwrite job no.);
+   ERASE; SETAV93P104;
+1;   =M7; JS8P196; JS1P29; JS128P196; =M7M5; EXIT1;
+14;   (OUT 14); SETAV61P104; J1;
+15;   (OUT15); SETAV61P104; J1;
+19;   (OUT19); JS8P196; JS1P29; JS128P196; DUP; J191<Z;
+   (Check dv owned); DUP; =Q7; SET1; DUP; SHCC7; REV; J193=;
+   V17P104M5; AND; J194=Z; DUP; SHL-40; J192;
+191;   (Simple wait for N secs); NEG; ZERO; REV;
+192;   DUP; SHL-5; J193!=Z; SHA24; V0P0; DUP;
+   =E30M4; +; =E10M4; =E20M4; SETB100; J113P300;
+193;   ERASE;
+194;   ERASE; J5P3;
+
+
+P72V4;   (TINT Z,  tape labelling as in Oxford director);
+V0=P [CN]TN/ID[Q];
+(V1/4= ansewer to TN/ID);
+
+   JSP32; J1P45; DUP; SHL-4; J1P45!=Z;
+   Q6TOQ5; (In case needed by RIO);
+   DUP; =C6; =M6; ZERO; V0P26M6;SHL+24; SHLD-30;
+   SHL-12; SETB54; NEV; OR;JP45!=Z;
+   JSP13; =M7; C7; SETB60; J5=; V-17P101M7; V3P155; NEV;
+   J1P45=Z; SETB35;J4=; SETB17; NEV; J10=Z; JS103P155;
+   ZERO; NOT; JS23P58; Q6; =E20M4;
+8;   ZERO; NOT;
+   SETAV0; SETAV4; JSP8; E20M4; =Q6; V1; DUP; SHL-36;
+   SETB4637; J7=;
+   SETB5617; NEV; SET-42; =C5; J1!=Z; ERASE; ZERO;
+   SET6; =+C5; ZERO; NOT; =+M5;
+1;   V5M5;V4M5;DUP;V3M5;SHLDC5; SETB17; NEV;
+   SHL+42; J9!=Z; (Check / for AAH);
+   PERM; SHLDC5; ERASE;
+2;   JSP13; SETAV-18P101; +; =RI7; M+I7;
+   =E2M7; =M0M7N; DUP; J3=Z; =M0M7; ZERO;
+3;   ERASE; SET2;=+M7;
+   C6TOQ7;
+   POBQ7;
+   SETB32000; JS10P100; EXIT2;
+4;   (Label zero); ERASE; ZERO; ZERO;
+6;   ZERO; J2;
+5;   (Lable printend); ERASE; ZERO; V17P155;
+   (Set TSN =); V-18P101M7; SHL6;
+   SETB36; OR; SHC-6; =V-18P101M7; J6;
+7;   (Ignore); ERASE; ERASE; JP135;
+9;   +D; ERASE; ERASE; J8;
+10;   ZERO; M0M5N; M0M5; SHLDC5; REV; SHL-36;
+   SETB3775; -; J3P45!=Z; J6;
+
+
+
+(== 24 ==)
+P76V0;   (TINT X initializse prompt or prime);
+   V0=-1;
+   (V0 0 disc unprimed
+       -1 primed);
+   (V77P104;V78P104;V79P104;V80P104;OR;OR;OR;J4P45<Z;)
+   ZERO; NOT; J1P52;
+
+P100V9;   (Deal with W mag tapes)
+   (V0 nz if there are W tapes)
+   (V1-9=Brick indicators for units 7-17)
+   V0; J4P45=Z;
+   V0P26; =Q6; ZERO;
+1;   =V0;
+2;   SETB10674; JS2P26;
+   EXIT1;
+   =TR;
+3;   BUSYQ6; J5TR;
+   PARQ6; V-6M6; J11NTR;
+   DUP; SET1; SHL+23;OR; =V-6M6;
+11;   FIX; NOT; SHLD-1; =LINK; J4<Z;
+   EXITAP101;
+4;   EXIT1AP101;
+5;   ZERO; NOT; J1;
+6;   SETAV-6U; =M7; M6M7H;
+   SHC+9; SHL+1; SHC-10; STAND;
+   DUP; =M6M7H; J3!=Z;
+   J2;
+10;   SET31; FLOAT; =V-6M6;               [ set mag tape status W, i.e. waiting for director transfer
+   V0P26M6; SHL-6; SHC-18; SHL+6; SETB67;
+   OR; SHC+18; =V0P26M6; ZERO; NOT;
+   DUP; =V0; =V19P0; EXIT1;
+
+P101V30;  (W mag tape bricks);
+   (V0 nz if there are new L tapes)
+   V1=B0112121212120101;
+   V2=B0020202020204254;
+   (V3=29=label block of units 7-17)
+   V24=Q 0/0/AV0P26; (OUT 11);
+   (V25 dv number of OUT8 tape awaiting printing);
+   (V26 TINT P marker);
+   V30=P*[N]PARITY;
+   J1; J2;
+   J3; J4;
+   J5; J6;
+1;   (Count back to BT)
+   V-6P100M6; PMBQ6; J11TR;
+   NOT; NEG; =V-6P100M6; SET1;
+12;   =Q7; C6TOQ7; PMEQ7; J5P100;
+11;   DUP; SHL-23; SHL+23; =V-6P100M6;
+   SHL25; SHL-25; V1;REV; FRB;
+   V2; OR; V0P26M6; SET2; JSP6;
+   J6P100;
+2;   (Skip back to BT)
+   PMBQ6; J6P100TR;
+   ZERO; J12;
+3;   (Read label block)
+   JSP131; SETAV-18; +; =RI7; M+I7;
+   C6TOQ7; PMBQ6;
+   J31NTR; SET2; =+M7; PIBQ7; JSP100;
+31;   PMEQ7; M0M7N; JSP122;
+   J32;
+   J35;
+32;   M0M7N; JSP132;
+   J33;
+   E2M7; DUP; J34!=Z;
+(== 25 ==)
+   NOT;
+34;   JSP122;
+   J6P100;
+35;   =M0M7N;
+33;   ZERO;NOT; SHL-3;=E2M7; J6P100;
+4;   (W becomes u)
+   C6; V1P52; NEV; J42!=Z;
+   ZERO; =V1P52;
+42;   SET1; SETB177776;
+43;   SHA+18; V0P26M6; +; =V0P26M6;
+   DUP; J46=Z; J2P100<Z; V0P26M6; SET1; J45;
+46;   ERASE; JSP131; =M7; V-18M7; JSP122;
+   V-18M7;
+   SET4; =C5; V-17M7; V-16M7; DUP; PERM; NOT; SHL+3;
+   J44!=Z; REV; DC5; ERASE; DUP; J44!=Z; ERASE;      V0P39;
+44;   V0P26M6; C5;
+45;   JSP6; V-6P100M6; SHL+24; J2P100>=Z;
+   V30; SET1; JSP6; J2P100;
+5;   (W becomes L)
+   ZERO;
+51;   ZERO;NOT; =V0; SETB17765; J43;
+6;   (W becomes L, nothing typed)
+   ZERO; NOT;J51;
+
+P102;   (Hold up subprogram until peripheral transfer
+   in programs area can be obeyed. Parameters
+   given in Q7)
+   SET1; JSP10;
+2;   Q7; JSP103; J1;
+   =Q7; EXIT1;
+1;   SET1; ZERO; CAB; JS2P10;
+   J2;
+
+P103;   (Check parameters in N1 before peripheral
+   transfer which may involve programs area)
+   SET4; =RC6;
+1;   J2C6NZ; EXIT2;
+2;   V9P0M6Q; JS1P300; DUP; JS108P300;
+   J1;
+   V8P0M6; DUP; SHL-24; J1P45!=Z;
+3;   SETB30000; AND; SETB140000; OR; =K1;
+   ERASE; EXIT2;
+
+(For actual p104 see in front of P11
+   V0=B01010101/23; (HUR)
+   (V1 onwards= constants associated with
+   priorities, in groups of 4)
+   (V1-4= overflow and TR record, etc.
+    V5-8= run time
+    V9-12= PHU time)
+   V13=B0141/11;   (NS counters etc.);
+   V14=B2141/11;
+   V15=B4141/11;
+   V16=B6141/11;
+   V17=1; V18=1; V19=1; V20=1;   (CPDAR);
+   (V21=24 = A program unit pre-allocation.
+     For B programs, records types to be
+     pre-allocated on dellocation by OUT 6)
+   V25=2; V26=2; V27=2; V28=2;   (Hold-ups);
+   V29=5; V30=5; V31=5; V32=5;   (APM);
+   (V33-36= Dump for E0
+    V37-44= Current program name
+   V45-52=New program name, transfer
+   parameters, OUT4/10 marker, etc. used
+(== 26 ==)
+        only by main subprogram.
+   V53-56=Program start time
+   V57-60=Streams used by proram
+   V61-68=Serial number of prog on tape)
+
+
+   (V69 D0-15 System discs
+   D16-31 32-47 Non system discs
+   V73 Correspondence between logical and actual discs
+   V77 D0 System marker
+   D1
+   D2 OUT 41/42/43 Obeyed
+   D3 Parity
+   V81 D0-16 OUT43 selection marker
+   D32-47 last seek requested
+   V85 D0-15 D32-47NOC for OUT46
+   D16 last C block
+   D17-31 length of block
+   V89 input store for NOC);
+   (V93-V96 job desc, of progs);
+   (V97.. top half CPU time allowed for job, bottom half PHU time
+   allowed for job. Overides E1 time for CPU, does restart on job
+   if PHU time exceeded(as V9P104),set by OUT15);
+End of dummy P104);
+
+P105V2; (Consolidate core storage and swop priorities.
+   Upgrades A priorities automatically if needed)
+(V1=Q no. of quartets in P104/4/AV1P104, set up by P200);
+V2=Q 4/10/AV3P11;
+   V0; J4P54=Z;
+6;   ZERO; =V0; SET4; =RC5;
+2;   V9P0M5;
+3;   DUP; SHL+38; J5=Z;
+   DUP; JS107P300; J4;
+   (Test for store move)
+   DUP; SHL+14; SHL-38; J5=Z;
+   (ZERO; NOT; =V0P193; (Set JO marker);)
+   (Move program in store)
+   Q7TOQ4; I4=-1; DUP;SHL+14; SHL-38;
+   SHL+5; I7; -;
+   DUP; =M6; I4=+1;
+*7;   M0M4;=M6M4Q; *J7C4NZS;
+   (Alter value of base address)
+   ZERO; REV; SHC-24; SHLD-10;
+   SHC+24; SHLD-38; ERASE;
+   (Alter affected parameters in OUT 8 q)
+107;
+61;
+   (Alter affected parameters in FLEX q)
+   SETAV0P6; =RM4;
+8;   M0M4; NOT; J9=Z;
+   M0M4; JSP127; JS109P300; =M0M4Q; J8;
+9;   (Alter affected SHUPS)
+   SET10; =RC4;
+10;   V1P11M4Q; J11<Z; (Updates inactive SHUPS for benefit of OUT29);
+   V10P11M4; JS109P300; =V10P11M4;
+11;   J10C4NZ;
+5;   (Test for priority swop)
+   DUP; SHL-45; J4=Z;
+   DUP; SHA-45; M5; +; =M4;
+   V9P0M4; JS107P300; J4;
+   (Alter BA/NOLS of swopped priorities)
+
+
+(== 27 ==)
+   SETB30000; NOT; SHL+3; SHL-3; DUP;
+   V9P0M4; AND; M5; SHL+12; OR;
+   PERM; AND; M4; SHL+12; OR;
+   =V9P0M4;
+   (Alter tab words)
+   V24P0M5; SHL-8; SHL+2; M4;
+   OR; SHL+6; V24P0M4; SHL-8; SHL+2;
+   M5; OR; SHL+6; =V24P0M5; =V24P0M4;
+   (Swop bits in V0P104)
+   M4; DUP; SHL+1; +; SHL+1;
+   =C4; M5; M4; -; DUP;
+   SHL+1; +; SHL+1; =C7;
+   V0P104; SHCC4;ZERO; SHLD+6; NC4;
+   REV;SHL-6; SHCC7; REV; SHLD+6;
+   NC7; SHC-6; SHLD-6; SHL+6; REV;
+   SHCC7; OR; SHCC4; =V0P104;
+   (Swop V-stores of P104)
+   V1; =Q6;
+*12;   M4M6; M5M6; =M4M6; =M5M6Q; J12C6NZS;
+   (Alter if needed recorded priorities
+   of interrupted program, A and B input)
+   V7P0; JS110P300; =V7P0;
+   V0P52; JS110P300; =V0P52;
+   V0P199; JS66; =V0P199;
+   V1P199; JS66; =V1P199;
+   J106;
+66;   SET8; =C6; SHC-10;
+67;   JS64; DC6; SHC+6; J67C6NZ;
+   SHC+10; EXIT1;62;
+   M0M6;
+64;   SHC+12; ZERO; SHLD+3; NEG; NOT;
+   JS110P300; NOT; NEG; OR; SHC-15; EXIT1;
+65;   =M6; M0M6; J4P45=Z; JS62;
+   DUP; =M0M6; SHL-16; J65;
+106;   (Attend to OUT8 queues);
+   SETAV0P23; JS65; SETAV2P23; JS65;
+63;
+   (Alter subprogram numbers in FLEX q)
+   SETAV0P6; =RM6;
+15;   M0M6; JSP127; J16; J17;
+16;   JS64;
+17;   DUP; =M0M6Q; NOT; J15!=Z;
+   (Swop SHU stores)
+   M4; SHL+1; =M4; M5; SHL+1; =M7;
+   V2; =Q6;
+14;   M7M6; M4M6; =M7M6; =M4M6;
+   M7M6N; M4M6N; =M7M6N; =M4M6QN; J14C6NZ;
+   J3;
+4;   =V9P0M5Q; J2C5NZ;
+1;   (Set up priority swops)
+    JSP116;
+40;   (Set up B program move)
+   SET4; =RC7; I7=-1;
+   V0P117; SHL-5;
+42;   =I6;
+44;   J43C7Z;
+   V3P116M7Q; DUP; JS115P300; J44=Z;
+   V9P0M6; SHC-10; ZERO; SHLD+10;
+   I6; J45!=;
+   REV; SHL+24; SHL-38; NOT; -;
+   J42;
+45;   OR; SHC+14; SHL+10; I6;
+   OR; SHC+24; JS112P300;
+43;   V0; J6!=Z;
+(== 28 ==)
+   SET4; =RC4;
+50;   M4TOQ5; SETB20; V9P0M4Q; SHL-24; J51!=Z;
+   JS114P300; JS2;
+51;   JS113P300; ZERO; NOT; =V0; SET1; SHC-27; =V0P13;
+52;   J50C4NZ;
+   EXIT1;
+
+18;   (Claim or return extra store);
+   JSP62; J16P23; V0P105; J3P45!=Z; J19<Z;
+   (Store to be increased);
+   (Mark 1 verson bloody awful code);
+   DUP; JSP117; ZERO; DUMMY; DUMMY; SHL-37; -; J1P45>Z; (J if too much);
+   V10P0; V11P0; V12P0; OR; OR; SHL38; J1P45!=Z;(J if others in MC);
+20;   SHL14; V9P0M5; +; =V9P0M5; ZERO; J1P24;
+19;   (Store to be reduced); DUP; NEG; V9P0M5;
+   SHL24; SHL-38; -; J1P45>=Z; J20; (Not quite as bad as 1st bit);
+
+P300;   (Old seperate P routines);
+106;   (Given BA/NOL, set C7= no. of words occupied,
+   I7,M7= first and last addresses occupied)
+   DUP; SHL+38; SHL-33; DUP; J10!=Z;
+   =Q7; ERASE; EXIT1;
+10;   DUP; =I7; =M7; SHL+24; SHL-38;
+   NOT; NEG; SHL+5; DUP; =C7;
+   NEG; NOT; =+M7; EXIT1;
+
+107;   (Given BA/NOL, set up Q7 as in P106, and
+   test lock-out on progrms area)
+   ZERO; =TR; JS106; TLOQ7; J4P45TR; EXIT2;
+
+108;   (Given transfer paramters, test for I >= I7 and
+   M <= M7)
+   ZERO; REV; SHLD-16; SHL+32; SHLD-32;
+   I7; SIGN; M7; CAB; SIGN;
+   OR; J4P45<Z; EXIT2;
+
+109;   (Given transfer parameters, add M6 to I and
+   M if transfer lies in area given by I7-M7)
+   DUP; JS108P300; EXIT1;
+   M6; SHL+32; DUP; CAB; SHC+16;
+   +; SHC+16; +; SHC+16; EXIT1;
+
+110;   (Replace N1 by M4 or M5 if N1=M5 or M4 respectively)
+   M5; J1!=;
+   ERASE; M4; EXIT1;
+
+1;   M4; J2!=; ERASE; M5;
+2;    EXIT1;
+
+111;   (Set up swop of priorities given in M6, M7)
+   M6; M7; -; SHL+45; DUP;
+   V9P0M7; OR; =V9P0M7; NEG; V9P0M6;
+   SHL+3; SHL-3; OR; ;
+
+112;   (Store new BA/NOL in V9P0M6, set V0P105 nz if new
+   BA/NOL differs from previous one)
+   DUP; V9P0M6; NEV; V0P105; OR;
+   =V0P105; =V9P0M6; EXIT1;
+
+113;   (Set HU bits in priority hold-up word)
+   V25P104M5; OR; J20;
+
+114;   (Clear HU bits from priority hold-up  word)
+   NOT; V25P104M5; AND;
+20;   DUP; =V25P104M5; JP13!=Z; SET-2; J1P13;
+
+(== 29 ==)
+115;   (Given BA/NOL, set priority no. in M6, 6 times
+   priority number in C6)
+   SHL+34; SHL-46; DUP; =M6; DUP;
+   SHL+1; +; SHL+1; =C6; EXIT1;
+
+P116V3;   (Form table of BA/NOLs in order of decreasing
+   base address)
+   SET4; =RC6; V10P45; SHL-5;
+1;   SHL+36; ZERO; =V0M6;
+   SET4; =RC7;
+2;   V9P0M7Q; SHL+36; DUP; V0M6; SHL+36;
+   SIGN; J3<=Z;
+   REV; DUP; PERM; SIGN; J4>=Z;
+   V8P0M7; =V0M6; ZERO;
+3;   ERASE;
+4;   J2C7NZ;
+   ERASE; V0M6Q; J1C6NZ; ERASE; EXIT1;
+
+P117V0;   (Set in N1 parameters for space between B and
+   A programs, as C= no. of words, I,M= first and
+   last addresses)
+   JSP116; SET4;=RC7; V10P45;
+1;   V0P116M7; DUP; JS115P300; J2=Z;
+   V0P116M7Q; V0P104; SHLC6; SHL+2; J3<Z;
+   REV; ERASE; SHL+38; SHL-33; J1C7NZ;
+2;   V0; J4;
+3;   DUP; SHL-14; +; SHL+38;
+   SHL-33; SET32; +;
+4;   DUP; =I7; NEG; REV; DUP;
+   NEG; NOT; =M7; +; =C7;
+   J4P45C7Z;
+   Q7; EXIT2;
+
+P118;   (Given N1=4 for A-program or 5
+   for B, and N2=BA/NOL, sets parameters
+   prior to reading in new program)
+   SET5; DUP; =V29P104M5; SHA-1;
+   M5; DUP; =V0P52; NOT; SHL+1;
+   DUP; SHL+1; +; =C5;
+   SET1;SHCC5; V0P104; OR; =V0P104;
+   V9P0M5; OR; =V9P0M5; EXIT1;
+
+P119;   (Given first word of program name, checks it
+   for 0702--02 and extracts third character)
+   ZERO; SHLD+18; SHC-6; SHLD-42; REV;
+   SETB70202; NEV; J1P45!=Z; EXIT3;
+
+P120V6;   (General program input procedures)
+   (V3=date,V4=N number)
+   V0=B0702606257470064;
+   V1=B4160450062456177;
+   V2=B0060516500000000;
+
+11;   (TINT T enters here); =V21P104M5; V2;
+   V0P26M6; SHL+30; SHL-30; OR; V24P0M5;
+   SET2; JSP6;
+   (Read A-block)
+   C6TOQ7; JSP126; JSP102;
+   PIBQ7; ZERO; JSP10;
+   PARQ7; J14NTR;
+   SET1; JP121;
+14;   I7; =M6; M0M6N; =V49P104M5;
+   M0M6; DUP; =V45P104M5; JSP119;
+
+(== 30 ==)
+16;   SET2; JP121;
+
+   E2M6; SHL-6; SHL6;V2P65; J94=; DUP;
+   SHL-42; SETB35; NEV; J98!=Z;
+   SET5; =C6; DUP;
+93;   SHL6; DUP; J96<Z; DC6; J93C6NZ; SHL6; SHC6;
+   SETB75; NEV; J98!=Z; SETB170000; AND;
+94;   =V93P104M5; (Store job no.);
+   SETB60; NEV; J30=Z; JSP123;
+22;   (OUT 1 enters here);
+   V45P104M5; JSP119; J35P0; JS35P0;
+   SETB44; J82=;
+   SETB55;NEV; J16!=Z;
+   (Program to be read from mag tape);
+   V1P52; DUP; =M6;
+   =C7; J21C7NZ;
+19;   V49P104M5; V45P104M5; SHL+24;
+   V29P104M5; SET1; SHL+45; OR;
+   =V29P104M5; JSP55; SHL6; SETB17; OR; SHLD-24; ERASE;
+   V1;V0; SET4; JS4P6;
+20;   JS4P10;
+   V29P104M5; SHL+2; J22>=Z;
+   V29P104M5; SHL+1; J20>=Z;
+24;   SET9; JP121;
+25;   (Program not on tape)
+   C7; =M6; JSP135;
+   ZERO; =V1P52; J19;
+105;   C7; =M6; JSP135; J22; (Abandon search);
+21;      V29P104M5; SHL+3; ZERO; NOT; CONT; SHL-3; =V29P104M5;
+   V0P26M6; SHL+24; SHL-42; SETB43; NEV;
+   J19=Z;
+   ZERO; V0P26M6; SHL+24; SHLD-30; SHL-12;
+   SETB54; NEV; OR; J20!=Z;
+   V0P26M6; JSP55; OR; =V0P26M6;
+23;   IM0TOQ7; PMAQ7; ZERO; JSP10;
+   V29P104M5; SHL+3; J105>=Z;
+   PARQ7; J28TR;
+28;   PMFQ7; J25TR;
+   PMCQ7; J23NTR;
+   JSP126; JSP102; PIAQ7; ZERO; JSP10;
+   PARQ7; J29TR;
+29;   PMCQ7; PMFQ7; J25TR;
+   I7; =M6; M0M6; V45P104M5;
+   JSP137; M0M6N; V49104M5; JSP137; OR;
+   J23!=Z;
+30;   (Read B-block)
+   JSP102; PIAQ7; ZERO; JSP10;
+   PARQ7; J31NTR;
+74;   SET4; JP121;
+81;   V49P104M5; V45P104M5; SHL24;
+   SHL-8; SETB135371; SHLD-16; ERASE;
+   V24P0M5; SET3; JS4P6; J20P121; (Nod gives CRNP message);
+69;   (Binary archived);
+   ZERO; NOT; SHL-3; REV; JSP58; (Request tape);
+   J24C6Z; V0P26M6; V45P104M5; SET9; SHL18;
+   DUP; SHL12; +D; =V45P104M5; SHL-6; SHL6; =V0P26M6;
+   (Change D to M and C to L);
+   C6TOQ7; J21;
+82;   (Program to be read from disc);
+   ERASE; V89P104M5; V29P104M5; SHL37; J182<Z;
+   ERASE; JSP194; J81;
+182;   DUP; J69<Z; (J if prog on tape);
+   (Program on disc); DUP;
+   SET1; SHC-9; OR; =V89P104M5; JSP126; JS84; J74;(Read B block);
+(== 31 ==)
+31;   I7; =M6; E2M6; V45P104M5; JSP137;
+   E3M6; V49P104M5;JSP137; OR; J32=Z;
+   SET5; JP121;
+32;   (Check and assign store requirement)
+   M0M6N; SHL+24; SHL-24; (Req);
+   V1P104M5; (Limit)
+   DUP; PERM; J35P0=Z;
+   DUP; J33=Z;
+37;   DUP; CAB; SIGN; J34<=Z;
+63;   ERASE;
+39;   SET6; JP121;
+(60;   REV; ERASE; DUP; J61=Z;
+   V10P45; V0P117; -; REV; J37;
+61;   (Zero limit and req); Q7; =V1P104M5;
+62;   ERASE; JSP117; ZERO; DUMMY; DUMMY;
+   SHL-32; SHL+9; V9P0M5; +; DUP =V9P0M5;
+   SHL+24; SHL-38; NOT; NEG; SHL+5;
+   V1P101; REV;
+   FRB; V4; OR; =V14;V24P0M5; JSP55; OR; =V11;
+   ZERO; SETAV11; SETAV15; JSP8;
+   SETAV15; =Q6; V10P45; V0P117; -;
+   SETB77740; JS1P32; ERASE; DUP; DUMMY;
+   NEG; NOT; SHL-5; NOT; NEG; SHL+5;
+   DUP; CAB; SIGN; J62>Z;
+133;   V1P104M5; =Q7; JSP126; I7; =M6; DUP; J63<=Z;
+   ZERO;
+);
+33;   ERASE;
+   DUP; M0M6N; OR; =M0M6N;
+34;   NEG; NOT; SHL-5;
+35;   DUP; V9P0M5; SHL+24; SHL-38;
+   SIGN; J38<=Z;
+   Q7; JSP117; J36;
+   SHL-32; SHL+9; V9P0M5; +;
+   =V9P0M5; =Q7; J35;
+36;   REV; =V1P104M5;
+   V77P104M5; SHL+7; JP130<Z; (J if foreground);
+136;   SET1; ZERO; CAB; JSP134; J39;
+   V1P104M5; J35;
+38;   JSP193; J140; (J if JO);
+   DUP; V9P0M5; SHC-24; ZERO; SHLD+10; CAB; -; SHL-6;
+   V0P193; OR; =V0P193; OR; SHC+14;
+   =V9P0M5; ZERO; NOT; =V0P105; ZERO;
+140;   ERASE; ZERO;
+40;   (Check filler word)
+   =V1P104M5; M0M7; DUP; =E20M4; =Q6;
+   IM6TOQ7; I7; DUP; SET7; SIGN; JS1P133; J85;
+   (Read C-blocks);
+   V45P104M5; SHL-30; SETB70244; NEV; J83=Z; (J if disc);
+   JSP102; PIAQ7; ZERO; JSP10;
+   PARQ7; J42NTR;
+78;   SET8; JP121;
+85;   SET7; JP121;
+83;   (Read C block from disc);
+   V77P104M5; SHL+1; J86>=Z; V0P76; J42!=Z;
+86;   I7; NEG; NOT; DUP; =I7; =M6; M0M6; =V37P104M5;
+   (Preserve word which will be overwritten by N.O.C.);
+   M7; I7; -; SET3839; -; J85>Z; JSP102; V89P104M5; JS84;
+   J78; I7; =M6; I4; =+I7;
+   M0M6; (N.O.C.); V37P104M5; =M0M6; =V89P104M5;
+42;   M7; I7; DUP; =RM6; -; =C6; V1P104M5;
+*51;   J52C6Z; M0M6Q; +; J51C6NZS;
+52;   E20M4; SHL-32; J40!=Z;
+
+(== 32 ==)
+   (Check C-block sum)
+   M0M7; NEV; V9P0M5; SHL+5; =M7;
+   M0M7; SHL+24; J53=Z;
+   SET3; REV; JP121!=Z;
+53;   (Dispose of input unit)
+   ERASE; J47C7Z; C7; =M6; V0P26M6;
+   SHL17;J43<Z; JSP123;J47;
+43;   JSP135;
+47;   V0P52; M5;NEV; J44!=Z; ZERO; NOT; =V0P52;
+44;   (OUT 2 enters here)
+   V9P0M5; SHL+5; =M6; M0M6;
+   V33P104M5; SHLD+24; SHC+24; =M0M6;
+   =V33P104M5; V93P104M5;V29P104M5;
+   ZERO; =V29P104M5; SET2; JS114P300;
+   ZERO; =V1P104M5; V3; =E7M6;
+   E3M6; DUP; =V41P104M5; E2M6; DUP;
+   =V37P104M5; SETB20002; SHL+24; -;
+   JS3P193; JS141; (Do things if JO);
+   SHL+6; JSP55; OR; SHC-6;
+   CAB; V24P0M5; SETB33; OR; REV; DUP;
+   SHC-2; J48<Z; ERASE;
+   V77P104M5; STR;DUP; V0P76; OR; =V0P76;
+   CONT; SETB40604; SHC-15; AND; =V77P104M5;
+   ZERO; NOT; =V65P104M5; V4; =E6M6; ZERO; =V4;
+   JS109; DUMMY; DUMMY; DUMMY;
+201;   V0P57; SHC12; V0P0; DUP; =V53P104M5;
+   ZERO; =V9P104M5; SHA-24; SET30; +; FRB;
+   V23P0; SHL+1; OR; V3; SHL-18;
+   SHLD+18; SHL-6; SHLD-12;SHL+6; SHLD-24;
+   SETB177733; SHL12; OR; SHC-18; V24P0M5; SET2; OR; SHC-6; SET7;
+49;   JSP6;
+64;   ZERO; JS6P29;
+50;   J35P0;
+   EXIT1;
+141;   V9P0M5; SHL+24; SHL-33; NOT; NEG; SHL+5; =M0M6N; EXIT1;
+48;   (OUT 1 only); JS109; J110;
+107;   M6M0HN; V97P104M5; MAX; ERASE; =M6M0HN;
+   JS3P29; JS35P0; JS3P29; JS35P0;
+   SHL37; J183>=Z; JS3P29; DUMMY; DUMMY; DUMMY;
+183;   JS5P29; J50; ERASE; V77P104M5; SHL12; J200<Z;
+   ERASE; ERASE; ERASE; ERASE; J64;
+200;   V77P104M5; SETB177676; SHC-13; AND; =V77P104M5; J201;
+109;   (If Leeds prog and TL <= 1 then replace with MAX TL);
+   V37P104M5; SHL24; SHL-42; DUP; SETB45;
+   NEV; ABS; NEG; REV; SETB53; NEV;
+   ABS; NEG; AND; M0M6N; SHL-25; OR; J4P45!=Z;
+111;   ZERO; NOT; STR; ERASE; =M6M0HN; EXIT2;
+110;   VR; M6M0HN; V5P104M5; ROUNDH; -; J106V; =M6M0HN; J107;
+106;   ERASE; JS111; DUMMY; DUMMY; DUMMY; J107;
+
+84;   (Read block from disc); DUP; SHL+32;
+   JS10P196; SHLD-16; ERASE; =E21M4; I4; JSP199;
+87;   E21M4; =Q6; I6; SETB16; OR; =C7; JS4P199; PIAQ7;
+   I4; JS5P199; EXIT1; J87; EXIT2;
+
+96;   ERASE;
+98;   ERASE;ERASE;J16;
+
+P121V0;   (CRNP failure-number given in N1)   [ Cannot read new program
+   V0=B43625660002020;
+
+   DUP; V0; OR; V24P0M5; CAB; SET3; -; SET2; REV; J22<Z;
+   DUP; +; V49P104M5; V45P104M5; SHLD24; REVD;
+22;   JS4P6;
+20;   V29P104M5;
+(== 33 ==)
+   SET5; =V29P104M5; V0P52; M5;
+   NEV; J21!=Z; (J if out from disc); ZERO; NOT; =V0P52;
+21;
+   JSP55; SETB10520; NEV; JS1P26;
+   J1;
+   ERASE; JSP135;
+1;   SHC-2; J2>=Z;
+   (CRNP failure in OUT 1);
+   SET5; J1P15; (CRNP in OUT1 does not say FAILSIO);
+
+2;   V2P52; =C7; J3C7Z;
+   MANUALQ7; ZERO; =V2P52;
+3;   V0P26; =Q6;
+4;   M0M6Q; ERASE; J10C6Z;
+   JSP125; J4;
+   JS1P27; (Make unit U); J4;
+10;   (Clear BA/NOL, PHU, etc.)
+   ZERO;=V77P104M5; (Clear disc allocation and other markers);
+   ZERO; =V37P104M5; ZERO; =V41P104M5;
+   ZERO; =V33P104M5; V9P0M5; DUP; JS115P300; DUP;
+   SETB147777; SHL+3; SHL-3; NOT; AND; JSP136;
+   V0P104; SHCC6; SHL+4; NC6; SHL-4;
+   SHCC6;=V0P104; EXIT1;
+
+P122V1;   (Check given word as mag tape identifier)
+   V0=B3252326532563253;              [ underlined word JUNK
+   V1=B377727377777777/43;            [ mask for allowable characters, digits, letters and a few others
+   DUP; SETB77; AND;
+1;   =C7; DUP; J1P45=Z;                 [ EXIT1 for OK, includes zero tape , i.e. work tape / scratch tape
+2;   V1; ZERO; SHLDC7; REV; ERASE;
+   SHL+27; SHLD+6; DUP; J1<Z;       [ J if current char is OK
+   ERASE; ERASE; V0; EXIT2;
+
+P123;   (Dispose of program inpt ptr, given C7)
+   C7; =M6; V0P26M6; DUP; SHL+24;
+   SHL-42; SETB65; NEV; J1!=Z;
+   MANUALQ7; SHL-6; SHL+6;
+1;   =V0P26M6;
+   ZERO; =V2P52; EXIT1;
+
+P125;   (Given unit number in M6, check if valid
+   and owned by priority in M5)
+   V0P26M6; JSP55; NEV; SHC+1; SHL+41; J4P45!=Z;
+   EXIT2;
+
+P126;   (Given priority no. in M5, set base address in
+   it and base address+7 in M7)
+   I0TOQ7; SET7; =M7; JP128;
+
+P127;   (Check given word for D0=1 and D1-11 all the same,
+   i.e. parametr in FLEX queue)
+   DUP; J1>=Z;
+   DUP; SHL+1; SHA-44; J4P45=Z; (The  SHA is changed from SHA-38
+   in a desperate bid to et KKT92P1 to work);
+1;   EXIT2;
+
+P128;   (Add base address of priority in M5 to I7 and M7)
+   V9P0M5; SHL+38; SHL-33; DUP;
+   =+I7; =+M7; EXIT1;
+
+P130V0;     (Handle foreground jobs);
+V0=-1;   (Letter of dumped job);
+   V0; J136P120>=Z; (J if if one level already dumped);
+   V1P104M5; V9P0M5; SHL+24; SHL-38; -;
+(== 34 ==)
+   V0P35;=RC6;
+1;   DUP; V9P0M6Q; SHL+24; SHL-38;
+   -; J2>Z; (J if no big enough);
+   V76P104M6; SHL+7; (Look at foreground marker and OUT40);
+   V24P104M6; SHC-2; (Lok at subprog activity bit and absent bit);
+   OR; DUP; SHL+1; OR; J3>=Z; (J if OK to roll out);
+2;   J1C4NZ;
+5;   ERASE; J136P120; (Wait and come round again);
+3;   M-I6; M5; JS4; =M5; JSP30; J5;
+4;   M6TOQ5; JSP30; V9P0M5; JS106P300; JSP55; =V0;
+   JSP139; JSP102; (Wait for no lo and no 2ND subprog);
+   (Now OK to dump);
+   ZERO;
+6;   DUP; DUP; SET96; +; DUP; =E31M4; (SHUL* of sec subprog);
+   SET40; xD; CONT;(Extent of max transfer); VR; V9P0M5;
+   SHL+24; SHL-38; NOT; NEG; SHL+5;
+   MAX; ERASE; (Leaves size of transfer in N1);
+   (VR set if this is last transer);
+   NEG; NOT; (High address of transfer);
+   REV; (Strat sector);
+   SET40; xD; CONT; SHL+16; (Low address); OR;
+   REV; SET1152; +; (Strat dump on track 12);
+   J7V; (J if last time);
+   JS10; E31M4; J6;
+7;   (Last time); JS10;
+   V9P0M5; DUP; SHL+5; =M6; DUP; =E2M6;
+   SHC+24; SHL+10; SHC+14; =V9P0M5; (Sets NOL = 32 words);
+   SET1152; =M0M6N; JS13; SET7; =RM6; Q6; SET33;JS10;
+   (Put entry for JO on disc);
+   SETB40; J113P300; (Hold up obj pro);
+10;   (Write on global disc);
+   SET768; +;LINK; J234P196;
+12;   (Invalid OUT25); SETB670; JP2;
+50;   (Swop levels - only available to JO);
+   DUP; SHL+16; SHL-32; REV;=LINK; LINK; JS1P54; JS247P196;
+   J8P196; (Set TR if swop not possible);
+25;   (OUT25, restore dumped prog if D0=0,
+   swop levels if D0=1);
+   (Used by JO, N2=Q-/LO/HI of prog now in store);
+   JS3P193; J11; SETB10; JP2; (Fail 01 if not JO);
+11;   JS3P196; J50<Z;
+   JSP133; J12; C0TOQ7; ZERO; JSP10;
+   V45P104M5; SHL+17; V9P0M5;
+   SHC+24; SHLD+10; SHC+14;
+   =V9P0M5; ERASE; (Chop off old prog )
+   JS8P196; V0; JS1P56; J12;
+   M7; I7; -; SHL-5; (New NOL);
+   V9P0M5; DUP; SHL5; =M7; (Old BA); SHC-14; OR; (Old was 0, put in new one);
+   SHC+2; SHL+12; I7; DUP;=M6; SHL-5; OR; (Put in new BA);
+   M0M7; =M0M6; (Copy word 0 so that TINT B is not lost);
+   =V9P0M5; ZERO; NOT; =V0; SETB40; JS114P300; (Clear HU);
+13;   ZERO; NOT; DUP; =V19P0; =V0P105; EXIT1;
+39;   (OUT39, initiate foreground job);
+   JS3P196; ERASE; SET2048; MAX; V1P193; MAX; =V1P193;         [ compare store request with JO size, and any previous request
+   ERASE; ERASE; ZERO; NOT; =V0P193; J8P196;                   [ set the JO request flag, and return to user-mode program
+
+
+P131;   (Leaves 3 times M6 in M1)
+   M6; DUP; SHL+1; +; EXIT1;
+
+P132;   (Check length of given mag tape identifier)
+   SHL-42; SETB35; NEV; J4P45!=Z; EXIT2;
+
+P133;   (Housekeeping for OUT involving
+(== 35 ==)
+   peripheral transfer. Checks given paramters,
+   copies to V45P104M5 and, with BA added, to Q7)
+   DUP; =V45P104M5; =Q7;
+   I7; DUP;
+1;   M7; CAB; SIGN; OR;
+   V9P0M5; SHL+24; SHL-38; M7; SHL-5;
+   SIGN; OR; J4P45<Z; (Fail)
+   JSP128; EXIT2;
+
+P134;   (Hold up subprogram during program input,
+   examine V29P104M5 for TINT A termination)
+   V29P104M5; SHL+3; NOT; NEG; SHC-3;
+   =V29P104M5; JS2P10; V29P104M5; DUP;
+   SHL+3; SHL-3; =V29P104M5; SHL+1; J4P45<Z;
+   EXIT2;
+
+P135;   (Dispose of program tape, given in M6)
+   SETB21000; J10P100;
+
+P136V0;   (Store new BA/NOL, check lockouts
+   cleared form old area, clear PHU)
+   V0=P LOCK-OUT;
+   Q6; M5TOQ6; REV; JS112P300; =Q6;
+   DUP; SETB30000; AND;
+   SETB140000; OR; =K1; REV; JS107P300;
+   (Lo on); ERASE; ZERO; DUMMY;
+   CLOQ7; J4P45!=Z;
+10;   V0; V24P0M5; SET2; J4P6;
+
+P137;   (Form N1 NEV N2, clear characters
+   corresponding to - IN N1)
+   DUP; SET8; =C6;
+1;   ZERO; SHLD+6; SETB36; MAX;
+   SIGN; SHL-42; OR; DC6; J1C6NZ;
+   PERM; NEV; AND; EXIT1;
+
+P138;   (Change bit in V17P104M5)
+   SET1; SHLC6; V17P104M5; NEV; =V1P104M5; EXIT1;
+
+P139;   (Given area in I7, M7, clears C7, leaves
+   subprogram via EXIT1- no extra links
+   saved, resume when area not locked
+   out and OUT 8 subprogram dead)
+   C0TOQ7; SET1; JS3P10;
+1;   M0M4N; JP139!=Z; EXIT1;
+
+[ OUT8 output a buffer to the output well.
+[ This was rewritten at Leeds to use 2 tapes which were automatically swapped over.
+
+
+P154; DUMMY; (This is V-1P155)
+P155V17;      (Process OUT8 queues, D.H. 24/11/67);
+
+V0=B4006402401; (Selection chars);
+V1=P ****HRS[C];
+V2=B0377777777600300;
+V3=P +KOUTPUT;
+V5=B7477777777777777;
+V6=B63646200212;  (Str 00, SHL-3);
+V17=P PRINTEND; (Ident of discarded OUT8 tape);
+
+   ZERO;
+   ZERO; NOT; =V4P23;
+93;   =TR; Q0TOQ4; V1P23; =Q7; (L queue);
+   J99C7Z; (J if no tape); BUSYQ7; J100TR;
+   V0P23; DUP; J101=Z; (If queue empty); JS1;
+
+
+(== 36 ==)
+   J100;
+99;   (No L tape); V4; J100>=Z; (If no TINT J);
+   JSP161; SET9; =RC6; SET3;=I6;
+   SHC+6; NEG; NOT; SHC-6;
+*98;   V5P101M6Q; J96=;
+97;   J98C6NZS; J91;
+96;   V3; V1P101M6; NEV; J97!=Z;
+   C6; NEG; =M6; V15P26M6;
+   SHL+24; SHL-42; SETB65; NEV; J90!=Z;
+   (J if tape still on machine);
+91;
+   (Switch); SET4; =RC5;
+   V0P161; NOT; NEG; =V0P161;
+   V-1; =V4;
+95;   V57P104M5; DUP; ZERO;
+   SIGN; NEG; CONT; =V57P104M5Q;
+   J95C5NZ; V2P23; DUP; =V0P23;
+   V3P23; REV; J92!=Z; SETAV0P23; SHLD-16; ERASE; SHC+16;
+92;   =V1P23;
+   ZERO; =V2P23; SETAV2P23; =V3P23; J93;
+162;   SETB7777;
+163;   V2P161; CAB; JS2P161; SHL+12; OR; SHL+6; C5;
+   OR; SHL+6; V12P104M5; SHL-46; SHL+3; NEG; =C6;
+   V0; SHLC6; SETB77; AND; OR; EXIT1;
+90;   ERASE;
+100;   V3P22; SET2; =M4; =Q7; J102C7Z; BUSYQ7; J4P45TR;
+   V2P23; DUP; J1P45=Z;
+1;   METQ7; J112TR;
+7;   PARQ7; ZERO; =TR;
+   DUP; =Q6; DUP; J11<Z;
+   SETAV7; DUP; =I7; =M7; TLOQ7; J1P45TR;
+11;   DUP; STR; ERASE; ZERO; SHLD+12; =RC5; IM6TOQ7;
+   SHL-44; DUP; =M6; SHL-1; DUP; =M5;
+   SHL+12; SETB130000; +; =K1; ERASE; (Set CPL);
+   M7; SET2; J254=; SHL-1; J2!=Z; DUP; NOT; NEG; J3;
+2;   V11P11M6; STR; REV; =V11P11M6;
+12;   ERASE; I7; =RM6; M0M6;
+   DUP; J3!=Z; V1P23M4; SETAV0P23; M4; +;
+   SHLD-16; ERASE; SHC+16; =V1P23M4; (Reset empty queue);
+3;   =V0P23M4; (Upatde queue);
+   J6>=Z;M7; I7; -; JS162; =M0M6;
+4;   MWQ7;
+5;   EXIT1;
+254;   (If punch then do gap);
+   C5; SHC-4; J12<Z; ERASE; DUP; SET4; +; J3;
+
+6;   (Director transfer);
+   SETAV7; DUP; =I7; =RM6;
+   M7; DUP; SHL-4; J50!=Z;
+   =LINK; EXITAR8;
+50;   (OUT50); ERASE; SET8; =RC6;
+51;   M7M6; =V8M6Q; J51C6NZ;
+   M-I6;
+   M7; DUP; =I6; =+M6; CLOQ6; (Clear out 50 lock out);
+   V12; SHL+24; J53!=Z;
+52;   V4P161; V3P161; DUP; NOT; NEG; =V3P161;
+   FRB; V5P161; +; V12; OR; =V12; (Serial no);
+53;   SETAV16; =M7; V0P65; =V7; V0; =M0M7; J4;
+*8;   J20; *J21; *J22; *J90P15;
+   *J23; *J72P15;
+*;   (Gap on punch); V2; SET72; -; J31;
+23;   (Stream terminator);
+   SET1; SETB7772; M5; J33=Z; V4; NEG; NOT; =V4;
+33;   JS163; =V7; V2; =M0M6QN; M6TOQ7; MLWQ7; EXIT1;
+(== 37 ==)
+20;   (Header block); SET1; SETB7741; J33;
+21;   (Title 1);
+   V3P120; ZERO; SHLD12; V29P0; J42<Z;
+   (If off line then add 2 dots); SETB3737; SHL18; OR;
+42;   V104P104M5; J40<=Z;
+   (Controlled prog); V100P104M5; J41;
+40;   V92P104M5;
+41;   ZERO; SHLD+24;
+   V8P0M5; SHL+5; =M4; E3M4; E2M4;
+   SHLD24; =M0M6QN; OR; =M0M6QN; OR;
+   =M0M6QN; =M0M6QN; V104P104M5; J25>=Z;
+   V100P104M5; =M0M6QN;
+   V108P104M5; =M0M6QN;
+   V112P104M5;J31;
+25;   SETB02;
+31;   =M0M6QN; C6; NEG; JS162; =V7;
+32;   M6TOQ7; J4;
+22;   ZERO; C5; SHLD-3; SHL+4; V6; OR; SHLD+15; =M0M6QN;
+   ERASE; V0P57; SHC+12; V0P0; SHA-24; SET30; +; FRB;V23P0; SHL+1;
+   OR; V1; SHLD+18; SHL-6; SHLD-36;
+   ERASE; SHC24; =M0M6QN; SETB170202; J31;
+101;   (L queue empty); ERASE; V57P104; V58P104; OR;
+   V59P104; OR; V60P104; OR; J100<Z; (J if still open);
+   V77P104; SHL11; J253>=Z; (J if ELDON will not print tape);
+   V0P161; =V25P101; J255; (Store serial number for OUT 11);
+253;   Q7; SET16; SET288; JS1P193; J90; (J if nogo);
+   JSP126; V0P161; =M0M7N; (Put reel no tape in E8 of prog); =Q7;
+255;   M0TOQ4;
+107;
+   SETAV5; DUP; =I7; =M7; MLWQ7;
+   V1P23M4; SHL+32; SHC+16; =V1P23M4;
+   C7; =M6; JP135;
+102;   (No N tape); V2P23; J4P45=Z; I7; J4P45<Z;
+   JS103; I7=-1;
+   Q7; =V3P23; (Claim tape);
+   ZERO;NOT; =M5; V17;
+104;   ZERO; NOT; SHL-3; REV; JSP58;J105C6Z;
+   C6; DUP; SHL+1; +;
+   SETAV-17P101; +; DUP; =RM7; V3; =M0M7Q; C6TOQ7;
+   V0P161; NOT; NEG; JS1P161;
+   SHC+6; NEG; NOT; SHC6; =M0M7;
+   NEG; NOT; =I7; POBQ7; ZERO; JSP10; SET256; =M7;
+   MWIPEQ7; I0TOQ7; V3P23; =M7; Q7; =V3P23; EXIT1;
+103;   SETAV2P11; =RM4; I4; =C4; M0M4; J106=Z; LINK; ERASE;
+106;   EXIT1;
+105;   ZERO; J104;
+112;   (End tape warning on OUT 8  tape);
+   Q4; REV; JS7; JS110; =Q4; V0P23M4; DUP; J112!=Z; NOT; =RM5;
+108;   V58P104M5Q; DUP; J111=Z; STR;
+   M4; SHL-1; -; NOT; J111!=Z; SET46; FLOAT;
+109;   DUP; FIX; =C5; ERASE; SET4; =M7; JS6;
+   JS110; SHC+9; SHL+1; SHC-10; STAND;
+   DUP; J109!=Z; =V57P104M5; ZERO;
+111;   ERASE; M5; SHA-1; SHL-1; J108=Z;
+   M4; J4P45=Z; V-1; V1P23; SHL-32; J91=Z;
+   =V4; V0P161; NOT; NEG; =V0P161; J107;
+110;        JSP60; ERASE; BUSYQ7; J110TR; EXIT1;
+   (Wait loop, crude but effective);
+
+
+P161V5;   (V0=Reel no of mag tape)
+   V1=B1212121212121212;
+
+
+(== 38 ==)
+   V2=B1010101010101010;
+   (V3=Stats serial no);
+   V4=B1212121212121212;
+   V5=B40202020;
+   V0;
+1;   V1; REV;
+2;   FRB; V2; SHL+1; OR; EXIT1;
+
+P192;   (General text file location routine);
+(V0 is mask)
+(V1=ident 1);
+(V2=ident 2);
+
+   (OUT 20  -  Parameters as follows
+           N1= out number
+   N2= Q-/LO/HI (644 word buffer)
+   V0/1= identifier
+Exit nest empty.
+Buffer containing
+   V0= D0-23 Disc address of index block
+       D24-47 Program address of entry - if found
+       D24-47  0 - if not found
+   V1= FOC library/FOC archive
+   V3= mask
+   V4-643= index block);
+
+   JS3P196; ERASE; JSP133;    (Get param into Q7 - datumised);
+   J5P196;      (Fail 60 if dud paras);
+   M7; I7; DUP; =M6; -; (Calc buffer size and leave address in M6);
+   SET643; NEV; J199!=Z;    (Fail if buffer is wrong size );
+   M0M6N; SET8; =C6;  (The next bit gets a mask with 00 for - 77 elsewhere)
+2;   ZERO;SHLD6;SETB36;DC6;
+   MAX;SIGN;SHL-42;OR;
+   J2C6NZ; =E3M6;(Stores mask);
+   JS8P196;  (Remove programs NZ);
+   JS1P139; (Await 2nd subprogram);
+   PMHQ7;          (Lock out the buffer area);
+   M+I4; I4; =+C4; ZERO; JSP199;   (Switch subprog and wait for disc );
+   V6P120; V10P45;
+   NEG; NOT; J98=;   (Check that there is an index andleave its address in N1 );
+   DUP; =M6; M0M6; =Q6; =+M6; (M6 points to 1st entry);
+   I7; =M5;
+   M0M5N; M0M5; SHLD-30; ERASE; (Base ident preceded by B02);
+   E3M5; NOT; SHL-30; (Mask with B77 for B36);
+   DUPD; OR; PERM; NOT; AND; (N1 has B00 for B36 - N2 has B77);
+*6;   DUP; M0M6Q; -; J16<=Z; J6C6NZS;
+16;   ERASE; M-I6; M0M6N; (1st possible block);
+   REV; J18C6Z; SET1; =+C6; (J if we must search to the bitter end);
+*7;   DUP; M0M6Q; -; J17<Z; J7C6NZS;
+18;   ZERO; J15; (Search to end because we may be in the last block);
+17;   J18C6Z; M0M6N; (Address of 1st block which cannot index this ident);
+15;   =E2M5; ERASE;=E20M4;
+19;   PMHQ7;  (Lockout transfer area - esp 1st 4 words);
+   SET4; =+I7;   (Set correct core addresses fro R87P120);
+   JS87P120; J99;   (Read block from disk and fail if parity);
+   SET-4; =+I7;   (Reset I7 to its correct value);
+   SET3; =I6; I7; =M6;  (Q6 will be used to scan the index blobk);;
+   E2M6; E3M6; (Mask); M0M6N; M0M6; (Iden);
+   SET2; =+M6;
+   SET212; E2M6; SHL-32; -; DUP; =C6; J4<=Z;
+*11;   E3M6Q;J5=;
+1;     J11C6NZS;
+4;   ERASE; ERASE; ERASE; (Dispose of mask and ident);
+   M0M7; (Next index block address);
+(== 39 ==)
+   REV; J20=; (J if not found because we have tried all poss blocks);
+   DUP; =E20M4; (Keep address of next block);
+   SHL+16; SHL-32; J99!=Z; (Fail if we are reading crud);
+   PMHQ7; ZERO; JSP199; (Await disc);
+   J19;            (Loop to read the next block in the index);
+98;   (Failures caus not found);
+20;   ERASE;
+99;   M7; SET643; -; DUP; =I7; J30;   (Get start of buffer without using I7);
+
+5;   PERM; DUPD; M0M6N; NEV; AND; PERM; REVD; J1!=Z;
+   E2M6; SHL16; J1<Z; xD; ERASE; ERASE;
+   M6;
+30;   I7;
+31;   DUP; =M6; -; M0M6;      (Put rel core address in V0);
+   CLOQ7;    (Make sure there is no lockout even on 1st 4 words);
+   E20M4; SHC-16; =M6M0H;  (Put disc address in top half );
+   V6P120; NEG; NOT; =M7; M0M7; =M0M6N;
+   I4; SHC-14; V77P104M5; OR; =V77P104M5; (Leeds use bit 12);
+   J99P23;    (Usual end to 2nd subprog);
+199;   (Fail invalid OUT20);
+   SETB420; JP2;  (Fail no = 42 );
+
+P193V2;   (Input JO if appropriate);
+V1=-1;   (Foreground job marker);                      [ = foreground store size requested
+(V2 time JO last called);
+   V0P105; J4P45!=Z; (J if core slide waiting);
+   SETAV7P32; =Q6; M0M6; J9>=Z; (J if no queued TINT T);
+   JS5P4; (Enter TINT routine to attempt prog input);
+9;   V26P101; J4P45<Z; (Dont load JO if operator does not want it);
+   SET17; V1; DUP; J7>=Z; (J if foreground job);
+8;   ERASE; V0; J10=Z; (J if no JO req);
+13;   SET2048; JS1; EXIT1;
+6;   ZERO;=V0; V0P0; =V2;
+   V26P101; SHL2;J4P45<Z; (J if no JO mess);
+   SETB25257; SHL+30; JSP55; OR; I4; J4P6;
+
+1;   (Input prog into given store limit if available);
+   DUP; JSP117; J12P45; SHL-32; SIGN; J3P45>Z; (Exit if nogo);
+2;   (Input prog without store availability check);
+   JS18P52; J3P45; V0P52; NOT; J3P45!=Z; (Exit if prog input in progress);
+   (Now OK to go);
+   JSP30; I7; SHL-5; JSP118; =V1P104M5;
+   I4; SHC-7; =V77P104M5; (Suppress FLEX output);
+   JS19P52; (Initiate input); EXIT2; (EXIT2 if prog initiated);
+
+3;   (Check for JO, EXIT1 if JO);
+   V41P104M5; V37P104M5;
+4;   (Ditto ident in N1,N2); SHLD-30; ERASE;
+   V17P254; (JO ident); NEV; J4P45=Z; EXIT2;
+5;   V49P104M5; V45P104M5; J4; (As 3 but during prog input);
+
+7;   V0P130; J8>=Z; (J if there is already a foreground job running);
+   JSP117; J3P45; ERASE; JS2; EXIT1;
+   ZERO; NOT; =V1; SET73; SHC-8; =V77P104M5; (Set foreground);
+   J6; (To clear V0 and give monitor message);
+10;   (If time since last JO >4 mins then call JO);
+   V0P0; V2; -; SHL-32; J1P45=Z; J13;
+
+
+11;   (OUT11, transfer from absolute address, used by JO);
+   JS3P196; ERASE; JSP133; JSP196; JS1P139;
+   V45P104M5; SHL-32; =RM6; M7; I7; DUP; =RM7; -; NOT; NEG; =C6;
+111;   M0M6Q; =M0M7Q; J111C6NZ; J8P196; (Copy core and go);
+
+(== 40 ==)
+12;   (OUT12, set up table in upper core store);
+   JSP117; J112; ERASE; JS2P196; ERASE; C7; REV; JSP133; J114;
+   V6P120; =RM6; I6=-1; M7; I7; -; NOT; NEG; DUP; =C7;
+   -; J112<Z; I7=-1;
+113;   M0M7Q; =M0M6Q; J113C7NZ; M6; NOT; NEG; SHL-5;
+   SHL+5; =V10P45; J8P196;
+114;   ERASE;
+112;   SETB410; JP2;
+
+P194V2;    (Manipulate PPI);
+(V0 = hash function of current ident);
+V1=P PPI*FULL;
+(V2 stores ID2 for OUT S13);
+
+   ZERO; J6; (Find ident);
+1;   ZERO; NOT; J6; (Replace);
+129;   E20M4; J1=Z;
+2;   ZERO;ZERO; NOT; CONT; (Delete);
+6;   =E20M4; Q0TOQ7; I4; JS1P199; (Awiat FH access);
+   V49P104M5; V45P104M5; SHLD-30; ERASE;
+   DUP; SHL-36; SETB253; NEV; NEG; NOT; SHL-36; NOT; AND;
+   SET90; %I; REV;ERASE; (Compute hash function);
+   SHL+6; SETB600; +; DUP; =V0; (OK as only one subprog at one time);
+5;   I4; REV; JSP197; JS29; (Read sector from PPI);
+   SET13; =RC7; SET3; =I7; V45P104M5;
+*15;   V1P197M7Q; DUP; J4=Z; J16=;
+17;   J15C7NZS; (Look for first word match);
+   ERASE; V0P197; SHL+3; SHL-41; (Sector no);
+   NOT; NEG; SHL+6; SETB14000; J10!=; ERASE; SETB600;
+10;   V0; J5!=; ERASE; (PPI full);
+   V1; V24P0M5; SET2; JS4P6; JS2P199;
+   LINK; ERASE; J128; (Fails 64);
+4;   (Empty slot found); ERASE;
+   E20M4; NOT; J3!=Z; (J if not replace);
+   Q7; =E20M4; JS14; JS29; E20M4; =Q7; (Insert new entry);
+   SET3; SHC-2; =E20M4; (Change to delete,with no mod check);
+   V45P104M5; (First word of ident);
+3;   V-1P197M7; J17!=Z; ERASE; J2P199; (Not found);
+14;   V49P104M5; V81P104M5;
+19;   =V0P197M7; =V-1P197M7;
+18;   =V-2P197M7; I4; J1P197;
+16;   V-1P197M7; V49P104M5; E20M4; SHL1; J22>=Z; (J if find or OUT 28);
+   NEV; SHL-6; SHC-12; SHL-12; J23; (Ignore mod butno wild -);
+22;   JSP137; (For find do NEV with wild -);
+23;   J17!=Z; (fOUND);
+   V-1P197M7; =V2; (Keep ID2);
+   V0P197M7; (FOC); =V0; E20M4; DUP; NOT; J8=Z; ROUND; J200>=Z;
+   (Delete); ZERO; V2P197M7; V3P197M7; JS19; JS29; (Set empty);
+           (Only set 1st wd !=Z if more entries in same sector);
+   J101;
+8;   ERASE; JS14; JS29;
+101;   JS2P199; V0; EXIT2;
+
+200;   (Mark prog used); V0; SHL19;J101<Z; (Jif already);
+   I4; DUP; SHC-20; V0P197M7; OR; =V0P197M7;
+   JS1P197; JS29; J101;
+
+27;   (OUT27); ZERO;
+127;   =E20M4; JS11P196; =V45P104M5; JSP119;
+128;   SETB640; JP2;
+   SETB44; NEV; J128!=Z; JS3P196; ERASE; =V49P104M5;
+   E20M4; J130!=Z; JS3P196; ERASE; =V81P104M5; (F.O.C. of new pEOG);
+130;   Q0TOQ7; JS1P139; JS129; ZERO;DUMMY; DUMMY;
+131;   JS8P196;
+
+(== 41 ==)
+132;   JS2P29; JS35P0; EXIT1;
+
+28;   (OUT28); ZERO; NOT; J127;
+29;   V30P101; SETB24650; SHL+30; SET2; J4P6;
+
+
+
+
+
+P195V7;     (Disc allocator OUTs);
+V1=P ***DISCS;
+V2=-1; (New disc availability marker);
+
+V0=2; (Pointer for OUT26 = gives sector of last allocated block);
+V7=B 00 03 77 43 00 00 00 00 ; (Check for OUT29);
+53;   ERASE; SETB530; JP2;
+   (The next bits are the various parts of OUT44,
+   which is attached with OUT26, - see below);
+
+*211;   V1P197M7Q; J212=Z;
+213;   J211C7NZS; J244; (Go back to OUT26 path);
+
+212;   (Spare logical disc found look for more);
+   V45P104M5; =RC6; M7TOQ6;
+*214;   V0P197M6Q; J213!=Z; J214C6NZS;
+   (Note: this may go off end of buffer in P197,
+   but will stop because coding is non-zero);
+
+   (Users area now found);
+   SET401; xD; CONT; M7; x; SET81; x; SHL+16;
+   V45P104M5; DUP; =C7; OR; STR; ERASE;
+   (I field = address of user area, M= no discs);
+   V77P104M5; OR; =V77P104M5;
+*215;   ZERO; NOT; =V0P197M7Q; *J215C7NZS;
+   JS8P196; J162; (Remove progs N2 and clear up);
+
+44;   (OUT44, claim userdiscs 29/1/70);
+   JS3P196; NEG; NOT; SHL-4; J53!=Z;
+   ZERO; NOT;CONT; V77P104M5; SHL+16; J226=Z;
+   ERASE; SETB540; JP2; (Fail OUT44 obeyed twice);
+
+45;(OUT45, deallocate user disc);
+   V77P104M5; DUP; SHL-32; SHL+32; =V77P104M5;
+   DUP; SHL+8; J15P3<Z; (Check no OUT40 on);
+   SHL+16; DUP; J242=Z;
+   ZERO; SHLD+16; SET40; %I;
+   =RM7; NOT; NEG; NOT; NEG;=E20M4; SHL-32; =C7; Q7; =V45P104M5;
+   ZERO; JS1P199; (Await fixed head access);
+   J25; V45P104M5; =Q7;
+145;   ZERO; =V1P197M7Q; J145C7NZ;
+   I4; JS161; ZERO;
+242;   ERASE; V25P104M5; SHC-2; J91P15<Z; (If from P151);
+   (Let OUT24 clear up nest);
+24;   (Claim system discs);  (OUT 24);
+   SETB510; JS3P29; JP2; JS3P29; JP2; J1P45;
+
+26;   (OUT 26, new version with bi disc 22/10/65);        [ queston the date here - misreading of 22/10/68 ??
+(The position of a bit in the ASL is given by
+        6*(D*N*P)*H  ,  where D is disc no                [ this must be a misread - probably for 6*(D+N*P)+H  or 6*(D*N+P)+H
+             N is no of system discs                      [ perhasp this comment should have been cylinders not discs ...
+        P is position                                     [ ...  after the switch to cylinder geometry
+        H is head no);                                    [ --- see original comment between labels 10 and 11
+   ZERO;
+
+(== 42 ==)
+226;   DUP; =V45P104M5;  (Side entry for OUT44);
+   Q7; =V19P0; (Reset EDT);
+   DUP; SHL+3; NOT; AND;J5P3>=Z; (Check no OUT40 on);
+   Q0TOQ7; JS1P139; (Await 2nd subprog);
+17;
+   ZERO; JS1P199; (Await fixed head access);
+   V0; (Start on same sector as last allocated block, OUT29 resets);
+10;   =E20M4; JS5; (Read ASL sector);
+   E20M4; DUP; NEG; NOT; SHL-2; SHL+5;
+   DUP; V45P104M5; NOT; SHL-42; AND; SHL-3; OR;
+   SET40; REV; -; =RC7; (Set up loop);
+   (Keeps 2 cylinders for user discs);
+   V45P104M5; J211<Z;  (J if OUT44);
+*11;   V1P197M7Q; NOT; J12!=Z; (J if free block);
+   J11C7NZS;   (Sector full when C7 zero);
+244;   NOT; NEG; (Sector := sector+1);
+   SET6; J10!=; (Goto next sector if sector != 6);
+13;   ERASE; (ASL full);
+   JS2P199; (Release fix H);
+   V1; V0P20; V24P0M5; SET3; JS4P6;
+   ZERO; ZERO; ZERO; NOT; CONT; ZERO;
+   JS2P10; ERASE; ERASE; J17; (Look every TINT H);
+12;   =V0; (Vacant block found);
+   M-I7; ZERO; V1P197M7; DUP; PERM; NOT; SHAD-1; STR; ERASE;
+   ZERO; FLOATD; FIX; NEG;DUP; NOT; =C7; SET6; %I; (Head no in N1);
+   SHL+36; =Q6; E30M4; NEG; NOT; NEG; NOT; SET40; xD; CONT;
+   M7; x; SHL+3; +; SET16; %I; (Disc no in N1);
+   SHL+6; =M6; DUP; =+M6; (Position);
+   SHL-6; PERM; ERASE; ERASE; J13!=Z; (J if ASL full);
+   Q6; SHL+6; JS131P194; (Replace out no by NOC in prog's nest);
+   I4; SHCC7; OR; =V1P197M7; (Set bit in ASL);
+162;   ZERO;
+161;   E20M4; J163=Z; (J if no sector has been read);
+   JS2P197; JS29P194; (Write back sector);
+163;   J2P199; (Deallocate FH and finish out);
+5;   (Read ASL sector and do sum check);
+   I4; E20M4; SHL+6; JSP197; JS29P194;
+22;   E20M4; =M7; V1M7; JS4P197; J4P45=Z;
+   SETB103473; SHL+32; V24P0M5; SET2; JS4P6; (Type ASL on FLEX);
+   I4; E20M4; SHL+6; JS3P197; JS29P194; J22;
+15;   SETB620;JP2; (Incorrect OUT29 buffer);
+29;   (OUT29, delete ASL bits);
+   JS11P196; ERASE; JSP133; J15; (CHECK PARAMTERS);
+   SET2; =V0; (Reset OUT26 pointer);
+   C0TOQ7; JS1P139; (Await 2nd subprog);
+   JS8P196; (Remove program's N2);
+   ZERO; JS1P199; (Await FH);
+   V45P104M5; DUP;SHL-15; =RM6; DUP; SHL-16;
+   -; NOT; NEG; SHL1; =C6; (Q6=N/1/ADD*2);
+   Q0TOQ7; JSP128; (M7 = BA); ZERO; =E20M4; (Set first);
+16;   M7M6QH; DUP; V7; AND; J255!=Z; DUP; J161=Z; ZERO; SHLD+4; (Disc)
+   REV; ZERO; SHLD+6; (Position);
+   SHL+4; (Multiply by number of S-discs - i.e. 16);
+   CAB; x; SET6; xD; CONT; REV; SHL+9; SHL-45; +; (Bit pos in N1);
+   SET1920; %I; Q7; CAB; SET2; x; (Sector);
+   E20M4; J14=;(J if same as last time);
+   E20M4; REV; =E20M4; PERM; =E11M4;
+           (BA in SHUP of ZSP gets updated by P105);
+   =E21M4; Q6; =V4P104M5; J160=Z; (J if forst time);
+   ZERO; JS2P197; JS29P194; (Write back current sector);
+160;   JS5; (Read new sector);
+   V45P104M5; =Q6; E21M4; E11M4; ZERO;
+14;   ERASE; REV; SET48; %I; NOT; =C7; =M7; (Address of word in sector);
+
+(== 43 ==);
+   V1P197M7;; I4; NOT; SHCC7; AND;=V1P197M7;           [ Hans had =V1P197M47;
+   =Q7; J16C6NZ; J162;
+37;   (OUT37);
+   JS3P196; SHL-24; SET2112; (NOL on global);
+   -; DUP; J100P196>=Z; NEG; (Max NOL in N1);
+   SHLD+24; DUP; =M7; (Required BA);
+   MAX;ERASE; M7; OR; SHC-24; (Actual BA/NOL);
+   =V85P104M5; VR; J147P196; (Reset EDT and erase N1);
+40;   (OUT40, inhibit other levels from disc);
+   JS3P196;JS8P196;ERASE; SHL-47; =Q7; JS1P139; Q7;J140=Z;
+   V77P104M5; SHL+8; JP45<Z; (Exit if already done);
+   ZERO; JSP199;
+   (Wait in disc queue so that any other OUT40 is cleared);
+   V77P104M5; SHC+8; ZERO; NOT; CONT;
+   V1P199; SHL+6; SHL-6; ZERO; NOT; CONT; J141; (Suspend Q);;
+142;   (Side entry used by P15 AND TINT 10);
+   V77P104M5; SHC+8; STR;J1P45=Z;
+   V1P199; SHL+6; C4; SHLD-6; NOT; =V19P0; (Release Q, sET EDT);
+   JS141;(Put everything away where it belongs);
+143;   SET-4; JS5P199; EXIT1; J143; EXIT1; (Wait till all is quiet);
+140;   JS142; EXIT1; (This JS is needed to keep SJNS OK for P10);
+141;   =V1P199; SHC-8; =V77P104M5; EXIT1;
+   (Enter P199 to enable next subprog if inhibit cleared);
+255;   ERASE; (Fail in OUT29); E20M4; J254=Z; JS2P197; JS2P194;
+254;   JS2P199; SETB470; JP2;
+
+
+
+
+
+P196;   (Disc transfer OUTS);
+101;   ZERO; SHLD+45; SHL+6; OR; SHC+9; EXIT1;
+11;   (Check no OUT40 on); V77P104M5; SHL+8; J129<Z;
+2;   (Check for systems prog); V77P104M5; DUP; SHL+5; OR; J129>=Z;
+3;   (Reset EDT); Q7; =V19P0;
+   (Check nest); JSP62; J128; EXIT1;
+128;   SETB510; J4;
+129;   SETB10;
+4;   LINK; ERASE; JP2;
+5;    SETB600; JP2;
+7;   xD;
+17;   =LINK; ERASE;  (Spare item in SJNS is removed later on);
+6;   SETB560; J4;
+9;   ERASE; SETB550; JP2;
+21;    (OUT21);
+31;   (OUT 31); ZERO; NOT; J127;
+22;   (OUT 22); ZERO;
+127;   =V49P104M5; JS2;
+132;   ERASE; V73P104M5; STR; ERASE;
+130;   =E20M4; JSP133; J5; C0TOQ7; JSP102; JS1P139;
+   V45P104M5; SHL-32; SETB17700; AND;
+   E20M4; V49P104M5; JP198;
+100;   ERASE; ERASE; SETB650; JP2; (Invalid global address);
+23;   (OUT23); JS2; ERASE; JS126;
+147;   Q7; =V19P0;
+8;   JS3P29; JS35P0; EXIT1;
+126;   JS10;
+   =V73P104M5; EXIT1;
+10;   ZERO; SHLD+4; JS101;
+   REV; SHL-42; SHL+9; OR;
+   EXIT1;
+30;   (OUT30); SET1;=V49P104M5; JS3; ERASE; ZERO; J130;
+32;   (OUT32); JS3; ERASE; JS126; ZERO; =V49P104M5; JS3; J132;
+
+(== 44 ==);
+41;   (OUT41, write to user disc); JS3; ZERO; NOT; J142;
+42;   (OUT42, ditto but read); JS3; ZERO;
+142;   =V49P104M5; SHL-32; DUP;
+   V77P104M5; SHL+16; DUP; SHL+1; +; ZERO; SHLD-16;
+   SHL+8; J236; (Changes disc to sector no);
+143;   SET96; %I; =I7;
+   SET16; %I; REV;
+   SHL+9; REV; JS10; OR; REV; SHL+10; I7; SHLD-10;
+   ERASE; REV; J130;
+47;   (OUT47); JS147; Q0TOQ7; JS1P139;
+    V77P104M5; SHC+2; DUP; J1P45>=Z; STR; ERASE; SHC-2; =V77P104M5;
+247;   V1P104M5; DUP; SHC+1; J1P45<Z; SHC-2; =V1P104M5; EXIT1;
+33;   (OUT33); JS3; ZERO; NOT;
+136;   =V49P104M5; SHL-32; DUP; V85P104M5;
+   DUP; J70=Z; (Set TR if red box job does OUT34);
+   ZERO; SHLD+24; SET768; +; (Add on global disc BA);
+236;   CAB; +; PERM;
+   SHL-24; SIGN; J100>=Z; (Check disc address not too big);
+138;   J143;
+34;   (OUT34); JS3; ZERO; J136;
+36;   (OUT36); JS3; SHL-32; SET768; +; ZERO;
+234;   =V49P104M5; J143;
+70;   +D; ERASE; ERASE; JS8; J247;
+
+
+
+
+
+
+
+
+
+P197V41;        (Transfer fixed head sector);
+   (N1=sector, N2=SJNS count);
+V0=QB16/AV1/AV40;
+V18; (Max number of system discs allowed,
+   the only chnages necessary to increase this are in this routine);
+
+100;   DUP; V0; SHL-32; NEV; SETB17700; AND; J4P56=Z;     [ label 100 must be on a word boundary
+   (Does EXIT2 if sector already present);               [ labels 100 and 1 are temporarily overwritten at start-up in P298
+3;   V0; =Q7; SETB100016; OR; =C7;
+   Q7; =V0;
+   NOT; NEG; (Add 1 to SJNS count); DUP; =V41; JSP199;
+11;   V0; SHL-32;=C7; JS14P199;
+   PICQ7; JS6P199; EXIT1; J11; EXIT2;
+5;   ZERO;
+4;   (Form sum check);
+   SET40; =RC7;
+*10;   V1M7Q; DUMMY; DUMMY; NEV; J10C7NZS; EXIT1;
+2;   (Write ASL sector);
+   JS5; V0; SHL+3; SHL-41; =M7; =V1P195M7;
+*1;   (Write to disc); NOT; NEG; DUP; =V41; Q0TOQ7; JSP199;     [ label 1 must be on a word boundary
+12;   V0; =Q7; JS14P199; (Check on disc Q);
+   POCQ7; JS6P199; EXIT1; J12; EXIT2;
+
+
+
+
+P198;   (Transfer to disc);
+   (N1= -1 write, 0 read, +1 FH read,  N2=posn.  N3=sector);
+
+   SHLD+16; SHL+16; OR; OR; DUP; =Q6; DUP; =E21M4; =E20M4;
+
+
+(== 45 ==);
+1;   SETB14000; M6; -; SET40; SHC-7; x; I7; +; M7; SIGN; J10<=Z;
+   V77P104M5; SHC2; STR; ERASE; SHC-2; =V77P104M5; (Clear parity);
+   C6; ABS; SHL-1; J9!=Z;
+   JS8P196; M+I4; I4; =+C4; (Erase progs N2, switch subprog);
+   PMHQ7; (Set LO to preserve area);
+9;   ZERO; JSP199; (Wait in queue);
+12;   E20M4; DUP; SHC+16; =Q6; SETB16; OR; =C7;
+   M6; DUP; NEG; NOT; J4=Z; JS4P199; DUP; J2=Z;
+   DUP; SETAR15P15; NEV; SHL32; J15=Z;
+   POAQ7; NOT; J3=Z; (Checks for read in P15);
+16;   ZERO; JS5P199; J14; J12;
+14;   E20M4; SHC+16; =LINK; EXIT1;
+4;   JS14P199; PICQ7; J13;
+2;   PIAQ7;
+13;   ERASE;
+3;   ZERO; JS5P199; J99P23; J12; J99P23;
+15;   ERASE; PIAQ7; J16;
+10;   SETB500; JP2;
+
+
+
+
+
+
+P199V3;    (Share out disc);
+V0=-1;   (FH Q);
+V1=-1; (Disc Q);
+(V2 last seek address);
+(V3 last read address);
+
+
+   (Await disc); Q0TOQ6;
+   V1; DUP; DUP; SHL+1; AND;(-ve if Q empty);
+   V77P104M5; SHL+8; (-ve if Q suspended by this level);
+   OR; (-ve if OK to go ahead with transfer);
+   J11>=Z; C4; SHLD+42; =V1; J3P45;
+11;   DUP; V23P0; SHL+1; AND; ZERO;
+   FLOAT; FIX; =C7; ERASE; C4; NOT;
+   SHL+42; NOT; SHCC7; AND; =V1M6;
+   SETB100000; =C7; NOT; NEG; JS3P10;
+   EXIT1;
+1;   (Await access to fixed heads);
+   I4; SHC-3;V29P104M5; OR; =V29P104M5;
+   ZERO; NOT; =Q6;
+   V0;
+    V0P197; DUP; ZERO; NOT; CONT; =V0P197;
+   J11<Z; J3P45;
+2;   (Release fixed heads);
+   V29P104M5; SHL+3; SHL-3; =V29104M5;
+   ZERO; NOT; =Q6;
+   V0; DUP; J13>=Z; ERASE; V0P197;
+   STR; ERASE; =V0P197; EXIT1;
+3;   (Allow disc access if free, entered every EDT);
+   V1; DUP; =TR; SETB16; =C7; BUSYQ7; J1P45TR; Q0TOQ6;
+   DUP; SHL-43; NEG; NOT; =M5;
+   PARQ7; J16NTR; V77P104M5; SHL2;J21>=Z;
+   V2; DUP; NOT;J71=Z; V3;SHL3; ZERO; SHLD3; JS72;
+   SHL24; REV; SHL-44; JS72; OR; SHL6; REV; DUP; ZERO; SHAD6; JS72;
+   PERM; SHL-44; REV; SHL-47; SHL3; OR; JS72; SHL24; OR; SHL6; J73;
+71;   ERASE; V3; SHL3; SHL-41; JS72; SETB100465; SHL9; SHC24;
+73;   V30P101; SETB4407; SHC-12; NEV; V24P0M5; SET4; JS4P6;
+21;   SET1; SHL+44; V77P104M5; OR; DUP; =V77P104M5; SHL+2; J18>=Z;   ( SET; -> SET1; ???? )
+16;   JS13; (Clear HU for completed transfer);
+19;   V1; DUP; J1P45<Z;
+(== 46 ==);
+18;     SHL-42; =M7; J15;
+13;   NOT; ZERO; NOT; SHLD+6; NOT; =M7; NOT; =V1M6;
+15;   V11P11M7; STR; J35P0=Z; DUP; =V11P11M7; =Q7; CLOQ7; EXIT1;
+6;   V41P197;
+5;   (Wait for transfer and check parity);
+   (EXIT1 fail second time, EXIT2 try again, EXIT3 OK);
+   NOT; NEG; SETB100000; =C7; JS3P10;
+   V25P04M5; J20!=Z; M5; =V14P0; (Resume obj prog after disc trans);  [ if no hold-ups select this program for resumption
+20;   V77P104M5; SHC+3; STR; DUP; J17<Z; (J if parity);
+   ERASE; SHL-1; SHC-2; =V77P104M5; EXIT3; (No parity, clear D2);
+17;   NEG; DUPD; OR; SHC-3; =V77P104M5; (Set D2, clear D3);
+4;
+   SETB16; =+C6; BUSYQ6; J35P0TR; PMAQ6; Q6;
+24;   =V2; Q7; =V3; EXIT1;
+14;   BUSYQ7; J35P0TR; ZERO; NOT; J24; (FH);
+72;   SETB1212; REV;FRB; SETB2020; OR; EXIT1;
+
+P2939V0;
+
+   (OUT13);
+   V0; SET99; J14=;
+13;   DUP; =V0P1; NOT; NEG; =V0; EXIT1;
+14;   ERASE; ZERO; J13;
+
+52;   (OUT52); ERASE;  V1P1; =V101P104M5;
+   V2P1; =V109P104M5;
+   V3P1; =V113P104M5;
+   V9P104M5; V5P104M5; SHA-24;
+   SHLD+24; NOT; NEG; =V105P104M5; ERASE; EXIT1;
+
+53;   (OUT53); ERASE; JS1; SHA-24; REV;SHA-24; REV;     [ unsure about the JS1;
+   V0P1; J2P64<Z; ZERO; =V105P104M5; JSP64;
+1;   V105P104M5; NEG; NOT; ZERO; SHLD+24;
+   SHL+24; REV; V9P104M5; REV; -; REV;
+   V5P104M5; REV; -; DUP; CAB; +; EXIT1;
+
+54;   (OUT 54); ERASE;
+   V1P1; DUP; NOT; J2=Z; =V101P104M5;
+   V2P1; =V109P104M5; V3P1; SHL-6; SHL6;
+   SETB02; OR; =V113P104M5; ZERO;
+2;   NOT; =V105P104M5; EXIT1;
+
+
+(End of DIRECTOR proper the rest is overwritten
+after initial input);
+
+
+
+P200V45;        (Initial routine on reading in Director.
+   read and type unit list,ask for machine
+   size,A-prog details,date and time);
+   V0=B0207645155450063;           [ cnTIME S       lowercase for non-printing chars
+   V1=B5041625156470044;           [ HARING D
+   V2=B5162454364576200;           [ IRECTOR
+   V3=B20202020006744;             [ 0000 WD
+   V4=B6375/11;                    [ Se
+   V5=B2020172020172020;           [ 00/00/00
+   V6=B0207647160456334;           [ cnTYPES;
+   V9=B0207636457624147;           [ cnSTORAG
+   V10=B4577777777777734;          [ Edddddde
+   V12=B0207074357624500;          [ cnnCORE
+   V13=B5557446554456334;          [ MODULES;
+(== 47 ==);
+   V15=B0207070744416445;          [ cnnnDATE
+   V16=B441755177134;              [   D/M/Y;
+   V19=B7473575675735756;
+   V20=B1212011212011212;          [ radix word
+   V21=B0207076451554500;          [ cnnTIME
+   V22=B5756002224365057;          [ ON 24-HO
+   V23=B6562004354574353;          [ UR CLOCK
+   V24=B0207070707505765;          [ cnnnHOU;
+   V25=B6263175551566334;          [ RS/MINS;
+   V27=B0207413660625747;          [ cnA-PROG
+   V28=B6241550044456441;          [ RAM DETA
+   V29=B51546375/23;               [ ILSe
+   V30=B0207544566455463;          [ cnLEVELS
+   V31=32768;
+   V34=Q1/AY1/AY31;
+   V35=B3770037700177400;
+   V36=B776/8;
+   V39=B0207464151540277;          [ cnFAILcd
+   V40=B6520200002072020;          [ U00 cn00
+V41=-1;   (Silent marker);
+V42=P ENGS,[EM];
+V43/44=P [C]QN-LINE*M/C[3QQ];
+(V45 Reply);
+
+   K4; ERASE;                              [ turn off the hooter
+   SETAP104; SETAV1P104; DUP; =M6;
+   -; SHL-2;=C6; SET4;=I6; Q6; =V1P105;    [ constant for scanning program variables
+   SETAV31; SHL-5; SHL+5; DUP; =V0P117;    [ the absolute address of the end of director
+   DUP; V31;REV;-; SHL-2; JS200; (Set up number user words);
+   V0P9; REV; FRB; V3; OR; =V3;            [ insert director size in title message
+   SETAV0; =RI5; SETAV4; =M5; JSP201;      [ ... and type it out on console
+   SET2; =C5; MANUALQ5; SET4; =C5; MANUALQ5; (Hoot on or goodbye);        [ set devices 2 and 4 unready (PTR + CR) ??????????
+   V39; =Y0;
+100;   V34;=Q5; PIBQ5;                         [ reading config info on reader 1
+101;   K4; ERASE; BUSYQ5; J101TR;              [ await paper tape reader
+   PARQ5; J104NTR;
+102;   SETAY0; =RI5; SETAY31; =M5; JSP201;     [ output FAIL + echo of input if parity
+103;   K4; ERASE; J103;                        [ and stop for ever, but don't annoy everybody by hooting
+105;   J106<Z; J100;
+104;   SETAY1; =Q6; JSP32; J105; =C7;          [ read a number
+   V36; V35; SHLDC7; REV; ERASE;
+   J102>=Z; V40; C7; SHLD-3; SHL+3;
+   OR; SHC+21; =V37;
+107;   JSP32; J108; =C7; ZERO; NOT;
+109;   =V38; C7; SHL-4; J102!=Z; SET7;         [ 2020fix
+   V37; C7; SHLD-3; SHL+3; OR; SHC+9;
+   C7; =M7; DUP; =V0P26M7; SHL+17;
+   J110<Z; ERASE; SET1;
+110;   C7; SIGN; J102>Z; V38; J107!=Z; J100;
+108;   DUP; =C7; J100<Z; ZERO;J109;
+106;   JSP206;
+2;   SETAV12; =RI5; SETAV14; =M5; JSP202;
+   J2; V14; DUP; V42; NEV; DUP; =V42; J70=Z;
+   SHL-36; SETB3775; NEV; DUP; =V41; J60=Z;
+   SETAV14; =Q6; JSP204; J2<Z;
+61;   DUP; SHL+12; =V10P45; NEG; NOT;
+   SHL-3; J2!=Z; ZERO; =V0;
+   JSP209; (Obtain disc device/unit no);
+   JSP208; (Obtain OUT 8 reel no)
+   V42; J16=Z;
+15;   SETAV43; =RI5; SETAV45; =M5; JSP202; J15;
+   V45; SHL-42; SETB71; NEV; J16!=Z;
+   (If on line then set D0 V29P0); ZERO; ZERO; NOT; CONT; JS200;
+16;   ZERO;
+(== 48 ==);
+9;   ERASE;
+10;   SETAV15; =RI5; SETAV18; =M5; JSP202;
+   J10; SETAV17; =Q6; JSP204; J9;
+   DUP; J9=Z; =I5; JSP204; J9;
+   DUP; =C5; SET13; SIGN; J10>=Z;
+   J10C5Z; JSP204; J9; DUP; SET100;
+   SIGN; J9>=Z; DUP; SET64; SIGN;
+   J9<Z; DUP; =M5; V19; REV;
+   SHL+46; J11!=Z; SHC+24;
+11;   SHCC5; SHCC5; SHL-46; SET26; +;
+   I5; SIGN; J10<Z; I5; SET100;
+   xD; ERASE; C5; +; SET100;
+   xD; ERASE; M5; x; V20;
+   REV; FRB; +; =V3P120; V42; J13=Z; JSP210; J10;
+   ZERO;
+12;   ERASE;
+13;   SETAV24;
+14;   =RI5; SETAV26; =M5; JSP202; J13;
+   SETAV26; =Q6; JSP204; J12; DUP;
+   SET24; SIGN; J12>=Z; SET3600; xD;
+   ERASE; =Q5; JSP204; J12; DUP;
+   SET60; SIGN; J12>=Z; SET60; xD;
+   ERASE; Q5; +; SHL+24; =V0P0;
+   V0P0; =V2P193; (Dont start JO immediately);
+   E2; SHL-24; SHL+12; SETAV3P101; OR; SHL+12; SETAV0P104; OR;
+   =E2; (Set up word 2 for OUT 11);
+   J23P0; (Enter Director PROPER);
+70;   ERASE; ZERO;=V41;
+60;   SET8; J61;
+200;   V29P0; OR; =V29P0; EXIT1;
+
+
+P201;   (Type message);
+1;   K4; ERASE; BUSYQ5; J1TR; POBQ5; EXIT1;
+
+P202;   (Type query direct);
+   JSP201; M5; I5; DUP; NOT;
+   NEG; =RM5; -;
+1;   K4; ERASE; BUSYQ5; J1TR;
+   PARQ5; =C5; J6TR;
+2;   SET8; J3C5NZ; =TR;
+6;   EXIT1;
+3;   =C6; M0M5Q;
+4;   ZERO; SHLD+6; SETB75; J5=; DC6;
+   SETB37; SIGN; SHC-1; NOT; =TR;
+   J4C6NZ; ERASE; J2;
+5;   ERASE; ERASE; J6NTR; EXIT2;
+
+
+P204;    (Fetch decimal number);
+   SETB77740; J1P32;
+
+
+P206;   (Read prog.lst);
+   V34P200; =Q5; SET16; =RC6;
+1;   PIBQ5;
+2;   K4; ERASE; BUSYQ5; J2TR;
+   PARQ5; J102P200TR; Y2; Y1; DUP; JSP119;
+   J102P200; J102P200; SHL+47; PERM;
+   SHLD-30; ERASE; OR; =V0P254M6Q;
+   J1C6NZ; EXIT1;
+
+
+
+(== 49 ==);
+P208V9;   (OUT8,COPLOT,STREAM,COUNT);
+V0/1=P [CN]OUT*8*REEL*NO[Q];
+V3/4=P [CNN]STREAM*COUNT[Q];
+V6/8=P [C8N]COPLOT*REEL*NO[Q];
+
+   V41P200; J3=Z;
+   SETAV0; =RI5; SETAV2; =M5;
+   JSP202; JP208;
+   SETAV2; =Q6; JSP204; JP208<Z;
+   =V0P161; (OUT8 reel no);
+   C7; SETB40; x; SET1000; xD;
+   REV; =V3P161; JP208<Z;
+2;   SETAV6; =RI5; SETAV9; =M5;
+   JSP202; J2; SETAV9; =M5;
+   JSP204; J2<Z; =V0P2939;
+1;   SETAV3; =RI5; SETAV5; =M5; JSP202; J1;
+   SETAV5; =Q6; JSP204; J1<Z; DUP; =V-1P155;
+   =V4P155; EXIT1;
+3;   ZERO; =V0P161; SET1000; =V3P161;
+   ZERO; =V0P2939; V42P2000; J4=Z; ZERO;
+5;   DUP; =V-1P155; =V4P155; EXIT1;
+4;   SET9999; ZERO; NOT; =V26P101; J5;
+
+
+P209V21;  (Temporary disc set-up);
+V0=QB16/AY3840/AY7679;
+V1=QB616/AY32/AY3631;
+V2=Q90/40/AY32;
+V3=Q13/3/0;
+V4=QB616/AY3840/AY7439;
+V5=Q0/AV6/AV7;
+V6=P [CN]PRIME[Q];
+V8=Q1/AY32/AY39;
+V9=P[CCN]NO-GO;
+V10=P[CN]PARITY;
+V11=QB216/AY3840/AY3999;
+V12=P *IDRP[EM];
+V13=Q1/AY32/AY32;
+V14/16=P [NC] DISC * MUST *BE * PRIMED [EM];
+V17=Q 0/AV14/AV16;
+(V18=Disc prime marker);
+V19=Q B16/AV19/AV19;
+V20=Q 10/4/AY5200;
+(V21 Zero if prime Y, -1 if prime  X, +1 if prime N);
+
+   SETB16; =RC4; PMAQ4;
+(Read IDRP and store on disc);
+   V8;=Q5; SETB16; =C5; PICQ5; JS12;J100; V19;
+   =Q15; PMAQ15; PIAQ15;JS12; J100; V19; SHL16;
+   SHL-32; SET3; NEV; V6;
+   Y38; NEV; OR; J60=Z; V17; =Q5; JSP201; ZERO; NOT; =V18;
+   V42P200; J103P200=Z; (Stop if engs and disc nogo);
+60;   V12; =Y1;
+   V8; =Q5; PIBQ5; JS12; DUMMY; DUMMY; DUMMY; PIAQ5;
+   JS12; J100;Y34; SHL-30; SETB70260; NEV;
+   Y39; SHL-5; SETB40000; NEV; V6; =Y38;
+   OR; J102P200!=Z; Y39; =Q5; Y34; SHL+18; SETB70244; SHLD-18;
+   ERASE; =Y34;
+   V13; =+Q5; PIAQ5; SETAY32; =I5; JS12; J100;
+   SETB16; =C5; POCQ5; JS12; JS100;
+
+111;   SET3840; =RC4;
+*10;   ZERO; =Y3840M4Q; *J10C4NZS; (Clear new PPI);
+   ZERO; =V21; (Show prime Y); V41P200; J61=Z;
+(== 50==);
+V5; =Q5; JSP202; J11;
+   SETAV7; =Q6; JSP31; J11; J11; J11; C7;
+   SETB70; J120=; (J if prime X);
+   SETB71; J20=; ( J if prime);
+   SETB56; NEV; J11!=Z; (J if not N);
+63;   SET1; =V21; (Show prime N); V1; =Q5; PICQ5; (Read PPI);
+   JS12; JS100; JSP298;
+   JS7; JS12; JS100; (Write back new PPI);
+
+   (Form ASL sum checks);
+   V11; =Q5; PICQ5; JS12; JS100; (Read ASL from disc);
+150;   SET4; =RC6;
+   SET768; =Y3970; (No of sectors in logical user disc);
+   ZERO; =RC7;
+102;   SET40; =C7; ZERO;
+*101;   Y3840M7Q; *NEV; J101C7NZS; =V3P195M6Q; J102C6NZ;
+   V11; =Q5; POCQ5; JS12; JS100; (Write back ASL);
+   (Claim global disc and write empty job Q);
+   SETB100016;=RC5; PMAQ5;V21;J69>Z; (j IF PRIME n);
+           (Select track 0 of global);
+   SET3840; =RC4;
+*51;    ZERO; NOT; =Y3840M4Q; *J51C4NZS;
+68;   V0; =Q5; POAQ5; JS12; JS100; EXIT1;
+
+69;   (Clear any jobs which were going on when Director put in);
+   V0; =Q5; PIAQ5; JS12; J100; V20; =Q15;
+*64;   M0M15Q; NOT; J65!=Z;
+67;   J64C15NZS; J68;
+65;   M-I15; M0M15N; SHL-24; SET40; xD; CONT;
+   =RM14; SET39; =C14; ZERO; NOT; DUP; =Y3840M14Q;
+*66;   ZERO; =Y3840M14Q; *J66C14NZS; DUP; =Y3840M14; DUP;
+   =M0M15; DUP; =M0M15N; DUP; =E2M15; =E3M15; M+I15; J67;
+
+61;   V18; J62!=Z;J63;
+120;   ZERO;NOT; =V21; (Show primed and mode X);
+20;   (Prime); ERASE;
+62;   JS7; (Write empty PPI); JS12; J100;
+   V21; DUP; =V0P76; (Set primed or not if Y or X);
+   ZERO; NOT; SHL32;=Y3968; SETB13200; =Y3969;
+   ZERO; NOT; DUP; =Y3841; DUP; =Y3842; SHL12; =Y3843;
+   J150=Z; (J if prime Y); SET128; =RC5;
+   (For mode X set ASL all ones);
+   236;   ZERO; NOT; =Y3840M5Q; J236C5NZ;
+   (ASL set up for prime X); J150;
+
+7;   V4; =Q5; POCQ5; EXIT1; (Write back new PPI and exit);
+11;   SETAV9; =RI5;M+I5; JSP201; J111;
+12;   K4; ERASE; BUSYQ5; J12TR; PARQ5; J4P45TR; EXIT2;
+100;   SETAV10; DUP; =RI5; =M5; JSP201; J103P200;
+
+
+P210V14; (Compute day of week);   [ used in check that the correct date was input at start-up
+V0=B 03 36 14 62 50 35;
+V1/2=P SUNDAY[DQ];
+V3/4=P MONDAY[DQ];
+V5/6=P TUESDAY[Q];
+V7/8=P WDNSDAY[Q];
+V9/10=P THRSDAY[Q];
+V11/12=P FRIDAY[DQ];
+V13/14=P SATDAY[DQ];
+
+   M5; DUP; NOT; NEG;  REV; NEG; NOT; SHL-2;
+   +; SET12; C5; -; SET-3; xD; CONT; =C15;
+   V0; SHLC15; SETB7; AND; x; C5; SET2; -;
+(== 51 ==);
+   J1<=Z; M5; SET3; AND; J1!=Z; NOT; NEG;
+1;   I5; NEG; NOT; x; SET7; %I; REV; ERASE; DUP; JS200P200;
+   SHL1; SETAV1; x; DUP; =RI15; NOT; NEG; =M15;
+2;   Q15TOQ5; JSP202; J2; M0M15; SHL-42; SETB71;
+   NEV; J4P45!=Z; EXIT2;
+
+
+P297V0; (Simulate PPI in core);
+   V0=40/6;
+
+   SET1; =+Q1;
+   DUP; V0P197; SHL+16; OR; SETB16; OR; SHC-16; =V0P197;
+   JS2;
+*11;   Y3600M15Q; =V1P197M7Q; J11C7NZS; EXIT2;
+1;   V0P197; SHL-32; JS2;
+*12;   V1P197M7Q; =Y3600M15Q; J12C7NZS; EXIT2;
+2;   SHL-6; DUP; SHL+2; +; SHL+3; =RM15; SET40; =RC7; ERASE; EXIT1;
+
+
+P298V5;   (Optimise PPI);
+V0=Q90/40/AY32;
+V1=Q2/1/AV3P11;
+V2=B07024402454456;
+V3=B0702440253;
+V4=Q13/3/0;
+V5=B 07 02 44 02 45 44 56 22;
+
+   Q0TOQ14;
+   R100P197; =Q10; R1P197; =Q11;
+   R9; =R100P197; R10; =R1P197; (Bus FH handler);
+   Q0TOQ5; V1; =Q4; (Play at level 0);
+   V0; =Q8;
+2;   V4; =Q9;
+3;   M8M9; V5; J5=; SHL-6; V2; J4=; (J if EDN but not CON2);
+   SHL-12; V3; J5!=; (J if not K prog);
+4;   JS60;
+5;   ERASE; J3C8NZ;
+   M+I8; DC8; J2C6NZ;
+   V4; =Q8;
+6;   V0; =Q9; (Put rest in PPI, 1 from each sector in turn);
+7;   M8M9Q; J8=Z; JS60;
+8;   J7C9NZ;
+   M+I8; DC8; J6C8NZ;
+   Q10; =R100P197; Q11; =R1P197; EXIT1;
+
+*9;   JP297;
+*10;   J1P297;
+60;   M-I9; M9; NOT; NEG; =RM3;
+   K4; ERASE; (Keep clock happy - this bit takes 6 secs);
+   SET1; =+Q14;
+   M8M3N; =V81P104; M8M9N; =V49P104; M8M9; =V45P104;
+   ZERO; =M8M9; (Mark as gone); M+I9;
+   JS1P194; EXIT1; (Wierd if same in twice);
+   ERASE; V49P104; V45P104; SHLD+16; SET2; J4P6;
+   (Put ident of duplicated prog in FLEXqueue);
+
+
+P999V9;   [ diagnostic aid
+      V0 = Q 0/AV1/AV3;
+      V1 = B0702640645636477;
+      V2 = B5156470702640677;
+      V3 = B4563645156470202;
+
+      K4; ERASE;
+      V0; =Q1; TWQ1;
+2;    K4; ERASE; BUSYQ1; J2TR;
+
+      SETB6551; =M15;
+      M0M15; ZERO; SHLD16; SETB177400; AND;
+      SET6; OR; SHLD-16; ERASE; =M0M15;
+      JP200;
+
+      SET6; =R1; J1;
+$1;   SETAP104; EXIT1;
+      MRWDQ0;
+
+
+FINISH;
+
+

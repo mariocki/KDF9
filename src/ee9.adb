@@ -1,6 +1,6 @@
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -64,7 +64,7 @@ procedure ee9 is
    procedure complain (about : in String; because : in String := "") is
    begin
       show_proper_usage(
-                        "Parameter " & about & " is not valid"
+                        "Parameter «" & about & "» is not valid"
                       & (if because = "" then "." else " because " & because & ".")
                        );
    end complain;
@@ -106,7 +106,7 @@ procedure ee9 is
 
          -- Fail any non-flag parameter.
          if argument(index) /= '-'  then
-            complain(about => "'" & argument & "'");
+            complain(about => argument);
          end if;
 
          -- Fail a too-short flag parameter.
@@ -120,7 +120,7 @@ procedure ee9 is
                argument(index..index+1) = "-m"                    then
             for i in index+2 .. argument'Last loop
                if is_invalid_miscellany_flag(argument(i)) then
-                  complain(about => """" & argument & """ at """ & argument(i) & """");
+                  complain(about => argument);
                end if;
             end loop;
             return;
@@ -147,12 +147,12 @@ procedure ee9 is
       end check_flag_setting;
 
    begin -- check_all_flag_settings
-      if CLI.Argument_Count = 0 then
-         return;
-      end if;
       for i in 1..CLI.Argument_Count loop
          check_flag_setting(i);
       end loop;
+      if the_program_name_position = 0 then
+         show_proper_usage("No program name parameter was given.");
+      end if;
    end check_all_flag_settings;
 
    procedure impose_all_flag_settings is
@@ -212,7 +212,7 @@ procedure ee9 is
          elsif argument = "-sp" then
             set_execution_mode(program_mode);
          elsif argument = "-st" then
-            set_execution_mode(test_program_mode);
+            set_execution_mode(privileged_mode);
          elsif argument = "-d-" then
             set_diagnostic_mode(fast_mode);
          elsif argument = "-df" then
@@ -235,57 +235,47 @@ procedure ee9 is
       end loop;
    end impose_all_flag_settings;
 
-   function plain (f : String)
+   function name_part_of (f : String)
    return String
    is (f(f'First+1 .. f'Last));
 
    function the_program_name
    return String
-   is (plain(CLI.Argument(the_program_name_position)));
-
-   procedure tidy_up (reason : in String) is
-   begin
-      Put_Line(Standard_Error, reason & ".");
-      close(the_log_file_name);
-      CLI.Set_Exit_Status(CLI.Failure);
-   end tidy_up;
+   is (name_part_of(CLI.Argument(the_program_name_position)));
 
 begin -- ee9
 
    check_all_flag_settings;
    open(the_log_file_name);
+   get_settings_from_file("1");
+   configure_the_IOC;
+   impose_all_flag_settings;
+   revise_the_IOC_configuration;
+   log_line(
+            "This is ee9 6.2e, compiled by "
+          & Standard'Compiler_Version
+          & " on "
+          & GNAT.Source_Info.Compilation_ISO_Date
+          & ".",
+            iff => the_log_is_wanted
+           );
+   display_execution_modes(the_program_name);
 
-   if the_program_name_position /= 0 then
-      get_settings_from_file("1");
-      configure_the_IOC;
-      impose_all_flag_settings;
-      revise_the_configuration;
-      if the_log_is_wanted then
-         log_line(
-                  "This is ee9 6.1a, compiled by "
-                & Standard'Compiler_Version
-                & " on "
-                & GNAT.Source_Info.Compilation_ISO_Date
-                & "."
-                 );
-      end if;
-      display_execution_modes(the_program_name);
-      execute(the_program_name);
-   else
-      log_line("Cannot run ee9; no program file parameter was supplied.");
-   end if;
+   execute(the_program_name);
 
    close(the_log_file_name);
 
 exception
 
    when a_command_line_error_is_detected =>
-      tidy_up("Invalid command line");
+      close(the_log_file_name);
 
    when diagnostic : operator_error =>
-      say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
+      say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
 
    when error : others =>
-      tidy_up("Failure in ee9; unexpected exception: " & Exception_Information(error));
+      Put_Line(Standard_Error, "Failure in ee9: " & Exception_Information(error) & ".");
+      close(the_log_file_name);
+      CLI.Set_Exit_Status(CLI.Failure);
 
 end ee9;

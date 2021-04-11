@@ -1,7 +1,7 @@
 -- Enable the devices included in the chosen KDF9 I/O configuration.
 --
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -89,6 +89,6 @@ package IOC.equipment is
    procedure configure_the_IOC;
 
    -- If a drum, disc or BSI has been enabled on the command line, make sure it is installed.
-   procedure revise_the_configuration;
+   procedure revise_the_IOC_configuration;
 
 end IOC.equipment;

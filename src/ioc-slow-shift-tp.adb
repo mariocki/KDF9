@@ -1,6 +1,6 @@
 -- Emulation of a tape punch buffer.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,6 +13,8 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
+
+with KDF9_char_sets.framed;
 
 package body IOC.slow.shift.TP is
 
@@ -48,35 +50,6 @@ package body IOC.slow.shift.TP is
    procedure write_KDF9_tape_code (the_TP        : in out TP.device;
                                    Q_operand     : in KDF9.Q_register;
                                    writing_to_EM : in Boolean := False) is
-
-      function framed (symbol : KDF9_char_sets.symbol)
-      return Natural is
-
-         SP : constant := 8#000#;
-
-         function channel_8
-         return KDF9.syllable
-         is (if symbol = SP then 2#10_000_000# else 0);
-
-         function parity
-         return KDF9.syllable is
-            frame  : KDF9.syllable := KDF9.syllable(KDF9_char_sets.symbol'Pos(symbol)) or channel_8;
-            parity : KDF9.syllable := 0;
-         begin -- parity
-            while frame /= 0 loop
-               parity := parity xor (frame and 1);
-               frame  := frame / 2;
-            end loop;
-            return (if parity = 0 then 0 else 2#00_010_000#);
-         end parity;
-
-         low_4_bits : constant KDF9.syllable := KDF9.syllable(symbol)   and 2#00_001_111#;
-         bits_5and6 : constant KDF9.syllable := KDF9.syllable(symbol)*2 and 2#01_100_000#;
-
-      begin -- framed
-         return KDF9.syllable'Pos(channel_8 or bits_5and6 or parity or low_4_bits);
-      end framed;
-
       start_address : constant KDF9.address := Q_operand.I;
       end_address   : constant KDF9.address := Q_operand.M;
       size   : KDF9.word := 0;
@@ -90,7 +63,7 @@ package body IOC.slow.shift.TP is
          for c in KDF9_char_sets.symbol_index'Range loop
             symbol := fetch_symbol(w, c);
             size := size + 1;
-            char := Character'Val(framed(symbol));
+            char := framed(symbol);
             put_byte(char, the_TP.stream);
          exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
          end loop;

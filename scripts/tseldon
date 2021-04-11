@@ -16,9 +16,8 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# tsdnine : Executes a KDF9 binary in the director.
+# tseldon : Executes a KDF9 binary in the eldon director.
 #------------------------------------------------------------------------
-
 if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
@@ -32,9 +31,9 @@ DATA=${KDF9RUNTIME}/Data
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in
     -h | --help)
-        echo "TSDNINE - Executes a KDF9 binary in director with data from DATAFILE."
+        echo "TSELDON - Executes a KDF9 binary in the Eldon director with data from DATAFILE."
         echo
-        echo "Usage: tsdnine [OPTION]... BINARYNAME [DATAFILE]"
+        echo "Usage: tseldon [OPTION]... BINARYNAME [DATAFILE]"
         echo
         echo "  -d, --diag [f|p|t]          define the diagnostic mode"
         echo "  -m, --misc [a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
@@ -66,7 +65,7 @@ trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 
 if [ x"${prog}"x = xx ]; then
     echo
-    echo "No program name was given."
+    echo No program name was given.
     echo
     exit 1
 fi
@@ -82,7 +81,6 @@ cat >${DATA}/tape_labels_for_TSD.txt <<++++
 0-00-777AMPEXTM4|
 |
 ++++
-
 rlt tape_labels_for_TSD.txt - z
 
 # Create a call tape from the binary program.
@@ -102,5 +100,5 @@ else
     a2b -L2p <${DATA}/${datafile}.txt >>${KDF9RUNTIME}/TR1
 fi
 
-# Run Director.
-tsd "${mode/-d/-d=}" "${miscellany/-m/-m=}" +Binary/KKT40E007UPU
+# Run the named bare Director.
+tsd "${mode/-d/-d=}" "${miscellany/-m/-m=}" +Binary/EDNTSD990

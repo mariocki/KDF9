@@ -1,6 +1,6 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ package body IOC.fast.tape is
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
-         trap_operator_error("'" & name & "' cannot be opened, even for reading");
+         trap_operator_error("«" & name & "» cannot be opened, even for reading");
    end open_RO;
 
    procedure open_RW (the_tape : in out tape.file; name : in String) is
@@ -40,7 +40,7 @@ package body IOC.fast.tape is
          the_tape.has_a_WP_ring := False;
          open_RO(the_tape, name);
       when Ada.IO_Exceptions.Name_Error =>
-         trap_operator_error("'" & name & "' cannot be opened");
+         trap_operator_error("«" & name & "» cannot be opened");
    end open_RW;
 
    procedure close (the_tape : in out tape.file) is
@@ -59,8 +59,6 @@ package body IOC.fast.tape is
 --
 --
    -- Slice management.
-
-   end_of_tape : exception;
 --
 --
 
@@ -69,7 +67,7 @@ package body IOC.fast.tape is
    begin
       the_tape.position := the_tape.position + 1;
       MT_slice_IO.Write(the_tape.reel, slice, to => the_tape.position);
-      if slice.kind not in tape_gap_kind then
+      if slice.kind not in tape.gap_kind then
          the_tape.last_data_index := Count'Max(the_tape.last_data_index, the_tape.position);
       end if;
    end write_slice;
@@ -81,8 +79,11 @@ package body IOC.fast.tape is
          the_tape.position := the_tape.position + 1;
          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
       else
-         raise end_of_tape with "this tape is empty";
+         trap_failing_IO_operation(Name(the_tape.reel), "is an empty file");
       end if;
+   exception
+      when End_Error =>
+          trap_failing_IO_operation(Name(the_tape.reel), "cannot be moved forward at EOF");
    end read_next_slice;
 
    procedure read_prev_slice (the_tape : in out tape.file;
@@ -92,11 +93,8 @@ package body IOC.fast.tape is
          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
          the_tape.position := the_tape.position - 1;
       else
-         raise end_of_tape with "read_prev_slice";
+         trap_failing_IO_operation(Name(the_tape.reel), "cannot be moved backward at BTW");
       end if;
-    exception
-       when End_Error =>
-          raise end_of_tape with "file size exceeded when reading a tape slice";
    end read_prev_slice;
 
    procedure bound_the_written_data (the_tape : in out tape.file) is
@@ -111,9 +109,9 @@ package body IOC.fast.tape is
       -- Locate the last data slice (if any).
       while the_tape.position > 0 loop
          read_prev_slice(the_tape, the_slice);
-      exit when the_slice.kind not in tape.tape_gap_kind;
+      exit when the_slice.kind not in tape.gap_kind;
       end loop;
-      if the_slice.kind in tape.tape_gap_kind then
+      if the_slice.kind in tape.gap_kind then
          the_tape.last_data_index := 0;
       else
          the_tape.last_data_index := the_tape.position + 1;
@@ -127,11 +125,6 @@ package body IOC.fast.tape is
       the_deck.is_LBM_flagged := False;
       the_deck.is_abnormal := False;
       the_deck.unwound_frames := 0;
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         the_deck.is_LBM_flagged := False;
-         the_deck.unwound_frames := 0;
    end reset;
 
 --
@@ -274,7 +267,7 @@ package body IOC.fast.tape is
    -- KDF9 MT operations.
 
    -- Skip back over erased tape, leaving the_slice containing the next preceding data.
-   -- Postcondition: the_deck.is_at_BTW or else the_slice.kind not in tape_gap_kind
+   -- Postcondition: the_deck.is_at_BTW or else the_slice.kind not in tape.gap_kind
    procedure skip_back_over_erasure (the_deck  : in out tape.deck;
                                      the_slice : in out tape.slice;
                                      crossed   : in out length_in_frames) is
@@ -287,13 +280,13 @@ package body IOC.fast.tape is
       end if;
       loop
          read_prev_slice(the_deck.tape_file, the_slice);
-      exit when the_deck.is_at_BTW or else the_slice.kind not in tape_gap_kind;
+      exit when the_deck.is_at_BTW or else the_slice.kind not in tape.gap_kind;
          crossed := crossed + the_slice.size;
       end loop;
    end skip_back_over_erasure;
 
    -- Skip forward over erased tape, leaving the_slice containing the next following data.
-   -- Postcondition: the_deck.is_at_EOD or else the_slice.kind not in tape_gap_kind
+   -- Postcondition: the_deck.is_at_EOD or else the_slice.kind not in tape.gap_kind
    procedure skip_forward_over_erasure (the_deck  : in out tape.deck;
                                         the_slice : in out tape.slice;
                                         crossed   : in out length_in_frames) is
@@ -303,13 +296,9 @@ package body IOC.fast.tape is
       end if;
       loop
          read_next_slice(the_deck.tape_file, the_slice);
-      exit when the_deck.is_at_EOD or else the_slice.kind not in tape.tape_gap_kind;
+      exit when the_deck.is_at_EOD or else the_slice.kind not in tape.gap_kind;
          crossed := crossed + the_slice.size;
       end loop;
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         raise end_of_tape with "in skip_forward_over_erasure";
    end skip_forward_over_erasure;
 
 --
@@ -342,7 +331,6 @@ package body IOC.fast.tape is
                          the_data  : out tape.block_storage;
                          the_size  : out length_in_frames;
                          direction : in movement := forwards) is
-
       left,
       right      : length_in_frames := 1;
       block_size,
@@ -450,9 +438,6 @@ package body IOC.fast.tape is
       if to_terminator then
          correct_transfer_time(the_deck, stored);
       end if;
-   exception
-      when end_of_tape =>
-         deal_with_trying_to_pass_PET(the_deck, "reading");
    end read;
 
    procedure find_start_of_earlier_block (the_deck : in out tape.deck;
@@ -468,14 +453,13 @@ package body IOC.fast.tape is
       skip_back_over_erasure(the_deck, the_slice, crossed);
       crossed := crossed + the_deck.inter_block_gap;
 
-      if the_deck.is_at_BTW and the_slice.kind in tape_gap_kind then
+      if the_deck.is_at_BTW and the_slice.kind in tape.gap_kind then
          the_deck.is_abnormal := True;
-         -- This cannot happen if the tape has (at least) a label.
-         raise emulation_failure with "no earlier block, at BTW on " & the_deck.device_name;
+         trap_failing_IO_operation(the_deck, "cannot move back, at BTW");
       end if;
 
       if not the_slice.is_last then
-         raise emulation_failure with "find_start_of_earlier_block did not find its last slice";
+         trap_failing_IO_operation(the_deck, "on-tape data is malformed");
       end if;
 
       -- We have reached the last slice of the block.
@@ -672,7 +656,7 @@ package body IOC.fast.tape is
       crossed := crossed + the_deck.inter_block_gap;
 
       if not the_slice.is_first then
-         raise emulation_failure with "find_start_of_later_block did not find its first slice";
+         trap_failing_IO_operation(the_deck, "on-tape data is malformed");
       end if;
 
       -- We have reached the first slice of the block.
@@ -690,10 +674,6 @@ package body IOC.fast.tape is
 
       the_deck.is_LBM_flagged := the_slice.is_LBM_flagged;
       crossed := crossed + block_size;
-   exception
-      when end_of_tape =>
-         the_deck.is_abnormal := True;
-         raise end_of_tape with "find_start_of_later_block";
    end find_start_of_later_block;
 
    procedure skip_forwards (the_deck       : in out tape.deck;
@@ -889,9 +869,6 @@ package body IOC.fast.tape is
                    );
       the_slice.data(1 .. put_data_slice.size) := put_data_slice.data;
       write_slice(the_deck.tape_file, the_slice);
-   exception
-      when end_of_tape =>
-         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end put_data_slice;
 
    procedure write_block (the_deck       : in out tape.deck;
@@ -954,9 +931,6 @@ package body IOC.fast.tape is
       update_statistics(the_deck,
                         the_deck.inter_block_gap, bytes_moved => the_data'Length);
 
-   exception
-      when end_of_tape =>
-         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end write_block;
 
    procedure write (the_deck       : in out tape.deck;
@@ -1048,9 +1022,6 @@ package body IOC.fast.tape is
    begin
       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
       write_slice(the_deck.tape_file, the_slice);
-   exception
-      when end_of_tape =>
-         deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
    end put_ST_tapemark_slice;
 
    -- MLWQq
@@ -1085,11 +1056,11 @@ package body IOC.fast.tape is
       end if;
    end POD;
 
-   procedure erase_tape_gap (the_deck   : in out tape.deck;
-                             the_length : in KDF9.Q_part; -- the_length is a number of words.
-                             gap_kind   : in tape_gap_kind) is
+   procedure erase_tape_gap (the_deck     : in out tape.deck;
+                             the_length   : in KDF9.Q_part; -- the_length is a number of words.
+                             the_gap_kind : in tape.gap_kind) is
       crossing  : constant length_in_frames := length_in_frames(the_length) * 8;
-      the_slice : tape.slice := (if gap_kind = GAP_slice then a_GAP_slice else a_WIPE_slice);
+      the_slice : tape.slice := (if the_gap_kind = GAP_slice then a_GAP_slice else a_WIPE_slice);
       remnant   : length_in_frames := crossing;
       old_slice : tape.slice;
       the_size  : length_in_frames;
@@ -1101,7 +1072,7 @@ package body IOC.fast.tape is
 
          the_slice.size := the_size;
 
-         if gap_kind = GAP_slice  and then
+         if the_gap_kind = GAP_slice  and then
                not the_deck.is_at_EOD then
             -- Safety rules apply to erasing gaps; see the Manual, Appendix 6.8, p.314.
             read_next_slice(the_deck.tape_file, old_slice);
@@ -1125,9 +1096,6 @@ package body IOC.fast.tape is
       the_deck.is_LBM_flagged := False;
       note_tape_position(the_deck, forwards, crossing, bytes_moved => 0);
       update_statistics(the_deck, crossing, bytes_moved => 0);
-   exception
-      when end_of_tape =>
-         deal_with_trying_to_pass_PET(the_deck, "WIPE/GAP " & the_deck.device_name);
    end erase_tape_gap;
 
    -- MGAPQq
@@ -1142,7 +1110,7 @@ package body IOC.fast.tape is
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
-      erase_tape_gap(the_deck, Q_operand.M, gap_kind => GAP_slice);
+      erase_tape_gap(the_deck, Q_operand.M, the_gap_kind => GAP_slice);
    end POE;
 
    -- MWIPEQq
@@ -1157,7 +1125,7 @@ package body IOC.fast.tape is
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
-      erase_tape_gap(the_deck, Q_operand.M, gap_kind => WIPE_slice);
+      erase_tape_gap(the_deck, Q_operand.M, the_gap_kind => WIPE_slice);
    end POF;
 
    overriding
@@ -1261,7 +1229,7 @@ package body IOC.fast.tape is
             end;
          end if;
       end loop;
-      trap_operator_error("'" & String(the_label) & "' has not been mounted");
+      trap_operator_error("«" & String(the_label) & "» has not been mounted");
    end find_tape;
 
 end IOC.fast.tape;

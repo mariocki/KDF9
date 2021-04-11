@@ -1,6 +1,6 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -42,18 +42,18 @@ package body IOC.fast.tape.TSD_OUTs is
          if W = 0 then
             log_API_message("OUT 4: requested a ZERO tape  and got "
                           & device_name_of(buffer(B).all)
-                          & " with TSN '"
+                          & " with TSN «"
                           & to_string(S)
-                          & "'"
+                          & "»"
                            );
          else
-            log_API_message("OUT 4: requested  '" --a tape labelled '"
+            log_API_message("OUT 4: requested  «"
                           & String(label)
-                          & "'  and got "
+                          & "»  and got "
                           & device_name_of(buffer(B).all)
-                          & " with TSN '"
+                          & " with TSN «"
                           & to_string(S)
-                          & "'"
+                          & "»"
                            );
          end if;
       end;
@@ -74,13 +74,13 @@ package body IOC.fast.tape.TSD_OUTs is
          push(S);
          push(KDF9.word(B));
          the_trace_operand := KDF9.word(B);
-         log_API_message("OUT 10: requested '" -- a tape labelled '"
+         log_API_message("OUT 10: requested «"
                        & String(label)
-                       & "' and got "
+                       & "» and got "
                        & device_name_of(buffer(B).all)
-                       & " with TSN '"
+                       & " with TSN «"
                        & to_string(S)
-                       & "'"
+                       & "»"
                         );
       end;
       set_state_of(buffer(B), allocated => True);

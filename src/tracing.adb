@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -84,7 +84,7 @@ package body tracing is
    procedure take_note_of (the_IAR   : in KDF9.syllable_address;
                            the_value : in KDF9.word) is
    begin
-      if the_retrospective_trace_is_enabled           and then
+      if retrospective_tracing_is_enabled             and then
             ICR in low_count .. high_count            and then
                NIA_word_number in low_bound .. high_bound then
          declare
@@ -129,7 +129,7 @@ package body tracing is
 
    procedure register_IO_event (the_note : in IOC_FIFO_entry) is
    begin
-      if the_peripheral_trace_is_enabled              and then
+      if peripheral_tracing_is_enabled                and then
             ICR in low_count .. high_count            and then
                NIA_word_number in low_bound .. high_bound then
          if IOC_FIFO_count = 0 then
@@ -296,7 +296,7 @@ package body tracing is
                     message        => content & padding
                    );
       begin
-         if the_interrupt_trace_is_enabled               and then
+         if interrupt_tracing_is_enabled                 and then
                ICR in low_count .. high_count            and then
                   NIA_word_number in low_bound .. high_bound then
             if interrupt_FIFO_count = 0 then

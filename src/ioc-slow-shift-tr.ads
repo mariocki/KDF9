@@ -1,6 +1,6 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -84,6 +84,12 @@ package IOC.slow.shift.TR is
 
    -- Read a binary program.
    procedure load_a_program (program_file_name : in String);
+
+   -- This emulates action of a Director call program, including:
+   --    1. Moving the JP0 order from E0U to E2U.
+   --    2. Inserting the interrupt handling code into E0 and E1, and
+   --    3. setting NIA to (4, 0) instead of (0, 0).
+   procedure load_a_bare_Director (program_file_name : in String);
 
    -- Set the character code to be used by the TR unit.
    procedure set_unit_code(unit : in Natural; is_transcribing : in Boolean);

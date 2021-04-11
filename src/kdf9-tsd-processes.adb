@@ -1,6 +1,6 @@
 -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -231,7 +231,7 @@ package body KDF9.TSD.processes is
       push(number);
    exception
       when others =>
-         trap_failing_OUT(97, name & " = '" & value & "', not a valid integer");
+         trap_failing_OUT(97, name & " = «"& value & "», not a valid integer");
    end do_OUT_97;
 
 end KDF9.TSD.processes;

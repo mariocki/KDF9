@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -28,9 +28,9 @@ package state_display is
 
    procedure show_V_and_T;
 
-   procedure show_NEST (when_empty : Boolean := True);
+   procedure show_NEST;
 
-   procedure show_SJNS (when_empty : Boolean := True);
+   procedure show_SJNS;
 
    procedure show_IO_register (the_Q_register : in KDF9.Q_register;
                                width          : in Positive := 8;
@@ -68,7 +68,7 @@ package state_display is
 
    procedure show_final_state (because : String);
 
-   procedure mark_all_code_blocks_and_data_blocks;
+   procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean);
 
    the_program_has_been_analysed : Boolean := False;
 

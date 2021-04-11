@@ -1,6 +1,6 @@
 -- Emulation of a fixed disc drive.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -282,7 +282,7 @@ package body IOC.fast.FD is
 
    subtype sector_image is String(1 .. bytes_per_sector);
 
-   empty_sector : constant sector_image := (others => ' ');
+   empty_sector : constant sector_image := (others => SP);
    this_sector  : sector_image;
 
    procedure get_next_sector (the_FD : in out FD.device) is
