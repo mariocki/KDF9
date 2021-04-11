@@ -20,14 +20,12 @@
 #        calls kalgol to perform compilation
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
@@ -35,64 +33,63 @@ DATA=${KDF9RUNTIME}/Data
 
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in
-        -h|--help) 
-            echo "KIDS - Compiles and runs a Kidsgrove Algol program.";
-            echo;
-            echo "Usage: kids [OPTION]... SOURCEFILE [DATAFILE]"
-            echo;
-            echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
-            echo "                              define the kalgol options";
-            echo "  -d, --diag [f|p|t]          define the diagnostic mode";
-            echo "  -s, --state [b|p|t]         define the run state";
-            echo "  -m, --misc [a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
-            echo "                              define the miscellaneous options";
-            echo "  -nc, --no-color             do not colorize error output."
-            echo "  -TP TPMODE                  define the TP mode";
-            echo "  -TR TRMODE                  define the TR mode";
-            echo;
-            echo "Note: SOURCEFILE must exist in ${SOURCE}"
-            echo "      DATAFILE must exist in ${DATA}"
-            echo;
-            exit 0;;
-        -s=*|--state=*)
-            state=-s${1#*=};
-            ;;
-        -d=*|--diag=*)
-            mode=-d${1#*=};
-            ;;
-        -nc|--no-color)
-            nc='-nc'
-            ;;
-        -k=*|--kids=*)
-            KIDSOPTS=-k${1#*=};
-            ;;
-        -m=*|--misc=*)
-            miscellany=-m${1#*=};
-            ;;
-        -TR=*)
-            TRmode=-TR${1#*=};
-            ;;
-        -TP=*)
-            TPmode=-TP${1#*=};
-            ;;
-        *)
-            if [ -z ${source} ];
-            then
-                source="$1";
-            else
-                datafile="$1";
-            fi
-            ;;
+    -h | --help)
+        echo "KIDS - Compiles and runs a Kidsgrove Algol program."
+        echo
+        echo "Usage: kids [OPTION]... SOURCEFILE [DATAFILE]"
+        echo
+        echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
+        echo "                              define the kalgol options"
+        echo "  -d, --diag [f|p|t]          define the diagnostic mode"
+        echo "  -s, --state [b|p|t]         define the run state"
+        echo "  -m, --misc [a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
+        echo "                              define the miscellaneous options"
+        echo "  -nc, --no-color             do not colorize error output."
+        echo "  -TP TPMODE                  define the TP mode"
+        echo "  -TR TRMODE                  define the TR mode"
+        echo
+        echo "Note: SOURCEFILE must exist in ${SOURCE}"
+        echo "      DATAFILE must exist in ${DATA}"
+        echo
+        exit 0
+        ;;
+    -s=* | --state=*)
+        state=-s${1#*=}
+        ;;
+    -d=* | --diag=*)
+        mode=-d${1#*=}
+        ;;
+    -nc | --no-color)
+        nc='-nc'
+        ;;
+    -k=* | --kids=*)
+        KIDSOPTS=-k${1#*=}
+        ;;
+    -m=* | --misc=*)
+        miscellany=-m${1#*=}
+        ;;
+    -TR=*)
+        TRmode=-TR${1#*=}
+        ;;
+    -TP=*)
+        TPmode=-TP${1#*=}
+        ;;
+    *)
+        if [ -z ${source} ]; then
+            source="$1"
+        else
+            datafile="$1"
+        fi
+        ;;
     esac
-    shift;
+    shift
 done
 
 kalgol ${KIDSOPTS/-k/-k=} "${nc}" ${source}
 
-if [ -s ${KDF9RUNTIME}/Binary/${source} ]
-then
-   cat ${KDF9RUNTIME}/settings_2.txt > ${KDF9RUNTIME}/settings_1.txt
-   nine "${state/-s/-s=}" "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" ${source} ${datafile}
+if [ -s ${KDF9RUNTIME}/Binary/${source} ]; then
+    cat ${KDF9RUNTIME}/settings_2.txt >${KDF9RUNTIME}/settings_1.txt
+    nine "${state/-s/-s=}" "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" ${source} ${datafile}
 else
-   exit 1
+    exit 1
 fi

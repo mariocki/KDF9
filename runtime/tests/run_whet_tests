@@ -15,9 +15,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-if [ -z $KDF9RUNTIME ]
-then
-    export KDF9RUNTIME="$HOME/.kdf9"
+if [ -z $KDF9RUNTIME ]; then
+   export KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 export DATA=${KDF9RUNTIME}/Data
@@ -31,10 +30,10 @@ export EE9REGTEST=1
 
 trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log /tmp/whetoutput" 0 1 2 3
 
-function runtest () {
-   whet $1 -d=t -m=prh >>${LOGS}/whet_test.log;
-   fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log;
-   echo $1 DONE >>${LOGS}/whet_test.log;
+function runtest() {
+   whet $1 -d=t -m=prh >>${LOGS}/whet_test.log
+   fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
+   echo $1 DONE >>${LOGS}/whet_test.log
 }
 
 >${LOGS}/whet_test.log
@@ -51,11 +50,10 @@ runtest WHETSTONE
 runtest ZELLER
 
 echo
-iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 < ${LOGS}/whet_test.log > /tmp/whetoutput;
-cat /tmp/whetoutput > ${LOGS}/whet_test.log;
+iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 <${LOGS}/whet_test.log >/tmp/whetoutput
+cat /tmp/whetoutput >${LOGS}/whet_test.log
 diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/whet_test.diff
-if [ -s ${LOGS}/whet_test.diff ]
-then
+if [ -s ${LOGS}/whet_test.diff ]; then
    echo "These are the unexpected variances for this run:"
    echo "==="
    more ${LOGS}/whet_test.diff

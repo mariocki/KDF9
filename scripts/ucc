@@ -18,52 +18,49 @@
 #------------------------------------------------------------------------
 # ucc : Compiles a Usercode file to a Binary
 #------------------------------------------------------------------------
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
-        -h|--help) 
-            echo "UCC - Compiles a Usercode file to a Binary.";
-            echo;
-            echo "Usage: ucc [OPTION] USERCODEFILE"
-            echo;
-            echo "   -q                quiet mode."
-            echo;
-            echo "Note: USERCODEFILE must exist in ${USERCODE}"
-            echo;
-            exit 0;;
+    -h | --help)
+        echo "UCC - Compiles a Usercode file to a Binary."
+        echo
+        echo "Usage: ucc [OPTION] USERCODEFILE"
+        echo
+        echo "   -q                quiet mode."
+        echo
+        echo "Note: USERCODEFILE must exist in ${USERCODE}"
+        echo
+        exit 0
+        ;;
     esac
 fi
 
 trap "rm -f  /tmp/a.out /tmp/mt.out" 0 1 2 3
 
-name=`basename "$1" ".k3"`
-if [ -f "${USERCODE}/$name.k3" ]
-then
-   kal3 -a ${USERCODE}/"$name.k3" > ${USERCODE}/"$name-listing.txt" 
-   if [ -s /tmp/a.out ]
-   then
-      mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
-   else
-      echo "$kal3 detected error\(s\) in $name.k3"
-      echo;
-      more ${USERCODE}/"$name-listing.txt"
-      exit 1;
-   fi
-   rm -f /tmp/a.out /tmp/mt.out
-   exit 0
+name=$(basename "$1" ".k3")
+if [ -f "${USERCODE}/$name.k3" ]; then
+    kal3 -a ${USERCODE}/"$name.k3" >${USERCODE}/"$name-listing.txt"
+    if [ -s /tmp/a.out ]; then
+        mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
+    else
+        echo "$kal3 detected error\(s\) in $name.k3"
+        echo
+        more ${USERCODE}/"$name-listing.txt"
+        exit 1
+    fi
+    rm -f /tmp/a.out /tmp/mt.out
+    exit 0
 else
-   echo "`basename "$0"`: there is no file named "$name.k3" in the ${USERCODE} folder!"
-   echo
-   exit 1
+    echo "$(basename "$0"): there is no file named "$name.k3" in the ${USERCODE} folder!"
+    echo
+    exit 1
 fi

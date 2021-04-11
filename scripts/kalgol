@@ -19,14 +19,12 @@
 # kalgol : compiles a60 to usercode and then onto a binary
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
-    KDF9RUNTIME="$HOME/.kdf9"
+if [ -z $KDF9RUNTIME ]; then
+   KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+   set -- "-h"
 fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
@@ -36,122 +34,117 @@ SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
 
 while [[ "$#" -gt 0 ]]; do
-    case ${1# } in
-        -h|--help) 
-            echo "KALGOL - compiles a60 to usercode and then onto a binary.";
-            echo;
-            echo "Usage: kalgol [OPTION]... SOURCEFILE"
-            echo;
-            echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
-            echo "                              define the kalgol options.";
-            echo "  -nc, --no-color             do not colorize error output."
-            echo "  -k3, --no-k3                do not generate binary file."
-            echo;
-            echo "Note: SOURCEFILE must exist in ${SOURCE}"
-            echo;
-            exit 0;;
-        -k=*|--kids=*)
-            KIDSOPTS=-k${1#*=};
-            ;;
-        -nc|--no-color)
-            NOCOLOR=1
-            ;;
-        -k3|--no-k3)
-            KIDSGROVE_ASSEMBLY=n
-            ;;            
-        *)
-            if [ -z ${prog} ];
-            then
-                prog="$1";
-            fi
-            ;;
-    esac
-    shift;
+   case ${1# } in
+   -h | --help)
+      echo "KALGOL - compiles a60 to usercode and then onto a binary."
+      echo
+      echo "Usage: kalgol [OPTION]... SOURCEFILE"
+      echo
+      echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
+      echo "                              define the kalgol options."
+      echo "  -nc, --no-color             do not colorize error output."
+      echo "  -k3, --no-k3                do not generate binary file."
+      echo
+      echo "Note: SOURCEFILE must exist in ${SOURCE}"
+      echo
+      exit 0
+      ;;
+   -k=* | --kids=*)
+      KIDSOPTS=-k${1#*=}
+      ;;
+   -nc | --no-color)
+      NOCOLOR=1
+      ;;
+   -k3 | --no-k3)
+      KIDSGROVE_ASSEMBLY=n
+      ;;
+   *)
+      if [ -z ${prog} ]; then
+         prog="$1"
+      fi
+      ;;
+   esac
+   shift
 done
 
 trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
-      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt"   \
-      0 1 2 3
-      
+      rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt" \
+   0 1 2 3
+
 trap " >${KDF9RUNTIME}/MT0 >${KDF9RUNTIME}/MT1 >${KDF9RUNTIME}/MT2 >${KDF9RUNTIME}/MT3 >${KDF9RUNTIME}/MT4
        >${KDF9RUNTIME}/MT5 >${KDF9RUNTIME}/MT6 >${KDF9RUNTIME}/MT7
        >${KDF9RUNTIME}/TR0 >${KDF9RUNTIME}/TR1 " 0
 
-if [ x$progx = xx ]
-then
-   echo No program name was given.; echo
+if [ x$progx = xx ]; then
+   echo No program name was given.
+   echo
    exit 1
-elif [ ! -r ${SOURCE}/$prog.a60 ]
-then
-   echo The file ${SOURCE}/$prog.a60 is absent or unreadable.; echo
+elif [ ! -r ${SOURCE}/$prog.a60 ]; then
+   echo The file ${SOURCE}/$prog.a60 is absent or unreadable.
+   echo
    exit 1
 fi
 
-> ${KDF9RUNTIME}/settings_1.txt
+>${KDF9RUNTIME}/settings_1.txt
 
 rlt tape_labels_for_KAlgol -m=wz
 #echo "The compiler work tapes have been labelled."
 
-cat ${DATA}/systape_kalgol.txt > ${DATA}/systape.txt
+cat ${DATA}/systape_kalgol.txt >${DATA}/systape.txt
 
 nine MKSYS2 systape -m=wz
 #echo "The compiler overlay tape has been generated."; echo
 
-mkchan ${SOURCE}/$prog.a60 /tmp/chan6.pt > /dev/null
+mkchan ${SOURCE}/$prog.a60 /tmp/chan6.pt >/dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
-> ${KDF9RUNTIME}/TP0
+>${KDF9RUNTIME}/TP0
 rm -f ${KDF9RUNTIME}/Binary/$prog
 rm -f ${USERCODE}/$prog.k3
-cat /tmp/chan6.pt > ${DATA}/ABS_text.txt
+cat /tmp/chan6.pt >${DATA}/ABS_text.txt
 
-cat ${SETTINGS}/settings_for_kalgol.txt > ${KDF9RUNTIME}/settings_1.txt
+cat ${SETTINGS}/settings_for_kalgol.txt >${KDF9RUNTIME}/settings_1.txt
 
-kidopt with ${KIDSOPTS:-NONE} >> ${KDF9RUNTIME}/settings_1.txt
+kidopt with ${KIDSOPTS:-NONE} >>${KDF9RUNTIME}/settings_1.txt
 
-if [ -z $NOCOLOR ]
-then
+if [ -z $NOCOLOR ]; then
    RED='\033[1;31m'
-   NC='\033[0m'  #No Color
+   NC='\033[0m' #No Color
    GREEN='\033[1;32m'
 fi
 
 # I have noticed sometimes the kalgol compiler gets 'stuck' so put a 60 second timout to prevent that.
-if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output
-then
-   if [ -s ${LOGS}/error_output ]
-   then
-      echo -e "${RED}**********************************************";
-      echo "The compilation was abandoned for ${prog}."; 
-      echo "**********************************************${NC}";
-      echo;
+if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output; then
+   if [ -s ${LOGS}/error_output ]; then
+      echo -e "${RED}**********************************************"
+      echo "The compilation was abandoned for ${prog}."
+      echo "**********************************************${NC}"
+      echo
       cat "${LOGS}/error_output"
-      echo -e "${RED}**********************************************${NC}";
+      echo -e "${RED}**********************************************${NC}"
       exit 2
    fi
 
-   if grep -q FAIL ${KDF9RUNTIME}/LP0 || grep -q FAIL ${KDF9RUNTIME}/TP0
-   then
-      echo -e "${RED}**********************************************";
-      echo "The compilation failed for ${prog}."; 
-      echo -e "**********************************************${NC}";
-      cat ${KDF9RUNTIME}/LP0;
-      echo;
-      cat ${KDF9RUNTIME}/TP0;
-      echo -e "${RED}**********************************************${NC}";
+   if grep -q FAIL ${KDF9RUNTIME}/LP0 || grep -q FAIL ${KDF9RUNTIME}/TP0; then
+      echo -e "${RED}**********************************************"
+      echo "The compilation failed for ${prog}."
+      echo -e "**********************************************${NC}"
+      cat ${KDF9RUNTIME}/LP0
+      echo
+      cat ${KDF9RUNTIME}/TP0
+      echo -e "${RED}**********************************************${NC}"
       exit 3
    fi
 fi
 
 #${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$prog.k3
-mtp MT0T > ${USERCODE}/$prog.k3
+mtp MT0T >${USERCODE}/$prog.k3
 
-if [ ! -s ${USERCODE}/$prog.k3 ]
-then
-   echo -e "${RED}**********************************************";
-   echo "The Usercode object program could not be retrieved for ${prog}."; 
-   echo -e "**********************************************${NC}";
-   echo;
+if [ ! -s ${USERCODE}/$prog.k3 ]; then
+   echo -e "${RED}**********************************************"
+   echo "The Usercode object program could not be retrieved for ${prog}."
+   echo -e "**********************************************${NC}"
+   echo
    exit 4
 fi
 
@@ -159,21 +152,20 @@ case ${KIDSGROVE_ASSEMBLY:-y} in
 y)
    neat $prog ${ST:-24000} ${TL:-99999}
    ucc $prog >${LOGS}/error_output 2>&1
-   if [ ! -s ${KDF9RUNTIME}/Binary/$prog ]
-   then
-      echo -e "${RED}**********************************************";
-      echo "An object program could not be assembled for ${prog}."; 
-      echo -e "**********************************************${NC}";
-      echo;
+   if [ ! -s ${KDF9RUNTIME}/Binary/$prog ]; then
+      echo -e "${RED}**********************************************"
+      echo "An object program could not be assembled for ${prog}."
+      echo -e "**********************************************${NC}"
+      echo
       cat "${LOGS}/error_output"
-      echo -e "${RED}**********************************************${NC}";
+      echo -e "${RED}**********************************************${NC}"
       exit 5
    fi
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in Assembly/$prog.k3 and the KDF9 executable is in Binary/$prog";
+   echo "The Usercode is in Assembly/$prog.k3 and the KDF9 executable is in Binary/$prog"
    ;;
 *)
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in Assembly/$prog.k3.";
+   echo "The Usercode is in Assembly/$prog.k3."
    ;;
 esac

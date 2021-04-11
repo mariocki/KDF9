@@ -19,8 +19,7 @@
 # kdf9_setup : sets up the kdf environment in a users $HOME/.kdf9/
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
@@ -34,60 +33,63 @@ cp -aR %prefix%/share/kdf9/* ${KDF9RUNTIME}/
 cd ${KDF9RUNTIME}
 
 # Set up the various devices
-> CP0
-> CP1
-> CR0
-> CR1
-> DR0
-> FD0
-> FW0
-> GP0
-> LP0
-> LP1
-> MT0
-> MT1
-> MT2
-> MT3
-> MT4
-> MT5
-> MT6
-> MT7
-> MT8
-> MT9
-> MT10
-> MTA
-> MTB
-> MTC
-> MTD
-> SI0
-> SI1
-> ST0
-> ST1
-> ST2
-> ST3
-> ST4
-> ST5
-> ST6
-> ST7
-> ST8
-> ST9
-> STA
-> STB
-> STC
-> STD
-> TP0
-> TP1
-> TR0
-> TR1
-> settings_1.txt
-> settings_2.txt
-chown -R $USER .;
+>CP0
+>CP1
+>CR0
+>CR1
+>DR0
+>FD0
+>FW0
+>GP0
+>LP0
+>LP1
+>MT0
+>MT1
+>MT2
+>MT3
+>MT4
+>MT5
+>MT6
+>MT7
+>MT8
+>MT9
+>MT10
+>MTA
+>MTB
+>MTC
+>MTD
+>SI0
+>SI1
+>ST0
+>ST1
+>ST2
+>ST3
+>ST4
+>ST5
+>ST6
+>ST7
+>ST8
+>ST9
+>STA
+>STB
+>STC
+>STD
+>TP0
+>TP1
+>TR0
+>TR1
+>settings_1.txt
+>settings_2.txt
+chown -R $USER .
 
-echo "Configuring runtime.";
+echo "Configuring runtime."
 for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again"); then chmod u+x $$a; fi; done
-a2b -r2p < Data/mksys2.bin > Binary/MKSYS2;
-a2b -r2p < Data/KAB00.bin > Binary/KAB00DH--USU;
+a2b -r2p <Data/mksys2.bin >Binary/MKSYS2
+a2b -r2p <Data/KAB00.bin >Binary/KAB00DH--USU
 
-echo "Compiling Binaries.";
-for f in Assembly/[1A-Z]*.k3; do p=`basename $f .k3`; ucc $p -q; done; 
-echo "Done.";
+echo "Compiling Binaries."
+for f in Assembly/[1A-Z]*.k3; do
+    p=$(basename $f .k3)
+    ucc $p -q
+done
+echo "Done."

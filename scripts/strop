@@ -19,14 +19,12 @@
 # strop : Convert Whetstone Algol to Kidsgrove format.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 SOURCE=${KDF9RUNTIME}/Whetstone
@@ -34,23 +32,23 @@ TARGET=${KDF9RUNTIME}/Kidsgrove
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
-        -h|--help) 
-            echo "STROP - Convert Whetstone Algol to Kidsgrove format.";
-            echo;
-            echo "Usage: strop SOURCEFILE"
-            echo;
-            echo "Note: SOURCEFILE must exist in ${SOURCE}"
-            echo;
-            exit 0;;
+    -h | --help)
+        echo "STROP - Convert Whetstone Algol to Kidsgrove format."
+        echo
+        echo "Usage: strop SOURCEFILE"
+        echo
+        echo "Note: SOURCEFILE must exist in ${SOURCE}"
+        echo
+        exit 0
+        ;;
     esac
 fi
 
 trap "rm -f /tmp/strop.commands /tmp/strop.tmp[01]" 0 1 2 3
 
-if [ ! -r  ${SOURCE}/$1.a60 ]
-then 
-      echo "Could not find $1.a60 in ${SOURCE}";
-      exit 1
+if [ ! -r ${SOURCE}/$1.a60 ]; then
+    echo "Could not find $1.a60 in ${SOURCE}"
+    exit 1
 fi
 
 cat >/tmp/strop.commands <<++++

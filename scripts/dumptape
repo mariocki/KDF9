@@ -20,44 +20,41 @@
 #            converting the output to UTF8
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in
-        -h|--help) 
-            echo "DUMPTAPE - Displays the contents of a tape drive.";
-            echo;
-            echo "Usage: dumptape TAPEDEVICE"
-            echo;
-            echo "Note: TAPEDEVICE must exist in ${KDF9RUNTIME}"
-            echo;
-            exit 0;;
-        *)
-            if [ -z ${tape} ];
-            then
-                tape="$1";
-            fi
-            ;;
+    -h | --help)
+        echo "DUMPTAPE - Displays the contents of a tape drive."
+        echo
+        echo "Usage: dumptape TAPEDEVICE"
+        echo
+        echo "Note: TAPEDEVICE must exist in ${KDF9RUNTIME}"
+        echo
+        exit 0
+        ;;
+    *)
+        if [ -z ${tape} ]; then
+            tape="$1"
+        fi
+        ;;
     esac
-    shift;
+    shift
 done
 
 TMPFILE=/tmp/mtp.dump
 
 trap "rm -f ${TMPFILE}" 0 1 2 3
 
-mtp ${tape} > ${TMPFILE}
+mtp ${tape} >${TMPFILE}
 
-if [ -s ${TMPFILE} ] 
-then
-    iconv -f `file -b --mime-encoding ${TMPFILE}` -t UTF8 < ${TMPFILE}; >/dev/null
+if [ -s ${TMPFILE} ]; then
+    iconv -f $(file -b --mime-encoding ${TMPFILE}) -t UTF8 <${TMPFILE}
+    >/dev/null
 fi
-

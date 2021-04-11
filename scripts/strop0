@@ -19,8 +19,7 @@
 # strop0 : Convert normal keyboard characters to Kidsgrove Algol format.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
@@ -28,10 +27,9 @@ TARGET=${KDF9RUNTIME}/Kidsgrove
 
 trap "rm -f /tmp/strop0.commands" 0 1 2 3
 
-if [ ! -r $1.a60 ]
-then 
-      echo "Could not find $1.a60"; 
-      exit 1
+if [ ! -r $1.a60 ]; then
+    echo "Could not find $1.a60"
+    exit 1
 fi
 
 cat >/tmp/strop0.commands <<++++
@@ -45,4 +43,4 @@ s/\<=/_\</g
 s/\^\\*\\*\\*\\*\$/\|/
 ++++
 
-cat $1.a60 | sed -f /tmp/strop0.commands > ${TARGET}/$1.a60
+cat $1.a60 | sed -f /tmp/strop0.commands >${TARGET}/$1.a60

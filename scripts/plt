@@ -19,39 +19,37 @@
 # plt : Create or update program library magnetic tape files.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 DATA=${KDF9RUNTIME}/Data
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
-        -h|--help) 
-            echo "PLT - Create or update program library magnetic tape files.";
-            echo;
-            echo "Usage: plt BINARYNAME"
-            echo;
-            echo "Note: BINARYNAME must exist in ${KDF9RUNTIME}/Binary"
-            echo;
-            exit 0;;
+    -h | --help)
+        echo "PLT - Create or update program library magnetic tape files."
+        echo
+        echo "Usage: plt BINARYNAME"
+        echo
+        echo "Note: BINARYNAME must exist in ${KDF9RUNTIME}/Binary"
+        echo
+        exit 0
+        ;;
     esac
 fi
 
-trap "rm -f ${DATA}/mt_test_labels.txt"  0 1 2 3
+trap "rm -f ${DATA}/mt_test_labels.txt" 0 1 2 3
 
 ucc PLT
 
-if [ x$1x = xx ]
-then
-   >${KDF9RUNTIME}/MT1
-   cat > ${DATA}/mt_test_labels.txt <<++++
+if [ x$1x = xx ]; then
+    >${KDF9RUNTIME}/MT1
+    cat >${DATA}/mt_test_labels.txt <<++++
 -00-1234WHETLIST|
 00000000        |
 -00-0552EFPBEAAG|
@@ -62,18 +60,17 @@ then
 |
 ++++
 
-   rlt mt_test_labels -m=zw
-   nine PLT
-   mtp MT1
-   exit 0
+    rlt mt_test_labels -m=zw
+    nine PLT
+    mtp MT1
+    exit 0
 fi
 
-if [ -r ${KDF9RUNTIME}/Binary/$1 ]
-then
-   a2b -p2c < ${KDF9RUNTIME}/Binary/$1 > ${DATA}/$1-forPLT.txt
-   cat ${KDF9RUNTIME}/Binary/$1 >> ${DATA}/$1-forPLT.txt
-   nine -d=t -TP=lk PLT $1-forPLT.txt 
-   mtp MT1
+if [ -r ${KDF9RUNTIME}/Binary/$1 ]; then
+    a2b -p2c <${KDF9RUNTIME}/Binary/$1 >${DATA}/$1-forPLT.txt
+    cat ${KDF9RUNTIME}/Binary/$1 >>${DATA}/$1-forPLT.txt
+    nine -d=t -TP=lk PLT $1-forPLT.txt
+    mtp MT1
 else
-   exit 0
+    exit 0
 fi

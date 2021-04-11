@@ -19,14 +19,12 @@
 # ports : Convert Kidsgrove Algol to Whetstone format.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
@@ -34,24 +32,24 @@ TARGET=${KDF9RUNTIME}/Whetstone
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
-        -h|--help) 
-            echo "PORTS - Convert Kidsgrove Algol to Whetstone format.";
-            echo;
-            echo "Usage: ports SOURCEFILE"
-            echo;
-            echo "Note: SOURCEFILE must exist in ${SOURCE}"
-            echo;
-            exit 0;;
+    -h | --help)
+        echo "PORTS - Convert Kidsgrove Algol to Whetstone format."
+        echo
+        echo "Usage: ports SOURCEFILE"
+        echo
+        echo "Note: SOURCEFILE must exist in ${SOURCE}"
+        echo
+        exit 0
+        ;;
     esac
 fi
 
-trap "rm -f /tmp/ports.commands  /tmp/ports.tmp"   \
-      0 1 2 3
+trap "rm -f /tmp/ports.commands  /tmp/ports.tmp" \
+    0 1 2 3
 
-if [ ! -r  ${SOURCE}/$1.a60 ]
-then 
-      echo "Could not find $1.a60 in ${SOURCE}"; 
-      exit 1
+if [ ! -r ${SOURCE}/$1.a60 ]; then
+    echo "Could not find $1.a60 in ${SOURCE}"
+    exit 1
 fi
 
 cat >/tmp/ports.commands <<++++
@@ -164,4 +162,4 @@ $1|
 |
 ++++
 
-cat ${SOURCE}/$1.a60 | sed -E -f /tmp/ports.commands > ${TARGET}/$1.a60
+cat ${SOURCE}/$1.a60 | sed -E -f /tmp/ports.commands >${TARGET}/$1.a60

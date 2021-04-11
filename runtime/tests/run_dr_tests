@@ -15,9 +15,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-if [ -z $KDF9RUNTIME ]
-then
-    export KDF9RUNTIME="$HOME/.kdf9"
+if [ -z $KDF9RUNTIME ]; then
+   export KDF9RUNTIME="$HOME/.kdf9"
 fi
 
 export DATA=${KDF9RUNTIME}/Data
@@ -37,50 +36,72 @@ cat >${KDF9RUNTIME}/settings_1.txt <<++++
 K 14 DR
 ++++
 
-> ${LOGS}/dr_test.log
+>${LOGS}/dr_test.log
 
 echo "TEST TDRUM     POA, PIA."
-echo "TEST TDRUM     POA, PIA." >> ${LOGS}/dr_test.log
->${KDF9RUNTIME}/DR0; ucc TDRUM; nine_test TDRUM $opt >> ${LOGS}/dr_test.log
-fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/dr_test.log
+echo "TEST TDRUM     POA, PIA." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDRUM
+nine_test TDRUM $opt >>${LOGS}/dr_test.log
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
 case $1 in
 z)
-   cat ${KDF9RUNTIME}/TP0; echo "======"; echo
-   od -c ${KDF9RUNTIME}/DR0 | more; echo "======"; echo;;
+   cat ${KDF9RUNTIME}/TP0
+   echo "======"
+   echo
+   od -c ${KDF9RUNTIME}/DR0 | more
+   echo "======"
+   echo
+   ;;
 *) ;;
 esac
 
 echo "TEST TDRUMR2EM POA, PIB."
-echo "TEST TDRUMR2EM POA, PIB." >> ${LOGS}/dr_test.log
->${KDF9RUNTIME}/DR0; ucc TDRUMR2EM; nine_test TDRUMR2EM $opt >> ${LOGS}/dr_test.log
-fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/dr_test.log
+echo "TEST TDRUMR2EM POA, PIB." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDRUMR2EM
+nine_test TDRUMR2EM $opt >>${LOGS}/dr_test.log
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
 case $1 in
 z)
-   cat ${KDF9RUNTIME}/TP0; echo "======"; echo
-   od -c ${KDF9RUNTIME}/DR0 | more; echo "======"; echo;;
+   cat ${KDF9RUNTIME}/TP0
+   echo "======"
+   echo
+   od -c ${KDF9RUNTIME}/DR0 | more
+   echo "======"
+   echo
+   ;;
 *) ;;
 esac
 
 echo "TEST TDRUMW2EM POB, PIA."
-echo "TEST TDRUMW2EM POB, PIA." >> ${LOGS}/dr_test.log
->${KDF9RUNTIME}/DR0; ucc TDRUMW2EM; nine_test TDRUMW2EM $opt >> ${LOGS}/dr_test.log
-fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/dr_test.log
+echo "TEST TDRUMW2EM POB, PIA." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDRUMW2EM
+nine_test TDRUMW2EM $opt >>${LOGS}/dr_test.log
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
 case $1 in
 z)
-   cat ${KDF9RUNTIME}/TP0; echo "======"; echo
-   od -c ${KDF9RUNTIME}/DR0 | more; echo "======"; echo;;
+   cat ${KDF9RUNTIME}/TP0
+   echo "======"
+   echo
+   od -c ${KDF9RUNTIME}/DR0 | more
+   echo "======"
+   echo
+   ;;
 *) ;;
 esac
 
 echo "TEST TDROUTS   11, 12, 13, 14."
-echo "TEST TDROUTS   11, 12, 13, 14."  >> ${LOGS}/dr_test.log
->${KDF9RUNTIME}/DR0; ucc TDROUTS; nine_test TDROUTS ${opt}k
-fgrep "Digital signature" ${LOGS}/KDF9.log >> ${LOGS}/dr_test.log
+echo "TEST TDROUTS   11, 12, 13, 14." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDROUTS
+nine_test TDROUTS ${opt}k
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/dr_test.log ${TESTS}/dr_regr_tests_good.log > ${LOGS}/dr_test.diff
-if [ -s ${LOGS}/dr_test.diff ]
-then
+diff -diwB --strip-trailing-cr ${LOGS}/dr_test.log ${TESTS}/dr_regr_tests_good.log >${LOGS}/dr_test.diff
+if [ -s ${LOGS}/dr_test.diff ]; then
    echo "These are the unexpected variances for this run:"
    echo "==="
    more ${LOGS}/dr_test.diff

@@ -19,28 +19,27 @@
 # sttl : Set the store size and time limit on Usercode files.
 #------------------------------------------------------------------------
 
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-if [ $# -eq 0 ]
-then
-    set -- "-h";
+if [ $# -eq 0 ]; then
+    set -- "-h"
 fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
-        -h|--help) 
-            echo "STTL - Set the store size and time limit on Usercode files.";
-            echo;
-            echo "Usage: sttl USERCODEFILE"
-            echo;
-            echo "Note: USERCODEFILE must exist in ${USERCODE}"
-            echo;
-            exit 0;;
+    -h | --help)
+        echo "STTL - Set the store size and time limit on Usercode files."
+        echo
+        echo "Usage: sttl USERCODEFILE"
+        echo
+        echo "Note: USERCODEFILE must exist in ${USERCODE}"
+        echo
+        exit 0
+        ;;
     esac
 fi
 
@@ -50,9 +49,8 @@ cat >/tmp/STTL.commands <<++++
 /^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
 ++++
 
-if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 > /tmp/STTL_tmp
-then
-   mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
+if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 >/tmp/STTL_tmp; then
+    mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
 else
-   echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
+    echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
 fi

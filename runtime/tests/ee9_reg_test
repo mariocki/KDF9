@@ -15,8 +15,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
-if [ -z $KDF9RUNTIME ]
-then
+if [ -z $KDF9RUNTIME ]; then
     export KDF9RUNTIME="$HOME/.kdf9"
 fi
 
@@ -32,103 +31,130 @@ export EE9REGTEST=1
 trap "rm -f ${LOGS}/error_output" 0 1 2 3
 
 function resetOutputFiles {
->${KDF9RUNTIME}/CP0
->${KDF9RUNTIME}/CP1
->${KDF9RUNTIME}/CR0
->${KDF9RUNTIME}/CR1
->${KDF9RUNTIME}/DR0
->${KDF9RUNTIME}/FD0
->${KDF9RUNTIME}/FW0
->${KDF9RUNTIME}/GP0
->${KDF9RUNTIME}/LP0
->${KDF9RUNTIME}/LP1
->${KDF9RUNTIME}/MT0
->${KDF9RUNTIME}/MT1
->${KDF9RUNTIME}/MT2
->${KDF9RUNTIME}/MT3
->${KDF9RUNTIME}/MT4
->${KDF9RUNTIME}/MT5
->${KDF9RUNTIME}/MT6
->${KDF9RUNTIME}/MT7
->${KDF9RUNTIME}/SI0
->${KDF9RUNTIME}/SI1
->${KDF9RUNTIME}/ST0
->${KDF9RUNTIME}/ST1
->${KDF9RUNTIME}/TP0
->${KDF9RUNTIME}/TP1
->${KDF9RUNTIME}/TR0
->${KDF9RUNTIME}/TR1
->${KDF9RUNTIME}/settings_1.txt
->${KDF9RUNTIME}/settings_2.txt
+    >${KDF9RUNTIME}/CP0
+    >${KDF9RUNTIME}/CP1
+    >${KDF9RUNTIME}/CR0
+    >${KDF9RUNTIME}/CR1
+    >${KDF9RUNTIME}/DR0
+    >${KDF9RUNTIME}/FD0
+    >${KDF9RUNTIME}/FW0
+    >${KDF9RUNTIME}/GP0
+    >${KDF9RUNTIME}/LP0
+    >${KDF9RUNTIME}/LP1
+    >${KDF9RUNTIME}/MT0
+    >${KDF9RUNTIME}/MT1
+    >${KDF9RUNTIME}/MT2
+    >${KDF9RUNTIME}/MT3
+    >${KDF9RUNTIME}/MT4
+    >${KDF9RUNTIME}/MT5
+    >${KDF9RUNTIME}/MT6
+    >${KDF9RUNTIME}/MT7
+    >${KDF9RUNTIME}/SI0
+    >${KDF9RUNTIME}/SI1
+    >${KDF9RUNTIME}/ST0
+    >${KDF9RUNTIME}/ST1
+    >${KDF9RUNTIME}/TP0
+    >${KDF9RUNTIME}/TP1
+    >${KDF9RUNTIME}/TR0
+    >${KDF9RUNTIME}/TR1
+    >${KDF9RUNTIME}/settings_1.txt
+    >${KDF9RUNTIME}/settings_2.txt
 }
 
 resetOutputFiles
 
 rm -f ${LOGS}/*
 
-echo; echo
+echo
+echo
 echo "Running CR emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run CR "run_cr_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run CR "run_cr_tests" >>${LOGS}/ee9_test_case.log
+echo
 
 resetOutputFiles
 
-echo; echo
+echo
+echo
 echo "Running MT emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run MT "run_mt_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run MT "run_mt_tests" >>${LOGS}/ee9_test_case.log
+echo
 
 resetOutputFiles
 
-echo; echo
+echo
+echo
 echo "Running DR emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run DR "run_dr_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run DR "run_dr_tests" >>${LOGS}/ee9_test_case.log
+echo
 
 resetOutputFiles
 
-echo; echo
+echo
+echo
 echo "Running FD emulation tests:"
 echo "=========================="
 echo
-${TESTS}/ee9_test_run FD "run_fd_tests"      >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_run FD "run_fd_tests" >>${LOGS}/ee9_test_case.log
+echo
 
 resetOutputFiles
 
-echo; echo
+echo
+echo
 echo "Running problem program correctness tests:"
 echo "========================================="
 echo
 
 resetOutputFiles
 
-${TESTS}/ee9_test_case HIG >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case LOG >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case DMP >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case ACK >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case HLT >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case HKT >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case MOB >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case GPR >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case FLU >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case WBM >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case RLT >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case TO4 >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case TOX >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case MTW >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case INP >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case HQP >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case WAB n >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case FLO >> ${LOGS}/ee9_test_case.log; echo
-${TESTS}/ee9_test_case 1DH >> ${LOGS}/ee9_test_case.log; echo
+${TESTS}/ee9_test_case HIG >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case LOG >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case DMP >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case ACK >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case HLT >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case HKT >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case MOB >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case GPR >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case FLU >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case WBM >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case RLT >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case TO4 >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case TOX >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case MTW >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case INP >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case HQP >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case WAB n >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case FLO >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case 1DH >>${LOGS}/ee9_test_case.log
+echo
 
-diff -diwB --strip-trailing-cr -I 'The Usercode*' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log > ${LOGS}/ee9_test_case.diff
+diff -diwB --strip-trailing-cr -I 'The Usercode*' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log >${LOGS}/ee9_test_case.diff
 
-if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]
-then
+if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]; then
     echo
     echo "Done: ee9 is working as expected."
     echo
