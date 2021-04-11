@@ -1,0 +1,55 @@
+export DATA=${KDF9_DATA:-Data}
+export BINARY=${KDF9_BINARY:-Binary}
+export DIRECTOR=${BINARY}/${ELDON:-EDNTSD990}
+
+trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
+
+if [ x$1x = xx ]
+then
+   echo; echo No program name was given.; echo
+   exit 1
+fi
+
+# Set up a set of labelled tapes, including at least one ZERO (scratch) tape.
+cat > ${DATA}/TSD_tape_labels.txt <<++++
+-00-1478        |
+-66-1909EXAMTIME|
+-00-0552EFPBEAAG|
+        MS-DUMP.|
+-00-2339+KOUTPUT/0023004|
+0-00-929PRINTEND|
+0-00-777AMPEXTM4|
+|
+++++
+rlt TSD_tape_labels - z
+
+# Create a call tape from the binary program.
+a2b -p2c P < ${BINARY}/$1  > /tmp/$1.pblk
+
+# Combine the call tape and the binary in a single paper tape file.
+cat ${BINARY}/$1          >> /tmp/$1.pblk
+mv /tmp/$1.pblk TR1
+
+#ucc PLT
+#nine PLT $1 - z kk
+
+if [ "x$2x" != xx -a "x$2x" != x-x ]
+then
+   datatxt=${DATA}/`basename "$2" ".txt"`.txt
+   if [ -r "$datatxt" ]
+   then
+      a2b -L2p < ${DATA}/$2.txt >> TR1
+   else
+      datatxt=${DATA}/`basename "$2"`
+      if [ -r "$datatxt" ]
+      then
+         cat "$datatxt" >>TR1
+      else
+         echo The file "$datatxt" is absent or unreadable.
+         exit 3
+      fi
+   fi
+fi
+
+# Run the named bare Director.
+tsd "${3}" "$4y" "$5" "$6"
