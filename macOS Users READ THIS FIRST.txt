@@ -1,6 +1,6 @@
 If you are using macOS and have Apple's Gatekeeper anti-malware protection enabled,
 macOS may try to prevent you from running the programs included in this distribution,
-which may be put in "quarantine" after download because it is not cryptographically signed.
+which may be put in "quarantine" after download because they are not cryptographically signed.
 
 You can handle this in one of three ways:
 

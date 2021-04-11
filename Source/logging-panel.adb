@@ -1,6 +1,6 @@
 -- Provide logging output to an interactive terminal/control panel.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -87,14 +87,6 @@ package body logging.panel is
       POSIX.output_line;
       logger.column_number := 1;
    end log_new_line;
-
-   not overriding
-   procedure show (logger : in out panel.display; message : in String := "") is
-   begin
-      if message /= "" then
-         logger.log(message);
-      end if;
-   end show;
 
    not overriding
    procedure show_line (logger : in out panel.display; message : in String := "") is

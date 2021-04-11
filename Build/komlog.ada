@@ -1,4 +1,4 @@
-Version V6p1a of ee9 for Linux, built on Sun 21 Feb 2021 03:54:04 PM PST.
+Version V6p2e of ee9 for Linux, built on Sat 10 Apr 2021 03:59:18 PM PDT.
 mk9 'ee9' build: optimised and with full language checks, using configuration options:
 
 pragma Unsuppress(All_Checks);
@@ -20,12 +20,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ee9.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- This is the "main program" for the entire emulator.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -88,7 +88,7 @@ Compiled at: 2021-02-21 15:54:04
     63.    procedure complain (about : in String; because : in String := "") is
     64.    begin
     65.       show_proper_usage(
-    66.                         "Parameter " & about & " is not valid"
+    66.                         "Parameter «" & about & "» is not valid"
     67.                       & (if because = "" then "." else " because " & because & ".")
     68.                        );
     69.    end complain;
@@ -130,7 +130,7 @@ Compiled at: 2021-02-21 15:54:04
    105.
    106.          -- Fail any non-flag parameter.
    107.          if argument(index) /= '-'  then
-   108.             complain(about => "'" & argument & "'");
+   108.             complain(about => argument);
    109.          end if;
    110.
    111.          -- Fail a too-short flag parameter.
@@ -144,7 +144,7 @@ Compiled at: 2021-02-21 15:54:04
    119.                argument(index..index+1) = "-m"                    then
    120.             for i in index+2 .. argument'Last loop
    121.                if is_invalid_miscellany_flag(argument(i)) then
-   122.                   complain(about => """" & argument & """ at """ & argument(i) & """");
+   122.                   complain(about => argument);
    123.                end if;
    124.             end loop;
    125.             return;
@@ -171,12 +171,12 @@ Compiled at: 2021-02-21 15:54:04
    146.       end check_flag_setting;
    147.
    148.    begin -- check_all_flag_settings
-   149.       if CLI.Argument_Count = 0 then
-   150.          return;
-   151.       end if;
-   152.       for i in 1..CLI.Argument_Count loop
-   153.          check_flag_setting(i);
-   154.       end loop;
+   149.       for i in 1..CLI.Argument_Count loop
+   150.          check_flag_setting(i);
+   151.       end loop;
+   152.       if the_program_name_position = 0 then
+   153.          show_proper_usage("No program name parameter was given.");
+   154.       end if;
    155.    end check_all_flag_settings;
    156.
    157.    procedure impose_all_flag_settings is
@@ -236,7 +236,7 @@ Compiled at: 2021-02-21 15:54:04
    211.          elsif argument = "-sp" then
    212.             set_execution_mode(program_mode);
    213.          elsif argument = "-st" then
-   214.             set_execution_mode(test_program_mode);
+   214.             set_execution_mode(privileged_mode);
    215.          elsif argument = "-d-" then
    216.             set_diagnostic_mode(fast_mode);
    217.          elsif argument = "-df" then
@@ -259,74 +259,64 @@ Compiled at: 2021-02-21 15:54:04
    234.       end loop;
    235.    end impose_all_flag_settings;
    236.
-   237.    function plain (f : String)
+   237.    function name_part_of (f : String)
    238.    return String
    239.    is (f(f'First+1 .. f'Last));
    240.
    241.    function the_program_name
    242.    return String
-   243.    is (plain(CLI.Argument(the_program_name_position)));
+   243.    is (name_part_of(CLI.Argument(the_program_name_position)));
    244.
-   245.    procedure tidy_up (reason : in String) is
-   246.    begin
-   247.       Put_Line(Standard_Error, reason & ".");
-   248.       close(the_log_file_name);
-   249.       CLI.Set_Exit_Status(CLI.Failure);
-   250.    end tidy_up;
-   251.
-   252. begin -- ee9
-   253.
-   254.    check_all_flag_settings;
-   255.    open(the_log_file_name);
-   256.
-   257.    if the_program_name_position /= 0 then
-   258.       get_settings_from_file("1");
-   259.       configure_the_IOC;
-   260.       impose_all_flag_settings;
-   261.       revise_the_configuration;
-   262.       if the_log_is_wanted then
-   263.          log_line(
-   264.                   "This is ee9 6.1a, compiled by "
-   265.                 & Standard'Compiler_Version
-   266.                 & " on "
-   267.                 & GNAT.Source_Info.Compilation_ISO_Date
-   268.                 & "."
-   269.                  );
-   270.       end if;
-   271.       display_execution_modes(the_program_name);
-   272.       execute(the_program_name);
-   273.    else
-   274.       log_line("Cannot run ee9; no program file parameter was supplied.");
-   275.    end if;
-   276.
-   277.    close(the_log_file_name);
-   278.
-   279. exception
-   280.
-   281.    when a_command_line_error_is_detected =>
-   282.       tidy_up("Invalid command line");
-   283.
-   284.    when diagnostic : operator_error =>
-   285.       say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
-   286.
-   287.    when error : others =>
-   288.       tidy_up("Failure in ee9; unexpected exception: " & Exception_Information(error));
-   289.
-   290. end ee9;
+   245. begin -- ee9
+   246.
+   247.    check_all_flag_settings;
+   248.    open(the_log_file_name);
+   249.    get_settings_from_file("1");
+   250.    configure_the_IOC;
+   251.    impose_all_flag_settings;
+   252.    revise_the_IOC_configuration;
+   253.    log_line(
+   254.             "This is ee9 6.2e, compiled by "
+   255.           & Standard'Compiler_Version
+   256.           & " on "
+   257.           & GNAT.Source_Info.Compilation_ISO_Date
+   258.           & ".",
+   259.             iff => the_log_is_wanted
+   260.            );
+   261.    display_execution_modes(the_program_name);
+   262.
+   263.    execute(the_program_name);
+   264.
+   265.    close(the_log_file_name);
+   266.
+   267. exception
+   268.
+   269.    when a_command_line_error_is_detected =>
+   270.       close(the_log_file_name);
+   271.
+   272.    when diagnostic : operator_error =>
+   273.       say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
+   274.
+   275.    when error : others =>
+   276.       Put_Line(Standard_Error, "Failure in ee9: " & Exception_Information(error) & ".");
+   277.       close(the_log_file_name);
+   278.       CLI.Set_Exit_Status(CLI.Failure);
+   279.
+   280. end ee9;
 
- 290 lines: No errors
+ 280 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/exceptions.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Declare the exceptions used in emulation-mode control.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -394,12 +384,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/execute.adb
-Source file time stamp: 2021-02-20 23:30:35
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- This is the emulation-mode coordinate module.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -470,141 +460,160 @@ Compiled at: 2021-02-21 15:54:04
     71.    case the_execution_mode is
     72.       when boot_mode =>
     73.          reset_the_internal_registers(Director_state);
-    74.          boot_the_KDF9(program_name);
-    75.       when test_program_mode=>
-    76.          reset_the_internal_registers(Director_state);
-    77.          load_a_program(program_name);
-    78.       when program_mode =>
-    79.          reset_the_internal_registers(program_state);
-    80.          load_a_program(program_name);
-    81.    end case;
-    82.
-    83.    if not loading_was_successful then
-    84.       say_goodbye("Could not load the specified program.");
-    85.       return;
-    86.    end if;
-    87.
-    88.    poke_all_amendments;
-    89.    show_all_prerun_dump_areas;
-    90.
-    91.    if do_not_execute then
-    92.       log_new_line;
-    93.       log_line("Run abandoned as requested.");
-    94.       return;
-    95.    end if;
-    96.
-    97.    reset_the_CPU_state;
-    98.
-    99. execution_loop:
-   100.    loop
-   101.
-   102.       begin
+    74.       when privileged_mode=>
+    75.          reset_the_internal_registers(Director_state);
+    76.       when program_mode =>
+    77.          reset_the_internal_registers(program_state);
+    78.    end case;
+    79.
+    80.    case the_execution_mode is
+    81.       when boot_mode =>
+    82.          if this_is_a_bare_Director then
+    83.             load_a_bare_Director(program_name);
+    84.          else
+    85.             boot_the_KDF9(program_name);
+    86.          end if;
+    87.       when privileged_mode=>
+    88.          load_a_program(program_name);
+    89.       when program_mode =>
+    90.          load_a_program(program_name);
+    91.    end case;
+    92.
+    93.    case the_execution_mode is
+    94.       when boot_mode =>
+    95.          if this_is_a_bare_Director then
+    96.             reset_the_CPU_state((4, 0));
+    97.          else
+    98.             reset_the_CPU_state((0, 0));
+    99.          end if;
+   100.       when others =>
+   101.          reset_the_CPU_state((0, 0));
+   102.    end case;
    103.
-   104.          check_times_and_modes;
-   105.          if the_diagnostic_mode /= fast_mode then
-   106.             -- Do a single, traced instruction, breaking-in conditionally.
-   107.             do_a_traced_instruction_cycle;
-   108.          else
-   109.             -- Fast mode is designed for minimal overhead;
-   110.             --    it interacts with the user only at the end of a time slice.
-   111.             loop
-   112.                do_a_fast_time_slice;
-   113.                check_times_and_modes;
-   114.             end loop;
-   115.          end if;
-   116.
-   117.       exception  -- handler for execution_loop
-   118.
-   119.          when debugging_stop =>
-   120.             null;
-   121.
-   122.          when mode_change_request =>
-   123.             quit_if_requested;
-   124.
-   125.          when abandon_this_order =>
-   126.             null;  -- Just get on with it after an interrupt or nullified order.
-   127.
-   128.          when LOV_exception =>
-   129.             IOC.handle_a_main_store_lockout;
-   130.
-   131.          when program_exit =>
-   132.             say_goodbye("", status => Success);
-   133.             exit execution_loop;
-   134.
-   135.          when quit_request =>
-   136.             say_goodbye("Run stopped by the user", status => Success);
-   137.             exit execution_loop;
-   138.
-   139.          when time_expired =>
-   140.             say_goodbye("Infinite loop? Run failed by exceeding the time limit");
-   141.             exit execution_loop;
-   142.
-   143.          when diagnostic : NOUV_exception =>
-   144.             say_goodbye("NOUV interrupt", Exception_Message(diagnostic));
-   145.             exit execution_loop;
+   104.    if not loading_was_successful then
+   105.       say_goodbye("Could not load the specified program.");
+   106.       return;
+   107.    end if;
+   108.
+   109.    poke_all_amendments;
+   110.    show_all_prerun_dump_areas;
+   111.
+   112.    if do_not_execute then
+   113.       log_new_line;
+   114.       log_line("Run abandoned as requested.");
+   115.       return;
+   116.    end if;
+   117.
+   118. execution_loop:
+   119.    loop
+   120.
+   121.       begin
+   122.
+   123.          check_times_and_modes;
+   124.          if the_diagnostic_mode /= fast_mode then
+   125.             -- Do a single, traced instruction, breaking-in conditionally.
+   126.             do_a_traced_instruction_cycle;
+   127.          else
+   128.             -- Fast mode is designed for minimal overhead;
+   129.             --    it interacts with the user only at the end of a time slice.
+   130.             loop
+   131.                do_a_fast_time_slice;
+   132.                check_times_and_modes;
+   133.             end loop;
+   134.          end if;
+   135.
+   136.       exception  -- handler for execution_loop
+   137.
+   138.          when mode_change_request =>
+   139.             quit_if_requested;
+   140.
+   141.          when abandon_this_order =>
+   142.             null;  -- Just get on with it after an interrupt or nullified order.
+   143.
+   144.          when LOV_exception =>
+   145.             IOC.handle_a_main_store_lockout;
    146.
-   147.          when input_is_impossible =>
-   148.             say_goodbye("Noninteractive mode cannot handle a prompt");
+   147.          when program_exit =>
+   148.             say_goodbye("", status => Success);
    149.             exit execution_loop;
    150.
-   151.          when diagnostic : not_yet_implemented =>
-   152.             say_goodbye("Not yet implemented", Exception_Message(diagnostic));
+   151.          when quit_request =>
+   152.             say_goodbye("Run stopped by the user", status => Success);
    153.             exit execution_loop;
    154.
-   155.          when diagnostic : RESET_exception =>
-   156.             say_goodbye("RESET interrupt", Exception_Message(diagnostic));
+   155.          when time_expired =>
+   156.             say_goodbye("Infinite loop? Run failed by exceeding the time limit");
    157.             exit execution_loop;
    158.
-   159.          when diagnostic : LIV_exception =>
-   160.             say_goodbye( "LIV interrupt", Exception_Message(diagnostic));
+   159.          when diagnostic : NOUV_exception =>
+   160.             say_goodbye("NOUV interrupt", Exception_Message(diagnostic));
    161.             exit execution_loop;
    162.
-   163.          when diagnostic : Director_failure =>
-   164.             say_goodbye("Invalid operation in Director", Exception_Message(diagnostic));
+   163.          when input_is_impossible =>
+   164.             say_goodbye("Noninteractive mode; cannot respond to a prompt");
    165.             exit execution_loop;
    166.
-   167.          when diagnostic : OUT_error =>
-   168.             say_goodbye("Failure in OUT", Exception_Message(diagnostic));
+   167.          when diagnostic : not_yet_implemented =>
+   168.             say_goodbye("Not yet implemented", Exception_Message(diagnostic));
    169.             exit execution_loop;
    170.
-   171.          when diagnostic : IO_error =>
-   172.             say_goodbye("Impossible I/O operation", Exception_Message(diagnostic));
+   171.          when diagnostic : RESET_exception =>
+   172.             say_goodbye("RESET interrupt", Exception_Message(diagnostic));
    173.             exit execution_loop;
    174.
-   175.          when diagnostic : Director_IO_error =>
-   176.             say_goodbye("Impossible I/O operation in Director", Exception_Message(diagnostic));
+   175.          when diagnostic : LIV_exception =>
+   176.             say_goodbye( "LIV interrupt", Exception_Message(diagnostic));
    177.             exit execution_loop;
    178.
-   179.          when diagnostic : operator_error =>
-   180.             say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
+   179.          when diagnostic : Director_failure =>
+   180.             say_goodbye("LIV interrupt in Director", Exception_Message(diagnostic));
    181.             exit execution_loop;
    182.
-   183.       end;
-   184.
-   185.    end loop execution_loop;
+   183.          when diagnostic : OUT_error =>
+   184.             say_goodbye("Failure in OUT", Exception_Message(diagnostic));
+   185.             exit execution_loop;
    186.
-   187. exception  -- handler for execute
-   188.
-   189.    when diagnostic : invalid_paper_tape_file =>
-   190.       say_goodbye("Invalid paper tape file supplied", Exception_Message(diagnostic));
-   191.
-   192.    when diagnostic : operator_error =>
-   193.       say_goodbye("The KDF9 operator must have made a mistake", Exception_Message(diagnostic));
+   187.          when diagnostic : IO_error =>
+   188.             say_goodbye("Impossible I/O operation", Exception_Message(diagnostic));
+   189.             exit execution_loop;
+   190.
+   191.          when diagnostic : Director_IO_error =>
+   192.             say_goodbye("Impossible I/O operation in Director", Exception_Message(diagnostic));
+   193.             exit execution_loop;
    194.
-   195.    when diagnostic : others =>
-   196.       say_goodbye("Apologies for this dismal failure", Exception_Message(diagnostic));
-   197.
-   198. end execute;
+   195.          when diagnostic : operator_error =>
+   196.             say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
+   197.             exit execution_loop;
+   198.
+   199.       end;
+   200.
+   201.    end loop execution_loop;
+   202.
+   203. exception  -- handler for execute
+   204.
+   205.    when diagnostic : debugging_stop =>
+   206.       say_goodbye("Debugging stop requested", Exception_Message(diagnostic));
+   207.
+   208.    when diagnostic : invalid_paper_tape_file =>
+   209.       say_goodbye("Invalid paper tape file supplied", Exception_Message(diagnostic));
+   210.
+   211.    when diagnostic : operator_error =>
+   212.       say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
+   213.
+   214.    when diagnostic : others =>
+   215.       say_goodbye("Apologies for this dismal failure", Exception_Message(diagnostic));
+   216.
+   217. end execute;
 
- 198 lines: No errors
+ 217 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/hci.adb
-Source file time stamp: 2021-02-11 18:24:04
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Provide operations supporting replicated human-readable output:
      2. --    1: to an interactive user interface for transient display, and
@@ -614,7 +623,7 @@ Compiled at: 2021-02-21 15:54:04
      6. --
      7. -- Also provide operations allowing synchronization with the user.
      8. --
-     9. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     9. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
     10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
     11. --
     12. -- The ee9 program is free software; you can redistribute it and/or
@@ -737,60 +746,47 @@ Compiled at: 2021-02-21 15:54:04
    129.       end if;
    130.    end log_API_message;
    131.
-   132.    procedure hoot (message : in String := "") is
+   132.    procedure show_line (message : in String) is
    133.    begin
-   134.       panel_logger.log(message & Character'Val (7));  -- Append a BEL to the message.
-   135.    end hoot;
-   136.
-   137.    procedure show (message : in String) is
-   138.    begin
-   139.       if debugging_is_enabled then
-   140.          panel_logger.show(message);
-   141.          flush;
-   142.       end if;
-   143.    end show;
+   134.       if debugging_is_enabled then
+   135.          panel_logger.show_line(message);
+   136.          flush;
+   137.       end if;
+   138.    end show_line;
+   139.
+   140.    procedure interact (reason : in String := "Mode") is
+   141.    begin
+   142.       panel_logger.interact(reason);
+   143.    end interact;
    144.
-   145.    procedure show_line (message : in String) is
+   145.    procedure open (logfile_name : in String) is
    146.    begin
-   147.       if debugging_is_enabled then
-   148.          panel_logger.show_line(message);
-   149.          flush;
-   150.       end if;
-   151.    end show_line;
-   152.
-   153.    procedure interact (reason : in String := "Mode") is
-   154.    begin
-   155.       panel_logger.interact(reason);
-   156.    end interact;
-   157.
-   158.    procedure open (logfile_name : in String) is
-   159.    begin
-   160.       cc_list.open(logfile_name);
-   161.    end open;
-   162.
-   163.    procedure close (logfile_name : in String) is
-   164.    begin
-   165.       cc_list.close(logfile_name);
-   166.    end close;
-   167.
-   168.    procedure flush (iff : in Boolean := True) is
-   169.    begin
-   170.       cc_list.flush(iff);
-   171.    end flush;
-   172.
-   173.    procedure log_to_file (message : in String) is
-   174.    begin
-   175.       file_logger.log(message);
-   176.       file_logger.log_new_line;
-   177.    end log_to_file;
-   178.
-   179. begin
-   180.    cc_list.set_logger_list((file_logger'Access, panel_logger'Access));
-   181. end HCI;
+   147.       cc_list.open(logfile_name);
+   148.    end open;
+   149.
+   150.    procedure close (logfile_name : in String) is
+   151.    begin
+   152.       cc_list.close(logfile_name);
+   153.    end close;
+   154.
+   155.    procedure flush (iff : in Boolean := True) is
+   156.    begin
+   157.       cc_list.flush(iff);
+   158.    end flush;
+   159.
+   160.    procedure log_to_file (message : in String) is
+   161.    begin
+   162.       file_logger.log(message);
+   163.       file_logger.log_new_line;
+   164.    end log_to_file;
+   165.
+   166. begin
+   167.    cc_list.set_logger_list((file_logger'Access, panel_logger'Access));
+   168. end HCI;
 
 Compiling: ../Source/hci.ads
-Source file time stamp: 2021-02-11 18:23:37
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Provide operations supporting replicated human-readable output:
      2. --    1: to an interactive user interface for transient display, and
@@ -800,7 +796,7 @@ Compiled at: 2021-02-21 15:54:04
      6. --
      7. -- Also provide operations allowing synchronization with the user.
      8. --
-     9. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     9. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
     10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
     11. --
     12. -- The ee9 program is free software; you can redistribute it and/or
@@ -860,38 +856,34 @@ Compiled at: 2021-02-21 15:54:04
     66.    procedure log_API_message (message  : in String;
     67.                               skip     : in Natural := 1);
     68.
-    69.    procedure hoot (message : in String := "");
+    69.    procedure show_line (message : in String);
     70.
-    71.    procedure show (message : in String);
+    71.    procedure interact (reason : in String := "Mode");
     72.
-    73.    procedure show_line (message : in String);
+    73.    procedure open  (logfile_name : in String);
     74.
-    75.    procedure interact (reason : in String := "Mode");
+    75.    procedure close (logfile_name : in String);
     76.
-    77.    procedure open  (logfile_name : in String);
+    77.    procedure flush (iff : in Boolean := True);
     78.
-    79.    procedure close (logfile_name : in String);
+    79.    procedure log_to_file (message : in String);
     80.
-    81.    procedure flush (iff : in Boolean := True);
-    82.
-    83.    procedure log_to_file (message : in String);
-    84.
-    85. end HCI;
+    81. end HCI;
 
- 181 lines: No errors
+ 168 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc.adb
-Source file time stamp: 2021-02-20 17:37:23
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -1566,230 +1558,236 @@ Compiled at: 2021-02-21 15:54:04
    676.       end if;
    677.    end mnemonic;
    678.
-   679.    procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String) is
-   680.       the_diagnostic : constant String := "%" & the_message & " on " & the_buffer.device_name;
+   679.    procedure trap_failing_IO_operation (the_culprit : in String; the_message : in String) is
+   680.       the_diagnostic : constant String := "%" & the_message & " on " & the_culprit;
    681.    begin
-   682.       if the_execution_mode in program_mode | test_program_mode then
+   682.       if the_execution_mode in program_mode | privileged_mode then
    683.          raise IO_error with the_diagnostic;
    684.       elsif the_CPU_state = program_state then
-   685.          the_buffer.is_abnormal := True;
-   686.          raise abandon_this_order with the_diagnostic;
-   687.       else
-   688.          -- The Director itself has gone seriously wrong.
-   689.          raise Director_IO_error with the_diagnostic;
-   690.       end if;
-   691.    end trap_failing_IO_operation;
-   692.
-   693.    procedure trap_illegal_IO_operation (order       : in String;
-   694.                                         buffer      : in IOC.device;
-   695.                                         Q_operand   : in KDF9.Q_register;
-   696.                                         set_offline : in Boolean) is
-   697.       pragma Unreferenced(Q_operand);
-   698.       pragma Unreferenced(set_offline);
-   699.    begin
-   700.       trap_illegal_instruction(order & " cannot be used on " & buffer.device_name);
-   701.    end trap_illegal_IO_operation;
-   702.
-   703.    --
-   704.    -- The following bodies provide inheritable default actions for
-   705.    -- operations that are not implemented by specific device types.
-   706.    --
-   707.
-   708.    procedure PIA (the_buffer  : in out IOC.device;
-   709.                   Q_operand   : in KDF9.Q_register;
-   710.                   set_offline : in Boolean) is
-   711.    begin
-   712.       trap_illegal_IO_operation("PIA", the_buffer, Q_operand, set_offline);
-   713.    end PIA;
-   714.
-   715.    procedure PIB (the_buffer  : in out IOC.device;
-   716.                   Q_operand   : in KDF9.Q_register;
-   717.                   set_offline : in Boolean) is
-   718.    begin
-   719.       trap_illegal_IO_operation("PIB", the_buffer, Q_operand, set_offline);
-   720.    end PIB;
-   721.
-   722.    procedure PIC (the_buffer  : in out IOC.device;
-   723.                   Q_operand   : in KDF9.Q_register;
-   724.                   set_offline : in Boolean) is
-   725.    begin
-   726.       trap_illegal_IO_operation("PIC", the_buffer, Q_operand, set_offline);
-   727.    end PIC;
-   728.
-   729.    procedure PID (the_buffer  : in out IOC.device;
-   730.                   Q_operand   : in KDF9.Q_register;
-   731.                   set_offline : in Boolean) is
-   732.    begin
-   733.       trap_illegal_IO_operation("PID", the_buffer, Q_operand, set_offline);
-   734.    end PID;
-   735.
-   736.    procedure PIE (the_buffer  : in out IOC.device;
-   737.                   Q_operand   : in KDF9.Q_register;
-   738.                   set_offline : in Boolean) is
-   739.    begin
-   740.       trap_illegal_IO_operation("PIE", the_buffer, Q_operand, set_offline);
-   741.    end PIE;
-   742.
-   743.    procedure PIF (the_buffer  : in out IOC.device;
-   744.                   Q_operand   : in KDF9.Q_register;
-   745.                   set_offline : in Boolean) is
-   746.    begin
-   747.       trap_illegal_IO_operation("PIF", the_buffer, Q_operand, set_offline);
-   748.    end PIF;
-   749.
-   750.    procedure PIG (the_buffer  : in out IOC.device;
-   751.                   Q_operand   : in KDF9.Q_register;
-   752.                   set_offline : in Boolean) is
-   753.    begin
-   754.       trap_illegal_IO_operation("PIG", the_buffer, Q_operand, set_offline);
-   755.    end PIG;
-   756.
-   757.    procedure PIH (the_buffer  : in out IOC.device;
-   758.                   Q_operand   : in KDF9.Q_register;
-   759.                   set_offline : in Boolean) is
-   760.    begin
-   761.       trap_illegal_IO_operation("PIH", the_buffer, Q_operand, set_offline);
-   762.    end PIH;
-   763.
-   764.    procedure PMA (the_buffer  : in out IOC.device;
-   765.                   Q_operand   : in KDF9.Q_register;
-   766.                   set_offline : in Boolean) is
-   767.    begin
-   768.       trap_illegal_IO_operation("PMA", the_buffer, Q_operand, set_offline);
-   769.    end PMA;
-   770.
-   771.    procedure PMB (the_buffer  : in out IOC.device;
-   772.                   Q_operand   : in KDF9.Q_register;
-   773.                   set_offline : in Boolean)
-   774.    is null;
-   775.
-   776.    procedure PMC (the_buffer  : in out IOC.device;
-   777.                   Q_operand   : in KDF9.Q_register;
-   778.                   set_offline : in Boolean)
-   779.    is null;
-   780.
-   781.    procedure PMD (the_buffer  : in out IOC.device;
-   782.                   Q_operand   : in KDF9.Q_register;
-   783.                   set_offline : in Boolean) is
-   784.    begin
-   785.       trap_illegal_IO_operation("PMD", the_buffer, Q_operand, set_offline);
-   786.    end PMD;
-   787.
-   788.    procedure PME (the_buffer  : in out IOC.device;
-   789.                   Q_operand   : in KDF9.Q_register;
-   790.                   set_offline : in Boolean) is
-   791.    begin
-   792.       trap_illegal_IO_operation("PME", the_buffer, Q_operand, set_offline);
-   793.    end PME;
-   794.
-   795.    procedure PMF (the_buffer  : in out IOC.device;
-   796.                   Q_operand   : in KDF9.Q_register;
-   797.                   set_offline : in Boolean)
-   798.    is null;
-   799.
-   800.    procedure PMG (the_buffer  : in out IOC.device;
-   801.                   Q_operand   : in KDF9.Q_register;
-   802.                   set_offline : in Boolean) is
-   803.    begin
-   804.       trap_illegal_IO_operation("PMG", the_buffer, Q_operand, set_offline);
-   805.    end PMG;
-   806.
-   807. -- procedure PMH is subsumed by SLOC.
-   808.
-   809.    procedure PMK (the_buffer  : in out IOC.device;
-   810.                   Q_operand   : in KDF9.Q_register;
-   811.                   set_offline : in Boolean) is
-   812.    begin
-   813.       trap_illegal_IO_operation("PMK", the_buffer, Q_operand, set_offline);
-   814.    end PMK;
-   815.
-   816.    procedure PML (the_buffer  : in out IOC.device;
-   817.                   Q_operand   : in KDF9.Q_register;
-   818.                   set_offline : in Boolean) is
-   819.    begin
-   820.       trap_illegal_IO_operation("PML", the_buffer, Q_operand, set_offline);
-   821.    end PML;
-   822.
-   823.    procedure POA (the_buffer  : in out IOC.device;
-   824.                   Q_operand   : in KDF9.Q_register;
-   825.                   set_offline : in Boolean) is
-   826.    begin
-   827.       trap_illegal_IO_operation("POA", the_buffer, Q_operand, set_offline);
-   828.    end POA;
-   829.
-   830.    procedure POB (the_buffer  : in out IOC.device;
-   831.                   Q_operand   : in KDF9.Q_register;
-   832.                   set_offline : in Boolean) is
-   833.    begin
-   834.       trap_illegal_IO_operation("POB", the_buffer, Q_operand, set_offline);
-   835.    end POB;
-   836.
-   837.    procedure POC (the_buffer  : in out IOC.device;
-   838.                   Q_operand   : in KDF9.Q_register;
-   839.                   set_offline : in Boolean) is
-   840.    begin
-   841.       trap_illegal_IO_operation("POC", the_buffer, Q_operand, set_offline);
-   842.    end POC;
-   843.
-   844.    procedure POD (the_buffer  : in out IOC.device;
-   845.                   Q_operand   : in KDF9.Q_register;
-   846.                   set_offline : in Boolean) is
-   847.    begin
-   848.       trap_illegal_IO_operation("POD", the_buffer, Q_operand, set_offline);
-   849.    end POD;
-   850.
-   851.    procedure POE (the_buffer  : in out IOC.device;
-   852.                   Q_operand   : in KDF9.Q_register;
-   853.                   set_offline : in Boolean) is
-   854.    begin
-   855.       trap_illegal_IO_operation("POE", the_buffer, Q_operand, set_offline);
-   856.    end POE;
-   857.
-   858.    procedure POF (the_buffer  : in out IOC.device;
-   859.                   Q_operand   : in KDF9.Q_register;
-   860.                   set_offline : in Boolean) is
-   861.    begin
-   862.       trap_illegal_IO_operation("POF", the_buffer, Q_operand, set_offline);
-   863.    end POF;
-   864.
-   865.    procedure POG (the_buffer  : in out IOC.device;
-   866.                   Q_operand   : in KDF9.Q_register;
-   867.                   set_offline : in Boolean) is
-   868.    begin
-   869.       trap_illegal_IO_operation("POG", the_buffer, Q_operand, set_offline);
-   870.    end POG;
-   871.
-   872.    procedure POH (the_buffer  : in out IOC.device;
-   873.                   Q_operand   : in KDF9.Q_register;
-   874.                   set_offline : in Boolean) is
-   875.    begin
-   876.       trap_illegal_IO_operation("POH", the_buffer, Q_operand, set_offline);
-   877.    end POH;
-   878.
-   879.    procedure POK (the_buffer  : in out IOC.device;
-   880.                   Q_operand   : in KDF9.Q_register;
-   881.                   set_offline : in Boolean) is
-   882.    begin
-   883.       trap_illegal_IO_operation("POK", the_buffer, Q_operand, set_offline);
-   884.    end POK;
-   885.
-   886.    procedure POL (the_buffer  : in out IOC.device;
-   887.                   Q_operand   : in KDF9.Q_register;
-   888.                   set_offline : in Boolean) is
-   889.    begin
-   890.       trap_illegal_IO_operation("POL", the_buffer, Q_operand, set_offline);
-   891.    end POL;
-   892.
-   893. end IOC;
+   685.          raise abandon_this_order with the_diagnostic;
+   686.       else
+   687.          raise Director_IO_error with the_diagnostic;
+   688.       end if;
+   689.    end trap_failing_IO_operation;
+   690.
+   691.    procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String) is
+   692.    begin
+   693.       if the_CPU_state = program_state then
+   694.          the_buffer.is_abnormal := True;
+   695.       end if;
+   696.       trap_failing_IO_operation(the_buffer.device_name, the_message);
+   697.    end trap_failing_IO_operation;
+   698.
+   699.    procedure trap_illegal_IO_operation (order       : in String;
+   700.                                         buffer      : in IOC.device;
+   701.                                         Q_operand   : in KDF9.Q_register;
+   702.                                         set_offline : in Boolean) is
+   703.       pragma Unreferenced(Q_operand);
+   704.       pragma Unreferenced(set_offline);
+   705.    begin
+   706.       trap_illegal_instruction(order & " cannot be used on " & buffer.device_name);
+   707.    end trap_illegal_IO_operation;
+   708.
+   709.    --
+   710.    -- The following bodies provide inheritable default actions for
+   711.    -- operations that are not implemented by specific device types.
+   712.    --
+   713.
+   714.    procedure PIA (the_buffer  : in out IOC.device;
+   715.                   Q_operand   : in KDF9.Q_register;
+   716.                   set_offline : in Boolean) is
+   717.    begin
+   718.       trap_illegal_IO_operation("PIA", the_buffer, Q_operand, set_offline);
+   719.    end PIA;
+   720.
+   721.    procedure PIB (the_buffer  : in out IOC.device;
+   722.                   Q_operand   : in KDF9.Q_register;
+   723.                   set_offline : in Boolean) is
+   724.    begin
+   725.       trap_illegal_IO_operation("PIB", the_buffer, Q_operand, set_offline);
+   726.    end PIB;
+   727.
+   728.    procedure PIC (the_buffer  : in out IOC.device;
+   729.                   Q_operand   : in KDF9.Q_register;
+   730.                   set_offline : in Boolean) is
+   731.    begin
+   732.       trap_illegal_IO_operation("PIC", the_buffer, Q_operand, set_offline);
+   733.    end PIC;
+   734.
+   735.    procedure PID (the_buffer  : in out IOC.device;
+   736.                   Q_operand   : in KDF9.Q_register;
+   737.                   set_offline : in Boolean) is
+   738.    begin
+   739.       trap_illegal_IO_operation("PID", the_buffer, Q_operand, set_offline);
+   740.    end PID;
+   741.
+   742.    procedure PIE (the_buffer  : in out IOC.device;
+   743.                   Q_operand   : in KDF9.Q_register;
+   744.                   set_offline : in Boolean) is
+   745.    begin
+   746.       trap_illegal_IO_operation("PIE", the_buffer, Q_operand, set_offline);
+   747.    end PIE;
+   748.
+   749.    procedure PIF (the_buffer  : in out IOC.device;
+   750.                   Q_operand   : in KDF9.Q_register;
+   751.                   set_offline : in Boolean) is
+   752.    begin
+   753.       trap_illegal_IO_operation("PIF", the_buffer, Q_operand, set_offline);
+   754.    end PIF;
+   755.
+   756.    procedure PIG (the_buffer  : in out IOC.device;
+   757.                   Q_operand   : in KDF9.Q_register;
+   758.                   set_offline : in Boolean) is
+   759.    begin
+   760.       trap_illegal_IO_operation("PIG", the_buffer, Q_operand, set_offline);
+   761.    end PIG;
+   762.
+   763.    procedure PIH (the_buffer  : in out IOC.device;
+   764.                   Q_operand   : in KDF9.Q_register;
+   765.                   set_offline : in Boolean) is
+   766.    begin
+   767.       trap_illegal_IO_operation("PIH", the_buffer, Q_operand, set_offline);
+   768.    end PIH;
+   769.
+   770.    procedure PMA (the_buffer  : in out IOC.device;
+   771.                   Q_operand   : in KDF9.Q_register;
+   772.                   set_offline : in Boolean) is
+   773.    begin
+   774.       trap_illegal_IO_operation("PMA", the_buffer, Q_operand, set_offline);
+   775.    end PMA;
+   776.
+   777.    procedure PMB (the_buffer  : in out IOC.device;
+   778.                   Q_operand   : in KDF9.Q_register;
+   779.                   set_offline : in Boolean)
+   780.    is null;
+   781.
+   782.    procedure PMC (the_buffer  : in out IOC.device;
+   783.                   Q_operand   : in KDF9.Q_register;
+   784.                   set_offline : in Boolean)
+   785.    is null;
+   786.
+   787.    procedure PMD (the_buffer  : in out IOC.device;
+   788.                   Q_operand   : in KDF9.Q_register;
+   789.                   set_offline : in Boolean) is
+   790.    begin
+   791.       trap_illegal_IO_operation("PMD", the_buffer, Q_operand, set_offline);
+   792.    end PMD;
+   793.
+   794.    procedure PME (the_buffer  : in out IOC.device;
+   795.                   Q_operand   : in KDF9.Q_register;
+   796.                   set_offline : in Boolean) is
+   797.    begin
+   798.       trap_illegal_IO_operation("PME", the_buffer, Q_operand, set_offline);
+   799.    end PME;
+   800.
+   801.    procedure PMF (the_buffer  : in out IOC.device;
+   802.                   Q_operand   : in KDF9.Q_register;
+   803.                   set_offline : in Boolean)
+   804.    is null;
+   805.
+   806.    procedure PMG (the_buffer  : in out IOC.device;
+   807.                   Q_operand   : in KDF9.Q_register;
+   808.                   set_offline : in Boolean) is
+   809.    begin
+   810.       trap_illegal_IO_operation("PMG", the_buffer, Q_operand, set_offline);
+   811.    end PMG;
+   812.
+   813. -- procedure PMH is subsumed by SLOC.
+   814.
+   815.    procedure PMK (the_buffer  : in out IOC.device;
+   816.                   Q_operand   : in KDF9.Q_register;
+   817.                   set_offline : in Boolean) is
+   818.    begin
+   819.       trap_illegal_IO_operation("PMK", the_buffer, Q_operand, set_offline);
+   820.    end PMK;
+   821.
+   822.    procedure PML (the_buffer  : in out IOC.device;
+   823.                   Q_operand   : in KDF9.Q_register;
+   824.                   set_offline : in Boolean) is
+   825.    begin
+   826.       trap_illegal_IO_operation("PML", the_buffer, Q_operand, set_offline);
+   827.    end PML;
+   828.
+   829.    procedure POA (the_buffer  : in out IOC.device;
+   830.                   Q_operand   : in KDF9.Q_register;
+   831.                   set_offline : in Boolean) is
+   832.    begin
+   833.       trap_illegal_IO_operation("POA", the_buffer, Q_operand, set_offline);
+   834.    end POA;
+   835.
+   836.    procedure POB (the_buffer  : in out IOC.device;
+   837.                   Q_operand   : in KDF9.Q_register;
+   838.                   set_offline : in Boolean) is
+   839.    begin
+   840.       trap_illegal_IO_operation("POB", the_buffer, Q_operand, set_offline);
+   841.    end POB;
+   842.
+   843.    procedure POC (the_buffer  : in out IOC.device;
+   844.                   Q_operand   : in KDF9.Q_register;
+   845.                   set_offline : in Boolean) is
+   846.    begin
+   847.       trap_illegal_IO_operation("POC", the_buffer, Q_operand, set_offline);
+   848.    end POC;
+   849.
+   850.    procedure POD (the_buffer  : in out IOC.device;
+   851.                   Q_operand   : in KDF9.Q_register;
+   852.                   set_offline : in Boolean) is
+   853.    begin
+   854.       trap_illegal_IO_operation("POD", the_buffer, Q_operand, set_offline);
+   855.    end POD;
+   856.
+   857.    procedure POE (the_buffer  : in out IOC.device;
+   858.                   Q_operand   : in KDF9.Q_register;
+   859.                   set_offline : in Boolean) is
+   860.    begin
+   861.       trap_illegal_IO_operation("POE", the_buffer, Q_operand, set_offline);
+   862.    end POE;
+   863.
+   864.    procedure POF (the_buffer  : in out IOC.device;
+   865.                   Q_operand   : in KDF9.Q_register;
+   866.                   set_offline : in Boolean) is
+   867.    begin
+   868.       trap_illegal_IO_operation("POF", the_buffer, Q_operand, set_offline);
+   869.    end POF;
+   870.
+   871.    procedure POG (the_buffer  : in out IOC.device;
+   872.                   Q_operand   : in KDF9.Q_register;
+   873.                   set_offline : in Boolean) is
+   874.    begin
+   875.       trap_illegal_IO_operation("POG", the_buffer, Q_operand, set_offline);
+   876.    end POG;
+   877.
+   878.    procedure POH (the_buffer  : in out IOC.device;
+   879.                   Q_operand   : in KDF9.Q_register;
+   880.                   set_offline : in Boolean) is
+   881.    begin
+   882.       trap_illegal_IO_operation("POH", the_buffer, Q_operand, set_offline);
+   883.    end POH;
+   884.
+   885.    procedure POK (the_buffer  : in out IOC.device;
+   886.                   Q_operand   : in KDF9.Q_register;
+   887.                   set_offline : in Boolean) is
+   888.    begin
+   889.       trap_illegal_IO_operation("POK", the_buffer, Q_operand, set_offline);
+   890.    end POK;
+   891.
+   892.    procedure POL (the_buffer  : in out IOC.device;
+   893.                   Q_operand   : in KDF9.Q_register;
+   894.                   set_offline : in Boolean) is
+   895.    begin
+   896.       trap_illegal_IO_operation("POL", the_buffer, Q_operand, set_offline);
+   897.    end POL;
+   898.
+   899. end IOC;
 
 Compiling: ../Source/ioc.ads
-Source file time stamp: 2021-02-19 23:58:27
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -1808,116 +1806,116 @@ Compiled at: 2021-02-21 15:54:04
     20. with KDF9;
     21.
     22. private with Ada.Exceptions;
-    23. private with Ada.Characters.Latin_1;
-    24. --
-    25. private with exceptions;
-    26. private with formatting;
-    27. private with HCI;
-    28. private with host_IO;
-    29. private with KDF9_char_sets;
-    30. private with KDF9.store;
-    31. private with POSIX;
-    32. private with settings;
-    33.
-    34. use  Ada.Finalization;
-    35. --
-    36. use  KDF9;
-    37.
-    38. package IOC is
-    39.
-    40.    -- N.B. the KDF9 'buffer' is a DMA controller in more modern terminology.
-    41.
-    42.    -- Each KDF9 buffer is externally characterized by:
-    43.    --    its (absolute) number,
-    44.    --    its (attached-device) kind, and
-    45.    --    its unit (the number of that device within its kind).
-    46.
-    47.    -- A device of AD_kind is attached to a buffer with No Device connected.
-    48.    -- If commanded, it performs a basic default action,
-    49.    --    which is to cause a LIV interrupt in the case of transfers,
-    50.    --       but is both benign and appropriate for all other operations.
-    51.
-    52.    type device_kind is
-    53.       (CP_kind,  -- Card Punch
-    54.        CR_kind,  -- Card Reader
-    55.        DR_kind,  -- Drum
-    56.        FD_kind,  -- Fixed Disc
-    57.        FW_kind,  -- FlexoWriter (monitor typewriter)
-    58.        GP_kind,  -- Graph Plotter (Calcomp 120' by 29.5" model)
-    59.        LP_kind,  -- Line Printer
-    60.        MT_kind,  -- Magnetic Tape
-    61.        SI_kind,  -- Standard Interface buffer
-    62.        ST_kind,  -- Seven Track (IBM) magnetic Tape
-    63.        TP_kind,  -- Tape Punch
-    64.        TR_kind,  -- Tape Reader
-    65.        AD_kind   -- Absent Device
-    66.       );
-    67.
-    68.    -- This is the number of the buffer a device is connected to.
-    69.    subtype device_number is KDF9.Q_part range 0 .. 15;
-    70.
-    71.    -- This is the index of a device within devices of the type in the configuration.
-    72.    subtype unit_number   is KDF9.Q_part range 0 .. 15;
-    73.
-    74.    -- An IOC.device_name is of the form XYu, where XY is a two-letter device-type code
-    75.    --    and u is the logical unit number, in the range 0..F, of the device within its type.
-    76.
-    77.    subtype device_name is String(1..3);
-    78.
+    23. --
+    24. private with exceptions;
+    25. private with formatting;
+    26. private with HCI;
+    27. private with host_IO;
+    28. private with KDF9_char_sets;
+    29. private with KDF9.store;
+    30. private with POSIX;
+    31. private with settings;
+    32.
+    33. use  Ada.Finalization;
+    34. --
+    35. use  KDF9;
+    36.
+    37. package IOC is
+    38.
+    39.    -- N.B. the KDF9 'buffer' is a DMA controller in more modern terminology.
+    40.
+    41.    -- Each KDF9 buffer is externally characterized by:
+    42.    --    its (absolute) number,
+    43.    --    its (attached-device) kind, and
+    44.    --    its unit (the number of that device within its kind).
+    45.
+    46.    -- A device of AD_kind is attached to a buffer with No Device connected.
+    47.    -- If commanded, it performs a basic default action,
+    48.    --    which is to cause a LIV interrupt in the case of transfers,
+    49.    --       but is both benign and appropriate for all other operations.
+    50.
+    51.    type device_kind is
+    52.       (CP_kind,  -- Card Punch
+    53.        CR_kind,  -- Card Reader
+    54.        DR_kind,  -- Drum
+    55.        FD_kind,  -- Fixed Disc
+    56.        FW_kind,  -- FlexoWriter (monitor typewriter)
+    57.        GP_kind,  -- Graph Plotter (Calcomp 120' by 29.5" model)
+    58.        LP_kind,  -- Line Printer
+    59.        MT_kind,  -- Magnetic Tape
+    60.        SI_kind,  -- Standard Interface buffer
+    61.        ST_kind,  -- Seven Track (IBM) magnetic Tape
+    62.        TP_kind,  -- Tape Punch
+    63.        TR_kind,  -- Tape Reader
+    64.        AD_kind   -- Absent Device
+    65.       );
+    66.
+    67.    -- This is the number of the buffer a device is connected to.
+    68.    subtype device_number is KDF9.Q_part range 0 .. 15;
+    69.
+    70.    -- This is the index of a device within devices of the type in the configuration.
+    71.    subtype unit_number   is KDF9.Q_part range 0 .. 15;
+    72.
+    73.    -- An IOC.device_name is of the form XYu, where XY is a two-letter device-type code
+    74.    --    and u is the logical unit number, in the range 0..F, of the device within its type.
+    75.
+    76.    subtype device_name is String(1..3);
+    77.
+    78. --
     79. --
-    80. --
-    81.    -- This is the root for all I/O device types.
+    80.    -- This is the root for all I/O device types.
+    81. --
     82. --
-    83. --
-    84.
-    85.    type device (number : IOC.device_number; unit : IOC.unit_number)
-    86.    is abstract new Limited_Controlled with private;
-    87.
-    88.    -- The quantum is the time, in µs, taken to transfer a basic datum.
-    89.    -- For unit-record devices (CR, CP, LP) this is the card/line.
-    90.    -- For other devices it is the KDF9 character.
-    91.    function quantum (the_buffer : IOC.device)
-    92.    return KDF9.us
-    93.    is abstract;
-    94.
-    95.    function kind (the_buffer : IOC.device)
-    96.    return IOC.device_kind
-    97.    is abstract;
-    98.
-    99.    -- This is overridden separately for fast and slow devices.
-   100.    procedure add_in_the_IO_CPU_time (the_buffer  : in IOC.device;
-   101.                                      bytes_moved : in KDF9.word)
-   102.    is abstract;
-   103.
-   104.    -- True iff the_buffer has been opened but not yet closed.
-   105.    -- It is overridden separately for magnetic tapes and all other devices.
-   106.    function is_open (the_buffer : IOC.device)
-   107.    return Boolean
-   108.    is abstract;
-   109.
-   110.    -- A measure of the I/O volume transferred by the_buffer, so far.
-   111.    function usage (the_buffer : IOC.device)
-   112.    return KDF9.word;
-   113.
-   114.    -- Ensure that all output to the_buffer has been transmitted.
-   115.    procedure flush (the_buffer : in out IOC.device);
-   116.
-   117.    -- Make the_buffer unavailable for further I/O use, after flushing if necessary.
-   118.    procedure close (the_buffer : in out IOC.device);
-   119.
-   120.    -- A IOC.device_name is of the form XYu, where XY is a two-letter device-type
-   121.    --    code (e.g., "LP" or "CR"); and u is the one-digit logical unit number
-   122.    --       of a device within its category.
-   123.
-   124.    function device_name_of (the_buffer : IOC.device)
-   125.    return IOC.device_name;
-   126.
-   127.    function device_name_of (the_number : IOC.device_number)
-   128.    return IOC.device_name;
-   129.
-   130.    function device_kind_of (the_number : IOC.device_number)
-   131.    return IOC.device_kind;
-   132.
+    83.
+    84.    type device (number : IOC.device_number; unit : IOC.unit_number)
+    85.    is abstract new Limited_Controlled with private;
+    86.
+    87.    -- The quantum is the time, in µs, taken to transfer a basic datum.
+    88.    -- For unit-record devices (CR, CP, LP) this is the card/line.
+    89.    -- For other devices it is the KDF9 character.
+    90.    function quantum (the_buffer : IOC.device)
+    91.    return KDF9.us
+    92.    is abstract;
+    93.
+    94.    function kind (the_buffer : IOC.device)
+    95.    return IOC.device_kind
+    96.    is abstract;
+    97.
+    98.    -- This is overridden separately for fast and slow devices.
+    99.    procedure add_in_the_IO_CPU_time (the_buffer  : in IOC.device;
+   100.                                      bytes_moved : in KDF9.word)
+   101.    is abstract;
+   102.
+   103.    -- True iff the_buffer has been opened but not yet closed.
+   104.    -- It is overridden separately for magnetic tapes and all other devices.
+   105.    function is_open (the_buffer : IOC.device)
+   106.    return Boolean
+   107.    is abstract;
+   108.
+   109.    -- A measure of the I/O volume transferred by the_buffer, so far.
+   110.    function usage (the_buffer : IOC.device)
+   111.    return KDF9.word;
+   112.
+   113.    -- Ensure that all output to the_buffer has been transmitted.
+   114.    procedure flush (the_buffer : in out IOC.device);
+   115.
+   116.    -- Make the_buffer unavailable for further I/O use, after flushing if necessary.
+   117.    procedure close (the_buffer : in out IOC.device);
+   118.
+   119.    -- A IOC.device_name is of the form XYn, where XY is a two-letter device-type
+   120.    --    code (e.g., "LP" or "CR"); and n is the one-digit logical unit number
+   121.    --       of a device within its category (n may be in hexadecimal).
+   122.
+   123.    function device_name_of (the_buffer : IOC.device)
+   124.    return IOC.device_name;
+   125.
+   126.    function device_name_of (the_number : IOC.device_number)
+   127.    return IOC.device_name;
+   128.
+   129.    function device_kind_of (the_number : IOC.device_number)
+   130.    return IOC.device_kind;
+   131.
+   132.    -- Get the device-specific name of the I/O order, or the generic name if there isn't one.
    133.    function mnemonic (order : in String; class : in IOC.device_name)
    134.    return String;
    135.
@@ -1940,350 +1938,361 @@ Compiled at: 2021-02-21 15:54:04
    152.    --
    153.    -- In boot mode, when Director is not running, it sets the buffer abnormal and abandons the order.
    154.    -- It is then up to the problem program to act accordingly.  Failure to do so may LIV.
-   155.    procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String)
-   156.       with Inline => False;
-   157.
-   158.    -- The elapsed time for the I/O of the given number of atomic_items
-   159.    --    which may be, e.g., bytes, or card images, or printer lines.
-   160.    function IO_elapsed_time (the_buffer   : IOC.device;
-   161.                              atomic_items : KDF9.word)
-   162.    return KDF9.us;
-   163.
-   164.    -- The total elapsed time taken, so far, by transfers on the attached device.
-   165.    function IO_elapsed_time_total (the_buffer : IOC.device)
+   155.
+   156.    procedure trap_failing_IO_operation (the_buffer : in out IOC.device; the_message : in String)
+   157.       with Inline => False;
+   158.
+   159.    procedure trap_failing_IO_operation (the_culprit : in String; the_message : in String)
+   160.       with Inline => False;
+   161.
+   162.    -- The elapsed time for the I/O of the given number of atomic_items
+   163.    --    which may be, e.g., bytes, or card images, or printer lines.
+   164.    function IO_elapsed_time (the_buffer   : IOC.device;
+   165.                              atomic_items : KDF9.word)
    166.    return KDF9.us;
    167.
-   168.
-   169.    --
-   170.    -- The CLOQq, SLOQq and TLOQq operations do NOT address a buffer,
-   171.    --    and so are fully implemented elsewhere.
-   172.    --
-   173.
-   174.    --
-   175.    -- The INTQq, BUSYQq, PARQq and MANUALQq/CTQq operations DO address a buffer,
-   176.    --    but do NOT initiate an I/O transfer, and are common to all devices,
-   177.    --       so they operate on a class-wide parameter.
+   168.    -- The total elapsed time taken, so far, by transfers on the attached device.
+   169.    function IO_elapsed_time_total (the_buffer : IOC.device)
+   170.    return KDF9.us;
+   171.
+   172.
+   173.    --
+   174.    -- The CLOQq, SLOQq and TLOQq operations do NOT address a buffer,
+   175.    --    and so are fully implemented elsewhere.
+   176.    --
+   177.
    178.    --
-   179.
-   180.    procedure INT (the_buffer  : in out IOC.device'Class;
-   181.                   Q_operand   : in KDF9.Q_register;
-   182.                   set_offline : in Boolean);
+   179.    -- The INTQq, BUSYQq, PARQq and MANUALQq/CTQq operations DO address a buffer,
+   180.    --    but do NOT initiate an I/O transfer, and are common to all devices,
+   181.    --       so they operate on a class-wide parameter.
+   182.    --
    183.
-   184.    procedure BUSY (the_buffer  : in out IOC.device'Class;
-   185.                    Q_operand   : in KDF9.Q_register;
-   186.                    set_offline : in Boolean;
-   187.                    result      : out Boolean);
-   188.
-   189.    procedure PAR (the_buffer   : in out IOC.device'Class;
-   190.                    Q_operand   : in KDF9.Q_register;
-   191.                    set_offline : in Boolean;
-   192.                    result      : out Boolean);
-   193.
-   194.    procedure MANUAL_CT (the_buffer  : in out IOC.device'Class;
-   195.                         Q_operand   : in KDF9.Q_register;
-   196.                         set_offline : in Boolean);
+   184.    procedure INT (the_buffer  : in out IOC.device'Class;
+   185.                   Q_operand   : in KDF9.Q_register;
+   186.                   set_offline : in Boolean);
+   187.
+   188.    procedure BUSY (the_buffer  : in out IOC.device'Class;
+   189.                    Q_operand   : in KDF9.Q_register;
+   190.                    set_offline : in Boolean;
+   191.                    result      : out Boolean);
+   192.
+   193.    procedure PAR (the_buffer   : in out IOC.device'Class;
+   194.                    Q_operand   : in KDF9.Q_register;
+   195.                    set_offline : in Boolean;
+   196.                    result      : out Boolean);
    197.
-   198.    -- These KDF9 data-transfer operations must be overridden for non-trivial functionality.
-   199.    -- Invoking any of them raises a LIV exception. This exactly mirrors the action of the
-   200.    --    KDF9 in causing a LIV interrupt when an invalid operation was applied to a device.
-   201.    -- A device without some of these operations inherits them from this list and so
-   202.    --    implements correctly the original semantics of the KDF9.
-   203.
-   204.    --
-   205.    -- The PI* are input operations.
-   206.    --
+   198.    procedure MANUAL_CT (the_buffer  : in out IOC.device'Class;
+   199.                         Q_operand   : in KDF9.Q_register;
+   200.                         set_offline : in Boolean);
+   201.
+   202.    -- These KDF9 data-transfer operations must be overridden for non-trivial functionality.
+   203.    -- Invoking any of them raises a LIV exception. This exactly mirrors the action of the
+   204.    --    KDF9 in causing a LIV interrupt when an invalid operation was applied to a device.
+   205.    -- A device without some of these operations inherits them from this list and so
+   206.    --    implements correctly the original semantics of the KDF9.
    207.
-   208.    procedure PIA (the_buffer  : in out IOC.device;
-   209.                   Q_operand   : in KDF9.Q_register;
-   210.                   set_offline : in Boolean);
+   208.    --
+   209.    -- The PI* are input operations.
+   210.    --
    211.
-   212.    procedure PIB (the_buffer  : in out IOC.device;
+   212.    procedure PIA (the_buffer  : in out IOC.device;
    213.                   Q_operand   : in KDF9.Q_register;
    214.                   set_offline : in Boolean);
    215.
-   216.    procedure PIC (the_buffer  : in out IOC.device;
+   216.    procedure PIB (the_buffer  : in out IOC.device;
    217.                   Q_operand   : in KDF9.Q_register;
    218.                   set_offline : in Boolean);
    219.
-   220.    procedure PID (the_buffer  : in out IOC.device;
+   220.    procedure PIC (the_buffer  : in out IOC.device;
    221.                   Q_operand   : in KDF9.Q_register;
    222.                   set_offline : in Boolean);
    223.
-   224.    procedure PIE (the_buffer  : in out IOC.device;
+   224.    procedure PID (the_buffer  : in out IOC.device;
    225.                   Q_operand   : in KDF9.Q_register;
    226.                   set_offline : in Boolean);
    227.
-   228.    procedure PIF (the_buffer  : in out IOC.device;
+   228.    procedure PIE (the_buffer  : in out IOC.device;
    229.                   Q_operand   : in KDF9.Q_register;
    230.                   set_offline : in Boolean);
    231.
-   232.    procedure PIG (the_buffer  : in out IOC.device;
+   232.    procedure PIF (the_buffer  : in out IOC.device;
    233.                   Q_operand   : in KDF9.Q_register;
    234.                   set_offline : in Boolean);
    235.
-   236.    procedure PIH (the_buffer  : in out IOC.device;
+   236.    procedure PIG (the_buffer  : in out IOC.device;
    237.                   Q_operand   : in KDF9.Q_register;
    238.                   set_offline : in Boolean);
    239.
-   240.    --
-   241.    -- The PM* are device-status operations.
-   242.    --
+   240.    procedure PIH (the_buffer  : in out IOC.device;
+   241.                   Q_operand   : in KDF9.Q_register;
+   242.                   set_offline : in Boolean);
    243.
-   244.    procedure PMA (the_buffer  : in out IOC.device;
-   245.                   Q_operand   : in KDF9.Q_register;
-   246.                   set_offline : in Boolean);
+   244.    --
+   245.    -- The PM* are device-status operations.
+   246.    --
    247.
-   248.    procedure PMB (the_buffer  : in out IOC.device;
+   248.    procedure PMA (the_buffer  : in out IOC.device;
    249.                   Q_operand   : in KDF9.Q_register;
    250.                   set_offline : in Boolean);
    251.
-   252.    procedure PMC (the_buffer  : in out IOC.device;
+   252.    procedure PMB (the_buffer  : in out IOC.device;
    253.                   Q_operand   : in KDF9.Q_register;
    254.                   set_offline : in Boolean);
    255.
-   256.    procedure PMD (the_buffer  : in out IOC.device;
+   256.    procedure PMC (the_buffer  : in out IOC.device;
    257.                   Q_operand   : in KDF9.Q_register;
    258.                   set_offline : in Boolean);
    259.
-   260.    procedure PME (the_buffer  : in out IOC.device;
+   260.    procedure PMD (the_buffer  : in out IOC.device;
    261.                   Q_operand   : in KDF9.Q_register;
    262.                   set_offline : in Boolean);
    263.
-   264.    procedure PMF (the_buffer  : in out IOC.device;
+   264.    procedure PME (the_buffer  : in out IOC.device;
    265.                   Q_operand   : in KDF9.Q_register;
    266.                   set_offline : in Boolean);
    267.
-   268.    procedure PMG (the_buffer  : in out IOC.device;
+   268.    procedure PMF (the_buffer  : in out IOC.device;
    269.                   Q_operand   : in KDF9.Q_register;
    270.                   set_offline : in Boolean);
    271.
-   272. -- procedure PMH is implemented by SLO
-   273.
-   274.    procedure PMK (the_buffer  : in out IOC.device;
-   275.                   Q_operand   : in KDF9.Q_register;
-   276.                   set_offline : in Boolean);
-   277.
-   278.    procedure PML (the_buffer  : in out IOC.device;
-   279.                   Q_operand   : in KDF9.Q_register;
-   280.                   set_offline : in Boolean);
-   281.
-   282.    --
-   283.    -- The PO* are output operations.
-   284.    --
-   285.
-   286.    procedure POA (the_buffer  : in out IOC.device;
-   287.                   Q_operand   : in KDF9.Q_register;
-   288.                   set_offline : in Boolean);
-   289.
-   290.    procedure POB (the_buffer  : in out IOC.device;
-   291.                   Q_operand   : in KDF9.Q_register;
-   292.                   set_offline : in Boolean);
-   293.
-   294.    procedure POC (the_buffer  : in out IOC.device;
-   295.                   Q_operand   : in KDF9.Q_register;
-   296.                   set_offline : in Boolean);
-   297.
-   298.    procedure POD (the_buffer  : in out IOC.device;
-   299.                   Q_operand   : in KDF9.Q_register;
-   300.                   set_offline : in Boolean);
-   301.
-   302.    procedure POE (the_buffer  : in out IOC.device;
-   303.                   Q_operand   : in KDF9.Q_register;
-   304.                   set_offline : in Boolean);
-   305.
-   306.    procedure POF (the_buffer  : in out IOC.device;
-   307.                   Q_operand   : in KDF9.Q_register;
-   308.                   set_offline : in Boolean);
-   309.
-   310.    procedure POG (the_buffer  : in out IOC.device;
-   311.                   Q_operand   : in KDF9.Q_register;
-   312.                   set_offline : in Boolean);
-   313.
-   314.    procedure POH (the_buffer  : in out IOC.device;
-   315.                   Q_operand   : in KDF9.Q_register;
-   316.                   set_offline : in Boolean);
-   317.
-   318.    procedure POK (the_buffer  : in out IOC.device;
-   319.                   Q_operand   : in KDF9.Q_register;
-   320.                   set_offline : in Boolean);
-   321.
-   322.    procedure POL (the_buffer  : in out IOC.device;
-   323.                   Q_operand   : in KDF9.Q_register;
-   324.                   set_offline : in Boolean);
-   325.
+   272.    -- This is the mysterious "read C store" order.
+   273.    procedure PMG (the_buffer  : in out IOC.device;
+   274.                   Q_operand   : in KDF9.Q_register;
+   275.                   set_offline : in Boolean);
+   276.
+   277. -- procedure PMH is implemented by SLO
+   278.
+   279.    procedure PMK (the_buffer  : in out IOC.device;
+   280.                   Q_operand   : in KDF9.Q_register;
+   281.                   set_offline : in Boolean);
+   282.
+   283.    procedure PML (the_buffer  : in out IOC.device;
+   284.                   Q_operand   : in KDF9.Q_register;
+   285.                   set_offline : in Boolean);
+   286.
+   287.    --
+   288.    -- The PO* are output operations.
+   289.    --
+   290.
+   291.    procedure POA (the_buffer  : in out IOC.device;
+   292.                   Q_operand   : in KDF9.Q_register;
+   293.                   set_offline : in Boolean);
+   294.
+   295.    procedure POB (the_buffer  : in out IOC.device;
+   296.                   Q_operand   : in KDF9.Q_register;
+   297.                   set_offline : in Boolean);
+   298.
+   299.    procedure POC (the_buffer  : in out IOC.device;
+   300.                   Q_operand   : in KDF9.Q_register;
+   301.                   set_offline : in Boolean);
+   302.
+   303.    procedure POD (the_buffer  : in out IOC.device;
+   304.                   Q_operand   : in KDF9.Q_register;
+   305.                   set_offline : in Boolean);
+   306.
+   307.    procedure POE (the_buffer  : in out IOC.device;
+   308.                   Q_operand   : in KDF9.Q_register;
+   309.                   set_offline : in Boolean);
+   310.
+   311.    procedure POF (the_buffer  : in out IOC.device;
+   312.                   Q_operand   : in KDF9.Q_register;
+   313.                   set_offline : in Boolean);
+   314.
+   315.    procedure POG (the_buffer  : in out IOC.device;
+   316.                   Q_operand   : in KDF9.Q_register;
+   317.                   set_offline : in Boolean);
+   318.
+   319.    procedure POH (the_buffer  : in out IOC.device;
+   320.                   Q_operand   : in KDF9.Q_register;
+   321.                   set_offline : in Boolean);
+   322.
+   323.    procedure POK (the_buffer  : in out IOC.device;
+   324.                   Q_operand   : in KDF9.Q_register;
+   325.                   set_offline : in Boolean);
    326.
-   327. --
-   328. --
-   329.    -- The buffer_configuration type enables the dynamic setting-up of a complement of I/O devices.
-   330. --
-   331. --
-   332.
-   333.    type device_class_access  is access all IOC.device'Class;
-   334.
-   335.    type buffer_configuration is array (KDF9.buffer_number) of IOC.device_class_access;
-   336.
-   337.    -- These are the I/O devices installed in this configuration.
-   338.    -- Each device installs itself into the configuration when the device is initialized.
+   327.    procedure POL (the_buffer  : in out IOC.device;
+   328.                   Q_operand   : in KDF9.Q_register;
+   329.                   set_offline : in Boolean);
+   330.
+   331.
+   332. --
+   333. --
+   334.    -- The buffer_configuration type enables the dynamic setting-up of a complement of I/O devices.
+   335. --
+   336. --
+   337.
+   338.    type device_class_access  is access all IOC.device'Class;
    339.
-   340.    buffer : buffer_configuration;
+   340.    type buffer_configuration is array (KDF9.buffer_number) of IOC.device_class_access;
    341.
-   342. --
-   343.    -- These operations are used by Directors to manage device allocation to problem programs.
-   344. --
-   345.
-   346.    procedure set_state_of (the_buffer : in device_class_access;
-   347.                            allocated  : in Boolean);
-   348.
-   349.    function is_allocated (the_buffer : device_class_access)  -- N.B. IS_allocated.
-   350.    return Boolean;
-   351.
-   352.    function is_unallocated (the_buffer : device_class_access)  -- N.B. is_UNallocated.
-   353.    return Boolean;
-   354.
-   355. --
-   356.    -- These buffer-implementation operations are used outside IOC and apply to all device types.
-   357. --
-   358.
-   359.    -- Complete all extant transfers, then Finalize each buffer.
-   360.    procedure finalize_all_KDF9_buffers;
-   361.
-   362.    -- Advance the elapsed time to a point after all extant transfer have terminated.
-   363.    procedure complete_all_extant_transfers;
-   364.
-   365.    -- Complete any terminated transfer operations and take any needed interrupts.
-   366.    procedure act_on_pending_interrupts;
-   367.
-   368.    -- Handle non-data transfer operations on busy device.
-   369.    procedure deal_with_a_busy_device (the_buffer  : in out IOC.device'Class;
-   370.                                       order_time  : in KDF9.us;
-   371.                                       set_offline : in Boolean);
+   342.    -- These are the I/O devices installed in this configuration.
+   343.    -- Each device installs itself into the configuration when the device is initialized.
+   344.
+   345.    buffer : buffer_configuration;
+   346.
+   347. --
+   348.    -- These operations are used by Directors to manage device allocation to problem programs.
+   349. --
+   350.
+   351.    procedure set_state_of (the_buffer : in device_class_access;
+   352.                            allocated  : in Boolean);
+   353.
+   354.    function is_allocated (the_buffer : device_class_access)  -- N.B. IS_allocated.
+   355.    return Boolean;
+   356.
+   357.    function is_unallocated (the_buffer : device_class_access)  -- N.B. is_UNallocated.
+   358.    return Boolean;
+   359.
+   360. --
+   361.    -- These buffer-implementation operations are used outside IOC and apply to all device types.
+   362. --
+   363.
+   364.    -- Complete all extant transfers, then Finalize each buffer.
+   365.    procedure finalize_all_KDF9_buffers;
+   366.
+   367.    -- Advance the elapsed time to a point after all extant transfer have terminated.
+   368.    procedure complete_all_extant_transfers;
+   369.
+   370.    -- Complete any terminated transfer operations and take any needed interrupts.
+   371.    procedure act_on_pending_interrupts;
    372.
-   373.    -- A LOV interupt caused by an attempted store access must arrange
-   374.    --    for the interrupted instruction to be resumed.
-   375.    -- In boot mode, effect the LOV interrupt to Director.
-   376.    -- In other modes, advance the elapsed time to the end-of-transfer time
-   377.    --    for the_locked_out_address, then act on pending interrupts.
-   378.    procedure handle_a_main_store_lockout;
-   379.
-   380.    type transfer_kind  is (input_operation,
-   381.                            output_operation,
-   382.                            control_operation,
-   383.                            some_other_operation);
+   373.    -- Handle non-data transfer operations on busy device.
+   374.    procedure deal_with_a_busy_device (the_buffer  : in out IOC.device'Class;
+   375.                                       order_time  : in KDF9.us;
+   376.                                       set_offline : in Boolean);
+   377.
+   378.    -- A LOV interupt caused by an attempted store access must arrange
+   379.    --    for the interrupted instruction to be resumed.
+   380.    -- In boot mode, effect the LOV interrupt to Director.
+   381.    -- In other modes, advance the elapsed time to the end-of-transfer time
+   382.    --    for the_locked_out_address, then act on pending interrupts.
+   383.    procedure handle_a_main_store_lockout;
    384.
-   385.    -- Take note of the start of a transfer.
-   386.    -- For I/O operations that do not entail an actual data transfer,
-   387.    --    such as testing a buffer for a graph plotter,
-   388.    --    set the busy time to the order's MC execution time.
-   389.    -- This keeps elapsed time in sync with CPU time,
-   390.    --    and ensures that the operation waits for any preceding transfer
-   391.    --    on the same buffer to complete before the test is actioned.
-   392.    procedure start_data_transfer (the_buffer  : in out IOC.device'Class;
-   393.                                   Q_operand   : in KDF9.Q_register;
-   394.                                   set_offline : in Boolean;
-   395.                                   busy_time   : in KDF9.us;
-   396.                                   operation   : in IOC.transfer_kind := IOC.some_other_operation);
-   397.
-   398. private
-   399.
-   400.    use Ada.Exceptions; pragma Warnings(Off, Ada.Exceptions);
-   401.    --
-   402.    use exceptions;     pragma Warnings(Off, exceptions);
-   403.    use formatting;     pragma Warnings(Off, formatting);
-   404.    use HCI;            pragma Warnings(Off, HCI);
-   405.    use host_IO;        pragma Warnings(Off, host_IO);
-   406.    use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
-   407.    use KDF9.store;     pragma Warnings(Off, KDF9.store);
-   408.    use settings;       pragma Warnings(Off, settings);
-   409.
-   410.    use POSIX;          -- Used here, so no need to suppress warnings.
-   411.
-   412.    type device (number : IOC.device_number; unit : IOC.unit_number)
-   413.    is abstract new Limited_Controlled with
-   414.       record
-   415.          is_abnormal,
-   416.          is_busy,
-   417.          is_offline,
-   418.          is_allocated,
-   419.          is_for_Director : Boolean := False;
-   420.          operation       : IOC.transfer_kind := IOC.some_other_operation;
-   421.          initiation_time : KDF9.us := KDF9.us'Last;
-   422.          transfer_time   : KDF9.us := KDF9.us'Last;
-   423.          completion_time : KDF9.us := KDF9.us'Last;
-   424.          priority_level  : KDF9.priority;
-   425.          control_word    : KDF9.Q_register;
-   426.          decoded_order   : KDF9.decoded_order;
-   427.          device_name     : IOC.device_name;
-   428.          order_address   : KDF9.syllable_address;
-   429.          order_count     : KDF9.order_counter;
-   430.          stream          : host_IO.stream;
-   431.       end record;
-   432.
-   433.    overriding
-   434.    procedure Initialize (the_buffer : in out IOC.device);
-   435.
-   436.    procedure open (the_buffer : in out IOC.device'Class;
-   437.                    the_mode   : in POSIX.access_mode);
-   438.
-   439.    overriding
-   440.    procedure Finalize (the_buffer : in out IOC.device)
-   441.       with Inline => False;
-   442.
-   443.    -- Operations, used only within the IOC hierarchy, that apply to all device types.
-   444.
-   445.    -- Check that the buffer for the_device is unused, then set it to the_device.
-   446.    procedure install (the_device : in out IOC.device'Class);
+   385.    type transfer_kind  is (input_operation,
+   386.                            output_operation,
+   387.                            control_operation,
+   388.                            some_other_operation);
+   389.
+   390.    -- Take note of the start of a transfer.
+   391.    -- For I/O operations that do not entail an actual data transfer,
+   392.    --    such as testing a buffer for a graph plotter,
+   393.    --    set the busy time to the order's MC execution time.
+   394.    -- This keeps elapsed time in sync with CPU time,
+   395.    --    and ensures that the operation waits for any preceding transfer
+   396.    --    on the same buffer to complete before the test is actioned.
+   397.    procedure start_data_transfer (the_buffer  : in out IOC.device'Class;
+   398.                                   Q_operand   : in KDF9.Q_register;
+   399.                                   set_offline : in Boolean;
+   400.                                   busy_time   : in KDF9.us;
+   401.                                   operation   : in IOC.transfer_kind := IOC.some_other_operation);
+   402.
+   403. private
+   404.
+   405.    use Ada.Exceptions; pragma Warnings(Off, Ada.Exceptions);
+   406.    --
+   407.    use exceptions;     pragma Warnings(Off, exceptions);
+   408.    use formatting;     pragma Warnings(Off, formatting);
+   409.    use HCI;            pragma Warnings(Off, HCI);
+   410.    use host_IO;        pragma Warnings(Off, host_IO);
+   411.    use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
+   412.    use KDF9.store;     pragma Warnings(Off, KDF9.store);
+   413.    use settings;       pragma Warnings(Off, settings);
+   414.
+   415.    use POSIX;          -- Used here, so no need to suppress warnings.
+   416.
+   417.    type device (number : IOC.device_number; unit : IOC.unit_number)
+   418.    is abstract new Limited_Controlled with
+   419.       record
+   420.          is_abnormal,
+   421.          is_busy,
+   422.          is_offline,
+   423.          is_allocated,
+   424.          is_for_Director : Boolean := False;
+   425.          operation       : IOC.transfer_kind := IOC.some_other_operation;
+   426.          initiation_time : KDF9.us := KDF9.us'Last;
+   427.          transfer_time   : KDF9.us := KDF9.us'Last;
+   428.          completion_time : KDF9.us := KDF9.us'Last;
+   429.          priority_level  : KDF9.priority;
+   430.          control_word    : KDF9.Q_register;
+   431.          decoded_order   : KDF9.decoded_order;
+   432.          device_name     : IOC.device_name;
+   433.          order_address   : KDF9.syllable_address;
+   434.          order_count     : KDF9.order_counter;
+   435.          stream          : host_IO.stream;
+   436.       end record;
+   437.
+   438.    overriding
+   439.    procedure Initialize (the_buffer : in out IOC.device);
+   440.
+   441.    procedure open (the_buffer : in out IOC.device'Class;
+   442.                    the_mode   : in POSIX.access_mode);
+   443.
+   444.    overriding
+   445.    procedure Finalize (the_buffer : in out IOC.device)
+   446.       with Inline => False;
    447.
-   448.    -- LIV if the_buffer is in the abnormal state.
-   449.    procedure validate_parity (the_buffer : in IOC.device'Class)
-   450.       with Inline => False;
-   451.
-   452.    -- Check that the_buffer is online, and that access to it is permitted; LIV if not.
-   453.    procedure validate_device (the_buffer : in IOC.device'Class)
-   454.       with Inline => False;
-   455.
-   456.    -- Check that the device and the transfer address bounds are valid;
-   457.    --    LIV if not.
-   458.    procedure validate_transfer (the_buffer : in IOC.device'Class;
-   459.                                 Q_operand  : in KDF9.Q_register);
+   448.    -- Operations, used only within the IOC hierarchy, that apply to all device types.
+   449.
+   450.    -- Check that the buffer for the_device is unused, then set it to the_device.
+   451.    procedure install (the_device : in out IOC.device'Class);
+   452.
+   453.    -- LIV if the_buffer is in the abnormal state.
+   454.    procedure validate_parity (the_buffer : in IOC.device'Class)
+   455.       with Inline => False;
+   456.
+   457.    -- Check that the_buffer is online, and that access to it is permitted; LIV if not.
+   458.    procedure validate_device (the_buffer : in IOC.device'Class)
+   459.       with Inline => False;
    460.
-   461.    -- When the real duration of a variable-length transfer is known,
-   462.    --    its completion time can be made accurate by giving its actual_time.
-   463.    -- correct_transfer_time must be called before finalize_transfer is called.
-   464.    procedure correct_transfer_time (the_buffer  : in out IOC.device'Class;
-   465.                                     actual_time : in KDF9.us);
-   466.
-   467.    procedure correct_transfer_time (the_buffer    : in out IOC.device'Class;
-   468.                                     actual_length : in KDF9.word);
-   469.
-   470.    -- LIV if the repetition count is negative.
-   471.    procedure require_nonnegative_count (count : in KDF9.Q_part);
-   472.
-   473.    -- LIV if the repetition count is negative or zero.
-   474.    procedure require_positive_count (count : in KDF9.Q_part);
-   475.
-   476.    -- Account for the CPU time taken by the buffer in setting store lockouts.
-   477.    procedure add_in_the_IO_lockout_CPU_time (Q_operand : in KDF9.Q_register);
-   478.
-   479.    -- These are handy, and also prevent a unreferenced warning for Ada.Characters.Latin_1.
-   480.    LF : constant Character := Ada.Characters.Latin_1.LF;
-   481.    SP : constant Character := Ada.Characters.Latin_1.Space;
-   482.
-   483. end IOC;
+   461.    -- Check that the device and the transfer address bounds are valid;
+   462.    --    LIV if not.
+   463.    procedure validate_transfer (the_buffer : in IOC.device'Class;
+   464.                                 Q_operand  : in KDF9.Q_register);
+   465.
+   466.    -- When the real duration of a variable-length transfer is known,
+   467.    --    its completion time can be made accurate by giving its actual_time.
+   468.    -- correct_transfer_time must be called before finalize_transfer is called.
+   469.    procedure correct_transfer_time (the_buffer  : in out IOC.device'Class;
+   470.                                     actual_time : in KDF9.us);
+   471.
+   472.    procedure correct_transfer_time (the_buffer    : in out IOC.device'Class;
+   473.                                     actual_length : in KDF9.word);
+   474.
+   475.    -- LIV if the repetition count is negative.
+   476.    procedure require_nonnegative_count (count : in KDF9.Q_part);
+   477.
+   478.    -- LIV if the repetition count is negative or zero.
+   479.    procedure require_positive_count (count : in KDF9.Q_part);
+   480.
+   481.    -- Account for the CPU time taken by the buffer in setting store lockouts.
+   482.    procedure add_in_the_IO_lockout_CPU_time (Q_operand : in KDF9.Q_register);
+   483.
+   484.    -- These are handy to have in the child packages.
+   485.    NUL : constant Character := Character'Val(0);
+   486.    BEL : constant Character := Character'Val(7);
+   487.    HT  : constant Character := Character'Val(9);
+   488.    LF  : constant Character := Character'Val (10);
+   489.    FF  : constant Character := Character'Val (12);
+   490.    ESC : constant Character := Character'Val (27);
+   491.    SP  : constant Character := ' ';
+   492.    DEL : constant Character := Character'Val (127);
+   493.
+   494. end IOC;
 
- 893 lines: No errors
+ 899 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-equipment.adb
-Source file time stamp: 2021-02-15 18:20:53
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Data supporting the definition of a KDF9 I/O equipment configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2345,9 +2354,9 @@ Compiled at: 2021-02-21 15:54:04
     63.       end if;
     64.    end configure_the_IOC;
     65.
-    66.    procedure revise_the_configuration is
+    66.    procedure revise_the_IOC_configuration is
     67.    begin
-    68.       -- By this point every buffer has a device which must be removed before it is replaced.
+    68.       -- By this point every buffer has a device which should be removed before it is replaced.
     69.       for b in equipment.choice'Range loop
     70.          case equipment.choice(b) is
     71.             when DR => IOC.fast.FD.remove_from_buffer(b);
@@ -2362,18 +2371,18 @@ Compiled at: 2021-02-21 15:54:04
     80.             when others => null;
     81.          end case;
     82.       end loop;
-    83.    end revise_the_configuration;
+    83.    end revise_the_IOC_configuration;
     84.
     85. end IOC.equipment;
 
 Compiling: ../Source/ioc-equipment.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:18
 
      1. -- Enable the devices included in the chosen KDF9 I/O configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2461,7 +2470,7 @@ Compiled at: 2021-02-21 15:54:04
     89.    procedure configure_the_IOC;
     90.
     91.    -- If a drum, disc or BSI has been enabled on the command line, make sure it is installed.
-    92.    procedure revise_the_configuration;
+    92.    procedure revise_the_IOC_configuration;
     93.
     94. end IOC.equipment;
 
@@ -2472,12 +2481,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow.adb
-Source file time stamp: 2021-02-19 00:23:40
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-07 01:29:37
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2567,24 +2576,24 @@ Compiled at: 2021-02-21 15:54:04
     90.    end reattach;
     91.
     92.    procedure deal_with_end_of_data (the_buffer : in out slow.device) is
-    93.       BEL      : constant String := (1 => Character'Val(7));   -- Audible prompt
-    94.       response : response_kind;
-    95.
-    96.       procedure reattach_the_text_file (name : in String) is
-    97.       begin
-    98.          if name = "" then
-    99.             the_buffer.is_abnormal := True;
-   100.             raise end_of_stream;
-   101.          elsif exists(name) then
-   102.             reattach(the_buffer, name);
-   103.             return;
-   104.          elsif exists(name & ".txt") then
-   105.             reattach(the_buffer, name & ".txt");
-   106.             return;
-   107.          else
-   108.             raise operator_error;
-   109.          end if;
-   110.       end reattach_the_text_file;
+    93.
+    94.       procedure reattach_the_text_file (name : in String) is
+    95.       begin
+    96.          if name = "" then
+    97.             the_buffer.is_abnormal := True;
+    98.             raise end_of_stream;
+    99.          elsif exists(name) then
+   100.             reattach(the_buffer, name);
+   101.             return;
+   102.          elsif exists(name & ".txt") then
+   103.             reattach(the_buffer, name & ".txt");
+   104.             return;
+   105.          else
+   106.             raise operator_error;
+   107.          end if;
+   108.       end reattach_the_text_file;
+   109.
+   110.       response : response_kind;
    111.
    112.    begin
    113.       output_line(BEL & "");
@@ -2604,81 +2613,68 @@ Compiled at: 2021-02-21 15:54:04
    127.             raise end_of_stream;
    128.          elsif response = here_response then
    129.             reattach(the_buffer, OS_specifics.UI_in_name);
-   130.             return;
-   131.          elsif response = at_response then
-   132.             declare
-   133.                here : constant String := environmental_value_of("KDF9_DATA", default => "Data") & "/";
-   134.                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
-   135.             begin
-   136.                reattach_the_text_file(here & next);
-   137.                return;
-   138.             exception
-   139.                when operator_error =>
-   140.                   output_line(BEL & "ee9: The file '" & here & next & "' could not be found");
-   141.             end;
-   142.          elsif response = name_response then
-   143.             declare
-   144.                next : constant String := next_file_name(BEL & "Give the pathname of the file");
-   145.             begin
-   146.                reattach_the_text_file(next);
-   147.                return;
-   148.             exception
-   149.                when operator_error =>
-   150.                   output_line(BEL & "ee9: The file '" & next & "' could not be found");
-   151.             end;
-   152.          end if;
-   153.       end loop;
-   154.    end deal_with_end_of_data;
-   155.
-   156.    procedure start_slow_transfer (the_buffer   : in out slow.device;
-   157.                                   Q_operand    : in KDF9.Q_register;
-   158.                                   set_offline  : in Boolean;
-   159.                                   operation    : in IOC.transfer_kind := some_other_operation) is
-   160.       atomic_items : constant KDF9.word := atomic_item_count(the_buffer, Q_operand);
-   161.       time_needed  : constant KDF9.us := IO_elapsed_time(the_buffer, atomic_items);
-   162.    begin
-   163.       start_data_transfer(the_buffer, Q_operand, set_offline,
-   164.                           busy_time => time_needed,
-   165.                           operation => start_slow_transfer.operation);
-   166.    end start_slow_transfer;
-   167.
-   168.    procedure get_byte_from_stream (byte       : out Character;
-   169.                                    the_buffer : in out slow.device) is
-   170.    begin
-   171.       loop
-   172.          begin
-   173.             get_byte(byte, the_buffer.stream);
-   174.             return;
-   175.          exception
-   176.             when end_of_stream =>
-   177.                deal_with_end_of_data(the_buffer);
-   178.          end;
-   179.       end loop;
-   180.    end get_byte_from_stream;
-   181.
-   182.    procedure get_char_from_stream (char       : out Character;
-   183.                                    the_buffer : in out slow.device) is
-   184.    begin
-   185.       loop
-   186.          begin
-   187.             get_char(char, the_buffer.stream);
-   188.             return;
-   189.          exception
-   190.             when end_of_stream =>
-   191.                deal_with_end_of_data(the_buffer);
-   192.          end;
-   193.       end loop;
-   194.    end get_char_from_stream;
-   195.
-   196. end IOC.slow;
+   130.             the_buffer.is_reading_a_file := False;
+   131.             return;
+   132.          elsif response = at_response then
+   133.             declare
+   134.                here : constant String := environmental_value_of("KDF9_DATA", default => "Data") & "/";
+   135.                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
+   136.             begin
+   137.                reattach_the_text_file(here & next);
+   138.                return;
+   139.             exception
+   140.                when operator_error =>
+   141.                   output_line(BEL & "ee9: The file «"& here & next & "» could not be found");
+   142.             end;
+   143.          elsif response = name_response then
+   144.             declare
+   145.                next : constant String := next_file_name(BEL & "Give the pathname of the file");
+   146.             begin
+   147.                reattach_the_text_file(next);
+   148.                return;
+   149.             exception
+   150.                when operator_error =>
+   151.                   output_line(BEL & "ee9: The file «"& next & "» could not be found");
+   152.             end;
+   153.          end if;
+   154.       end loop;
+   155.    end deal_with_end_of_data;
+   156.
+   157.    procedure start_slow_transfer (the_buffer   : in out slow.device;
+   158.                                   Q_operand    : in KDF9.Q_register;
+   159.                                   set_offline  : in Boolean;
+   160.                                   operation    : in IOC.transfer_kind := some_other_operation) is
+   161.       atomic_items : constant KDF9.word := atomic_item_count(the_buffer, Q_operand);
+   162.       time_needed  : constant KDF9.us := IO_elapsed_time(the_buffer, atomic_items);
+   163.    begin
+   164.       start_data_transfer(the_buffer, Q_operand, set_offline,
+   165.                           busy_time => time_needed,
+   166.                           operation => start_slow_transfer.operation);
+   167.    end start_slow_transfer;
+   168.
+   169.    procedure get_char_from_stream (char       : out Character;
+   170.                                    the_buffer : in out slow.device) is
+   171.    begin
+   172.       loop
+   173.          begin
+   174.             get_char(char, the_buffer.stream);
+   175.             return;
+   176.          exception
+   177.             when end_of_stream =>
+   178.                deal_with_end_of_data(the_buffer);
+   179.          end;
+   180.       end loop;
+   181.    end get_char_from_stream;
+   182.
+   183. end IOC.slow;
 
 Compiling: ../Source/ioc-slow.ads
-Source file time stamp: 2021-02-13 13:46:28
-Compiled at: 2021-02-21 15:54:04
+Source file time stamp: 2021-04-08 00:00:02
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2720,61 +2716,61 @@ Compiled at: 2021-02-21 15:54:04
     42.
     43.    type device is abstract new IOC.device with
     44.       record
-    45.          is_transcribing : Boolean := True;
-    46.          byte_count      : KDF9.word := 0;
-    47.       end record;
-    48.
-    49.    overriding
-    50.    function is_open (the_buffer : slow.device)
-    51.    return Boolean;
-    52.
-    53.    overriding
-    54.    procedure add_in_the_IO_CPU_time (the_buffer  : in slow.device;
-    55.                                      bytes_moved : in KDF9.word);
-    56.
-    57.    -- Optionally log an activity message for the device; close its I/O stream.
-    58.    procedure close (the_buffer  : in out slow.device;
-    59.                     the_action  : in String;
-    60.                     the_amount  : in KDF9.word;
-    61.                     the_quantum : in String);
-    62.
-    63.    -- The number of timed transfer units in the designated core-store area.
-    64.    -- In the case of unit-record devices, such as card readers and line printers,
-    65.    --    this is the number of unit records (cards, or lines, respectively).
-    66.    -- In all other cases it is the number of characters in the designated core-store area.
-    67.    function atomic_item_count (the_buffer : slow.device;
-    68.                                Q_operand  : KDF9.Q_register)
-    69.    return KDF9.word;
-    70.
-    71.    -- Check the IO parameters and the buffer state, and handle any old lockout.
-    72.    -- Set the new buffer state, and project the next interrupt time.
-    73.    procedure start_slow_transfer (the_buffer   : in out slow.device;
-    74.                                   Q_operand    : in KDF9.Q_register;
-    75.                                   set_offline  : in Boolean;
-    76.                                   operation    : in IOC.transfer_kind := some_other_operation);
-    77.
-    78.    -- Read a character from the stream and deal with any input file concatenation.
-    79.    procedure get_char_from_stream (char       : out Character;
-    80.                                    the_buffer : in out slow.device);
-    81.
-    82.    -- Read a raw byte from the stream and deal with any input file concatenation.
-    83.    procedure get_byte_from_stream (byte       : out Character;
-    84.                                    the_buffer : in out slow.device);
+    45.          is_transcribing   : Boolean := True;
+    46.          is_reading_a_file : Boolean := True;
+    47.          byte_count        : KDF9.word := 0;
+    48.       end record;
+    49.
+    50.    overriding
+    51.    function is_open (the_buffer : slow.device)
+    52.    return Boolean;
+    53.
+    54.    overriding
+    55.    procedure add_in_the_IO_CPU_time (the_buffer  : in slow.device;
+    56.                                      bytes_moved : in KDF9.word);
+    57.
+    58.    -- Optionally log an activity message for the device; close its I/O stream.
+    59.    procedure close (the_buffer  : in out slow.device;
+    60.                     the_action  : in String;
+    61.                     the_amount  : in KDF9.word;
+    62.                     the_quantum : in String);
+    63.
+    64.    -- The number of timed transfer units in the designated core-store area.
+    65.    -- In the case of unit-record devices, such as card readers and line printers,
+    66.    --    this is the number of unit records (cards, or lines, respectively).
+    67.    -- In all other cases it is the number of characters in the designated core-store area.
+    68.    function atomic_item_count (the_buffer : slow.device;
+    69.                                Q_operand  : KDF9.Q_register)
+    70.    return KDF9.word;
+    71.
+    72.    -- Check the IO parameters and the buffer state, and handle any old lockout.
+    73.    -- Set the new buffer state, and project the next interrupt time.
+    74.    procedure start_slow_transfer (the_buffer   : in out slow.device;
+    75.                                   Q_operand    : in KDF9.Q_register;
+    76.                                   set_offline  : in Boolean;
+    77.                                   operation    : in IOC.transfer_kind := some_other_operation);
+    78.
+    79.    procedure deal_with_end_of_data (the_buffer : in out slow.device);
+    80.
+    81.    -- Read a raw byte from the stream and deal with any input file concatenation.
+    82.    procedure get_char_from_stream (char       : out Character;
+    83.                                    the_buffer : in out slow.device);
+    84.
     85. end IOC.slow;
 
- 196 lines: No errors
+ 183 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift.adb
-Source file time stamp: 2021-02-13 13:25:23
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-10 00:48:04
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2788,275 +2784,306 @@ Compiled at: 2021-02-21 15:54:05
     14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
     15. --
     16.
-    17. package body IOC.slow.shift is
+    17. with KDF9_char_sets.framed;
     18.
-    19.    use KDF9_char_sets;
+    19. package body IOC.slow.shift is
     20.
-    21.    overriding
-    22.    procedure Initialize (the_device : in out shift.device) is
-    23.    begin
-    24.       -- Open the associated file.
-    25.       open(the_device, read_mode);
-    26.    end Initialize;
-    27.
-    28.    procedure do_input_housekeeping (the_device : in out shift.device;
-    29.                                     read_in,
-    30.                                     stored     : in KDF9.word) is
-    31.    begin
-    32.       add_in_the_IO_CPU_time(the_device, stored);
-    33.       correct_transfer_time(the_device, read_in);
-    34.       the_device.byte_count := the_device.byte_count + read_in;
-    35.    end do_input_housekeeping;
-    36.
-    37.    procedure get_symbols (the_device    : in out shift.device;
-    38.                           Q_operand     : in KDF9.Q_register;
-    39.                           reading_to_EM : in Boolean) is
-    40.       start_address : constant KDF9.address := Q_operand.I;
-    41.       end_address   : constant KDF9.address := Q_operand.M;
-    42.       fill   : KDF9.word := 0;
-    43.       size   : KDF9.word := 0;
-    44.       symbol : KDF9_char_sets.symbol;
-    45.       char   : Character;
-    46.    begin
-    47.       check_addresses_and_lockouts(start_address, end_address);
-    48.    word_loop:
-    49.       for w in start_address .. end_address loop
-    50.          store_word(0, w);
-    51.          for c in KDF9_char_sets.symbol_index'Range loop
-    52.             get_char_from_stream(char, the_device);
-    53.             size := size + 1;
-    54.             if char = KDF9_char_sets.W_F then
-    55.                -- Filler was suppressed on normal input from the slow devices.
-    56.                fill := fill + 1;
-    57.             elsif case_of(char) /= both                   and then
-    58.                      case_of(char) /= the_device.current_case then
-    59.                store_symbol(CN_TR(next_case(the_device.current_case)), w, c);
-    60.                the_device.current_case := the_device.current_case xor 1;
-    61.                back_off(the_device.stream);
-    62.             else
-    63.                symbol := CN_TR(char) or CS_TR(char);
-    64.                store_symbol(symbol, w, c);
-    65.                if reading_to_EM and symbol = KDF9_char_sets.End_Message then
-    66.                   for d in 1 .. 7-c loop
-    67.                      store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
-    68.                   end loop;
-    69.                   exit word_loop;
-    70.                end if;
-    71.             end if;
-    72.          end loop;
-    73.       end loop word_loop;
-    74.       do_input_housekeeping(the_device, read_in => size, stored => size-fill);
-    75.    exception
-    76.       when end_of_stream =>
-    77.          flush(the_device.stream);
-    78.          do_input_housekeeping(the_device, read_in => size, stored => size-fill);
-    79.    end get_symbols;
-    80.
-    81.    procedure read (the_device : in out shift.device;
-    82.                    Q_operand  : in KDF9.Q_register) is
-    83.    begin
-    84.       get_symbols(the_device, Q_operand, reading_to_EM => False);
-    85.    end read;
-    86.
-    87.    procedure read_to_EM (the_device : in out shift.device;
-    88.                          Q_operand  : in KDF9.Q_register) is
-    89.    begin
-    90.       get_symbols(the_device, Q_operand, reading_to_EM => True);
-    91.    end read_to_EM;
-    92.
-    93.    procedure get_words (the_device    : in out shift.device;
-    94.                         Q_operand     : in KDF9.Q_register;
-    95.                         reading_to_EM : in Boolean) is
-    96.       start_address : constant KDF9.address := Q_operand.I;
-    97.       end_address   : constant KDF9.address := Q_operand.M;
-    98.       size : KDF9.word := 0;
-    99.       word : KDF9.word;
-   100.       char : Character;
-   101.    begin
-   102.       check_addresses_and_lockouts(start_address, end_address);
-   103.       for w in start_address .. end_address loop
-   104.          get_char_from_stream(char, the_device);
-   105.          word := KDF9.word(Character'Pos(char));
-   106.          size := size + 1;
-   107.          store_word(word, w);
-   108.       exit when reading_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   109.       end loop;
-   110.       do_input_housekeeping(the_device, read_in => size, stored => size);
-   111.    exception
-   112.       when end_of_stream =>
-   113.          flush(the_device.stream);
-   114.          do_input_housekeeping(the_device, read_in => size, stored => size);
-   115.    end get_words;
-   116.
-   117.    procedure words_read (the_device : in out shift.device;
-   118.                          Q_operand  : in KDF9.Q_register) is
-   119.    begin
-   120.       get_words(the_device, Q_operand, reading_to_EM => False);
-   121.    end words_read;
-   122.
-   123.    procedure words_read_to_EM (the_device : in out shift.device;
-   124.                                Q_operand  : in KDF9.Q_register) is
-   125.    begin
-   126.       get_words(the_device, Q_operand, reading_to_EM => True);
-   127.    end words_read_to_EM;
-   128.
-   129.    procedure put_symbols (the_device    : in out shift.device;
-   130.                           Q_operand     : in KDF9.Q_register;
-   131.                           writing_to_EM : in Boolean) is
-   132.       start_address : constant KDF9.address := Q_operand.I;
-   133.       end_address   : constant KDF9.address := Q_operand.M;
-   134.       fill   : KDF9.word := 0;
-   135.       size   : KDF9.word := 0;
-   136.       symbol : KDF9_char_sets.symbol;
-   137.       char   : Character;
-   138.    begin
-   139.       check_addresses_and_lockouts(start_address, end_address);
-   140.    word_loop:
-   141.       for w in start_address .. end_address loop
-   142.          for c in KDF9_char_sets.symbol_index'Range loop
-   143.             symbol := fetch_symbol(w, c);
-   144.             size := size + 1;
-   145.             if symbol = KDF9_char_sets.Word_Filler then
-   146.                -- Filler was suppressed on normal output to the slow devices.
-   147.                fill := fill + 1;
-   148.             elsif symbol = KDF9_char_sets.Case_Shift then
-   149.                the_device.current_case := KDF9_char_sets.Case_Shift;
-   150.             elsif  symbol = KDF9_char_sets.Case_Normal then
-   151.                the_device.current_case := KDF9_char_sets.Case_Normal;
-   152.             else
-   153.                if the_device.current_case = KDF9_char_sets.Case_Normal then
-   154.                   char := TP_CN(symbol);
-   155.                else
-   156.                   char := TP_CS(symbol);
-   157.                end if;
-   158.                put_char(char, the_device.stream);
-   159.                exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
-   160.             end if;
-   161.          end loop;
-   162.       end loop word_loop;
-   163.       do_output_housekeeping(the_device, written => size-fill, fetched => size);
-   164.    exception
-   165.       when end_of_stream =>
-   166.          do_output_housekeeping(the_device, written => size-fill, fetched => size);
-   167.    end put_symbols;
-   168.
-   169.    procedure write (the_device : in out shift.device;
-   170.                     Q_operand  : in KDF9.Q_register) is
-   171.    begin
-   172.       put_symbols(the_device, Q_operand, writing_to_EM => False);
-   173.    end write;
-   174.
-   175.    procedure write_to_EM (the_device : in out shift.device;
-   176.                           Q_operand  : in KDF9.Q_register) is
-   177.    begin
-   178.       put_symbols(the_device, Q_operand, writing_to_EM => True);
-   179.    end write_to_EM;
-   180.
-   181.    procedure put_words (the_device    : in out shift.device;
-   182.                         Q_operand     : in KDF9.Q_register;
-   183.                         writing_to_EM : in Boolean) is
-   184.       start_address : constant KDF9.address := Q_operand.I;
-   185.       end_address   : constant KDF9.address := Q_operand.M;
-   186.       size : KDF9.word := 0;
-   187.       word : KDF9.word;
-   188.       char : Character;
-   189.    begin
-   190.       check_addresses_and_lockouts(start_address, end_address);
-   191.       for w in start_address .. end_address loop
-   192.          word := fetch_word(w) and 8#377#;
-   193.          char := Character'Val(word);
-   194.          put_byte(char, the_device.stream);
-   195.          size := size + 1;
-   196.       exit when writing_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   197.       end loop;
-   198.       do_output_housekeeping(the_device, written => size, fetched => size);
-   199.    exception
-   200.       when end_of_stream =>
-   201.          do_output_housekeeping(the_device, written => size, fetched => size);
-   202.    end put_words;
-   203.
-   204.    procedure words_write (the_device : in out shift.device;
-   205.                           Q_operand  : in KDF9.Q_register) is
-   206.    begin
-   207.       put_words(the_device, Q_operand, writing_to_EM => False);
-   208.    end words_write;
-   209.
-   210.    procedure words_write_to_EM (the_device : in out shift.device;
-   211.                                 Q_operand  : in KDF9.Q_register) is
-   212.    begin
-   213.       put_words(the_device, Q_operand, writing_to_EM => True);
-   214.    end words_write_to_EM;
-   215.
-   216.    procedure output_a_gap (the_device   : in out shift.device;
-   217.                            Q_operand    : in KDF9.Q_register;
-   218.                            set_offline  : in Boolean;
-   219.                            word_mode    : in Boolean := False;
-   220.                            text_mode    : in Boolean := False) is
-   221.       length : constant KDF9.word :=  KDF9.word(Q_operand.M) * (if word_mode then 8 else 1);
-   222.       char   : constant Character := Character'Val(0);
-   223.       size   : KDF9.word := 0;
-   224.    begin
-   225.       require_positive_count(Q_operand.M);
-   226.       for i in 1 .. length loop
-   227.          size := size + 1;
-   228.          if text_mode then
-   229.             do_not_put_byte(char, the_device.stream);
-   230.          else
-   231.             put_byte(char, the_device.stream);
-   232.          end if;
-   233.       end loop;
-   234.       start_data_transfer(
-   235.                           the_device,
-   236.                           (Q_operand.C, 0, Q_operand.M),
-   237.                           set_offline,
-   238.                           busy_time => IO_elapsed_time(the_device, length)
-   239.                          );
-   240.       do_output_housekeeping(the_device, written => length, fetched => 0);
-   241.    exception
-   242.       when end_of_stream =>
-   243.          do_output_housekeeping(the_device, written => size, fetched => 0);
-   244.    end output_a_gap;
-   245.
-   246.    procedure do_output_housekeeping (the_device : in out shift.device;
-   247.                                      written,
-   248.                                      fetched    : in KDF9.word) is
-   249.    begin
-   250.       flush(the_device.stream);
-   251.       add_in_the_IO_CPU_time(the_device, fetched);
-   252.       correct_transfer_time(the_device, written);
-   253.       the_device.byte_count := the_device.byte_count + fetched;
-   254.    end do_output_housekeeping;
-   255.
-   256.    procedure set_case (the_device  : in out shift.device;
-   257.                        the_setting : in KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal) is
-   258.    begin
-   259.       the_device.current_case := the_setting;
-   260.    end set_case;
-   261.
-   262.    function uses_Latin_1 (the_device : in shift.device)
-   263.    return Boolean
-   264.    is (the_device.is_transcribing);
-   265.
-   266.    overriding
-   267.    procedure Finalize (the_device : in out shift.device) is
-   268.    begin
-   269.       close(
-   270.             the_device,
-   271.             "transferred",
-   272.             the_device.byte_count,
-   273.             "character" & plurality(the_device.byte_count)
-   274.            );
-   275.    end Finalize;
+    21.    use KDF9_char_sets;
+    22.
+    23.    overriding
+    24.    procedure Initialize (the_device : in out shift.device) is
+    25.    begin
+    26.       -- Open the associated file.
+    27.       open(the_device, read_mode);
+    28.    end Initialize;
+    29.
+    30.    procedure do_input_housekeeping (the_device : in out shift.device;
+    31.                                     read_in,
+    32.                                     stored     : in KDF9.word) is
+    33.    begin
+    34.       add_in_the_IO_CPU_time(the_device, stored);
+    35.       correct_transfer_time(the_device, read_in);
+    36.       the_device.byte_count := the_device.byte_count + read_in;
+    37.    end do_input_housekeeping;
+    38.
+    39.    procedure get_byte_from_stream (byte       : out Character;
+    40.                                    the_device : in out shift.device) is
+    41.    begin
+    42.       loop
+    43.          begin
+    44.             get_byte(byte, the_device.stream);
+    45.             if the_device.is_reading_a_file then
+    46.                -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
+    47.                return;
+    48.             end if;
+    49.             -- Reading from the terminal, the byte is in Latin-1 and must be converted.
+    50.             -- This may entail interpolating shift characters.
+    51.             if case_of(byte) not in both | the_device.current_case then
+    52.                byte := framed(CN_TR(next_case(the_device.current_case)));
+    53.                the_device.current_case := the_device.current_case xor 1;
+    54.                back_off(the_device.stream);
+    55.             elsif the_device.current_case = KDF9_char_sets.Case_Normal then
+    56.                byte := framed(CN_TR(byte));
+    57.             else
+    58.                byte := framed(CS_TR(byte));
+    59.             end if;
+    60.             return;
+    61.          exception
+    62.             when end_of_stream =>
+    63.                deal_with_end_of_data(the_device);
+    64.          end;
+    65.       end loop;
+    66.    end get_byte_from_stream;
+    67.
+    68.    procedure get_symbols (the_device    : in out shift.device;
+    69.                           Q_operand     : in KDF9.Q_register;
+    70.                           reading_to_EM : in Boolean) is
+    71.       start_address : constant KDF9.address := Q_operand.I;
+    72.       end_address   : constant KDF9.address := Q_operand.M;
+    73.       fill   : KDF9.word := 0;
+    74.       size   : KDF9.word := 0;
+    75.       symbol : KDF9_char_sets.symbol;
+    76.       char   : Character;
+    77.    begin
+    78.       check_addresses_and_lockouts(start_address, end_address);
+    79.    word_loop:
+    80.       for w in start_address .. end_address loop
+    81.          store_word(0, w);
+    82.          for c in KDF9_char_sets.symbol_index'Range loop
+    83.             get_char_from_stream(char, the_device);
+    84.             size := size + 1;
+    85.             if char = KDF9_char_sets.W_F then
+    86.                -- Filler was suppressed on normal input from the slow devices.
+    87.                fill := fill + 1;
+    88.             elsif case_of(char) /= both                   and then
+    89.                      case_of(char) /= the_device.current_case then
+    90.                store_symbol(CN_TR(next_case(the_device.current_case)), w, c);
+    91.                the_device.current_case := the_device.current_case xor 1;
+    92.                back_off(the_device.stream);
+    93.             else
+    94.                symbol := CN_TR(char) or CS_TR(char);
+    95.                store_symbol(symbol, w, c);
+    96.                if reading_to_EM and symbol = KDF9_char_sets.End_Message then
+    97.                   for d in 1 .. 7-c loop
+    98.                      store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
+    99.                   end loop;
+   100.                   exit word_loop;
+   101.                end if;
+   102.             end if;
+   103.          end loop;
+   104.       end loop word_loop;
+   105.       do_input_housekeeping(the_device, read_in => size, stored => size-fill);
+   106.    exception
+   107.       when end_of_stream =>
+   108.          flush(the_device.stream);
+   109.          do_input_housekeeping(the_device, read_in => size, stored => size-fill);
+   110.    end get_symbols;
+   111.
+   112.    procedure read (the_device : in out shift.device;
+   113.                    Q_operand  : in KDF9.Q_register) is
+   114.    begin
+   115.       get_symbols(the_device, Q_operand, reading_to_EM => False);
+   116.    end read;
+   117.
+   118.    procedure read_to_EM (the_device : in out shift.device;
+   119.                          Q_operand  : in KDF9.Q_register) is
+   120.    begin
+   121.       get_symbols(the_device, Q_operand, reading_to_EM => True);
+   122.    end read_to_EM;
+   123.
+   124.    procedure get_words (the_device    : in out shift.device;
+   125.                         Q_operand     : in KDF9.Q_register;
+   126.                         reading_to_EM : in Boolean) is
+   127.       start_address : constant KDF9.address := Q_operand.I;
+   128.       end_address   : constant KDF9.address := Q_operand.M;
+   129.       size : KDF9.word := 0;
+   130.       word : KDF9.word;
+   131.       char : Character;
+   132.    begin
+   133.       check_addresses_and_lockouts(start_address, end_address);
+   134.       for w in start_address .. end_address loop
+   135.          get_char_from_stream(char, the_device);
+   136.          word := KDF9.word(Character'Pos(char));
+   137.          size := size + 1;
+   138.          store_word(word, w);
+   139.       exit when reading_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   140.       end loop;
+   141.       do_input_housekeeping(the_device, read_in => size, stored => size);
+   142.    exception
+   143.       when end_of_stream =>
+   144.          flush(the_device.stream);
+   145.          do_input_housekeeping(the_device, read_in => size, stored => size);
+   146.    end get_words;
+   147.
+   148.    procedure words_read (the_device : in out shift.device;
+   149.                          Q_operand  : in KDF9.Q_register) is
+   150.    begin
+   151.       get_words(the_device, Q_operand, reading_to_EM => False);
+   152.    end words_read;
+   153.
+   154.    procedure words_read_to_EM (the_device : in out shift.device;
+   155.                                Q_operand  : in KDF9.Q_register) is
+   156.    begin
+   157.       get_words(the_device, Q_operand, reading_to_EM => True);
+   158.    end words_read_to_EM;
+   159.
+   160.    procedure put_symbols (the_device    : in out shift.device;
+   161.                           Q_operand     : in KDF9.Q_register;
+   162.                           writing_to_EM : in Boolean) is
+   163.       start_address : constant KDF9.address := Q_operand.I;
+   164.       end_address   : constant KDF9.address := Q_operand.M;
+   165.       fill   : KDF9.word := 0;
+   166.       size   : KDF9.word := 0;
+   167.       symbol : KDF9_char_sets.symbol;
+   168.       char   : Character;
+   169.    begin
+   170.       check_addresses_and_lockouts(start_address, end_address);
+   171.    word_loop:
+   172.       for w in start_address .. end_address loop
+   173.          for c in KDF9_char_sets.symbol_index'Range loop
+   174.             symbol := fetch_symbol(w, c);
+   175.             size := size + 1;
+   176.             if symbol = KDF9_char_sets.Word_Filler then
+   177.                -- Filler was suppressed on normal output to the slow devices.
+   178.                fill := fill + 1;
+   179.             elsif symbol = KDF9_char_sets.Case_Shift then
+   180.                the_device.current_case := KDF9_char_sets.Case_Shift;
+   181.             elsif  symbol = KDF9_char_sets.Case_Normal then
+   182.                the_device.current_case := KDF9_char_sets.Case_Normal;
+   183.             else
+   184.                if the_device.current_case = KDF9_char_sets.Case_Normal then
+   185.                   char := TP_CN(symbol);
+   186.                else
+   187.                   char := TP_CS(symbol);
+   188.                end if;
+   189.                put_char(char, the_device.stream);
+   190.                exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
+   191.             end if;
+   192.          end loop;
+   193.       end loop word_loop;
+   194.       do_output_housekeeping(the_device, written => size-fill, fetched => size);
+   195.    exception
+   196.       when end_of_stream =>
+   197.          do_output_housekeeping(the_device, written => size-fill, fetched => size);
+   198.    end put_symbols;
+   199.
+   200.    procedure write (the_device : in out shift.device;
+   201.                     Q_operand  : in KDF9.Q_register) is
+   202.    begin
+   203.       put_symbols(the_device, Q_operand, writing_to_EM => False);
+   204.    end write;
+   205.
+   206.    procedure write_to_EM (the_device : in out shift.device;
+   207.                           Q_operand  : in KDF9.Q_register) is
+   208.    begin
+   209.       put_symbols(the_device, Q_operand, writing_to_EM => True);
+   210.    end write_to_EM;
+   211.
+   212.    procedure put_words (the_device    : in out shift.device;
+   213.                         Q_operand     : in KDF9.Q_register;
+   214.                         writing_to_EM : in Boolean) is
+   215.       start_address : constant KDF9.address := Q_operand.I;
+   216.       end_address   : constant KDF9.address := Q_operand.M;
+   217.       size : KDF9.word := 0;
+   218.       word : KDF9.word;
+   219.       char : Character;
+   220.    begin
+   221.       check_addresses_and_lockouts(start_address, end_address);
+   222.       for w in start_address .. end_address loop
+   223.          word := fetch_word(w) and 8#377#;
+   224.          char := Character'Val(word);
+   225.          put_byte(char, the_device.stream);
+   226.          size := size + 1;
+   227.       exit when writing_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   228.       end loop;
+   229.       do_output_housekeeping(the_device, written => size, fetched => size);
+   230.    exception
+   231.       when end_of_stream =>
+   232.          do_output_housekeeping(the_device, written => size, fetched => size);
+   233.    end put_words;
+   234.
+   235.    procedure words_write (the_device : in out shift.device;
+   236.                           Q_operand  : in KDF9.Q_register) is
+   237.    begin
+   238.       put_words(the_device, Q_operand, writing_to_EM => False);
+   239.    end words_write;
+   240.
+   241.    procedure words_write_to_EM (the_device : in out shift.device;
+   242.                                 Q_operand  : in KDF9.Q_register) is
+   243.    begin
+   244.       put_words(the_device, Q_operand, writing_to_EM => True);
+   245.    end words_write_to_EM;
+   246.
+   247.    procedure output_a_gap (the_device   : in out shift.device;
+   248.                            Q_operand    : in KDF9.Q_register;
+   249.                            set_offline  : in Boolean;
+   250.                            word_mode    : in Boolean := False;
+   251.                            text_mode    : in Boolean := False) is
+   252.       length : constant KDF9.word :=  KDF9.word(Q_operand.M) * (if word_mode then 8 else 1);
+   253.       char   : constant Character := Character'Val(0);
+   254.       size   : KDF9.word := 0;
+   255.    begin
+   256.       require_positive_count(Q_operand.M);
+   257.       for i in 1 .. length loop
+   258.          size := size + 1;
+   259.          if text_mode then
+   260.             do_not_put_byte(char, the_device.stream);
+   261.          else
+   262.             put_byte(char, the_device.stream);
+   263.          end if;
+   264.       end loop;
+   265.       start_data_transfer(
+   266.                           the_device,
+   267.                           (Q_operand.C, 0, Q_operand.M),
+   268.                           set_offline,
+   269.                           busy_time => IO_elapsed_time(the_device, length)
+   270.                          );
+   271.       do_output_housekeeping(the_device, written => length, fetched => 0);
+   272.    exception
+   273.       when end_of_stream =>
+   274.          do_output_housekeeping(the_device, written => size, fetched => 0);
+   275.    end output_a_gap;
    276.
-   277. end IOC.slow.shift;
+   277.    procedure do_output_housekeeping (the_device : in out shift.device;
+   278.                                      written,
+   279.                                      fetched    : in KDF9.word) is
+   280.    begin
+   281.       flush(the_device.stream);
+   282.       add_in_the_IO_CPU_time(the_device, fetched);
+   283.       correct_transfer_time(the_device, written);
+   284.       the_device.byte_count := the_device.byte_count + fetched;
+   285.    end do_output_housekeeping;
+   286.
+   287.    procedure set_case (the_device  : in out shift.device;
+   288.                        the_setting : in KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal) is
+   289.    begin
+   290.       the_device.current_case := the_setting;
+   291.    end set_case;
+   292.
+   293.    function uses_Latin_1 (the_device : in shift.device)
+   294.    return Boolean
+   295.    is (the_device.is_transcribing);
+   296.
+   297.    overriding
+   298.    procedure Finalize (the_device : in out shift.device) is
+   299.    begin
+   300.       close(
+   301.             the_device,
+   302.             "transferred",
+   303.             the_device.byte_count,
+   304.             "character" & plurality(the_device.byte_count)
+   305.            );
+   306.    end Finalize;
+   307.
+   308. end IOC.slow.shift;
 
 Compiling: ../Source/ioc-slow-shift.ads
-Source file time stamp: 2021-02-13 13:58:43
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-07 23:59:54
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3087,72 +3114,78 @@ Compiled at: 2021-02-21 15:54:05
     31.    function uses_Latin_1 (the_device : in shift.device)
     32.    return Boolean;
     33.
-    34. private
-    35.
-    36.    type device is abstract new IOC.slow.device with
-    37.       record
-    38.          current_case : KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal;
-    39.       end record;
-    40.
-    41.    overriding
-    42.    procedure Finalize (the_device : in out shift.device);
-    43.
-    44.    overriding
-    45.    procedure Initialize (the_device : in out shift.device);
+    34.    -- Read a character from the stream and deal with any input file concatenation.
+    35.    -- If the buffer is reading from a file, deliver the character found; otherwise:
+    36.    --    convert the character from Latin-1 to the corresponding paper tape 8-bit code.
+    37.    procedure get_byte_from_stream (byte       : out Character;
+    38.                                    the_device : in out shift.device);
+    39.
+    40. private
+    41.
+    42.    type device is abstract new IOC.slow.device with
+    43.       record
+    44.          current_case : KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal;
+    45.       end record;
     46.
-    47.    procedure do_input_housekeeping (the_device : in out shift.device;
-    48.                                     read_in,
-    49.                                     stored     : in KDF9.word);
-    50.
-    51.    procedure do_output_housekeeping (the_device : in out shift.device;
-    52.                                      written,
-    53.                                      fetched    : in KDF9.word);
-    54.
-    55.    procedure write (the_device : in out shift.device;
-    56.                     Q_operand  : in KDF9.Q_register);
-    57.
-    58.    procedure read (the_device : in out shift.device;
-    59.                    Q_operand  : in KDF9.Q_register);
+    47.    overriding
+    48.    procedure Finalize (the_device : in out shift.device);
+    49.
+    50.    overriding
+    51.    procedure Initialize (the_device : in out shift.device);
+    52.
+    53.    procedure do_input_housekeeping (the_device : in out shift.device;
+    54.                                     read_in,
+    55.                                     stored     : in KDF9.word);
+    56.
+    57.    procedure do_output_housekeeping (the_device : in out shift.device;
+    58.                                      written,
+    59.                                      fetched    : in KDF9.word);
     60.
-    61.    procedure write_to_EM (the_device : in out shift.device;
-    62.                           Q_operand  : in KDF9.Q_register);
+    61.    procedure write (the_device : in out shift.device;
+    62.                     Q_operand  : in KDF9.Q_register);
     63.
-    64.    procedure read_to_EM (the_device : in out shift.device;
-    65.                          Q_operand  : in KDF9.Q_register);
+    64.    procedure read (the_device : in out shift.device;
+    65.                    Q_operand  : in KDF9.Q_register);
     66.
-    67.    procedure words_write (the_device : in out shift.device;
+    67.    procedure write_to_EM (the_device : in out shift.device;
     68.                           Q_operand  : in KDF9.Q_register);
     69.
-    70.    procedure words_read (the_device : in out shift.device;
+    70.    procedure read_to_EM (the_device : in out shift.device;
     71.                          Q_operand  : in KDF9.Q_register);
     72.
-    73.    procedure words_write_to_EM (the_device : in out shift.device;
-    74.                                 Q_operand  : in KDF9.Q_register);
+    73.    procedure words_write (the_device : in out shift.device;
+    74.                           Q_operand  : in KDF9.Q_register);
     75.
-    76.    procedure words_read_to_EM (the_device : in out shift.device;
-    77.                                Q_operand  : in KDF9.Q_register);
+    76.    procedure words_read (the_device : in out shift.device;
+    77.                          Q_operand  : in KDF9.Q_register);
     78.
-    79.    procedure output_a_gap (the_device   : in out shift.device;
-    80.                            Q_operand    : in KDF9.Q_register;
-    81.                            set_offline  : in Boolean;
-    82.                            word_mode    : in Boolean := False;
-    83.                            text_mode    : in Boolean := False);
+    79.    procedure words_write_to_EM (the_device : in out shift.device;
+    80.                                 Q_operand  : in KDF9.Q_register);
+    81.
+    82.    procedure words_read_to_EM (the_device : in out shift.device;
+    83.                                Q_operand  : in KDF9.Q_register);
     84.
-    85. end IOC.slow.shift;
+    85.    procedure output_a_gap (the_device   : in out shift.device;
+    86.                            Q_operand    : in KDF9.Q_register;
+    87.                            set_offline  : in Boolean;
+    88.                            word_mode    : in Boolean := False;
+    89.                            text_mode    : in Boolean := False);
+    90.
+    91. end IOC.slow.shift;
 
- 277 lines: No errors
+ 308 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tp.adb
-Source file time stamp: 2021-02-19 16:40:08
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-10 00:48:04
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3166,243 +3199,216 @@ Compiled at: 2021-02-21 15:54:05
     14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
     15. --
     16.
-    17. package body IOC.slow.shift.TP is
+    17. with KDF9_char_sets.framed;
     18.
-    19.    use KDF9_char_sets;
+    19. package body IOC.slow.shift.TP is
     20.
-    21.    overriding
-    22.    procedure Initialize (the_TP : in out TP.device) is
-    23.    begin
-    24.       open(the_TP, write_mode);
-    25.    end Initialize;
-    26.
-    27.    -- the_T_bit_is_set := (the buffer has been switched from a tape punch to a graph plotter)
-    28.    overriding
-    29.    procedure PMB (the_TP      : in out TP.device;
-    30.                   Q_operand   : in KDF9.Q_register;
-    31.                   set_offline : in Boolean) is
-    32.    begin
-    33.       validate_device(the_TP);
-    34.       validate_parity(the_TP);
-    35.       deal_with_a_busy_device(the_TP, 13, set_offline);
-    36.       the_T_bit_is_set := False;  -- We never get here if GP0 is enabled.
-    37.       take_note_of_test(the_TP.device_name, Q_operand, the_T_bit_is_set);
-    38.    end PMB;
-    39.
-    40. --
-    41. --
-    42.    --
-    43.    -- See Manual, §17.4 for paper tape 8-bit frame format.
+    21.    use KDF9_char_sets;
+    22.
+    23.    overriding
+    24.    procedure Initialize (the_TP : in out TP.device) is
+    25.    begin
+    26.       open(the_TP, write_mode);
+    27.    end Initialize;
+    28.
+    29.    -- the_T_bit_is_set := (the buffer has been switched from a tape punch to a graph plotter)
+    30.    overriding
+    31.    procedure PMB (the_TP      : in out TP.device;
+    32.                   Q_operand   : in KDF9.Q_register;
+    33.                   set_offline : in Boolean) is
+    34.    begin
+    35.       validate_device(the_TP);
+    36.       validate_parity(the_TP);
+    37.       deal_with_a_busy_device(the_TP, 13, set_offline);
+    38.       the_T_bit_is_set := False;  -- We never get here if GP0 is enabled.
+    39.       take_note_of_test(the_TP.device_name, Q_operand, the_T_bit_is_set);
+    40.    end PMB;
+    41.
+    42. --
+    43. --
     44.    --
-    45. --
-    46. --
-    47.
-    48.    procedure write_KDF9_tape_code (the_TP        : in out TP.device;
-    49.                                    Q_operand     : in KDF9.Q_register;
-    50.                                    writing_to_EM : in Boolean := False) is
-    51.
-    52.       function framed (symbol : KDF9_char_sets.symbol)
-    53.       return Natural is
-    54.
-    55.          SP : constant := 8#000#;
-    56.
-    57.          function channel_8
-    58.          return KDF9.syllable
-    59.          is (if symbol = SP then 2#10_000_000# else 0);
-    60.
-    61.          function parity
-    62.          return KDF9.syllable is
-    63.             frame  : KDF9.syllable := KDF9.syllable(KDF9_char_sets.symbol'Pos(symbol)) or channel_8;
-    64.             parity : KDF9.syllable := 0;
-    65.          begin -- parity
-    66.             while frame /= 0 loop
-    67.                parity := parity xor (frame and 1);
-    68.                frame  := frame / 2;
-    69.             end loop;
-    70.             return (if parity = 0 then 0 else 2#00_010_000#);
-    71.          end parity;
-    72.
-    73.          low_4_bits : constant KDF9.syllable := KDF9.syllable(symbol)   and 2#00_001_111#;
-    74.          bits_5and6 : constant KDF9.syllable := KDF9.syllable(symbol)*2 and 2#01_100_000#;
-    75.
-    76.       begin -- framed
-    77.          return KDF9.syllable'Pos(channel_8 or bits_5and6 or parity or low_4_bits);
-    78.       end framed;
-    79.
-    80.       start_address : constant KDF9.address := Q_operand.I;
-    81.       end_address   : constant KDF9.address := Q_operand.M;
-    82.       size   : KDF9.word := 0;
-    83.       symbol : KDF9_char_sets.symbol;
-    84.       char   : Character;
-    85.
-    86.    begin -- write_KDF9_tape_code
-    87.       check_addresses_and_lockouts(start_address, end_address);
-    88.    word_loop:
-    89.       for w in start_address .. end_address loop
-    90.          for c in KDF9_char_sets.symbol_index'Range loop
-    91.             symbol := fetch_symbol(w, c);
-    92.             size := size + 1;
-    93.             char := Character'Val(framed(symbol));
-    94.             put_byte(char, the_TP.stream);
-    95.          exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
-    96.          end loop;
-    97.       end loop word_loop;
-    98.       do_output_housekeeping(the_TP, written => size, fetched => size);
-    99.    exception
-   100.       when end_of_stream =>
-   101.          do_output_housekeeping(the_TP, written => size, fetched => size);
-   102.    end write_KDF9_tape_code;
-   103.
-   104.    -- PWQq
-   105.    overriding
-   106.    procedure POA (the_TP      : in out TP.device;
-   107.                   Q_operand   : in KDF9.Q_register;
-   108.                   set_offline : in Boolean) is
-   109.    begin
-   110.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
-   111.       if the_TP.is_transcribing then
-   112.          write(the_TP, Q_operand);
-   113.       else
-   114.          write_KDF9_tape_code(the_TP, Q_operand);
-   115.       end if;
-   116.       lock_out_relative_addresses(Q_operand);
-   117.    end POA;
-   118.
-   119.    -- PWEQq
-   120.    overriding
-   121.    procedure POB (the_TP      : in out TP.device;
-   122.                   Q_operand   : in KDF9.Q_register;
-   123.                   set_offline : in Boolean) is
-   124.    begin
-   125.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
-   126.       if the_TP.is_transcribing then
-   127.          write_to_EM(the_TP, Q_operand);
-   128.       else
-   129.          write_KDF9_tape_code(the_TP, Q_operand, writing_to_EM => True);
-   130.       end if;
-   131.       lock_out_relative_addresses(Q_operand);
-   132.    end POB;
-   133.
-   134.    -- PWCQq
-   135.    overriding
-   136.    procedure POC (the_TP      : in out TP.device;
-   137.                   Q_operand   : in KDF9.Q_register;
-   138.                   set_offline : in Boolean) is
-   139.    begin
-   140.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
-   141.       words_write(the_TP, Q_operand);
-   142.       lock_out_relative_addresses(Q_operand);
-   143.    end POC;
+    45.    -- See Manual, §17.4 for paper tape 8-bit frame format.
+    46.    --
+    47. --
+    48. --
+    49.
+    50.    procedure write_KDF9_tape_code (the_TP        : in out TP.device;
+    51.                                    Q_operand     : in KDF9.Q_register;
+    52.                                    writing_to_EM : in Boolean := False) is
+    53.       start_address : constant KDF9.address := Q_operand.I;
+    54.       end_address   : constant KDF9.address := Q_operand.M;
+    55.       size   : KDF9.word := 0;
+    56.       symbol : KDF9_char_sets.symbol;
+    57.       char   : Character;
+    58.
+    59.    begin -- write_KDF9_tape_code
+    60.       check_addresses_and_lockouts(start_address, end_address);
+    61.    word_loop:
+    62.       for w in start_address .. end_address loop
+    63.          for c in KDF9_char_sets.symbol_index'Range loop
+    64.             symbol := fetch_symbol(w, c);
+    65.             size := size + 1;
+    66.             char := framed(symbol);
+    67.             put_byte(char, the_TP.stream);
+    68.          exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
+    69.          end loop;
+    70.       end loop word_loop;
+    71.       do_output_housekeeping(the_TP, written => size, fetched => size);
+    72.    exception
+    73.       when end_of_stream =>
+    74.          do_output_housekeeping(the_TP, written => size, fetched => size);
+    75.    end write_KDF9_tape_code;
+    76.
+    77.    -- PWQq
+    78.    overriding
+    79.    procedure POA (the_TP      : in out TP.device;
+    80.                   Q_operand   : in KDF9.Q_register;
+    81.                   set_offline : in Boolean) is
+    82.    begin
+    83.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
+    84.       if the_TP.is_transcribing then
+    85.          write(the_TP, Q_operand);
+    86.       else
+    87.          write_KDF9_tape_code(the_TP, Q_operand);
+    88.       end if;
+    89.       lock_out_relative_addresses(Q_operand);
+    90.    end POA;
+    91.
+    92.    -- PWEQq
+    93.    overriding
+    94.    procedure POB (the_TP      : in out TP.device;
+    95.                   Q_operand   : in KDF9.Q_register;
+    96.                   set_offline : in Boolean) is
+    97.    begin
+    98.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
+    99.       if the_TP.is_transcribing then
+   100.          write_to_EM(the_TP, Q_operand);
+   101.       else
+   102.          write_KDF9_tape_code(the_TP, Q_operand, writing_to_EM => True);
+   103.       end if;
+   104.       lock_out_relative_addresses(Q_operand);
+   105.    end POB;
+   106.
+   107.    -- PWCQq
+   108.    overriding
+   109.    procedure POC (the_TP      : in out TP.device;
+   110.                   Q_operand   : in KDF9.Q_register;
+   111.                   set_offline : in Boolean) is
+   112.    begin
+   113.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
+   114.       words_write(the_TP, Q_operand);
+   115.       lock_out_relative_addresses(Q_operand);
+   116.    end POC;
+   117.
+   118.    -- PWCEQq
+   119.    overriding
+   120.    procedure POD (the_TP      : in out TP.device;
+   121.                   Q_operand   : in KDF9.Q_register;
+   122.                   set_offline : in Boolean) is
+   123.    begin
+   124.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
+   125.       words_write_to_EM(the_TP, Q_operand);
+   126.       lock_out_relative_addresses(Q_operand);
+   127.    end POD;
+   128.
+   129.    -- PGAPQq
+   130.    overriding
+   131.    procedure POE (the_TP      : in out TP.device;
+   132.                   Q_operand   : in KDF9.Q_register;
+   133.                   set_offline : in Boolean) is
+   134.    begin
+   135.       require_nonnegative_count(Q_operand.M);
+   136.       output_a_gap(
+   137.                    the_TP,
+   138.                    Q_operand,
+   139.                    set_offline,
+   140.                    word_mode => False,
+   141.                    text_mode => the_TP.is_transcribing
+   142.                   );
+   143.    end POE;
    144.
-   145.    -- PWCEQq
+   145.    -- "word gap"
    146.    overriding
-   147.    procedure POD (the_TP      : in out TP.device;
+   147.    procedure POF (the_TP      : in out TP.device;
    148.                   Q_operand   : in KDF9.Q_register;
    149.                   set_offline : in Boolean) is
    150.    begin
-   151.       start_slow_transfer(the_TP, Q_operand, set_offline, output_operation);
-   152.       words_write_to_EM(the_TP, Q_operand);
-   153.       lock_out_relative_addresses(Q_operand);
-   154.    end POD;
-   155.
-   156.    -- PGAPQq
-   157.    overriding
-   158.    procedure POE (the_TP      : in out TP.device;
-   159.                   Q_operand   : in KDF9.Q_register;
-   160.                   set_offline : in Boolean) is
-   161.    begin
-   162.       require_nonnegative_count(Q_operand.M);
-   163.       output_a_gap(
-   164.                    the_TP,
-   165.                    Q_operand,
-   166.                    set_offline,
-   167.                    word_mode => False,
-   168.                    text_mode => the_TP.is_transcribing
-   169.                   );
-   170.    end POE;
-   171.
-   172.    -- "word gap"
-   173.    overriding
-   174.    procedure POF (the_TP      : in out TP.device;
-   175.                   Q_operand   : in KDF9.Q_register;
-   176.                   set_offline : in Boolean) is
-   177.    begin
-   178.       require_nonnegative_count(Q_operand.M);
-   179.       output_a_gap(
-   180.                    the_TP,
-   181.                    Q_operand,
-   182.                    set_offline,
-   183.                    word_mode => True,
-   184.                    text_mode => the_TP.is_transcribing
-   185.                   );
-   186.    end POF;
-   187.
-   188.    overriding
-   189.    procedure Finalize (the_TP : in out TP.device) is
-   190.    begin
-   191.       close(
-   192.             the_TP,
-   193.             "punched",
-   194.             the_TP.byte_count,
-   195.             "character" & plurality(the_TP.byte_count)
-   196.           & " in "
-   197.           & (if the_TP.is_transcribing then "Latin-1" else "KDF9")
-   198.           & " code"
-   199.            );
-   200.    end Finalize;
-   201.
-   202.    type TP_access is access TP.device;
-   203.
-   204.    TP0  : TP_access with Warnings => Off;
-   205.    TP1  : TP_access with Warnings => Off;
-   206.
-   207.    unit : IOC.unit_number := 0;
-   208.
-   209.    procedure enable (b : in KDF9.buffer_number) is
+   151.       require_nonnegative_count(Q_operand.M);
+   152.       output_a_gap(
+   153.                    the_TP,
+   154.                    Q_operand,
+   155.                    set_offline,
+   156.                    word_mode => True,
+   157.                    text_mode => the_TP.is_transcribing
+   158.                   );
+   159.    end POF;
+   160.
+   161.    overriding
+   162.    procedure Finalize (the_TP : in out TP.device) is
+   163.    begin
+   164.       close(
+   165.             the_TP,
+   166.             "punched",
+   167.             the_TP.byte_count,
+   168.             "character" & plurality(the_TP.byte_count)
+   169.           & " in "
+   170.           & (if the_TP.is_transcribing then "Latin-1" else "KDF9")
+   171.           & " code"
+   172.            );
+   173.    end Finalize;
+   174.
+   175.    type TP_access is access TP.device;
+   176.
+   177.    TP0  : TP_access with Warnings => Off;
+   178.    TP1  : TP_access with Warnings => Off;
+   179.
+   180.    unit : IOC.unit_number := 0;
+   181.
+   182.    procedure enable (b : in KDF9.buffer_number) is
+   183.    begin
+   184.       case unit is
+   185.          when 0 =>
+   186.             TP0 := new TP.device (number => b, unit => 0);
+   187.             TP0_number := b;
+   188.          when 1 =>
+   189.             TP1 := new TP.device (number => b, unit => 1);
+   190.             TP1_number := b;
+   191.          when others =>
+   192.             trap_operator_error("more than two TP units have been configured");
+   193.       end case;
+   194.       unit := unit + 1;
+   195.    end enable;
+   196.
+   197.    procedure remove_from_buffer (b : in KDF9.buffer_number) is
+   198.    begin
+   199.       if TP1 /= null   and then
+   200.             TP1.number = b then
+   201.          Finalize(TP1.all);
+   202.          TP1 := null;
+   203.       else
+   204.          trap_operator_error("GP0 cannot be configured. TP1 is not on buffer #" & oct_of(b, 2));
+   205.       end if;
+   206.    end remove_from_buffer;
+   207.
+   208.    -- Set the character code to be used by the designated TP.
+   209.    procedure set_unit_code (unit : in Natural; is_transcribing : in Boolean) is
    210.    begin
-   211.       case unit is
-   212.          when 0 =>
-   213.             TP0 := new TP.device (number => b, unit => 0);
-   214.             TP0_number := b;
-   215.          when 1 =>
-   216.             TP1 := new TP.device (number => b, unit => 1);
-   217.             TP1_number := b;
-   218.          when others =>
-   219.             trap_operator_error("more than two TP units have been configured");
-   220.       end case;
-   221.       unit := unit + 1;
-   222.    end enable;
-   223.
-   224.    procedure remove_from_buffer (b : in KDF9.buffer_number) is
-   225.    begin
-   226.       if TP1 /= null   and then
-   227.             TP1.number = b then
-   228.          Finalize(TP1.all);
-   229.          TP1 := null;
-   230.       else
-   231.          trap_operator_error("GP0 cannot be configured. TP1 is not on buffer #" & oct_of(b, 2));
-   232.       end if;
-   233.    end remove_from_buffer;
-   234.
-   235.    -- Set the character code to be used by the designated TP.
-   236.    procedure set_unit_code (unit : in Natural; is_transcribing : in Boolean) is
-   237.    begin
-   238.       if unit = 0 and then TP0 /= null then
-   239.          TP0.is_transcribing := set_unit_code.is_transcribing;
-   240.       elsif unit = 1 and then TP1 /= null then
-   241.          TP1.is_transcribing := set_unit_code.is_transcribing;
-   242.       end if;
-   243.    end set_unit_code;
-   244.
-   245. end IOC.slow.shift.TP;
+   211.       if unit = 0 and then TP0 /= null then
+   212.          TP0.is_transcribing := set_unit_code.is_transcribing;
+   213.       elsif unit = 1 and then TP1 /= null then
+   214.          TP1.is_transcribing := set_unit_code.is_transcribing;
+   215.       end if;
+   216.    end set_unit_code;
+   217.
+   218. end IOC.slow.shift.TP;
 
 Compiling: ../Source/ioc-slow-shift-tp.ads
-Source file time stamp: 2021-02-15 01:13:24
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3492,19 +3498,19 @@ Compiled at: 2021-02-21 15:54:05
     90.
     91. end IOC.slow.shift.TP;
 
- 245 lines: No errors
+ 218 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tr.adb
-Source file time stamp: 2021-02-19 16:40:08
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-07 00:31:29
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3776,7 +3782,7 @@ Compiled at: 2021-02-21 15:54:05
    272.       if the_reader.is_open then
    273.          the_reader.current_case := KDF9_char_sets.Case_Normal;
    274.       else
-   275.          trap_operator_error("'" & next_file_name & "' cannot be found");
+   275.          trap_operator_error("«" & next_file_name & "» cannot be found");
    276.       end if;
    277.    end reattach;
    278.
@@ -3789,151 +3795,164 @@ Compiled at: 2021-02-21 15:54:05
    285.    end reset_loader_usage;
    286.
    287.    -- This emulates the Director's program load from a designated  paper tape reader.
-   288.    -- Once the loading is done, the tape reader is reattached to TR<unit>.
-   289.
-   290.    procedure load_a_program  (program_file_name : in String) is
-   291.
-   292.       -- This is the call sign for a program on Disc or Drum.
-   293.       CN_LS_D_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
-   294.                                       or (KDF9.word(Line_Shift)   * 2**12)
-   295.                                       or (KDF9.word(Upper_Case_D) * 2** 6)
-   296.                                       or (KDF9.word(Line_Shift)   * 2** 0);
-   297.
-   298.       -- This is the call sign for a program on Magnetic Tape.
-   299.       CN_LS_M_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
-   300.                                       or (KDF9.word(Line_Shift)   * 2**12)
-   301.                                       or (KDF9.word(Upper_Case_M) * 2** 6)
-   302.                                       or (KDF9.word(Line_Shift)   * 2** 0);
-   303.
-   304.       -- This is the call sign for a program on Paper Tape.
-   305.       CN_LS_P_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
-   306.                                       or (KDF9.word(Line_Shift)   * 2**12)
-   307.                                       or (KDF9.word(Upper_Case_P) * 2** 6)
-   308.                                       or (KDF9.word(Line_Shift)   * 2** 0);
-   309.
-   310.       threshold  : constant KDF9.word := 32767 * 2**24;
-   311.       substitute : constant KDF9.word := 32736 * 2**24;
-   312.       get_a_word : constant KDF9.Q_register := (TR0.number, 0, 0);
-   313.
-   314.       descriptor : KDF9.Q_register := (TR0.number, 1, 7);
-   315.       word_count : Positive := 2;
-   316.
-   317.    begin -- load_a_program
-   318.
-   319.       loading_was_successful := False;
-   320.
-   321.       -- Access the program file as TR0.
-   322.       reattach(0, program_file_name);
-   323.
-   324.       --
-   325.       -- For the structure of a compiled program, see Manual §26.3.
-   326.       --
-   327.
-   328.       -- Get the first word of the file into E0: it may start an A block or a B block.
-   329.       read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True);
-   330.
-   331.       -- Check for an A block.  If one is found, check its validity, but otherwise ignore it.
-   332.       if fetch_halfword(0, 0)/2**24 in CN_LS_D_LS | CN_LS_M_LS | CN_LS_P_LS then
-   333.          -- We have an A block.
-   334.          -- The next word completes the program name used by Director.  Ignore it.
-   335.          read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True);
-   336.
-   337.       block_loop:
-   338.          -- An A block is at most 8 words long but can end sooner with a word containing EM.
-   339.          loop
-   340.             word_count := word_count + 1;
-   341.          exit block_loop when word_count > 8;
-   342.             read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True, reading_to_EM => True);
-   343.             for c in KDF9_char_sets.symbol_index loop
-   344.          exit block_loop when fetch_symbol(0, c) = End_Message;
-   345.             end loop;
-   346.          end loop block_loop;
-   347.
-   348.          if word_count > 8 then
-   349.             -- The file is not a valid program tape.
-   350.             trap_invalid_paper_tape("excessively long A block");
-   351.          end if;
-   352.
-   353.          -- Read the first word of the following B block.
-   354.          read_KDF9_tape_code(TR0.all, (TR0.number, 0, 0), loading_code => True);
-   355.       end if;
-   356.
-   357.       -- Check for an unconditional jump at the start of the B block.
-   358.       if (fetch_word(0)/ 2**32 and 2#1111_0000_1111_0000#) /= 2#1000_0000_1011_0000# then
-   359.          -- The file is not a valid program tape.
-   360.          trap_invalid_paper_tape("no jump was found in E0H");
-   361.       end if;
-   362.
-   363.       -- At this point, E0 contains the first word of the B block, so get the rest of it in E1-E7.
-   364.       read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
-   365.
-   366.       descriptor := as_Q(fetch_word(descriptor.M));
-   367.       -- Read the non-final C blocks; the validity of the designated descriptors cannot be assumed.
-   368.       while descriptor.C /= 0 loop
-   369.          validate_address_range(descriptor.I, descriptor.M);
-   370.          read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
-   371.          descriptor := as_Q(fetch_word(descriptor.M));
-   372.       end loop;
-   373.
-   374.       -- Read the final C block.
-   375.       validate_address_range(descriptor.I, descriptor.M);
-   376.       read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
-   377.
-   378.       -- Set up the rest of the stored image.
+   288.    -- Once the loading is done, the tape reader is reattached to TR0.
+   289.    procedure load_a_program (program_file_name : in String) is
+   290.
+   291.       -- This is the call sign for a program on Disc or Drum.
+   292.       CN_LS_D_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
+   293.                                       or (KDF9.word(Line_Shift)   * 2**12)
+   294.                                       or (KDF9.word(Upper_Case_D) * 2** 6)
+   295.                                       or (KDF9.word(Line_Shift)   * 2** 0);
+   296.
+   297.       -- This is the call sign for a program on Magnetic Tape.
+   298.       CN_LS_M_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
+   299.                                       or (KDF9.word(Line_Shift)   * 2**12)
+   300.                                       or (KDF9.word(Upper_Case_M) * 2** 6)
+   301.                                       or (KDF9.word(Line_Shift)   * 2** 0);
+   302.
+   303.       -- This is the call sign for a program on Paper Tape.
+   304.       CN_LS_P_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
+   305.                                       or (KDF9.word(Line_Shift)   * 2**12)
+   306.                                       or (KDF9.word(Upper_Case_P) * 2** 6)
+   307.                                       or (KDF9.word(Line_Shift)   * 2** 0);
+   308.
+   309.       threshold  : constant KDF9.word := 32767 * 2**24;
+   310.       substitute : constant KDF9.word := 32736 * 2**24;
+   311.       get_a_word : constant KDF9.Q_register := (TR0.number, 0, 0);
+   312.
+   313.       descriptor : KDF9.Q_register := (TR0.number, 1, 7);
+   314.       word_count : Positive := 2;
+   315.
+   316.    begin -- load_a_program
+   317.
+   318.       loading_was_successful := False;
+   319.
+   320.       -- Access the program file as TR0.
+   321.       reattach(0, program_file_name);
+   322.
+   323.       --
+   324.       -- For the structure of a compiled program, see Manual §26.3.
+   325.       --
+   326.
+   327.       -- Get the first word of the file into E0: it may start an A block or a B block.
+   328.       read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True);
+   329.
+   330.       -- Check for an A block.  If one is found, check its validity, but otherwise ignore it.
+   331.       if fetch_halfword(0, 0)/2**24 in CN_LS_D_LS | CN_LS_M_LS | CN_LS_P_LS then
+   332.          -- We have an A block.
+   333.          -- The next word completes the program name used by Director.  Ignore it.
+   334.          read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True);
+   335.
+   336.       block_loop:
+   337.          -- An A block is at most 8 words long but can end sooner with a word containing EM.
+   338.          loop
+   339.             word_count := word_count + 1;
+   340.          exit block_loop when word_count > 8;
+   341.             read_KDF9_tape_code(TR0.all, get_a_word, loading_code => True, reading_to_EM => True);
+   342.             for c in KDF9_char_sets.symbol_index loop
+   343.          exit block_loop when fetch_symbol(0, c) = End_Message;
+   344.             end loop;
+   345.          end loop block_loop;
+   346.
+   347.          if word_count > 8 then
+   348.             -- The file is not a valid program tape.
+   349.             trap_invalid_paper_tape("excessively long A block");
+   350.          end if;
+   351.
+   352.          -- Read the first word of the following B block.
+   353.          read_KDF9_tape_code(TR0.all, (TR0.number, 0, 0), loading_code => True);
+   354.       end if;
+   355.
+   356.       -- Check for an unconditional jump at the start of the B block.
+   357.       if (fetch_word(0)/ 2**32 and 2#1111_0000_1111_0000#) /= 2#1000_0000_1011_0000# then
+   358.          -- The file is not a valid program tape.
+   359.          trap_invalid_paper_tape("no jump was found in E0U: " & oct_of(fetch_word(0)));
+   360.       else
+   361.          -- Preserve the initial jump in case of corruption by a buggy program.
+   362.          save_the_initial_jump;
+   363.       end if;
+   364.
+   365.       -- At this point, E0 contains the first word of the B block, so get the rest of it in E1-E7.
+   366.       read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
+   367.
+   368.       descriptor := as_Q(fetch_word(descriptor.M));
+   369.       -- Read the non-final C blocks; the validity of the designated descriptors cannot be assumed.
+   370.       while descriptor.C /= 0 loop
+   371.          validate_address_range(descriptor.I, descriptor.M);
+   372.          read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
+   373.          descriptor := as_Q(fetch_word(descriptor.M));
+   374.       end loop;
+   375.
+   376.       -- Read the final C block.
+   377.       validate_address_range(descriptor.I, descriptor.M);
+   378.       read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
    379.
-   380.       -- Preserve the initial jump in case of corruption by a buggy program.
-   381.       save_the_initial_jump;
-   382.
-   383.       -- Set the (virtual) date in E7.
-   384.       store_word(todays_date_28n_years_ago, 7);
-   385.
-   386.       -- Ensure valid parameters in E1 (some binaries may have invalid entries).
-   387.       if fetch_halfword(1, 0) > threshold or else fetch_halfword(1, 0) = 0 then
-   388.          store_halfword(substitute, 1, 0);
-   389.       end if;
-   390.       if fetch_halfword(1, 1) > threshold or else fetch_halfword(1, 1) = 0 then
-   391.          store_halfword(substitute, 1, 1);
-   392.       end if;
-   393.
-   394.       -- Do not set the time if we are computing a signature, so as to get a repeatable hash.
-   395.       if not the_signature_is_enabled then
-   396.          KDF9.TSD.timing.set_the_time_of_loading(the_time_of_day);
-   397.       end if;
-   398.
-   399.       loading_was_successful := True;
-   400.
-   401.       -- Clear up the I/O system.
-   402.       reattach(0, "TR0");
-   403.       clear_IOC_FIFO;
-   404.       reset_loader_usage(0);
-   405.    end load_a_program;
-   406.
-   407.    -- TR0 is the hardware bootstrap device for reading initial orders.
-   408.    procedure boot_the_KDF9 (program_file_name : in String) is
-   409.       boot_descriptor : constant KDF9.Q_register := (C => TR0.number, I => 0, M => 8);
-   410.    begin
-   411.       loading_was_successful := False;
-   412.       reattach(0, program_file_name);
-   413.
-   414.       -- The bootstrap is 9 words of instruction code, which reads in the rest of its file.
-   415.       -- The validity of the bootstrap descriptor is hardware defined.
-   416.       read_KDF9_tape_code(TR0.all, boot_descriptor, loading_code => True);
-   417.
-   418.       -- Reset the I/O system for execution of the Director.
-   419.       clear_IOC_FIFO;
-   420.       reset_loader_usage(0);
-   421.       loading_was_successful := True;
-   422.    end boot_the_KDF9;
-   423.
-   424. end IOC.slow.shift.TR;
+   380.       -- Set up the rest of the stored image.
+   381.
+   382.       -- Set the (virtual) date in E7.
+   383.       store_word(todays_date_28n_years_ago, 7);
+   384.
+   385.       -- Ensure valid parameters in E1 (some binaries may have invalid entries).
+   386.       if fetch_halfword(1, 0) > threshold or else fetch_halfword(1, 0) = 0 then
+   387.          store_halfword(substitute, 1, 0);
+   388.       end if;
+   389.       if fetch_halfword(1, 1) > threshold or else fetch_halfword(1, 1) = 0 then
+   390.          store_halfword(substitute, 1, 1);
+   391.       end if;
+   392.
+   393.       -- Do not set the time if we are computing a signature, so as to get a repeatable hash.
+   394.       if not the_signature_is_enabled then
+   395.          KDF9.TSD.timing.set_the_time_of_loading(the_time_of_day);
+   396.       end if;
+   397.
+   398.       loading_was_successful := True;
+   399.
+   400.       -- Clear up the I/O system.
+   401.       reattach(0, "TR0");
+   402.       clear_IOC_FIFO;
+   403.       reset_loader_usage(0);
+   404.    end load_a_program;
+   405.
+   406.    -- This emulates action of a Director call program, including:
+   407.    --    1. Moving the JP0 order from E0U to E2U.
+   408.    --    2. Inserting the interrupt handling code into E0 and E1, and
+   409.    --    3. setting NIA to (4, 0) instead of (0, 0).
+   410.    procedure load_a_bare_Director (program_file_name : in String) is
+   411.
+   412.    begin -- load_a_bare_Director
+   413.       load_a_program(program_file_name);
+   414.       store_halfword(fetch_halfword(0, index => 0), 2, index => 0);
+   415.       store_word(8#3620716437675016#, 0); -- #171 #016 #164 #177 #172 #016: Q0; SHL+63; =+Q0;
+   416.       store_word(8#6114000037240052#, 1); -- #304 #300 #000 #175 #100 #052: SETB140000;; =K1; ERASE
+   417.       set_NIA_to((4, 0));
+   418.    end load_a_bare_Director;
+   419.
+   420.    -- TR0 is the hardware bootstrap device for reading initial orders.
+   421.    procedure boot_the_KDF9 (program_file_name : in String) is
+   422.       boot_descriptor : constant KDF9.Q_register := (C => TR0.number, I => 0, M => 8);
+   423.    begin
+   424.       loading_was_successful := False;
+   425.       reattach(0, program_file_name);
+   426.
+   427.       -- The bootstrap is 9 words of instruction code, which reads in the rest of its file.
+   428.       -- The validity of the bootstrap descriptor is hardware defined.
+   429.       read_KDF9_tape_code(TR0.all, boot_descriptor, loading_code => True);
+   430.
+   431.       -- Reset the I/O system for execution of the Director.
+   432.       clear_IOC_FIFO;
+   433.       reset_loader_usage(0);
+   434.       loading_was_successful := True;
+   435.    end boot_the_KDF9;
+   436.
+   437. end IOC.slow.shift.TR;
 
 Compiling: ../Source/ioc-slow-shift-tr.ads
-Source file time stamp: 2021-02-15 01:13:04
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4018,44 +4037,50 @@ Compiled at: 2021-02-21 15:54:05
     85.    -- Read a binary program.
     86.    procedure load_a_program (program_file_name : in String);
     87.
-    88.    -- Set the character code to be used by the TR unit.
-    89.    procedure set_unit_code(unit : in Natural; is_transcribing : in Boolean);
-    90.
-    91. private
-    92.
-    93.    type device is new IOC.slow.shift.device with null record;
-    94.
-    95.    overriding
-    96.    procedure Initialize (the_TR : in out TR.device);
-    97.
-    98.    overriding
-    99.    procedure Finalize (the_TR : in out TR.device);
+    88.    -- This emulates action of a Director call program, including:
+    89.    --    1. Moving the JP0 order from E0U to E2U.
+    90.    --    2. Inserting the interrupt handling code into E0 and E1, and
+    91.    --    3. setting NIA to (4, 0) instead of (0, 0).
+    92.    procedure load_a_bare_Director (program_file_name : in String);
+    93.
+    94.    -- Set the character code to be used by the TR unit.
+    95.    procedure set_unit_code(unit : in Natural; is_transcribing : in Boolean);
+    96.
+    97. private
+    98.
+    99.    type device is new IOC.slow.shift.device with null record;
    100.
    101.    overriding
-   102.    function kind (the_TR : TR.device)
-   103.    return IOC.device_kind
-   104.    is (TR_kind);
-   105.
-   106.    overriding
-   107.    function quantum (the_TR : TR.device)
-   108.    return KDF9.us
-   109.    is (1_000);
-   110.
-   111. end IOC.slow.shift.TR;
+   102.    procedure Initialize (the_TR : in out TR.device);
+   103.
+   104.    overriding
+   105.    procedure Finalize (the_TR : in out TR.device);
+   106.
+   107.    overriding
+   108.    function kind (the_TR : TR.device)
+   109.    return IOC.device_kind
+   110.    is (TR_kind);
+   111.
+   112.    overriding
+   113.    function quantum (the_TR : TR.device)
+   114.    return KDF9.us
+   115.    is (1_000);
+   116.
+   117. end IOC.slow.shift.TR;
 
- 424 lines: No errors
+ 437 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/say_goodbye.adb
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- Finalize emulation with a helpful message derived from exception information.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4130,12 +4155,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/settings.adb
-Source file time stamp: 2021-02-21 12:55:54
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-07 01:30:39
+Compiled at: 2021-04-10 15:59:19
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4177,1010 +4202,1030 @@ Compiled at: 2021-02-21 15:54:05
     42.
     43. package body settings is
     44.
-    45.    function is_invalid_miscellany_flag (option : in Character)
-    46.    return Boolean is
-    47.    begin
-    48.       for f of miscellany_flags loop
-    49.          if f = option then
-    50.             return False;
-    51.          end if;
-    52.       end loop;
-    53.       if option = '-' then  -- Ignore hyphens to make the calling scripts easier.
-    54.          return False;
-    55.       end if;
-    56.       return True;
-    57.    end is_invalid_miscellany_flag;
-    58.
-    59.    procedure set_this_miscellany_flag (option : in Character) is
-    60.       use IOC.equipment;
-    61.    begin
-    62.       if is_invalid_miscellany_flag(option) then
-    63.          log_line(
-    64.                   "***** Error in a miscellany specification: '"
-    65.                 & option
-    66.                 & "'."
-    67.                  );
-    68.          return;
-    69.       end if;
-    70.       case option is
-    71.          when '-'        =>
-    72.             null;  -- Ignore hyphens, to make the calling scripts easier.
-    73.          when '.'        =>
-    74.             time_limit := 1_000_000;
-    75.          when '0' .. '9' =>
-    76.             time_limit := (Character'Pos(option) - Character'Pos('0') + 1) * 100_000_000;
-    77.          when 'a' | 'A' =>
-    78.             API_logging_is_wanted := False;
-    79.          when 'b' | 'B' =>
-    80.             choice(KDF9.buffer_number'(15)) := SI;
-    81.          when 'd' | 'D' =>
-    82.             debugging_is_enabled := True;
-    83.          when 'e' | 'E' =>
-    84.             the_log_is_wanted := False;
-    85.          when 'f' | 'F' =>
-    86.             the_final_state_is_wanted := False;
-    87.          when 'g' | 'G' =>
-    88.             choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
-    89.          when 'h' | 'H' =>
-    90.             any_histogram_is_wanted := False;
-    91.          when 'i' | 'I' =>
-    92.             interrupt_tracing_is_wanted := False;
-    93.          when 'k' | 'K' =>
-    94.             choice(DR0_default) := DR;
-    95.          when 'm' | 'M' =>
-    96.             the_terminal_is_ANSI_compatible := False;
-    97.          when 'n' | 'N' =>
-    98.             noninteractive_usage_is_enabled := True;
-    99.             time_limit := offline_time_limit;
-   100.           when 'o' |'O' =>
-   101.             pre_overlay_state_is_enabled := True;
-   102.          when 'p' |'P' =>
-   103.             peripheral_tracing_is_wanted := False;
-   104.          when 'q' | 'Q' =>
-   105.             do_not_execute := True;
-   106.          when 'r' | 'R' =>
-   107.             retrospective_tracing_is_wanted := False;
-   108.          when 's' | 'S' =>
-   109.             the_signature_is_wanted := False;
-   110.          when 't' | 'T' =>
-   111.             authentic_timing_is_enabled := True;
-   112.          when 'w' | 'W' =>
-   113.             flexowriter_output_is_wanted := False;
-   114.          when 'x' | 'X' =>
-   115.             only_signature_tracing := True;
-   116.          when 'z' | 'Z' =>
-   117.             the_log_is_wanted := False;
-   118.             debugging_is_enabled := False;
-   119.             API_logging_is_wanted := False;
-   120.             any_histogram_is_wanted := False;
-   121.             the_signature_is_wanted := False;
-   122.             the_final_state_is_wanted := False;
-   123.             interrupt_tracing_is_wanted := False;
-   124.             peripheral_tracing_is_wanted := False;
-   125.             retrospective_tracing_is_wanted := False;
-   126.          when others =>
-   127.             null;
-   128.       end case;
-   129.       set_diagnostic_mode(the_diagnostic_mode);
-   130.    end set_this_miscellany_flag;
-   131.
-   132.    procedure display_execution_modes (for_this_run : in String := "") is
-   133.       needs_comma : Boolean := False;
-   134.
-   135.       procedure append_option (flag : in Boolean; name : in String) is
-   136.       begin
-   137.          if flag then
-   138.             if needs_comma then
-   139.                log(", ");
-   140.             end if;
-   141.             log(name);
-   142.             needs_comma := True;
-   143.          end if;
-   144.       end append_option;
-   145.
-   146.       function description_of (type_of_run, name_of_code : String)
-   147.       return String
-   148.       is (if name_of_code = "" then type_of_run else type_of_run & " " & name_of_code);
-   149.
-   150.    begin -- display_execution_modes
-   151.       if not the_log_is_wanted then return; end if;
-   152.       log_new_line;
-   153.       if for_this_run = "" then
-   154.          log("Resuming the run");
-   155.       else
-   156.          log(
-   157.              case the_execution_mode is
-   158.                when boot_mode         => "Booting the KDF9 " & description_of("Director", for_this_run),
-   159.                when program_mode      => "Running the KDF9 " & description_of("problem program", for_this_run),
-   160.                when test_program_mode => "Running the KDF9 " & description_of("privileged program", for_this_run)
-   161.             );
-   162.       end if;
-   163.       log(" in ");
-   164.       log(
-   165.           case the_diagnostic_mode is
-   166.              when trace_mode    =>
-   167.                 (if the_external_trace_is_enabled then "external trace mode" else "trace mode"),
-   168.              when fast_mode     => "fast mode",
-   169.              when pause_mode    => "pause mode",
-   170.              when external_mode => "external trace mode"
-   171.          );
-   172.       if the_histogram_is_enabled           or else
-   173.          the_interrupt_trace_is_enabled     or else
-   174.          the_peripheral_trace_is_enabled    or else
-   175.          the_retrospective_trace_is_enabled or else
-   176.          the_signature_is_enabled           or else
-   177.          the_external_trace_is_enabled      or else
-   178.          authentic_timing_is_enabled        or else
-   179.          debugging_is_enabled               or else
-   180.          noninteractive_usage_is_enabled       then
-   181.
-   182.          log_line(", with option(s):");
-   183.          log("   ");
-   184.          append_option(authentic_timing_is_enabled,        "authentic timing");
-   185.          append_option(debugging_is_enabled,               "debugging output");
-   186.          append_option(the_histogram_is_enabled,           "histogram(s)");
-   187.          append_option(the_interrupt_trace_is_enabled,     "interrupt trace");
-   188.          append_option(noninteractive_usage_is_enabled,    "noninteractive");
-   189.          append_option(the_peripheral_trace_is_enabled,    "peripheral trace");
-   190.          append_option(the_retrospective_trace_is_enabled, "retro trace");
-   191.          append_option(the_signature_is_enabled,           "signature hash");
-   192.       end if;
-   193.       log_line(".");
-   194.       log_rule;
-   195.    end display_execution_modes;
-   196.
-   197.    procedure quit_if_requested is
-   198.    begin
-   199.       if quit_was_requested then
-   200.          raise quit_request;
-   201.       end if;
-   202.    end quit_if_requested;
-   203.
-   204.    procedure change_diagnostic_mode_if_requested is
-   205.    begin
-   206.       if the_diagnostic_mode_changed then
-   207.          the_diagnostic_mode_changed := False;
-   208.          raise mode_change_request;
-   209.       end if;
-   210.    end change_diagnostic_mode_if_requested;
-   211.
-   212.    procedure set_diagnostic_mode (a_diagnostic_mode : in settings.diagnostic_mode) is
-   213.       the_signature_is_appropriate,
-   214.       the_histogram_is_appropriate,
-   215.       retrospective_tracing_is_appropriate,
-   216.       peripheral_tracing_is_appropriate,
-   217.       interrupt_tracing_is_appropriate : Boolean;
-   218.    begin
-   219.       if a_diagnostic_mode = external_mode then
-   220.          if (the_diagnostic_mode /= external_mode) and (not the_external_trace_is_enabled) then
-   221.             open(the_external_trace_file, the_external_trace_file_name);
-   222.          end if;
-   223.          the_diagnostic_mode := trace_mode;
-   224.          the_external_trace_is_enabled := True;
-   225.       else
-   226.          the_diagnostic_mode := a_diagnostic_mode;
+    45.    procedure reset_default_visibility_options is
+    46.    begin
+    47.       API_logging_is_wanted            := True;
+    48.       flexowriter_output_is_wanted     := True;
+    49.       histogramming_is_wanted          := True;
+    50.       interrupt_tracing_is_wanted      := True;
+    51.       peripheral_tracing_is_wanted     := True;
+    52.       realistic_FW_output_is_wanted    := True;
+    53.       retrospective_tracing_is_wanted  := True;
+    54.       the_final_state_is_wanted        := True;
+    55.       the_log_is_wanted                := True;
+    56.       the_signature_is_wanted          := True;
+    57.       the_terminal_is_ANSI_compatible  := True;
+    58.       authentic_timing_is_enabled      := False;
+    59.       debugging_is_enabled             := False;
+    60.       histogramming_is_enabled         := False;
+    61.       interrupt_tracing_is_enabled     := False;
+    62.       peripheral_tracing_is_enabled    := False;
+    63.       retrospective_tracing_is_enabled := False;
+    64.       the_signature_is_enabled         := False;
+    65.    end reset_default_visibility_options;
+    66.
+    67.    function is_invalid_miscellany_flag (option : in Character)
+    68.    return Boolean is
+    69.    begin
+    70.       for f of miscellany_flags loop
+    71.          if f = option then
+    72.             return False;
+    73.          end if;
+    74.       end loop;
+    75.       if option = '-' then  -- Ignore hyphens to make the calling scripts easier.
+    76.          return False;
+    77.       end if;
+    78.       return True;
+    79.    end is_invalid_miscellany_flag;
+    80.
+    81.    procedure set_this_miscellany_flag (option : in Character) is
+    82.       use IOC.equipment;
+    83.    begin
+    84.       if is_invalid_miscellany_flag(option) then
+    85.          log_line(
+    86.                   "***** Error in a miscellany specification: «"
+    87.                 & option
+    88.                 & "»."
+    89.                  );
+    90.          return;
+    91.       end if;
+    92.       case option is
+    93.          when '-'        =>
+    94.             null;  -- Ignore hyphens, to make the calling scripts easier.
+    95.          when '.'        =>
+    96.             time_limit := 1_000_000;
+    97.          when '0' .. '9' =>
+    98.             time_limit := (Character'Pos(option) - Character'Pos('0') + 1) * 100_000_000;
+    99.          when 'a' | 'A' =>
+   100.             API_logging_is_wanted := False;
+   101.          when 'b' | 'B' =>
+   102.             choice(KDF9.buffer_number'(15)) := SI;
+   103.          when 'd' | 'D' =>
+   104.             debugging_is_enabled := True;
+   105.          when 'e' | 'E' =>
+   106.             the_log_is_wanted := False;
+   107.          when 'f' | 'F' =>
+   108.             the_final_state_is_wanted := False;
+   109.          when 'g' | 'G' =>
+   110.             choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
+   111.          when 'h' | 'H' =>
+   112.             histogramming_is_wanted := False;
+   113.          when 'i' | 'I' =>
+   114.             interrupt_tracing_is_wanted := False;
+   115.          when 'k' | 'K' =>
+   116.             choice(DR0_default) := DR;
+   117.          when 'm' | 'M' =>
+   118.             the_terminal_is_ANSI_compatible := False;
+   119.          when 'n' | 'N' =>
+   120.             noninteractive_usage_is_enabled := True;
+   121.             time_limit := offline_time_limit;
+   122.           when 'o' |'O' =>
+   123.             pre_overlay_state_is_enabled := True;
+   124.          when 'p' |'P' =>
+   125.             peripheral_tracing_is_wanted := False;
+   126.          when 'q' | 'Q' =>
+   127.             do_not_execute := True;
+   128.          when 'r' | 'R' =>
+   129.             retrospective_tracing_is_wanted := False;
+   130.          when 's' | 'S' =>
+   131.             the_signature_is_wanted := False;
+   132.          when 't' | 'T' =>
+   133.             authentic_timing_is_enabled := True;
+   134.          when 'w' | 'W' =>
+   135.             flexowriter_output_is_wanted := False;
+   136.          when 'x' | 'X' =>
+   137.             only_signature_tracing := True;
+   138.          when 'y' | 'Y' =>
+   139.             this_is_a_bare_Director := True;
+   140.          when 'z' | 'Z' =>
+   141.             API_logging_is_wanted           := False;
+   142.             debugging_is_enabled            := False;
+   143.             histogramming_is_wanted         := False;
+   144.             interrupt_tracing_is_wanted     := False;
+   145.             peripheral_tracing_is_wanted    := False;
+   146.             retrospective_tracing_is_wanted := False;
+   147.             the_final_state_is_wanted       := False;
+   148.             the_log_is_wanted               := False;
+   149.             the_signature_is_wanted         := False;
+   150.          when others =>
+   151.             null;
+   152.       end case;
+   153.       set_diagnostic_mode(the_diagnostic_mode);
+   154.    end set_this_miscellany_flag;
+   155.
+   156.    procedure display_execution_modes (for_this : in String := "") is
+   157.       needs_comma : Boolean := False;
+   158.
+   159.       procedure append_option (flag : in Boolean; name : in String) is
+   160.       begin
+   161.          if flag then
+   162.             if needs_comma then
+   163.                log(", ");
+   164.             end if;
+   165.             log(name);
+   166.             needs_comma := True;
+   167.          end if;
+   168.       end append_option;
+   169.
+   170.       function run_type (type_of_run : String)
+   171.       return String
+   172.       is (if for_this = "" then type_of_run else type_of_run & " " & for_this);
+   173.
+   174.    begin -- display_execution_modes
+   175.       if not the_log_is_wanted then return; end if;
+   176.       log_new_line;
+   177.       if for_this = "" then
+   178.          log("Resuming the run");
+   179.       else
+   180.          log(
+   181.              case the_execution_mode is
+   182.                when boot_mode        => (if this_is_a_bare_Director then
+   183.                                             "Running the bare " & run_type("Director")
+   184.                                          else
+   185.                                             "Booting the KDF9 " & run_type("Director")
+   186.                                         ),
+   187.                when program_mode     => "Running the KDF9 " & run_type("problem program"),
+   188.                when privileged_mode  => "Running the KDF9 " & run_type("privileged program")
+   189.             );
+   190.       end if;
+   191.       log(" in ");
+   192.       log(
+   193.           case the_diagnostic_mode is
+   194.              when trace_mode    =>
+   195.                 (if the_external_trace_is_enabled then "external trace mode" else "trace mode"),
+   196.              when fast_mode     => "fast mode",
+   197.              when pause_mode    => "pause mode",
+   198.              when external_mode => "external trace mode"
+   199.          );
+   200.       if the_diagnostic_mode = fast_mode then
+   201.          log_line(".");
+   202.          log_rule;
+   203.          return;
+   204.       end if;
+   205.
+   206.       if authentic_timing_is_enabled      or else
+   207.          debugging_is_enabled             or else
+   208.          histogramming_is_enabled         or else
+   209.          interrupt_tracing_is_enabled     or else
+   210.          noninteractive_usage_is_enabled  or else
+   211.          peripheral_tracing_is_enabled    or else
+   212.          retrospective_tracing_is_enabled or else
+   213.          the_external_trace_is_enabled    or else
+   214.          the_signature_is_enabled            then
+   215.
+   216.          log_line(", with option(s):");
+   217.          log("   ");
+   218.          append_option(authentic_timing_is_enabled,      "authentic timing");
+   219.          append_option(debugging_is_enabled,             "debugging output");
+   220.          append_option(histogramming_is_enabled,         "histogram(s)");
+   221.          append_option(interrupt_tracing_is_enabled,     "interrupt trace");
+   222.          append_option(noninteractive_usage_is_enabled,  "noninteractive");
+   223.          append_option(peripheral_tracing_is_enabled,    "peripheral trace");
+   224.          append_option(retrospective_tracing_is_enabled, "retro trace");
+   225.          append_option(the_external_trace_is_enabled,    "external trace");
+   226.          append_option(the_signature_is_enabled,         "signature hash");
    227.       end if;
-   228.       case a_diagnostic_mode is
-   229.          when fast_mode =>
-   230.             debugging_is_enabled := False;
-   231.             the_signature_is_appropriate := False;
-   232.             the_histogram_is_appropriate := False;
-   233.             retrospective_tracing_is_appropriate := False;
-   234.             peripheral_tracing_is_appropriate := False;
-   235.             interrupt_tracing_is_appropriate := False;
-   236.          when trace_mode | external_mode | pause_mode =>
-   237.             the_signature_is_appropriate := True;
-   238.             the_histogram_is_appropriate := True;
-   239.             retrospective_tracing_is_appropriate := True;
-   240.             peripheral_tracing_is_appropriate := True;
-   241.             interrupt_tracing_is_appropriate := (the_execution_mode = boot_mode);
-   242.       end case;
-   243.       the_signature_is_enabled :=
-   244.          the_signature_is_wanted and the_signature_is_appropriate;
-   245.       the_histogram_is_enabled :=
-   246.          any_histogram_is_wanted and the_histogram_is_appropriate;
-   247.       the_retrospective_trace_is_enabled :=
-   248.          retrospective_tracing_is_wanted and retrospective_tracing_is_appropriate;
-   249.       the_peripheral_trace_is_enabled :=
-   250.          peripheral_tracing_is_wanted and peripheral_tracing_is_appropriate;
-   251.       the_interrupt_trace_is_enabled :=
-   252.          interrupt_tracing_is_wanted and interrupt_tracing_is_appropriate;
-   253.    end set_diagnostic_mode;
-   254.
-   255.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode) is
-   256.    begin
-   257.       the_execution_mode := an_execution_mode;
-   258.    end set_execution_mode;
-   259.
-   260.    package diagnostic_mode_IO   is new Ada.Text_IO.Enumeration_IO(settings.diagnostic_mode);
-   261.
-   262.    package execution_mode_IO    is new Ada.Text_IO.Enumeration_IO(settings.execution_mode);
-   263.
-   264.    package authenticity_mode_IO is new Ada.Text_IO.Enumeration_IO(KDF9.authenticity_mode);
-   265.
-   266.    package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.kind);
-   267.
-   268.    procedure get_settings_from_file (version : in String) is
-   269.
-   270.       the_settings_file_name : constant String := "settings_" & version & ".txt";
-   271.       counts_are_set : Boolean := False;
-   272.       settings_file  : File_Type;
-   273.       flag           : Character;
-   274.
-   275.       procedure set_the_miscellany_flags is
-   276.          option : Character;
-   277.       begin
-   278.          loop
-   279.             get(settings_file, option);
-   280.             if is_invalid_miscellany_flag(option) then
-   281.                raise Data_Error;
-   282.             else
-   283.                set_this_miscellany_flag(option);
-   284.             end if;
-   285.          exit when End_Of_Line(settings_file);
-   286.          end loop;
-   287.       exception
-   288.          when error : others =>
-   289.             if not End_Of_Line(settings_file) then
-   290.                Skip_Line(settings_file);
-   291.             end if;
-   292.             log_new_line;
-   293.             log_line(
-   294.                      "***** Error in a miscellany specification: '"
-   295.                    & option
-   296.                    & "' at "
-   297.                    & Exception_Message(error)
-   298.                     );
-   299.       end set_the_miscellany_flags;
-   300.
-   301.       procedure set_breakpoints is
-   302.          start, end_point : KDF9.order_word_number;
-   303.       begin
-   304.          begin
-   305.             get_word(settings_file, KDF9.word(start));
-   306.          exception
-   307.             when others =>
-   308.                log_new_line;
-   309.                log_line("***** Error in lower address; no breakpoint set.");
-   310.                return;
-   311.          end;
-   312.
-   313.          log_new_line;
-   314.          log_line(
-   315.                   "Lower breakpoint: "
-   316.                 & oct_of(KDF9.syllable_address'(start, 0))
-   317.                 & " ("
-   318.                 & dec_of(KDF9.syllable_address'(start, 0))
-   319.                 & ")",
-   320.                   iff => the_log_is_wanted
-   321.                  );
-   322.          breakpoints(start) := True;
-   323.
-   324.          begin
-   325.             get_word(settings_file, KDF9.word(end_point));
-   326.          exception
-   327.             when Data_Error =>
-   328.                log_line("      No upper address: one breakpoint set.", iff => the_log_is_wanted);
-   329.                set_breakpoints(start, start);
-   330.                return;
-   331.          end;
+   228.       log_line(".");
+   229.       log_rule;
+   230.    end display_execution_modes;
+   231.
+   232.    procedure quit_if_requested is
+   233.    begin
+   234.       if quit_was_requested then
+   235.          raise quit_request;
+   236.       end if;
+   237.    end quit_if_requested;
+   238.
+   239.    procedure change_diagnostic_mode_if_requested is
+   240.    begin
+   241.       if the_diagnostic_mode_changed then
+   242.          the_diagnostic_mode_changed := False;
+   243.          raise mode_change_request;
+   244.       end if;
+   245.    end change_diagnostic_mode_if_requested;
+   246.
+   247.    procedure set_diagnostic_mode (a_diagnostic_mode : in settings.diagnostic_mode) is
+   248.       tracing_is_allowed    : constant Boolean := a_diagnostic_mode /= fast_mode;
+   249.       interrupts_can_happen : constant Boolean := the_execution_mode = boot_mode and tracing_is_allowed;
+   250.    begin
+   251.       if a_diagnostic_mode = external_mode then
+   252.          if (the_diagnostic_mode /= external_mode) and (not the_external_trace_is_enabled) then
+   253.             open(the_external_trace_file, the_external_trace_file_name);
+   254.          end if;
+   255.          the_diagnostic_mode := trace_mode;
+   256.          the_external_trace_is_enabled := True;
+   257.       else
+   258.          the_diagnostic_mode := a_diagnostic_mode;
+   259.       end if;
+   260.       histogramming_is_enabled         := histogramming_is_wanted         and tracing_is_allowed;
+   261.       interrupt_tracing_is_enabled     := interrupt_tracing_is_wanted     and interrupts_can_happen;
+   262.       peripheral_tracing_is_enabled    := peripheral_tracing_is_wanted    and tracing_is_allowed;
+   263.       retrospective_tracing_is_enabled := retrospective_tracing_is_wanted and tracing_is_allowed;
+   264.       the_signature_is_enabled         := the_signature_is_wanted         and tracing_is_allowed;
+   265.    end set_diagnostic_mode;
+   266.
+   267.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode) is
+   268.    begin
+   269.       the_execution_mode := an_execution_mode;
+   270.    end set_execution_mode;
+   271.
+   272.    package diagnostic_mode_IO   is new Ada.Text_IO.Enumeration_IO(settings.diagnostic_mode);
+   273.
+   274.    package execution_mode_IO    is new Ada.Text_IO.Enumeration_IO(settings.execution_mode);
+   275.
+   276.    package authenticity_mode_IO is new Ada.Text_IO.Enumeration_IO(KDF9.authenticity_mode);
+   277.
+   278.    package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.kind);
+   279.
+   280.    procedure get_settings_from_file (version : in String) is
+   281.
+   282.       the_settings_file_name : constant String := "settings_" & version & ".txt";
+   283.       counts_are_set : Boolean := False;
+   284.       settings_file  : File_Type;
+   285.       flag           : Character;
+   286.
+   287.       procedure set_the_miscellany_flags is
+   288.          HT : constant Character := Character'Val(9);
+   289.          c  : Character := ' ';
+   290.       begin
+   291.          skip_to_next_non_blank(settings_file);
+   292.          if End_Of_Line(settings_file) then
+   293.             reset_default_visibility_options;
+   294.             return;
+   295.          end if;
+   296.          loop
+   297.             get(settings_file, c);
+   298.             if is_invalid_miscellany_flag(c) then
+   299.                if c not in  ' ' | HT  then
+   300.                   raise Data_Error;
+   301.                end if;
+   302.             else
+   303.                set_this_miscellany_flag(c);
+   304.             end if;
+   305.          exit when End_Of_Line(settings_file);
+   306.          end loop;
+   307.       exception
+   308.          when Data_Error =>
+   309.             if not End_Of_Line(settings_file) then
+   310.                Skip_Line(settings_file);
+   311.             end if;
+   312.             log_new_line;
+   313.             log_line(
+   314.                      "***** Error in a miscellany specification: "
+   315.                    & (if c = ' ' then "no option was given." else "invalid data «"& c & "».")
+   316.                     );
+   317.       end set_the_miscellany_flags;
+   318.
+   319.       procedure set_breakpoints is
+   320.          start, end_point : KDF9.order_word_number;
+   321.       begin
+   322.          begin
+   323.             get_word(settings_file, KDF9.word(start));
+   324.          exception
+   325.             when others =>
+   326.                log_new_line;
+   327.                log_line("***** Error in lower address; no breakpoint set.");
+   328.                return;
+   329.          end;
+   330.
+   331.          log_new_line;
    332.          log_line(
-   333.                   "Upper breakpoint: "
-   334.                 & oct_of(KDF9.syllable_address'(end_point, 5))
-   335.                 & " (" & dec_of(KDF9.syllable_address'(end_point, 5))
-   336.                 & ")",
-   337.                   iff => the_log_is_wanted
-   338.                  );
-   339.          set_breakpoints(start, end_point);
-   340.       exception
-   341.          when others =>
-   342.             log_line("***** Error setting breakpoints; ignored.");
-   343.       end set_breakpoints;
-   344.
-   345.       procedure set_store_points is
-   346.          start, end_point : KDF9.address;
-   347.       begin
-   348.          begin
-   349.             get_word(settings_file, KDF9.word(start));
-   350.          exception
-   351.             when others =>
-   352.                log_new_line;
-   353.                log_line("***** Error in lower address; no storepoint set.");
-   354.                return;
-   355.          end;
-   356.          log_new_line;
-   357.          log_line(
-   358.                   "Lower storepoint: #"
-   359.                 & oct_of(start)
-   360.                 & " ("
-   361.                 & dec_of(start)
-   362.                 & ")",
-   363.                   iff => the_log_is_wanted
-   364.                  );
-   365.          begin
-   366.             get_word(settings_file, KDF9.word(end_point));
-   367.          exception
-   368.             when Data_Error =>
-   369.                log_line("      No upper address: one storepoint set.", iff => the_log_is_wanted);
-   370.                set_store_points(start, start);
-   371.                return;
-   372.          end;
-   373.          log_line(
-   374.                   "Upper storepoint: #"
-   375.                 & oct_of(end_point)
-   376.                 & " ("
-   377.                 & dec_of(end_point)
-   378.                 & ")",
-   379.                   iff => the_log_is_wanted
-   380.                  );
-   381.          set_store_points(start, end_point);
-   382.       exception
-   383.          when others =>
-   384.             log_line("***** Error setting storepoints; ignored.");
-   385.       end set_store_points;
-   386.
-   387.       procedure set_watchpoints is
-   388.          start, end_point : KDF9.address;
-   389.       begin
-   390.          begin
-   391.             get_word(settings_file, KDF9.word(start));
-   392.          exception
-   393.             when others =>
-   394.                log_new_line;
-   395.                log_line("***** Error in lower address; no watchpoint set.");
-   396.                return;
-   397.          end;
-   398.          log_new_line;
-   399.          log_line(
-   400.                   "Lower watchpoint: #"
-   401.                 & oct_of(start)
-   402.                 & " ("
-   403.                 & dec_of(start)
-   404.                 & ")",
-   405.                   iff => the_log_is_wanted
-   406.                  );
-   407.          begin
-   408.             get_word(settings_file, KDF9.word(end_point));
-   409.          exception
-   410.             when Data_Error =>
-   411.                log_line("      No upper address: one watchpoint set.", iff => the_log_is_wanted);
-   412.                set_store_points(start, start);
-   413.                set_fetch_points(start, start);
+   333.                   "Lower breakpoint: "
+   334.                 & oct_of(KDF9.syllable_address'(start, 0))
+   335.                 & " ("
+   336.                 & dec_of(KDF9.syllable_address'(start, 0))
+   337.                 & ")",
+   338.                   iff => the_log_is_wanted
+   339.                  );
+   340.          breakpoints(start) := True;
+   341.
+   342.          begin
+   343.             get_word(settings_file, KDF9.word(end_point));
+   344.          exception
+   345.             when Data_Error =>
+   346.                log_line("      No upper address: one breakpoint set.", iff => the_log_is_wanted);
+   347.                set_breakpoints(start, start);
+   348.                return;
+   349.          end;
+   350.          log_line(
+   351.                   "Upper breakpoint: "
+   352.                 & oct_of(KDF9.syllable_address'(end_point, 5))
+   353.                 & " (" & dec_of(KDF9.syllable_address'(end_point, 5))
+   354.                 & ")",
+   355.                   iff => the_log_is_wanted
+   356.                  );
+   357.          set_breakpoints(start, end_point);
+   358.       exception
+   359.          when others =>
+   360.             log_line("***** Error setting breakpoints; ignored.");
+   361.       end set_breakpoints;
+   362.
+   363.       procedure set_store_points is
+   364.          start, end_point : KDF9.address;
+   365.       begin
+   366.          begin
+   367.             get_word(settings_file, KDF9.word(start));
+   368.          exception
+   369.             when others =>
+   370.                log_new_line;
+   371.                log_line("***** Error in lower address; no storepoint set.");
+   372.                return;
+   373.          end;
+   374.          log_new_line;
+   375.          log_line(
+   376.                   "Lower storepoint: #"
+   377.                 & oct_of(start)
+   378.                 & " ("
+   379.                 & dec_of(start)
+   380.                 & ")",
+   381.                   iff => the_log_is_wanted
+   382.                  );
+   383.          begin
+   384.             get_word(settings_file, KDF9.word(end_point));
+   385.          exception
+   386.             when Data_Error =>
+   387.                log_line("      No upper address: one storepoint set.", iff => the_log_is_wanted);
+   388.                set_store_points(start, start);
+   389.                return;
+   390.          end;
+   391.          log_line(
+   392.                   "Upper storepoint: #"
+   393.                 & oct_of(end_point)
+   394.                 & " ("
+   395.                 & dec_of(end_point)
+   396.                 & ")",
+   397.                   iff => the_log_is_wanted
+   398.                  );
+   399.          set_store_points(start, end_point);
+   400.       exception
+   401.          when others =>
+   402.             log_line("***** Error setting storepoints; ignored.");
+   403.       end set_store_points;
+   404.
+   405.       procedure set_watchpoints is
+   406.          start, end_point : KDF9.address;
+   407.       begin
+   408.          begin
+   409.             get_word(settings_file, KDF9.word(start));
+   410.          exception
+   411.             when others =>
+   412.                log_new_line;
+   413.                log_line("***** Error in lower address; no watchpoint set.");
    414.                return;
    415.          end;
-   416.          log_line("Upper watchpoint: #" & oct_of(end_point) & " (" & dec_of(end_point) & ")",
-   417.                   iff => the_log_is_wanted);
-   418.          set_fetch_points(start, end_point);
-   419.          set_store_points(start, end_point);
-   420.       exception
-   421.          when others =>
-   422.             log_line("***** Error setting watchpoints; ignored.");
-   423.       end set_watchpoints;
-   424.
-   425.       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
-   426.          use dumping.flag_support;
-   427.          epoch_flag   : constant Character := (if epoch = initial_flag then 'I' else 'F');
-   428.          format       : dumping.format_set := no_dumping_flags or epoch;
-   429.          first_address,
-   430.          last_address : KDF9.address := 0;
-   431.          bad_range    : Boolean := False;
-   432.          data         : KDF9.word;
-   433.          c            : Character;
-   434.          OK           : Boolean;
-   435.       begin
-   436.          log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
-   437.          while not End_Of_Line(settings_file) loop
-   438.             get(settings_file, c);
-   439.             log(c, iff => the_log_is_wanted);
-   440.          exit when c = ' ';
-   441.             if is_parameter_flag/dumping_flag(to_upper(c)) then
-   442.                format := format or dumping_flag(to_upper(c));
-   443.             else
-   444.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   445.                log_new_line;
-   446.                log_line("***** Error: '" & c & "' is not a valid dump type.");
-   447.                return;
-   448.             end if;
-   449.          end loop;
-   450.          log_new_line;
-   451.          if (format and is_parameter_flag) /= no_dumping_flags then
-   452.             get_word(settings_file, data);
-   453.             if data > max_address                     or else
-   454.                   (format/Usercode_flag and data > 8191) then
-   455.                log_line(
-   456.                         "***** Error: Lower dump address  = #"
-   457.                       & oct_of(data)
-   458.                       & " =" & data'Image
-   459.                       & " is too large for this option."
-   460.                        );
-   461.                bad_range := True;
-   462.             else
-   463.                first_address := KDF9.address(data);
-   464.                last_address  := KDF9.address(data);
-   465.                log_line(
-   466.                         "      Lower dump address: #"
-   467.                       & oct_of(first_address)
-   468.                       & " (" & dec_of(first_address)
-   469.                       & ")",
-   470.                         iff => the_log_is_wanted
-   471.                        );
-   472.             end if;
-   473.
-   474.            skip_to_next_non_blank (settings_file);
-   475.
-   476.             if not end_of_line(settings_file) then
-   477.                get_word(settings_file, data);
-   478.                if data > max_address                     or else
-   479.                   (format/Usercode_flag and data > 8191) then
-   480.                   log_line(
-   481.                            "***** Error: Upper dump address: #"
-   482.                          & oct_of(data)
-   483.                          & " =" & data'Image
-   484.                          & " is too large for this option."
-   485.                           );
-   486.                   bad_range := True;
-   487.                else
-   488.                   last_address := KDF9.address(data);
-   489.                   log_line(
-   490.                            "      Upper dump address: #"
-   491.                          & oct_of(last_address)
-   492.                          & " ("
-   493.                          & dec_of(last_address)
-   494.                          & ")",
-   495.                            iff => the_log_is_wanted
-   496.                           );
-   497.                end if;
-   498.             end if;
-   499.
-   500.             if first_address > last_address then
-   501.                log_line(
-   502.                         "***** Error: Upper dump address: #"
-   503.                       & oct_of(last_address)
-   504.                       & " =" & last_address'Image
-   505.                       & " is less than lower dump address: #"
-   506.                       & oct_of(first_address)
-   507.                       & " =" & first_address'Image
-   508.                       & "."
-   509.                        );
-   510.                bad_range := True;
-   511.             end if;
-   512.
-   513.             if format/Usercode_flag then
-   514.               if not end_of_line(settings_file) then
-   515.                   get_word(settings_file, data);
-   516.                   if data > 8190 then
-   517.                      log_line(
-   518.                               "***** Error: Scan start address: #"
-   519.                             & oct_of(data)
-   520.                             & " ="
-   521.                             & data'Image
-   522.                             & " > 8190, ignored."
-   523.                              );
-   524.                   else
-   525.                      nominated_address := KDF9.order_word_number(data);
-   526.                      log_line(
-   527.                               "      Scan start address: #"
-   528.                             & oct_of(nominated_address)
-   529.                             & " ("
-   530.                             & dec_of(nominated_address)
-   531.                             & ")",
-   532.                               iff => the_log_is_wanted
-   533.                              );
-   534.                   end if;
-   535.                end if;
-   536.             end if;
-   537.
-   538.          end if;
-   539.
-   540.          if not bad_range then
-   541.             request_a_dumping_area(format, first_address, last_address, OK);
-   542.             if not OK then
-   543.                log_line("***** Error: Too many dump specifications (ignored).");
-   544.             end if;
-   545.          end if;
-   546.
-   547.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   548.       exception
-   549.          when others =>
-   550.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   551.             log_new_line;
-   552.             log_line("***** Error in a dump area specification (ignored)." );
-   553.       end set_specified_dumping_ranges;
-   554.
-   555.       procedure set_initial_dumping_ranges is
-   556.       begin
-   557.          set_specified_dumping_ranges(initial_flag);
-   558.       end set_initial_dumping_ranges;
-   559.
-   560.       procedure set_final_dumping_ranges is
-   561.       begin
-   562.          set_specified_dumping_ranges(final_flag);
-   563.       end set_final_dumping_ranges;
+   416.          log_new_line;
+   417.          log_line(
+   418.                   "Lower watchpoint: #"
+   419.                 & oct_of(start)
+   420.                 & " ("
+   421.                 & dec_of(start)
+   422.                 & ")",
+   423.                   iff => the_log_is_wanted
+   424.                  );
+   425.          begin
+   426.             get_word(settings_file, KDF9.word(end_point));
+   427.          exception
+   428.             when Data_Error =>
+   429.                log_line("      No upper address: one watchpoint set.", iff => the_log_is_wanted);
+   430.                set_store_points(start, start);
+   431.                set_fetch_points(start, start);
+   432.                return;
+   433.          end;
+   434.          log_line("Upper watchpoint: #" & oct_of(end_point) & " (" & dec_of(end_point) & ")",
+   435.                   iff => the_log_is_wanted);
+   436.          set_fetch_points(start, end_point);
+   437.          set_store_points(start, end_point);
+   438.       exception
+   439.          when others =>
+   440.             log_line("***** Error setting watchpoints; ignored.");
+   441.       end set_watchpoints;
+   442.
+   443.       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
+   444.          use dumping.flag_support;
+   445.          epoch_flag   : constant Character := (if epoch = initial_flag then 'I' else 'F');
+   446.          format       : dumping.format_set := no_dumping_flags or epoch;
+   447.          first_address,
+   448.          last_address : KDF9.address := 0;
+   449.          bad_range    : Boolean := False;
+   450.          data         : KDF9.word;
+   451.          c            : Character;
+   452.          OK           : Boolean;
+   453.       begin
+   454.          log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
+   455.          while not End_Of_Line(settings_file) loop
+   456.             get(settings_file, c);
+   457.             log(c, iff => the_log_is_wanted);
+   458.          exit when c = ' ';
+   459.             if is_parameter_flag/dumping_flag(to_upper(c)) then
+   460.                format := format or dumping_flag(to_upper(c));
+   461.             else
+   462.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   463.                log_new_line;
+   464.                log_line("***** Error: «"& c & "» is not a valid dump type.");
+   465.                return;
+   466.             end if;
+   467.          end loop;
+   468.          log_new_line;
+   469.          if (format and is_parameter_flag) /= no_dumping_flags then
+   470.             get_word(settings_file, data);
+   471.             if data > max_address                     or else
+   472.                   (format/Usercode_flag and data > 8191) then
+   473.                log_line(
+   474.                         "***** Error: Lower dump address  = #"
+   475.                       & oct_of(data)
+   476.                       & " =" & data'Image
+   477.                       & " is too large for this option."
+   478.                        );
+   479.                bad_range := True;
+   480.             else
+   481.                first_address := KDF9.address(data);
+   482.                last_address  := KDF9.address(data);
+   483.                log_line(
+   484.                         "      Lower dump address: #"
+   485.                       & oct_of(first_address)
+   486.                       & " (" & dec_of(first_address)
+   487.                       & ")",
+   488.                         iff => the_log_is_wanted
+   489.                        );
+   490.             end if;
+   491.
+   492.            skip_to_next_non_blank (settings_file);
+   493.
+   494.             if not end_of_line(settings_file) then
+   495.                get_word(settings_file, data);
+   496.                if data > max_address                     or else
+   497.                   (format/Usercode_flag and data > 8191) then
+   498.                   log_line(
+   499.                            "***** Error: Upper dump address: #"
+   500.                          & oct_of(data)
+   501.                          & " =" & data'Image
+   502.                          & " is too large for this option."
+   503.                           );
+   504.                   bad_range := True;
+   505.                else
+   506.                   last_address := KDF9.address(data);
+   507.                   log_line(
+   508.                            "      Upper dump address: #"
+   509.                          & oct_of(last_address)
+   510.                          & " ("
+   511.                          & dec_of(last_address)
+   512.                          & ")",
+   513.                            iff => the_log_is_wanted
+   514.                           );
+   515.                end if;
+   516.             end if;
+   517.
+   518.             if first_address > last_address then
+   519.                log_line(
+   520.                         "***** Error: Upper dump address: #"
+   521.                       & oct_of(last_address)
+   522.                       & " =" & last_address'Image
+   523.                       & " is less than lower dump address: #"
+   524.                       & oct_of(first_address)
+   525.                       & " =" & first_address'Image
+   526.                       & "."
+   527.                        );
+   528.                bad_range := True;
+   529.             end if;
+   530.
+   531.             if format/Usercode_flag then
+   532.               if not end_of_line(settings_file) then
+   533.                   get_word(settings_file, data);
+   534.                   if data > 8190 then
+   535.                      log_line(
+   536.                               "***** Error: Scan start address: #"
+   537.                             & oct_of(data)
+   538.                             & " ="
+   539.                             & data'Image
+   540.                             & " > 8190, ignored."
+   541.                              );
+   542.                   else
+   543.                      root_address := KDF9.order_word_number(data);
+   544.                      log_line(
+   545.                               "      Scan start address: #"
+   546.                             & oct_of(root_address)
+   547.                             & " ("
+   548.                             & dec_of(root_address)
+   549.                             & ")",
+   550.                               iff => the_log_is_wanted
+   551.                              );
+   552.                   end if;
+   553.                end if;
+   554.             end if;
+   555.
+   556.          end if;
+   557.
+   558.          if not bad_range then
+   559.             request_a_dumping_area(format, first_address, last_address, OK);
+   560.             if not OK then
+   561.                log_line("***** Error: Too many dump specifications (ignored).");
+   562.             end if;
+   563.          end if;
    564.
-   565.       procedure set_histogram_options is
-   566.          c : Character;
-   567.       begin
-   568.          while not End_Of_Line(settings_file) loop
-   569.             get(settings_file, c);
-   570.          exit when c = ' ';
-   571.             if c not in 'P' | 'p' | 'T' | 't' then
-   572.                raise Data_Error;
-   573.             end if;
-   574.             if c in 'P' | 'p' then
-   575.                the_profile_is_wanted  := True;
-   576.                clear_the_profile;
-   577.             elsif c in  'T' | 't' then
-   578.                the_INS_plot_is_wanted := True;
-   579.                clear_the_histogram;
-   580.             end if;
-   581.          end loop;
-   582.          ensure_not_at_end_of_line(settings_file);
-   583.          get(settings_file, histogram_cutoff);
-   584.          if histogram_cutoff >= 100.0 or histogram_cutoff < 0.0 then
-   585.             raise Data_Error;
-   586.          end if;
-   587.          get(settings_file, c);
-   588.          if c /= '%' then
-   589.             raise Data_Error;
-   590.          end if;
-   591.       exception
-   592.          when others =>
-   593.             histogram_cutoff := cutoff_default;
-   594.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   595.             log_new_line;
-   596.             log_line("***** Error in the histogram option; default used.");
-   597.       end set_histogram_options;
-   598.
-   599.       procedure set_time_limit is
-   600.          begin
-   601.             begin
-   602.             get_decimal(settings_file, KDF9.word(time_limit));
-   603.          exception
-   604.             when others =>
-   605.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   606.                time_limit := offline_time_limit;
-   607.          end;
-   608.
-   609.          if not counts_are_set then
-   610.             high_count := time_limit;
-   611.          end if;
-   612.
-   613.          log_new_line;
-   614.          log_line("Time limit (in instructions) =" & time_limit'Image,
-   615.                   iff => the_log_is_wanted);
-   616.       end set_time_limit;
-   617.
-   618.       procedure set_tracing_counts is
-   619.
-   620.          procedure show_counts is
-   621.          begin
-   622.             if not the_log_is_wanted then return; end if;
-   623.             log_new_line;
-   624.             log_line("Lower tracing count:" & low_count'Image);
-   625.             log_line("Upper tracing count:" & high_count'Image);
-   626.          end show_counts;
-   627.
-   628.       begin
-   629.          get_decimal(settings_file, KDF9.word(low_count));
-   630.          get_decimal(settings_file, KDF9.word(high_count));
-   631.          show_counts;
-   632.          if low_count > high_count then
-   633.             log_new_line;
-   634.             log_line("***** Error: Low count > high count.");
-   635.             raise Data_Error;
-   636.          end if;
-   637.          counts_are_set := True;
-   638.       exception
-   639.          when others =>
-   640.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   641.             low_count  := low_count_default;
-   642.             high_count := high_count_default;
-   643.             log_new_line;
-   644.             log_line("***** Error in a tracing count; defaults used.");
-   645.             show_counts;
-   646.       end set_tracing_counts;
-   647.
-   648.       procedure set_tracing_range is
-   649.
-   650.          procedure show_range is
-   651.          begin
-   652.             if not the_log_is_wanted then return; end if;
-   653.             log_new_line;
-   654.             log_line(
-   655.                      "Lower trace address: #"
-   656.                    & oct_of(KDF9.syllable_address'(low_bound, 0))
-   657.                    & " ("
-   658.                    & dec_of(KDF9.syllable_address'(low_bound, 0))
-   659.                    & ")"
-   660.                     );
-   661.             log_line(
-   662.                      "Upper trace address: #"
-   663.                    & oct_of(KDF9.syllable_address'(high_bound, 5))
-   664.                    & " ("
-   665.                    & dec_of(KDF9.syllable_address'(high_bound, 5))
-   666.                    & ")"
-   667.                     );
-   668.          end show_range;
-   669.
-   670.       begin
-   671.          get_word(settings_file, KDF9.word(low_bound));
-   672.          get_word(settings_file, KDF9.word(high_bound));
-   673.          if low_bound > high_bound then
-   674.             log_new_line;
-   675.             log_line("***** Error: Low bound > high bound.");
-   676.             raise Data_Error;
-   677.          end if;
-   678.          show_range;
-   679.       exception
-   680.          when others =>
-   681.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   682.             low_bound  := low_bound_default;
-   683.             high_bound := high_bound_default;
-   684.             log_new_line;
-   685.             log_line("***** Error in a tracing address; defaults used.");
-   686.             show_range;
-   687.       end set_tracing_range;
-   688.
-   689.       procedure set_diagnostic_mode is
-   690.          use diagnostic_mode_IO;
-   691.          the_diagnostic_mode : settings.diagnostic_mode;
-   692.       begin
-   693.          ensure_not_at_end_of_line(settings_file);
-   694.          get(settings_file, the_diagnostic_mode);
-   695.          set_diagnostic_mode(the_diagnostic_mode);
-   696.       exception
-   697.          when others =>
-   698.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   699.             set_diagnostic_mode(the_diagnostics_default);
-   700.             log_new_line;
-   701.             log_line("***** Error in the diagnostic mode; default used.");
-   702.       end set_diagnostic_mode;
-   703.
-   704.       procedure set_execution_mode is
-   705.          use execution_mode_IO;
-   706.       begin
-   707.          ensure_not_at_end_of_line(settings_file);
-   708.          get(settings_file, the_execution_mode);
-   709.       exception
-   710.          when others =>
-   711.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   712.             the_execution_mode := the_execution_default;
-   713.             log_new_line;
-   714.             log_line("***** Error in the testing mode; default used.");
-   715.       end set_execution_mode;
-   716.
-   717.       procedure set_authenticity is
-   718.          use authenticity_mode_IO;
-   719.       begin
-   720.          ensure_not_at_end_of_line(settings_file);
-   721.          get(settings_file, the_authenticity_mode);
-   722.          if the_authenticity_mode = authentic_time_mode then
-   723.             authentic_timing_is_enabled := True;
-   724.          end if;
-   725.       exception
-   726.          when others =>
-   727.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   728.             the_authenticity_mode := the_authenticity_default;
-   729.             log_new_line;
-   730.             log_line("***** Error in the authenticity mode; default used.");
-   731.       end set_authenticity;
-   732.
-   733.       procedure set_graph_plotting_pen is
-   734.          use postscript;
-   735.          use colour_IO;
-   736.          use  width_IO;
-   737.          the_colour   : pen_colour   := the_default_colour;
-   738.          the_pen_size : pen_tip_size := the_default_tip_size;
-   739.
-   740.          procedure show_pen_options is
-   741.          begin
-   742.             if not the_log_is_wanted then return; end if;
-   743.             log_new_line;
-   744.             if the_colour /= the_default_colour then
-   745.                log_line("The graph plotter pen colour is " & the_colour'Image & ".");
-   746.             end if;
-   747.             if the_pen_size /= the_default_tip_size then
-   748.                log_line("The graph plotter pen tip is " & the_pen_size'Image & ".");
-   749.             end if;
-   750.          end show_pen_options;
-   751.
-   752.          procedure configure_the_plotter is
-   753.          begin
-   754.             if the_colour /= the_default_colour or the_pen_size /= the_default_tip_size then
-   755.                set_the_pen_properties(the_colour, the_pen_size);
-   756.                show_pen_options;
-   757.             end if;
-   758.          end configure_the_plotter;
-   759.
-   760.       begin  -- set_graph_plotting_pen
-   761.          ensure_not_at_end_of_line(settings_file);
-   762.          begin
-   763.             Get(settings_file, the_colour);
-   764.          exception
-   765.             when others =>
-   766.                log_new_line;
-   767.                log_line("***** Error in the plotter pen the_colour; default used.");
-   768.          end;
-   769.          ensure_not_at_end_of_line(settings_file);
-   770.          begin
-   771.             Get(settings_file, the_pen_size);
-   772.          exception
-   773.             when others =>
-   774.                log_new_line;
-   775.                log_line("***** Error in the plotter pen tip; default used.");
-   776.          end;
-   777.          configure_the_plotter;
-   778.       exception
-   779.          when Data_Error =>
-   780.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   781.             configure_the_plotter;
-   782.       end set_graph_plotting_pen;
-   783.
-   784.       procedure set_non_interactivity is
-   785.       begin
-   786.          noninteractive_usage_is_enabled := True;
-   787.          set_time_limit;
-   788.       end set_non_interactivity;
-   789.
-   790.       procedure save_poke_value is
-   791.          -- W: full Word, U: Upper halfword, L: Lower halfword, S: Syllable, C: Character
-   792.          address  : KDF9.address;
-   793.          sub_word : Character;
-   794.          position : KDF9.address;
-   795.          value    : KDF9.word;
-   796.          OK       : Boolean;
-   797.       begin
-   798.          begin
-   799.             get_word(settings_file, KDF9.word(address));
-   800.          exception
-   801.             when others =>
-   802.                log_line("***** Error in poke word address.");
-   803.                Skip_Line(settings_file);
-   804.                return;
-   805.          end;
-   806.
-   807.          get_char(settings_file, sub_word);
-   808.          if sub_word not in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w' then
-   809.             log_line(
-   810.                      "***** Error in (sub)word indicator; "
-   811.                    & sub_word
-   812.                    & " should be W, L, U, S, or C."
-   813.                     );
-   814.             Skip_Line(settings_file);
-   815.             return;
-   816.          end if;
-   817.
-   818.          if sub_word in 'S' | 's' | 'C' | 'c' then
-   819.             begin
-   820.                get_word(settings_file, KDF9.word(position));
-   821.                if (sub_word in 'S' | 's' and position > 5) or else
-   822.                   (sub_word in 'C' | 'c' and position > 7)    then
-   823.                   log_line(
-   824.                            "***** Error in position given for a "
-   825.                          & (if sub_word in 'S' | 's' then "syllable:" else "character:")
-   826.                          & position'Image
-   827.                          & " is too large, poke request ignored."
-   828.                           );
-   829.                   Skip_Line(settings_file);
-   830.                   return;
-   831.                end if;
-   832.             exception
-   833.                when others =>
-   834.                   log_line(
-   835.                            "***** Error in position given for a "
-   836.                          & (if sub_word in 'S' | 's' then "syllable" else "character")
-   837.                          & ", poke request ignored."
-   838.                           );
-   839.                   Skip_Line(settings_file);
-   840.                   return;
-   841.             end;
-   842.          else
-   843.             position := 0;
-   844.          end if;
-   845.
-   846.          begin
-   847.             get_word(settings_file, value);
-   848.          exception
-   849.             when others =>
-   850.                log_line("***** Error in poked value.");
-   851.                Skip_Line(settings_file);
-   852.                return;
-   853.          end;
-   854.
-   855.          if (sub_word in 'L' | 'l' | 'U' | 'u' and value > 2**24-1) or else
-   856.                (sub_word in 'S' | 's'          and value > 255)     or else
-   857.                   (sub_word in 'C' | 'c'       and value > 63)      then
-   858.             log_line(
-   859.                      "***** Error in poked value #"
-   860.                    & oct_of(value)
-   861.                    & ": out of range for a "
-   862.                    & (case sub_word is
-   863.                          when 'L' | 'l' | 'U' | 'u' => "halfword",
-   864.                          when 'S' | 's'             => "syllable",
-   865.                          when 'C' | 'c'             => "character",
-   866.                          when others                => "word")
-   867.                    & ", poke request ignored."
-   868.                     );
-   869.             Skip_Line(settings_file);
-   870.             return;
-   871.          end if;
+   565.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   566.       exception
+   567.          when others =>
+   568.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   569.             log_new_line;
+   570.             log_line("***** Error in a dump area specification (ignored)." );
+   571.       end set_specified_dumping_ranges;
+   572.
+   573.       procedure set_initial_dumping_ranges is
+   574.       begin
+   575.          set_specified_dumping_ranges(initial_flag);
+   576.       end set_initial_dumping_ranges;
+   577.
+   578.       procedure set_final_dumping_ranges is
+   579.       begin
+   580.          set_specified_dumping_ranges(final_flag);
+   581.       end set_final_dumping_ranges;
+   582.
+   583.       procedure set_histogram_options is
+   584.          c : Character;
+   585.       begin
+   586.          while not End_Of_Line(settings_file) loop
+   587.             get(settings_file, c);
+   588.          exit when c = ' ';
+   589.             if c not in 'P' | 'p' | 'T' | 't' then
+   590.                raise Data_Error;
+   591.             end if;
+   592.             if c in 'P' | 'p' then
+   593.                the_profile_is_wanted  := True;
+   594.                clear_the_profile;
+   595.             elsif c in  'T' | 't' then
+   596.                the_INS_plot_is_wanted := True;
+   597.                clear_the_histogram;
+   598.             end if;
+   599.          end loop;
+   600.          ensure_not_at_end_of_line(settings_file);
+   601.          get(settings_file, histogram_cutoff);
+   602.          if histogram_cutoff >= 100.0 or histogram_cutoff < 0.0 then
+   603.             raise Data_Error;
+   604.          end if;
+   605.          get(settings_file, c);
+   606.          if c /= '%' then
+   607.             raise Data_Error;
+   608.          end if;
+   609.       exception
+   610.          when others =>
+   611.             histogram_cutoff := cutoff_default;
+   612.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   613.             log_new_line;
+   614.             log_line("***** Error in the histogram option; default used.");
+   615.       end set_histogram_options;
+   616.
+   617.       procedure set_time_limit is
+   618.          begin
+   619.             begin
+   620.             get_decimal(settings_file, KDF9.word(time_limit));
+   621.          exception
+   622.             when others =>
+   623.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   624.                time_limit := offline_time_limit;
+   625.          end;
+   626.
+   627.          if not counts_are_set then
+   628.             high_count := time_limit;
+   629.          end if;
+   630.
+   631.          log_new_line;
+   632.          log_line("Time limit (in instructions) =" & time_limit'Image,
+   633.                   iff => the_log_is_wanted);
+   634.       end set_time_limit;
+   635.
+   636.       procedure set_tracing_counts is
+   637.
+   638.          procedure show_counts is
+   639.          begin
+   640.             if not the_log_is_wanted then return; end if;
+   641.             log_new_line;
+   642.             log_line("Lower tracing count:" & low_count'Image);
+   643.             log_line("Upper tracing count:" & high_count'Image);
+   644.          end show_counts;
+   645.
+   646.       begin
+   647.          get_decimal(settings_file, KDF9.word(low_count));
+   648.          get_decimal(settings_file, KDF9.word(high_count));
+   649.          show_counts;
+   650.          if low_count > high_count then
+   651.             log_new_line;
+   652.             log_line("***** Error: Low count > high count.");
+   653.             raise Data_Error;
+   654.          end if;
+   655.          counts_are_set := True;
+   656.       exception
+   657.          when others =>
+   658.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   659.             low_count  := low_count_default;
+   660.             high_count := high_count_default;
+   661.             log_new_line;
+   662.             log_line("***** Error in a tracing count; defaults used.");
+   663.             show_counts;
+   664.       end set_tracing_counts;
+   665.
+   666.       procedure set_tracing_range is
+   667.
+   668.          procedure show_range is
+   669.          begin
+   670.             if not the_log_is_wanted then return; end if;
+   671.             log_new_line;
+   672.             log_line(
+   673.                      "Lower trace address: #"
+   674.                    & oct_of(KDF9.syllable_address'(low_bound, 0))
+   675.                    & " ("
+   676.                    & dec_of(KDF9.syllable_address'(low_bound, 0))
+   677.                    & ")"
+   678.                     );
+   679.             log_line(
+   680.                      "Upper trace address: #"
+   681.                    & oct_of(KDF9.syllable_address'(high_bound, 5))
+   682.                    & " ("
+   683.                    & dec_of(KDF9.syllable_address'(high_bound, 5))
+   684.                    & ")"
+   685.                     );
+   686.          end show_range;
+   687.
+   688.       begin
+   689.          get_word(settings_file, KDF9.word(low_bound));
+   690.          get_word(settings_file, KDF9.word(high_bound));
+   691.          if low_bound > high_bound then
+   692.             log_new_line;
+   693.             log_line("***** Error: Low bound > high bound.");
+   694.             raise Data_Error;
+   695.          end if;
+   696.          show_range;
+   697.       exception
+   698.          when others =>
+   699.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   700.             low_bound  := low_bound_default;
+   701.             high_bound := high_bound_default;
+   702.             log_new_line;
+   703.             log_line("***** Error in a tracing address; defaults used.");
+   704.             show_range;
+   705.       end set_tracing_range;
+   706.
+   707.       procedure set_diagnostic_mode is
+   708.          use diagnostic_mode_IO;
+   709.          the_diagnostic_mode : settings.diagnostic_mode;
+   710.       begin
+   711.          ensure_not_at_end_of_line(settings_file);
+   712.          get(settings_file, the_diagnostic_mode);
+   713.          set_diagnostic_mode(the_diagnostic_mode);
+   714.       exception
+   715.          when others =>
+   716.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   717.             set_diagnostic_mode(the_diagnostics_default);
+   718.             log_new_line;
+   719.             log_line("***** Error in the diagnostic mode; default used.");
+   720.       end set_diagnostic_mode;
+   721.
+   722.       procedure set_execution_mode is
+   723.          use execution_mode_IO;
+   724.       begin
+   725.          ensure_not_at_end_of_line(settings_file);
+   726.          get(settings_file, the_execution_mode);
+   727.       exception
+   728.          when others =>
+   729.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   730.             the_execution_mode := the_execution_default;
+   731.             log_new_line;
+   732.             log_line("***** Error in the testing mode; default used.");
+   733.       end set_execution_mode;
+   734.
+   735.       procedure set_authenticity is
+   736.          use authenticity_mode_IO;
+   737.       begin
+   738.          ensure_not_at_end_of_line(settings_file);
+   739.          get(settings_file, the_authenticity_mode);
+   740.          if the_authenticity_mode = authentic_time_mode then
+   741.             authentic_timing_is_enabled := True;
+   742.          end if;
+   743.       exception
+   744.          when others =>
+   745.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   746.             the_authenticity_mode := the_authenticity_default;
+   747.             log_new_line;
+   748.             log_line("***** Error in the authenticity mode; default used.");
+   749.       end set_authenticity;
+   750.
+   751.       procedure set_graph_plotting_pen is
+   752.          use postscript;
+   753.          use colour_IO;
+   754.          use  width_IO;
+   755.          the_colour   : pen_colour   := the_default_colour;
+   756.          the_pen_size : pen_tip_size := the_default_tip_size;
+   757.
+   758.          procedure show_pen_options is
+   759.          begin
+   760.             if not the_log_is_wanted then return; end if;
+   761.             log_new_line;
+   762.             if the_colour /= the_default_colour then
+   763.                log_line("The graph plotter pen colour is " & the_colour'Image & ".");
+   764.             end if;
+   765.             if the_pen_size /= the_default_tip_size then
+   766.                log_line("The graph plotter pen tip is " & the_pen_size'Image & ".");
+   767.             end if;
+   768.          end show_pen_options;
+   769.
+   770.          procedure configure_the_plotter is
+   771.          begin
+   772.             if the_colour /= the_default_colour or the_pen_size /= the_default_tip_size then
+   773.                set_the_pen_properties(the_colour, the_pen_size);
+   774.                show_pen_options;
+   775.             end if;
+   776.          end configure_the_plotter;
+   777.
+   778.       begin  -- set_graph_plotting_pen
+   779.          ensure_not_at_end_of_line(settings_file);
+   780.          begin
+   781.             Get(settings_file, the_colour);
+   782.          exception
+   783.             when others =>
+   784.                log_new_line;
+   785.                log_line("***** Error in the plotter pen the_colour; default used.");
+   786.          end;
+   787.          ensure_not_at_end_of_line(settings_file);
+   788.          begin
+   789.             Get(settings_file, the_pen_size);
+   790.          exception
+   791.             when others =>
+   792.                log_new_line;
+   793.                log_line("***** Error in the plotter pen tip; default used.");
+   794.          end;
+   795.          configure_the_plotter;
+   796.       exception
+   797.          when Data_Error =>
+   798.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   799.             configure_the_plotter;
+   800.       end set_graph_plotting_pen;
+   801.
+   802.       procedure set_non_interactivity is
+   803.       begin
+   804.          noninteractive_usage_is_enabled := True;
+   805.          set_time_limit;
+   806.       end set_non_interactivity;
+   807.
+   808.       procedure save_poke_value is
+   809.          -- W: full Word, U: Upper halfword, L: Lower halfword, S: Syllable, C: Character
+   810.          address  : KDF9.address;
+   811.          sub_word : Character;
+   812.          position : KDF9.address;
+   813.          value    : KDF9.word;
+   814.          OK       : Boolean;
+   815.       begin
+   816.          begin
+   817.             get_word(settings_file, KDF9.word(address));
+   818.          exception
+   819.             when others =>
+   820.                log_line("***** Error in poke word address.");
+   821.                Skip_Line(settings_file);
+   822.                return;
+   823.          end;
+   824.
+   825.          get_char(settings_file, sub_word);
+   826.          if sub_word not in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w' then
+   827.             log_line(
+   828.                      "***** Error in (sub)word indicator; "
+   829.                    & sub_word
+   830.                    & " should be W, L, U, S, or C."
+   831.                     );
+   832.             Skip_Line(settings_file);
+   833.             return;
+   834.          end if;
+   835.
+   836.          if sub_word in 'S' | 's' | 'C' | 'c' then
+   837.             begin
+   838.                get_word(settings_file, KDF9.word(position));
+   839.                if (sub_word in 'S' | 's' and position > 5) or else
+   840.                   (sub_word in 'C' | 'c' and position > 7)    then
+   841.                   log_line(
+   842.                            "***** Error in position given for a "
+   843.                          & (if sub_word in 'S' | 's' then "syllable:" else "character:")
+   844.                          & position'Image
+   845.                          & " is too large, poke request ignored."
+   846.                           );
+   847.                   Skip_Line(settings_file);
+   848.                   return;
+   849.                end if;
+   850.             exception
+   851.                when others =>
+   852.                   log_line(
+   853.                            "***** Error in position given for a "
+   854.                          & (if sub_word in 'S' | 's' then "syllable" else "character")
+   855.                          & ", poke request ignored."
+   856.                           );
+   857.                   Skip_Line(settings_file);
+   858.                   return;
+   859.             end;
+   860.          else
+   861.             position := 0;
+   862.          end if;
+   863.
+   864.          begin
+   865.             get_word(settings_file, value);
+   866.          exception
+   867.             when others =>
+   868.                log_line("***** Error in poked value.");
+   869.                Skip_Line(settings_file);
+   870.                return;
+   871.          end;
    872.
-   873.          add_to_poke_list(address, sub_word, position, value, OK);
-   874.
-   875.          if not OK then
-   876.             log_line("***** Error setting up a poke: poke list full; request ignored.");
-   877.          end if;
-   878.
-   879.       exception
-   880.
-   881.          when others =>
-   882.             null;  -- to skip line at end of input loop
-   883.
-   884.       end save_poke_value;
-   885.
-   886.       procedure set_KDF9_configuration is
-   887.          use equipment_IO;
-   888.          use IOC.equipment;
-   889.          d : IOC.equipment.kind := AD;
-   890.          b : KDF9.buffer_number;
-   891.       begin
-   892.          if version = "1" then
-   893.             for i in IOC.equipment.setup'Range loop
-   894.             exit when end_of_line(settings_file);
-   895.                get_word(settings_file, KDF9.word(b));
-   896.                ensure_not_at_end_of_line(settings_file);
-   897.                get(settings_file, d);
-   898.                IOC.equipment.choice(b) := d;
-   899.             end loop;
-   900.          else
-   901.             log_new_line;
-   902.             log_line("The previous KDF9 configuration is still being used.");
-   903.          end if;
-   904.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   905.       exception
-   906.          when others =>
-   907.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   908.             IOC.equipment.choice := IOC.equipment.default;
-   909.             log_new_line;
-   910.             log_line("***** Error in the device configuration; defaults used.");
-   911.       end set_KDF9_configuration;
-   912.
-   913.    begin -- get_settings_from_file
-   914.
-   915.       do_not_execute := False;
-   916.       high_count := time_limit;
-   917.       open_options_file(settings_file, the_settings_file_name);
-   918.       if End_of_File(settings_file) then
-   919.          raise End_Error;
-   920.       end if;
-   921.
-   922.       loop
-   923.          skip_to_next_nonempty_line(settings_file);
-   924.          get(settings_file, flag);
-   925.          case flag is
-   926.             when 'A' | 'a' =>
-   927.                set_authenticity;
-   928.             when 'B' | 'b' =>
-   929.                set_breakpoints;
-   930.             when 'C' | 'c' =>
-   931.                set_tracing_counts;
-   932.             when 'D' | 'd' =>
-   933.                set_diagnostic_mode;
-   934.             when 'F' | 'f' =>
-   935.                set_final_dumping_ranges;
-   936.             when 'G' | 'g' =>
-   937.                set_graph_plotting_pen;
-   938.             when 'H' | 'h' =>
-   939.                set_histogram_options;
-   940.             when 'I' | 'i' =>
-   941.                set_initial_dumping_ranges;
-   942.             when 'K' | 'k' =>
-   943.                set_KDF9_configuration;
-   944.             when 'L' | 'l' =>
-   945.                set_time_limit;
-   946.             when 'N' | 'n' =>
-   947.                set_non_interactivity;
-   948.                time_limit := offline_time_limit;
-   949.             when 'O' |'o' =>
-   950.                set_this_miscellany_flag(flag);
-   951.             when 'P' | 'p' =>
-   952.                save_poke_value;
-   953.             when 'Q' | 'q' =>
-   954.                do_not_execute := True;
-   955.                raise End_Error;
-   956.             when 'R' | 'r' =>
-   957.                set_tracing_range;
-   958.             when 'S' | 's' =>
-   959.                set_store_points;
-   960.             when 'T' | 't' =>
-   961.                set_execution_mode;
-   962.             when 'V' | 'v' =>
-   963.                set_the_miscellany_flags;
-   964.             when 'W' | 'w' =>
-   965.                set_watchpoints;
-   966.             when 'X' | 'x' =>
-   967.                only_signature_tracing := True;
-   968.             when '-' | '/' =>
-   969.                Skip_Line(settings_file);
-   970.             when others =>
-   971.                log_new_line;
-   972.                log_line(
-   973.                         "Invalid flag: """
-   974.                       & flag
-   975.                       & """ at line/column "
-   976.                       & line_number'Image
-   977.                       & "/"
-   978.                       & Ada.Text_IO.Count'Image(Col(settings_file))
-   979.                       & " of the settings file!"
-   980.                        );
-   981.                log_line(" ...  the valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
-   982.                Skip_Line(settings_file);
-   983.          end case;
-   984.       end loop;
-   985.
-   986.    exception
-   987.
-   988.       when Status_Error =>
-   989.          log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
-   990.          log_new_line;
-   991.
-   992.       when End_Error =>
-   993.          close_options_file(settings_file, the_settings_file_name);
-   994.
-   995.       when Data_Error =>
-   996.          close_options_file(settings_file, the_settings_file_name);
-   997.          log_new_line;
-   998.          log_line("***** Error: invalid data in the settings file.");
-   999.          log_line(
-  1000.                   "Reading of settings abandoned at line "
-  1001.                 & line_number'Image
-  1002.                 & " of "
-  1003.                 & the_settings_file_name
-  1004.                 & "."
-  1005.                  );
-  1006.
-  1007.       when quit_request =>
-  1008.          close_options_file(settings_file, the_settings_file_name);
-  1009.          log_new_line;
-  1010.          log_line(
-  1011.                   "Quit requested at line "
-  1012.                 & line_number'Image
-  1013.                 & " of "
-  1014.                 & the_settings_file_name
-  1015.                 & "."
-  1016.                  );
-  1017.          log_rule;
-  1018.          raise;
-  1019.
-  1020.       when error : others =>
-  1021.          close_options_file(settings_file, the_settings_file_name);
-  1022.          log_new_line;
-  1023.          log_line(
-  1024.                   "Failure in ee9; unexpected exception: "
-  1025.                 & Exception_Information(error)
-  1026.                 & " in get_settings_from_file!"
-  1027.                  );
-  1028.          log_line(
-  1029.                   "Reading of settings abandoned at line "
-  1030.                 & line_number'Image
-  1031.                 & " of "
-  1032.                 & the_settings_file_name
-  1033.                 & "!"
-  1034.                  );
-  1035.          log_rule;
-  1036.          raise;
-  1037.
-  1038.    end get_settings_from_file;
+   873.          if (sub_word in 'L' | 'l' | 'U' | 'u' and value > 2**24-1) or else
+   874.                (sub_word in 'S' | 's'          and value > 255)     or else
+   875.                   (sub_word in 'C' | 'c'       and value > 63)      then
+   876.             log_line(
+   877.                      "***** Error in poked value #"
+   878.                    & oct_of(value)
+   879.                    & ": out of range for a "
+   880.                    & (case sub_word is
+   881.                          when 'L' | 'l' | 'U' | 'u' => "halfword",
+   882.                          when 'S' | 's'             => "syllable",
+   883.                          when 'C' | 'c'             => "character",
+   884.                          when others                => "word")
+   885.                    & ", poke request ignored."
+   886.                     );
+   887.             Skip_Line(settings_file);
+   888.             return;
+   889.          end if;
+   890.
+   891.          add_to_poke_list(address, sub_word, position, value, OK);
+   892.
+   893.          if not OK then
+   894.             log_line("***** Error setting up a poke: poke list full; request ignored.");
+   895.          end if;
+   896.
+   897.       exception
+   898.
+   899.          when others =>
+   900.             null;  -- to skip line at end of input loop
+   901.
+   902.       end save_poke_value;
+   903.
+   904.       procedure set_KDF9_configuration is
+   905.          use equipment_IO;
+   906.          use IOC.equipment;
+   907.          d : IOC.equipment.kind := AD;
+   908.          b : KDF9.buffer_number;
+   909.       begin
+   910.          if version = "1" then
+   911.             for i in IOC.equipment.setup'Range loop
+   912.             exit when end_of_line(settings_file);
+   913.                get_word(settings_file, KDF9.word(b));
+   914.                ensure_not_at_end_of_line(settings_file);
+   915.                get(settings_file, d);
+   916.                IOC.equipment.choice(b) := d;
+   917.             end loop;
+   918.          else
+   919.             log_new_line;
+   920.             log_line("The previous KDF9 configuration is still being used.");
+   921.          end if;
+   922.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   923.       exception
+   924.          when others =>
+   925.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   926.             IOC.equipment.choice := IOC.equipment.default;
+   927.             log_new_line;
+   928.             log_line("***** Error in the device configuration; defaults used.");
+   929.       end set_KDF9_configuration;
+   930.
+   931.    begin -- get_settings_from_file
+   932.
+   933.       do_not_execute := False;
+   934.       high_count := time_limit;
+   935.       open_options_file(settings_file, the_settings_file_name);
+   936.       if End_of_File(settings_file) then
+   937.          raise End_Error;
+   938.       end if;
+   939.
+   940.       loop
+   941.          skip_to_next_nonempty_line(settings_file);
+   942.          get(settings_file, flag);
+   943.          case flag is
+   944.             when 'A' | 'a' =>
+   945.                set_authenticity;
+   946.             when 'B' | 'b' =>
+   947.                set_breakpoints;
+   948.             when 'C' | 'c' =>
+   949.                set_tracing_counts;
+   950.             when 'D' | 'd' =>
+   951.                set_diagnostic_mode;
+   952.             when 'F' | 'f' =>
+   953.                set_final_dumping_ranges;
+   954.             when 'G' | 'g' =>
+   955.                set_graph_plotting_pen;
+   956.             when 'H' | 'h' =>
+   957.                set_histogram_options;
+   958.             when 'I' | 'i' =>
+   959.                set_initial_dumping_ranges;
+   960.             when 'K' | 'k' =>
+   961.                set_KDF9_configuration;
+   962.             when 'L' | 'l' =>
+   963.                set_time_limit;
+   964.             when 'N' | 'n' =>
+   965.                set_non_interactivity;
+   966.                time_limit := offline_time_limit;
+   967.             when 'O' |'o' =>
+   968.                set_this_miscellany_flag(flag);
+   969.             when 'P' | 'p' =>
+   970.                save_poke_value;
+   971.             when 'Q' | 'q' =>
+   972.                do_not_execute := True;
+   973.                raise End_Error;
+   974.             when 'R' | 'r' =>
+   975.                set_tracing_range;
+   976.             when 'S' | 's' =>
+   977.                set_store_points;
+   978.             when 'T' | 't' =>
+   979.                set_execution_mode;
+   980.             when 'V' | 'v' =>
+   981.                set_the_miscellany_flags;
+   982.             when 'W' | 'w' =>
+   983.                set_watchpoints;
+   984.             when 'X' | 'x' =>
+   985.                only_signature_tracing := True;
+   986.             when 'Y' | 'y' =>
+   987.                this_is_a_bare_Director := True;
+   988.             when '-' | '/' =>
+   989.                Skip_Line(settings_file);
+   990.             when others =>
+   991.                log_new_line;
+   992.                log_line(
+   993.                         "Invalid flag: """
+   994.                       & flag
+   995.                       & """ at line/column "
+   996.                       & line_number'Image
+   997.                       & "/"
+   998.                       & Ada.Text_IO.Count'Image(Col(settings_file))
+   999.                       & " of the settings file!"
+  1000.                        );
+  1001.                log_line(" ...  the valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
+  1002.                Skip_Line(settings_file);
+  1003.          end case;
+  1004.       end loop;
+  1005.
+  1006.    exception
+  1007.
+  1008.       when Status_Error =>
+  1009.          log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
+  1010.          log_new_line;
+  1011.
+  1012.       when End_Error =>
+  1013.          close_options_file(settings_file, the_settings_file_name);
+  1014.
+  1015.       when Data_Error =>
+  1016.          close_options_file(settings_file, the_settings_file_name);
+  1017.          log_new_line;
+  1018.          log_line("***** Error: invalid data in the settings file.");
+  1019.          log_line(
+  1020.                   "Reading of settings abandoned at line "
+  1021.                 & line_number'Image
+  1022.                 & " of "
+  1023.                 & the_settings_file_name
+  1024.                 & "."
+  1025.                  );
+  1026.
+  1027.       when quit_request =>
+  1028.          close_options_file(settings_file, the_settings_file_name);
+  1029.          log_new_line;
+  1030.          log_line(
+  1031.                   "Quit requested at line "
+  1032.                 & line_number'Image
+  1033.                 & " of "
+  1034.                 & the_settings_file_name
+  1035.                 & "."
+  1036.                  );
+  1037.          log_rule;
+  1038.          raise;
   1039.
-  1040. end settings;
+  1040.       when error : others =>
+  1041.          close_options_file(settings_file, the_settings_file_name);
+  1042.          log_new_line;
+  1043.          log_line(
+  1044.                   "Failure in ee9; unexpected exception: "
+  1045.                 & Exception_Information(error)
+  1046.                 & " in get_settings_from_file!"
+  1047.                  );
+  1048.          log_line(
+  1049.                   "Reading of settings abandoned at line "
+  1050.                 & line_number'Image
+  1051.                 & " of "
+  1052.                 & the_settings_file_name
+  1053.                 & "!"
+  1054.                  );
+  1055.          log_rule;
+  1056.          raise;
+  1057.
+  1058.    end get_settings_from_file;
+  1059.
+  1060. end settings;
 
 Compiling: ../Source/settings.ads
-Source file time stamp: 2021-02-21 00:19:08
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5239,122 +5284,127 @@ Compiled at: 2021-02-21 15:54:05
     59.    --    they are both requested, and offered by the_diagnostic_mode.
     60.    -- These requests may be set by the miscellany and visibilty options.
     61.
-    62.    miscellany_flags  : constant String := "abdefghikmnopqrstwxz.0123456789ABDEFGHIKMNOPQRSTWXZ";
+    62.    miscellany_flags  : constant String := "abdefghikmnopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
     63.    miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|m|n|o|p|q|r|s|t|w|x|z|.|0..9}";
     64.
-    65.    the_log_is_wanted,
-    66.    API_logging_is_wanted,
-    67.    the_signature_is_wanted,
-    68.    any_histogram_is_wanted,
-    69.    the_final_state_is_wanted,
-    70.    interrupt_tracing_is_wanted,
-    71.    peripheral_tracing_is_wanted,
-    72.    flexowriter_output_is_wanted,
-    73.    realistic_FW_output_is_wanted,
-    74.    the_terminal_is_ANSI_compatible,
-    75.    retrospective_tracing_is_wanted    : Boolean := True;
-    76.
-    77.    do_not_execute,
-    78.    debugging_is_enabled,
-    79.    the_signature_is_enabled,
-    80.    the_histogram_is_enabled,
-    81.    pre_overlay_state_is_enabled,
-    82.    the_external_trace_is_enabled,
-    83.    the_interrupt_trace_is_enabled,
-    84.    noninteractive_usage_is_enabled,
-    85.    the_peripheral_trace_is_enabled,
-    86.    the_retrospective_trace_is_enabled : Boolean := False;
-    87.
-    88.    -- This option may also be set by an authenticity option (see KDF9).
-    89.    authentic_timing_is_enabled : Boolean := False;
-    90.
-    91.    -- In boot_mode: a Director program is read from TR0 and executed
-    92.    --    in Director state, with full use of the emulated hardware.
-    93.    -- In program_mode: a user program is read from TR0 and executed
-    94.    --    in program state, with basic OUTs implemented by the emulator.
-    95.    -- In test_program_mode: a user program is read from TR0 and executed
-    96.    --    in Director state, with basic OUTs implemented by the emulator,
-    97.    --    this being useful for executing "hardware test" programs.
-    98.
-    99.    type execution_mode is (boot_mode, program_mode, test_program_mode);
-   100.
-   101.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode);
+    65.    -- *_is_wanted  iff the facility is provided by default.
+    66.    -- *_is_enabled iff the facility is wanted and not suppressed by other considerations,
+    67.    --    such as the diagnostic mode (e.g. fast mode suppresses all tracing).
+    68.
+    69.    API_logging_is_wanted,
+    70.    flexowriter_output_is_wanted,
+    71.    histogramming_is_wanted,
+    72.    interrupt_tracing_is_wanted,
+    73.    peripheral_tracing_is_wanted,
+    74.    realistic_FW_output_is_wanted,
+    75.    retrospective_tracing_is_wanted,
+    76.    the_final_state_is_wanted,
+    77.    the_log_is_wanted,
+    78.    the_signature_is_wanted,
+    79.    the_terminal_is_ANSI_compatible : Boolean := True;
+    80.
+    81.    authentic_timing_is_enabled,
+    82.    debugging_is_enabled,
+    83.    do_not_execute,
+    84.    histogramming_is_enabled,
+    85.    interrupt_tracing_is_enabled,
+    86.    noninteractive_usage_is_enabled,
+    87.    peripheral_tracing_is_enabled,
+    88.    pre_overlay_state_is_enabled,
+    89.    retrospective_tracing_is_enabled,
+    90.    the_external_trace_is_enabled,
+    91.    the_signature_is_enabled        : Boolean := False;
+    92.
+    93.    procedure reset_default_visibility_options;
+    94.
+    95.    -- In boot_mode: a Director program is read from TR0 and executed
+    96.    --    in Director state, with full use of the emulated hardware.
+    97.    -- In program_mode: a user program is read from TR0 and executed
+    98.    --    in program state, with basic OUTs implemented by the emulator.
+    99.    -- In privileged_mode: a user program is read from TR0 and executed
+   100.    --    as in program state, but allowing orders that should LIV to succeed,
+   101.    --    this being useful for executing "hardware test" programs.
    102.
-   103.    the_execution_default : constant settings.execution_mode := program_mode;
-   104.    the_execution_mode    :          settings.execution_mode := the_execution_default;
-   105.
-   106.    --
-   107.    -- Tracing bound settings.
-   108.    --
+   103.    type execution_mode is (boot_mode, program_mode, privileged_mode);
+   104.
+   105.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode);
+   106.
+   107.    the_execution_default   : constant settings.execution_mode := program_mode;
+   108.    the_execution_mode      :          settings.execution_mode := the_execution_default;
    109.
-   110.    -- time_limit bounds the number of KDF9 instructions executed.
+   110.    this_is_a_bare_Director : Boolean := False;
    111.
-   112.    time_limit_default : constant KDF9.order_counter := KDF9.order_counter'Last;
-   113.    time_slice         : constant KDF9.order_counter := 10_000;
-   114.    offline_time_limit : constant KDF9.order_counter := 10_000 * time_slice;
-   115.    time_limit         :          KDF9.order_counter := time_limit_default;
-   116.
+   112.    --
+   113.    -- Tracing bound settings.
+   114.    --
+   115.
+   116.    -- time_limit bounds the number of KDF9 instructions executed.
    117.
-   118.    -- low_bound and high_bound bound the static scope of tracing.
-   119.
-   120.    low_bound_default  : constant KDF9.order_word_number := 0;
-   121.    high_bound_default : constant KDF9.order_word_number := KDF9.order_word_number'Last;
-   122.    low_bound          :          KDF9.order_word_number := low_bound_default;
-   123.    high_bound         :          KDF9.order_word_number := high_bound_default;
-   124.
-   125.    -- nominated_address sets a flow analysis starting point for Usercode format dumps.
-   126.    invalid_address    :          KDF9.order_word_number := 8191;
-   127.    nominated_address  :          KDF9.order_word_number := invalid_address;
-   128.
-   129.    -- low_count and high_count bound the dynamic scope of tracing.
+   118.    time_limit_default : constant KDF9.order_counter := KDF9.order_counter'Last;
+   119.    time_slice         : constant KDF9.order_counter := 10_000;
+   120.    offline_time_limit : constant KDF9.order_counter := 10_000 * time_slice;
+   121.    time_limit         :          KDF9.order_counter := time_limit_default;
+   122.
+   123.
+   124.    -- low_bound and high_bound bound the static scope of tracing.
+   125.
+   126.    low_bound_default  : constant KDF9.order_word_number := 0;
+   127.    high_bound_default : constant KDF9.order_word_number := KDF9.order_word_number'Last;
+   128.    low_bound          :          KDF9.order_word_number := low_bound_default;
+   129.    high_bound         :          KDF9.order_word_number := high_bound_default;
    130.
-   131.    low_count_default  : constant KDF9.order_counter := 0;
-   132.    high_count_default : constant KDF9.order_counter := time_limit_default;
-   133.    low_count          :          KDF9.order_counter := low_count_default;
-   134.    high_count         :          KDF9.order_counter := high_count_default;
+   131.    -- root_address sets a flow analysis starting point for Usercode format dumps.
+   132.    root_address       :          KDF9.order_word_number := 8191;
+   133.
+   134.    -- low_count and high_count bound the dynamic scope of tracing.
    135.
-   136.    -- Histogram bin frequencies less than histogram_cutoff are not logged.
-   137.    the_profile_is_wanted  :          Boolean := False;
-   138.    the_INS_plot_is_wanted :          Boolean := False;
-   139.    cutoff_default         : constant Long_Float := 0.0;
-   140.    histogram_cutoff       :          Long_Float := cutoff_default;
-   141.
-   142.    function is_invalid_miscellany_flag (option : in Character)
-   143.    return Boolean;
-   144.
-   145.    procedure set_this_miscellany_flag (option : in Character);
+   136.    low_count_default  : constant KDF9.order_counter := 0;
+   137.    high_count_default : constant KDF9.order_counter := time_limit_default;
+   138.    low_count          :          KDF9.order_counter := low_count_default;
+   139.    high_count         :          KDF9.order_counter := high_count_default;
+   140.
+   141.    -- Histogram bin frequencies less than histogram_cutoff are not logged.
+   142.    the_profile_is_wanted  :          Boolean := False;
+   143.    the_INS_plot_is_wanted :          Boolean := False;
+   144.    cutoff_default         : constant Long_Float := 0.0;
+   145.    histogram_cutoff       :          Long_Float := cutoff_default;
    146.
-   147.    -- do_not_execute is set if a quit is requested in the settings file.
-   148.    -- The K option is not actioned unless version = "1".
-   149.    procedure get_settings_from_file (version : in String);
-   150.
-   151.    procedure display_execution_modes (for_this_run : in String := "");
-   152.
-   153.    procedure quit_if_requested;
-   154.
-   155.    quit_was_requested          : Boolean := False;
-   156.
-   157.    the_diagnostic_mode_changed : Boolean := False;
-   158.
-   159.    loading_was_successful      : Boolean := False;
-   160.
-   161.    mode_change_request         : exception;
-   162.
-   163. end settings;
+   147.    function is_invalid_miscellany_flag (option : in Character)
+   148.    return Boolean;
+   149.
+   150.    procedure set_this_miscellany_flag (option : in Character);
+   151.
+   152.    -- do_not_execute is set if a quit is requested in the settings file.
+   153.    -- The K option is not actioned unless version = "1".
+   154.    procedure get_settings_from_file (version : in String);
+   155.
+   156.    procedure display_execution_modes (for_this : in String := "");
+   157.
+   158.    procedure quit_if_requested;
+   159.
+   160.    quit_was_requested          : Boolean := False;
+   161.
+   162.    the_diagnostic_mode_changed : Boolean := False;
+   163.
+   164.    loading_was_successful      : Boolean := False;
+   165.
+   166.    mode_change_request         : exception;
+   167.
+   168. end settings;
 
- 1040 lines: No errors
+ 1060 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/break_in.adb
-Source file time stamp: 2021-02-20 23:33:33
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- This communicates a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5418,12 +5468,12 @@ Compiled at: 2021-02-21 15:54:05
     64. end break_in;
 
 Compiling: ../Source/break_in.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:19
 
      1. -- This conveys a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5456,12 +5506,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/dumping.adb
-Source file time stamp: 2021-02-21 00:14:12
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5598,7 +5648,7 @@ Compiled at: 2021-02-21 15:54:05
    137.          Usercode_wanted := Usercode_wanted or d.format_set/Usercode_flag;
    138.       end loop;
    139.       if Usercode_wanted then
-   140.          mark_all_code_blocks_and_data_blocks;
+   140.          mark_all_code_blocks_and_data_blocks(pre_run => flag = initial_flag);
    141.       end if;
    142.       for d of dumping_areas loop
    143.          if d.format_set/flag then
@@ -5666,12 +5716,12 @@ Compiled at: 2021-02-21 15:54:05
    205. end dumping;
 
 Compiling: ../Source/dumping.ads
-Source file time stamp: 2021-02-21 00:13:42
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5794,12 +5844,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9.adb
-Source file time stamp: 2021-02-21 13:17:23
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- The machine-state manipulations used by the CPU microcode.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -6210,7 +6260,7 @@ Compiled at: 2021-02-21 15:54:05
    411.    empty_SJNS : constant SJNS := (others => (0, 0));
    412.    empty_Q_s  : constant Q_store := (others => (0, 0, 0));
    413.
-   414.    procedure reset_the_CPU_state is
+   414.    procedure reset_the_CPU_state (initial_entry : KDF9.syllable_address) is
    415.    begin
    416.       the_context := 0;
    417.       for bank of register_bank loop
@@ -6227,7 +6277,7 @@ Compiled at: 2021-02-21 15:54:05
    428.          reset_the_internal_registers(Director_state);
    429.       end if;
    430.       -- Setting NIA must follow program loading, as it fetches E0 into the IWBs.
-   431.       set_NIA_to((0, 0));
+   431.       set_NIA_to(initial_entry);
    432.    end reset_the_CPU_state;
    433.
    434.    procedure reset_the_program_state is
@@ -6273,7 +6323,7 @@ Compiled at: 2021-02-21 15:54:05
    474.                the_RFIR(caused_by_NOUV) := False;
    475.             end if;
    476.
-   477.          when test_program_mode =>
+   477.          when privileged_mode =>
    478.             -- Interrupts other than LOV and RESET are ignored.
    479.             -- There is no need to accurately emulate the address placed by the hardware in JB.
    480.             case caused_by_this is
@@ -6322,7 +6372,7 @@ Compiled at: 2021-02-21 15:54:05
    523.    procedure check_for_a_clock_interrupt is
    524.       interval : KDF9.us;
    525.    begin
-   526.       -- Clock ticks are ignored in program_mode and test_program_mode.
+   526.       -- Clock ticks are ignored in program_mode and privileged_mode.
    527.       -- In boot_mode:
    528.       --    they are actioned in program_state;
    529.       --    they are deferred in Director_state: Director will eventually find the time for itself.
@@ -6341,7 +6391,7 @@ Compiled at: 2021-02-21 15:54:05
    542.          when program_mode =>
    543.             -- The unprivileged program has attempted a privileged operation.
    544.             raise LIV_exception with "%Director-only instruction";
-   545.          when test_program_mode =>
+   545.          when privileged_mode =>
    546.             -- The privileged program is allowed to use privileged instructions.
    547.             return;
    548.          when boot_mode =>
@@ -6371,7 +6421,7 @@ Compiled at: 2021-02-21 15:54:05
    572.       -- The program has failed in a manner that could cause a LIV interrupt.
    573.       case the_execution_mode is
    574.          when program_mode
-   575.             | test_program_mode =>
+   575.             | privileged_mode =>
    576.             raise LIV_exception with "%" & the_message;
    577.          when boot_mode =>
    578.             if the_CPU_state = program_state then
@@ -6780,7 +6830,7 @@ Compiled at: 2021-02-21 15:54:05
    981.    return Boolean
    982.    is (
    983.        (decoded.kind = data_access_order and then (decoded.order.syllable_0 and 2#101#) > 2#100#)
-   984.          or else (decoded.kind = normal_jump_order and decoded.target.syllable_index > 5)
+   984.          or else (decoded.kind = normal_jump_order and then decoded.target.syllable_index > 5)
    985.             -- 0 is now treated as a valid DUMMY0 order for KAlgol
    986.                or else decoded.order.syllable_0 = 8#006#
    987.                   or else decoded.order.syllable_0 = 8#040#
@@ -6829,12 +6879,12 @@ Compiled at: 2021-02-21 15:54:05
   1030. end KDF9;
 
 Compiling: ../Source/kdf9.ads
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:05
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- The architecturally-defined data and register formats of the KDF9 computer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -7378,7 +7428,7 @@ Compiled at: 2021-02-21 15:54:05
    544.
    545.    procedure reset_V_and_T;
    546.
-   547.    procedure reset_the_CPU_state;
+   547.    procedure reset_the_CPU_state (initial_entry : KDF9.syllable_address);
    548.
    549.    procedure reset_the_internal_registers (the_new_state : in CPU_state);
    550.
@@ -7569,12 +7619,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-microcode.adb
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -8313,8 +8363,8 @@ Compiled at: 2021-02-21 15:54:06
    739.
    740.          when JCqNZS =>
    741.             if CIA.syllable_index = 5 then
-   742.                -- KDF9 did not actually detect this error, and the JCqNZS instruction often worked,
-   743.                --    unless broken-into by an interrupt, which returned to the word following that
+   742.                -- KDF9 did not actually detect this error, and the JCqNZS instruction would work
+   743.                --    until broken-into by an interrupt, which returned to the word following that
    744.                --       containing the first syllable of the JCqNZS instruction.
    745.                -- I see no case for reproducing this behaviour.
    746.                trap_illegal_instruction ("JCqNZS instruction at syllable 5");
@@ -9079,7 +9129,7 @@ Compiled at: 2021-02-21 15:54:06
   1505.             if the_signature_is_enabled then
   1506.                update_the_digital_signature;
   1507.             end if;
-  1508.             if the_histogram_is_enabled then
+  1508.             if histogramming_is_enabled then
   1509.                add_INS_to_the_histogram;
   1510.                add_CIA_to_the_profile;
   1511.             end if;
@@ -9175,12 +9225,12 @@ Compiled at: 2021-02-21 15:54:06
   1601. end KDF9.microcode;
 
 Compiling: ../Source/kdf9-microcode.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9209,12 +9259,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/state_display.adb
-Source file time stamp: 2021-02-21 13:23:30
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-09 15:03:29
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9459,32 +9509,32 @@ Compiled at: 2021-02-21 15:54:06
    245.       if the_RFIR(caused_by_RESET)  then log("RESET, "); end if;
    246.       if interval >= 2**20          then log("CLOCK, "); end if;
    247.       log_line(trimmed(KDF9.us'Image(interval/32*32)) & " KDF9 us since last CLOCK");
-   248.    end show_Director_registers;
-   249.
-   250.    procedure show_V_and_T is
-   251.    begin
-   252.       if the_V_bit_is_set or the_T_bit_is_set then
-   253.          log_new_line;
-   254.          if the_V_bit_is_set then
-   255.             log("V is set. ");
-   256.          else
-   257.             log("V is clear. ");
-   258.          end if;
-   259.          if the_T_bit_is_set then
-   260.             log("T is set. ");
-   261.          else
-   262.             log("T is clear. ");
-   263.          end if;
-   264.          log_new_line;
-   265.       end if;
-   266.    end show_V_and_T;
-   267.
-   268.    procedure show_NEST (when_empty : Boolean := True) is
-   269.    begin
-   270.       if the_NEST_depth = 0 then
-   271.          if when_empty then
-   272.             log_line("The NEST is empty.");
-   273.          end if;
+   248.       log_new_line;
+   249.    end show_Director_registers;
+   250.
+   251.    procedure show_V_and_T is
+   252.    begin
+   253.       if the_V_bit_is_set or the_T_bit_is_set then
+   254.          log_new_line;
+   255.          if the_V_bit_is_set then
+   256.             log("V is set. ");
+   257.          else
+   258.             log("V is clear. ");
+   259.          end if;
+   260.          if the_T_bit_is_set then
+   261.             log("T is set. ");
+   262.          else
+   263.             log("T is clear. ");
+   264.          end if;
+   265.          log_new_line;
+   266.       end if;
+   267.    end show_V_and_T;
+   268.
+   269.    procedure show_NEST is
+   270.    begin
+   271.       if the_NEST_depth = 0 then
+   272.          log_line("The NEST is empty.");
+   273.          return;
    274.       else
    275.          log_line("NEST:");
    276.          for i in reverse KDF9.NEST_depth loop
@@ -9498,303 +9548,303 @@ Compiled at: 2021-02-21 15:54:06
    284.       end if;
    285.    end show_NEST;
    286.
-   287.    procedure show_SJNS (when_empty : Boolean := True) is
+   287.    procedure show_SJNS is
    288.    begin
    289.       if the_SJNS_depth = 0 then
-   290.          if when_empty then
-   291.             log_line("The SJNS is empty.");
-   292.          end if;
-   293.       else
-   294.          log_line("SJNS:");
-   295.       end if;
-   296.       for i in reverse KDF9.SJNS_depth loop
-   297.          if i < the_SJNS_depth then
-   298.             log(just_right("S" & trimmed(KDF9.SJNS_depth'Image(the_SJNS_depth-i)), 3) & ": ");
-   299.             log_line(oct_of(the_SJNS(i)) & " (" & dec_of(KDF9.syllable_address(the_SJNS(i))) & ")");
-   300.          end if;
-   301.       end loop;
-   302.    end show_SJNS;
-   303.
-   304.    procedure show_Q_store is
-   305.       Q_bits  : KDF9.word := 0;
-   306.    begin
-   307.       for Qq of the_Q_store loop
-   308.          Q_bits := Q_bits or as_word(Qq);
-   309.       end loop;
-   310.       if Q_bits = 0 then
-   311.          log_line("Q store: all zero.");
-   312.          return;
-   313.       else
-   314.          log_line("Q store:");
-   315.       end if;
-   316.       for q in KDF9.Q_store'Range loop
-   317.          if as_word(the_Q_store(q)) /= KDF9.word'(0) then
-   318.             log(just_right("Q" & trimmed(q'Image), 3) & ": ");
-   319.             show_Q_register(the_Q_store(q));
-   320.             log("  = ");
-   321.             show_Q_in_decimal(the_Q_store(q));
-   322.             log_new_line;
-   323.          end if;
-   324.       end loop;
-   325.    end show_Q_store;
-   326.
-   327.    procedure show_registers is
-   328.    begin
-   329.       show_progress;
-   330.       log_new_line;
-   331.       if the_execution_mode = boot_mode then
-   332.          show_Director_registers;
-   333.          log_new_line;
-   334.       end if;
-   335.       show_SJNS;
-   336.       log_new_line;
-   337.       show_Q_store;
-   338.       show_V_and_T;
-   339.       log_new_line;
-   340.       show_NEST;
-   341.    end show_registers;
-   342.
-   343.    procedure show_order is
-   344.    begin
-   345.       log(the_code_and_name_of_INS);
-   346.    end show_order;
-   347.
-   348.    procedure show_execution_context is
-   349.    begin
-   350.       log("At "
-   351.         & oct_of(CIA)
-   352.         & " ("
-   353.         & dec_of(CIA)
-   354.         & ")"
-   355.         & "; ICR ="
-   356.         & ICR'Image
-   357.         & "; EL ="
-   358.         & the_clock_time'Image
-   359.         & "; the instruction was ");
-   360.       show_order;
-   361.       log_new_line;
-   362.    end show_execution_context;
-   363.
-   364.    procedure log_to_external_trace is
-   365.    begin
-   366.       log(the_external_trace_file, oct_of(CIA));
-   367.       tab_log_to(the_external_trace_file, 10);
-   368.       log(the_external_trace_file, ICR'Image);
-   369.       tab_log_to(the_external_trace_file, 20);
-   370.       if only_signature_tracing then
-   371.          log(
-   372.              the_external_trace_file,
-   373.              "#"
-   374.            & oct_of(the_digital_signature)
-   375.            & (if the_V_bit_is_set then "V" else " ")
-   376.            & (if the_T_bit_is_set then "T" else " ")
-   377.             );
-   378.          tab_log_to(the_external_trace_file, 40);
-   379.          if the_NEST_depth > 0 then
-   380.             log(the_external_trace_file, "#" & oct_of(read_top));
-   381.          end if;
-   382.          tab_log_to(the_external_trace_file, 58);
-   383.       else
-   384.          log(the_external_trace_file, the_CPU_time'Image);
-   385.          tab_log_to(the_external_trace_file, 40);
-   386.          log(the_external_trace_file, the_NEST_depth'Image);
-   387.          tab_log_to(the_external_trace_file, 43);
-   388.          log(the_external_trace_file, the_SJNS_depth'Image);
-   389.          tab_log_to(the_external_trace_file, 46);
-   390.          log(the_external_trace_file, (if the_V_bit_is_set then "V" else " "));
-   391.          log(the_external_trace_file, (if the_T_bit_is_set then "T" else " "));
-   392.          tab_log_to(the_external_trace_file, 50);
-   393.          if the_NEST_depth > 0 then
-   394.             log(the_external_trace_file, "#" & oct_of(read_top));
-   395.          end if;
-   396.          tab_log_to(the_external_trace_file, 68);
-   397.       end if;
-   398.       log(the_external_trace_file, " |" & the_full_name_of(INS));
-   399.       tab_log_to(the_external_trace_file, 90);
-   400.       log(the_external_trace_file, KDF9.us'Image(the_clock_time));
-   401.       log_new_line(the_external_trace_file);
-   402.    end log_to_external_trace;
-   403.
-   404.    procedure log_an_external_trace_header (caption : in String := "") is
-   405.    begin
-   406.       if caption /= "" then
+   290.          log_line("The SJNS is empty.");
+   291.          return;
+   292.       else
+   293.          log_line("SJNS:");
+   294.       end if;
+   295.       for i in reverse KDF9.SJNS_depth loop
+   296.          if i < the_SJNS_depth then
+   297.             log(just_right("S" & trimmed(KDF9.SJNS_depth'Image(the_SJNS_depth-i)), 3) & ": ");
+   298.             log_line(oct_of(the_SJNS(i)) & " (" & dec_of(KDF9.syllable_address(the_SJNS(i))) & ")");
+   299.          end if;
+   300.       end loop;
+   301.    end show_SJNS;
+   302.
+   303.    procedure show_Q_store is
+   304.       Q_bits  : KDF9.word := 0;
+   305.    begin
+   306.       for Qq of the_Q_store loop
+   307.          Q_bits := Q_bits or as_word(Qq);
+   308.       end loop;
+   309.       if Q_bits = 0 then
+   310.          log_line("Q store: all zero.");
+   311.          return;
+   312.       else
+   313.          log_line("Q store:");
+   314.       end if;
+   315.       for q in KDF9.Q_store'Range loop
+   316.          if as_word(the_Q_store(q)) /= KDF9.word'(0) then
+   317.             log(just_right("Q" & trimmed(q'Image), 3) & ": ");
+   318.             show_Q_register(the_Q_store(q));
+   319.             log("  = ");
+   320.             show_Q_in_decimal(the_Q_store(q));
+   321.             log_new_line;
+   322.          end if;
+   323.       end loop;
+   324.    end show_Q_store;
+   325.
+   326.    procedure show_registers is
+   327.    begin
+   328.       show_progress;
+   329.       log_new_line;
+   330.       if the_execution_mode = boot_mode then
+   331.          show_Director_registers;
+   332.       end if;
+   333.       show_SJNS;
+   334.       log_new_line;
+   335.       show_Q_store;
+   336.       show_V_and_T;
+   337.       log_new_line;
+   338.       show_NEST;
+   339.    end show_registers;
+   340.
+   341.    procedure show_order is
+   342.    begin
+   343.       log(the_code_and_name_of_INS);
+   344.    end show_order;
+   345.
+   346.    procedure show_execution_context is
+   347.    begin
+   348.       log("At "
+   349.         & oct_of(CIA)
+   350.         & " ("
+   351.         & dec_of(CIA)
+   352.         & ")"
+   353.         & "; ICR ="
+   354.         & ICR'Image
+   355.         & "; EL ="
+   356.         & the_clock_time'Image
+   357.         & "; the instruction was ");
+   358.       show_order;
+   359.       log_new_line;
+   360.    end show_execution_context;
+   361.
+   362.    procedure log_to_external_trace is
+   363.    begin
+   364.       log(the_external_trace_file, oct_of(CIA));
+   365.       tab_log_to(the_external_trace_file, 10);
+   366.       log(the_external_trace_file, ICR'Image);
+   367.       tab_log_to(the_external_trace_file, 20);
+   368.       if only_signature_tracing then
+   369.          log(
+   370.              the_external_trace_file,
+   371.              "#"
+   372.            & oct_of(the_digital_signature)
+   373.            & (if the_V_bit_is_set then "V" else " ")
+   374.            & (if the_T_bit_is_set then "T" else " ")
+   375.             );
+   376.          tab_log_to(the_external_trace_file, 40);
+   377.          if the_NEST_depth > 0 then
+   378.             log(the_external_trace_file, "#" & oct_of(read_top));
+   379.          end if;
+   380.          tab_log_to(the_external_trace_file, 58);
+   381.       else
+   382.          log(the_external_trace_file, the_CPU_time'Image);
+   383.          tab_log_to(the_external_trace_file, 40);
+   384.          log(the_external_trace_file, the_NEST_depth'Image);
+   385.          tab_log_to(the_external_trace_file, 43);
+   386.          log(the_external_trace_file, the_SJNS_depth'Image);
+   387.          tab_log_to(the_external_trace_file, 46);
+   388.          log(the_external_trace_file, (if the_V_bit_is_set then "V" else " "));
+   389.          log(the_external_trace_file, (if the_T_bit_is_set then "T" else " "));
+   390.          tab_log_to(the_external_trace_file, 50);
+   391.          if the_NEST_depth > 0 then
+   392.             log(the_external_trace_file, "#" & oct_of(read_top));
+   393.          end if;
+   394.          tab_log_to(the_external_trace_file, 68);
+   395.       end if;
+   396.       log(the_external_trace_file, " |" & the_full_name_of(INS));
+   397.       tab_log_to(the_external_trace_file, 90);
+   398.       log(the_external_trace_file, KDF9.us'Image(the_clock_time));
+   399.       log_new_line(the_external_trace_file);
+   400.    end log_to_external_trace;
+   401.
+   402.    procedure log_an_external_trace_header (caption : in String := "") is
+   403.    begin
+   404.       if caption /= "" then
+   405.          log_new_line(the_external_trace_file);
+   406.          log(the_external_trace_file, caption);
    407.          log_new_line(the_external_trace_file);
-   408.          log(the_external_trace_file, caption);
-   409.          log_new_line(the_external_trace_file);
-   410.       end if;
-   411.       log(the_external_trace_file, "LOCATION");
-   412.       tab_log_to(the_external_trace_file, 11);
-   413.       log(the_external_trace_file, "ICR");
-   414.       tab_log_to(the_external_trace_file, 20);
-   415.       if only_signature_tracing then
-   416.          log(the_external_trace_file, "DIGITAL SIGNATURE");
-   417.          tab_log_to(the_external_trace_file, 40);
-   418.          log(the_external_trace_file, "[N1]");
-   419.          tab_log_to(the_external_trace_file, 58);
-   420.       else
-   421.          log(the_external_trace_file, " CPU");
-   422.          tab_log_to(the_external_trace_file, 40);
-   423.          log(the_external_trace_file, "ND");
-   424.          tab_log_to(the_external_trace_file, 43);
-   425.          log(the_external_trace_file, "SD");
-   426.          tab_log_to(the_external_trace_file, 46);
-   427.          log(the_external_trace_file, "VT");
-   428.          tab_log_to(the_external_trace_file, 50);
-   429.          log(the_external_trace_file, "[N1]");
-   430.          tab_log_to(the_external_trace_file, 68);
-   431.       end if;
-   432.       log(the_external_trace_file, " |INSTRUCTION");
-   433.       log_new_line(the_external_trace_file);
-   434.    end log_an_external_trace_header;
-   435.
-   436.    procedure show_CIA_and_NIA is
-   437.    begin
-   438.       log_line("CIA:        " & just_right(oct_of(CIA), 10) & " (" & just_right(dec_of(CIA) & ")"));
-   439.       log_line("NIA:        " & just_right(oct_of(NIA), 10) & " (" & just_right(dec_of(NIA) & ")"));
-   440.    end show_CIA_and_NIA;
-   441.
-   442.    procedure long_witness is
-   443.    begin
-   444.       log_new_line;
-   445.       log("At " & oct_of(CIA) & " (" & dec_of(CIA) & ") the instruction was ");
-   446.       show_order;
-   447.       log_new_line;
-   448.       show_registers;
-   449.    end long_witness;
+   408.       end if;
+   409.       log(the_external_trace_file, "LOCATION");
+   410.       tab_log_to(the_external_trace_file, 11);
+   411.       log(the_external_trace_file, "ICR");
+   412.       tab_log_to(the_external_trace_file, 20);
+   413.       if only_signature_tracing then
+   414.          log(the_external_trace_file, "DIGITAL SIGNATURE");
+   415.          tab_log_to(the_external_trace_file, 40);
+   416.          log(the_external_trace_file, "[N1]");
+   417.          tab_log_to(the_external_trace_file, 58);
+   418.       else
+   419.          log(the_external_trace_file, " CPU");
+   420.          tab_log_to(the_external_trace_file, 40);
+   421.          log(the_external_trace_file, "ND");
+   422.          tab_log_to(the_external_trace_file, 43);
+   423.          log(the_external_trace_file, "SD");
+   424.          tab_log_to(the_external_trace_file, 46);
+   425.          log(the_external_trace_file, "VT");
+   426.          tab_log_to(the_external_trace_file, 50);
+   427.          log(the_external_trace_file, "[N1]");
+   428.          tab_log_to(the_external_trace_file, 68);
+   429.       end if;
+   430.       log(the_external_trace_file, " |INSTRUCTION");
+   431.       log_new_line(the_external_trace_file);
+   432.    end log_an_external_trace_header;
+   433.
+   434.    procedure show_CIA_and_NIA is
+   435.    begin
+   436.       log_line("CIA:        " & just_right(oct_of(CIA), 10) & " (" & just_right(dec_of(CIA) & ")"));
+   437.       log_line("NIA:        " & just_right(oct_of(NIA), 10) & " (" & just_right(dec_of(NIA) & ")"));
+   438.    end show_CIA_and_NIA;
+   439.
+   440.    procedure long_witness is
+   441.    begin
+   442.       log_new_line;
+   443.       log("At " & oct_of(CIA) & " (" & dec_of(CIA) & ") the instruction was ");
+   444.       show_order;
+   445.       log_new_line;
+   446.       show_registers;
+   447.    end long_witness;
+   448.
+   449.    procedure short_witness is
    450.
-   451.    procedure short_witness is
-   452.
-   453.       type register_usage is array (KDF9.compressed_opcode) of Boolean
-   454.          with Size => 64, Component_Size => 1;
-   455.
-   456.       it_uses_JB : constant register_usage
-   457.                  := (
-   458.                       LINK
-   459.                     | TO_LINK
-   460.                     | OS_OUT
-   461.                     | JrNEJ
-   462.                     | JSr
-   463.                     | EXIT_n
-   464.                     | JrEJ
-   465.                     | EXITD     => True,
-   466.                       others    => False
-   467.                     );
-   468.
-   469.       it_uses_Qq : constant register_usage
-   470.                  := (
-   471.                       MkMq
-   472.                     | MkMqQ
-   473.                     | MkMqH
-   474.                     | MkMqQH
-   475.                     | MkMqN
-   476.                     | MkMqQN
-   477.                     | MkMqHN
-   478.                     | MkMqQHN
-   479.                     | TO_MkMq
-   480.                     | TO_MkMqQ
-   481.                     | TO_MkMqH
-   482.                     | TO_MkMqQH
-   483.                     | TO_MkMqN
-   484.                     | TO_MkMqQN
-   485.                     | TO_MkMqHN
-   486.                     | TO_MkMqQHN
-   487.                     | MqTOQk
-   488.                     | IqTOQk
-   489.                     | IMqTOQk
-   490.                     | CqTOQk
-   491.                     | CMqTOQk
-   492.                     | CIqTOQk
-   493.                     | QqTOQk
-   494.                     | M_PLUS_Iq
-   495.                     | M_MINUS_Iq
-   496.                     | NCq
-   497.                     | DCq
-   498.                     | POS1_TO_Iq
-   499.                     | NEG1_TO_Iq
-   500.                     | POS2_TO_Iq
-   501.                     | NEG2_TO_Iq
-   502.                     | SHA
-   503.                     | SHAD
-   504.                     | MACC
-   505.                     | SHL
-   506.                     | SHLD
-   507.                     | SHC
-   508.                     | TO_RCIMq
-   509.                     | QCIMq
-   510.                     | ADD_TO_QCIMq
-   511.                     | JCqNZS
-   512.                     | PAR_Qq
-   513.                     | PIA_PIC_CLO_TLO_Qq
-   514.                     | PIB_PID_Qq
-   515.                     | PIE_PIG_Qq
-   516.                     | PIF_PIH_Qq
-   517.                     | PMA_PMK_INT_Qq
-   518.                     | CT_PMB_PMC_BUSY_Qq
-   519.                     | PMD_PME_PML_Qq
-   520.                     | PMF_PMG_Qq
-   521.                     | POA_POC_POE_POF_PMH_Qq
-   522.                     | POB_POD_Qq
-   523.                     | POG_POL_Qq
-   524.                     | POH_POK_Qq
-   525.                     | JrCqNZ    => True,
-   526.                       others    => False
-   527.                     );
-   528.
-   529.       is_modified : constant register_usage
-   530.                   := (
-   531.                        EaMq
-   532.                      | TO_EaMq
-   533.                      | EaMqQ
-   534.                      | TO_EaMqQ  => True,
-   535.                        others    => False
-   536.                      );
-   537.
-   538.       it_uses_Qk : constant register_usage
-   539.                  := (
-   540.                       MkMq
-   541.                     | MkMqQ
-   542.                     | MkMqH
-   543.                     | MkMqQH
-   544.                     | MkMqN
-   545.                     | MkMqQN
-   546.                     | MkMqHN
-   547.                     | MkMqQHN
-   548.                     | TO_MkMq
-   549.                     | TO_MkMqQ
-   550.                     | TO_MkMqH
-   551.                     | TO_MkMqQH
-   552.                     | TO_MkMqN
-   553.                     | TO_MkMqQN
-   554.                     | TO_MkMqHN
-   555.                     | TO_MkMqQHN
-   556.                     | MqTOQk
-   557.                     | IqTOQk
-   558.                     | IMqTOQk
-   559.                     | CqTOQk
-   560.                     | CMqTOQk
-   561.                     | CIqTOQk
-   562.                     | QqTOQk    => True,
-   563.                       others    => False
-   564.                     );
-   565.
-   566.       function INS_uses_Qq
-   567.       return Boolean is
-   568.          (
-   569.           -- A compressed_opcode may be ambiguous: to know which opcode it represents,
-   570.           --   further attributes of the order may need to be considered.
-   571.           case INS.kind is
-   572.              when two_syllable_order =>
-   573.                 it_uses_Qq(INS.compressed_opcode)
-   574.                   and
-   575.                 -- If a shift, exclude fixed-amount shifts.
-   576.                 ((INS.order.syllable_1 and 1) = 0 or else INS.compressed_opcode not in SHA..SHC),
-   577.              when normal_jump_order =>
-   578.                 INS.compressed_opcode in JrCqZ | JrCqNZ,
-   579.              when data_access_order =>
-   580.                 is_modified(INS.compressed_opcode),
-   581.              when others =>
-   582.                 False
-   583.          );
+   451.       type register_usage is array (KDF9.compressed_opcode) of Boolean
+   452.          with Size => 64, Component_Size => 1;
+   453.
+   454.       it_uses_JB : constant register_usage
+   455.                  := (
+   456.                       LINK
+   457.                     | TO_LINK
+   458.                     | OS_OUT
+   459.                     | JrNEJ
+   460.                     | JSr
+   461.                     | EXIT_n
+   462.                     | JrEJ
+   463.                     | EXITD     => True,
+   464.                       others    => False
+   465.                     );
+   466.
+   467.       it_uses_Qq : constant register_usage
+   468.                  := (
+   469.                       MkMq
+   470.                     | MkMqQ
+   471.                     | MkMqH
+   472.                     | MkMqQH
+   473.                     | MkMqN
+   474.                     | MkMqQN
+   475.                     | MkMqHN
+   476.                     | MkMqQHN
+   477.                     | TO_MkMq
+   478.                     | TO_MkMqQ
+   479.                     | TO_MkMqH
+   480.                     | TO_MkMqQH
+   481.                     | TO_MkMqN
+   482.                     | TO_MkMqQN
+   483.                     | TO_MkMqHN
+   484.                     | TO_MkMqQHN
+   485.                     | MqTOQk
+   486.                     | IqTOQk
+   487.                     | IMqTOQk
+   488.                     | CqTOQk
+   489.                     | CMqTOQk
+   490.                     | CIqTOQk
+   491.                     | QqTOQk
+   492.                     | M_PLUS_Iq
+   493.                     | M_MINUS_Iq
+   494.                     | NCq
+   495.                     | DCq
+   496.                     | POS1_TO_Iq
+   497.                     | NEG1_TO_Iq
+   498.                     | POS2_TO_Iq
+   499.                     | NEG2_TO_Iq
+   500.                     | SHA
+   501.                     | SHAD
+   502.                     | MACC
+   503.                     | SHL
+   504.                     | SHLD
+   505.                     | SHC
+   506.                     | TO_RCIMq
+   507.                     | QCIMq
+   508.                     | ADD_TO_QCIMq
+   509.                     | JCqNZS
+   510.                     | PAR_Qq
+   511.                     | PIA_PIC_CLO_TLO_Qq
+   512.                     | PIB_PID_Qq
+   513.                     | PIE_PIG_Qq
+   514.                     | PIF_PIH_Qq
+   515.                     | PMA_PMK_INT_Qq
+   516.                     | CT_PMB_PMC_BUSY_Qq
+   517.                     | PMD_PME_PML_Qq
+   518.                     | PMF_PMG_Qq
+   519.                     | POA_POC_POE_POF_PMH_Qq
+   520.                     | POB_POD_Qq
+   521.                     | POG_POL_Qq
+   522.                     | POH_POK_Qq
+   523.                     | JrCqNZ    => True,
+   524.                       others    => False
+   525.                     );
+   526.
+   527.       is_modified : constant register_usage
+   528.                   := (
+   529.                        EaMq
+   530.                      | TO_EaMq
+   531.                      | EaMqQ
+   532.                      | TO_EaMqQ  => True,
+   533.                        others    => False
+   534.                      );
+   535.
+   536.       it_uses_Qk : constant register_usage
+   537.                  := (
+   538.                       MkMq
+   539.                     | MkMqQ
+   540.                     | MkMqH
+   541.                     | MkMqQH
+   542.                     | MkMqN
+   543.                     | MkMqQN
+   544.                     | MkMqHN
+   545.                     | MkMqQHN
+   546.                     | TO_MkMq
+   547.                     | TO_MkMqQ
+   548.                     | TO_MkMqH
+   549.                     | TO_MkMqQH
+   550.                     | TO_MkMqN
+   551.                     | TO_MkMqQN
+   552.                     | TO_MkMqHN
+   553.                     | TO_MkMqQHN
+   554.                     | MqTOQk
+   555.                     | IqTOQk
+   556.                     | IMqTOQk
+   557.                     | CqTOQk
+   558.                     | CMqTOQk
+   559.                     | CIqTOQk
+   560.                     | QqTOQk    => True,
+   561.                       others    => False
+   562.                     );
+   563.
+   564.       function INS_uses_Qq
+   565.       return Boolean is
+   566.          (
+   567.           -- A compressed_opcode may be ambiguous: to know which opcode it represents,
+   568.           --   further attributes of the order may need to be considered.
+   569.           case INS.kind is
+   570.              when two_syllable_order =>
+   571.                 it_uses_Qq(INS.compressed_opcode)
+   572.                   and
+   573.                 -- If a shift, exclude fixed-amount shifts.
+   574.                 ((INS.order.syllable_1 and 1) = 0 or else INS.compressed_opcode not in SHA..SHC),
+   575.              when normal_jump_order =>
+   576.                 INS.compressed_opcode in JrCqZ | JrCqNZ,
+   577.              when data_access_order =>
+   578.                 is_modified(INS.compressed_opcode),
+   579.              when others =>
+   580.                 False
+   581.          );
+   582.
+   583.       need_new_line : Boolean := False;
    584.
    585.    begin  -- short_witness
    586.       log_new_line;
@@ -9802,1644 +9852,1696 @@ Compiled at: 2021-02-21 15:54:06
    588.       if the_CPU_state = Director_state then
    589.          show_Director_registers;
    590.       end if;
-   591.       if it_uses_JB(INS.compressed_opcode)                     and then
-   592.             INS.kind in two_syllable_order | normal_jump_order and then
-   593.                the_SJNS_depth > 0                                  then
-   594.          log_line(
-   595.                   " JB: "
-   596.                 & oct_of(the_SJNS(the_SJNS_depth-1))
-   597.                 & "; SJNS depth: " & just_right(the_SJNS_depth'Image, 3)
-   598.                  );
-   599.       end if;
-   600.       if INS.Qq /= 0 and then
-   601.             INS_uses_Qq  then
-   602.          log(just_right("Q" & trimmed(INS.Qq'Image), 3) & ": ");
-   603.          show_Q_register(the_Q_store(INS.Qq));
-   604.          log("  = ");
-   605.          show_Q_in_decimal(the_Q_store(INS.Qq));
-   606.          log_new_line;
-   607.       end if;
-   608.       if INS.Qk /= 0                       and then
-   609.             INS.kind in two_syllable_order and then
-   610.                it_uses_Qk(INS.compressed_opcode)    and then
-   611.                   INS.Qq /= INS.Qk             then
-   612.          log(just_right("Q" & trimmed(INS.Qk'Image), 3) & ": ");
-   613.          show_Q_register(the_Q_store(INS.Qk));
-   614.          log("  = ");
-   615.          show_Q_in_decimal(the_Q_store(INS.Qk));
-   616.          log_new_line;
-   617.          log_new_line;
-   618.       end if;
-   619.       show_V_and_T;
-   620.       show_NEST(when_empty => False);
-   621.       log_rule;
-   622.    end short_witness;
-   623.
-   624.    procedure show_frequency_plots is
+   591.
+   592.       if it_uses_JB(INS.compressed_opcode)                     and then
+   593.             INS.kind in two_syllable_order | normal_jump_order and then
+   594.                the_SJNS_depth > 0                                  then
+   595.          log_line(
+   596.                   " JB: "
+   597.                 & oct_of(the_SJNS(the_SJNS_depth-1))
+   598.                 & "; SJNS depth: " & just_right(the_SJNS_depth'Image, 3)
+   599.                  );
+   600.       end if;
+   601.
+   602.       if INS.Qq /= 0 and then
+   603.             INS_uses_Qq  then
+   604.          log(just_right("Q" & trimmed(INS.Qq'Image), 3) & ": ");
+   605.          show_Q_register(the_Q_store(INS.Qq));
+   606.          log("  = ");
+   607.          show_Q_in_decimal(the_Q_store(INS.Qq));
+   608.          log_new_line;
+   609.          need_new_line := True;
+   610.       end if;
+   611.       if INS.Qk /= 0                       and then
+   612.             INS.kind in two_syllable_order and then
+   613.                it_uses_Qk(INS.compressed_opcode)    and then
+   614.                   INS.Qq /= INS.Qk             then
+   615.          log(just_right("Q" & trimmed(INS.Qk'Image), 3) & ": ");
+   616.          show_Q_register(the_Q_store(INS.Qk));
+   617.          log("  = ");
+   618.          show_Q_in_decimal(the_Q_store(INS.Qk));
+   619.          log_new_line;
+   620.          need_new_line := True;
+   621.       end if;
+   622.       if need_new_line then
+   623.          log_new_line;
+   624.       end if;
    625.
-   626.       function summed_counts (from, to : KDF9.syllable)
-   627.       return KDF9.order_counter is
-   628.          sum : KDF9.order_counter := 0;
-   629.       begin
-   630.          for i in from .. to loop
-   631.             sum := sum + the_histogram(i);
-   632.          end loop;
-   633.          return sum;
-   634.       end summed_counts;
-   635.
-   636.       procedure log_opcode_bin (bin    : in KDF9.syllable;
-   637.                                 sum    : in KDF9.order_counter;
-   638.                                 bound  : in Long_Float) is
-   639.          percent : Long_Float;
-   640.          image   : String(1 .. 6);
-   641.       begin
-   642.          if sum /= 0 then
-   643.             percent := Long_Float(sum)/Long_Float(ICR)*100.0;
-   644.             if percent < bound then
-   645.                return;
-   646.             end if;
-   647.             log(oct_of(bin) & ": " & the_short_name_of(bin));
-   648.             tab_log_to(32);
-   649.             log(sum'Image);
-   650.             tab_log_to(42);
-   651.             Put(image, percent, Aft => 2, Exp => 0);
-   652.             log(image & "% :");
-   653.             for i in 1 .. Integer(percent) loop
-   654.                log("|");
-   655.             end loop;
-   656.             log_new_line;
-   657.          end if;
-   658.       end log_opcode_bin;
-   659.
-   660.       procedure log_opcode_usage (bound : in Long_Float) is
-   661.       begin
-   662.          for i in KDF9.syllable'(0) .. 8#167# loop
-   663.             log_opcode_bin(i, the_histogram(i), bound);
-   664.          end loop;
-   665.          for i in KDF9.syllable'(8#170#) .. 8#237# loop
-   666.             log_opcode_bin(i, the_histogram(i), bound);
-   667.          end loop;
-   668.          log_opcode_bin(8#240#, summed_counts(from => 8#240#, to => 8#257#), bound);
-   669.          log_opcode_bin(8#260#, summed_counts(from => 8#240#, to => 8#277#), bound);
-   670.          for i in KDF9.syllable'(8#300#) .. 8#377# loop
-   671.             log_opcode_bin(i, the_histogram(i), bound);
-   672.          end loop;
-   673.       end log_opcode_usage;
-   674.
-   675.       accounted_for : Long_Float;
-   676.       cutoff_image  : String(1 .. 7) := "      %";
-   677.       percent_image : String(1 .. 7) := "      %";
-   678.
-   679.       procedure log_order_word_bin (bin    : in KDF9.order_word_number;
-   680.                                     sum    : in KDF9.order_counter;
-   681.                                     bound  : in Long_Float) is
-   682.          percent : Long_Float;
-   683.       begin
-   684.          if sum /= 0 then
-   685.             percent := Long_Float(sum)/Long_Float(ICR)*100.0;
-   686.             if percent < bound then
-   687.                return;
-   688.             end if;
-   689.             accounted_for := accounted_for + percent;
-   690.             log("#" & oct_of(bin) & ": ");
-   691.             tab_log_to(32);
-   692.             log(sum'Image);
-   693.             tab_log_to(42);
-   694.             Put(percent_image, percent, Aft => 2, Exp => 0);
-   695.             percent_image(7) := '%';
-   696.             log(percent_image);
-   697.             log(" :");
-   698.             for i in 1 .. Integer(percent) loop
-   699.                log("|");
-   700.             end loop;
-   701.             log_new_line;
-   702.          end if;
-   703.       end log_order_word_bin;
-   704.
-   705.       procedure log_profile (bound : in Long_Float) is
-   706.       begin
-   707.          accounted_for := 0.0;
-   708.          for w in KDF9.order_word_number loop
-   709.             if the_profile(w) /= 0 then
-   710.                log_order_word_bin(w, the_profile(w), bound);
-   711.             end if;
-   712.          end loop;
-   713.       end log_profile;
-   714.
-   715.       procedure sum_logged_frequencies (bound  : in Long_Float) is
-   716.          percent : Long_Float;
-   717.       begin
-   718.          accounted_for := 0.0;
-   719.          for w in KDF9.order_word_number loop
-   720.             percent := Long_Float(the_profile(w))/Long_Float(ICR)*100.0;
-   721.             if percent >= bound then
-   722.                accounted_for := accounted_for + percent;
-   723.             end if;
-   724.          end loop;
-   725.       end sum_logged_frequencies;
-   726.
-   727.    begin -- show_frequency_plots
-   728.       Put(cutoff_image(1..6), histogram_cutoff, Aft => 2, Exp => 0);
-   729.       cutoff_image(7) := '%';
-   730.       if the_INS_plot_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
-   731.          -- Print the instruction execution-frequency histogram.
-   732.          log_title(
-   733.                    "Histogram of the opcodes of"
-   734.                  & ICR'Image
-   735.                  & " executed instructions with frequency >="
-   736.                  & cutoff_image
-   737.                   );
-   738.          log_opcode_usage(bound => histogram_cutoff);
-   739.          log_new_line;
-   740.       end if;
-   741.       if the_profile_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
-   742.          log_title(
-   743.                    "Histogram of the loci of"
-   744.                  & ICR'Image
-   745.                  & " executed instructions with frequency >="
-   746.                  & cutoff_image
-   747.                   );
-   748.          log_profile(bound => histogram_cutoff);
-   749.          log_new_line;
-   750.       end if;
-   751.       sum_logged_frequencies(bound => histogram_cutoff);
-   752.       Put(percent_image(1..6), accounted_for, Aft =>1, Exp => 0);
-   753.       log_line("Executions accounted for in the profile:" & percent_image);
-   754.       log_rule;
-   755.    end show_frequency_plots;
-   756.
-   757.    function as_RFIR (K4_word : KDF9.word)
-   758.    return KDF9.RFIR is
-   759.       mask : KDF9.word := 2**16;
-   760.       RFIR : KDF9.RFIR := (others => False);
-   761.    begin
-   762.       for r in reverse KDF9.interrupt_number loop
-   763.          if (K4_word and mask) /= 0 then
-   764.             RFIR(r) := True;
-   765.          end if;
-   766.          mask := 2 * mask;
-   767.       end loop;
-   768.       return RFIR;
-   769.    end as_RFIR;
-   770.
-   771.    function for_FH_disc (compressed_opcode : KDF9.compressed_opcode; Pxy_bits : KDF9.Q_number)
-   772.    return Boolean
-   773.    is (case compressed_opcode is
-   774.           when PIA_PIC_CLO_TLO_Qq     => Pxy_bits = PIC_bits,
-   775.           when PIB_PID_Qq             => Pxy_bits = PID_bits,
-   776.           when PIE_PIG_Qq             => Pxy_bits = PIG_bits,
-   777.           when PIF_PIH_Qq             => Pxy_bits = PIH_bits,
-   778.           when POA_POC_POE_POF_PMH_Qq => Pxy_bits = POC_bits,
-   779.           when POB_POD_Qq             => Pxy_bits = POD_bits,
-   780.           when POG_POL_Qq             => Pxy_bits = POL_bits,
-   781.           when POH_POK_Qq             => Pxy_bits = POK_bits,
-   782.           when others                 => False
-   783.       );
-   784.
-   785.
-   786.    first_col   : constant := 17;
-   787.    device_col  : constant := first_col + 20;
-   788.    operand_col : constant := device_col;
-   789.    event_col   : constant := operand_col + 4;
-   790.    is_D_col    : constant := event_col + 29;
-   791.    depth_col   : constant := operand_col + 29;
-   792.    time_col    : constant := depth_col + 11;
-   793.    ICR_col     : constant := time_col + 13;
-   794.
-   795.    procedure show_retro_FIFO is
-   796.
-   797.       RFIR_id : constant array (KDF9.interrupt_number) of Character
-   798.               := ('P', 'F', 'I', 'N', 'E', 'S', 'O', 'R', 'Y', 'Z');
-   799.       image   : String(1 .. 21);
-   800.       RFIR    : KDF9.RFIR;
-   801.    begin
-   802.       if retro_FIFO_count = 0 then
-   803.          return;
-   804.       end if;
-   805.       log_title("Retrospective trace of all instructions.");
-   806.       tab_log_to(depth_col);
-   807.       log_line("ND SD VTD   CPU TIME     ICR");
-   808.       for i in 1 .. retro_FIFO_count loop
-   809.          if i = 1 then
-   810.             log("Ended ");
-   811.          else
-   812.             log("After ");
-   813.          end if;
-   814.          declare
-   815.             this      : tracing.retro_FIFO_entry renames retro_FIFO(retro_FIFO_index);
-   816.             Q         : constant KDF9.Q_register := as_Q(this.parameter);
-   817.             decoded   : KDF9.decoded_order;
-   818.          begin
-   819.             log(oct_of(this.location) & ":");
-   820.             tab_log_to(first_col);
-   821.             decoded.order := this.order;
-   822.             decode(decoded);
-   823.             log(the_full_name_of(decoded,
-   824.                                  octal_option => decoded.kind = normal_jump_order,
-   825.                                  both_bases   => False));
-   826.             tab_log_to(operand_col);
-   827.             case decoded.kind is
-   828.                when one_syllable_order =>
-   829.                   if this.nested > 0 then
-   830.                      case decoded.compressed_opcode is
-   831.                         when DIV
-   832.                            | DIVD
-   833.                            | X_frac =>
-   834.                            log(CPU.fraction'Image(as_fraction(this.parameter)));
-   835.                         when DIVI =>
-   836.                            log(CPU.signed'Image(resign(this.parameter)));
-   837.                         when STAND
-   838.                            | ABSF
-   839.                            | DIVDF
-   840.                            | DIVF
-   841.                            | FLOAT_9
-   842.                            | FLOATD
-   843.                            | MINUSDF
-   844.                            | MINUSF
-   845.                            | NEGDF
-   846.                            | NEGF
-   847.                            | PLUSDF
-   848.                            | PLUSF
-   849.                            | ROUNDF
-   850.                            | ROUNDHF
-   851.                            | XDF
-   852.                            | XF
-   853.                            | XPLUSF
-   854.                            | MAXF =>
-   855.                            Put(image, host_float(CPU.f48(this.parameter)), Aft => 12, Exp => 2);
-   856.                            log(trimmed(image));
-   857.                         when others =>
-   858.                            if this.nested > 0 then
-   859.                               log_octal(this.parameter);
-   860.                            end if;
-   861.                      end case;
-   862.                   end if;
-   863.                when two_syllable_order =>
-   864.                   case decoded.compressed_opcode is
-   865.                      when PAR_Qq =>
-   866.                         show_IO_register(Q, for_DR => False, for_FD => False);
-   867.                      when CT_PMB_PMC_BUSY_Qq
-   868.                         | PMA_PMK_INT_Qq
-   869.                         | PMD_PME_PML_Qq
-   870.                         | PMF_PMG_Qq =>
-   871.                         show_IO_register(
-   872.                                          Q,
-   873.                                          for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
-   874.                                          for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-   875.                                          for_seek => decoded.Qk = PMA_bits
-   876.                                         );
-   877.                      when PIA_PIC_CLO_TLO_Qq
-   878.                         | PIB_PID_Qq
-   879.                         | PIE_PIG_Qq
-   880.                         | PIF_PIH_Qq
-   881.                         | POA_POC_POE_POF_PMH_Qq
-   882.                         | POB_POD_Qq
-   883.                         | POG_POL_Qq
-   884.                         | POH_POK_Qq =>
-   885.                         show_IO_register(
-   886.                                          Q,
-   887.                                          for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
-   888.                                          for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-   889.                                          for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk)
-   890.                                         );
-   891.                      when M_PLUS_Iq
-   892.                         | M_MINUS_Iq
-   893.                         | NCq
-   894.                         | DCq
-   895.                         | POS1_TO_Iq
-   896.                         | NEG1_TO_Iq
-   897.                         | POS2_TO_Iq
-   898.                         | NEG2_TO_Iq
-   899.                         | CqTOQk
-   900.                         | IqTOQk
-   901.                         | MqTOQk
-   902.                         | QqTOQk
-   903.                         | CIqTOQk
-   904.                         | IMqTOQk
-   905.                         | CMqTOQk
-   906.                         | TO_RCIMq
-   907.                         | ADD_TO_QCIMq
-   908.                         | JCqNZS =>
-   909.                         show_Q_register(Q);
-   910.                      when Kk =>
-   911.                         case decoded.Qk is
-   912.                            when K4 =>
-   913.                               log(KDF9.word'Image(32*KDF9.word(Q.C)));
-   914.                               log("us");
-   915.                               if Q.I /= 0 then
-   916.                                  log("; RFIR: ");
-   917.                                  RFIR := as_RFIR(this.parameter);
-   918.                                  for r in KDF9.interrupt_number loop
-   919.                                     if RFIR(r) then
-   920.                                        log(RFIR_id(r)&"");
-   921.                                     end if;
-   922.                                  end loop;
-   923.                               end if;
-   924.                               if resign(this.parameter) < 0 then
-   925.                                  log("C");
-   926.                               end if;
-   927.                            when K5 | K7 =>
-   928.                               log_octal(this.parameter);
-   929.                            when others =>
-   930.                               log("invalid K order: #" & oct_of(decoded.compressed_opcode));
-   931.                         end case;
-   932.                      when TO_LINK =>
-   933.                         log(oct_of(as_link(this.parameter)));
-   934.                      when LINK =>
-   935.                         log(oct_of(as_link(this.parameter)));
-   936.                      when TO_MkMq
-   937.                         | TO_MkMqQ
-   938.                         | TO_MkMqH
-   939.                         | TO_MkMqQH
-   940.                         | TO_MkMqN
-   941.                         | TO_MkMqQN
-   942.                         | TO_MkMqHN
-   943.                         | TO_MkMqQHN =>
-   944.                         log_octal(this.parameter);
-   945.                      when others =>
-   946.                         if this.nested > 0 then
-   947.                            log_octal(this.parameter);
-   948.                         end if;
-   949.                   end case;
-   950.                when normal_jump_order =>
-   951.                   case decoded.compressed_opcode is
-   952.                      when Jr
-   953.                         | JSr =>
-   954.                         log(oct_of(as_link(this.parameter)));
-   955.                      when EXIT_n =>
-   956.                         if this.parameter < 8 then
-   957.                            log(this.parameter'Image);
-   958.                         else
-   959.                            log(oct_of(as_link(this.parameter)));
-   960.                         end if;
-   961.                      when EXITD =>
-   962.                         log(oct_of(as_link(this.parameter)));
-   963.                      when JrCqZ
-   964.                         | JrCqNZ =>
-   965.                         show_Q_register(Q);
-   966.                      when OS_OUT =>
-   967.                         if this.parameter < 16 then
-   968.                            log_octal(this.parameter);
-   969.                         elsif this.parameter < 64 then
-   970.                            log(this.parameter'Image);
-   971.                         elsif this.parameter > 2**47 then
-   972.                            log_octal(this.parameter);
-   973.                         else
-   974.                            show_Q_register(Q);
-   975.                         end if;
-   976.                      when JrEJ
-   977.                         | JrNEJ
-   978.                         | JrEN
-   979.                         | JrNEN =>
-   980.                            log(this.parameter'Image);
-   981.                      when JrTR
-   982.                         | JrV =>
-   983.                            log(Boolean'Image(Boolean'Val(this.parameter)));
-   984.                      when JrNTR
-   985.                         | JrNV =>
-   986.                            log(Boolean'Image(not Boolean'Val(this.parameter)));
-   987.                      when others =>
-   988.                         if this.nested > 0 then
-   989.                            log_octal(this.parameter);
-   990.                         end if;
-   991.                      end case;
-   992.                when others =>
-   993.                   if this.nested > 0 then
-   994.                      log_octal(this.parameter);
-   995.                   end if;
-   996.             end case;
-   997.             tab_log_to(depth_col);
-   998.             log(just_right(this.nested'Image,2));
-   999.             log(" ");
-  1000.             log(just_right(this.called'Image,2));
-  1001.             log(" ");
-  1002.             log(if this.V then "V" else " ");
-  1003.             log(if this.T then "T" else " ");
-  1004.             log(if this.D then "D" else " ");
-  1005.             tab_log_to(time_col);
-  1006.             log(this.CPU_time'Image);
-  1007.             tab_log_to(ICR_col);
-  1008.             log(this.ICR_value'Image);
-  1009.             log_new_line;
-  1010.          end;
-  1011.          retro_FIFO_index := retro_FIFO_index - 1;
-  1012.       end loop;
-  1013.       if retro_FIFO_count = FIFO_size then
-  1014.          log("After earlier instructions, whose tracing is now lost.");
-  1015.       else
-  1016.          log("After the start of traced execution.");
-  1017.       end if;
-  1018.       log_new_line;
-  1019.       log_rule;
-  1020.    end show_retro_FIFO;
-  1021.
-  1022.    the_final_ICR : KDF9.order_counter := 0;
-  1023.
-  1024.    procedure notify_state_display_of_final_ICR is
-  1025.    begin
-  1026.       the_final_ICR := ICR;
-  1027.    end notify_state_display_of_final_ICR;
+   626.       show_V_and_T;
+   627.       show_NEST;
+   628.       log_rule;
+   629.    end short_witness;
+   630.
+   631.    procedure show_frequency_plots is
+   632.
+   633.       function summed_counts (from, to : KDF9.syllable)
+   634.       return KDF9.order_counter is
+   635.          sum : KDF9.order_counter := 0;
+   636.       begin
+   637.          for i in from .. to loop
+   638.             sum := sum + the_histogram(i);
+   639.          end loop;
+   640.          return sum;
+   641.       end summed_counts;
+   642.
+   643.       procedure log_opcode_bin (bin    : in KDF9.syllable;
+   644.                                 sum    : in KDF9.order_counter;
+   645.                                 bound  : in Long_Float) is
+   646.          percent : Long_Float;
+   647.          image   : String(1 .. 6);
+   648.       begin
+   649.          if sum /= 0 then
+   650.             percent := Long_Float(sum)/Long_Float(ICR)*100.0;
+   651.             if percent < bound then
+   652.                return;
+   653.             end if;
+   654.             log(oct_of(bin) & ": " & the_short_name_of(bin));
+   655.             tab_log_to(32);
+   656.             log(sum'Image);
+   657.             tab_log_to(42);
+   658.             Put(image, percent, Aft => 2, Exp => 0);
+   659.             log(image & "% :");
+   660.             for i in 1 .. Integer(percent) loop
+   661.                log("|");
+   662.             end loop;
+   663.             log_new_line;
+   664.          end if;
+   665.       end log_opcode_bin;
+   666.
+   667.       procedure log_opcode_usage (bound : in Long_Float) is
+   668.       begin
+   669.          for i in KDF9.syllable'(0) .. 8#167# loop
+   670.             log_opcode_bin(i, the_histogram(i), bound);
+   671.          end loop;
+   672.          for i in KDF9.syllable'(8#170#) .. 8#237# loop
+   673.             log_opcode_bin(i, the_histogram(i), bound);
+   674.          end loop;
+   675.          log_opcode_bin(8#240#, summed_counts(from => 8#240#, to => 8#257#), bound);
+   676.          log_opcode_bin(8#260#, summed_counts(from => 8#240#, to => 8#277#), bound);
+   677.          for i in KDF9.syllable'(8#300#) .. 8#377# loop
+   678.             log_opcode_bin(i, the_histogram(i), bound);
+   679.          end loop;
+   680.       end log_opcode_usage;
+   681.
+   682.       accounted_for : Long_Float;
+   683.       cutoff_image  : String(1 .. 7) := "      %";
+   684.       percent_image : String(1 .. 7) := "      %";
+   685.
+   686.       procedure log_order_word_bin (bin    : in KDF9.order_word_number;
+   687.                                     sum    : in KDF9.order_counter;
+   688.                                     bound  : in Long_Float) is
+   689.          percent : Long_Float;
+   690.       begin
+   691.          if sum /= 0 then
+   692.             percent := Long_Float(sum)/Long_Float(ICR)*100.0;
+   693.             if percent < bound then
+   694.                return;
+   695.             end if;
+   696.             accounted_for := accounted_for + percent;
+   697.             log("#" & oct_of(bin) & ": ");
+   698.             tab_log_to(32);
+   699.             log(sum'Image);
+   700.             tab_log_to(42);
+   701.             Put(percent_image, percent, Aft => 2, Exp => 0);
+   702.             percent_image(7) := '%';
+   703.             log(percent_image);
+   704.             log(" :");
+   705.             for i in 1 .. Integer(percent) loop
+   706.                log("|");
+   707.             end loop;
+   708.             log_new_line;
+   709.          end if;
+   710.       end log_order_word_bin;
+   711.
+   712.       procedure log_profile (bound : in Long_Float) is
+   713.       begin
+   714.          accounted_for := 0.0;
+   715.          for w in KDF9.order_word_number loop
+   716.             if the_profile(w) /= 0 then
+   717.                log_order_word_bin(w, the_profile(w), bound);
+   718.             end if;
+   719.          end loop;
+   720.       end log_profile;
+   721.
+   722.       procedure sum_logged_frequencies (bound  : in Long_Float) is
+   723.          percent : Long_Float;
+   724.       begin
+   725.          accounted_for := 0.0;
+   726.          for w in KDF9.order_word_number loop
+   727.             percent := Long_Float(the_profile(w))/Long_Float(ICR)*100.0;
+   728.             if percent >= bound then
+   729.                accounted_for := accounted_for + percent;
+   730.             end if;
+   731.          end loop;
+   732.       end sum_logged_frequencies;
+   733.
+   734.    begin -- show_frequency_plots
+   735.       Put(cutoff_image(1..6), histogram_cutoff, Aft => 2, Exp => 0);
+   736.       cutoff_image(7) := '%';
+   737.       if the_INS_plot_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
+   738.          -- Print the instruction execution-frequency histogram.
+   739.          log_title(
+   740.                    "Histogram of the opcodes of"
+   741.                  & ICR'Image
+   742.                  & " executed instructions with frequency >="
+   743.                  & cutoff_image
+   744.                   );
+   745.          log_opcode_usage(bound => histogram_cutoff);
+   746.          log_new_line;
+   747.       end if;
+   748.       if the_profile_is_wanted and ICR /= 0 and the_diagnostic_mode /= fast_mode then
+   749.          log_title(
+   750.                    "Histogram of the loci of"
+   751.                  & ICR'Image
+   752.                  & " executed instructions with frequency >="
+   753.                  & cutoff_image
+   754.                   );
+   755.          log_profile(bound => histogram_cutoff);
+   756.          log_new_line;
+   757.       end if;
+   758.       sum_logged_frequencies(bound => histogram_cutoff);
+   759.       Put(percent_image(1..6), accounted_for, Aft =>1, Exp => 0);
+   760.       log_line("Executions accounted for in the profile:" & percent_image);
+   761.       log_rule;
+   762.    end show_frequency_plots;
+   763.
+   764.    function as_RFIR (K4_word : KDF9.word)
+   765.    return KDF9.RFIR is
+   766.       mask : KDF9.word := 2**16;
+   767.       RFIR : KDF9.RFIR := (others => False);
+   768.    begin
+   769.       for r in reverse KDF9.interrupt_number loop
+   770.          if (K4_word and mask) /= 0 then
+   771.             RFIR(r) := True;
+   772.          end if;
+   773.          mask := 2 * mask;
+   774.       end loop;
+   775.       return RFIR;
+   776.    end as_RFIR;
+   777.
+   778.    function for_FH_disc (compressed_opcode : KDF9.compressed_opcode; Pxy_bits : KDF9.Q_number)
+   779.    return Boolean
+   780.    is (case compressed_opcode is
+   781.           when PIA_PIC_CLO_TLO_Qq     => Pxy_bits = PIC_bits,
+   782.           when PIB_PID_Qq             => Pxy_bits = PID_bits,
+   783.           when PIE_PIG_Qq             => Pxy_bits = PIG_bits,
+   784.           when PIF_PIH_Qq             => Pxy_bits = PIH_bits,
+   785.           when POA_POC_POE_POF_PMH_Qq => Pxy_bits = POC_bits,
+   786.           when POB_POD_Qq             => Pxy_bits = POD_bits,
+   787.           when POG_POL_Qq             => Pxy_bits = POL_bits,
+   788.           when POH_POK_Qq             => Pxy_bits = POK_bits,
+   789.           when others                 => False
+   790.       );
+   791.
+   792.
+   793.    first_col   : constant := 17;
+   794.    device_col  : constant := first_col + 20;
+   795.    operand_col : constant := device_col;
+   796.    event_col   : constant := operand_col + 4;
+   797.    is_D_col    : constant := event_col + 29;
+   798.    depth_col   : constant := operand_col + 29;
+   799.    time_col    : constant := depth_col + 11;
+   800.    ICR_col     : constant := time_col + 13;
+   801.
+   802.    procedure show_retro_FIFO is
+   803.
+   804.       RFIR_id : constant array (KDF9.interrupt_number) of Character
+   805.               := ('P', 'F', 'I', 'N', 'E', 'S', 'O', 'R', 'Y', 'Z');
+   806.       image   : String(1 .. 21);
+   807.       RFIR    : KDF9.RFIR;
+   808.    begin
+   809.       if retro_FIFO_count = 0 then
+   810.          return;
+   811.       end if;
+   812.       log_title("Retrospective trace of all instructions.");
+   813.       tab_log_to(depth_col);
+   814.       log_line("ND SD VTD   CPU TIME     ICR");
+   815.       for i in 1 .. retro_FIFO_count loop
+   816.          if i = 1 then
+   817.             log("Ended ");
+   818.          else
+   819.             log("After ");
+   820.          end if;
+   821.          declare
+   822.             this      : tracing.retro_FIFO_entry renames retro_FIFO(retro_FIFO_index);
+   823.             Q         : constant KDF9.Q_register := as_Q(this.parameter);
+   824.             decoded   : KDF9.decoded_order;
+   825.          begin
+   826.             log(oct_of(this.location) & ":");
+   827.             tab_log_to(first_col);
+   828.             decoded.order := this.order;
+   829.             decode(decoded);
+   830.             log(the_full_name_of(decoded,
+   831.                                  octal_option => decoded.kind = normal_jump_order,
+   832.                                  both_bases   => False));
+   833.             tab_log_to(operand_col);
+   834.             case decoded.kind is
+   835.                when one_syllable_order =>
+   836.                   if this.nested > 0 then
+   837.                      case decoded.compressed_opcode is
+   838.                         when DIV
+   839.                            | DIVD
+   840.                            | X_frac =>
+   841.                            log(CPU.fraction'Image(as_fraction(this.parameter)));
+   842.                         when DIVI =>
+   843.                            log(CPU.signed'Image(resign(this.parameter)));
+   844.                         when STAND
+   845.                            | ABSF
+   846.                            | DIVDF
+   847.                            | DIVF
+   848.                            | FLOAT_9
+   849.                            | FLOATD
+   850.                            | MINUSDF
+   851.                            | MINUSF
+   852.                            | NEGDF
+   853.                            | NEGF
+   854.                            | PLUSDF
+   855.                            | PLUSF
+   856.                            | ROUNDF
+   857.                            | ROUNDHF
+   858.                            | XDF
+   859.                            | XF
+   860.                            | XPLUSF
+   861.                            | MAXF =>
+   862.                            Put(image, host_float(CPU.f48(this.parameter)), Aft => 12, Exp => 2);
+   863.                            log(trimmed(image));
+   864.                         when others =>
+   865.                            if this.nested > 0 then
+   866.                               log_octal(this.parameter);
+   867.                            end if;
+   868.                      end case;
+   869.                   end if;
+   870.                when two_syllable_order =>
+   871.                   case decoded.compressed_opcode is
+   872.                      when PAR_Qq =>
+   873.                         show_IO_register(Q, for_DR => False, for_FD => False);
+   874.                      when CT_PMB_PMC_BUSY_Qq
+   875.                         | PMA_PMK_INT_Qq
+   876.                         | PMD_PME_PML_Qq
+   877.                         | PMF_PMG_Qq =>
+   878.                         show_IO_register(
+   879.                                          Q,
+   880.                                          for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+   881.                                          for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+   882.                                          for_seek => decoded.Qk = PMA_bits
+   883.                                         );
+   884.                      when PIA_PIC_CLO_TLO_Qq
+   885.                         | PIB_PID_Qq
+   886.                         | PIE_PIG_Qq
+   887.                         | PIF_PIH_Qq
+   888.                         | POA_POC_POE_POF_PMH_Qq
+   889.                         | POB_POD_Qq
+   890.                         | POG_POL_Qq
+   891.                         | POH_POK_Qq =>
+   892.                         show_IO_register(
+   893.                                          Q,
+   894.                                          for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+   895.                                          for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+   896.                                          for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk)
+   897.                                         );
+   898.                      when M_PLUS_Iq
+   899.                         | M_MINUS_Iq
+   900.                         | NCq
+   901.                         | DCq
+   902.                         | POS1_TO_Iq
+   903.                         | NEG1_TO_Iq
+   904.                         | POS2_TO_Iq
+   905.                         | NEG2_TO_Iq
+   906.                         | CqTOQk
+   907.                         | IqTOQk
+   908.                         | MqTOQk
+   909.                         | QqTOQk
+   910.                         | CIqTOQk
+   911.                         | IMqTOQk
+   912.                         | CMqTOQk
+   913.                         | TO_RCIMq
+   914.                         | ADD_TO_QCIMq
+   915.                         | JCqNZS =>
+   916.                         show_Q_register(Q);
+   917.                      when Kk =>
+   918.                         case decoded.Qk is
+   919.                            when K4 =>
+   920.                               log(KDF9.word'Image(32*KDF9.word(Q.C)));
+   921.                               log("us");
+   922.                               if Q.I /= 0 then
+   923.                                  log("; RFIR: ");
+   924.                                  RFIR := as_RFIR(this.parameter);
+   925.                                  for r in KDF9.interrupt_number loop
+   926.                                     if RFIR(r) then
+   927.                                        log(RFIR_id(r)&"");
+   928.                                     end if;
+   929.                                  end loop;
+   930.                               end if;
+   931.                               if resign(this.parameter) < 0 then
+   932.                                  log("C");
+   933.                               end if;
+   934.                            when K5 | K7 =>
+   935.                               log_octal(this.parameter);
+   936.                            when others =>
+   937.                               log("invalid K order: #" & oct_of(decoded.compressed_opcode));
+   938.                         end case;
+   939.                      when TO_LINK =>
+   940.                         log(oct_of(as_link(this.parameter)));
+   941.                      when LINK =>
+   942.                         log(oct_of(as_link(this.parameter)));
+   943.                      when TO_MkMq
+   944.                         | TO_MkMqQ
+   945.                         | TO_MkMqH
+   946.                         | TO_MkMqQH
+   947.                         | TO_MkMqN
+   948.                         | TO_MkMqQN
+   949.                         | TO_MkMqHN
+   950.                         | TO_MkMqQHN =>
+   951.                         log_octal(this.parameter);
+   952.                      when others =>
+   953.                         if this.nested > 0 then
+   954.                            log_octal(this.parameter);
+   955.                         end if;
+   956.                   end case;
+   957.                when normal_jump_order =>
+   958.                   case decoded.compressed_opcode is
+   959.                      when Jr
+   960.                         | JSr =>
+   961.                         log(oct_of(as_link(this.parameter)));
+   962.                      when EXIT_n =>
+   963.                         if this.parameter < 8 then
+   964.                            log(this.parameter'Image);
+   965.                         else
+   966.                            log(oct_of(as_link(this.parameter)));
+   967.                         end if;
+   968.                      when EXITD =>
+   969.                         log(oct_of(as_link(this.parameter)));
+   970.                      when JrCqZ
+   971.                         | JrCqNZ =>
+   972.                         show_Q_register(Q);
+   973.                      when OS_OUT =>
+   974.                         if this.parameter < 16 then
+   975.                            log_octal(this.parameter);
+   976.                         elsif this.parameter < 64 then
+   977.                            log(this.parameter'Image);
+   978.                         elsif this.parameter > 2**47 then
+   979.                            log_octal(this.parameter);
+   980.                         else
+   981.                            show_Q_register(Q);
+   982.                         end if;
+   983.                      when JrEJ
+   984.                         | JrNEJ
+   985.                         | JrEN
+   986.                         | JrNEN =>
+   987.                            log(this.parameter'Image);
+   988.                      when JrTR
+   989.                         | JrV =>
+   990.                            log(Boolean'Image(Boolean'Val(this.parameter)));
+   991.                      when JrNTR
+   992.                         | JrNV =>
+   993.                            log(Boolean'Image(not Boolean'Val(this.parameter)));
+   994.                      when others =>
+   995.                         if this.nested > 0 then
+   996.                            log_octal(this.parameter);
+   997.                         end if;
+   998.                      end case;
+   999.                when others =>
+  1000.                   if this.nested > 0 then
+  1001.                      log_octal(this.parameter);
+  1002.                   end if;
+  1003.             end case;
+  1004.             tab_log_to(depth_col);
+  1005.             log(just_right(this.nested'Image,2));
+  1006.             log(" ");
+  1007.             log(just_right(this.called'Image,2));
+  1008.             log(" ");
+  1009.             log(if this.V then "V" else " ");
+  1010.             log(if this.T then "T" else " ");
+  1011.             log(if this.D then "D" else " ");
+  1012.             tab_log_to(time_col);
+  1013.             log(this.CPU_time'Image);
+  1014.             tab_log_to(ICR_col);
+  1015.             log(this.ICR_value'Image);
+  1016.             log_new_line;
+  1017.          end;
+  1018.          retro_FIFO_index := retro_FIFO_index - 1;
+  1019.       end loop;
+  1020.       if retro_FIFO_count = FIFO_size then
+  1021.          log("After earlier instructions, whose tracing is now lost.");
+  1022.       else
+  1023.          log("After the start of traced execution.");
+  1024.       end if;
+  1025.       log_new_line;
+  1026.       log_rule;
+  1027.    end show_retro_FIFO;
   1028.
-  1029.    procedure show_IOC_FIFO is
-  1030.    begin
-  1031.       if IOC_FIFO_count = 0 then return; end if;
-  1032.       log_title("Retrospective trace of peripheral I/O events.");
-  1033.       tab_log_to(is_D_col);
-  1034.       log_line("CPL T   EL. TIME     ICR");
-  1035.       for i in 1 .. IOC_FIFO_count loop
-  1036.          if i = 1 then
-  1037.             log("Ended ");
-  1038.          else
-  1039.             log("After ");
-  1040.          end if;
-  1041.
-  1042.          declare
-  1043.             this    : tracing.IOC_FIFO_entry renames IOC_FIFO(IOC_FIFO_index);
-  1044.             decoded : constant KDF9.decoded_order := this.decoded_order;
-  1045.
-  1046.             procedure show_transfer (
-  1047.                                      Q                 : in KDF9.Q_register;
-  1048.                                      for_OUT, for_seek : in Boolean := False
-  1049.                                     ) is
-  1050.             begin
-  1051.                case decoded.compressed_opcode is
-  1052.                   when PAR_Qq =>
-  1053.                      show_IO_register(Q, for_DR => False, for_FD => False);
-  1054.                   when CT_PMB_PMC_BUSY_Qq
-  1055.                      | PMA_PMK_INT_Qq
-  1056.                      | PMD_PME_PML_Qq
-  1057.                      | PMF_PMG_Qq =>
-  1058.                      show_IO_register(
-  1059.                                       Q,
-  1060.                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
-  1061.                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-  1062.                                       for_seek => (decoded.Qk in PMA_bits) or show_transfer.for_seek,
-  1063.                                       for_OUT  => show_transfer.for_OUT
-  1064.                                      );
-  1065.                   when PIA_PIC_CLO_TLO_Qq
-  1066.                      | PIB_PID_Qq
-  1067.                      | PIE_PIG_Qq
-  1068.                      | PIF_PIH_Qq
-  1069.                      | POA_POC_POE_POF_PMH_Qq
-  1070.                      | POB_POD_Qq
-  1071.                      | POG_POL_Qq
-  1072.                      | POH_POK_Qq
-  1073.                      | OS_OUT =>
-  1074.                      show_IO_register(
-  1075.                                       Q,
-  1076.                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
-  1077.                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
-  1078.                                       for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk),
-  1079.                                       for_OUT  => show_transfer.for_OUT
-  1080.                                      );
-  1081.                   when others =>
-  1082.                      log("invalid IO order: #" & oct_of(decoded.compressed_opcode));
-  1083.                end case;
-  1084.             end show_transfer;
-  1085.
-  1086.             shown_ICR : KDF9.order_counter := this.ICR_value;
-  1087.             FD_seek   : Boolean := False;
-  1088.             FD_xfer   : Boolean := False;
-  1089.
-  1090.          begin -- show_IOC_FIFO
-  1091.             log(oct_of(this.order_address) & ":");
-  1092.             tab_log_to(first_col);
-  1093.             if the_full_name_of(this.decoded_order) = "OUT"  then
-  1094.                 if this.device_name(1..2) in "MT" | "ST" and then
-  1095.                       this.ICR_value >= the_final_ICR        then
-  1096.                   log("OUT 0/2 rewind");
-  1097.                   shown_ICR := the_final_ICR + 1;
-  1098.                elsif this.device_name(1..2) in "MT" | "ST" then
-  1099.                   log("OUT 6/7 rewind");
-  1100.                elsif this.device_name(1..2) in "LP" | "TP" then
-  1101.                   log("OUT 8");
-  1102.                elsif this.device_name(1..2) = "DR" then
-  1103.                   if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
-  1104.                      log(if this.operation = output_operation then "OUT 11" else "OUT 12");
-  1105.                   else
-  1106.                      log("OUT 11/12");
-  1107.                   end if;
-  1108.                elsif this.device_name(1..2) = "FD" then
-  1109.                   if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
-  1110.                      log(if this.operation = output_operation then "OUT 41" else "OUT 42");
-  1111.                   else
-  1112.                      log("OUT 41/42 seek"); FD_seek := True;
-  1113.                   end if;
-  1114.                elsif this.device_name(1..2) = "FW" then
-  1115.                   log("OUT 8/16");
-  1116.                else
-  1117.                   log("OUT ?");
-  1118.                end if;
-  1119.             else
-  1120.                log(mnemonic(the_full_name_of(this.decoded_order), this.device_name));
-  1121.             end if;
-  1122.             tab_log_to(device_col);
-  1123.             log(this.device_name);
-  1124.             case this.kind is
-  1125.                when store_lockout =>
-  1126.                   tab_log_to(event_col);
-  1127.                   log("locks out #");
-  1128.                   log(oct_of(this.data_address));
-  1129.                   log(" = E");
-  1130.                   log(dec_of(this.data_address));
-  1131.                   tab_log_to(is_D_col);
-  1132.                   log(if this.is_for_Director then "D" else slot_name(this.context));
-  1133.                   log(this.priority_level'Image);
-  1134.                   tab_log_to(time_col);
-  1135.                   log(this.initiation_time'Image);
-  1136.                   tab_log_to(ICR_col);
-  1137.                   log(shown_ICR'Image);
-  1138.                 when buffer_lockout =>
-  1139.                   tab_log_to(event_col);
-  1140.                   log("buffer lockout");
-  1141.                   tab_log_to(is_D_col);
-  1142.                   log(if this.is_for_Director then "D" else slot_name(this.context));
-  1143.                   log(this.priority_level'Image);
-  1144.                   tab_log_to(time_col);
-  1145.                   log(this.initiation_time'Image);
-  1146.                   tab_log_to(ICR_col);
-  1147.                   log(shown_ICR'Image);
-  1148.                when start_transfer =>
-  1149.                   tab_log_to(event_col);
-  1150.                   show_transfer(this.control_word);
-  1151.                   tab_log_to(is_D_col);
-  1152.                   log(if this.is_for_Director then "D" else slot_name(this.context));
-  1153.                   log(this.priority_level'Image);
-  1154.                   tab_log_to(time_col-2);
-  1155.                   log(" S" & this.initiation_time'Image);
-  1156.                   tab_log_to(ICR_col);
-  1157.                   log(shown_ICR'Image);
-  1158.                when finis_transfer =>
-  1159.                   tab_log_to(event_col);
-  1160.                   show_transfer(this.control_word);
-  1161.                   tab_log_to(is_D_col);
-  1162.                   log(if this.is_for_Director then "D" else slot_name(this.context));
-  1163.                   log(this.priority_level'Image);
-  1164.                   tab_log_to(time_col-2);
-  1165.                   log(" E" & this.completion_time'Image);
-  1166.                   tab_log_to(ICR_col);
-  1167.                   log(shown_ICR'Image);
-  1168.                when buffer_status =>
-  1169.                   tab_log_to(event_col);
-  1170.                   FD_xfer := this.device_name(1..2) = "FD";
-  1171.                   -- PMFQq entails no data transfer or seek, but has a sector address parameter.
-  1172.                   FD_seek := (FD_seek or (decoded.Qk in PMA_bits)) and FD_xfer;
-  1173.                   FD_seek := FD_seek and decoded.compressed_opcode /= PMF_PMG_Qq;
-  1174.                   show_IO_register(this.Q_register, for_FD => FD_xfer, for_seek => FD_seek);
-  1175.                   tab_log_to(is_D_col);
-  1176.                   log(if this.is_for_Director then "D" else slot_name(this.context));
-  1177.                   log(this.priority_level'Image);
-  1178.                   log(if this.status then " Y" else " N");
-  1179.                   tab_log_to(time_col);
-  1180.                   log(this.initiation_time'Image);
-  1181.                   tab_log_to(ICR_col);
-  1182.                   log(shown_ICR'Image);
-  1183.             end case;
-  1184.             log_new_line;
-  1185.          end;
-  1186.          IOC_FIFO_index := IOC_FIFO_index - 1;
-  1187.       end loop;
-  1188.       if IOC_FIFO_count = FIFO_size then
-  1189.          log_line("After earlier instructions, whose tracing is now lost.");
-  1190.       else
-  1191.          log_line("After the start of traced execution.");
-  1192.       end if;
-  1193.       log_line("Total time waiting for unoverlapped I/O to finish ="
-  1194.              & KDF9.us'Image((the_clock_time-the_CPU_time+500) / 1000)
-  1195.              & " ms.");
-  1196.       log_rule;
-  1197.    end show_IOC_FIFO;
-  1198.
-  1199.    procedure show_interrupt_FIFO is
-  1200.    begin
-  1201.       if interrupt_FIFO_count = 0 then return; end if;
-  1202.       log_title("Retrospective trace of interrupt requests.");
-  1203.       tab_log_to(is_D_col);
-  1204.       log_line("CPL     EL. TIME     ICR");
-  1205.       for i in 1 .. interrupt_FIFO_count loop
-  1206.          log(if i = 1 then "Ended " else "After ");
-  1207.          declare
-  1208.             this : tracing.interrupt_FIFO_entry renames interrupt_FIFO(interrupt_FIFO_index);
-  1209.          begin
-  1210.             log(oct_of(this.order_address) & ": ");
-  1211.             tab_log_to(first_col);
-  1212.             log(case this.interrupt_code is
-  1213.                    when caused_by_PR     => "PR   ",
-  1214.                    when caused_by_FLEX   => "FLEX ",
-  1215.                    when caused_by_LIV    => "LIV  ",
-  1216.                    when caused_by_NOUV   => "NOUV ",
-  1217.                    when caused_by_EDT    => "EDT  ",
-  1218.                    when caused_by_OUT    => "OUT  ",
-  1219.                    when caused_by_LOV     => "LOV  ",
-  1220.                    when caused_by_RESET   => "RESET",
-  1221.                    when caused_by_CLOCK   => "CLOCK",
-  1222.                    when EXITD_flag       => "EXITD"
-  1223.                );
-  1224.             tab_log_to(event_col-4);
-  1225.             log(trimmed(this.message));
-  1226.             tab_log_to(is_D_col);
-  1227.             log(slot_name(this.context));
-  1228.             log(this.priority_level'Image);
-  1229.             tab_log_to(time_col);
-  1230.             log(this.busy_time'Image);
-  1231.             tab_log_to(ICR_col);
-  1232.             log(this.ICR_value'Image);
-  1233.             log_new_line;
-  1234.          end;
-  1235.          interrupt_FIFO_index := interrupt_FIFO_index - 1;
-  1236.       end loop;
-  1237.       log(
-  1238.           if interrupt_FIFO_count = FIFO_size then
-  1239.              "After earlier interrupts, whose tracing is now lost."
-  1240.           else
-  1241.             "After the start of traced execution."
-  1242.          );
-  1243.       log_new_line;
-  1244.       log_new_line;
-  1245.    end show_interrupt_FIFO;
-  1246.
-  1247.    procedure show_retrospective_traces is
-  1248.    begin
-  1249.       if the_peripheral_trace_is_enabled then
-  1250.          pragma Debug(IOC.diagnostics);
-  1251.       end if;
-  1252.       if the_interrupt_trace_is_enabled then
-  1253.          show_interrupt_FIFO;
-  1254.       end if;
-  1255.       if the_peripheral_trace_is_enabled then
-  1256.          show_IOC_FIFO;
-  1257.       end if;
-  1258.       if the_retrospective_trace_is_enabled then
-  1259.          show_retro_FIFO;
-  1260.       end if;
-  1261.    end show_retrospective_traces;
-  1262.
-  1263.    procedure show_current_state is
-  1264.    begin
-  1265.       show_execution_context;
-  1266.       log_rule;
-  1267.       show_registers;
-  1268.       log_rule;
-  1269.    end show_current_state;
-  1270.
-  1271.    procedure show_final_state (because : in String) is
-  1272.    begin
-  1273.       if the_final_state_is_wanted then
-  1274.          if loading_was_successful then
-  1275.             -- make sure there is at least one NL after any FW output.
-  1276.             if the_log_is_wanted then
-  1277.                log_new_line;
-  1278.                log_rule;
-  1279.             else
-  1280.                log_new_line;
-  1281.             end if;
-  1282.             log_line("Final State: " & because & ".");
-  1283.             if not the_log_is_wanted then return; end if;
-  1284.             long_witness;
-  1285.             log_rule;
-  1286.
-  1287.             if nr_of_post_dumping_areas /= 0 then
-  1288.                log_title("Post-run Dump:");
-  1289.                print_postrun_dump_areas;
-  1290.             end if;
-  1291.
-  1292.             if the_INS_plot_is_wanted or the_profile_is_wanted then
-  1293.                if the_histogram_is_enabled then
-  1294.                   show_frequency_plots;
-  1295.                end if;
-  1296.             end if;
-  1297.
-  1298.             show_retrospective_traces;
-  1299.
-  1300.             if the_signature_is_enabled then
-  1301.                log_title("Digital signature of traced orders = #"
-  1302.                        & oct_of(the_digital_signature)
-  1303.                        & ".");
-  1304.             end if;
-  1305.          else
-  1306.             log_line("ee9: " & because & ".");
-  1307.             show_all_prerun_dump_areas;
-  1308.             return;
-  1309.          end if;
-  1310.       end if;
-  1311.    end show_final_state;
-  1312.
-  1313.    procedure show_all_prerun_dump_areas is
-  1314.    begin
-  1315.       if the_log_is_wanted and nr_of_pre_dumping_areas /= 0 then
-  1316.          log_title("Pre-run Dump:");
-  1317.          print_prerun_dump_areas;
-  1318.          remove_prerun_dump_areas;
-  1319.       end if;
-  1320.    end show_all_prerun_dump_areas;
-  1321.
-  1322.    increment   : constant := 8;
-  1323.    jump_tab    : constant := 12;
-  1324.    first_tab   : constant := 16;
-  1325.    last_column : constant := 80;
-  1326.
-  1327.    function is_non_blank (first : in KDF9.address)
-  1328.    return Boolean is
-  1329.       result : Boolean := False;
-  1330.    begin
-  1331.       for address in first .. first+increment-1 loop
-  1332.          result := result or (fetch_word(address) /= 0);
-  1333.       end loop;
-  1334.       return result;
-  1335.    end is_non_blank;
-  1336.
-  1337.    subtype converted_word is String(1..8);
-  1338.
-  1339.    type convertor is
-  1340.       not null access function (address : KDF9.address) return converted_word;
-  1341.
-  1342.    procedure show_core (first, last : in KDF9.address;
-  1343.                         head, side  : in String;
-  1344.                         converted   : in convertor) is
+  1029.    the_final_ICR : KDF9.order_counter := 0;
+  1030.
+  1031.    procedure notify_state_display_of_final_ICR is
+  1032.    begin
+  1033.       the_final_ICR := ICR;
+  1034.    end notify_state_display_of_final_ICR;
+  1035.
+  1036.    procedure show_IOC_FIFO is
+  1037.    begin
+  1038.       if IOC_FIFO_count = 0 then return; end if;
+  1039.       log_title("Retrospective trace of peripheral I/O events.");
+  1040.       tab_log_to(is_D_col);
+  1041.       log_line("CPL T   EL. TIME     ICR");
+  1042.       for i in 1 .. IOC_FIFO_count loop
+  1043.          if i = 1 then
+  1044.             log("Ended ");
+  1045.          else
+  1046.             log("After ");
+  1047.          end if;
+  1048.
+  1049.          declare
+  1050.             this    : tracing.IOC_FIFO_entry renames IOC_FIFO(IOC_FIFO_index);
+  1051.             decoded : constant KDF9.decoded_order := this.decoded_order;
+  1052.
+  1053.             procedure show_transfer (
+  1054.                                      Q                 : in KDF9.Q_register;
+  1055.                                      for_OUT, for_seek : in Boolean := False
+  1056.                                     ) is
+  1057.             begin
+  1058.                case decoded.compressed_opcode is
+  1059.                   when PAR_Qq =>
+  1060.                      show_IO_register(Q, for_DR => False, for_FD => False);
+  1061.                   when CT_PMB_PMC_BUSY_Qq
+  1062.                      | PMA_PMK_INT_Qq
+  1063.                      | PMD_PME_PML_Qq
+  1064.                      | PMF_PMG_Qq =>
+  1065.                      show_IO_register(
+  1066.                                       Q,
+  1067.                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+  1068.                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+  1069.                                       for_seek => (decoded.Qk in PMA_bits) or show_transfer.for_seek,
+  1070.                                       for_OUT  => show_transfer.for_OUT
+  1071.                                      );
+  1072.                   when PIA_PIC_CLO_TLO_Qq
+  1073.                      | PIB_PID_Qq
+  1074.                      | PIE_PIG_Qq
+  1075.                      | PIF_PIH_Qq
+  1076.                      | POA_POC_POE_POF_PMH_Qq
+  1077.                      | POB_POD_Qq
+  1078.                      | POG_POL_Qq
+  1079.                      | POH_POK_Qq
+  1080.                      | OS_OUT =>
+  1081.                      show_IO_register(
+  1082.                                       Q,
+  1083.                                       for_DR   => device_kind_of(Q.C mod 16) = DR_kind,
+  1084.                                       for_FD   => device_kind_of(Q.C mod 16) = FD_kind,
+  1085.                                       for_FH   => for_FH_disc(decoded.compressed_opcode, decoded.Qk),
+  1086.                                       for_OUT  => show_transfer.for_OUT
+  1087.                                      );
+  1088.                   when others =>
+  1089.                      log("invalid IO order: #" & oct_of(decoded.compressed_opcode));
+  1090.                end case;
+  1091.             end show_transfer;
+  1092.
+  1093.             shown_ICR : KDF9.order_counter := this.ICR_value;
+  1094.             FD_seek   : Boolean := False;
+  1095.             FD_xfer   : Boolean := False;
+  1096.
+  1097.          begin -- show_IOC_FIFO
+  1098.             log(oct_of(this.order_address) & ":");
+  1099.             tab_log_to(first_col);
+  1100.             if the_full_name_of(this.decoded_order) = "OUT"  then
+  1101.                 if this.device_name(1..2) in "MT" | "ST" and then
+  1102.                       this.ICR_value >= the_final_ICR        then
+  1103.                   log("OUT 0/2 rewind");
+  1104.                   shown_ICR := the_final_ICR + 1;
+  1105.                elsif this.device_name(1..2) in "MT" | "ST" then
+  1106.                   log("OUT 6/7 rewind");
+  1107.                elsif this.device_name(1..2) in "LP" | "TP" then
+  1108.                   log("OUT 8");
+  1109.                elsif this.device_name(1..2) = "DR" then
+  1110.                   if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
+  1111.                      log(if this.operation = output_operation then "OUT 11" else "OUT 12");
+  1112.                   else
+  1113.                      log("OUT 11/12");
+  1114.                   end if;
+  1115.                elsif this.device_name(1..2) = "FD" then
+  1116.                   if this.kind in start_transfer | finis_transfer | buffer_lockout | store_lockout then
+  1117.                      log(if this.operation = output_operation then "OUT 41" else "OUT 42");
+  1118.                   else
+  1119.                      log("OUT 41/42 seek"); FD_seek := True;
+  1120.                   end if;
+  1121.                elsif this.device_name(1..2) = "FW" then
+  1122.                   log("OUT 8/16");
+  1123.                else
+  1124.                   log("OUT ?");
+  1125.                end if;
+  1126.             else
+  1127.                log(mnemonic(the_full_name_of(this.decoded_order), this.device_name));
+  1128.             end if;
+  1129.             tab_log_to(device_col);
+  1130.             log(this.device_name);
+  1131.             case this.kind is
+  1132.                when store_lockout =>
+  1133.                   tab_log_to(event_col);
+  1134.                   log("locks out #");
+  1135.                   log(oct_of(this.data_address));
+  1136.                   log(" = E");
+  1137.                   log(dec_of(this.data_address));
+  1138.                   tab_log_to(is_D_col);
+  1139.                   log(if this.is_for_Director then "D" else slot_name(this.context));
+  1140.                   log(this.priority_level'Image);
+  1141.                   tab_log_to(time_col);
+  1142.                   log(this.initiation_time'Image);
+  1143.                   tab_log_to(ICR_col);
+  1144.                   log(shown_ICR'Image);
+  1145.                 when buffer_lockout =>
+  1146.                   tab_log_to(event_col);
+  1147.                   log("buffer lockout");
+  1148.                   tab_log_to(is_D_col);
+  1149.                   log(if this.is_for_Director then "D" else slot_name(this.context));
+  1150.                   log(this.priority_level'Image);
+  1151.                   tab_log_to(time_col);
+  1152.                   log(this.initiation_time'Image);
+  1153.                   tab_log_to(ICR_col);
+  1154.                   log(shown_ICR'Image);
+  1155.                when start_transfer =>
+  1156.                   tab_log_to(event_col);
+  1157.                   show_transfer(this.control_word);
+  1158.                   tab_log_to(is_D_col);
+  1159.                   log(if this.is_for_Director then "D" else slot_name(this.context));
+  1160.                   log(this.priority_level'Image);
+  1161.                   tab_log_to(time_col-2);
+  1162.                   log(" S" & this.initiation_time'Image);
+  1163.                   tab_log_to(ICR_col);
+  1164.                   log(shown_ICR'Image);
+  1165.                when finis_transfer =>
+  1166.                   tab_log_to(event_col);
+  1167.                   show_transfer(this.control_word);
+  1168.                   tab_log_to(is_D_col);
+  1169.                   log(if this.is_for_Director then "D" else slot_name(this.context));
+  1170.                   log(this.priority_level'Image);
+  1171.                   tab_log_to(time_col-2);
+  1172.                   log(" E" & this.completion_time'Image);
+  1173.                   tab_log_to(ICR_col);
+  1174.                   log(shown_ICR'Image);
+  1175.                when buffer_status =>
+  1176.                   tab_log_to(event_col);
+  1177.                   FD_xfer := this.device_name(1..2) = "FD";
+  1178.                   -- PMFQq entails no data transfer or seek, but has a sector address parameter.
+  1179.                   FD_seek := (FD_seek or (decoded.Qk in PMA_bits)) and FD_xfer;
+  1180.                   FD_seek := FD_seek and decoded.compressed_opcode /= PMF_PMG_Qq;
+  1181.                   show_IO_register(this.Q_register, for_FD => FD_xfer, for_seek => FD_seek);
+  1182.                   tab_log_to(is_D_col);
+  1183.                   log(if this.is_for_Director then "D" else slot_name(this.context));
+  1184.                   log(this.priority_level'Image);
+  1185.                   log(if this.status then " Y" else " N");
+  1186.                   tab_log_to(time_col);
+  1187.                   log(this.initiation_time'Image);
+  1188.                   tab_log_to(ICR_col);
+  1189.                   log(shown_ICR'Image);
+  1190.             end case;
+  1191.             log_new_line;
+  1192.          end;
+  1193.          IOC_FIFO_index := IOC_FIFO_index - 1;
+  1194.       end loop;
+  1195.       if IOC_FIFO_count = FIFO_size then
+  1196.          log_line("After earlier instructions, whose tracing is now lost.");
+  1197.       else
+  1198.          log_line("After the start of traced execution.");
+  1199.       end if;
+  1200.       log_line("Total time waiting for unoverlapped I/O to finish ="
+  1201.              & KDF9.us'Image((the_clock_time-the_CPU_time+500) / 1000)
+  1202.              & " ms.");
+  1203.       log_rule;
+  1204.    end show_IOC_FIFO;
+  1205.
+  1206.    procedure show_interrupt_FIFO is
+  1207.    begin
+  1208.       if interrupt_FIFO_count = 0 then return; end if;
+  1209.       log_title("Retrospective trace of interrupt requests.");
+  1210.       tab_log_to(is_D_col);
+  1211.       log_line("CPL     EL. TIME     ICR");
+  1212.       for i in 1 .. interrupt_FIFO_count loop
+  1213.          log(if i = 1 then "Ended " else "After ");
+  1214.          declare
+  1215.             this : tracing.interrupt_FIFO_entry renames interrupt_FIFO(interrupt_FIFO_index);
+  1216.          begin
+  1217.             log(oct_of(this.order_address) & ": ");
+  1218.             tab_log_to(first_col);
+  1219.             log(case this.interrupt_code is
+  1220.                    when caused_by_PR     => "PR   ",
+  1221.                    when caused_by_FLEX   => "FLEX ",
+  1222.                    when caused_by_LIV    => "LIV  ",
+  1223.                    when caused_by_NOUV   => "NOUV ",
+  1224.                    when caused_by_EDT    => "EDT  ",
+  1225.                    when caused_by_OUT    => "OUT  ",
+  1226.                    when caused_by_LOV     => "LOV  ",
+  1227.                    when caused_by_RESET   => "RESET",
+  1228.                    when caused_by_CLOCK   => "CLOCK",
+  1229.                    when EXITD_flag       => "EXITD"
+  1230.                );
+  1231.             tab_log_to(event_col-4);
+  1232.             log(trimmed(this.message));
+  1233.             tab_log_to(is_D_col);
+  1234.             log(slot_name(this.context));
+  1235.             log(this.priority_level'Image);
+  1236.             tab_log_to(time_col);
+  1237.             log(this.busy_time'Image);
+  1238.             tab_log_to(ICR_col);
+  1239.             log(this.ICR_value'Image);
+  1240.             log_new_line;
+  1241.          end;
+  1242.          interrupt_FIFO_index := interrupt_FIFO_index - 1;
+  1243.       end loop;
+  1244.       log(
+  1245.           if interrupt_FIFO_count = FIFO_size then
+  1246.              "After earlier interrupts, whose tracing is now lost."
+  1247.           else
+  1248.             "After the start of traced execution."
+  1249.          );
+  1250.       log_new_line;
+  1251.       log_new_line;
+  1252.    end show_interrupt_FIFO;
+  1253.
+  1254.    procedure show_retrospective_traces is
+  1255.    begin
+  1256.       if peripheral_tracing_is_enabled then
+  1257.          pragma Debug(IOC.diagnostics);
+  1258.       end if;
+  1259.       if interrupt_tracing_is_enabled then
+  1260.          show_interrupt_FIFO;
+  1261.       end if;
+  1262.       if peripheral_tracing_is_enabled then
+  1263.          show_IOC_FIFO;
+  1264.       end if;
+  1265.       if retrospective_tracing_is_enabled then
+  1266.          show_retro_FIFO;
+  1267.       end if;
+  1268.    end show_retrospective_traces;
+  1269.
+  1270.    procedure show_current_state is
+  1271.    begin
+  1272.       show_execution_context;
+  1273.       log_rule;
+  1274.       show_registers;
+  1275.       log_rule;
+  1276.    end show_current_state;
+  1277.
+  1278.    procedure show_final_state (because : in String) is
+  1279.    begin
+  1280.       if the_final_state_is_wanted then
+  1281.          if loading_was_successful then
+  1282.             -- make sure there is at least one NL after any FW output.
+  1283.             if the_log_is_wanted then
+  1284.                log_new_line;
+  1285.                log_rule;
+  1286.             else
+  1287.                log_new_line;
+  1288.             end if;
+  1289.             log_line("Final State: " & because & ".");
+  1290.             if not the_log_is_wanted then return; end if;
+  1291.             long_witness;
+  1292.             log_rule;
+  1293.
+  1294.             if nr_of_post_dumping_areas /= 0 then
+  1295.                log_title("Post-run Dump:");
+  1296.                print_postrun_dump_areas;
+  1297.             end if;
+  1298.
+  1299.             if the_INS_plot_is_wanted or the_profile_is_wanted then
+  1300.                if histogramming_is_enabled then
+  1301.                   show_frequency_plots;
+  1302.                end if;
+  1303.             end if;
+  1304.
+  1305.             show_retrospective_traces;
+  1306.
+  1307.             if the_signature_is_enabled then
+  1308.                log_title("Digital signature of traced orders = #"
+  1309.                        & oct_of(the_digital_signature)
+  1310.                        & ".");
+  1311.             end if;
+  1312.          else
+  1313.             log_line("ee9: " & because & ".");
+  1314.             show_all_prerun_dump_areas;
+  1315.             return;
+  1316.          end if;
+  1317.       end if;
+  1318.    end show_final_state;
+  1319.
+  1320.    procedure show_all_prerun_dump_areas is
+  1321.    begin
+  1322.       if the_log_is_wanted and nr_of_pre_dumping_areas /= 0 then
+  1323.          log_title("Pre-run Dump:");
+  1324.          print_prerun_dump_areas;
+  1325.          remove_prerun_dump_areas;
+  1326.       end if;
+  1327.    end show_all_prerun_dump_areas;
+  1328.
+  1329.    increment   : constant := 8;
+  1330.    jump_tab    : constant := 12;
+  1331.    first_tab   : constant := 16;
+  1332.    last_column : constant := 96;
+  1333.
+  1334.    function is_non_blank (first : in KDF9.address)
+  1335.    return Boolean is
+  1336.       result : Boolean := False;
+  1337.    begin
+  1338.       for address in first .. first+increment-1 loop
+  1339.          result := result or (fetch_word(address) /= 0);
+  1340.       end loop;
+  1341.       return result;
+  1342.    end is_non_blank;
+  1343.
+  1344.    subtype converted_word is String(1..8);
   1345.
-  1346.       procedure show_group (first : in KDF9.address) is
-  1347.          address : KDF9.address := first;
-  1348.       begin
-  1349.          while address <= first+increment-1 loop
-  1350.             log(converted(address));
-  1351.             address := address + 1;
-  1352.             exit when address < first;
-  1353.          end loop;
-  1354.       end show_group;
-  1355.
-  1356.       address : KDF9.address := first;
-  1357.
-  1358.    begin
-  1359.       if (last-first+1) < 1 then
-  1360.          return;
-  1361.       end if;
-  1362.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  1363.       log_title("Core store [#" & oct_of(first) & " .. #" & oct_of(last) & "] interpreted as " & head & ":");
-  1364.       while address <= last loop
-  1365.          if is_non_blank(address) then
-  1366.             log_octal(KDF9.field_of_16_bits(address));
-  1367.             log(":");
-  1368.             tab_log_to(jump_tab);
-  1369.             log(side);
-  1370.             log(" """);
-  1371.             show_group(address);
-  1372.             log("""");
-  1373.             log_new_line;
-  1374.          else
-  1375.             log_line("========  blank  ========");
-  1376.          end if;
-  1377.       exit when address >= KDF9.address'Last - increment;
-  1378.          address := address + increment;
-  1379.       end loop;
-  1380.       log_new_line;
-  1381.    end show_core;
-  1382.
-  1383.    function encoding_of (address : KDF9.address; code_table : output_code_table)
-  1384.    return converted_word is
-  1385.       result : converted_word;
-  1386.    begin
-  1387.       for b in KDF9_char_sets.symbol_index loop
-  1388.          result(Natural(b)+1) := glyph_for(code_table(fetch_symbol(address, b)));
-  1389.       end loop;
-  1390.       return result;
-  1391.    end encoding_of;
-  1392.
-  1393.    current_case : KDF9_char_sets.symbol := KDF9_char_sets.Case_Normal;
-  1394.
-  1395.    function interpretation_of (address : KDF9.address)
-  1396.    return converted_word is
-  1397.       result : converted_word;
-  1398.       symbol : KDF9_char_sets.symbol;
-  1399.       char   : Character;
-  1400.    begin
-  1401.       for b in KDF9_char_sets.symbol_index loop
-  1402.          symbol := fetch_symbol(address, b);
-  1403.          if current_case = KDF9_char_sets.Case_Normal then
-  1404.             char := TP_CN(symbol);
-  1405.          else
-  1406.             char := TP_CS(symbol);
-  1407.          end if;
-  1408.          if symbol = KDF9_char_sets.Case_Normal then
-  1409.             current_case := KDF9_char_sets.Case_Normal;
-  1410.          elsif symbol = KDF9_char_sets.Case_Shift then
-  1411.             current_case := KDF9_char_sets.Case_Shift;
-  1412.          end if;
-  1413.          result(Natural(b)+1) := glyph_for(char);
-  1414.       end loop;
-  1415.       return result;
-  1416.    end interpretation_of;
-  1417.
-  1418.    function case_visible (address : KDF9.address)
-  1419.    return converted_word
-  1420.    is (interpretation_of(address));
-  1421.
-  1422.    function case_normal (address : KDF9.address)
-  1423.    return converted_word
-  1424.    is (encoding_of(address, code_table => TP_CN));
-  1425.
-  1426.    function case_shift (address : KDF9.address)
-  1427.    return converted_word
-  1428.    is (encoding_of(address, code_table => TP_CS));
-  1429.
-  1430.    function printer_code (address : KDF9.address)
-  1431.    return converted_word
-  1432.    is (encoding_of(address, code_table => to_LP));
-  1433.
-  1434.    function card_code (address : KDF9.address)
-  1435.    return converted_word
-  1436.    is (encoding_of(address, code_table => to_CP));
-  1437.
-  1438.    function Latin_1_code (address : KDF9.address)
-  1439.    return converted_word
-  1440.    is (converted_word'(1..7 => Space,
-  1441.                        8    => glyph_for(Character'Val(fetch_word(address) and 8#377#))));
-  1442.
-  1443.    procedure show_core_in_case_visible (first, last : in KDF9.address) is
-  1444.    begin
-  1445.       show_core(first, last,
-  1446.                 head => "characters in TR/TP code with case shifting",
-  1447.                 side => "  ",
-  1448.                 converted => case_visible'Access);
-  1449.    end show_core_in_case_visible;
-  1450.
-  1451.    procedure show_core_in_case_normal (first, last : in KDF9.address) is
-  1452.    begin
-  1453.       show_core(first, last,
-  1454.                 head => "characters in TR/TP Normal Case code",
-  1455.                 side => "NC",
-  1456.                 converted => case_normal'Access);
-  1457.    end show_core_in_case_normal;
-  1458.
-  1459.    procedure show_core_in_case_shift (first, last : in KDF9.address) is
-  1460.    begin
-  1461.       show_core(first, last,
-  1462.                 head => "characters in TR/TP Shift Case code",
-  1463.                 side => "SC",
-  1464.                 converted => case_shift'Access);
-  1465.    end show_core_in_case_shift;
-  1466.
-  1467.    procedure show_core_in_print_code (first, last : in KDF9.address) is
-  1468.    begin
-  1469.       show_core(first, last,
-  1470.                 head => "characters in LP code",
-  1471.                 side => "LP",
-  1472.                 converted => printer_code'Access);
-  1473.    end show_core_in_print_code;
-  1474.
-  1475.    procedure show_core_in_card_code (first, last : in KDF9.address) is
-  1476.    begin
-  1477.       show_core(first, last,head => "characters in CR/CP code",
-  1478.                 side => "CP",
-  1479.                 converted => card_code'Access);
-  1480.    end show_core_in_card_code;
+  1346.    type convertor is
+  1347.       not null access function (address : KDF9.address) return converted_word;
+  1348.
+  1349.    procedure show_core (first, last : in KDF9.address;
+  1350.                         head, side  : in String;
+  1351.                         converted   : in convertor) is
+  1352.
+  1353.       procedure show_group (first : in KDF9.address) is
+  1354.          address : KDF9.address := first;
+  1355.       begin
+  1356.          while address <= first+increment-1 loop
+  1357.             log(converted(address));
+  1358.             address := address + 1;
+  1359.             exit when address < first;
+  1360.          end loop;
+  1361.       end show_group;
+  1362.
+  1363.       address : KDF9.address := first;
+  1364.
+  1365.    begin
+  1366.       if (last-first+1) < 1 then
+  1367.          return;
+  1368.       end if;
+  1369.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  1370.       log_title("Core store [#" & oct_of(first) & " .. #" & oct_of(last) & "] interpreted as " & head & ":");
+  1371.       while address <= last loop
+  1372.          if is_non_blank(address) then
+  1373.             log_octal(KDF9.field_of_16_bits(address));
+  1374.             log(":");
+  1375.             tab_log_to(jump_tab);
+  1376.             log(side);
+  1377.             log(" """);
+  1378.             show_group(address);
+  1379.             log("""");
+  1380.             log_new_line;
+  1381.          else
+  1382.             log_line("========  blank  ========");
+  1383.          end if;
+  1384.       exit when address >= KDF9.address'Last - increment;
+  1385.          address := address + increment;
+  1386.       end loop;
+  1387.       log_new_line;
+  1388.    end show_core;
+  1389.
+  1390.    function encoding_of (address : KDF9.address; code_table : output_code_table)
+  1391.    return converted_word is
+  1392.       result : converted_word;
+  1393.    begin
+  1394.       for b in KDF9_char_sets.symbol_index loop
+  1395.          result(Natural(b)+1) := glyph_for(code_table(fetch_symbol(address, b)));
+  1396.       end loop;
+  1397.       return result;
+  1398.    end encoding_of;
+  1399.
+  1400.    current_case : KDF9_char_sets.symbol := KDF9_char_sets.Case_Normal;
+  1401.
+  1402.    function interpretation_of (address : KDF9.address)
+  1403.    return converted_word is
+  1404.       result : converted_word;
+  1405.       symbol : KDF9_char_sets.symbol;
+  1406.       char   : Character;
+  1407.    begin
+  1408.       for b in KDF9_char_sets.symbol_index loop
+  1409.          symbol := fetch_symbol(address, b);
+  1410.          if current_case = KDF9_char_sets.Case_Normal then
+  1411.             char := TP_CN(symbol);
+  1412.          else
+  1413.             char := TP_CS(symbol);
+  1414.          end if;
+  1415.          if symbol = KDF9_char_sets.Case_Normal then
+  1416.             current_case := KDF9_char_sets.Case_Normal;
+  1417.          elsif symbol = KDF9_char_sets.Case_Shift then
+  1418.             current_case := KDF9_char_sets.Case_Shift;
+  1419.          end if;
+  1420.          result(Natural(b)+1) := glyph_for(char);
+  1421.       end loop;
+  1422.       return result;
+  1423.    end interpretation_of;
+  1424.
+  1425.    function case_visible (address : KDF9.address)
+  1426.    return converted_word
+  1427.    is (interpretation_of(address));
+  1428.
+  1429.    function case_normal (address : KDF9.address)
+  1430.    return converted_word
+  1431.    is (encoding_of(address, code_table => TP_CN));
+  1432.
+  1433.    function case_shift (address : KDF9.address)
+  1434.    return converted_word
+  1435.    is (encoding_of(address, code_table => TP_CS));
+  1436.
+  1437.    function printer_code (address : KDF9.address)
+  1438.    return converted_word
+  1439.    is (encoding_of(address, code_table => to_LP));
+  1440.
+  1441.    function card_code (address : KDF9.address)
+  1442.    return converted_word
+  1443.    is (encoding_of(address, code_table => to_CP));
+  1444.
+  1445.    function Latin_1_code (address : KDF9.address)
+  1446.    return converted_word
+  1447.    is (converted_word'(1..7 => Space,
+  1448.                        8    => glyph_for(Character'Val(fetch_word(address) and 8#377#))));
+  1449.
+  1450.    procedure show_core_in_case_visible (first, last : in KDF9.address) is
+  1451.    begin
+  1452.       show_core(first, last,
+  1453.                 head => "characters in TR/TP code with case shifting",
+  1454.                 side => "  ",
+  1455.                 converted => case_visible'Access);
+  1456.    end show_core_in_case_visible;
+  1457.
+  1458.    procedure show_core_in_case_normal (first, last : in KDF9.address) is
+  1459.    begin
+  1460.       show_core(first, last,
+  1461.                 head => "characters in TR/TP Normal Case code",
+  1462.                 side => "NC",
+  1463.                 converted => case_normal'Access);
+  1464.    end show_core_in_case_normal;
+  1465.
+  1466.    procedure show_core_in_case_shift (first, last : in KDF9.address) is
+  1467.    begin
+  1468.       show_core(first, last,
+  1469.                 head => "characters in TR/TP Shift Case code",
+  1470.                 side => "SC",
+  1471.                 converted => case_shift'Access);
+  1472.    end show_core_in_case_shift;
+  1473.
+  1474.    procedure show_core_in_print_code (first, last : in KDF9.address) is
+  1475.    begin
+  1476.       show_core(first, last,
+  1477.                 head => "characters in LP code",
+  1478.                 side => "LP",
+  1479.                 converted => printer_code'Access);
+  1480.    end show_core_in_print_code;
   1481.
-  1482.    procedure show_core_in_Latin_1 (first, last : in KDF9.address) is
+  1482.    procedure show_core_in_card_code (first, last : in KDF9.address) is
   1483.    begin
-  1484.       show_core(first, last,
-  1485.                 head => "words with bits 40-47 of each in Latin-1 code",
-  1486.                 side => "L1",
-  1487.                 converted => Latin_1_code'Access);
-  1488.    end show_core_in_Latin_1;
-  1489.
-  1490.    procedure show_core_in_tape_code (first, last : in KDF9.address) is
-  1491.    begin
-  1492.       show_core_in_case_visible(first, last);
-  1493.    end show_core_in_tape_code;
-  1494.
-  1495.    procedure show_core_as_word_forms (first, last  : KDF9.address) is
+  1484.       show_core(first, last,head => "characters in CR/CP code",
+  1485.                 side => "CP",
+  1486.                 converted => card_code'Access);
+  1487.    end show_core_in_card_code;
+  1488.
+  1489.    procedure show_core_in_Latin_1 (first, last : in KDF9.address) is
+  1490.    begin
+  1491.       show_core(first, last,
+  1492.                 head => "words with bits 40-47 of each in Latin-1 code",
+  1493.                 side => "L1",
+  1494.                 converted => Latin_1_code'Access);
+  1495.    end show_core_in_Latin_1;
   1496.
-  1497.       procedure show_word (address : KDF9.address) is
-  1498.          word : constant KDF9.word := fetch_word(address);
-  1499.       begin
-  1500.          log_octal(KDF9.field_of_16_bits(address));
-  1501.          log(":");
-  1502.          tab_log_to(jump_tab);
-  1503.          show_in_various_formats(word, column => jump_tab);
-  1504.          log_new_line;
-  1505.       end show_word;
-  1506.
-  1507.       procedure show_word_group (first, last  : KDF9.address) is
-  1508.          last_address : KDF9.address := first;
-  1509.          this_word, last_word : KDF9.word;
-  1510.       begin
-  1511.          if last = first or last = 0 then
-  1512.             show_word(last);
-  1513.             return;
-  1514.          end if;
-  1515.          this_word := fetch_word(first);
-  1516.          last_word := this_word;
-  1517.          show_word(first);
-  1518.          for address in first+1 .. last-1 loop
-  1519.             this_word := fetch_word(address);
-  1520.             if this_word = last_word and address = last_address+1 then
-  1521.                log_line("==========  ditto  ========");
-  1522.             elsif this_word /= last_word then
-  1523.                show_word(address);
-  1524.                last_word := this_word;
-  1525.                last_address := address;
-  1526.             end if;
-  1527.          end loop;
-  1528.          if last > first then
-  1529.             show_word(last);
-  1530.          end if;
-  1531.       end show_word_group;
-  1532.
-  1533.    begin
-  1534.       if first > last then
-  1535.          return;
-  1536.       end if;
-  1537.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  1538.       log_title("Core store interpreted as 48-bit words:");
-  1539.       show_word_group(first, last);
-  1540.       log_new_line;
-  1541.    end show_core_as_word_forms;
-  1542.
-  1543.    -- Each word of code space is described by a set of flags.
-  1544.    -- Flags 0 .. 5 are set iff a jump order has that syllable as target.
-  1545.    -- Flag 6 is set if the word is thought to be code, but not a target.
-  1546.    -- Flag 7 is set if the word is thought to be addressed as data.
-  1547.
-  1548.    is_a_code_word : constant KDF9.syllable_index := 6;
-  1549.    is_a_data_word : constant KDF9.syllable_index := 7;
-  1550.
-  1551.    package word_flags is new generic_sets(member => KDF9.syllable_index);
-  1552.    use word_flags;
-  1553.
-  1554.    all_jump_targets : constant word_flags.set := (0 .. 5 => True, 6|7 => False);
-  1555.
-  1556.    analysis_flags : array (KDF9.order_word_number) of word_flags.set;
+  1497.    procedure show_core_in_tape_code (first, last : in KDF9.address) is
+  1498.    begin
+  1499.       show_core_in_case_visible(first, last);
+  1500.    end show_core_in_tape_code;
+  1501.
+  1502.    procedure show_core_as_word_forms (first, last  : KDF9.address) is
+  1503.
+  1504.       procedure show_word (address : KDF9.address) is
+  1505.          word : constant KDF9.word := fetch_word(address);
+  1506.       begin
+  1507.          log_octal(KDF9.field_of_16_bits(address));
+  1508.          log(":");
+  1509.          tab_log_to(jump_tab);
+  1510.          show_in_various_formats(word, column => jump_tab);
+  1511.          log_new_line;
+  1512.       end show_word;
+  1513.
+  1514.       procedure show_word_group (first, last  : KDF9.address) is
+  1515.          last_address : KDF9.address := first;
+  1516.          this_word, last_word : KDF9.word;
+  1517.       begin
+  1518.          if last in first | 0 then
+  1519.             show_word(last);
+  1520.             return;
+  1521.          end if;
+  1522.          this_word := fetch_word(first);
+  1523.          last_word := this_word;
+  1524.          show_word(first);
+  1525.          for address in first+1 .. last-1 loop
+  1526.             this_word := fetch_word(address);
+  1527.             if this_word = last_word and address = last_address+1 then
+  1528.                log_line("==========  ditto  ========");
+  1529.             elsif this_word /= last_word then
+  1530.                show_word(address);
+  1531.                last_word := this_word;
+  1532.                last_address := address;
+  1533.             end if;
+  1534.          end loop;
+  1535.          if last > first then
+  1536.             show_word(last);
+  1537.          end if;
+  1538.       end show_word_group;
+  1539.
+  1540.    begin
+  1541.       if first > last then
+  1542.          return;
+  1543.       end if;
+  1544.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  1545.       log_title("Core store interpreted as 48-bit words:");
+  1546.       show_word_group(first, last);
+  1547.       log_new_line;
+  1548.    end show_core_as_word_forms;
+  1549.
+  1550.    -- Each word of code space is described by a set of flags.
+  1551.    -- Flags 0 .. 5 are set iff a jump order has that syllable as target.
+  1552.    -- Flag 6 is set if the word is thought to be code, but not a target.
+  1553.    -- Flag 7 is set if the word is thought to be addressed as data.
+  1554.
+  1555.    package word_flags is new generic_sets(member => KDF9.syllable_index);
+  1556.    use word_flags;
   1557.
-  1558.    function "/" (word : KDF9.order_word_number; flag : KDF9.syllable_index)
-  1559.    return Boolean
-  1560.    is (analysis_flags(word)(flag));
+  1558.    is_a_code_word   : constant KDF9.syllable_index := 6;
+  1559.    is_a_data_word   : constant KDF9.syllable_index := 7;
+  1560.    all_jump_targets : constant word_flags.set := (6|7 => False, others => True);
   1561.
-  1562.    function is_a_jump_target (the_point : in KDF9.syllable_address)
-  1563.    return Boolean
-  1564.    is (analysis_flags(the_point.order_word_number)(the_point.syllable_index));
-  1565.
-  1566.    function is_a_jump_target (the_operand : in KDF9.order_word_number)
-  1567.    return Boolean
-  1568.    is ((analysis_flags(the_operand) and all_jump_targets) /= empty_set);
-  1569.
-  1570.    procedure clear_all_analysis_flags is
-  1571.    begin
-  1572.       analysis_flags := (others => empty_set);
-  1573.    end clear_all_analysis_flags;
-  1574.
-  1575.    procedure unmark_as_a_data_word (the_operand : in KDF9.order_word_number) is
-  1576.    begin
-  1577.       analysis_flags(the_operand)(is_a_data_word) := False;
-  1578.    end unmark_as_a_data_word;
-  1579.
-  1580.    procedure unmark_as_a_code_word (the_operand : in KDF9.order_word_number) is
-  1581.    begin
-  1582.       analysis_flags(the_operand)(is_a_code_word) := False;
-  1583.    end unmark_as_a_code_word;
-  1584.
-  1585.    procedure mark_as_a_code_word (the_operand : in KDF9.order_word_number) is
-  1586.    begin
-  1587.       analysis_flags(the_operand)(is_a_code_word) := True;
-  1588.       unmark_as_a_data_word(the_operand);
-  1589.    end mark_as_a_code_word;
+  1562.    analysis_flags   : array (KDF9.order_word_number) of word_flags.set;
+  1563.
+  1564.    function "/" (word : KDF9.order_word_number; flag : KDF9.syllable_index)
+  1565.    return Boolean
+  1566.    is (analysis_flags(word)/flag);
+  1567.
+  1568.    function is_a_jump_target (the_point : in KDF9.syllable_address)
+  1569.    return Boolean
+  1570.    is (analysis_flags(the_point.order_word_number)/the_point.syllable_index);
+  1571.
+  1572.    function is_a_jump_target (the_operand : in KDF9.order_word_number)
+  1573.    return Boolean
+  1574.    is ((analysis_flags(the_operand) and all_jump_targets) /= empty_set);
+  1575.
+  1576.    procedure clear_all_analysis_flags is
+  1577.    begin
+  1578.       analysis_flags := (others => empty_set);
+  1579.    end clear_all_analysis_flags;
+  1580.
+  1581.    procedure unmark_as_a_data_word (the_operand : in KDF9.order_word_number) is
+  1582.    begin
+  1583.       analysis_flags(the_operand)(is_a_data_word) := False;
+  1584.    end unmark_as_a_data_word;
+  1585.
+  1586.    procedure unmark_as_a_code_word (the_operand : in KDF9.order_word_number) is
+  1587.    begin
+  1588.       analysis_flags(the_operand)(is_a_code_word) := False;
+  1589.    end unmark_as_a_code_word;
   1590.
-  1591.    procedure mark_as_a_jump_target (the_point : in KDF9.syllable_address) is
+  1591.    procedure mark_as_a_code_word (the_operand : in KDF9.order_word_number) is
   1592.    begin
-  1593.       analysis_flags(the_point.order_word_number)(the_point.syllable_index) := True;
-  1594.       mark_as_a_code_word(the_point.order_word_number);
-  1595.    end mark_as_a_jump_target;
+  1593.       analysis_flags(the_operand)(is_a_code_word) := True;
+  1594.       unmark_as_a_data_word(the_operand);
+  1595.    end mark_as_a_code_word;
   1596.
-  1597.    procedure mark_as_a_data_word (the_operand : in KDF9.order_word_number) is
+  1597.    procedure mark_as_a_jump_target (the_point : in KDF9.syllable_address) is
   1598.    begin
-  1599.       analysis_flags(the_operand)(is_a_data_word) := True;
-  1600.       unmark_as_a_code_word(the_operand);
-  1601.    end mark_as_a_data_word;
+  1599.       analysis_flags(the_point.order_word_number)(the_point.syllable_index) := True;
+  1600.       mark_as_a_code_word(the_point.order_word_number);
+  1601.    end mark_as_a_jump_target;
   1602.
-  1603.    procedure mark_all_code_blocks_and_data_blocks is
-  1604.
-  1605.       procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
-  1606.          address : KDF9.syllable_address := the_beginning;
-  1607.       begin
-  1608.          if address.syllable_index > 5 then
-  1609.             return;  -- We have blundered into non-code words.
-  1610.          end if;
-  1611.          -- Mark the first syllable of the block.
-  1612.          mark_as_a_jump_target(the_beginning);
-  1613.          -- Mark the destinations of all jumps in the block as code.
-  1614.          loop
-  1615.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1616.          exit when address.order_word_number = 8191;
-  1617.             set_NIA_to(address);
-  1618.             decode_the_next_order;
-  1619.             if is_an_invalid_order(INS)                                                  or else
-  1620.                   (address.order_word_number/is_a_data_word and address.syllable_index = 0) then
-  1621.                return;
-  1622.             else
-  1623.                -- Assuming a valid code word, act on it.
-  1624.                mark_as_a_code_word(address.order_word_number);
-  1625.                case INS.kind is
-  1626.                   when normal_jump_order =>
-  1627.                      if not is_a_jump_target((INS.target.order_word_number, INS.target.syllable_index)) then
-  1628.                         -- Mark the jump's destination recursively.
-  1629.                         -- N.B. EXIT is actioned only if it is of EXIT ARr type.
-  1630.                         mark_all_code_blocks((INS.target.order_word_number, INS.target.syllable_index));
-  1631.                      end if;
-  1632.                      increment_by_3(address);
-  1633.                      if INS.compressed_opcode = JSr  then
-  1634.                         -- Mark its return point.
-  1635.                         mark_as_a_jump_target(address);
-  1636.                      end if;
-  1637.                   when one_syllable_order =>
-  1638.                      increment_by_1(address);
-  1639.                   when two_syllable_order =>
-  1640.                      if INS.compressed_opcode = JCqNZS then
-  1641.                         -- Mark the preceding word.
-  1642.                         mark_as_a_jump_target((address.order_word_number-1, 0));
-  1643.                      end if;
-  1644.                      increment_by_2(address);
-  1645.                   when data_access_order =>
-  1646.                      increment_by_3(address);
-  1647.                end case;
-  1648.             end if;
-  1649.          end loop;
-  1650.       end mark_all_code_blocks;
-  1651.
-  1652.       procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
-  1653.          address : KDF9.syllable_address := the_beginning;
-  1654.       begin
-  1655.          if address.syllable_index > 5 then
-  1656.             return;  -- We have blundered into non-code words.
-  1657.          end if;
-  1658.          the_code_block_handler: loop
-  1659.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1660.          exit when address.order_word_number = 8191;
-  1661.             -- Process orders, starting at an established code word.
-  1662.             set_NIA_to(address); -- **
-  1663.             decode_the_next_order;
-  1664.             if (is_an_invalid_order(INS)                         or else
-  1665.                   address.order_word_number/is_a_data_word)     and then
-  1666.                      not (address.order_word_number/is_a_code_word) then
-  1667.                -- This word is data: make sure it is not designated as code;
-  1668.                --    and find the start of the next code block.
-  1669.                for a in address.order_word_number .. 8190 loop
-  1670.                   address := (a, 0);
-  1671.                   exit when is_a_jump_target(a);
-  1672.                   unmark_as_a_code_word(a);
-  1673.                   mark_as_a_data_word(a);
-  1674.                end loop;
-  1675.
-  1676.                exit the_code_block_handler
-  1677.                   when address.order_word_number = 8190;
-  1678.
-  1679.                -- Find the syllable at which the block starts.
-  1680.                for s in KDF9.syllable_index'(0) .. 5 loop
-  1681.                   address.syllable_index := s;
-  1682.                   exit when is_a_jump_target(address);
-  1683.                end loop;
-  1684.
-  1685.             else
-  1686.
-  1687.                -- Assuming a valid code word, act on it.
-  1688.                case INS.kind is
-  1689.                   when data_access_order =>
-  1690.                      if INS.operand < 8192 then
-  1691.                         declare
-  1692.                            operand : constant KDF9.order_word_number
-  1693.                                    := KDF9.order_word_number(INS.operand);
-  1694.                         begin
-  1695.                            if INS.compressed_opcode /= KDF9.decoding.SET and then
-  1696.                                  not is_a_jump_target(operand)               then
-  1697.                               mark_as_a_data_word(operand);
-  1698.                            end if;
-  1699.                         end;
-  1700.                      end if;
-  1701.                      increment_by_3(address);
-  1702.                   when one_syllable_order =>
-  1703.                      increment_by_1(address);
-  1704.                   when two_syllable_order =>
-  1705.                      increment_by_2(address);
-  1706.                   when normal_jump_order =>
-  1707.                      increment_by_3(address);
-  1708.                end case;
-  1709.             end if;
-  1710.
-  1711.             exit the_code_block_handler
-  1712.                when address.order_word_number = KDF9.order_word_number'Last;
-  1713.
-  1714.          end loop the_code_block_handler;
-  1715.       end mark_all_data_blocks;
+  1603.    procedure mark_as_a_data_word (the_operand : in KDF9.order_word_number) is
+  1604.    begin
+  1605.       analysis_flags(the_operand)(is_a_data_word) := True;
+  1606.       unmark_as_a_code_word(the_operand);
+  1607.    end mark_as_a_data_word;
+  1608.
+  1609.    procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
+  1610.       address : KDF9.syllable_address := the_beginning;
+  1611.    begin
+  1612.       if address.syllable_index > 5 then
+  1613.          return;  -- We have blundered into non-code words.
+  1614.       end if;
+  1615.       -- Mark the first syllable of the block.
+  1616.       mark_as_a_jump_target(the_beginning);
+  1617.       -- Mark the destinations of all jumps in the block as code.
+  1618.       loop
+  1619.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1620.       exit when address.order_word_number = 8191;
+  1621.          set_NIA_to(address);
+  1622.          decode_the_next_order;
+  1623.          if is_an_invalid_order(INS)                                                  or else
+  1624.                (address.order_word_number/is_a_data_word and address.syllable_index = 0) then
+  1625.             return;
+  1626.          else
+  1627.             -- Assuming a valid code word, act on it.
+  1628.             mark_as_a_code_word(address.order_word_number);
+  1629.             case INS.kind is
+  1630.                when normal_jump_order =>
+  1631.                   if not is_a_jump_target((INS.target.order_word_number, INS.target.syllable_index)) then
+  1632.                      -- Mark the jump's destination recursively.
+  1633.                      -- N.B. EXIT is actioned only if it is of EXIT ARr type.
+  1634.                      mark_all_code_blocks((INS.target.order_word_number, INS.target.syllable_index));
+  1635.                   end if;
+  1636.                   increment_by_3(address);
+  1637.                   if INS.compressed_opcode = JSr  then
+  1638.                      -- Mark its return point.
+  1639.                      mark_as_a_jump_target(address);
+  1640.                   end if;
+  1641.                when one_syllable_order =>
+  1642.                   increment_by_1(address);
+  1643.                when two_syllable_order =>
+  1644.                   if INS.compressed_opcode = JCqNZS then
+  1645.                      -- Mark the preceding word.
+  1646.                      mark_as_a_jump_target((address.order_word_number-1, 0));
+  1647.                   end if;
+  1648.                   increment_by_2(address);
+  1649.                when data_access_order =>
+  1650.                   increment_by_3(address);
+  1651.             end case;
+  1652.          end if;
+  1653.       end loop;
+  1654.    end mark_all_code_blocks;
+  1655.
+  1656.    procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
+  1657.       address : KDF9.syllable_address := the_beginning;
+  1658.    begin
+  1659.       if address.syllable_index > 5 then
+  1660.          return;  -- We have blundered into non-code words.
+  1661.       end if;
+  1662.
+  1663.    the_code_block_handler: loop
+  1664.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1665.    exit the_code_block_handler when address.order_word_number = 8191;
+  1666.
+  1667.          -- Deal with the possibility that we actually have a word of instruction code.
+  1668.          set_NIA_to(address);
+  1669.          decode_the_next_order;
+  1670.
+  1671.          if (is_an_invalid_order(INS)                         or else
+  1672.                address.order_word_number/is_a_data_word)     and then
+  1673.                   not (address.order_word_number/is_a_code_word) then
+  1674.
+  1675.             -- This word is data: make sure it is not designated as code;
+  1676.             --    and find the start of the next code block.
+  1677.             for a in address.order_word_number .. 8190 loop
+  1678.                address := (a, 0);
+  1679.             exit when is_a_jump_target(a);
+  1680.                unmark_as_a_code_word(a);
+  1681.                mark_as_a_data_word(a);
+  1682.             end loop;
+  1683.    exit the_code_block_handler when address.order_word_number = 8190;
+  1684.             -- Find the syllable at which the block starts.
+  1685.             for s in KDF9.syllable_index'(0) .. 5 loop
+  1686.                address.syllable_index := s;
+  1687.             exit when is_a_jump_target(address);
+  1688.             end loop;
+  1689.
+  1690.          else
+  1691.
+  1692.             -- We have a order, so act on it.
+  1693.             case INS.kind is
+  1694.                when data_access_order =>
+  1695.                   -- Note the operand word as data, not code.
+  1696.                   if INS.operand < 8192 then
+  1697.                      declare
+  1698.                         operand : constant KDF9.order_word_number
+  1699.                                 := KDF9.order_word_number(INS.operand);
+  1700.                      begin
+  1701.                         if INS.compressed_opcode /= KDF9.decoding.SET and then
+  1702.                               not is_a_jump_target(operand)               then
+  1703.                            mark_as_a_data_word(operand);
+  1704.                         end if;
+  1705.                      end;
+  1706.                   end if;
+  1707.                   increment_by_3(address);
+  1708.                when one_syllable_order =>
+  1709.                   increment_by_1(address);
+  1710.                when two_syllable_order =>
+  1711.                   increment_by_2(address);
+  1712.                when normal_jump_order =>
+  1713.                   increment_by_3(address);
+  1714.             end case;
+  1715.          end if;
   1716.
-  1717.       procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
-  1718.          address : KDF9.syllable_address := the_beginning;
-  1719.          locus   : KDF9.order_word_number;
-  1720.       begin
-  1721.          if address.syllable_index > 5 then
-  1722.             return;  -- We have blundered into non-code words.
-  1723.          end if;
-  1724.          -- Unmark the first instruction of the block.
-  1725.          unmark_as_a_data_word(address.order_word_number);
-  1726.
-  1727.          -- Unmark data marks on destinations of jumps.
-  1728.          loop
-  1729.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1730.          exit when address.order_word_number = 8191;
-  1731.             set_NIA_to(address);
-  1732.             decode_the_next_order;
-  1733.             if is_an_invalid_order(INS)                          or else
-  1734.                   address.order_word_number/is_a_data_word       or else
-  1735.                      not (address.order_word_number/is_a_code_word) then
-  1736.                -- We have reached the end of the code block.
-  1737.                return;
-  1738.             else
-  1739.                -- Assuming a valid code word, act on it.
-  1740.                case INS.kind is
-  1741.                   when normal_jump_order =>
-  1742.                      locus := address.order_word_number;
-  1743.                      increment_by_3(address);
-  1744.                      if INS.target.order_word_number/is_a_data_word    then
-  1745.                         -- UNmark the jump's destination recursively.
-  1746.                         reset_wrong_data_marks((INS.target.order_word_number, INS.target.syllable_index));
-  1747.                      end if;
-  1748.                      if INS.compressed_opcode /= Jr          and then
-  1749.                            INS.compressed_opcode /= EXIT_n   and then
-  1750.                               locus /= address.order_word_number then
-  1751.                         -- It flows on, so the next word cannot be data.
-  1752.                         unmark_as_a_data_word(address.order_word_number);
-  1753.                      elsif not (address.order_word_number/is_a_data_word) then
-  1754.                         -- The next syllable starts a block, iff it is not the end of a block.
-  1755.                         set_NIA_to(address);
-  1756.                         decode_the_next_order;
-  1757.                         if not is_an_invalid_order(INS) then
-  1758.                            mark_as_a_jump_target(address);
-  1759.                         end if;
-  1760.                      end if;
-  1761.                   when one_syllable_order =>
-  1762.                      increment_by_1(address);
-  1763.                   when two_syllable_order =>
-  1764.                      increment_by_2(address);
-  1765.                   when data_access_order =>
-  1766.                      increment_by_3(address);
-  1767.                end case;
-  1768.             end if;
-  1769.             exit when address.order_word_number = KDF9.order_word_number'Last;
-  1770.          end loop;
-  1771.       end reset_wrong_data_marks;
-  1772.
-  1773.       procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
-  1774.          start_point : KDF9.syllable_address;
-  1775.       begin
-  1776.          mark_as_a_jump_target(address);
-  1777.          set_NIA_to(address);
-  1778.          decode_the_next_order;
-  1779.          if INS.kind =normal_jump_order then
-  1780.          start_point := (INS.target.order_word_number, INS.target.syllable_index);
-  1781.          mark_all_code_blocks(start_point);
-  1782.          mark_all_data_blocks(start_point);
-  1783.          reset_wrong_data_marks(start_point);
-  1784.          end if;
-  1785.       end mark_the_words_reachable_from;
-  1786.
-  1787.       procedure markup_a_problem_program is
-  1788.       begin
-  1789.          if the_initial_jump_was_corrupted then
-  1790.             -- We cannot sensibly locate the order words using E0  ...
-  1791.             log_new_line;
-  1792.             log_line("The initial jump, in E0U, has been corrupted!");
-  1793.             log_new_line;
-  1794.             show_core_as_syllables((0, 0), (5, 0));
-  1795.             --  ... so restore it to the value it had on loading.
-  1796.             restore_the_initial_jump;
-  1797.             log_line("E0U has been restored to the value it had on loading.");
-  1798.             log_new_line;
-  1799.          end if;
-  1800.
-  1801.          -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
-  1802.
-  1803.          mark_the_words_reachable_from((0, 0));
-  1804.          mark_the_words_reachable_from((0, 4));
-  1805.          mark_the_words_reachable_from((1, 4));
-  1806.
-  1807.          -- Mark the words between E0 and P0 as data, skipping E4.
-  1808.          mark_as_a_data_word(1);
-  1809.          mark_as_a_data_word(2);
-  1810.          mark_as_a_data_word(3);
-  1811.          set_NIA_to((0, 0));
-  1812.          decode_the_next_order;
-  1813.          for d in 5 .. INS.target.order_word_number-1 loop
-  1814.             mark_as_a_data_word(d);
-  1815.          end loop;
-  1816.
-  1817.          the_program_has_been_analysed := True;
-  1818.       end markup_a_problem_program;
-  1819.
-  1820.       -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
-  1821.       procedure markup_a_Director is
-  1822.
-  1823.       begin
-  1824.          BA := 0;  -- Director starts at physical word 0.
-  1825.
-  1826.          mark_as_a_code_word(0);
-  1827.          mark_as_a_code_word(1);
-  1828.          mark_as_a_code_word(2);
-  1829.          mark_as_a_data_word(3);
-  1830.          mark_as_a_code_word(4);
-  1831.
-  1832.          for a in nominated_address .. 3200 loop  -- 3200 was the size of the Eldon 2 Director.
-  1833.             -- mark_as_a_code_word(a);
-  1834.             -- mark_as_a_jump_target((a, 0));
-  1835.             set_NIA_to((a, 0));
-  1836.             decode_the_next_order;
-  1837.             if INS.kind = normal_jump_order then
-  1838.                mark_the_words_reachable_from((a, 0));
-  1839.             elsif INS.kind = data_access_order then
-  1840.                if INS.operand < 8192 then
-  1841.                   declare
-  1842.                      operand : constant KDF9.order_word_number
-  1843.                              := KDF9.order_word_number(INS.operand);
-  1844.                   begin
-  1845.                      if INS.compressed_opcode /= KDF9.decoding.SET and then
-  1846.                            not is_a_jump_target(operand)               then
-  1847.                         mark_as_a_data_word(operand);
-  1848.                      end if;
-  1849.                   end;
-  1850.                end if;
-  1851.              else
-  1852.                 mark_as_a_jump_target((a, 0));
-  1853.             end if;
-  1854.             set_NIA_to((a, 3));
-  1855.             decode_the_next_order;
-  1856.             if INS.kind = normal_jump_order then
-  1857.                mark_the_words_reachable_from((a, 3));
-  1858.             elsif INS.kind = data_access_order then
-  1859.                if INS.operand < 8192 then
-  1860.                   declare
-  1861.                      operand : constant KDF9.order_word_number
-  1862.                              := KDF9.order_word_number(INS.operand);
-  1863.                   begin
-  1864.                      if INS.compressed_opcode /= KDF9.decoding.SET and then
-  1865.                            not is_a_jump_target(operand)               then
-  1866.                         mark_as_a_data_word(operand);
-  1867.                      end if;
-  1868.                   end;
-  1869.                end if;
-  1870.              else
-  1871.                 mark_as_a_jump_target((a, 3));
-  1872.             end if;
-  1873.          end loop;
-  1874.
-  1875.          -- Mark all orders reachable from the initial jump(s).
+  1717.       exit the_code_block_handler when address.order_word_number = KDF9.order_word_number'Last;
+  1718.       end loop the_code_block_handler;
+  1719.    end mark_all_data_blocks;
+  1720.
+  1721.    procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
+  1722.       address : KDF9.syllable_address := the_beginning;
+  1723.       locus   : KDF9.order_word_number;
+  1724.    begin
+  1725.       if address.syllable_index > 5 then
+  1726.          return;  -- We have blundered into non-code words.
+  1727.       end if;
+  1728.       -- Unmark the first instruction of the block.
+  1729.       unmark_as_a_data_word(address.order_word_number);
+  1730.
+  1731.       -- Unmark data marks on destinations of jumps.
+  1732.       loop
+  1733.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1734.       exit when address.order_word_number = 8191;
+  1735.          set_NIA_to(address);
+  1736.          decode_the_next_order;
+  1737.
+  1738.          if is_an_invalid_order(INS)                          or else
+  1739.                address.order_word_number/is_a_data_word       or else
+  1740.                   not (address.order_word_number/is_a_code_word) then
+  1741.             -- We have reached the end of the code block.
+  1742.             return;
+  1743.
+  1744.          else
+  1745.
+  1746.             -- We have a valid order, so act on it.
+  1747.             case INS.kind is
+  1748.                when normal_jump_order =>
+  1749.                   locus := address.order_word_number;
+  1750.                   increment_by_3(address);
+  1751.                   if INS.target.order_word_number/is_a_data_word    then
+  1752.                      -- UNmark the jump's destination recursively.
+  1753.                      reset_wrong_data_marks((INS.target.order_word_number, INS.target.syllable_index));
+  1754.                   end if;
+  1755.                   if INS.compressed_opcode /= Jr          and then
+  1756.                         INS.compressed_opcode /= EXIT_n   and then
+  1757.                            locus /= address.order_word_number then
+  1758.                      -- The order flows on, so the next word cannot be data.
+  1759.                      unmark_as_a_data_word(address.order_word_number);
+  1760.                   elsif not (address.order_word_number/is_a_data_word) then
+  1761.                      -- The next syllable starts a block, iff it is not the end of a block.
+  1762.                      set_NIA_to(address);
+  1763.                      decode_the_next_order;
+  1764.                      if not is_an_invalid_order(INS) then
+  1765.                         mark_as_a_jump_target(address);
+  1766.                      end if;
+  1767.                   end if;
+  1768.                when one_syllable_order =>
+  1769.                   increment_by_1(address);
+  1770.                when two_syllable_order =>
+  1771.                   increment_by_2(address);
+  1772.                when data_access_order =>
+  1773.                   increment_by_3(address);
+  1774.             end case;
+  1775.          end if;
+  1776.       exit when address.order_word_number = KDF9.order_word_number'Last;
+  1777.       end loop;
+  1778.    end reset_wrong_data_marks;
+  1779.
+  1780.    procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
+  1781.       start_point : KDF9.syllable_address;
+  1782.    begin
+  1783.       mark_as_a_jump_target(address);
+  1784.       set_NIA_to(address);
+  1785.       decode_the_next_order;
+  1786.       if INS.kind = normal_jump_order then
+  1787.          start_point := (INS.target.order_word_number, INS.target.syllable_index);
+  1788.          mark_all_code_blocks(start_point);
+  1789.          mark_all_data_blocks(start_point);
+  1790.          reset_wrong_data_marks(start_point);
+  1791.       end if;
+  1792.    end mark_the_words_reachable_from;
+  1793.
+  1794.    procedure markup_a_problem_program is
+  1795.    begin
+  1796.       if the_initial_jump_was_corrupted then
+  1797.          -- We cannot sensibly locate the order words using E0  ...
+  1798.          log_new_line;
+  1799.          log_line("The initial jump, in E0U, has been corrupted!");
+  1800.          log_new_line;
+  1801.          show_core_as_syllables((0, syllable_index => 0), (0, syllable_index => 5));
+  1802.          --  ... so restore it to the value it had on loading.
+  1803.          restore_the_initial_jump;
+  1804.          log_line("E0U has been restored to the value it had on loading.");
+  1805.          log_new_line;
+  1806.       end if;
+  1807.
+  1808.       -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
+  1809.
+  1810.       mark_the_words_reachable_from((0, syllable_index => 0));
+  1811.       mark_the_words_reachable_from((4, syllable_index => 0));
+  1812.       mark_the_words_reachable_from((4, syllable_index => 3));
+  1813.
+  1814.       -- Mark the words between E0 and P0 as data, skipping E4.
+  1815.       mark_as_a_data_word(1);
+  1816.       mark_as_a_data_word(2);
+  1817.       mark_as_a_data_word(3);
+  1818.       set_NIA_to((0, syllable_index => 0));
+  1819.       decode_the_next_order;
+  1820.       for d in 5 .. INS.target.order_word_number-1 loop
+  1821.          mark_as_a_data_word(d);
+  1822.       end loop;
+  1823.
+  1824.       the_program_has_been_analysed := True;
+  1825.    end markup_a_problem_program;
+  1826.
+  1827.    -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
+  1828.    procedure markup_a_Director (pre_run : in Boolean) is
+  1829.
+  1830. --        procedure deal_with_a_3_syllable_order (address : in KDF9.syllable_address) is
+  1831. --        begin
+  1832. --           set_NIA_to(address);
+  1833. --           decode_the_next_order;
+  1834. --
+  1835. --           if INS.kind = normal_jump_order then
+  1836. --              mark_the_words_reachable_from(address);
+  1837. --           elsif INS.kind = data_access_order then
+  1838. --              -- Mark a feasible operand as data.
+  1839. --              if INS.operand < 8192 then
+  1840. --                 declare
+  1841. --                    operand : constant KDF9.order_word_number := KDF9.order_word_number(INS.operand);
+  1842. --                 begin
+  1843. --                    if INS.compressed_opcode /= KDF9.decoding.SET and then
+  1844. --                          not is_a_jump_target(operand)               then
+  1845. --                       mark_as_a_data_word(operand);
+  1846. --                    end if;
+  1847. --                 end;
+  1848. --              end if;
+  1849. --           else
+  1850. --              -- Treat it as code.
+  1851. --              mark_as_a_jump_target(address);
+  1852. --           end if;
+  1853. --        end deal_with_a_3_syllable_order;
+  1854. --
+  1855. --        procedure show_flags (a : in KDF9.order_word_number) is
+  1856. --        begin
+  1857. --           log_line(a'Image & ":  "
+  1858. --            & (if analysis_flags(a)(is_a_code_word) then "CODE " else "DATA ")
+  1859. --            & (if analysis_flags(a)(0) then "T" else " ")
+  1860. --            & (if analysis_flags(a)(1) then "T" else " ")
+  1861. --            & (if analysis_flags(a)(2) then "T" else " ")
+  1862. --            & (if analysis_flags(a)(3) then "T" else " ")
+  1863. --            & (if analysis_flags(a)(4) then "T" else " ")
+  1864. --            & (if analysis_flags(a)(5) then "T" else " ")
+  1865. --             );
+  1866. --        end show_flags;
+  1867.
+  1868.    begin
+  1869.       the_program_has_been_analysed := False;
+  1870.       BA := 0;  -- Director starts at physical word 0.
+  1871.
+  1872.       -- It does not have a jump in E0U, unlike problem programs.
+  1873.       -- Instead it has a fixed sequence of orders to reset the hardware.
+  1874.       -- Before intialization, it is: K4; SHL+63; =+Q0; with the code: #3740416437675016.
+  1875.       -- After intialization,  it is: Q0; SHL+63; =+Q0; with the code: #3620716437675016.
   1876.
-  1877.          set_NIA_to((order_word_number => 2, syllable_index => 0));
-  1878.          decode_the_next_order;
-  1879.          if INS.kind /= normal_jump_order then
-  1880.             log_line("An initial jump, in E2U, has not been found!");
-  1881.          else
-  1882.             mark_the_words_reachable_from((0, 2));
-  1883.             -- Mark the words between E4 and P0 as data.
-  1884.             set_NIA_to((0, 2));
-  1885.             decode_the_next_order;
-  1886.             for d in 5 .. INS.target.order_word_number-1 loop
-  1887.                mark_as_a_data_word(d);
-  1888.             end loop;
-  1889.             the_program_has_been_analysed := True;
-  1890.          end if;
-  1891.
-  1892.          set_NIA_to((0, 4));
-  1893.          decode_the_next_order;
-  1894.          if INS.kind /= normal_jump_order then
-  1895.             log_line("An expected jump, in E4U, has not been found!");
-  1896.             return;
-  1897.          else
-  1898.             mark_the_words_reachable_from((0, 4));
-  1899.             the_program_has_been_analysed := True;
-  1900.          end if;
-  1901.
-  1902.          set_NIA_to((1, 4));
-  1903.          decode_the_next_order;
-  1904.          if INS.kind /= normal_jump_order then
-  1905.             log_line("An expected jump, in E4L, has not been found!");
-  1906.             return;
-  1907.          else
-  1908.             mark_the_words_reachable_from((1, 4));
-  1909.             the_program_has_been_analysed := True;
-  1910.          end if;
-  1911.       end markup_a_Director;
-  1912.
-  1913.    begin -- mark_all_code_blocks_and_data_blocks
-  1914.       if the_program_has_been_analysed then
-  1915.          return;
-  1916.       end if;
-  1917.
-  1918.       clear_all_analysis_flags;
-  1919.
-  1920.       if the_execution_mode = boot_mode  then
-  1921.          markup_a_Director;
-  1922.       else
-  1923.          markup_a_problem_program;
-  1924.       end if;
-  1925.
-  1926.       if nominated_address < invalid_address then
-  1927.          mark_the_words_reachable_from((nominated_address, 0));
-  1928.       end if;
-  1929.
-  1930.    end mark_all_code_blocks_and_data_blocks;
-  1931.
-  1932.    procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
-  1933.                                     octal_option : in Boolean) is
-  1934.
-  1935.       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
-  1936.       saved_CIA   : constant KDF9.syllable_address := CIA;
-  1937.       last_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
-  1938.       comparator  : KDF9.word := last_word;
-  1939.       this_word   : KDF9.word;
-  1940.       address     : KDF9.syllable_address;
-  1941.
-  1942.       procedure show_a_block_of_orders is
-  1943.
-  1944.          function is_a_store_order (decoded : KDF9.decoded_order)
-  1945.          return Boolean
-  1946.          is (
-  1947.              if decoded.kind = one_syllable_order then
-  1948.                 False
-  1949.              elsif decoded.kind = two_syllable_order then
-  1950.                 (
-  1951.                  case decoded.compressed_opcode is
-  1952.                    when TO_MkMq   | TO_MkMqQ
-  1953.                       | TO_MkMqH  | TO_MkMqQH
-  1954.                       | TO_MkMqN  | TO_MkMqQN
-  1955.                       | TO_MkMqHN | TO_MkMqQHN => True,
-  1956.                    when others                 => False
-  1957.                 )
-  1958.              elsif decoded.kind = data_access_order then
-  1959.                 (
-  1960.                  case decoded.compressed_opcode is
-  1961.                     when TO_EaMq | TO_EaMqQ => True,
-  1962.                     when others             => False
-  1963.                 )
-  1964.              else
-  1965.                 False
-  1966.             );
+  1877.        -- Check that we do actually have a Director to examine.
+  1878.
+  1879.       if pre_run then
+  1880.          if fetch_word(0) /= 8#3740416437675016# then
+  1881.             log_line("The loaded program is not a Director bootstrap!");
+  1882.             return;
+  1883.          else
+  1884.             log_line("The loaded program is a Director bootstrap.");
+  1885.          end if;
+  1886.
+  1887.          -- The jumps in E2 and E4 are absent until after Director's initialzation,
+  1888.          --    so they are not present in a pre-run state.
+  1889.          -- All 9 words of the bootstrap are filled with instructions.
+  1890.          for w in order_word_number'(0) .. 8 loop
+  1891.             mark_as_a_code_word(w);
+  1892.          end loop;
+  1893.          mark_as_a_jump_target((0, 0));
+  1894.          the_program_has_been_analysed := True;
+  1895.          return;
+  1896.       end if;
+  1897.
+  1898.       if fetch_word(0) /= 8#3620716437675016# then
+  1899.          log_line("The loaded program is not a Director!");
+  1900.          return;
+  1901.       else
+  1902.          log_line("The loaded program is a Director.");
+  1903.       end if;
+  1904.
+  1905.       -- An initialised Director has a number of jumps in words 2 and 4, but not word 0.
+  1906.       -- Give up if these are absent.
+  1907.
+  1908.       set_NIA_to((2, syllable_index => 0));
+  1909.       decode_the_next_order;
+  1910.       if INS.kind /= normal_jump_order then
+  1911.          log_line("An expected jump, in E2U, has not been found!");
+  1912.          return;
+  1913.       end if;
+  1914.       mark_as_a_jump_target((2, syllable_index => 0));
+  1915.       mark_the_words_reachable_from((2, syllable_index => 0));
+  1916.       mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+  1917.       set_NIA_to((4, syllable_index => 0));
+  1918.       decode_the_next_order;
+  1919.       if INS.kind /= normal_jump_order then
+  1920.          log_line("An expected jump, in E4U, has not been found!");
+  1921.          return;
+  1922.       end if;
+  1923.       mark_as_a_jump_target((4, syllable_index => 0));
+  1924.       mark_the_words_reachable_from((4, syllable_index => 0));
+  1925.       mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+  1926.
+  1927.       set_NIA_to((4, syllable_index => 3));
+  1928.       decode_the_next_order;
+  1929.       if INS.kind /= normal_jump_order then
+  1930.          log_line("An expected jump, in E4L, has not been found!");
+  1931.          return;
+  1932.       end if;
+  1933.       mark_as_a_jump_target((4, syllable_index => 3));
+  1934.       mark_the_words_reachable_from((4, syllable_index => 3));
+  1935.       mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+  1936.
+  1937.       -- E0 is marked because interrupts cause a jump to it, in effect.
+  1938.       mark_as_a_jump_target((0, syllable_index => 0));
+  1939.
+  1940.       -- Mark E3 and E5 through AP0 - 1 as data words.
+  1941.       mark_as_a_data_word(3);
+  1942.       set_NIA_to((2, 0));
+  1943.       decode_the_next_order;
+  1944.       for d in 5 .. INS.target.order_word_number-1 loop
+  1945.          mark_as_a_data_word(d);
+  1946.       end loop;
+  1947.
+  1948.       the_program_has_been_analysed := True;
+  1949.    end markup_a_Director;
+  1950.
+  1951.    procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean) is
+  1952.    begin
+  1953.       clear_all_analysis_flags;
+  1954.       if the_execution_mode = boot_mode  then
+  1955.          markup_a_Director(pre_run);
+  1956.       else
+  1957.          markup_a_problem_program;
+  1958.       end if;
+  1959.       -- Do a second marking for (e.g.) an overlaid area of a Director, at a specified address.
+  1960.       if root_address < 8191 then
+  1961.          mark_the_words_reachable_from((root_address, 0));
+  1962.       end if;
+  1963.    end mark_all_code_blocks_and_data_blocks;
+  1964.
+  1965.    procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
+  1966.                                     octal_option : in Boolean) is
   1967.
-  1968.          procedure set_line_at_minimum (tab : in Natural) is
-  1969.          begin
-  1970.             if panel_logger.column < tab then
-  1971.                tab_log_to(tab);
-  1972.             end if;
-  1973.          end set_line_at_minimum;
-  1974.
-  1975.          procedure set_line_at (tab : in Natural) is
-  1976.          begin
-  1977.             if panel_logger.column > tab then
-  1978.                log_new_line;
-  1979.             end if;
-  1980.             if panel_logger.column < tab then
-  1981.                tab_log_to(tab);
-  1982.             end if;
-  1983.          end set_line_at;
-  1984.
-  1985.          procedure set_at_new_line is
-  1986.          begin
-  1987.             if panel_logger.column > 1 then
-  1988.                log_new_line;
-  1989.             end if;
-  1990.          end set_at_new_line;
-  1991.
-  1992.       last_nz_location : KDF9.syllable_address;
-  1993.
-  1994.       begin -- show_a_block_of_orders
-  1995.          this_word := fetch_word(KDF9.address(address.order_word_number));
-  1996.
-  1997.          if this_word+1 < 2 or this_word = six_DUMMIES then
-  1998.             -- The word is not worth logging.
-  1999.             address := (address.order_word_number+1, 0);
-  2000.             return;
-  2001.          end if;
-  2002.
-  2003.          -- Log useful information about data words.
-  2004.          if address.order_word_number/is_a_data_word then
-  2005.             set_at_new_line;
-  2006.          end if;
-  2007.          loop
-  2008.             if address.order_word_number/is_a_data_word then
-  2009.                last_nz_location := address;
-  2010.                -- Display a line of data.
-  2011.                log(oct_or_dec_of(address, octal_option) & ": ");
-  2012.                set_line_at(jump_tab);
-  2013.                show_in_various_formats(fetch_word(KDF9.address(address.order_word_number)),
-  2014.                                        column => jump_tab);
-  2015.                log_new_line;
-  2016.                loop
-  2017.                   if address.order_word_number = last.order_word_number then
-  2018.                      return;
-  2019.                   end if;
-  2020.                   address := (address.order_word_number+1, 0);
-  2021.                exit when fetch_word(KDF9.address(address.order_word_number)) /= 0;
-  2022.                end loop;
-  2023.                if address.order_word_number > last_nz_location.order_word_number+1 then
-  2024.                   log("========  zeros  ========");
-  2025.                   log_new_line;
-  2026.                end if;
-  2027.             else
-  2028.                log_new_line;
-  2029.                exit;
-  2030.             end if;
-  2031.          end loop;
-  2032.
-  2033.          loop
-  2034.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  2035.          exit when address.order_word_number = 8191;
-  2036.             this_word := fetch_word(KDF9.address(address.order_word_number));
-  2037.             if this_word = comparator and this_word = last_word then
-  2038.                -- The word is not worth logging.
-  2039.                address := (address.order_word_number+1, 0);
-  2040.                return;
-  2041.             end if;
-  2042.
-  2043.             if this_word+1 < 2 or this_word = six_DUMMIES then
-  2044.                comparator := this_word;
-  2045.             end if;
-  2046.
-  2047.             set_NIA_to(address);
-  2048.             decode_the_next_order;
-  2049.             if is_an_invalid_order(INS) then
-  2050.                -- The word is not worth logging.
-  2051.                address := (address.order_word_number+1, 0);
-  2052.                return;
-  2053.             end if;
-  2054.
-  2055.             if is_a_jump_target(address) then
-  2056.                -- Start a code paragraph, with its address for easy reference.
-  2057.                set_at_new_line;
-  2058.                log(oct_or_dec_of(address, octal_option) & ": ");
-  2059.                log_new_line;
-  2060.             end if;
-  2061.
-  2062.             -- Set the tab position appropriately for the order type.
-  2063.             case INS.kind is
-  2064.                when one_syllable_order | data_access_order =>
-  2065.                   set_line_at_minimum(first_tab);
-  2066.                when two_syllable_order =>
-  2067.                   case INS.compressed_opcode is
-  2068.                      when JCqNZS =>
-  2069.                         set_line_at(jump_tab);
-  2070.                      when  CT_PMB_PMC_BUSY_Qq
-  2071.                         |  PAR_Qq
-  2072.                         |  PMF_PMG_Qq
-  2073.                         |  PIA_PIC_CLO_TLO_Qq
-  2074.                         |  PIB_PID_Qq
-  2075.                         |  PIE_PIG_Qq
-  2076.                         |  PIF_PIH_Qq
-  2077.                         |  POA_POC_POE_POF_PMH_Qq
-  2078.                         |  POB_POD_Qq
-  2079.                         |  POG_POL_Qq
-  2080.                         |  POH_POK_Qq
-  2081.                         |  PMA_PMK_INT_Qq
-  2082.                         |  PMA_PMK_INT_Qq+1
-  2083.                         |  PMD_PME_PML_Qq
-  2084.                         |  PMD_PME_PML_Qq+1 =>
-  2085.                         set_line_at(first_tab);
-  2086.                      when others =>
-  2087.                         if panel_logger.column < first_tab then
-  2088.                            set_line_at_minimum(first_tab);
-  2089.                         end if;
-  2090.                   end case;
-  2091.                when normal_jump_order =>
-  2092.                   set_line_at(jump_tab);
-  2093.             end case;
-  2094.
-  2095.             -- Show the order in pseudo-Usercode format.
-  2096.             log(the_full_name_of(INS, octal_option) &  "; ");
+  1968.       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
+  1969.       prev_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
+  1970.       comparator  : KDF9.word := prev_word;
+  1971.       address     : KDF9.syllable_address;
+  1972.       this_word   : KDF9.word;
+  1973.
+  1974.       procedure show_a_block_of_orders (address : in out KDF9.syllable_address) is
+  1975.
+  1976.          function is_a_store_order (decoded : KDF9.decoded_order)
+  1977.          return Boolean
+  1978.          is (
+  1979.              if decoded.kind = one_syllable_order then
+  1980.                 False
+  1981.              elsif decoded.kind = two_syllable_order then
+  1982.                 (
+  1983.                  case decoded.compressed_opcode is
+  1984.                    when TO_MkMq   | TO_MkMqQ
+  1985.                       | TO_MkMqH  | TO_MkMqQH
+  1986.                       | TO_MkMqN  | TO_MkMqQN
+  1987.                       | TO_MkMqHN | TO_MkMqQHN
+  1988.                       | TO_Kq     | TO_LINK    => True,
+  1989.                    when others                 => False
+  1990.                 )
+  1991.              elsif decoded.kind = data_access_order then
+  1992.                 (
+  1993.                  case decoded.compressed_opcode is
+  1994.                     when TO_EaMq | TO_EaMqQ => True,
+  1995.                     when others             => False
+  1996.                 )
+  1997.              else
+  1998.                 False
+  1999.             );
+  2000.
+  2001.          procedure set_line_at_minimum (tab : in Natural) is
+  2002.          begin
+  2003.             if panel_logger.column < tab then
+  2004.                tab_log_to(tab);
+  2005.             end if;
+  2006.          end set_line_at_minimum;
+  2007.
+  2008.          procedure set_line_at (tab : in Natural) is
+  2009.          begin
+  2010.             if panel_logger.column > tab then
+  2011.                log_new_line;
+  2012.             end if;
+  2013.             if panel_logger.column < tab then
+  2014.                tab_log_to(tab);
+  2015.             end if;
+  2016.          end set_line_at;
+  2017.
+  2018.          procedure set_at_new_line is
+  2019.          begin
+  2020.             if panel_logger.column > 1 then
+  2021.                log_new_line;
+  2022.             end if;
+  2023.          end set_at_new_line;
+  2024.
+  2025.          last_nz_location : KDF9.syllable_address;
+  2026.
+  2027.       begin -- show_a_block_of_orders
+  2028.          this_word := fetch_word(KDF9.address(address.order_word_number));
+  2029.
+  2030.          if this_word in not 0 | 0 | six_DUMMIES then
+  2031.             -- The word is not worth logging.  Step on.
+  2032.             address := (address.order_word_number+1, 0);
+  2033.             return;
+  2034.          end if;
+  2035.
+  2036.          -- Handle data words.
+  2037.          if address.order_word_number/is_a_data_word then
+  2038.             set_at_new_line;
+  2039.          end if;
+  2040.          loop
+  2041.             if address.order_word_number/is_a_data_word then
+  2042.                last_nz_location := address;
+  2043.
+  2044.                -- Display a line of data.
+  2045.                log(oct_or_dec_of(address, octal_option) & ": ");
+  2046.                set_line_at(jump_tab);
+  2047.                show_in_various_formats(fetch_word(KDF9.address(address.order_word_number)),
+  2048.                                        column => jump_tab);
+  2049.                log_new_line;
+  2050.
+  2051.                -- Skip over any following zero words (DUMMY0 or uninitialized V stores).
+  2052.                loop
+  2053.                   if address.order_word_number = last.order_word_number then
+  2054.                      -- The whole block has been processed.
+  2055.                      return;
+  2056.                   end if;
+  2057.                   address := (address.order_word_number+1, 0);
+  2058.                exit when fetch_word(KDF9.address(address.order_word_number)) /= 0;
+  2059.                end loop;
+  2060.                if address.order_word_number > last_nz_location.order_word_number+1 then
+  2061.                   log("========  zeros  ========");
+  2062.                   log_new_line;
+  2063.                end if;
+  2064.             else
+  2065.                -- We have found an instruction word.
+  2066.                log_new_line;
+  2067.          exit;
+  2068.             end if;
+  2069.          end loop;
+  2070.
+  2071.          -- Handle instruction words.
+  2072.          loop
+  2073.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  2074.          exit when address.order_word_number = 8191;
+  2075.             this_word := fetch_word(KDF9.address(address.order_word_number));
+  2076.
+  2077.             -- Suppress output of more than 1 of a block of equal values.
+  2078.             if this_word = comparator and this_word = prev_word then
+  2079.                -- The word is not worth logging.  Step on.
+  2080.                address := (address.order_word_number+1, 0);
+  2081.                return;
+  2082.             end if;
+  2083.
+  2084.             if this_word in not 0 | 0 | six_DUMMIES then
+  2085.                -- Take this word as the new basis for comparison.
+  2086.                comparator := this_word;
+  2087.             end if;
+  2088.
+  2089.             -- This updates the Instruction word buffers.  Nasty side effect that has to be undone!
+  2090.             set_NIA_to(address);
+  2091.             decode_the_next_order;
+  2092.             if is_an_invalid_order(INS) then
+  2093.                -- The word is not worth logging.  Step on.
+  2094.                address := (address.order_word_number+1, 0);
+  2095.                return;
+  2096.             end if;
   2097.
-  2098.             case INS.kind is
-  2099.                when one_syllable_order =>
-  2100.                   increment_by_1(address);
-  2101.                when two_syllable_order =>
-  2102.                   increment_by_2(address);
-  2103.                when normal_jump_order | data_access_order =>
-  2104.                   increment_by_3(address);
-  2105.             end case;
-  2106.
-  2107.             if address.order_word_number = last.order_word_number then
-  2108.                log_new_line;
-  2109.                return;
-  2110.             end if;
-  2111.
-  2112.             if (address.order_word_number+1)/is_a_data_word or
-  2113.                   address.order_word_number > last.order_word_number then
-  2114.                return;
-  2115.             end if;
-  2116.
-  2117.             if is_a_store_order(INS)                   or else
-  2118.                   INS.compressed_opcode = JCqNZS                or else
-  2119.                      INS.kind = normal_jump_order      or else
-  2120.                         panel_logger.column > last_column then
-  2121.                log_new_line;
-  2122.             elsif this_word = comparator and this_word /= last_word then
-  2123.                log_new_line;
-  2124.                log_line("==========  #"
-  2125.                       & oct_of(KDF9.syllable(this_word and 255))
-  2126.                       & "  ==========");
-  2127.                address := (address.order_word_number+1, 0);
-  2128.                if address.order_word_number > last.order_word_number or
-  2129.                      address.order_word_number/is_a_data_word then
-  2130.                   return;
-  2131.                end if;
-  2132.             end if;
-  2133.
-  2134.             last_word := this_word;
-  2135.
-  2136.          end loop;
-  2137.
-  2138.       end show_a_block_of_orders;
-  2139.
-  2140.    begin
-  2141.       if the_program_has_been_analysed then
-  2142.          log_line("Core store interpreted as instructions.");
-  2143.          BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  2144.          address := first;
-  2145.          loop
-  2146.             show_a_block_of_orders;
-  2147.             exit when address.order_word_number >= last.order_word_number;
-  2148.          end loop;
-  2149.          log_new_line;
-  2150.          log_rule;
-  2151.          CIA := saved_CIA;
-  2152.          decode_the_next_order;
-  2153.       else
-  2154.          log_line(" ... Core store cannot be interpreted as instructions!");
-  2155.          log_new_line;
-  2156.       end if;
-  2157.    end show_core_as_Usercode;
-  2158.
-  2159.    procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
-  2160.
-  2161.       address     :   KDF9.syllable_address;
-  2162.
-  2163.       procedure show_a_block is
+  2098.             if is_a_jump_target(address) then
+  2099.                -- Jumps go at the start of a fresh line for best visibility.
+  2100.                -- Label the jump with its address at the start of the line for easy reference.
+  2101.                set_at_new_line;
+  2102.                log(oct_or_dec_of(address, octal_option) & ": ");
+  2103.                log_new_line;
+  2104.             end if;
+  2105.
+  2106.             -- Set the tab position appropriately for the order type.
+  2107.             case INS.kind is
+  2108.                when one_syllable_order | data_access_order =>
+  2109.                   set_line_at_minimum(first_tab);
+  2110.                when two_syllable_order =>
+  2111.                   case INS.compressed_opcode is
+  2112.                      when JCqNZS =>
+  2113.                         set_line_at(jump_tab);
+  2114.                      when CT_PMB_PMC_BUSY_Qq
+  2115.                         | PAR_Qq
+  2116.                         | PMF_PMG_Qq
+  2117.                         | PIA_PIC_CLO_TLO_Qq
+  2118.                         | PIB_PID_Qq
+  2119.                         | PIE_PIG_Qq
+  2120.                         | PIF_PIH_Qq
+  2121.                         | POA_POC_POE_POF_PMH_Qq
+  2122.                         | POB_POD_Qq
+  2123.                         | POG_POL_Qq
+  2124.                         | POH_POK_Qq
+  2125.                         | PMA_PMK_INT_Qq
+  2126.                         | PMA_PMK_INT_Qq+1
+  2127.                         | PMD_PME_PML_Qq
+  2128.                         | PMD_PME_PML_Qq+1 =>
+  2129.                         set_line_at(first_tab);
+  2130.                      when TO_Kq
+  2131.                         | TO_LINK =>
+  2132.                         set_line_at(jump_tab);
+  2133.                      when others =>
+  2134.                         if panel_logger.column < first_tab then
+  2135.                            set_line_at_minimum(first_tab);
+  2136.                         end if;
+  2137.                   end case;
+  2138.                when normal_jump_order =>
+  2139.                   set_line_at(jump_tab);
+  2140.             end case;
+  2141.
+  2142.             -- Show the order in pseudo-Usercode format.
+  2143.             log(the_full_name_of(INS, octal_option) &  "; ");
+  2144.
+  2145.             case INS.kind is
+  2146.                when one_syllable_order =>
+  2147.                   increment_by_1(address);
+  2148.                when two_syllable_order =>
+  2149.                   increment_by_2(address);
+  2150.                when normal_jump_order | data_access_order =>
+  2151.                   increment_by_3(address);
+  2152.             end case;
+  2153.
+  2154.             if address.order_word_number = last.order_word_number then
+  2155.                -- All done with this block.
+  2156.                log_new_line;
+  2157.                return;
+  2158.             end if;
+  2159.
+  2160.             if (address.order_word_number+1)/is_a_data_word then
+  2161.                -- We have reached the end of the orders and are about to run into data.
+  2162.                return;
+  2163.             end if;
   2164.
-  2165.          procedure set_line_at (tab : Natural) is
-  2166.          begin  -- set_line_at
-  2167.             if panel_logger.column > tab then
-  2168.                log_new_line;
-  2169.             end if;
-  2170.             if panel_logger.column < tab then
-  2171.                tab_log_to(tab);
-  2172.             end if;
-  2173.          end set_line_at;
-  2174.
-  2175.       begin  -- show_a_block
-  2176.          loop
-  2177.             if address.syllable_index = 0 then
-  2178.                log_new_line;
-  2179.                log(oct_of(address) & ": ");
-  2180.                set_line_at(jump_tab);
-  2181.             end if;
-  2182.             log(oct_of(fetch_syllable(address)) &  "; ");
-  2183.             increment_by_1(address);
-  2184.          exit when address.order_word_number > last.order_word_number;
-  2185.          end loop;
-  2186.          log_new_line;
-  2187.       end show_a_block;
-  2188.
-  2189.     begin  -- show_core_as_syllables
-  2190.        BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  2191.       log_line("Core store interpreted as order syllables.");
-  2192.       address := first;
-  2193.       loop
-  2194.          show_a_block;
-  2195.          exit when address.order_word_number > last.order_word_number;
-  2196.       end loop;
-  2197.       log_new_line;
-  2198.       log_rule;
-  2199.    end show_core_as_syllables;
-  2200.
-  2201.    procedure poke (address    : in KDF9.address;
-  2202.                    sub_word   : in sub_word_flag;
-  2203.                    position   : in KDF9.address;
-  2204.                    value      : in KDF9.word) is
-  2205.    begin
-  2206.       case sub_word is
-  2207.          when 'W' | 'w' =>
-  2208.             store_word(value, address);
-  2209.          when 'U' | 'u' =>
-  2210.             store_halfword(value*2**24, address, 0);
-  2211.          when 'L' | 'l' =>
-  2212.             store_halfword(value*2**24, address, 1);
-  2213.          when 'S' | 's' =>
-  2214.             store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
-  2215.          when 'C' | 'c' =>
-  2216.             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
-  2217.       end case;
-  2218.    end poke;
-  2219.
-  2220. end state_display;
+  2165.             if is_a_store_order(INS)                   or else
+  2166.                   INS.compressed_opcode = JCqNZS       or else
+  2167.                      INS.kind = normal_jump_order      or else
+  2168.                         panel_logger.column > last_column then
+  2169.                -- Make store to core and jump orders end their line for best visibility.
+  2170.                log_new_line;
+  2171.             elsif this_word = comparator and this_word /= prev_word then
+  2172.                -- Display the placeholder of a suppressed group of equal words.
+  2173.                log_new_line;
+  2174.                log_line("==========  #"
+  2175.                       & oct_of(KDF9.syllable(this_word and 255))
+  2176.                       & "  ==========");
+  2177.                address := (address.order_word_number+1, 0);
+  2178.                if address.order_word_number > last.order_word_number or else
+  2179.                      address.order_word_number/is_a_data_word           then
+  2180.                   -- We have reached the end of the orders or are about to run into data.
+  2181.                   return;
+  2182.                end if;
+  2183.             end if;
+  2184.             prev_word := this_word;
+  2185.
+  2186.          end loop;
+  2187.
+  2188.       end show_a_block_of_orders;
+  2189.
+  2190.    begin -- show_core_as_Usercode
+  2191.       if not the_program_has_been_analysed then
+  2192.          mark_all_code_blocks_and_data_blocks(pre_run => False);
+  2193.       end if;
+  2194.       if the_program_has_been_analysed then
+  2195.          log_line("Core store interpreted as instructions.");
+  2196.           -- Ensure that physical store is examined when running in boot mode.
+  2197.          BA := 0;
+  2198.          address := first;
+  2199.          loop
+  2200.             show_a_block_of_orders(address);
+  2201.             exit when address.order_word_number >= last.order_word_number;
+  2202.          end loop;
+  2203.          log_new_line;
+  2204.          log_rule;
+  2205.       else
+  2206.          log_line(" ... Core store cannot be interpreted as instructions!");
+  2207.          log_new_line;
+  2208.       end if;
+  2209.    end show_core_as_Usercode;
+  2210.
+  2211.    procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
+  2212.
+  2213.       address     :   KDF9.syllable_address;
+  2214.
+  2215.       procedure show_a_block is
+  2216.
+  2217.          procedure set_line_at (tab : Natural) is
+  2218.          begin  -- set_line_at
+  2219.             if panel_logger.column > tab then
+  2220.                log_new_line;
+  2221.             end if;
+  2222.             if panel_logger.column < tab then
+  2223.                tab_log_to(tab);
+  2224.             end if;
+  2225.          end set_line_at;
+  2226.
+  2227.       begin  -- show_a_block
+  2228.          loop
+  2229.             if address.syllable_index = 0 then
+  2230.                log_new_line;
+  2231.                log(oct_of(address) & ": ");
+  2232.                set_line_at(jump_tab);
+  2233.             end if;
+  2234.             log(oct_of(fetch_syllable(address)) &  "; ");
+  2235.             increment_by_1(address);
+  2236.          exit when address.order_word_number > last.order_word_number;
+  2237.          end loop;
+  2238.          log_new_line;
+  2239.       end show_a_block;
+  2240.
+  2241.     begin  -- show_core_as_syllables
+  2242.        BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  2243.       log_line("Core store interpreted as order syllables.");
+  2244.       address := first;
+  2245.       loop
+  2246.          show_a_block;
+  2247.          exit when address.order_word_number > last.order_word_number;
+  2248.       end loop;
+  2249.       log_new_line;
+  2250.       log_rule;
+  2251.    end show_core_as_syllables;
+  2252.
+  2253.    procedure poke (address    : in KDF9.address;
+  2254.                    sub_word   : in sub_word_flag;
+  2255.                    position   : in KDF9.address;
+  2256.                    value      : in KDF9.word) is
+  2257.    begin
+  2258.       case sub_word is
+  2259.          when 'W' | 'w' =>
+  2260.             store_word(value, address);
+  2261.          when 'U' | 'u' =>
+  2262.             store_halfword(value*2**24, address, 0);
+  2263.          when 'L' | 'l' =>
+  2264.             store_halfword(value*2**24, address, 1);
+  2265.          when 'S' | 's' =>
+  2266.             store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
+  2267.          when 'C' | 'c' =>
+  2268.             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
+  2269.       end case;
+  2270.    end poke;
+  2271.
+  2272. end state_display;
 
 Compiling: ../Source/state_display.ads
-Source file time stamp: 2021-02-21 00:17:50
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-09 14:50:58
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11467,9 +11569,9 @@ Compiled at: 2021-02-21 15:54:06
     28.
     29.    procedure show_V_and_T;
     30.
-    31.    procedure show_NEST (when_empty : Boolean := True);
+    31.    procedure show_NEST;
     32.
-    33.    procedure show_SJNS (when_empty : Boolean := True);
+    33.    procedure show_SJNS;
     34.
     35.    procedure show_IO_register (the_Q_register : in KDF9.Q_register;
     36.                                width          : in Positive := 8;
@@ -11507,7 +11609,7 @@ Compiled at: 2021-02-21 15:54:06
     68.
     69.    procedure show_final_state (because : String);
     70.
-    71.    procedure mark_all_code_blocks_and_data_blocks;
+    71.    procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean);
     72.
     73.    the_program_has_been_analysed : Boolean := False;
     74.
@@ -11541,19 +11643,19 @@ Compiled at: 2021-02-21 15:54:06
    102.
    103. end state_display;
 
- 2220 lines: No errors
+ 2272 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/generic_logger.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide operations supporting replicated output to a list of logging interfaces.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11654,12 +11756,12 @@ Compiled at: 2021-02-21 15:54:06
    101. end generic_logger;
 
 Compiling: ../Source/generic_logger.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide operations supporting replicated output to a list of logging interfaces.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11744,12 +11846,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Define an abstract log output device.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11802,12 +11904,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging-file.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide logging output to a named text file.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11915,12 +12017,12 @@ Compiled at: 2021-02-21 15:54:06
    108. end logging.file;
 
 Compiling: ../Source/logging-file.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide logging output to a named text file.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11993,12 +12095,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging-panel.adb
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide logging output to an interactive terminal/control panel.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12087,68 +12189,60 @@ Compiled at: 2021-02-21 15:54:06
     89.    end log_new_line;
     90.
     91.    not overriding
-    92.    procedure show (logger : in out panel.display; message : in String := "") is
+    92.    procedure show_line (logger : in out panel.display; message : in String := "") is
     93.    begin
     94.       if message /= "" then
     95.          logger.log(message);
     96.       end if;
-    97.    end show;
-    98.
-    99.    not overriding
-   100.    procedure show_line (logger : in out panel.display; message : in String := "") is
-   101.    begin
-   102.       if message /= "" then
-   103.          logger.log(message);
-   104.       end if;
-   105.       logger.log_new_line;
-   106.    end show_line;
-   107.
-   108.    not overriding
-   109.    procedure interact (logger : in out panel.display; reason : in String := "Mode") is
-   110.       old_mode : constant settings.diagnostic_mode := the_diagnostic_mode;
-   111.       response : response_kind;
-   112.       choice   : Character;
-   113.    begin
-   114.    interaction_loop:
-   115.       loop
-   116.          logger.column_number := 1;
-   117.          POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
-   118.          if response = name_response then
-   119.             case choice is
-   120.                when 'q' | 'Q' =>
-   121.                   quit_was_requested := True;
-   122.                   exit interaction_loop;
-   123.                when 'd' | 'D' =>
-   124.                   debugging_is_enabled := not debugging_is_enabled;
-   125.                   exit interaction_loop;
-   126.                when 'f' | 'F' =>
-   127.                   set_diagnostic_mode(fast_mode);
-   128.                   exit interaction_loop;
-   129.                when 'p' | 'P' =>
-   130.                   set_diagnostic_mode(pause_mode);
-   131.                   exit interaction_loop;
-   132.                when 't' | 'T' =>
-   133.                   set_diagnostic_mode(trace_mode);
-   134.                   exit interaction_loop;
-   135.                when others =>
-   136.                   null; -- An invalid choice, try again.
-   137.             end case;
-   138.          elsif response = EOF_response then
-   139.             exit;
-   140.          end if;
-   141.       end loop interaction_loop;
-   142.       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
-   143.    end interact;
-   144.
-   145. end logging.panel;
+    97.       logger.log_new_line;
+    98.    end show_line;
+    99.
+   100.    not overriding
+   101.    procedure interact (logger : in out panel.display; reason : in String := "Mode") is
+   102.       old_mode : constant settings.diagnostic_mode := the_diagnostic_mode;
+   103.       response : response_kind;
+   104.       choice   : Character;
+   105.    begin
+   106.    interaction_loop:
+   107.       loop
+   108.          logger.column_number := 1;
+   109.          POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
+   110.          if response = name_response then
+   111.             case choice is
+   112.                when 'q' | 'Q' =>
+   113.                   quit_was_requested := True;
+   114.                   exit interaction_loop;
+   115.                when 'd' | 'D' =>
+   116.                   debugging_is_enabled := not debugging_is_enabled;
+   117.                   exit interaction_loop;
+   118.                when 'f' | 'F' =>
+   119.                   set_diagnostic_mode(fast_mode);
+   120.                   exit interaction_loop;
+   121.                when 'p' | 'P' =>
+   122.                   set_diagnostic_mode(pause_mode);
+   123.                   exit interaction_loop;
+   124.                when 't' | 'T' =>
+   125.                   set_diagnostic_mode(trace_mode);
+   126.                   exit interaction_loop;
+   127.                when others =>
+   128.                   null; -- An invalid choice, try again.
+   129.             end case;
+   130.          elsif response = EOF_response then
+   131.             exit;
+   132.          end if;
+   133.       end loop interaction_loop;
+   134.       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
+   135.    end interact;
+   136.
+   137. end logging.panel;
 
 Compiling: ../Source/logging-panel.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:20
 
      1. -- Provide logging output to an interactive terminal/control panel.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12196,45 +12290,42 @@ Compiled at: 2021-02-21 15:54:06
     48.                            iff    : in Boolean := True);
     49.
     50.    not overriding
-    51.    procedure show (logger : in out panel.display; message : in String := "");
+    51.    procedure show_line (logger : in out panel.display; message : in String := "");
     52.
     53.    not overriding
-    54.    procedure show_line (logger : in out panel.display; message : in String := "");
+    54.    procedure interact (logger : in out panel.display; reason : in String := "Mode");
     55.
-    56.    not overriding
-    57.    procedure interact (logger : in out panel.display; reason : in String := "Mode");
+    56.    overriding
+    57.    procedure open (logger : in out panel.display; logfile_name : in String) is null;
     58.
     59.    overriding
-    60.    procedure open (logger : in out panel.display; logfile_name : in String) is null;
+    60.    procedure close (logger : in out panel.display; logfile_name : in String) is null;
     61.
     62.    overriding
-    63.    procedure close (logger : in out panel.display; logfile_name : in String) is null;
+    63.    procedure flush (logger : in out panel.display; iff : in Boolean := True) is null;
     64.
-    65.    overriding
-    66.    procedure flush (logger : in out panel.display; iff : in Boolean := True) is null;
-    67.
-    68. private
-    69.
-    70.    type display is new logging.output with
-    71.       record
-    72.          column_number : Positive := 1;
-    73.       end record;
-    74.
-    75. end logging.panel;
+    65. private
+    66.
+    67.    type display is new logging.output with
+    68.       record
+    69.          column_number : Positive := 1;
+    70.       end record;
+    71.
+    72. end logging.panel;
 
- 145 lines: No errors
+ 137 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-the_locker_of.adb
-Source file time stamp: 2021-02-20 00:00:34
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Identify the buffer that caused a store lockout.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12279,13 +12370,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-cpu.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
      2. --   Ada types; and for types used in the internal functioning of the microcode.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -13374,13 +13465,13 @@ Compiled at: 2021-02-21 15:54:06
   1090. end KDF9.CPU;
 
 Compiling: ../Source/kdf9-cpu.ads
-Source file time stamp: 2021-02-20 23:52:36
-Compiled at: 2021-02-21 15:54:06
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
      2. --   Ada types; and for types used in the internal functioning of the microcode.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -13850,12 +13941,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-phu_store.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- The K5 operation data formats.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -13918,12 +14009,12 @@ Compiled at: 2021-02-21 15:54:07
     63. end KDF9.PHU_store;
 
 Compiling: ../Source/kdf9-phu_store.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- The K5 operation data formats.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14008,12 +14099,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/tracing.adb
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14097,7 +14188,7 @@ Compiled at: 2021-02-21 15:54:07
     84.    procedure take_note_of (the_IAR   : in KDF9.syllable_address;
     85.                            the_value : in KDF9.word) is
     86.    begin
-    87.       if the_retrospective_trace_is_enabled           and then
+    87.       if retrospective_tracing_is_enabled             and then
     88.             ICR in low_count .. high_count            and then
     89.                NIA_word_number in low_bound .. high_bound then
     90.          declare
@@ -14142,7 +14233,7 @@ Compiled at: 2021-02-21 15:54:07
    129.
    130.    procedure register_IO_event (the_note : in IOC_FIFO_entry) is
    131.    begin
-   132.       if the_peripheral_trace_is_enabled              and then
+   132.       if peripheral_tracing_is_enabled                and then
    133.             ICR in low_count .. high_count            and then
    134.                NIA_word_number in low_bound .. high_bound then
    135.          if IOC_FIFO_count = 0 then
@@ -14309,7 +14400,7 @@ Compiled at: 2021-02-21 15:54:07
    296.                     message        => content & padding
    297.                    );
    298.       begin
-   299.          if the_interrupt_trace_is_enabled               and then
+   299.          if interrupt_tracing_is_enabled                 and then
    300.                ICR in low_count .. high_count            and then
    301.                   NIA_word_number in low_bound .. high_bound then
    302.             if interrupt_FIFO_count = 0 then
@@ -14609,12 +14700,12 @@ Compiled at: 2021-02-21 15:54:07
    596. end tracing;
 
 Compiling: ../Source/tracing.ads
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14847,12 +14938,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/formatting.adb
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Provide basic data-formatting operations for KDF9 data types.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15010,7 +15101,7 @@ Compiled at: 2021-02-21 15:54:07
    158.       return oct;
    159.    end oct_of;
    160.
-   161.    -- Return "L', R'", or "L'" if R' is empty; "'" indicates removal of trailing blanks.
+   161.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
    162.    function "-" (L, R : String)
    163.    return String is
    164.       trim_R : constant String := trim(R, right);
@@ -15103,12 +15194,12 @@ Compiled at: 2021-02-21 15:54:07
    251. end formatting;
 
 Compiling: ../Source/formatting.ads
-Source file time stamp: 2021-02-20 23:56:00
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Provide basic data-formatting operations for KDF9 data types.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15190,7 +15281,7 @@ Compiled at: 2021-02-21 15:54:07
     82.    function oct_of (N : KDF9.word)
     83.    return String;
     84.
-    85.    -- Return "L', R'", or "L'" if R' is empty: "'" indicates removal of trailing blanks.
+    85.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
     86.    function "-" (L, R : String)
     87.    return String;
     88.
@@ -15250,12 +15341,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/host_io.adb
-Source file time stamp: 2021-02-19 17:03:38
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Buffered I/O streams to support KDF9 device I/O.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15309,7 +15400,7 @@ Compiled at: 2021-02-21 15:54:07
     54.       open(the_stream, file_name, mode, fd);
     55.    exception
     56.       when POSIX_IO_error =>
-    57.          trap_operator_error("'" & file_name & "' cannot be opened");
+    57.          trap_operator_error("«" & file_name & "» cannot be opened");
     58.    end open;
     59.
     60.    procedure truncate (the_stream : in out host_IO.stream) is
@@ -15611,12 +15702,12 @@ Compiled at: 2021-02-21 15:54:07
    356. end host_IO;
 
 Compiling: ../Source/host_io.ads
-Source file time stamp: 2021-02-19 02:26:51
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Buffered I/O streams to support KDF9 device I/O.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15802,12 +15893,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-store.adb
-Source file time stamp: 2021-02-19 21:08:16
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- KDF9 core store operations.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16048,12 +16139,12 @@ Compiled at: 2021-02-21 15:54:07
    241. end KDF9.store;
 
 Compiling: ../Source/kdf9-store.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- KDF9 core store operations.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16208,12 +16299,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-absent.adb
-Source file time stamp: 2021-02-16 23:23:54
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Handle attempted usage of a buffer with No Device attached.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16422,12 +16513,12 @@ Compiled at: 2021-02-21 15:54:07
    209.
 
 Compiling: ../Source/ioc-absent.ads
-Source file time stamp: 2021-02-16 23:12:16
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Handle attempted usage of a buffer with No Device attached.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16618,12 +16709,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast.adb
-Source file time stamp: 2021-02-18 00:56:14
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16655,12 +16746,12 @@ Compiled at: 2021-02-21 15:54:07
     32. end IOC.fast;
 
 Compiling: ../Source/ioc-fast.ads
-Source file time stamp: 2021-02-13 13:50:50
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16715,12 +16806,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr.adb
-Source file time stamp: 2021-02-19 15:58:28
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Emulation of a drum store.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16871,316 +16962,316 @@ Compiled at: 2021-02-21 15:54:07
    151.       end if;
    152.    end increment;
    153.
-   154.    procedure read_drum (the_DR    : in out DR.device;
-   155.                         Q_operand : in KDF9.Q_register) is
-   156.       end_address  : constant KDF9.address := Q_operand.M;
-   157.       next_address : KDF9.address := Q_operand.I;
-   158.       the_sector   : DR.sector := (others => Character'Val(0));
-   159.       symbol_nr    : KDF9_char_sets.symbol_index;
-   160.       size         : KDF9.word := 0;
-   161.       the_index    : KDF9.word;
-   162.       latency,
-   163.       busy_time    : KDF9.us;
-   164.    begin
-   165.       check_addresses_and_lockouts(next_address, end_address);
-   166.       the_index := validated_drum_address(the_DR, Q_operand.C);
-   167.       latency := latent_time(the_index);
-   168.       get(the_DR, the_sector, the_index);
-   169.    sector_loop:
-   170.       loop
-   171.          if the_index > DR.drum_index'Last then
-   172.             trap_failing_IO_operation(the_DR, "reading more would exceed the storage available");
-   173.          end if;
-   174.          symbol_nr := 0;
-   175.       byte_loop:
-   176.          for i in 1 .. bytes_per_sector loop
-   177.             if symbol_nr = 0 then
-   178.                store_word(0, next_address);
-   179.             end if;
-   180.             store_symbol(CN_TR(the_sector(i)), next_address, symbol_nr);
-   181.             size := size + 1;
-   182.          exit byte_loop when next_address = end_address and symbol_nr = 7;
-   183.             increment(next_address, symbol_nr);
-   184.          end loop byte_loop;
-   185.       exit sector_loop when next_address = end_address and symbol_nr = 7;
-   186.          validate_the_sector_number(the_DR, the_index);
-   187.          get(the_DR, the_sector, the_index);
-   188.          the_index := the_index + 1;
-   189.       end loop sector_loop;
-   190.       keep_house(the_DR, size, busy_time);
-   191.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, input_operation);
-   192.       update_statistics(the_DR, latency);
-   193.       lock_out_relative_addresses(Q_operand);
-   194.    end read_drum;
-   195.
-   196.    overriding
-   197.    procedure PIA (the_DR      : in out DR.device;
-   198.                   Q_operand   : in KDF9.Q_register;
-   199.                   set_offline : in Boolean) is
-   200.       pragma Unreferenced(set_offline);
-   201.    begin
-   202.       validate_transfer(the_DR, Q_operand);
-   203.       validate_parity(the_DR);
-   204.       read_drum(the_DR, Q_operand);
-   205.    end PIA;
-   206.
-   207.    procedure read_drum_to_EM (the_DR    : in out DR.device;
-   208.                               Q_operand : in KDF9.Q_register) is
-   209.       end_address  : constant KDF9.address := Q_operand.M;
-   210.       next_address : KDF9.address := Q_operand.I;
-   211.       the_sector   : DR.sector := (others => Character'Val(0));
-   212.       at_EM     : Boolean := False;
-   213.       symbol_nr : KDF9_char_sets.symbol_index;
-   214.       size      : KDF9.word := 0;
-   215.       the_index : KDF9.word;
-   216.       latency,
-   217.       busy_time : KDF9.us;
-   218.    begin
-   219.       check_addresses_and_lockouts(next_address, end_address);
-   220.       the_index := validated_drum_address(the_DR, Q_operand.C);
-   221.       latency := latent_time(the_index);
-   222.       get(the_DR, the_sector, the_index);
-   223.    sector_loop:
-   224.       loop
-   225.          if the_index > DR.drum_index'Last then
-   226.             trap_failing_IO_operation(the_DR, "reading more would exceed the storage available");
-   227.          end if;
-   228.          symbol_nr := 0;
-   229.       byte_loop:
-   230.          for i in 1 .. bytes_per_sector loop
-   231.             if symbol_nr = 0 then
-   232.                store_word(0, next_address);
-   233.             end if;
-   234.             store_symbol(CN_TR(the_sector(i)), next_address, symbol_nr);
-   235.             size := size + 1;
-   236.          at_EM := the_sector(i) = KDF9_char_sets.E_M;
-   237.          exit byte_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
-   238.             increment(next_address, symbol_nr);
-   239.          end loop byte_loop;
-   240.          exit sector_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
-   241.          validate_the_sector_number(the_DR, the_index);
-   242.          get(the_DR, the_sector, the_index);
-   243.          the_index := the_index + 1;
-   244.       end loop sector_loop;
-   245.       keep_house(the_DR, size, busy_time);
-   246.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, input_operation);
-   247.       lock_out_relative_addresses(Q_operand);
-   248.       update_statistics(the_DR, latency);
-   249.    end read_drum_to_EM;
-   250.
-   251.    overriding
-   252.    procedure PIB (the_DR      : in out DR.device;
-   253.                   Q_operand   : in KDF9.Q_register;
-   254.                   set_offline : in Boolean) is
-   255.        pragma Unreferenced(set_offline);
-   256.   begin
-   257.       validate_transfer(the_DR, Q_operand);
-   258.       validate_parity(the_DR);
-   259.       read_drum_to_EM(the_DR, Q_operand);
-   260.    end PIB;
-   261.
-   262.    overriding
-   263.    procedure PIC (the_DR      : in out DR.device;
-   264.                   Q_operand   : in KDF9.Q_register;
-   265.                   set_offline : in Boolean) is
-   266.    begin
-   267.       PIA(the_DR, Q_operand, set_offline);
-   268.    end PIC;
-   269.
-   270.    overriding
-   271.    procedure PID (the_DR      : in out DR.device;
-   272.                   Q_operand   : in KDF9.Q_register;
-   273.                   set_offline : in Boolean) is
-   274.    begin
-   275.       PIB(the_DR, Q_operand, set_offline);
-   276.    end PID;
-   277.
-   278.    overriding
-   279.    procedure PIE (the_DR      : in out DR.device;
-   280.                   Q_operand   : in KDF9.Q_register;
-   281.                   set_offline : in Boolean) is
-   282.    begin
-   283.       PIA(the_DR, Q_operand, set_offline);
-   284.    end PIE;
-   285.
-   286.    overriding
-   287.    procedure PIF (the_DR      : in out DR.device;
-   288.                   Q_operand   : in KDF9.Q_register;
-   289.                   set_offline : in Boolean) is
-   290.    begin
-   291.       PIB(the_DR, Q_operand, set_offline);
-   292.    end PIF;
-   293.
-   294.    overriding
-   295.    procedure PIG (the_DR      : in out DR.device;
-   296.                   Q_operand   : in KDF9.Q_register;
-   297.                   set_offline : in Boolean) is
-   298.    begin
-   299.       PIA(the_DR, Q_operand, set_offline);
-   300.    end PIG;
-   301.
-   302.    overriding
-   303.    procedure PIH (the_DR      : in out DR.device;
-   304.                   Q_operand   : in KDF9.Q_register;
-   305.                   set_offline : in Boolean) is
-   306.    begin
-   307.       PIB(the_DR, Q_operand, set_offline);
-   308.    end PIH;
-   309.
-   310.    procedure write_drum (the_DR    : in out DR.device;
-   311.                          Q_operand : in KDF9.Q_register) is
-   312.       end_address  : constant KDF9.address := Q_operand.M;
-   313.       next_address : KDF9.address := Q_operand.I;
-   314.       the_sector   : DR.sector := (others => Character'Val(0));
-   315.       symbol_nr : KDF9_char_sets.symbol_index;
-   316.       size      : KDF9.word := 0;
-   317.       the_index : KDF9.word;
-   318.       latency,
-   319.       busy_time : KDF9.us;
-   320.    begin
-   321.       check_addresses_and_lockouts(next_address, end_address);
-   322.       the_index := validated_drum_address(the_DR, Q_operand.C);
-   323.       latency := latent_time(the_index);
-   324.    sector_loop:
-   325.       loop
-   326.          symbol_nr := 0;
-   327.       byte_loop:
-   328.          for i in 1 .. bytes_per_sector loop
-   329.             the_sector(i) := TP_CN(fetch_symbol(next_address, symbol_nr));
-   330.             size := size + 1;
-   331.          exit byte_loop when next_address = end_address and symbol_nr = 7;
-   332.             increment(next_address, symbol_nr);
-   333.          end loop byte_loop;
-   334.          validate_the_sector_number(the_DR, the_index);
-   335.          put(the_DR, the_sector, the_index);
-   336.       exit sector_loop when next_address = end_address and symbol_nr = 7;
-   337.          if the_index = DR.drum_index'Last then
-   338.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
-   339.          else
-   340.             the_index := the_index + 1;
-   341.          end if;
-   342.       end loop sector_loop;
-   343.       keep_house(the_DR, size, busy_time);
-   344.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
-   345.       lock_out_relative_addresses(Q_operand);
-   346.       update_statistics(the_DR, latency);
-   347.    end write_drum;
-   348.
-   349.    overriding
-   350.    procedure POA (the_DR      : in out DR.device;
-   351.                   Q_operand   : in KDF9.Q_register;
-   352.                   set_offline : in Boolean) is
-   353.       pragma Unreferenced(set_offline);
-   354.    begin
-   355.       validate_transfer(the_DR, Q_operand);
-   356.       validate_parity(the_DR);
-   357.       write_drum(the_DR, Q_operand);
-   358.    end POA;
-   359.
-   360.    procedure write_drum_to_EM (the_DR    : in out DR.device;
-   361.                                Q_operand : in KDF9.Q_register) is
-   362.       end_address  : constant KDF9.address := Q_operand.M;
-   363.       next_address : KDF9.address := Q_operand.I;
-   364.       the_sector   : DR.sector := (others => Character'Val(0));
-   365.       at_EM     : Boolean := False;
-   366.       size      : KDF9.word := 0;
-   367.       symbol_nr : KDF9_char_sets.symbol_index;
-   368.       the_index : KDF9.word;
-   369.       latency,
-   370.       busy_time : KDF9.us;
-   371.    begin
-   372.       check_addresses_and_lockouts(next_address, end_address);
-   373.       the_index := validated_drum_address(the_DR, Q_operand.C);
-   374.       latency := latent_time(the_index);
-   375.    sector_loop:
-   376.       loop
-   377.          if the_index > DR.drum_index'Last then
-   378.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
-   379.          end if;
-   380.          symbol_nr := 0;
-   381.       byte_loop:
-   382.          for i in 1 .. bytes_per_sector loop
-   383.             the_sector(i) := TP_CN(fetch_symbol(next_address, symbol_nr));
-   384.             size := size + 1;
-   385.          at_EM := the_sector(i) = KDF9_char_sets.E_M;
-   386.          exit byte_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
-   387.             increment(next_address, symbol_nr);
-   388.          end loop byte_loop;
-   389.          validate_the_sector_number(the_DR, the_index);
-   390.          put(the_DR, the_sector, the_index);
-   391.          exit sector_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
-   392.          the_index := the_index + 1;
-   393.       end loop sector_loop;
-   394.       keep_house(the_DR, size, busy_time);
-   395.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
-   396.       lock_out_relative_addresses(Q_operand);
-   397.       update_statistics(the_DR, latency);
-   398.    end write_drum_to_EM;
-   399.
-   400.    overriding
-   401.    procedure POB (the_DR      : in out DR.device;
-   402.                   Q_operand   : in KDF9.Q_register;
-   403.                   set_offline : in Boolean) is
-   404.       pragma Unreferenced(set_offline);
-   405.    begin
-   406.       validate_transfer(the_DR, Q_operand);
-   407.       validate_parity(the_DR);
-   408.       write_drum_to_EM(the_DR, Q_operand);
-   409.    end POB;
-   410.
-   411.    overriding
-   412.    procedure POC (the_DR      : in out DR.device;
-   413.                   Q_operand   : in KDF9.Q_register;
-   414.                   set_offline : in Boolean) is
-   415.    begin
-   416.       POA(the_DR, Q_operand, Set_offline);
-   417.    end POC;
-   418.
-   419.    overriding
-   420.    procedure POD (the_DR      : in out DR.device;
-   421.                   Q_operand   : in KDF9.Q_register;
-   422.                   set_offline : in Boolean) is
-   423.    begin
-   424.       POB(the_DR, Q_operand, Set_offline);
-   425.    end POD;
-   426.
-   427.    procedure write_zeroes (the_DR      : in out DR.device;
-   428.                            Q_operand   : in KDF9.Q_register;
-   429.                            set_offline : in Boolean) is
-   430.       pragma Unreferenced(set_offline);
+   154.    a_zero_sector   : constant DR.sector := (others => SP);
+   155.
+   156.    procedure read_drum (the_DR    : in out DR.device;
+   157.                         Q_operand : in KDF9.Q_register) is
+   158.       end_address  : constant KDF9.address := Q_operand.M;
+   159.       next_address : KDF9.address := Q_operand.I;
+   160.       the_sector   : DR.sector := a_zero_sector;
+   161.       symbol_nr    : KDF9_char_sets.symbol_index;
+   162.       size         : KDF9.word := 0;
+   163.       the_index    : KDF9.word;
+   164.       latency,
+   165.       busy_time    : KDF9.us;
+   166.    begin
+   167.       check_addresses_and_lockouts(next_address, end_address);
+   168.       the_index := validated_drum_address(the_DR, Q_operand.C);
+   169.       latency := latent_time(the_index);
+   170.       get(the_DR, the_sector, the_index);
+   171.    sector_loop:
+   172.       loop
+   173.          if the_index > DR.drum_index'Last then
+   174.             trap_failing_IO_operation(the_DR, "reading more would exceed the storage available");
+   175.          end if;
+   176.          symbol_nr := 0;
+   177.       byte_loop:
+   178.          for i in 1 .. bytes_per_sector loop
+   179.             if symbol_nr = 0 then
+   180.                store_word(0, next_address);
+   181.             end if;
+   182.             store_symbol(CN_TR(the_sector(i)), next_address, symbol_nr);
+   183.             size := size + 1;
+   184.          exit byte_loop when next_address = end_address and symbol_nr = 7;
+   185.             increment(next_address, symbol_nr);
+   186.          end loop byte_loop;
+   187.       exit sector_loop when next_address = end_address and symbol_nr = 7;
+   188.          validate_the_sector_number(the_DR, the_index);
+   189.          get(the_DR, the_sector, the_index);
+   190.          the_index := the_index + 1;
+   191.       end loop sector_loop;
+   192.       keep_house(the_DR, size, busy_time);
+   193.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, input_operation);
+   194.       update_statistics(the_DR, latency);
+   195.       lock_out_relative_addresses(Q_operand);
+   196.    end read_drum;
+   197.
+   198.    overriding
+   199.    procedure PIA (the_DR      : in out DR.device;
+   200.                   Q_operand   : in KDF9.Q_register;
+   201.                   set_offline : in Boolean) is
+   202.       pragma Unreferenced(set_offline);
+   203.    begin
+   204.       validate_transfer(the_DR, Q_operand);
+   205.       validate_parity(the_DR);
+   206.       read_drum(the_DR, Q_operand);
+   207.    end PIA;
+   208.
+   209.    procedure read_drum_to_EM (the_DR    : in out DR.device;
+   210.                               Q_operand : in KDF9.Q_register) is
+   211.       end_address  : constant KDF9.address := Q_operand.M;
+   212.       next_address : KDF9.address := Q_operand.I;
+   213.       the_sector   : DR.sector := a_zero_sector;
+   214.       at_EM        : Boolean := False;
+   215.       symbol_nr    : KDF9_char_sets.symbol_index;
+   216.       size         : KDF9.word := 0;
+   217.       the_index    : KDF9.word;
+   218.       latency,
+   219.       busy_time    : KDF9.us;
+   220.    begin
+   221.       check_addresses_and_lockouts(next_address, end_address);
+   222.       the_index := validated_drum_address(the_DR, Q_operand.C);
+   223.       latency := latent_time(the_index);
+   224.       get(the_DR, the_sector, the_index);
+   225.    sector_loop:
+   226.       loop
+   227.          if the_index > DR.drum_index'Last then
+   228.             trap_failing_IO_operation(the_DR, "reading more would exceed the storage available");
+   229.          end if;
+   230.          symbol_nr := 0;
+   231.       byte_loop:
+   232.          for i in 1 .. bytes_per_sector loop
+   233.             if symbol_nr = 0 then
+   234.                store_word(0, next_address);
+   235.             end if;
+   236.             store_symbol(CN_TR(the_sector(i)), next_address, symbol_nr);
+   237.             size := size + 1;
+   238.          at_EM := the_sector(i) = KDF9_char_sets.E_M;
+   239.          exit byte_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
+   240.             increment(next_address, symbol_nr);
+   241.          end loop byte_loop;
+   242.          exit sector_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
+   243.          validate_the_sector_number(the_DR, the_index);
+   244.          get(the_DR, the_sector, the_index);
+   245.          the_index := the_index + 1;
+   246.       end loop sector_loop;
+   247.       keep_house(the_DR, size, busy_time);
+   248.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, input_operation);
+   249.       lock_out_relative_addresses(Q_operand);
+   250.       update_statistics(the_DR, latency);
+   251.    end read_drum_to_EM;
+   252.
+   253.    overriding
+   254.    procedure PIB (the_DR      : in out DR.device;
+   255.                   Q_operand   : in KDF9.Q_register;
+   256.                   set_offline : in Boolean) is
+   257.        pragma Unreferenced(set_offline);
+   258.   begin
+   259.       validate_transfer(the_DR, Q_operand);
+   260.       validate_parity(the_DR);
+   261.       read_drum_to_EM(the_DR, Q_operand);
+   262.    end PIB;
+   263.
+   264.    overriding
+   265.    procedure PIC (the_DR      : in out DR.device;
+   266.                   Q_operand   : in KDF9.Q_register;
+   267.                   set_offline : in Boolean) is
+   268.    begin
+   269.       PIA(the_DR, Q_operand, set_offline);
+   270.    end PIC;
+   271.
+   272.    overriding
+   273.    procedure PID (the_DR      : in out DR.device;
+   274.                   Q_operand   : in KDF9.Q_register;
+   275.                   set_offline : in Boolean) is
+   276.    begin
+   277.       PIB(the_DR, Q_operand, set_offline);
+   278.    end PID;
+   279.
+   280.    overriding
+   281.    procedure PIE (the_DR      : in out DR.device;
+   282.                   Q_operand   : in KDF9.Q_register;
+   283.                   set_offline : in Boolean) is
+   284.    begin
+   285.       PIA(the_DR, Q_operand, set_offline);
+   286.    end PIE;
+   287.
+   288.    overriding
+   289.    procedure PIF (the_DR      : in out DR.device;
+   290.                   Q_operand   : in KDF9.Q_register;
+   291.                   set_offline : in Boolean) is
+   292.    begin
+   293.       PIB(the_DR, Q_operand, set_offline);
+   294.    end PIF;
+   295.
+   296.    overriding
+   297.    procedure PIG (the_DR      : in out DR.device;
+   298.                   Q_operand   : in KDF9.Q_register;
+   299.                   set_offline : in Boolean) is
+   300.    begin
+   301.       PIA(the_DR, Q_operand, set_offline);
+   302.    end PIG;
+   303.
+   304.    overriding
+   305.    procedure PIH (the_DR      : in out DR.device;
+   306.                   Q_operand   : in KDF9.Q_register;
+   307.                   set_offline : in Boolean) is
+   308.    begin
+   309.       PIB(the_DR, Q_operand, set_offline);
+   310.    end PIH;
+   311.
+   312.    procedure write_drum (the_DR    : in out DR.device;
+   313.                          Q_operand : in KDF9.Q_register) is
+   314.       end_address  : constant KDF9.address := Q_operand.M;
+   315.       next_address : KDF9.address := Q_operand.I;
+   316.       the_sector   : DR.sector := a_zero_sector;
+   317.       symbol_nr    : KDF9_char_sets.symbol_index;
+   318.       size         : KDF9.word := 0;
+   319.       the_index    : KDF9.word;
+   320.       latency,
+   321.       busy_time    : KDF9.us;
+   322.    begin
+   323.       check_addresses_and_lockouts(next_address, end_address);
+   324.       the_index := validated_drum_address(the_DR, Q_operand.C);
+   325.       latency := latent_time(the_index);
+   326.    sector_loop:
+   327.       loop
+   328.          symbol_nr := 0;
+   329.       byte_loop:
+   330.          for i in 1 .. bytes_per_sector loop
+   331.             the_sector(i) := TP_CN(fetch_symbol(next_address, symbol_nr));
+   332.             size := size + 1;
+   333.          exit byte_loop when next_address = end_address and symbol_nr = 7;
+   334.             increment(next_address, symbol_nr);
+   335.          end loop byte_loop;
+   336.          validate_the_sector_number(the_DR, the_index);
+   337.          put(the_DR, the_sector, the_index);
+   338.       exit sector_loop when next_address = end_address and symbol_nr = 7;
+   339.          if the_index = DR.drum_index'Last then
+   340.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
+   341.          else
+   342.             the_index := the_index + 1;
+   343.          end if;
+   344.       end loop sector_loop;
+   345.       keep_house(the_DR, size, busy_time);
+   346.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
+   347.       lock_out_relative_addresses(Q_operand);
+   348.       update_statistics(the_DR, latency);
+   349.    end write_drum;
+   350.
+   351.    overriding
+   352.    procedure POA (the_DR      : in out DR.device;
+   353.                   Q_operand   : in KDF9.Q_register;
+   354.                   set_offline : in Boolean) is
+   355.       pragma Unreferenced(set_offline);
+   356.    begin
+   357.       validate_transfer(the_DR, Q_operand);
+   358.       validate_parity(the_DR);
+   359.       write_drum(the_DR, Q_operand);
+   360.    end POA;
+   361.
+   362.    procedure write_drum_to_EM (the_DR    : in out DR.device;
+   363.                                Q_operand : in KDF9.Q_register) is
+   364.       end_address  : constant KDF9.address := Q_operand.M;
+   365.       next_address : KDF9.address := Q_operand.I;
+   366.       the_sector   : DR.sector := a_zero_sector;
+   367.       at_EM        : Boolean := False;
+   368.       size         : KDF9.word := 0;
+   369.       symbol_nr    : KDF9_char_sets.symbol_index;
+   370.       the_index    : KDF9.word;
+   371.       latency,
+   372.       busy_time    : KDF9.us;
+   373.    begin
+   374.       check_addresses_and_lockouts(next_address, end_address);
+   375.       the_index := validated_drum_address(the_DR, Q_operand.C);
+   376.       latency := latent_time(the_index);
+   377.    sector_loop:
+   378.       loop
+   379.          if the_index > DR.drum_index'Last then
+   380.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
+   381.          end if;
+   382.          symbol_nr := 0;
+   383.       byte_loop:
+   384.          for i in 1 .. bytes_per_sector loop
+   385.             the_sector(i) := TP_CN(fetch_symbol(next_address, symbol_nr));
+   386.             size := size + 1;
+   387.          at_EM := the_sector(i) = KDF9_char_sets.E_M;
+   388.          exit byte_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
+   389.             increment(next_address, symbol_nr);
+   390.          end loop byte_loop;
+   391.          validate_the_sector_number(the_DR, the_index);
+   392.          put(the_DR, the_sector, the_index);
+   393.          exit sector_loop when at_EM or else (next_address = end_address and symbol_nr = 7);
+   394.          the_index := the_index + 1;
+   395.       end loop sector_loop;
+   396.       keep_house(the_DR, size, busy_time);
+   397.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
+   398.       lock_out_relative_addresses(Q_operand);
+   399.       update_statistics(the_DR, latency);
+   400.    end write_drum_to_EM;
+   401.
+   402.    overriding
+   403.    procedure POB (the_DR      : in out DR.device;
+   404.                   Q_operand   : in KDF9.Q_register;
+   405.                   set_offline : in Boolean) is
+   406.       pragma Unreferenced(set_offline);
+   407.    begin
+   408.       validate_transfer(the_DR, Q_operand);
+   409.       validate_parity(the_DR);
+   410.       write_drum_to_EM(the_DR, Q_operand);
+   411.    end POB;
+   412.
+   413.    overriding
+   414.    procedure POC (the_DR      : in out DR.device;
+   415.                   Q_operand   : in KDF9.Q_register;
+   416.                   set_offline : in Boolean) is
+   417.    begin
+   418.       POA(the_DR, Q_operand, set_offline);
+   419.    end POC;
+   420.
+   421.    overriding
+   422.    procedure POD (the_DR      : in out DR.device;
+   423.                   Q_operand   : in KDF9.Q_register;
+   424.                   set_offline : in Boolean) is
+   425.    begin
+   426.       POB(the_DR, Q_operand, set_offline);
+   427.    end POD;
+   428.
+   429.    procedure write_zeroes (the_DR      : in out DR.device;
+   430.                            Q_operand   : in KDF9.Q_register) is
    431.       start_address : constant KDF9.address := Q_operand.I;
    432.       end_address   : constant KDF9.address := Q_operand.M;
-   433.       the_sector    : constant DR.sector := (others => Character'Val(0));
-   434.       size      : KDF9.word := 0;
-   435.       the_index : KDF9.word;
-   436.       latency,
-   437.       busy_time : KDF9.us;
-   438.    begin
-   439.       check_addresses_and_lockouts(start_address, end_address);
-   440.       the_index := validated_drum_address(the_DR, Q_operand.C);
-   441.       latency := latent_time(the_index);
-   442.       for s in 1 .. (KDF9.word(end_address) - KDF9.word(start_address) + 128) / 128 loop
-   443.          if the_index > DR.drum_index'Last then
-   444.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
-   445.          end if;
-   446.          validate_the_sector_number(the_DR, the_index);
-   447.          put(the_DR, the_sector, the_index);
-   448.          size := size + bytes_per_sector;
-   449.          the_index := the_index + 1;
-   450.       end loop;
-   451.       keep_house(the_DR, size, busy_time, from_core => False);
-   452.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
-   453.       lock_out_relative_addresses(Q_operand);
-   454.       update_statistics(the_DR, latency);
-   455.    end write_zeroes;
-   456.
-   457.    overriding
-   458.    procedure POE (the_DR      : in out DR.device;
-   459.                   Q_operand   : in KDF9.Q_register;
-   460.                   set_offline : in Boolean) is
+   433.       size      : KDF9.word := 0;
+   434.       the_index : KDF9.word;
+   435.       latency,
+   436.       busy_time : KDF9.us;
+   437.    begin
+   438.       check_addresses_and_lockouts(start_address, end_address);
+   439.       the_index := validated_drum_address(the_DR, Q_operand.C);
+   440.       latency := latent_time(the_index);
+   441.       for s in 1 .. (KDF9.word(end_address) - KDF9.word(start_address) + 128) / 128 loop
+   442.          if the_index > DR.drum_index'Last then
+   443.             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
+   444.          end if;
+   445.          validate_the_sector_number(the_DR, the_index);
+   446.          put(the_DR, a_zero_sector, the_index);
+   447.          size := size + bytes_per_sector;
+   448.          the_index := the_index + 1;
+   449.       end loop;
+   450.       keep_house(the_DR, size, busy_time, from_core => False);
+   451.       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, output_operation);
+   452.       lock_out_relative_addresses(Q_operand);
+   453.       update_statistics(the_DR, latency);
+   454.    end write_zeroes;
+   455.
+   456.    overriding
+   457.    procedure POE (the_DR      : in out DR.device;
+   458.                   Q_operand   : in KDF9.Q_register;
+   459.                   set_offline : in Boolean) is
+   460.       pragma Unreferenced(set_offline);
    461.    begin
    462.       validate_transfer(the_DR, Q_operand);
-   463.       write_zeroes(the_DR, Q_operand, set_offline);
+   463.       write_zeroes(the_DR, Q_operand);
    464.    end POE;
    465.
    466.    overriding
@@ -17188,7 +17279,7 @@ Compiled at: 2021-02-21 15:54:07
    468.                   Q_operand   : in KDF9.Q_register;
    469.                   set_offline : in Boolean) is
    470.    begin
-   471.       POE(the_DR, Q_operand, Set_offline);
+   471.       POE(the_DR, Q_operand, set_offline);
    472.    end POF;
    473.
    474.    overriding
@@ -17267,12 +17358,12 @@ Compiled at: 2021-02-21 15:54:07
    547. end IOC.fast.DR;
 
 Compiling: ../Source/ioc-fast-dr.ads
-Source file time stamp: 2021-02-15 01:20:43
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:21
 
      1. -- Emulation of a drum store buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17443,12 +17534,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd.adb
-Source file time stamp: 2021-02-21 19:17:16
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17730,7 +17821,7 @@ Compiled at: 2021-02-21 15:54:07
    282.
    283.    subtype sector_image is String(1 .. bytes_per_sector);
    284.
-   285.    empty_sector : constant sector_image := (others => ' ');
+   285.    empty_sector : constant sector_image := (others => SP);
    286.    this_sector  : sector_image;
    287.
    288.    procedure get_next_sector (the_FD : in out FD.device) is
@@ -18329,12 +18420,12 @@ Compiled at: 2021-02-21 15:54:07
    881. end IOC.fast.FD;
 
 Compiling: ../Source/ioc-fast-fd.ads
-Source file time stamp: 2021-02-15 01:21:51
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18585,12 +18676,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape.adb
-Source file time stamp: 2021-02-20 17:40:24
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18618,7 +18709,7 @@ Compiled at: 2021-02-21 15:54:07
     28.       the_tape.has_a_WP_ring := False;
     29.    exception
     30.       when others =>
-    31.          trap_operator_error("'" & name & "' cannot be opened, even for reading");
+    31.          trap_operator_error("«" & name & "» cannot be opened, even for reading");
     32.    end open_RO;
     33.
     34.    procedure open_RW (the_tape : in out tape.file; name : in String) is
@@ -18630,7 +18721,7 @@ Compiled at: 2021-02-21 15:54:07
     40.          the_tape.has_a_WP_ring := False;
     41.          open_RO(the_tape, name);
     42.       when Ada.IO_Exceptions.Name_Error =>
-    43.          trap_operator_error("'" & name & "' cannot be opened");
+    43.          trap_operator_error("«" & name & "» cannot be opened");
     44.    end open_RW;
     45.
     46.    procedure close (the_tape : in out tape.file) is
@@ -18649,1220 +18740,1188 @@ Compiled at: 2021-02-21 15:54:07
     59. --
     60. --
     61.    -- Slice management.
-    62.
-    63.    end_of_tape : exception;
-    64. --
-    65. --
-    66.
-    67.    procedure write_slice (the_tape : in out tape.file;
-    68.                           slice    : in tape.slice) is
-    69.    begin
-    70.       the_tape.position := the_tape.position + 1;
-    71.       MT_slice_IO.Write(the_tape.reel, slice, to => the_tape.position);
-    72.       if slice.kind not in tape_gap_kind then
-    73.          the_tape.last_data_index := Count'Max(the_tape.last_data_index, the_tape.position);
-    74.       end if;
-    75.    end write_slice;
-    76.
-    77.    procedure read_next_slice (the_tape : in out tape.file;
-    78.                               slice    : out tape.slice) is
-    79.    begin
-    80.       if the_tape.last_data_index > 0 then
-    81.          the_tape.position := the_tape.position + 1;
-    82.          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
-    83.       else
-    84.          raise end_of_tape with "this tape is empty";
-    85.       end if;
-    86.    end read_next_slice;
-    87.
-    88.    procedure read_prev_slice (the_tape : in out tape.file;
-    89.                               slice    : out tape.slice) is
-    90.    begin
-    91.       if the_tape.position > 0 then
-    92.          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
-    93.          the_tape.position := the_tape.position - 1;
-    94.       else
-    95.          raise end_of_tape with "read_prev_slice";
-    96.       end if;
-    97.     exception
-    98.        when End_Error =>
-    99.           raise end_of_tape with "file size exceeded when reading a tape slice";
-   100.    end read_prev_slice;
-   101.
-   102.    procedure bound_the_written_data (the_tape : in out tape.file) is
-   103.       the_slice : tape.slice;
-   104.    begin
-   105.       the_tape.position := Size(the_tape.reel);
-   106.       if the_tape.position = 0 then
-   107.          -- There is no data in the file.
-   108.          the_tape.last_data_index := 0;
-   109.          return;
-   110.       end if;
-   111.       -- Locate the last data slice (if any).
-   112.       while the_tape.position > 0 loop
-   113.          read_prev_slice(the_tape, the_slice);
-   114.       exit when the_slice.kind not in tape.tape_gap_kind;
-   115.       end loop;
-   116.       if the_slice.kind in tape.tape_gap_kind then
-   117.          the_tape.last_data_index := 0;
-   118.       else
-   119.          the_tape.last_data_index := the_tape.position + 1;
-   120.       end if;
-   121.       the_tape.position := 0;
-   122.    end bound_the_written_data;
-   123.
-   124.    procedure reset (the_deck : in out tape.deck) is
-   125.     begin
-   126.       bound_the_written_data(the_deck.tape_file);
-   127.       the_deck.is_LBM_flagged := False;
-   128.       the_deck.is_abnormal := False;
-   129.       the_deck.unwound_frames := 0;
-   130.    exception
-   131.       when end_of_tape =>
-   132.          the_deck.is_abnormal := True;
-   133.          the_deck.is_LBM_flagged := False;
-   134.          the_deck.unwound_frames := 0;
-   135.    end reset;
-   136.
-   137. --
-   138. --
-   139.    -- Tape physical characteristics.
-   140. --
-   141. --
+    62. --
+    63. --
+    64.
+    65.    procedure write_slice (the_tape : in out tape.file;
+    66.                           slice    : in tape.slice) is
+    67.    begin
+    68.       the_tape.position := the_tape.position + 1;
+    69.       MT_slice_IO.Write(the_tape.reel, slice, to => the_tape.position);
+    70.       if slice.kind not in tape.gap_kind then
+    71.          the_tape.last_data_index := Count'Max(the_tape.last_data_index, the_tape.position);
+    72.       end if;
+    73.    end write_slice;
+    74.
+    75.    procedure read_next_slice (the_tape : in out tape.file;
+    76.                               slice    : out tape.slice) is
+    77.    begin
+    78.       if the_tape.last_data_index > 0 then
+    79.          the_tape.position := the_tape.position + 1;
+    80.          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
+    81.       else
+    82.          trap_failing_IO_operation(Name(the_tape.reel), "is an empty file");
+    83.       end if;
+    84.    exception
+    85.       when End_Error =>
+    86.           trap_failing_IO_operation(Name(the_tape.reel), "cannot be moved forward at EOF");
+    87.    end read_next_slice;
+    88.
+    89.    procedure read_prev_slice (the_tape : in out tape.file;
+    90.                               slice    : out tape.slice) is
+    91.    begin
+    92.       if the_tape.position > 0 then
+    93.          MT_slice_IO.Read(the_tape.reel, slice, from => the_tape.position);
+    94.          the_tape.position := the_tape.position - 1;
+    95.       else
+    96.          trap_failing_IO_operation(Name(the_tape.reel), "cannot be moved backward at BTW");
+    97.       end if;
+    98.    end read_prev_slice;
+    99.
+   100.    procedure bound_the_written_data (the_tape : in out tape.file) is
+   101.       the_slice : tape.slice;
+   102.    begin
+   103.       the_tape.position := Size(the_tape.reel);
+   104.       if the_tape.position = 0 then
+   105.          -- There is no data in the file.
+   106.          the_tape.last_data_index := 0;
+   107.          return;
+   108.       end if;
+   109.       -- Locate the last data slice (if any).
+   110.       while the_tape.position > 0 loop
+   111.          read_prev_slice(the_tape, the_slice);
+   112.       exit when the_slice.kind not in tape.gap_kind;
+   113.       end loop;
+   114.       if the_slice.kind in tape.gap_kind then
+   115.          the_tape.last_data_index := 0;
+   116.       else
+   117.          the_tape.last_data_index := the_tape.position + 1;
+   118.       end if;
+   119.       the_tape.position := 0;
+   120.    end bound_the_written_data;
+   121.
+   122.    procedure reset (the_deck : in out tape.deck) is
+   123.     begin
+   124.       bound_the_written_data(the_deck.tape_file);
+   125.       the_deck.is_LBM_flagged := False;
+   126.       the_deck.is_abnormal := False;
+   127.       the_deck.unwound_frames := 0;
+   128.    end reset;
+   129.
+   130. --
+   131. --
+   132.    -- Tape physical characteristics.
+   133. --
+   134. --
+   135.
+   136.    -- The physical end of tape (PET) is signalled one maximum block length before the tape runs out.
+   137.    --  So PET is signalled at max_block_size before the absolute maximum position
+   138.    --    to avoid running past the end of the tape when a very large block is written.
+   139.
+   140.    -- There could be as little as 60 inches of tape between the End of Tape Warning (ETW) and PET.
+   141.    -- See the Manual, §22.1.3, p.182.
    142.
-   143.    -- The physical end of tape (PET) is signalled one maximum block length before the tape runs out.
-   144.    --  So PET is signalled at max_block_size before the absolute maximum position
-   145.    --    to avoid running past the end of the tape when a very large block is written.
-   146.
-   147.    -- There could be as little as 60 inches of tape between the End of Tape Warning (ETW) and PET.
-   148.    -- See the Manual, §22.1.3, p.182.
-   149.
-   150.    overriding
-   151.    procedure Initialize (the_deck : in out MT_deck) is
-   152.    begin
-   153.       the_deck.device_name := device_name_of(the_deck);
-   154.       open_RW(the_deck.tape_file, the_deck.device_name);
-   155.       Initialize(IOC.device(the_deck));
-   156.       the_deck.terminator        := End_Message;
-   157.       the_deck.recording_density := max_bits_per_inch;  -- bits / inch
-   158.       the_deck.max_reel_length   := max_reel_length;    -- inches
-   159.       the_deck.inter_block_gap := the_deck.recording_density / 3;
-   160.       the_deck.tape_capacity   := the_deck.max_reel_length * the_deck.recording_density;
-   161.       the_deck.PET_position    := the_deck.tape_capacity - max_block_size;
-   162.       the_deck.ETW_position    := the_deck.PET_position - 60 * the_deck.recording_density;
-   163.       reset(tape.deck(the_deck));
-   164.    end Initialize;
-   165.
-   166.    overriding
-   167.    procedure Initialize (the_deck : in out ST_deck) is
-   168.    begin
-   169.       the_deck.device_name := device_name_of(the_deck);
-   170.       open_RW(the_deck.tape_file, the_deck.device_name);
-   171.       Initialize(IOC.device(the_deck));
-   172.       the_deck.terminator        := Group_Mark;
-   173.       the_deck.recording_density := max_bits_per_inch/2;  -- bits / inch
-   174.       the_deck.max_reel_length   := max_reel_length;      -- inches
-   175.       the_deck.inter_block_gap := the_deck.recording_density / 3;
-   176.       the_deck.tape_capacity   := the_deck.max_reel_length * the_deck.recording_density;
-   177.       the_deck.PET_position    := the_deck.tape_capacity - max_block_size;
-   178.       the_deck.ETW_position    := the_deck.PET_position - 60 * the_deck.recording_density;
-   179.       reset(tape.deck(the_deck));
-   180.    end Initialize;
-   181.
-   182.    function is_at_BTW (the_deck : tape.deck)
-   183.    return Boolean
-   184.    is (the_deck.is_open and then the_deck.tape_file.position = 0);
-   185.
-   186.    function holds_data (the_deck : tape.deck)
-   187.    return Boolean
-   188.    is (the_deck.is_open and then the_deck.tape_file.last_data_index > 0);
-   189.
-   190.    function is_at_ETW (the_deck : tape.deck)
-   191.    return Boolean
-   192.    is (the_deck.is_open and then the_deck.unwound_frames >= the_deck.ETW_position);
-   193.
-   194.    function is_at_PET (the_deck : tape.deck)
-   195.    return Boolean
-   196.    is (the_deck.is_open and then the_deck.unwound_frames >= the_deck.PET_position);
-   197.
-   198.    procedure deal_with_trying_to_pass_PET (the_deck : in out tape.deck;
-   199.                                            do_this  : String) is
-   200.    begin
-   201.       if is_at_PET (the_deck) then
-   202.          trap_failing_IO_operation(the_deck, "an attempt was made to " & do_this & " past PET");
-   203.       end if;
-   204.    end deal_with_trying_to_pass_PET;
-   205.
-   206.    -- There are cases that are invalid iff the tape is positioned beyond the last written block.
-   207.    function is_at_EOD (the_deck : tape.deck)
-   208.    return Boolean
-   209.    is (the_deck.is_open and then the_deck.tape_file.position > the_deck.tape_file.last_data_index);
-   210.
-   211.    function tape_traversal_time (the_deck : tape.deck; tape_crossed : KDF9.word)
-   212.    return KDF9.us
-   213.    is (the_deck.quantum * KDF9.us(tape_crossed));
-   214.
-   215.    function data_transfer_time (the_deck   : tape.deck;
-   216.                                 byte_count : KDF9.word)
-   217.    return KDF9.us
-   218.    is (the_deck.quantum * KDF9.us(byte_count));
-   219.
-   220.    -- This is the time the MT deck is busy traversing the interblock gap and the data block.
-   221.    function MT_IO_time (the_deck  : tape.deck;
-   222.                         Q_operand : in KDF9.Q_register)
-   223.    return KDF9.us
-   224.    is (KDF9.us(the_deck.inter_block_gap) + 8*KDF9.us(Q_operand.M-Q_operand.I+1) * the_deck.quantum);
-   225.
-   226.    overriding
-   227.    function usage (the_deck : tape.deck)
-   228.    return KDF9.word
-   229.    is (the_deck.bytes_moved);
-   230.
-   231.    overriding
-   232.    procedure close (the_deck : in out tape.deck) is
-   233.    begin
-   234.       the_deck.tape_file.close;
-   235.    end close;
-   236.
-   237.    procedure update_statistics (the_deck    : in out tape.deck;
-   238.                                 tape_crossed,
-   239.                                 bytes_moved : in length_in_frames) is
-   240.       real_time : KDF9.us;
-   241.    begin
-   242.       the_deck.bytes_moved := the_deck.bytes_moved + KDF9.word(bytes_moved);
-   243.       real_time := tape_traversal_time(the_deck, KDF9.word(tape_crossed))
-   244.                  + data_transfer_time (the_deck, KDF9.word(bytes_moved));
-   245.       the_deck.elapsed_time := the_deck.elapsed_time + real_time;
-   246.       add_in_the_IO_CPU_time(the_deck, KDF9.word(bytes_moved));
-   247.       correct_transfer_time(the_deck, real_time);
-   248.    end update_statistics;
-   249.
-   250. --
-   251. --
-   252.    -- Tape manipulations.
-   253. --
-   254. --
-   255.
-   256.    type movement is (forwards, backwards);
-   257.
-   258.    procedure note_tape_position (the_deck    : in out tape.deck;
-   259.                                  direction   : in tape.movement;
-   260.                                  tape_crossed,
-   261.                                  bytes_moved : in length_in_frames) is
-   262.    begin
-   263.       if direction = forwards then
-   264.          the_deck.unwound_frames := the_deck.unwound_frames
-   265.                                   + tape.length_in_frames(tape_crossed + bytes_moved);
-   266.       elsif tape.length_in_frames(tape_crossed + bytes_moved) > the_deck.unwound_frames then
-   267.          the_deck.unwound_frames := 0;
-   268.       else
-   269.          the_deck.unwound_frames := the_deck.unwound_frames
-   270.                                   - tape.length_in_frames(tape_crossed + bytes_moved);
-   271.       end if;
-   272.    end note_tape_position;
-   273.
-   274.    -- KDF9 MT operations.
-   275.
-   276.    -- Skip back over erased tape, leaving the_slice containing the next preceding data.
-   277.    -- Postcondition: the_deck.is_at_BTW or else the_slice.kind not in tape_gap_kind
-   278.    procedure skip_back_over_erasure (the_deck  : in out tape.deck;
-   279.                                      the_slice : in out tape.slice;
-   280.                                      crossed   : in out length_in_frames) is
-   281.    begin
-   282.       if the_deck.is_at_BTW then
-   283.          return; -- We are as far back as we can go;
-   284.       end if;
-   285.       if the_slice.kind in data_kind then
-   286.          return;  -- We have already found the preceding data block.
-   287.       end if;
-   288.       loop
-   289.          read_prev_slice(the_deck.tape_file, the_slice);
-   290.       exit when the_deck.is_at_BTW or else the_slice.kind not in tape_gap_kind;
-   291.          crossed := crossed + the_slice.size;
-   292.       end loop;
-   293.    end skip_back_over_erasure;
-   294.
-   295.    -- Skip forward over erased tape, leaving the_slice containing the next following data.
-   296.    -- Postcondition: the_deck.is_at_EOD or else the_slice.kind not in tape_gap_kind
-   297.    procedure skip_forward_over_erasure (the_deck  : in out tape.deck;
-   298.                                         the_slice : in out tape.slice;
-   299.                                         crossed   : in out length_in_frames) is
-   300.    begin
-   301.       if the_slice.kind in data_slice then
-   302.          return;
-   303.       end if;
-   304.       loop
-   305.          read_next_slice(the_deck.tape_file, the_slice);
-   306.       exit when the_deck.is_at_EOD or else the_slice.kind not in tape.tape_gap_kind;
-   307.          crossed := crossed + the_slice.size;
-   308.       end loop;
-   309.    exception
-   310.       when end_of_tape =>
-   311.          the_deck.is_abnormal := True;
-   312.          raise end_of_tape with "in skip_forward_over_erasure";
-   313.    end skip_forward_over_erasure;
-   314.
-   315. --
-   316. --
-   317.    -- Tape I/O.
-   318. --
-   319. --
+   143.    overriding
+   144.    procedure Initialize (the_deck : in out MT_deck) is
+   145.    begin
+   146.       the_deck.device_name := device_name_of(the_deck);
+   147.       open_RW(the_deck.tape_file, the_deck.device_name);
+   148.       Initialize(IOC.device(the_deck));
+   149.       the_deck.terminator        := End_Message;
+   150.       the_deck.recording_density := max_bits_per_inch;  -- bits / inch
+   151.       the_deck.max_reel_length   := max_reel_length;    -- inches
+   152.       the_deck.inter_block_gap := the_deck.recording_density / 3;
+   153.       the_deck.tape_capacity   := the_deck.max_reel_length * the_deck.recording_density;
+   154.       the_deck.PET_position    := the_deck.tape_capacity - max_block_size;
+   155.       the_deck.ETW_position    := the_deck.PET_position - 60 * the_deck.recording_density;
+   156.       reset(tape.deck(the_deck));
+   157.    end Initialize;
+   158.
+   159.    overriding
+   160.    procedure Initialize (the_deck : in out ST_deck) is
+   161.    begin
+   162.       the_deck.device_name := device_name_of(the_deck);
+   163.       open_RW(the_deck.tape_file, the_deck.device_name);
+   164.       Initialize(IOC.device(the_deck));
+   165.       the_deck.terminator        := Group_Mark;
+   166.       the_deck.recording_density := max_bits_per_inch/2;  -- bits / inch
+   167.       the_deck.max_reel_length   := max_reel_length;      -- inches
+   168.       the_deck.inter_block_gap := the_deck.recording_density / 3;
+   169.       the_deck.tape_capacity   := the_deck.max_reel_length * the_deck.recording_density;
+   170.       the_deck.PET_position    := the_deck.tape_capacity - max_block_size;
+   171.       the_deck.ETW_position    := the_deck.PET_position - 60 * the_deck.recording_density;
+   172.       reset(tape.deck(the_deck));
+   173.    end Initialize;
+   174.
+   175.    function is_at_BTW (the_deck : tape.deck)
+   176.    return Boolean
+   177.    is (the_deck.is_open and then the_deck.tape_file.position = 0);
+   178.
+   179.    function holds_data (the_deck : tape.deck)
+   180.    return Boolean
+   181.    is (the_deck.is_open and then the_deck.tape_file.last_data_index > 0);
+   182.
+   183.    function is_at_ETW (the_deck : tape.deck)
+   184.    return Boolean
+   185.    is (the_deck.is_open and then the_deck.unwound_frames >= the_deck.ETW_position);
+   186.
+   187.    function is_at_PET (the_deck : tape.deck)
+   188.    return Boolean
+   189.    is (the_deck.is_open and then the_deck.unwound_frames >= the_deck.PET_position);
+   190.
+   191.    procedure deal_with_trying_to_pass_PET (the_deck : in out tape.deck;
+   192.                                            do_this  : String) is
+   193.    begin
+   194.       if is_at_PET (the_deck) then
+   195.          trap_failing_IO_operation(the_deck, "an attempt was made to " & do_this & " past PET");
+   196.       end if;
+   197.    end deal_with_trying_to_pass_PET;
+   198.
+   199.    -- There are cases that are invalid iff the tape is positioned beyond the last written block.
+   200.    function is_at_EOD (the_deck : tape.deck)
+   201.    return Boolean
+   202.    is (the_deck.is_open and then the_deck.tape_file.position > the_deck.tape_file.last_data_index);
+   203.
+   204.    function tape_traversal_time (the_deck : tape.deck; tape_crossed : KDF9.word)
+   205.    return KDF9.us
+   206.    is (the_deck.quantum * KDF9.us(tape_crossed));
+   207.
+   208.    function data_transfer_time (the_deck   : tape.deck;
+   209.                                 byte_count : KDF9.word)
+   210.    return KDF9.us
+   211.    is (the_deck.quantum * KDF9.us(byte_count));
+   212.
+   213.    -- This is the time the MT deck is busy traversing the interblock gap and the data block.
+   214.    function MT_IO_time (the_deck  : tape.deck;
+   215.                         Q_operand : in KDF9.Q_register)
+   216.    return KDF9.us
+   217.    is (KDF9.us(the_deck.inter_block_gap) + 8*KDF9.us(Q_operand.M-Q_operand.I+1) * the_deck.quantum);
+   218.
+   219.    overriding
+   220.    function usage (the_deck : tape.deck)
+   221.    return KDF9.word
+   222.    is (the_deck.bytes_moved);
+   223.
+   224.    overriding
+   225.    procedure close (the_deck : in out tape.deck) is
+   226.    begin
+   227.       the_deck.tape_file.close;
+   228.    end close;
+   229.
+   230.    procedure update_statistics (the_deck    : in out tape.deck;
+   231.                                 tape_crossed,
+   232.                                 bytes_moved : in length_in_frames) is
+   233.       real_time : KDF9.us;
+   234.    begin
+   235.       the_deck.bytes_moved := the_deck.bytes_moved + KDF9.word(bytes_moved);
+   236.       real_time := tape_traversal_time(the_deck, KDF9.word(tape_crossed))
+   237.                  + data_transfer_time (the_deck, KDF9.word(bytes_moved));
+   238.       the_deck.elapsed_time := the_deck.elapsed_time + real_time;
+   239.       add_in_the_IO_CPU_time(the_deck, KDF9.word(bytes_moved));
+   240.       correct_transfer_time(the_deck, real_time);
+   241.    end update_statistics;
+   242.
+   243. --
+   244. --
+   245.    -- Tape manipulations.
+   246. --
+   247. --
+   248.
+   249.    type movement is (forwards, backwards);
+   250.
+   251.    procedure note_tape_position (the_deck    : in out tape.deck;
+   252.                                  direction   : in tape.movement;
+   253.                                  tape_crossed,
+   254.                                  bytes_moved : in length_in_frames) is
+   255.    begin
+   256.       if direction = forwards then
+   257.          the_deck.unwound_frames := the_deck.unwound_frames
+   258.                                   + tape.length_in_frames(tape_crossed + bytes_moved);
+   259.       elsif tape.length_in_frames(tape_crossed + bytes_moved) > the_deck.unwound_frames then
+   260.          the_deck.unwound_frames := 0;
+   261.       else
+   262.          the_deck.unwound_frames := the_deck.unwound_frames
+   263.                                   - tape.length_in_frames(tape_crossed + bytes_moved);
+   264.       end if;
+   265.    end note_tape_position;
+   266.
+   267.    -- KDF9 MT operations.
+   268.
+   269.    -- Skip back over erased tape, leaving the_slice containing the next preceding data.
+   270.    -- Postcondition: the_deck.is_at_BTW or else the_slice.kind not in tape.gap_kind
+   271.    procedure skip_back_over_erasure (the_deck  : in out tape.deck;
+   272.                                      the_slice : in out tape.slice;
+   273.                                      crossed   : in out length_in_frames) is
+   274.    begin
+   275.       if the_deck.is_at_BTW then
+   276.          return; -- We are as far back as we can go;
+   277.       end if;
+   278.       if the_slice.kind in data_kind then
+   279.          return;  -- We have already found the preceding data block.
+   280.       end if;
+   281.       loop
+   282.          read_prev_slice(the_deck.tape_file, the_slice);
+   283.       exit when the_deck.is_at_BTW or else the_slice.kind not in tape.gap_kind;
+   284.          crossed := crossed + the_slice.size;
+   285.       end loop;
+   286.    end skip_back_over_erasure;
+   287.
+   288.    -- Skip forward over erased tape, leaving the_slice containing the next following data.
+   289.    -- Postcondition: the_deck.is_at_EOD or else the_slice.kind not in tape.gap_kind
+   290.    procedure skip_forward_over_erasure (the_deck  : in out tape.deck;
+   291.                                         the_slice : in out tape.slice;
+   292.                                         crossed   : in out length_in_frames) is
+   293.    begin
+   294.       if the_slice.kind in data_slice then
+   295.          return;
+   296.       end if;
+   297.       loop
+   298.          read_next_slice(the_deck.tape_file, the_slice);
+   299.       exit when the_deck.is_at_EOD or else the_slice.kind not in tape.gap_kind;
+   300.          crossed := crossed + the_slice.size;
+   301.       end loop;
+   302.    end skip_forward_over_erasure;
+   303.
+   304. --
+   305. --
+   306.    -- Tape I/O.
+   307. --
+   308. --
+   309.
+   310.    -- Deal with blocks of invalid sizes.
+   311.
+   312.    -- 1081 buffers always write and read a whole number of words;
+   313.    --    see Manual §22.1.5, p184, ¶2; and Appendix 7 ¶3, p318.
+   314.    overriding
+   315.    procedure handle_any_abnormality (the_deck : in out MT_deck;
+   316.                                      the_size : in length_in_frames) is
+   317.    begin
+   318.       the_deck.is_abnormal := the_deck.is_abnormal or (the_size mod 8 /= 0);
+   319.    end handle_any_abnormality;
    320.
-   321.    -- Deal with blocks of invalid sizes.
-   322.
-   323.    -- 1081 buffers always write and read a whole number of words;
-   324.    --    see Manual §22.1.5, p184, ¶2; and Appendix 7 ¶3, p318.
-   325.    overriding
-   326.    procedure handle_any_abnormality (the_deck : in out MT_deck;
-   327.                                      the_size : in length_in_frames) is
-   328.    begin
-   329.       the_deck.is_abnormal := the_deck.is_abnormal or (the_size mod 8 /= 0);
-   330.    end handle_any_abnormality;
-   331.
-   332.    -- §3.4.7 of the EGDON 3 manual says that the 7-track tape buffer, due to a hardware
-   333.    --    limitation, rejects blocks (other than tape marks) of less than 6 characters.
-   334.    overriding
-   335.    procedure handle_any_abnormality (the_deck : in out ST_deck;
-   336.                                      the_size : in length_in_frames) is
-   337.    begin
-   338.       the_deck.is_abnormal := the_deck.is_abnormal or (the_size < 6);
-   339.    end handle_any_abnormality;
-   340.
-   341.    procedure read_block (the_deck  : in out tape.deck;
-   342.                          the_data  : out tape.block_storage;
-   343.                          the_size  : out length_in_frames;
-   344.                          direction : in movement := forwards) is
+   321.    -- §3.4.7 of the EGDON 3 manual says that the 7-track tape buffer, due to a hardware
+   322.    --    limitation, rejects blocks (other than tape marks) of less than 6 characters.
+   323.    overriding
+   324.    procedure handle_any_abnormality (the_deck : in out ST_deck;
+   325.                                      the_size : in length_in_frames) is
+   326.    begin
+   327.       the_deck.is_abnormal := the_deck.is_abnormal or (the_size < 6);
+   328.    end handle_any_abnormality;
+   329.
+   330.    procedure read_block (the_deck  : in out tape.deck;
+   331.                          the_data  : out tape.block_storage;
+   332.                          the_size  : out length_in_frames;
+   333.                          direction : in movement := forwards) is
+   334.       left,
+   335.       right      : length_in_frames := 1;
+   336.       block_size,
+   337.       crossed    : length_in_frames := 0;
+   338.       is_last,
+   339.       is_flagged : Boolean := False;
+   340.       the_slice  : tape.slice := a_NULL_slice;
+   341.    begin
+   342.       the_deck.is_LBM_flagged := False;
+   343.
+   344.       skip_forward_over_erasure(the_deck, the_slice, crossed);
    345.
-   346.       left,
-   347.       right      : length_in_frames := 1;
-   348.       block_size,
-   349.       crossed    : length_in_frames := 0;
-   350.       is_last,
-   351.       is_flagged : Boolean := False;
-   352.       the_slice  : tape.slice := a_NULL_slice;
-   353.    begin
-   354.       the_deck.is_LBM_flagged := False;
-   355.
-   356.       skip_forward_over_erasure(the_deck, the_slice, crossed);
-   357.
-   358.       -- Ensure that we are not beyond the end of valid data.
-   359.       if the_deck.is_at_EOD then
-   360.          trap_failing_IO_operation(
-   361.                                    the_deck,
-   362.                                    "there is no data past slice" & the_deck.tape_file.position'Image
-   363.                                   );
-   364.       end if;
-   365.
-   366.       if the_slice.kind in tape.tape_mark_kind then
-   367.          -- Deal with a tape mark block; according to the Maual, Appendix 7, §2, p.317,
-   368.          --    it reads as a single character with value #17.
-   369.          block_size := 8;
-   370.          the_data(1)    := KDF9_char_sets.TP_CN(KDF9_char_sets.Tape_Mark);
-   371.          the_data(2..8) := (others => KDF9_char_sets.TP_CN(KDF9_char_sets.Blank_Space));
-   372.          the_deck.is_LBM_flagged := True;
-   373.       else
-   374.          -- We have a bona fide data block.
-   375.          the_size := 0;
-   376.          -- Accumulate a series of slicefuls.
-   377.          loop
-   378.             right := left + the_slice.size - 1;
-   379.             the_data(left .. right) := the_slice.data(1..the_slice.size);
-   380.             block_size := block_size + the_slice.size;
-   381.             left := left + the_slice.size;
-   382.             is_flagged := is_flagged or the_slice.is_LBM_flagged;
-   383.             is_last  := the_slice.is_last;
-   384.          exit when is_last or block_size = max_block_size;
-   385.             read_next_slice(the_deck.tape_file, the_slice);
-   386.          end loop;
-   387.          the_deck.is_LBM_flagged := is_flagged;
-   388.       end if;
-   389.       the_size := block_size;
-   390.
-   391.       note_tape_position(the_deck, direction,
-   392.                         crossed + the_deck.inter_block_gap, bytes_moved => the_size);
-   393.       update_statistics(the_deck,
-   394.                         crossed + the_deck.inter_block_gap, bytes_moved => the_size);
-   395.
-   396.      if not is_last and block_size = max_block_size then
-   397.          trap_failing_IO_operation(the_deck, "a magnetic tape block > 32KW");
+   346.       -- Ensure that we are not beyond the end of valid data.
+   347.       if the_deck.is_at_EOD then
+   348.          trap_failing_IO_operation(
+   349.                                    the_deck,
+   350.                                    "there is no data past slice" & the_deck.tape_file.position'Image
+   351.                                   );
+   352.       end if;
+   353.
+   354.       if the_slice.kind in tape.tape_mark_kind then
+   355.          -- Deal with a tape mark block; according to the Maual, Appendix 7, §2, p.317,
+   356.          --    it reads as a single character with value #17.
+   357.          block_size := 8;
+   358.          the_data(1)    := KDF9_char_sets.TP_CN(KDF9_char_sets.Tape_Mark);
+   359.          the_data(2..8) := (others => KDF9_char_sets.TP_CN(KDF9_char_sets.Blank_Space));
+   360.          the_deck.is_LBM_flagged := True;
+   361.       else
+   362.          -- We have a bona fide data block.
+   363.          the_size := 0;
+   364.          -- Accumulate a series of slicefuls.
+   365.          loop
+   366.             right := left + the_slice.size - 1;
+   367.             the_data(left .. right) := the_slice.data(1..the_slice.size);
+   368.             block_size := block_size + the_slice.size;
+   369.             left := left + the_slice.size;
+   370.             is_flagged := is_flagged or the_slice.is_LBM_flagged;
+   371.             is_last  := the_slice.is_last;
+   372.          exit when is_last or block_size = max_block_size;
+   373.             read_next_slice(the_deck.tape_file, the_slice);
+   374.          end loop;
+   375.          the_deck.is_LBM_flagged := is_flagged;
+   376.       end if;
+   377.       the_size := block_size;
+   378.
+   379.       note_tape_position(the_deck, direction,
+   380.                         crossed + the_deck.inter_block_gap, bytes_moved => the_size);
+   381.       update_statistics(the_deck,
+   382.                         crossed + the_deck.inter_block_gap, bytes_moved => the_size);
+   383.
+   384.      if not is_last and block_size = max_block_size then
+   385.          trap_failing_IO_operation(the_deck, "a magnetic tape block > 32KW");
+   386.       end if;
+   387.       handle_any_abnormality(the_deck, block_size);
+   388.    end read_block;
+   389.
+   390.    procedure increment (word_address : in out KDF9.address;
+   391.                         symbol_nr    : in out KDF9_char_sets.symbol_index) is
+   392.    begin
+   393.       if symbol_nr < 7 then
+   394.          symbol_nr := symbol_nr + 1;
+   395.       else
+   396.          symbol_nr := 0;
+   397.          word_address := word_address + 1;
    398.       end if;
-   399.       handle_any_abnormality(the_deck, block_size);
-   400.    end read_block;
-   401.
-   402.    procedure increment (word_address : in out KDF9.address;
-   403.                         symbol_nr    : in out KDF9_char_sets.symbol_index) is
-   404.    begin
-   405.       if symbol_nr < 7 then
-   406.          symbol_nr := symbol_nr + 1;
-   407.       else
-   408.          symbol_nr := 0;
-   409.          word_address := word_address + 1;
-   410.       end if;
-   411.    end increment;
-   412.
-   413.    tape_mark_data_word : constant KDF9.word := 8#17_00_00_00_00_00_00_00#;
-   414.
-   415.    procedure read (the_deck       : in out tape.deck;
-   416.                    Q_operand      : in KDF9.Q_register;
-   417.                    to_terminator  : in Boolean := False) is
-   418.       start_address : constant KDF9.address := Q_operand.I;
-   419.       end_address   : constant KDF9.address := Q_operand.M;
-   420.       the_data : tape.block_storage;
-   421.       s        : KDF9_char_sets.symbol_index;
-   422.       w        : KDF9.address;
-   423.       stored   : KDF9.word := 0;
-   424.       the_size : length_in_frames;
-   425.    begin
-   426.       validate_device(the_deck);
-   427.       check_addresses_and_lockouts(start_address, end_address);
-   428.
-   429.       read_block(the_deck, the_data, the_size);
-   430.
-   431.       if the_size mod 8 /= 0 and the_deck.kind = MT_kind then
-   432.          -- Disregard an incomplete final word; see Manual, §22.1.5, p184, ¶2.
-   433.          the_deck.is_abnormal := True;
-   434.          the_size := the_size - the_size mod 8;
-   435.       end if;
-   436.
-   437.       -- Store the relevant words.
-   438.       w := start_address;
-   439.       s := 0;
-   440.       for i in 1 .. the_size loop
-   441.          if s = 0 then
-   442.             store_word(0, w);
-   443.          end if;
-   444.          store_symbol(CN_TR(the_data(i)), w, s);
-   445.          stored := stored + 1;
-   446.       exit when (w = end_address) and (s = 7);
-   447.       exit when to_terminator and CN_TR(the_data(i)) = the_deck.terminator;
-   448.          increment(w, s);
-   449.       end loop;
-   450.       if to_terminator then
-   451.          correct_transfer_time(the_deck, stored);
-   452.       end if;
-   453.    exception
-   454.       when end_of_tape =>
-   455.          deal_with_trying_to_pass_PET(the_deck, "reading");
-   456.    end read;
-   457.
-   458.    procedure find_start_of_earlier_block (the_deck : in out tape.deck;
-   459.                                           crossed  : in out length_in_frames) is
-   460.       the_slice  : tape.slice := a_NULL_slice;
-   461.       block_size : length_in_frames;
-   462.    begin
-   463.       if the_deck.is_at_BTW then
-   464.          return; -- We have already gone as far back as possible.
-   465.       end if;
-   466.
-   467.       -- Skip back over any erasures or tape marks.
-   468.       skip_back_over_erasure(the_deck, the_slice, crossed);
-   469.       crossed := crossed + the_deck.inter_block_gap;
-   470.
-   471.       if the_deck.is_at_BTW and the_slice.kind in tape_gap_kind then
-   472.          the_deck.is_abnormal := True;
-   473.          -- This cannot happen if the tape has (at least) a label.
-   474.          raise emulation_failure with "no earlier block, at BTW on " & the_deck.device_name;
-   475.       end if;
-   476.
-   477.       if not the_slice.is_last then
-   478.          raise emulation_failure with "find_start_of_earlier_block did not find its last slice";
-   479.       end if;
+   399.    end increment;
+   400.
+   401.    tape_mark_data_word : constant KDF9.word := 8#17_00_00_00_00_00_00_00#;
+   402.
+   403.    procedure read (the_deck       : in out tape.deck;
+   404.                    Q_operand      : in KDF9.Q_register;
+   405.                    to_terminator  : in Boolean := False) is
+   406.       start_address : constant KDF9.address := Q_operand.I;
+   407.       end_address   : constant KDF9.address := Q_operand.M;
+   408.       the_data : tape.block_storage;
+   409.       s        : KDF9_char_sets.symbol_index;
+   410.       w        : KDF9.address;
+   411.       stored   : KDF9.word := 0;
+   412.       the_size : length_in_frames;
+   413.    begin
+   414.       validate_device(the_deck);
+   415.       check_addresses_and_lockouts(start_address, end_address);
+   416.
+   417.       read_block(the_deck, the_data, the_size);
+   418.
+   419.       if the_size mod 8 /= 0 and the_deck.kind = MT_kind then
+   420.          -- Disregard an incomplete final word; see Manual, §22.1.5, p184, ¶2.
+   421.          the_deck.is_abnormal := True;
+   422.          the_size := the_size - the_size mod 8;
+   423.       end if;
+   424.
+   425.       -- Store the relevant words.
+   426.       w := start_address;
+   427.       s := 0;
+   428.       for i in 1 .. the_size loop
+   429.          if s = 0 then
+   430.             store_word(0, w);
+   431.          end if;
+   432.          store_symbol(CN_TR(the_data(i)), w, s);
+   433.          stored := stored + 1;
+   434.       exit when (w = end_address) and (s = 7);
+   435.       exit when to_terminator and CN_TR(the_data(i)) = the_deck.terminator;
+   436.          increment(w, s);
+   437.       end loop;
+   438.       if to_terminator then
+   439.          correct_transfer_time(the_deck, stored);
+   440.       end if;
+   441.    end read;
+   442.
+   443.    procedure find_start_of_earlier_block (the_deck : in out tape.deck;
+   444.                                           crossed  : in out length_in_frames) is
+   445.       the_slice  : tape.slice := a_NULL_slice;
+   446.       block_size : length_in_frames;
+   447.    begin
+   448.       if the_deck.is_at_BTW then
+   449.          return; -- We have already gone as far back as possible.
+   450.       end if;
+   451.
+   452.       -- Skip back over any erasures or tape marks.
+   453.       skip_back_over_erasure(the_deck, the_slice, crossed);
+   454.       crossed := crossed + the_deck.inter_block_gap;
+   455.
+   456.       if the_deck.is_at_BTW and the_slice.kind in tape.gap_kind then
+   457.          the_deck.is_abnormal := True;
+   458.          trap_failing_IO_operation(the_deck, "cannot move back, at BTW");
+   459.       end if;
+   460.
+   461.       if not the_slice.is_last then
+   462.          trap_failing_IO_operation(the_deck, "on-tape data is malformed");
+   463.       end if;
+   464.
+   465.       -- We have reached the last slice of the block.
+   466.       if the_deck.kind = ST_kind and the_slice.kind in tape_mark_kind then
+   467.          block_size := 1;
+   468.       else
+   469.          block_size := the_slice.size;
+   470.          -- Jump backwards over data slices until we reach the first of the block.
+   471.          while not the_slice.is_first and then the_deck.tape_file.position > 0 loop
+   472.             read_prev_slice(the_deck.tape_file, the_slice);
+   473.             block_size := block_size + the_slice.size;
+   474.          end loop;
+   475.          handle_any_abnormality(the_deck, block_size);
+   476.       end if;
+   477.
+   478.       crossed := crossed + block_size;
+   479.    end find_start_of_earlier_block;
    480.
-   481.       -- We have reached the last slice of the block.
-   482.       if the_deck.kind = ST_kind and the_slice.kind in tape_mark_kind then
-   483.          block_size := 1;
-   484.       else
-   485.          block_size := the_slice.size;
-   486.          -- Jump backwards over data slices until we reach the first of the block.
-   487.          while not the_slice.is_first and then the_deck.tape_file.position > 0 loop
-   488.             read_prev_slice(the_deck.tape_file, the_slice);
-   489.             block_size := block_size + the_slice.size;
-   490.          end loop;
-   491.          handle_any_abnormality(the_deck, block_size);
-   492.       end if;
-   493.
-   494.       crossed := crossed + block_size;
-   495.    end find_start_of_earlier_block;
-   496.
-   497.    procedure decrement (word_address : in out KDF9.address;
-   498.                         symbol_nr    : in out KDF9_char_sets.symbol_index) is
-   499.    begin
-   500.       if symbol_nr > 0 then
-   501.          symbol_nr := symbol_nr - 1;
-   502.       else
-   503.          symbol_nr := 7;
-   504.          word_address := word_address + 1;
-   505.       end if;
-   506.    end decrement;
+   481.    procedure decrement (word_address : in out KDF9.address;
+   482.                         symbol_nr    : in out KDF9_char_sets.symbol_index) is
+   483.    begin
+   484.       if symbol_nr > 0 then
+   485.          symbol_nr := symbol_nr - 1;
+   486.       else
+   487.          symbol_nr := 7;
+   488.          word_address := word_address + 1;
+   489.       end if;
+   490.    end decrement;
+   491.
+   492.    procedure read_backwards (the_deck       : in out tape.deck;
+   493.                              Q_operand      : in KDF9.Q_register;
+   494.                              to_terminator  : in Boolean := False) is
+   495.       start_address : constant KDF9.address := Q_operand.I;
+   496.       end_address   : constant KDF9.address := Q_operand.M;
+   497.       terminator    : constant KDF9_char_sets.symbol := the_deck.terminator;
+   498.       the_data  : tape.block_storage;
+   499.       s         : KDF9_char_sets.symbol_index;
+   500.       w         : KDF9.address;
+   501.       the_first,
+   502.       the_last  : length_in_frames;
+   503.       crossed   : length_in_frames := 0 with Warnings => Off;  -- Because its value is never used.
+   504.    begin
+   505.       validate_device(the_deck);
+   506.       check_addresses_and_lockouts(start_address, end_address);
    507.
-   508.    procedure read_backwards (the_deck       : in out tape.deck;
-   509.                              Q_operand      : in KDF9.Q_register;
-   510.                              to_terminator  : in Boolean := False) is
-   511.       start_address : constant KDF9.address := Q_operand.I;
-   512.       end_address   : constant KDF9.address := Q_operand.M;
-   513.       terminator    : constant KDF9_char_sets.symbol := the_deck.terminator;
-   514.       the_data  : tape.block_storage;
-   515.       s         : KDF9_char_sets.symbol_index;
-   516.       w         : KDF9.address;
-   517.       the_first,
-   518.       the_last  : length_in_frames;
-   519.       crossed   : length_in_frames := 0 with Warnings => Off;  -- Because its value is never used.
-   520.    begin
-   521.       validate_device(the_deck);
-   522.       check_addresses_and_lockouts(start_address, end_address);
-   523.
-   524.       -- Locate the start of the previous block.
-   525.       find_start_of_earlier_block(the_deck, crossed);
-   526.
-   527.       -- Read it normally, i.e. forwards.
-   528.       read_block(the_deck, the_data, the_last, backwards);
-   529.
-   530.       -- And retrace our steps, to position the tape as if the block had been read backwards.
-   531.       find_start_of_earlier_block(the_deck, crossed);
-   532.
-   533.       -- Disregard an incomplete first word; see Manual §22.1.5, p184, ¶2; and Appendix 7 ¶3, p318.
-   534.       if the_last mod 8 = 0 or the_deck.kind = ST_kind then
-   535.          the_first := the_data'First;
-   536.       elsif the_last = 1 and the_deck.kind = ST_kind then
-   537.          -- See Manual, Appendix 7 ¶2, p317.
-   538.          store_word(tape_mark_data_word, start_address);
-   539.       else
-   540.          the_deck.is_abnormal := True;
-   541.          the_first := the_data'First + the_last mod 8;
-   542.       end if;
-   543.
-   544.       -- Store the relevant words.
-   545.       w := start_address;
-   546.       s := 7;
-   547.       for i in reverse the_first .. the_last loop
-   548.          if s = 7 then
-   549.             store_word(0, w);
-   550.          end if;
-   551.          store_symbol(CN_TR(the_data(i)), w, s);
-   552.       exit when to_terminator and CN_TR(the_data(i)) = terminator;
-   553.          decrement(w, s);
-   554.       end loop;
-   555.    end read_backwards;
-   556.
-   557. --
-   558. --
-   559.    -- KDF9 tape input orders.
-   560. --
-   561. --
-   562.
-   563.    -- MFRQq
-   564.    overriding
-   565.    procedure PIA (the_deck    : in out tape.deck;
-   566.                   Q_operand   : in KDF9.Q_register;
-   567.                   set_offline : in Boolean) is
-   568.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-   569.    begin
-   570.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
-   571.       read(the_deck, Q_operand, to_terminator => False);
-   572.       lock_out_relative_addresses(Q_operand);
-   573.    end PIA;
-   574.
-   575.    -- MFREQq
-   576.    overriding
-   577.    procedure PIB (the_deck    : in out tape.deck;
-   578.                   Q_operand   : in KDF9.Q_register;
-   579.                   set_offline : in Boolean) is
-   580.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-   581.    begin
-   582.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
-   583.       read(the_deck, Q_operand, to_terminator => True);
-   584.       lock_out_relative_addresses(Q_operand);
-   585.    end PIB;
-   586.
-   587.    -- as PIA
-   588.    overriding
-   589.    procedure PIC (the_deck    : in out tape.deck;
-   590.                   Q_operand   : in KDF9.Q_register;
-   591.                   set_offline : in Boolean) is
-   592.    begin
-   593.       the_deck.PIA(Q_operand, set_offline);
-   594.    end PIC;
-   595.
-   596.    -- as PIB
-   597.    overriding
-   598.    procedure PID (the_deck    : in out tape.deck;
-   599.                   Q_operand   : in KDF9.Q_register;
-   600.                   set_offline : in Boolean) is
-   601.    begin
-   602.       the_deck.PIB(Q_operand, set_offline);
-   603.    end PID;
-   604.
-   605.    -- MBRQq
-   606.    overriding
-   607.    procedure PIE (the_deck    : in out tape.deck;
-   608.                   Q_operand   : in KDF9.Q_register;
-   609.                   set_offline : in Boolean) is
-   610.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-   611.    begin
-   612.       if the_deck.is_at_BTW then
-   613.          trap_illegal_instruction("MBRQq at BTW on " & the_deck.device_name);
-   614.       end if;
-   615.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
-   616.       read_backwards(the_deck, Q_operand, to_terminator => False);
-   617.       if the_deck.kind = ST_kind then
-   618.          the_deck.is_LBM_flagged := False;
-   619.       end if;
-   620.       lock_out_relative_addresses(Q_operand);
-   621.    end PIE;
-   622.
-   623.    -- MBREQq
-   624.    overriding
-   625.    procedure PIF (the_deck    : in out tape.deck;
-   626.                   Q_operand   : in KDF9.Q_register;
-   627.                   set_offline : in Boolean) is
-   628.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-   629.    begin
-   630.       if the_deck.is_at_BTW then
-   631.          trap_illegal_instruction("MBREQq at BTW on " & the_deck.device_name);
-   632.       end if;
-   633.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
-   634.       read_backwards(the_deck, Q_operand, to_terminator => True);
-   635.       if the_deck.kind = ST_kind then
-   636.          the_deck.is_LBM_flagged := False;
-   637.       end if;
-   638.       lock_out_relative_addresses(Q_operand);
-   639.    end PIF;
-   640.
-   641.    -- as PIE
-   642.    overriding
-   643.    procedure PIG (the_deck    : in out tape.deck;
-   644.                   Q_operand   : in KDF9.Q_register;
-   645.                   set_offline : in Boolean) is
-   646.    begin
-   647.       the_deck.PIE(Q_operand, set_offline);
-   648.    end PIG;
-   649.
-   650.    -- as PIF
-   651.    overriding
-   652.    procedure PIH (the_deck    : in out tape.deck;
-   653.                   Q_operand   : in KDF9.Q_register;
-   654.                   set_offline : in Boolean) is
-   655.    begin
-   656.       the_deck.PIF(Q_operand, set_offline);
-   657.    end PIH;
-   658.
-   659. --
-   660. --
-   661.    -- KDF9 tape movement and test orders.
-   662. --
-   663. --
-   664.
-   665.    procedure find_start_of_later_block (the_deck : in out tape.deck;
-   666.                                         crossed  : in out length_in_frames) is
-   667.       the_slice  : tape.slice := a_NULL_slice;
-   668.       block_size : length_in_frames := 0;
-   669.    begin
-   670.       -- Skip over any erasures or tape marks.
-   671.       skip_forward_over_erasure(the_deck, the_slice, crossed);
-   672.       crossed := crossed + the_deck.inter_block_gap;
-   673.
-   674.       if not the_slice.is_first then
-   675.          raise emulation_failure with "find_start_of_later_block did not find its first slice";
-   676.       end if;
-   677.
-   678.       -- We have reached the first slice of the block.
-   679.       if the_deck.kind = ST_kind and the_slice.kind in tape_mark_kind then
-   680.          block_size := 1;
-   681.       else
-   682.          block_size := the_slice.size;
-   683.          -- Ignore data slices until we get to the last slice of the block.
-   684.          while not the_slice.is_last loop
-   685.             read_next_slice(the_deck.tape_file, the_slice);
-   686.             block_size := block_size + the_slice.size;
-   687.          end loop;
-   688.          handle_any_abnormality(the_deck, block_size);
-   689.       end if;
-   690.
-   691.       the_deck.is_LBM_flagged := the_slice.is_LBM_flagged;
-   692.       crossed := crossed + block_size;
-   693.    exception
-   694.       when end_of_tape =>
-   695.          the_deck.is_abnormal := True;
-   696.          raise end_of_tape with "find_start_of_later_block";
-   697.    end find_start_of_later_block;
-   698.
-   699.    procedure skip_forwards (the_deck       : in out tape.deck;
-   700.                             blocks_skipped : in KDF9.word) is
-   701.       crossed : length_in_frames := 0;
-   702.    begin
-   703.       for i in 1 .. blocks_skipped loop
-   704.          find_start_of_later_block(the_deck, crossed);
-   705.       -- MFSKQq stops at an LBM-flagged block, or on count expiry.
-   706.       -- Unlike MBSKQq it does record having seen an LBM-flagged block during the skipping.
-   707.       -- See the Manual, §22.1.3, p.183, ¶1 and §22.1.9, p.188, ¶-2.
-   708.       exit when the_deck.is_LBM_flagged;
-   709.       end loop;
-   710.       note_tape_position(the_deck, forwards, crossed, bytes_moved => 0);
-   711.       update_statistics(the_deck, crossed, bytes_moved => 0);
-   712.    end skip_forwards;
-   713.
-   714.    -- MFSKQq
-   715.    overriding
-   716.    procedure PMA (the_deck    : in out tape.deck;
-   717.                   Q_operand   : in KDF9.Q_register;
-   718.                   set_offline : in Boolean) is
-   719.    begin
-   720.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
-   721.       if Q_operand.M = 0 then
-   722.          skip_forwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
-   723.       else
-   724.          require_positive_count(Q_operand.M);
-   725.          skip_forwards(the_deck, KDF9.word(Q_operand.M));
-   726.       end if;
-   727.    end PMA;
-   728.
-   729.    -- MBTQq
-   730.    overriding
-   731.    procedure PMB (the_deck    : in out tape.deck;
-   732.                   Q_operand   : in KDF9.Q_register;
-   733.                   set_offline : in Boolean) is
-   734.    begin
-   735.       validate_device(the_deck);
-   736.       validate_parity(the_deck);
-   737.       deal_with_a_busy_device(the_deck, 14, set_offline);
-   738.       the_T_bit_is_set := the_deck.is_at_BTW and the_deck.holds_data;
-   739.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
-   740.    end PMB;
-   741.
-   742.    -- MLBQq
-   743.    overriding
-   744.    procedure PMC (the_deck    : in out tape.deck;
-   745.                   Q_operand   : in KDF9.Q_register;
-   746.                   set_offline : in Boolean) is
-   747.    begin
-   748.       validate_device(the_deck);
-   749.       validate_parity(the_deck);
-   750.       deal_with_a_busy_device(the_deck, 14, set_offline);
-   751.       the_T_bit_is_set := the_deck.is_LBM_flagged;
-   752.       the_deck.is_LBM_flagged := False;
-   753.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
-   754.    end PMC;
-   755.
-   756.    procedure skip_backwards (the_deck       : in out tape.deck;
-   757.                              blocks_skipped : in KDF9.word) is
-   758.       crossed : length_in_frames := 0;
-   759.    begin
-   760.       for i in 1 .. blocks_skipped loop
-   761.       exit when the_deck.is_at_BTW;  -- I.e., the tape is fully rewound.
-   762.          find_start_of_earlier_block(the_deck, crossed);
-   763.       -- MBSKQq does not stop at an LBM-flagged block, only at BTW or count expiry.
-   764.       -- It ignores LBM flags encountered during the skipping.
-   765.       -- See the Manual, §22.1.3, p.183, ¶1 and §22.1.9, p.188, ¶-2.
-   766.       end loop;
-   767.       note_tape_position(the_deck, backwards, crossed, bytes_moved => 0);
-   768.       update_statistics(the_deck, crossed, bytes_moved => 0);
-   769.    end skip_backwards;
-   770.
-   771.    -- MRWDQq
-   772.    overriding
-   773.    procedure PMD (the_deck    : in out tape.deck;
-   774.                   Q_operand   : in KDF9.Q_register;
-   775.                   set_offline : in Boolean) is
-   776.       byte_count,
-   777.       tape_length : length_in_frames := 0;
-   778.       the_slice   : tape.slice;
-   779.    begin  -- PMD
-   780.       the_deck.is_abnormal := False;  -- See Manual §22.1.9, p.189, ¶-2.
-   781.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
-   782.       -- No motion takes place if the tape is at BTW; see Manual §22.1.9, p.190, ¶1.
-   783.       if the_deck.tape_file.position > 0 then
-   784.          -- Make sure we dont try to read past the end of data.
-   785.          -- Spool back to the BTW, accumulating distances.
-   786.          while the_deck.tape_file.position > 0 loop
-   787.             read_prev_slice(the_deck.tape_file, the_slice);
-   788.             case the_slice.kind is
-   789.                when data_slice =>
-   790.                   byte_count := byte_count + the_slice.size;
-   791.                   if the_slice.is_first then
-   792.                      tape_length := tape_length + the_deck.inter_block_gap;
-   793.                   end if;
-   794.                when GAP_slice
-   795.                   | WIPE_slice =>
-   796.                   tape_length := tape_length + the_slice.size;
-   797.                when others =>
-   798.                   null;
-   799.             end case;
-   800.          end loop;
-   801.       else
-   802.          -- No motion takes place; see Manual §22.1.9, p.190, ¶1.
-   803.          null;
-   804.       end if;
-   805.
-   806.       update_statistics(the_deck, tape_length + byte_count, bytes_moved => 0);
-   807.
-   808.       reset(the_deck);
-   809.    end PMD;
-   810.
-   811.    -- MBSKQq
-   812.    overriding
-   813.    procedure PME (the_deck    : in out tape.deck;
-   814.                   Q_operand   : in KDF9.Q_register;
-   815.                   set_offline : in Boolean) is
-   816.    begin
-   817.       if the_deck.is_at_BTW then
-   818.          trap_illegal_instruction("MBSKQq at BTW on " & the_deck.device_name);
-   819.       end if;
-   820.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
-   821.       if Q_operand.M = 0 then
-   822.          skip_backwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
-   823.       else
-   824.          require_positive_count(Q_operand.M);
-   825.          skip_backwards(the_deck, KDF9.word(Q_operand.M));
-   826.       end if;
-   827.    end PME;
-   828.
-   829.    -- METQq
-   830.    overriding
-   831.    procedure PMF (the_deck    : in out tape.deck;
-   832.                   Q_operand   : in KDF9.Q_register;
-   833.                   set_offline : in Boolean) is
-   834.    begin
-   835.       validate_device(the_deck);
-   836.       validate_parity(the_deck);
-   837.       deal_with_a_busy_device(the_deck, 13, set_offline);
-   838.       the_T_bit_is_set := the_deck.is_at_ETW;
-   839.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
-   840.    end PMF;
-   841.
-   842.    -- PMKQq, forward skip, even parity, for character data with "group mark" (8#77#)
-   843.    overriding
-   844.    procedure PMK (the_deck    : in out tape.deck;
-   845.                   Q_operand   : in KDF9.Q_register;
-   846.                   set_offline : in Boolean) is
-   847.    begin
-   848.       if the_deck.kind = MT_kind then
-   849.          trap_illegal_instruction("PMKQq on 1081 deck " & the_deck.device_name);
-   850.       else
-   851.          the_deck.PMA(Q_operand, set_offline);
-   852.       end if;
-   853.    end PMK;
-   854.
-   855.    -- PMLQq, backward skip, even parity, for character data with "group mark" (8#77#)
-   856.    overriding
-   857.    procedure PML (the_deck    : in out tape.deck;
-   858.                   Q_operand   : in KDF9.Q_register;
-   859.                   set_offline : in Boolean) is
-   860.    begin
-   861.       if the_deck.kind = MT_kind then
-   862.          trap_illegal_instruction("PMLQq on 1081 deck " & the_deck.device_name);
-   863.       else
-   864.          the_deck.PMB(Q_operand, set_offline);
-   865.       end if;
-   866.    end PML;
-   867.
-   868. --
-   869. --
-   870.    -- KDF9 tape output orders.
-   871. --
-   872. --
+   508.       -- Locate the start of the previous block.
+   509.       find_start_of_earlier_block(the_deck, crossed);
+   510.
+   511.       -- Read it normally, i.e. forwards.
+   512.       read_block(the_deck, the_data, the_last, backwards);
+   513.
+   514.       -- And retrace our steps, to position the tape as if the block had been read backwards.
+   515.       find_start_of_earlier_block(the_deck, crossed);
+   516.
+   517.       -- Disregard an incomplete first word; see Manual §22.1.5, p184, ¶2; and Appendix 7 ¶3, p318.
+   518.       if the_last mod 8 = 0 or the_deck.kind = ST_kind then
+   519.          the_first := the_data'First;
+   520.       elsif the_last = 1 and the_deck.kind = ST_kind then
+   521.          -- See Manual, Appendix 7 ¶2, p317.
+   522.          store_word(tape_mark_data_word, start_address);
+   523.       else
+   524.          the_deck.is_abnormal := True;
+   525.          the_first := the_data'First + the_last mod 8;
+   526.       end if;
+   527.
+   528.       -- Store the relevant words.
+   529.       w := start_address;
+   530.       s := 7;
+   531.       for i in reverse the_first .. the_last loop
+   532.          if s = 7 then
+   533.             store_word(0, w);
+   534.          end if;
+   535.          store_symbol(CN_TR(the_data(i)), w, s);
+   536.       exit when to_terminator and CN_TR(the_data(i)) = terminator;
+   537.          decrement(w, s);
+   538.       end loop;
+   539.    end read_backwards;
+   540.
+   541. --
+   542. --
+   543.    -- KDF9 tape input orders.
+   544. --
+   545. --
+   546.
+   547.    -- MFRQq
+   548.    overriding
+   549.    procedure PIA (the_deck    : in out tape.deck;
+   550.                   Q_operand   : in KDF9.Q_register;
+   551.                   set_offline : in Boolean) is
+   552.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+   553.    begin
+   554.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
+   555.       read(the_deck, Q_operand, to_terminator => False);
+   556.       lock_out_relative_addresses(Q_operand);
+   557.    end PIA;
+   558.
+   559.    -- MFREQq
+   560.    overriding
+   561.    procedure PIB (the_deck    : in out tape.deck;
+   562.                   Q_operand   : in KDF9.Q_register;
+   563.                   set_offline : in Boolean) is
+   564.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+   565.    begin
+   566.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
+   567.       read(the_deck, Q_operand, to_terminator => True);
+   568.       lock_out_relative_addresses(Q_operand);
+   569.    end PIB;
+   570.
+   571.    -- as PIA
+   572.    overriding
+   573.    procedure PIC (the_deck    : in out tape.deck;
+   574.                   Q_operand   : in KDF9.Q_register;
+   575.                   set_offline : in Boolean) is
+   576.    begin
+   577.       the_deck.PIA(Q_operand, set_offline);
+   578.    end PIC;
+   579.
+   580.    -- as PIB
+   581.    overriding
+   582.    procedure PID (the_deck    : in out tape.deck;
+   583.                   Q_operand   : in KDF9.Q_register;
+   584.                   set_offline : in Boolean) is
+   585.    begin
+   586.       the_deck.PIB(Q_operand, set_offline);
+   587.    end PID;
+   588.
+   589.    -- MBRQq
+   590.    overriding
+   591.    procedure PIE (the_deck    : in out tape.deck;
+   592.                   Q_operand   : in KDF9.Q_register;
+   593.                   set_offline : in Boolean) is
+   594.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+   595.    begin
+   596.       if the_deck.is_at_BTW then
+   597.          trap_illegal_instruction("MBRQq at BTW on " & the_deck.device_name);
+   598.       end if;
+   599.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
+   600.       read_backwards(the_deck, Q_operand, to_terminator => False);
+   601.       if the_deck.kind = ST_kind then
+   602.          the_deck.is_LBM_flagged := False;
+   603.       end if;
+   604.       lock_out_relative_addresses(Q_operand);
+   605.    end PIE;
+   606.
+   607.    -- MBREQq
+   608.    overriding
+   609.    procedure PIF (the_deck    : in out tape.deck;
+   610.                   Q_operand   : in KDF9.Q_register;
+   611.                   set_offline : in Boolean) is
+   612.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+   613.    begin
+   614.       if the_deck.is_at_BTW then
+   615.          trap_illegal_instruction("MBREQq at BTW on " & the_deck.device_name);
+   616.       end if;
+   617.       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
+   618.       read_backwards(the_deck, Q_operand, to_terminator => True);
+   619.       if the_deck.kind = ST_kind then
+   620.          the_deck.is_LBM_flagged := False;
+   621.       end if;
+   622.       lock_out_relative_addresses(Q_operand);
+   623.    end PIF;
+   624.
+   625.    -- as PIE
+   626.    overriding
+   627.    procedure PIG (the_deck    : in out tape.deck;
+   628.                   Q_operand   : in KDF9.Q_register;
+   629.                   set_offline : in Boolean) is
+   630.    begin
+   631.       the_deck.PIE(Q_operand, set_offline);
+   632.    end PIG;
+   633.
+   634.    -- as PIF
+   635.    overriding
+   636.    procedure PIH (the_deck    : in out tape.deck;
+   637.                   Q_operand   : in KDF9.Q_register;
+   638.                   set_offline : in Boolean) is
+   639.    begin
+   640.       the_deck.PIF(Q_operand, set_offline);
+   641.    end PIH;
+   642.
+   643. --
+   644. --
+   645.    -- KDF9 tape movement and test orders.
+   646. --
+   647. --
+   648.
+   649.    procedure find_start_of_later_block (the_deck : in out tape.deck;
+   650.                                         crossed  : in out length_in_frames) is
+   651.       the_slice  : tape.slice := a_NULL_slice;
+   652.       block_size : length_in_frames := 0;
+   653.    begin
+   654.       -- Skip over any erasures or tape marks.
+   655.       skip_forward_over_erasure(the_deck, the_slice, crossed);
+   656.       crossed := crossed + the_deck.inter_block_gap;
+   657.
+   658.       if not the_slice.is_first then
+   659.          trap_failing_IO_operation(the_deck, "on-tape data is malformed");
+   660.       end if;
+   661.
+   662.       -- We have reached the first slice of the block.
+   663.       if the_deck.kind = ST_kind and the_slice.kind in tape_mark_kind then
+   664.          block_size := 1;
+   665.       else
+   666.          block_size := the_slice.size;
+   667.          -- Ignore data slices until we get to the last slice of the block.
+   668.          while not the_slice.is_last loop
+   669.             read_next_slice(the_deck.tape_file, the_slice);
+   670.             block_size := block_size + the_slice.size;
+   671.          end loop;
+   672.          handle_any_abnormality(the_deck, block_size);
+   673.       end if;
+   674.
+   675.       the_deck.is_LBM_flagged := the_slice.is_LBM_flagged;
+   676.       crossed := crossed + block_size;
+   677.    end find_start_of_later_block;
+   678.
+   679.    procedure skip_forwards (the_deck       : in out tape.deck;
+   680.                             blocks_skipped : in KDF9.word) is
+   681.       crossed : length_in_frames := 0;
+   682.    begin
+   683.       for i in 1 .. blocks_skipped loop
+   684.          find_start_of_later_block(the_deck, crossed);
+   685.       -- MFSKQq stops at an LBM-flagged block, or on count expiry.
+   686.       -- Unlike MBSKQq it does record having seen an LBM-flagged block during the skipping.
+   687.       -- See the Manual, §22.1.3, p.183, ¶1 and §22.1.9, p.188, ¶-2.
+   688.       exit when the_deck.is_LBM_flagged;
+   689.       end loop;
+   690.       note_tape_position(the_deck, forwards, crossed, bytes_moved => 0);
+   691.       update_statistics(the_deck, crossed, bytes_moved => 0);
+   692.    end skip_forwards;
+   693.
+   694.    -- MFSKQq
+   695.    overriding
+   696.    procedure PMA (the_deck    : in out tape.deck;
+   697.                   Q_operand   : in KDF9.Q_register;
+   698.                   set_offline : in Boolean) is
+   699.    begin
+   700.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
+   701.       if Q_operand.M = 0 then
+   702.          skip_forwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
+   703.       else
+   704.          require_positive_count(Q_operand.M);
+   705.          skip_forwards(the_deck, KDF9.word(Q_operand.M));
+   706.       end if;
+   707.    end PMA;
+   708.
+   709.    -- MBTQq
+   710.    overriding
+   711.    procedure PMB (the_deck    : in out tape.deck;
+   712.                   Q_operand   : in KDF9.Q_register;
+   713.                   set_offline : in Boolean) is
+   714.    begin
+   715.       validate_device(the_deck);
+   716.       validate_parity(the_deck);
+   717.       deal_with_a_busy_device(the_deck, 14, set_offline);
+   718.       the_T_bit_is_set := the_deck.is_at_BTW and the_deck.holds_data;
+   719.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
+   720.    end PMB;
+   721.
+   722.    -- MLBQq
+   723.    overriding
+   724.    procedure PMC (the_deck    : in out tape.deck;
+   725.                   Q_operand   : in KDF9.Q_register;
+   726.                   set_offline : in Boolean) is
+   727.    begin
+   728.       validate_device(the_deck);
+   729.       validate_parity(the_deck);
+   730.       deal_with_a_busy_device(the_deck, 14, set_offline);
+   731.       the_T_bit_is_set := the_deck.is_LBM_flagged;
+   732.       the_deck.is_LBM_flagged := False;
+   733.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
+   734.    end PMC;
+   735.
+   736.    procedure skip_backwards (the_deck       : in out tape.deck;
+   737.                              blocks_skipped : in KDF9.word) is
+   738.       crossed : length_in_frames := 0;
+   739.    begin
+   740.       for i in 1 .. blocks_skipped loop
+   741.       exit when the_deck.is_at_BTW;  -- I.e., the tape is fully rewound.
+   742.          find_start_of_earlier_block(the_deck, crossed);
+   743.       -- MBSKQq does not stop at an LBM-flagged block, only at BTW or count expiry.
+   744.       -- It ignores LBM flags encountered during the skipping.
+   745.       -- See the Manual, §22.1.3, p.183, ¶1 and §22.1.9, p.188, ¶-2.
+   746.       end loop;
+   747.       note_tape_position(the_deck, backwards, crossed, bytes_moved => 0);
+   748.       update_statistics(the_deck, crossed, bytes_moved => 0);
+   749.    end skip_backwards;
+   750.
+   751.    -- MRWDQq
+   752.    overriding
+   753.    procedure PMD (the_deck    : in out tape.deck;
+   754.                   Q_operand   : in KDF9.Q_register;
+   755.                   set_offline : in Boolean) is
+   756.       byte_count,
+   757.       tape_length : length_in_frames := 0;
+   758.       the_slice   : tape.slice;
+   759.    begin  -- PMD
+   760.       the_deck.is_abnormal := False;  -- See Manual §22.1.9, p.189, ¶-2.
+   761.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
+   762.       -- No motion takes place if the tape is at BTW; see Manual §22.1.9, p.190, ¶1.
+   763.       if the_deck.tape_file.position > 0 then
+   764.          -- Make sure we dont try to read past the end of data.
+   765.          -- Spool back to the BTW, accumulating distances.
+   766.          while the_deck.tape_file.position > 0 loop
+   767.             read_prev_slice(the_deck.tape_file, the_slice);
+   768.             case the_slice.kind is
+   769.                when data_slice =>
+   770.                   byte_count := byte_count + the_slice.size;
+   771.                   if the_slice.is_first then
+   772.                      tape_length := tape_length + the_deck.inter_block_gap;
+   773.                   end if;
+   774.                when GAP_slice
+   775.                   | WIPE_slice =>
+   776.                   tape_length := tape_length + the_slice.size;
+   777.                when others =>
+   778.                   null;
+   779.             end case;
+   780.          end loop;
+   781.       else
+   782.          -- No motion takes place; see Manual §22.1.9, p.190, ¶1.
+   783.          null;
+   784.       end if;
+   785.
+   786.       update_statistics(the_deck, tape_length + byte_count, bytes_moved => 0);
+   787.
+   788.       reset(the_deck);
+   789.    end PMD;
+   790.
+   791.    -- MBSKQq
+   792.    overriding
+   793.    procedure PME (the_deck    : in out tape.deck;
+   794.                   Q_operand   : in KDF9.Q_register;
+   795.                   set_offline : in Boolean) is
+   796.    begin
+   797.       if the_deck.is_at_BTW then
+   798.          trap_illegal_instruction("MBSKQq at BTW on " & the_deck.device_name);
+   799.       end if;
+   800.       start_data_transfer(the_deck, Q_operand, set_offline, 19);
+   801.       if Q_operand.M = 0 then
+   802.          skip_backwards(the_deck, 32768);  -- See Manual §22.1.9, p188, ¶1.
+   803.       else
+   804.          require_positive_count(Q_operand.M);
+   805.          skip_backwards(the_deck, KDF9.word(Q_operand.M));
+   806.       end if;
+   807.    end PME;
+   808.
+   809.    -- METQq
+   810.    overriding
+   811.    procedure PMF (the_deck    : in out tape.deck;
+   812.                   Q_operand   : in KDF9.Q_register;
+   813.                   set_offline : in Boolean) is
+   814.    begin
+   815.       validate_device(the_deck);
+   816.       validate_parity(the_deck);
+   817.       deal_with_a_busy_device(the_deck, 13, set_offline);
+   818.       the_T_bit_is_set := the_deck.is_at_ETW;
+   819.       take_note_of_test(the_deck.device_name, Q_operand, the_T_bit_is_set);
+   820.    end PMF;
+   821.
+   822.    -- PMKQq, forward skip, even parity, for character data with "group mark" (8#77#)
+   823.    overriding
+   824.    procedure PMK (the_deck    : in out tape.deck;
+   825.                   Q_operand   : in KDF9.Q_register;
+   826.                   set_offline : in Boolean) is
+   827.    begin
+   828.       if the_deck.kind = MT_kind then
+   829.          trap_illegal_instruction("PMKQq on 1081 deck " & the_deck.device_name);
+   830.       else
+   831.          the_deck.PMA(Q_operand, set_offline);
+   832.       end if;
+   833.    end PMK;
+   834.
+   835.    -- PMLQq, backward skip, even parity, for character data with "group mark" (8#77#)
+   836.    overriding
+   837.    procedure PML (the_deck    : in out tape.deck;
+   838.                   Q_operand   : in KDF9.Q_register;
+   839.                   set_offline : in Boolean) is
+   840.    begin
+   841.       if the_deck.kind = MT_kind then
+   842.          trap_illegal_instruction("PMLQq on 1081 deck " & the_deck.device_name);
+   843.       else
+   844.          the_deck.PMB(Q_operand, set_offline);
+   845.       end if;
+   846.    end PML;
+   847.
+   848. --
+   849. --
+   850.    -- KDF9 tape output orders.
+   851. --
+   852. --
+   853.
+   854.    procedure put_data_slice (the_deck   : in out tape.deck;
+   855.                              data       : in tape.data_storage;
+   856.                              size       : in length_in_frames;
+   857.                              is_first,
+   858.                              is_last,
+   859.                              is_flagged : in Boolean) is
+   860.       the_slice : tape.slice;
+   861.    begin
+   862.       the_slice := (
+   863.                     data_slice,
+   864.                     is_LBM_flagged => is_flagged,
+   865.                     is_first => put_data_slice.is_first,
+   866.                     is_last  => put_data_slice.is_last,
+   867.                     size     => put_data_slice.size,
+   868.                     data     => erased_gap_data
+   869.                    );
+   870.       the_slice.data(1 .. put_data_slice.size) := put_data_slice.data;
+   871.       write_slice(the_deck.tape_file, the_slice);
+   872.    end put_data_slice;
    873.
-   874.    procedure put_data_slice (the_deck   : in out tape.deck;
-   875.                              data       : in tape.data_storage;
-   876.                              size       : in length_in_frames;
-   877.                              is_first,
-   878.                              is_last,
-   879.                              is_flagged : in Boolean) is
-   880.       the_slice : tape.slice;
-   881.    begin
-   882.       the_slice := (
-   883.                     data_slice,
-   884.                     is_LBM_flagged => is_flagged,
-   885.                     is_first => put_data_slice.is_first,
-   886.                     is_last  => put_data_slice.is_last,
-   887.                     size     => put_data_slice.size,
-   888.                     data     => erased_gap_data
-   889.                    );
-   890.       the_slice.data(1 .. put_data_slice.size) := put_data_slice.data;
-   891.       write_slice(the_deck.tape_file, the_slice);
-   892.    exception
-   893.       when end_of_tape =>
-   894.          deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
-   895.    end put_data_slice;
-   896.
-   897.    procedure write_block (the_deck       : in out tape.deck;
-   898.                           the_data       : in tape.data_storage;
-   899.                           is_LBM_flagged : in Boolean) is
-   900.       remnant  : length_in_frames := the_data'Length;
-   901.       from     : length_in_frames;
-   902.       the_size : length_in_frames;
-   903.    begin
-   904.       if not the_deck.tape_file.has_a_WP_ring then
-   905.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
-   906.       end if;
-   907.
-   908.       deal_with_trying_to_pass_PET(the_deck, "write");
-   909.
-   910.       the_deck.is_LBM_flagged := False;
-   911.
-   912.       -- Write the first (and possibly final) slice of the block.
-   913.       the_size := (if remnant > slice_size_limit then slice_size_limit else remnant);
-   914.       remnant := remnant - the_size;
-   915.       from := the_data'First;
-   916.       put_data_slice (
-   917.                       the_deck,
-   918.                       the_data(from .. the_size),
-   919.                       the_size,
-   920.                       is_first   => True,
-   921.                       is_last    => remnant = 0,
-   922.                       is_flagged => write_block.is_LBM_flagged
-   923.                      );
-   924.
-   925.       -- Write any full slices, the last of which may be final.
-   926.       while remnant >= slice_size_limit loop
-   927.          deal_with_trying_to_pass_PET(the_deck, "write");
-   928.          remnant := remnant - slice_size_limit;
-   929.          from := from + slice_size_limit;
-   930.          put_data_slice (
-   931.                          the_deck,
-   932.                          the_data(from .. from+slice_size_limit-1),
-   933.                          slice_size_limit,
-   934.                          is_first   => False,
-   935.                          is_last    => remnant = 0,
-   936.                          is_flagged => write_block.is_LBM_flagged
-   937.                         );
-   938.       end loop;
-   939.
-   940.       -- Write the residue as a final slice of the block.
-   941.       if remnant > 0 then
-   942.          put_data_slice (
-   943.                          the_deck,
-   944.                          the_data(from+slice_size_limit .. the_data'Last),
-   945.                          remnant,
-   946.                          is_first   => False,
-   947.                          is_last    => True,
-   948.                          is_flagged => write_block.is_LBM_flagged
-   949.                         );
-   950.       end if;
-   951.
-   952.       note_tape_position(the_deck, forwards,
-   953.                         the_deck.inter_block_gap, bytes_moved => the_data'Length);
-   954.       update_statistics(the_deck,
-   955.                         the_deck.inter_block_gap, bytes_moved => the_data'Length);
-   956.
-   957.    exception
-   958.       when end_of_tape =>
-   959.          deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
-   960.    end write_block;
-   961.
-   962.    procedure write (the_deck       : in out tape.deck;
-   963.                     Q_operand      : in KDF9.Q_register;
-   964.                     is_LBM_flagged : in Boolean := False) is
-   965.       start_address : constant KDF9.address := Q_operand.I;
-   966.       end_address   : constant KDF9.address := Q_operand.M;
-   967.    begin
-   968.       validate_device(the_deck);
-   969.       check_addresses_and_lockouts(start_address, end_address);
-   970.       declare
-   971.          next_byte : length_in_frames := 1;
-   972.          the_data  : tape.data_storage(1 .. length_in_frames(end_address-start_address+1)*8);
-   973.       begin
-   974.       word_loop:
-   975.          for w in start_address .. end_address loop
-   976.             for c in KDF9_char_sets.symbol_index'Range loop
-   977.                the_data(next_byte) := TP_CN(fetch_symbol(w, c));
-   978.                next_byte := next_byte + 1;
+   874.    procedure write_block (the_deck       : in out tape.deck;
+   875.                           the_data       : in tape.data_storage;
+   876.                           is_LBM_flagged : in Boolean) is
+   877.       remnant  : length_in_frames := the_data'Length;
+   878.       from     : length_in_frames;
+   879.       the_size : length_in_frames;
+   880.    begin
+   881.       if not the_deck.tape_file.has_a_WP_ring then
+   882.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+   883.       end if;
+   884.
+   885.       deal_with_trying_to_pass_PET(the_deck, "write");
+   886.
+   887.       the_deck.is_LBM_flagged := False;
+   888.
+   889.       -- Write the first (and possibly final) slice of the block.
+   890.       the_size := (if remnant > slice_size_limit then slice_size_limit else remnant);
+   891.       remnant := remnant - the_size;
+   892.       from := the_data'First;
+   893.       put_data_slice (
+   894.                       the_deck,
+   895.                       the_data(from .. the_size),
+   896.                       the_size,
+   897.                       is_first   => True,
+   898.                       is_last    => remnant = 0,
+   899.                       is_flagged => write_block.is_LBM_flagged
+   900.                      );
+   901.
+   902.       -- Write any full slices, the last of which may be final.
+   903.       while remnant >= slice_size_limit loop
+   904.          deal_with_trying_to_pass_PET(the_deck, "write");
+   905.          remnant := remnant - slice_size_limit;
+   906.          from := from + slice_size_limit;
+   907.          put_data_slice (
+   908.                          the_deck,
+   909.                          the_data(from .. from+slice_size_limit-1),
+   910.                          slice_size_limit,
+   911.                          is_first   => False,
+   912.                          is_last    => remnant = 0,
+   913.                          is_flagged => write_block.is_LBM_flagged
+   914.                         );
+   915.       end loop;
+   916.
+   917.       -- Write the residue as a final slice of the block.
+   918.       if remnant > 0 then
+   919.          put_data_slice (
+   920.                          the_deck,
+   921.                          the_data(from+slice_size_limit .. the_data'Last),
+   922.                          remnant,
+   923.                          is_first   => False,
+   924.                          is_last    => True,
+   925.                          is_flagged => write_block.is_LBM_flagged
+   926.                         );
+   927.       end if;
+   928.
+   929.       note_tape_position(the_deck, forwards,
+   930.                         the_deck.inter_block_gap, bytes_moved => the_data'Length);
+   931.       update_statistics(the_deck,
+   932.                         the_deck.inter_block_gap, bytes_moved => the_data'Length);
+   933.
+   934.    end write_block;
+   935.
+   936.    procedure write (the_deck       : in out tape.deck;
+   937.                     Q_operand      : in KDF9.Q_register;
+   938.                     is_LBM_flagged : in Boolean := False) is
+   939.       start_address : constant KDF9.address := Q_operand.I;
+   940.       end_address   : constant KDF9.address := Q_operand.M;
+   941.    begin
+   942.       validate_device(the_deck);
+   943.       check_addresses_and_lockouts(start_address, end_address);
+   944.       declare
+   945.          next_byte : length_in_frames := 1;
+   946.          the_data  : tape.data_storage(1 .. length_in_frames(end_address-start_address+1)*8);
+   947.       begin
+   948.       word_loop:
+   949.          for w in start_address .. end_address loop
+   950.             for c in KDF9_char_sets.symbol_index'Range loop
+   951.                the_data(next_byte) := TP_CN(fetch_symbol(w, c));
+   952.                next_byte := next_byte + 1;
+   953.             end loop;
+   954.          end loop word_loop;
+   955.          write_block(the_deck, the_data, is_LBM_flagged);
+   956.       end;
+   957.    end write;
+   958.
+   959.    procedure write_to_terminator (the_deck       : in out tape.deck;
+   960.                                   Q_operand      : in KDF9.Q_register;
+   961.                                   is_LBM_flagged : in Boolean := False) is
+   962.       start_address : constant KDF9.address := Q_operand.I;
+   963.       end_address   : constant KDF9.address := Q_operand.M;
+   964.    begin
+   965.       validate_device(the_deck);
+   966.       check_addresses_and_lockouts(start_address, end_address);
+   967.       declare
+   968.          next_byte : length_in_frames := 1;
+   969.          the_data  : tape.data_storage(1 .. length_in_frames(end_address-start_address+1)*8);
+   970.          symbol    : KDF9_char_sets.symbol;
+   971.       begin
+   972.       word_loop:
+   973.          for w in start_address .. end_address loop
+   974.             for c in KDF9_char_sets.symbol_index'Range loop
+   975.                symbol := fetch_symbol(w, c);
+   976.                the_data(next_byte) := TP_CN(symbol);
+   977.                next_byte := next_byte + 1;
+   978.          exit word_loop when symbol = the_deck.terminator;
    979.             end loop;
    980.          end loop word_loop;
-   981.          write_block(the_deck, the_data, is_LBM_flagged);
-   982.       end;
-   983.    end write;
-   984.
-   985.    procedure write_to_terminator (the_deck       : in out tape.deck;
-   986.                                   Q_operand      : in KDF9.Q_register;
-   987.                                   is_LBM_flagged : in Boolean := False) is
-   988.       start_address : constant KDF9.address := Q_operand.I;
-   989.       end_address   : constant KDF9.address := Q_operand.M;
-   990.    begin
-   991.       validate_device(the_deck);
-   992.       check_addresses_and_lockouts(start_address, end_address);
-   993.       declare
-   994.          next_byte : length_in_frames := 1;
-   995.          the_data  : tape.data_storage(1 .. length_in_frames(end_address-start_address+1)*8);
-   996.          symbol    : KDF9_char_sets.symbol;
-   997.       begin
-   998.       word_loop:
-   999.          for w in start_address .. end_address loop
-  1000.             for c in KDF9_char_sets.symbol_index'Range loop
-  1001.                symbol := fetch_symbol(w, c);
-  1002.                the_data(next_byte) := TP_CN(symbol);
-  1003.                next_byte := next_byte + 1;
-  1004.          exit word_loop when symbol = the_deck.terminator;
-  1005.             end loop;
-  1006.          end loop word_loop;
-  1007.          if the_deck.kind = MT_kind then
-  1008.             -- Pad out the last word to a full 8 symbols; 7-track decks do not do this.
-  1009.             while next_byte mod 8 /= 1 loop
-  1010.                the_data(next_byte) := TP_CN(0);
-  1011.                next_byte := next_byte + 1;
-  1012.             end loop;
-  1013.          end if;
-  1014.          write_block(the_deck, the_data(1 .. next_byte-1), is_LBM_flagged);
-  1015.          correct_transfer_time(the_deck, KDF9.word(next_byte-1));
-  1016.       end;
-  1017.    end write_to_terminator;
-  1018.
-  1019.    -- MWQq
-  1020.    overriding
-  1021.    procedure POA (the_deck    : in out tape.deck;
-  1022.                   Q_operand   : in KDF9.Q_register;
-  1023.                   set_offline : in Boolean) is
-  1024.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-  1025.    begin
-  1026.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
-  1027.       write(the_deck, Q_operand);
-  1028.       lock_out_relative_addresses(Q_operand);
-  1029.    end POA;
-  1030.
-  1031.    -- MWEQq
-  1032.    overriding
-  1033.    procedure POB (the_deck    : in out tape.deck;
-  1034.                   Q_operand   : in KDF9.Q_register;
-  1035.                   set_offline : in Boolean) is
-  1036.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-  1037.    begin
-  1038.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
-  1039.       write_to_terminator(the_deck, Q_operand);
-  1040.       lock_out_relative_addresses(Q_operand);
-  1041.    end POB;
+   981.          if the_deck.kind = MT_kind then
+   982.             -- Pad out the last word to a full 8 symbols; 7-track decks do not do this.
+   983.             while next_byte mod 8 /= 1 loop
+   984.                the_data(next_byte) := TP_CN(0);
+   985.                next_byte := next_byte + 1;
+   986.             end loop;
+   987.          end if;
+   988.          write_block(the_deck, the_data(1 .. next_byte-1), is_LBM_flagged);
+   989.          correct_transfer_time(the_deck, KDF9.word(next_byte-1));
+   990.       end;
+   991.    end write_to_terminator;
+   992.
+   993.    -- MWQq
+   994.    overriding
+   995.    procedure POA (the_deck    : in out tape.deck;
+   996.                   Q_operand   : in KDF9.Q_register;
+   997.                   set_offline : in Boolean) is
+   998.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+   999.    begin
+  1000.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
+  1001.       write(the_deck, Q_operand);
+  1002.       lock_out_relative_addresses(Q_operand);
+  1003.    end POA;
+  1004.
+  1005.    -- MWEQq
+  1006.    overriding
+  1007.    procedure POB (the_deck    : in out tape.deck;
+  1008.                   Q_operand   : in KDF9.Q_register;
+  1009.                   set_offline : in Boolean) is
+  1010.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+  1011.    begin
+  1012.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
+  1013.       write_to_terminator(the_deck, Q_operand);
+  1014.       lock_out_relative_addresses(Q_operand);
+  1015.    end POB;
+  1016.
+  1017.    procedure put_ST_tapemark_slice (the_deck    : in out tape.deck;
+  1018.                                     Q_operand   : in KDF9.Q_register;
+  1019.                                     set_offline : in Boolean;
+  1020.                                     the_slice   : in tape.slice) is
+  1021.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, (Q_operand.C, 0, 0));
+  1022.    begin
+  1023.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
+  1024.       write_slice(the_deck.tape_file, the_slice);
+  1025.    end put_ST_tapemark_slice;
+  1026.
+  1027.    -- MLWQq
+  1028.    overriding
+  1029.    procedure POC (the_deck    : in out tape.deck;
+  1030.                   Q_operand   : in KDF9.Q_register;
+  1031.                   set_offline : in Boolean) is
+  1032.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+  1033.    begin
+  1034.       if the_deck.kind = MT_kind then
+  1035.          start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
+  1036.          write(the_deck, Q_operand, is_LBM_flagged => True);
+  1037.          lock_out_relative_addresses(Q_operand);
+  1038.       else
+  1039.          put_ST_tapemark_slice(the_deck, Q_operand, set_offline, odd_parity_tape_mark);
+  1040.       end if;
+  1041.    end POC;
   1042.
-  1043.    procedure put_ST_tapemark_slice (the_deck    : in out tape.deck;
-  1044.                                     Q_operand   : in KDF9.Q_register;
-  1045.                                     set_offline : in Boolean;
-  1046.                                     the_slice   : in tape.slice) is
-  1047.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, (Q_operand.C, 0, 0));
-  1048.    begin
-  1049.       start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
-  1050.       write_slice(the_deck.tape_file, the_slice);
-  1051.    exception
-  1052.       when end_of_tape =>
-  1053.          deal_with_trying_to_pass_PET(the_deck, "write " & the_deck.device_name);
-  1054.    end put_ST_tapemark_slice;
-  1055.
-  1056.    -- MLWQq
-  1057.    overriding
-  1058.    procedure POC (the_deck    : in out tape.deck;
-  1059.                   Q_operand   : in KDF9.Q_register;
-  1060.                   set_offline : in Boolean) is
-  1061.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-  1062.    begin
-  1063.       if the_deck.kind = MT_kind then
-  1064.          start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
-  1065.          write(the_deck, Q_operand, is_LBM_flagged => True);
-  1066.          lock_out_relative_addresses(Q_operand);
-  1067.       else
-  1068.          put_ST_tapemark_slice(the_deck, Q_operand, set_offline, odd_parity_tape_mark);
-  1069.       end if;
-  1070.    end POC;
-  1071.
-  1072.    -- MLWEQq
-  1073.    overriding
-  1074.    procedure POD (the_deck    : in out tape.deck;
-  1075.                   Q_operand   : in KDF9.Q_register;
-  1076.                   set_offline : in Boolean) is
-  1077.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
-  1078.    begin
-  1079.       if the_deck.kind = MT_kind then
-  1080.          start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
-  1081.          write_to_terminator(the_deck, Q_operand, is_LBM_flagged => True);
-  1082.          lock_out_relative_addresses(Q_operand);
-  1083.       else
-  1084.          put_ST_tapemark_slice(the_deck, Q_operand, set_offline, even_parity_tape_mark);
-  1085.       end if;
-  1086.    end POD;
-  1087.
-  1088.    procedure erase_tape_gap (the_deck   : in out tape.deck;
-  1089.                              the_length : in KDF9.Q_part; -- the_length is a number of words.
-  1090.                              gap_kind   : in tape_gap_kind) is
-  1091.       crossing  : constant length_in_frames := length_in_frames(the_length) * 8;
-  1092.       the_slice : tape.slice := (if gap_kind = GAP_slice then a_GAP_slice else a_WIPE_slice);
-  1093.       remnant   : length_in_frames := crossing;
-  1094.       old_slice : tape.slice;
-  1095.       the_size  : length_in_frames;
-  1096.    begin
-  1097.       loop
-  1098.          deal_with_trying_to_pass_PET(the_deck, "erase");
-  1099.          the_size := length_in_frames'Min(remnant, slice_size_limit);
-  1100.          remnant  := remnant - the_size;
-  1101.
-  1102.          the_slice.size := the_size;
-  1103.
-  1104.          if gap_kind = GAP_slice  and then
-  1105.                not the_deck.is_at_EOD then
-  1106.             -- Safety rules apply to erasing gaps; see the Manual, Appendix 6.8, p.314.
-  1107.             read_next_slice(the_deck.tape_file, old_slice);
-  1108.             if old_slice.kind /= WIPE_slice then
-  1109.                trap_failing_IO_operation(
-  1110.                                          the_deck,
-  1111.                                          "a GAP of length"
-  1112.                                        & the_length'Image
-  1113.                                        & " words would overwrite data at slice"
-  1114.                                        & the_deck.tape_file.position'Image
-  1115.                                         );
-  1116.             end if;
-  1117.             -- Restore the writing position.
-  1118.             read_prev_slice(the_deck.tape_file, old_slice);
-  1119.          end if;
-  1120.
-  1121.          write_slice(the_deck.tape_file, the_slice);
-  1122.       exit when remnant = 0;
-  1123.       end loop;
-  1124.
-  1125.       the_deck.is_LBM_flagged := False;
-  1126.       note_tape_position(the_deck, forwards, crossing, bytes_moved => 0);
-  1127.       update_statistics(the_deck, crossing, bytes_moved => 0);
-  1128.    exception
-  1129.       when end_of_tape =>
-  1130.          deal_with_trying_to_pass_PET(the_deck, "WIPE/GAP " & the_deck.device_name);
-  1131.    end erase_tape_gap;
-  1132.
-  1133.    -- MGAPQq
-  1134.    overriding
-  1135.    procedure POE (the_deck    : in out tape.deck;
-  1136.                   Q_operand   : in KDF9.Q_register;
-  1137.                   set_offline : in Boolean) is
-  1138.       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
-  1139.    begin
-  1140.       if not the_deck.tape_file.has_a_WP_ring then
-  1141.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
-  1142.       end if;
-  1143.       require_positive_count(Q_operand.M);
-  1144.       start_data_transfer(the_deck, Q_operand, set_offline, time);
-  1145.       erase_tape_gap(the_deck, Q_operand.M, gap_kind => GAP_slice);
-  1146.    end POE;
-  1147.
-  1148.    -- MWIPEQq
-  1149.    overriding
-  1150.    procedure POF (the_deck    : in out tape.deck;
-  1151.                   Q_operand   : in KDF9.Q_register;
-  1152.                   set_offline : in Boolean) is
-  1153.       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
-  1154.    begin
-  1155.       if not the_deck.tape_file.has_a_WP_ring then
-  1156.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
-  1157.       end if;
-  1158.       require_positive_count(Q_operand.M);
-  1159.       start_data_transfer(the_deck, Q_operand, set_offline, time);
-  1160.       erase_tape_gap(the_deck, Q_operand.M, gap_kind => WIPE_slice);
-  1161.    end POF;
-  1162.
-  1163.    overriding
-  1164.    procedure Finalize (the_deck : in out tape.deck) is
-  1165.       the_deck_was_used : constant Boolean := the_deck.bytes_moved /= 0 or not the_deck.is_at_BTW;
-  1166.       buffer            : constant String  := oct_of(KDF9.Q_part(the_deck.number), 2);
-  1167.    begin
-  1168.       if the_deck.is_open then
-  1169.          if (the_final_state_is_wanted and the_log_is_wanted) and then
-  1170.                the_deck_was_used                                  then
-  1171.             log_line(
-  1172.                      the_deck.device_name
-  1173.                    & " on buffer #"
-  1174.                    & buffer
-  1175.                    & " transferred"
-  1176.                    & the_deck.bytes_moved'Image
-  1177.                    & " character" & plurality(the_deck.bytes_moved)
-  1178.                    & (
-  1179.                       if    the_deck.is_at_PET then ", and is now at PET."
-  1180.                       elsif the_deck.is_at_ETW then ", and is now at ETW."
-  1181.                       else                          "."
-  1182.                      )
-  1183.                    );
-  1184.          end if;
-  1185.          close(the_deck.tape_file);
-  1186.       end if;
-  1187.    end Finalize;
+  1043.    -- MLWEQq
+  1044.    overriding
+  1045.    procedure POD (the_deck    : in out tape.deck;
+  1046.                   Q_operand   : in KDF9.Q_register;
+  1047.                   set_offline : in Boolean) is
+  1048.       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
+  1049.    begin
+  1050.       if the_deck.kind = MT_kind then
+  1051.          start_data_transfer(the_deck, Q_operand, set_offline, time, output_operation);
+  1052.          write_to_terminator(the_deck, Q_operand, is_LBM_flagged => True);
+  1053.          lock_out_relative_addresses(Q_operand);
+  1054.       else
+  1055.          put_ST_tapemark_slice(the_deck, Q_operand, set_offline, even_parity_tape_mark);
+  1056.       end if;
+  1057.    end POD;
+  1058.
+  1059.    procedure erase_tape_gap (the_deck     : in out tape.deck;
+  1060.                              the_length   : in KDF9.Q_part; -- the_length is a number of words.
+  1061.                              the_gap_kind : in tape.gap_kind) is
+  1062.       crossing  : constant length_in_frames := length_in_frames(the_length) * 8;
+  1063.       the_slice : tape.slice := (if the_gap_kind = GAP_slice then a_GAP_slice else a_WIPE_slice);
+  1064.       remnant   : length_in_frames := crossing;
+  1065.       old_slice : tape.slice;
+  1066.       the_size  : length_in_frames;
+  1067.    begin
+  1068.       loop
+  1069.          deal_with_trying_to_pass_PET(the_deck, "erase");
+  1070.          the_size := length_in_frames'Min(remnant, slice_size_limit);
+  1071.          remnant  := remnant - the_size;
+  1072.
+  1073.          the_slice.size := the_size;
+  1074.
+  1075.          if the_gap_kind = GAP_slice  and then
+  1076.                not the_deck.is_at_EOD then
+  1077.             -- Safety rules apply to erasing gaps; see the Manual, Appendix 6.8, p.314.
+  1078.             read_next_slice(the_deck.tape_file, old_slice);
+  1079.             if old_slice.kind /= WIPE_slice then
+  1080.                trap_failing_IO_operation(
+  1081.                                          the_deck,
+  1082.                                          "a GAP of length"
+  1083.                                        & the_length'Image
+  1084.                                        & " words would overwrite data at slice"
+  1085.                                        & the_deck.tape_file.position'Image
+  1086.                                         );
+  1087.             end if;
+  1088.             -- Restore the writing position.
+  1089.             read_prev_slice(the_deck.tape_file, old_slice);
+  1090.          end if;
+  1091.
+  1092.          write_slice(the_deck.tape_file, the_slice);
+  1093.       exit when remnant = 0;
+  1094.       end loop;
+  1095.
+  1096.       the_deck.is_LBM_flagged := False;
+  1097.       note_tape_position(the_deck, forwards, crossing, bytes_moved => 0);
+  1098.       update_statistics(the_deck, crossing, bytes_moved => 0);
+  1099.    end erase_tape_gap;
+  1100.
+  1101.    -- MGAPQq
+  1102.    overriding
+  1103.    procedure POE (the_deck    : in out tape.deck;
+  1104.                   Q_operand   : in KDF9.Q_register;
+  1105.                   set_offline : in Boolean) is
+  1106.       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
+  1107.    begin
+  1108.       if not the_deck.tape_file.has_a_WP_ring then
+  1109.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+  1110.       end if;
+  1111.       require_positive_count(Q_operand.M);
+  1112.       start_data_transfer(the_deck, Q_operand, set_offline, time);
+  1113.       erase_tape_gap(the_deck, Q_operand.M, the_gap_kind => GAP_slice);
+  1114.    end POE;
+  1115.
+  1116.    -- MWIPEQq
+  1117.    overriding
+  1118.    procedure POF (the_deck    : in out tape.deck;
+  1119.                   Q_operand   : in KDF9.Q_register;
+  1120.                   set_offline : in Boolean) is
+  1121.       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
+  1122.    begin
+  1123.       if not the_deck.tape_file.has_a_WP_ring then
+  1124.          trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+  1125.       end if;
+  1126.       require_positive_count(Q_operand.M);
+  1127.       start_data_transfer(the_deck, Q_operand, set_offline, time);
+  1128.       erase_tape_gap(the_deck, Q_operand.M, the_gap_kind => WIPE_slice);
+  1129.    end POF;
+  1130.
+  1131.    overriding
+  1132.    procedure Finalize (the_deck : in out tape.deck) is
+  1133.       the_deck_was_used : constant Boolean := the_deck.bytes_moved /= 0 or not the_deck.is_at_BTW;
+  1134.       buffer            : constant String  := oct_of(KDF9.Q_part(the_deck.number), 2);
+  1135.    begin
+  1136.       if the_deck.is_open then
+  1137.          if (the_final_state_is_wanted and the_log_is_wanted) and then
+  1138.                the_deck_was_used                                  then
+  1139.             log_line(
+  1140.                      the_deck.device_name
+  1141.                    & " on buffer #"
+  1142.                    & buffer
+  1143.                    & " transferred"
+  1144.                    & the_deck.bytes_moved'Image
+  1145.                    & " character" & plurality(the_deck.bytes_moved)
+  1146.                    & (
+  1147.                       if    the_deck.is_at_PET then ", and is now at PET."
+  1148.                       elsif the_deck.is_at_ETW then ", and is now at ETW."
+  1149.                       else                          "."
+  1150.                      )
+  1151.                    );
+  1152.          end if;
+  1153.          close(the_deck.tape_file);
+  1154.       end if;
+  1155.    end Finalize;
+  1156.
+  1157.
+  1158. --
+  1159. --
+  1160.    -- KDF9 tape configuration.
+  1161. --
+  1162. --
+  1163.
+  1164.    type tape_access is access tape.deck'Class;
+  1165.    tape_deck         : array (IOC.unit_number range 0..14) of tape_access with Warnings => Off;
+  1166.
+  1167.    -- This cannot overflow, because there must be at least 2 non-tape buffers: FW0 and TR0.
+  1168.    tape_units, ST_units : IOC.unit_number := 0;
+  1169.
+  1170.    procedure enable_MT_deck (b : in KDF9.buffer_number) is
+  1171.    begin
+  1172.       if tape_units > tape_deck'Last then
+  1173.          trap_operator_error("too many tape decks specified");
+  1174.       end if;
+  1175.       tape_deck(tape_units) := new MT_deck (number => b, unit => tape_units-ST_units);
+  1176.       tape_units := tape_units + 1;
+  1177.    end enable_MT_deck;
+  1178.
+  1179.    procedure enable_ST_deck (b : in KDF9.buffer_number) is
+  1180.    begin
+  1181.       if tape_units > tape_deck'Last then
+  1182.          trap_operator_error("too many tape decks specified");
+  1183.       end if;
+  1184.       tape_deck(tape_units) := new ST_deck (number => b, unit => ST_units);
+  1185.       tape_units := tape_units + 1;
+  1186.       ST_units   := ST_units + 1;
+  1187.    end enable_ST_deck;
   1188.
-  1189.
-  1190. --
-  1191. --
-  1192.    -- KDF9 tape configuration.
-  1193. --
-  1194. --
-  1195.
-  1196.    type tape_access is access tape.deck'Class;
-  1197.    tape_deck         : array (IOC.unit_number range 0..14) of tape_access with Warnings => Off;
-  1198.
-  1199.    -- This cannot overflow, because there must be at least 2 non-tape buffers: FW0 and TR0.
-  1200.    tape_units, ST_units : IOC.unit_number := 0;
-  1201.
-  1202.    procedure enable_MT_deck (b : in KDF9.buffer_number) is
-  1203.    begin
-  1204.       if tape_units > tape_deck'Last then
-  1205.          trap_operator_error("too many tape decks specified");
-  1206.       end if;
-  1207.       tape_deck(tape_units) := new MT_deck (number => b, unit => tape_units-ST_units);
-  1208.       tape_units := tape_units + 1;
-  1209.    end enable_MT_deck;
-  1210.
-  1211.    procedure enable_ST_deck (b : in KDF9.buffer_number) is
-  1212.    begin
-  1213.       if tape_units > tape_deck'Last then
-  1214.          trap_operator_error("too many tape decks specified");
-  1215.       end if;
-  1216.       tape_deck(tape_units) := new ST_deck (number => b, unit => ST_units);
-  1217.       tape_units := tape_units + 1;
-  1218.       ST_units   := ST_units + 1;
-  1219.    end enable_ST_deck;
-  1220.
-  1221.    -- This is for use by Directors.
-  1222.    procedure find_tape (the_label  : in  tape.data_storage;
-  1223.                         its_number : out KDF9.buffer_number;
-  1224.                         its_serial : out KDF9.word) is
-  1225.
-  1226.       function as_word (the_serial : tape.data_storage)
-  1227.       return KDF9.word is
-  1228.          word : KDF9.word := 0;
-  1229.       begin
-  1230.          for b in the_serial'Range loop
-  1231.             word := (word * 2**6) or KDF9.word(CN_TR(the_serial(b)));
-  1232.          end loop;
-  1233.          return word;
-  1234.       end as_word;
-  1235.
-  1236.       the_block : tape.data_storage(1 .. max_block_size);
-  1237.       the_size  : length_in_frames;
-  1238.
-  1239.    begin -- find_tape
-  1240.       for t in KDF9.buffer_number loop
-  1241.          if buffer(t) /= null                      and then
-  1242.                buffer(t).kind in MT_kind | ST_kind and then
-  1243.                    is_unallocated(buffer(t))           then
-  1244.             declare
-  1245.                the_deck : tape.deck renames tape.deck(buffer(t).all);
-  1246.             begin
-  1247.                if the_deck.holds_data  and then
-  1248.                      the_deck.is_at_BTW    then
-  1249.                   -- Read the label.
-  1250.                   -- After reading the label the tape must be set back to BTW,
-  1251.                   -- as is required to emulate Director; see the Manual, §22.1, Ex. 1.
-  1252.                   read_block(the_deck, the_block, the_size);
-  1253.                   reset(the_deck);
-  1254.                   if the_size >= 8+the_label'Length                and then
-  1255.                         the_block(9 .. 8+the_label'Length) = the_label then
-  1256.                      its_number := t;
-  1257.                      its_serial := as_word(the_block(1 .. 8));
-  1258.                      return;
-  1259.                   end if;
-  1260.                end if;
-  1261.             end;
-  1262.          end if;
-  1263.       end loop;
-  1264.       trap_operator_error("'" & String(the_label) & "' has not been mounted");
-  1265.    end find_tape;
-  1266.
-  1267. end IOC.fast.tape;
+  1189.    -- This is for use by Directors.
+  1190.    procedure find_tape (the_label  : in  tape.data_storage;
+  1191.                         its_number : out KDF9.buffer_number;
+  1192.                         its_serial : out KDF9.word) is
+  1193.
+  1194.       function as_word (the_serial : tape.data_storage)
+  1195.       return KDF9.word is
+  1196.          word : KDF9.word := 0;
+  1197.       begin
+  1198.          for b in the_serial'Range loop
+  1199.             word := (word * 2**6) or KDF9.word(CN_TR(the_serial(b)));
+  1200.          end loop;
+  1201.          return word;
+  1202.       end as_word;
+  1203.
+  1204.       the_block : tape.data_storage(1 .. max_block_size);
+  1205.       the_size  : length_in_frames;
+  1206.
+  1207.    begin -- find_tape
+  1208.       for t in KDF9.buffer_number loop
+  1209.          if buffer(t) /= null                      and then
+  1210.                buffer(t).kind in MT_kind | ST_kind and then
+  1211.                    is_unallocated(buffer(t))           then
+  1212.             declare
+  1213.                the_deck : tape.deck renames tape.deck(buffer(t).all);
+  1214.             begin
+  1215.                if the_deck.holds_data  and then
+  1216.                      the_deck.is_at_BTW    then
+  1217.                   -- Read the label.
+  1218.                   -- After reading the label the tape must be set back to BTW,
+  1219.                   -- as is required to emulate Director; see the Manual, §22.1, Ex. 1.
+  1220.                   read_block(the_deck, the_block, the_size);
+  1221.                   reset(the_deck);
+  1222.                   if the_size >= 8+the_label'Length                and then
+  1223.                         the_block(9 .. 8+the_label'Length) = the_label then
+  1224.                      its_number := t;
+  1225.                      its_serial := as_word(the_block(1 .. 8));
+  1226.                      return;
+  1227.                   end if;
+  1228.                end if;
+  1229.             end;
+  1230.          end if;
+  1231.       end loop;
+  1232.       trap_operator_error("«" & String(the_label) & "» has not been mounted");
+  1233.    end find_tape;
+  1234.
+  1235. end IOC.fast.tape;
 
 Compiling: ../Source/ioc-fast-tape.ads
-Source file time stamp: 2021-02-21 19:41:36
-Compiled at: 2021-02-21 15:54:07
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20094,8 +20153,8 @@ Compiled at: 2021-02-21 15:54:07
    232.                        even_parity_mark => Character'Pos('e'),
    233.                        odd_parity_mark  => Character'Pos('o'));
    234.
-   235.    subtype tape_gap_kind is tape.basis_kind
-   236.       with Static_Predicate => tape_gap_kind in GAP_slice | WIPE_slice;
+   235.    subtype gap_kind is tape.basis_kind
+   236.       with Static_Predicate => gap_kind in GAP_slice | WIPE_slice;
    237.
    238.    subtype tape_mark_kind is tape.basis_kind
    239.       with Static_Predicate => tape_mark_kind in odd_parity_mark | even_parity_mark;
@@ -20145,39 +20204,39 @@ Compiled at: 2021-02-21 15:54:07
    283.       end record;
    284.
    285.    even_parity_tape_mark : constant tape.slice := (even_parity_mark,
-   286.                                                  is_first       => True,
-   287.                                                  is_last        => True,
-   288.                                                  is_LBM_flagged => True,
-   289.                                                  size           => 1,
-   290.                                                  data           => tape_mark_data);
+   286.                                                    is_first       => True,
+   287.                                                    is_last        => True,
+   288.                                                    is_LBM_flagged => True,
+   289.                                                    size           => 1,
+   290.                                                    data           => tape_mark_data);
    291.
    292.    odd_parity_tape_mark  : constant tape.slice := (odd_parity_mark,
-   293.                                                  is_first       => True,
-   294.                                                  is_last        => True,
-   295.                                                  is_LBM_flagged => True,
-   296.                                                  size           => 1,
-   297.                                                  data           => tape_mark_data);
+   293.                                                    is_first       => True,
+   294.                                                    is_last        => True,
+   295.                                                    is_LBM_flagged => True,
+   296.                                                    size           => 1,
+   297.                                                    data           => tape_mark_data);
    298.
    299.    a_NULL_slice          : constant tape.slice := (NULL_slice,
-   300.                                                  is_first       => False,
-   301.                                                  is_last        => False,
-   302.                                                  is_LBM_flagged => False,
-   303.                                                  size           => 0,
-   304.                                                  data           => erased_gap_data);
+   300.                                                    is_first       => False,
+   301.                                                    is_last        => False,
+   302.                                                    is_LBM_flagged => False,
+   303.                                                    size           => 0,
+   304.                                                    data           => erased_gap_data);
    305.
    306.    a_WIPE_slice          : constant tape.slice := (WIPE_slice,
-   307.                                                  is_first       => True,
-   308.                                                  is_last        => True,
-   309.                                                  is_LBM_flagged => False,
-   310.                                                  size           => 0,
-   311.                                                  data           => erased_gap_data);
+   307.                                                    is_first       => True,
+   308.                                                    is_last        => True,
+   309.                                                    is_LBM_flagged => False,
+   310.                                                    size           => 0,
+   311.                                                    data           => erased_gap_data);
    312.
    313.    a_GAP_slice           : constant tape.slice := (GAP_slice,
-   314.                                                  is_first       => True,
-   315.                                                  is_last        => True,
-   316.                                                  is_LBM_flagged => False,
-   317.                                                  size           => 0,
-   318.                                                  data           => erased_gap_data);
+   314.                                                    is_first       => True,
+   315.                                                    is_last        => True,
+   316.                                                    is_LBM_flagged => False,
+   317.                                                    size           => 0,
+   318.                                                    data           => erased_gap_data);
    319.
    320.    package MT_slice_IO is new Ada.Direct_IO(tape.slice);
    321.    use MT_slice_IO;
@@ -20272,7 +20331,7 @@ Compiled at: 2021-02-21 15:54:07
    404.    overriding
    405.    function quantum (the_deck : MT_deck)
    406.    return KDF9.us
-   407.    is (1E6 / 40E3);
+   407.    is (1E6 / 40E3);  -- ch/s
    408.
    409.    overriding
    410.    procedure handle_any_abnormality (the_deck : in out MT_deck;
@@ -20291,7 +20350,7 @@ Compiled at: 2021-02-21 15:54:07
    423.    overriding
    424.    function quantum (the_deck : ST_deck)
    425.    return KDF9.us
-   426.    is (1E6 / 15E3);
+   426.    is (1E6 / 16E3);  -- ch/s
    427.
    428.    overriding
    429.    procedure handle_any_abnormality (the_deck : in out ST_deck;
@@ -20310,12 +20369,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-fw.adb
-Source file time stamp: 2021-02-20 17:44:35
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20341,655 +20400,658 @@ Compiled at: 2021-02-21 15:54:08
     26.
     27. package body IOC.slow.shift.FW is
     28.
-    29.    use  KDF9_char_sets;
-    30.    use  Ada.Characters.Latin_1;
-    31.
-    32.    function a_LF_was_just_read (the_FW : FW.device)
-    33.    return Boolean
-    34.    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
+    29.    function a_LF_was_just_read (the_FW : FW.device)
+    30.    return Boolean
+    31.    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
+    32.
+    33.    max_text_length : constant Positive := 64;  -- This is arbitrary, but seems reasonable.
+    34.    min_text_length : constant Positive :=  2;  -- This is arbitrary, but seems reasonable.
     35.
-    36.    function a_LF_was_just_written (the_FW : FW.device)
-    37.    return Boolean
-    38.    is (the_FW.mode = the_flexowriter_is_writing and then a_LF_was_just_written(the_FW.stream));
-    39.
-    40.    max_text_length : constant Positive := 64;  -- This is arbitrary, but seems reasonable.
-    41.    type interaction is
-    42.       record
-    43.          text           : String(1 .. max_text_length);
-    44.          prompt_length,
-    45.          total_length   : Positive range 1 .. max_text_length;
-    46.       end record;
-    47.
-    48.    max_interactions : constant Positive := 16; -- This is arbitrary, but seems reasonable.
-    49.    interactions     : array (1 .. max_interactions) of IOC.slow.shift.FW.interaction;
-    50.    next_interaction : Positive := 1;
-    51.    last_interaction : Natural  := 0;
+    36.    type interaction is
+    37.       record
+    38.          text           : String(1 .. max_text_length);
+    39.          prompt_length,
+    40.          total_length   : Positive range 1 .. max_text_length;
+    41.       end record;
+    42.
+    43.    max_interactions : constant Positive := 16; -- This is arbitrary, but seems reasonable.
+    44.
+    45.    interactions     : array (1 .. max_interactions) of FW.interaction;
+    46.    next_interaction : Positive := 1;
+    47.    last_interaction : Natural  := 0;
+    48.
+    49.     -- A '®' denotes LF, and the '©' denotes FF in an interaction text input.
+    50.    LF_surrogate     : constant Character := '®';
+    51.    FF_surrogate     : constant Character := '©';
     52.
-    53.     -- A '®' denotes LF, and the '©' denotes FF in an interaction text input.
-    54.    LF_surrogate     : constant Character := '®';
-    55.    FF_surrogate     : constant Character := '©';
-    56.
-    57.    -- These are the ANSI SGR terminal escape codes for styling FW output.
-    58.    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-    59.    black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
-    60.    underline_code  : constant String := ESC & "[4m";
-    61.    plain_font_code : constant String := ESC & "[0m";
-    62.
-    63.    procedure set_text_colour_to_red (the_flexowriter_output : in out host_IO.stream) is
-    64.    begin
-    65.       if the_terminal_is_ANSI_compatible and realistic_FW_output_is_wanted then
-    66.          put_escape_code(red_font_code, the_flexowriter_output);
-    67.       end if;
-    68.    end set_text_colour_to_red;
-    69.
-    70.    procedure set_text_colour_to_black (the_flexowriter_output : in out host_IO.stream) is
-    71.    begin
-    72.       if the_terminal_is_ANSI_compatible then
-    73.          put_escape_code(black_font_code, the_flexowriter_output);
-    74.       end if;
-    75.    end set_text_colour_to_black;
-    76.
-    77.    procedure set_text_style_to_underline (the_flexowriter_output : in out host_IO.stream) is
-    78.    begin
-    79.       if the_terminal_is_ANSI_compatible then
-    80.          put_escape_code(underline_code, the_flexowriter_output);
-    81.       end if;
-    82.    end set_text_style_to_underline;
-    83.
-    84.    procedure set_text_style_to_plain (the_flexowriter_output : in out host_IO.stream) is
-    85.    begin
-    86.       if the_terminal_is_ANSI_compatible then
-    87.          put_escape_code(plain_font_code, the_flexowriter_output);
-    88.       end if;
-    89.    end set_text_style_to_plain;
-    90.
-    91.    overriding
-    92.    procedure Initialize (the_FW : in out FW.device) is
-    93.       interaction_file : Ada.Text_IO.File_Type;
-    94.    begin
-    95.       ensure_UI_is_open;
-    96.       the_FW.mode := the_flexowriter_is_writing;
-    97.       the_FW.device_name := device_name_of(the_FW);
-    98.       if the_FW.device_name = "FW0" then
-    99.          -- Attempt to open the command file for the console the_FW.
-   100.          begin
-   101.             Open(interaction_file, In_File, "FW0");
-   102.          response_list_loop:
-   103.             while not End_of_File(interaction_file) loop
-   104.                if last_interaction = max_interactions then
-   105.                   log_line("The file FW0 contains too many interactions!");
-   106.                   raise Ada.Text_IO.Data_Error;
-   107.                end if;
-   108.                last_interaction := last_interaction + 1;
-   109.                declare
-   110.                   interaction       : String  := Get_Line(interaction_file);
-   111.                   the_prompt_length : Natural := 0;
-   112.                begin
-   113.                   if interaction'Length > max_text_length then
-   114.                      log_line(
-   115.                               "The file FW0 contains an overlong string: '"
-   116.                             & interaction
-   117.                             & "'!"
-   118.                              );
-   119.                      raise Ada.Text_IO.Data_Error;
-   120.                   end if;
-   121.
-   122.                   exit response_list_loop when interaction'Length = 0;
-   123.
-   124.                   for p in 1 .. interaction'Length loop
-   125.                      if interaction(p) = ';' then
-   126.                         the_prompt_length := p;
-   127.                      elsif interaction(p) = LF_surrogate then
-   128.                         -- Convert '®' to LF to allow for multi-line prompts.
-   129.                         interaction(p) := LF;
-   130.                      elsif interaction(p) = FF_surrogate then
-   131.                         -- Convert '©' to FF to allow for multi-line prompts.
-   132.                         interaction(p) := FF;
-   133.                      end if;
-   134.                   end loop;
-   135.
-   136.                   if the_prompt_length = 0 then
-   137.                      log_line(
-   138.                               "The file FW0 contains the string: '"
-   139.                             & interaction
-   140.                             & "' without the semicolon!"
-   141.                              );
-   142.                      raise Ada.Text_IO.Data_Error;
-   143.                   end if;
+    53.    -- These are the ANSI SGR terminal escape codes for styling FW output.
+    54.    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
+    55.    black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
+    56.    underline_code  : constant String := ESC & "[4m";
+    57.    plain_font_code : constant String := ESC & "[0m";
+    58.
+    59.    procedure set_text_colour_to_red (the_flexowriter_output : in out host_IO.stream) is
+    60.    begin
+    61.       if the_terminal_is_ANSI_compatible and realistic_FW_output_is_wanted then
+    62.          put_escape_code(red_font_code, the_flexowriter_output);
+    63.       end if;
+    64.    end set_text_colour_to_red;
+    65.
+    66.    procedure set_text_colour_to_black (the_flexowriter_output : in out host_IO.stream) is
+    67.    begin
+    68.       if the_terminal_is_ANSI_compatible then
+    69.          put_escape_code(black_font_code, the_flexowriter_output);
+    70.       end if;
+    71.    end set_text_colour_to_black;
+    72.
+    73.    procedure set_text_style_to_underline (the_flexowriter_output : in out host_IO.stream) is
+    74.    begin
+    75.       if the_terminal_is_ANSI_compatible then
+    76.          put_escape_code(underline_code, the_flexowriter_output);
+    77.       end if;
+    78.    end set_text_style_to_underline;
+    79.
+    80.    procedure set_text_style_to_plain (the_flexowriter_output : in out host_IO.stream) is
+    81.    begin
+    82.       if the_terminal_is_ANSI_compatible then
+    83.          put_escape_code(plain_font_code, the_flexowriter_output);
+    84.       end if;
+    85.    end set_text_style_to_plain;
+    86.
+    87.    overriding
+    88.    procedure Initialize (the_FW : in out FW.device) is
+    89.
+    90.       procedure complain (part_1         : in String;
+    91.                           part_2, part_3 : in String := "")
+    92.       with No_Return is
+    93.          complaint : constant String := part_1 & part_2 & part_3;
+    94.       begin
+    95.          raise operator_error with complaint;
+    96.       end complain;
+    97.
+    98.       the_data         : String(1 .. max_text_length+1);
+    99.       the_data_length  : Natural;
+   100.
+   101.       interaction_file : Ada.Text_IO.File_Type;
+   102.    begin
+   103.       ensure_UI_is_open;
+   104.       the_FW.mode := the_flexowriter_is_writing;
+   105.       the_FW.device_name := device_name_of(the_FW);
+   106.       if the_FW.device_name = "FW0" then
+   107.          -- Attempt to open the command file for the console the_FW.
+   108.          begin
+   109.             Open(interaction_file, In_File, "FW0");
+   110.          response_list_loop:
+   111.             while not End_of_File(interaction_file) loop
+   112.                if last_interaction = max_interactions then
+   113.                   complain("The file FW0 contains too many prompts");
+   114.                end if;
+   115.                last_interaction := last_interaction + 1;
+   116.
+   117.                Get_line(interaction_file, the_data, the_data_length);
+   118.             exit response_list_loop when the_data_length = 0;
+   119.                if the_data_length > max_text_length then
+   120.                   complain("This FW0 prompt is too long: «", the_data, "»");
+   121.                end if;
+   122.                if the_data_length < min_text_length then
+   123.                   complain("This FW0 prompt is too short: «", the_data(1..the_data_length), "»");
+   124.                end if;
+   125.
+   126.                declare
+   127.                   interaction : String  := the_data(1..the_data_length);
+   128.                   prompt_length : Natural := 0;
+   129.                begin
+   130.                   for p in 1 .. interaction'Length loop
+   131.                      if interaction(p) = ';' then
+   132.                         if prompt_length /= 0 then
+   133.                            complain("This FW0 prompt: «", interaction, "» has 2 semicolons");
+   134.                         end if;
+   135.                         prompt_length := p;
+   136.                      elsif interaction(p) = LF_surrogate then
+   137.                         -- Convert '®' to LF to allow for multi-line prompts.
+   138.                         interaction(p) := LF;
+   139.                      elsif interaction(p) = FF_surrogate then
+   140.                         -- Convert '©' to FF to allow for multi-line prompts.
+   141.                         interaction(p) := FF;
+   142.                      end if;
+   143.                   end loop;
    144.
-   145.                   interactions(last_interaction).text(1 .. interaction'Length) := interaction;
-   146.                   interactions(last_interaction).prompt_length := the_prompt_length;
-   147.                   interactions(last_interaction).total_length := interaction'Length;
-   148.                end;
-   149.             end loop response_list_loop;
-   150.          exception
-   151.             when Name_Error =>
-   152.                null;
-   153.             when Use_Error =>
-   154.                log_line("The file FW0 exists, but cannot be read!");
-   155.          end;
-   156.       end if;
-   157.       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
-   158.       open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
-   159.       IOC.device(the_FW).Initialize;
-   160.       the_FW.current_case := KDF9_char_sets.Case_Normal;
-   161.    end Initialize;
-   162.
-   163.    -- If authentic timing, the delay of length the_pause is inserted between characters output
-   164.    --    to the Flexowriter, with the aim of approximating the actual speed of its typing.
-   165.    the_pause  : KDF9.us := 0;
+   145.                   if prompt_length = 0 then
+   146.                      complain("This FW0 prompt: «", interaction, "» has no semicolon");
+   147.                   end if;
+   148.
+   149.                   interactions(last_interaction).text(1 .. interaction'Length) := interaction;
+   150.                   interactions(last_interaction).prompt_length := prompt_length;
+   151.                   interactions(last_interaction).total_length := interaction'Length;
+   152.                end;
+   153.             end loop response_list_loop;
+   154.          exception
+   155.             when Name_Error =>
+   156.                complain("The file FW0 is absent");
+   157.             when Use_Error =>
+   158.                complain("The file FW0 exists, but cannot be read");
+   159.          end;
+   160.       end if;
+   161.       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
+   162.       open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
+   163.       IOC.device(the_FW).Initialize;
+   164.       the_FW.current_case := KDF9_char_sets.Case_Normal;
+   165.    end Initialize;
    166.
-   167.    procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
-   168.    begin
-   169.       if authentic_timing_is_enabled then
-   170.          the_pause := the_FW.quantum;
-   171.       else
-   172.          the_pause := 0;
-   173.       end if;
-   174.    end set_the_duration_of_the_pause;
-   175.
-   176.    call_for_manual_input    : constant String (1..2) := (others => BEL);
-   177.
-   178.    procedure inject_a_response (the_FW     : in out FW.device;
-   179.                                 the_prompt : in String;
-   180.                                 the_size   : in out KDF9.word) is
-   181.    begin
-   182.       set_the_duration_of_the_pause(the_FW);
-   183.       for t in next_interaction .. last_interaction loop
-   184.          declare
-   185.             the : interaction renames interactions(t);
-   186.          begin
-   187.             if the.prompt_length = the.total_length then
-   188.                -- A null response, so terminate the program.
-   189.                raise exceptions.quit_request with "at the prompt: '" & the_prompt & "'";
-   190.             end if;
-   191.             next_interaction := next_interaction + 1;
-   192.             if the.text(1..the.prompt_length-1) = the_prompt and then
-   193.                   the.text(the.prompt_length-0) = ';'            then
-   194.                inject(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.stream);
-   195.                the_size := the_size + KDF9.word(the.total_length-the.prompt_length);
-   196.                put_chars(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.output);
-   197.                -- Human operators type much more slowly than KDF9 buffers!
-   198.                flush(the_FW.output, the_pause*10);
-   199.                the_FW.mode := the_flexowriter_is_reading;
-   200.                return;
-   201.             end if;
-   202.          end;
-   203.       end loop;
-   204.       -- No canned response is available, so control reverts to the terminal.
-   205.       -- Output an audible signal to notify the operator.
-   206.       if noninteractive_usage_is_enabled then
-   207.          raise input_is_impossible;
-   208.       end if;
-   209.       put_bytes(call_for_manual_input, the_FW.output);
-   210.       flush(the_FW.output, the_pause);
-   211.       the_FW.mode := the_flexowriter_is_reading;
-   212.    end inject_a_response;
-   213.
-   214.    -- TRQq
-   215.    overriding
-   216.    procedure PIA (the_FW      : in out FW.device;
-   217.                   Q_operand   : in KDF9.Q_register;
-   218.                   set_offline : in Boolean) is
-   219.    begin
-   220.       if noninteractive_usage_is_enabled then
-   221.          raise input_is_impossible;
-   222.       end if;
-   223.       put_bytes(call_for_manual_input, the_FW.output);
-   224.       flush(the_FW.output);
-   225.       the_FW.mode := the_flexowriter_is_reading;
-   226.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   227.       read(the_FW, Q_operand);
-   228.       lock_out_relative_addresses(Q_operand);
-   229.       reset(the_FW.stream);
-   230.    end PIA;
-   231.
-   232.    -- TREQq
-   233.    overriding
-   234.    procedure PIB (the_FW      : in out FW.device;
-   235.                   Q_operand   : in KDF9.Q_register;
-   236.                   set_offline : in Boolean) is
-   237.    begin
-   238.       if noninteractive_usage_is_enabled then
-   239.          raise input_is_impossible;
-   240.       end if;
-   241.       put_bytes(call_for_manual_input, the_FW.output);
-   242.       flush(the_FW.output);
-   243.       the_FW.mode := the_flexowriter_is_reading;
-   244.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   245.       read_to_EM(the_FW, Q_operand);
-   246.       lock_out_relative_addresses(Q_operand);
-   247.       reset(the_FW.stream);
-   248.    end PIB;
-   249.
-   250.    overriding
-   251.    procedure PIC (the_FW      : in out FW.device;
-   252.                   Q_operand   : in KDF9.Q_register;
-   253.                   set_offline : in Boolean) is
-   254.    begin
-   255.       if noninteractive_usage_is_enabled then
-   256.          raise input_is_impossible;
-   257.       end if;
-   258.       put_bytes(call_for_manual_input, the_FW.output);
-   259.       flush(the_FW.output);
-   260.       the_FW.mode := the_flexowriter_is_reading;
-   261.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   262.       words_read(the_FW, Q_operand);
-   263.       lock_out_relative_addresses(Q_operand);
-   264.       reset(the_FW.stream);
-   265.    end PIC;
-   266.
-   267.    overriding
-   268.    procedure PID (the_FW      : in out FW.device;
-   269.                   Q_operand   : in KDF9.Q_register;
-   270.                   set_offline : in Boolean) is
-   271.    begin
-   272.       if noninteractive_usage_is_enabled then
-   273.          raise input_is_impossible;
-   274.       end if;
-   275.       put_bytes(call_for_manual_input, the_FW.output);
-   276.       flush(the_FW.output);
-   277.       the_FW.mode := the_flexowriter_is_reading;
-   278.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   279.       words_read_to_EM(the_FW, Q_operand);
-   280.       lock_out_relative_addresses(Q_operand);
-   281.       reset(the_FW.stream);
-   282.    end PID;
-   283.
-   284.    overriding
-   285.    procedure PIE (the_FW      : in out FW.device;
-   286.                   Q_operand   : in KDF9.Q_register;
-   287.                   set_offline : in Boolean) is
-   288.    begin
-   289.       PIA(the_FW, Q_operand, set_offline);
-   290.    end PIE;
-   291.
-   292.    overriding
-   293.    procedure PIF (the_FW      : in out FW.device;
-   294.                   Q_operand   : in KDF9.Q_register;
-   295.                   set_offline : in Boolean) is
-   296.    begin
-   297.       PIB(the_FW, Q_operand, set_offline);
-   298.    end PIF;
-   299.
-   300.    overriding
-   301.    procedure PIG (the_FW      : in out FW.device;
-   302.                   Q_operand   : in KDF9.Q_register;
-   303.                   set_offline : in Boolean) is
-   304.    begin
-   305.       PIC(the_FW, Q_operand, set_offline);
-   306.    end PIG;
-   307.
-   308.    overriding
-   309.    procedure PIH (the_FW      : in out FW.device;
-   310.                   Q_operand   : in KDF9.Q_register;
-   311.                   set_offline : in Boolean) is
-   312.    begin
-   313.       PID(the_FW, Q_operand, set_offline);
-   314.    end PIH;
-   315.
-   316.    -- neat strips off any enclosing non-graphic characters from s.
-   317.    function neat (s : String)
-   318.    return String is
-   319.       l : Positive := 1;
-   320.       r : Natural  := 0;
-   321.    begin
-   322.       for i in s'Range loop
-   323.          l := i;
-   324.       exit when s(i) > ' ' and s(i) /= DEL;
-   325.       end loop;
-   326.       for i in reverse s'Range loop
-   327.          r := i;
-   328.       exit when s(i) > ' ' and s(i) /= DEL;
+   167.    -- If authentic timing, the delay of length the_pause is inserted between characters output
+   168.    --    to the Flexowriter, with the aim of approximating the actual speed of its typing.
+   169.    the_pause  : KDF9.us := 0;
+   170.
+   171.    procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
+   172.    begin
+   173.       if authentic_timing_is_enabled then
+   174.          the_pause := the_FW.quantum;
+   175.       else
+   176.          the_pause := 0;
+   177.       end if;
+   178.    end set_the_duration_of_the_pause;
+   179.
+   180.    call_for_manual_input    : constant String (1..2) := (others => BEL);
+   181.
+   182.    procedure inject_a_response (the_FW     : in out FW.device;
+   183.                                 the_prompt : in String;
+   184.                                 the_size   : in out KDF9.word) is
+   185.    begin
+   186.       set_the_duration_of_the_pause(the_FW);
+   187.       for t in next_interaction .. last_interaction loop
+   188.          declare
+   189.             the : interaction renames interactions(t);
+   190.          begin
+   191.             if the.prompt_length = the.total_length then
+   192.                -- A null response, so terminate the program.
+   193.                raise exceptions.quit_request with "at the prompt: «"& the_prompt & "»";
+   194.             end if;
+   195.             next_interaction := next_interaction + 1;
+   196.             if the.text(1..the.prompt_length-1) = the_prompt and then
+   197.                   the.text(the.prompt_length-0) = ';'            then
+   198.                inject(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.stream);
+   199.                the_size := the_size + KDF9.word(the.total_length-the.prompt_length);
+   200.                put_chars(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.output);
+   201.                -- Human operators type much more slowly than KDF9 buffers!
+   202.                flush(the_FW.output, the_pause*10);
+   203.                the_FW.mode := the_flexowriter_is_reading;
+   204.                return;
+   205.             end if;
+   206.          end;
+   207.       end loop;
+   208.       -- No canned response is available, so control reverts to the terminal.
+   209.       -- Output an audible signal to notify the operator.
+   210.       if noninteractive_usage_is_enabled then
+   211.          raise input_is_impossible;
+   212.       end if;
+   213.       put_bytes(call_for_manual_input, the_FW.output);
+   214.       flush(the_FW.output, the_pause);
+   215.       the_FW.mode := the_flexowriter_is_reading;
+   216.    end inject_a_response;
+   217.
+   218.    -- TRQq
+   219.    overriding
+   220.    procedure PIA (the_FW      : in out FW.device;
+   221.                   Q_operand   : in KDF9.Q_register;
+   222.                   set_offline : in Boolean) is
+   223.    begin
+   224.       if noninteractive_usage_is_enabled then
+   225.          raise input_is_impossible;
+   226.       end if;
+   227.       put_bytes(call_for_manual_input, the_FW.output);
+   228.       flush(the_FW.output);
+   229.       the_FW.mode := the_flexowriter_is_reading;
+   230.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   231.       read(the_FW, Q_operand);
+   232.       lock_out_relative_addresses(Q_operand);
+   233.       reset(the_FW.stream);
+   234.    end PIA;
+   235.
+   236.    -- TREQq
+   237.    overriding
+   238.    procedure PIB (the_FW      : in out FW.device;
+   239.                   Q_operand   : in KDF9.Q_register;
+   240.                   set_offline : in Boolean) is
+   241.    begin
+   242.       if noninteractive_usage_is_enabled then
+   243.          raise input_is_impossible;
+   244.       end if;
+   245.       put_bytes(call_for_manual_input, the_FW.output);
+   246.       flush(the_FW.output);
+   247.       the_FW.mode := the_flexowriter_is_reading;
+   248.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   249.       read_to_EM(the_FW, Q_operand);
+   250.       lock_out_relative_addresses(Q_operand);
+   251.       reset(the_FW.stream);
+   252.    end PIB;
+   253.
+   254.    overriding
+   255.    procedure PIC (the_FW      : in out FW.device;
+   256.                   Q_operand   : in KDF9.Q_register;
+   257.                   set_offline : in Boolean) is
+   258.    begin
+   259.       if noninteractive_usage_is_enabled then
+   260.          raise input_is_impossible;
+   261.       end if;
+   262.       put_bytes(call_for_manual_input, the_FW.output);
+   263.       flush(the_FW.output);
+   264.       the_FW.mode := the_flexowriter_is_reading;
+   265.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   266.       words_read(the_FW, Q_operand);
+   267.       lock_out_relative_addresses(Q_operand);
+   268.       reset(the_FW.stream);
+   269.    end PIC;
+   270.
+   271.    overriding
+   272.    procedure PID (the_FW      : in out FW.device;
+   273.                   Q_operand   : in KDF9.Q_register;
+   274.                   set_offline : in Boolean) is
+   275.    begin
+   276.       if noninteractive_usage_is_enabled then
+   277.          raise input_is_impossible;
+   278.       end if;
+   279.       put_bytes(call_for_manual_input, the_FW.output);
+   280.       flush(the_FW.output);
+   281.       the_FW.mode := the_flexowriter_is_reading;
+   282.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   283.       words_read_to_EM(the_FW, Q_operand);
+   284.       lock_out_relative_addresses(Q_operand);
+   285.       reset(the_FW.stream);
+   286.    end PID;
+   287.
+   288.    overriding
+   289.    procedure PIE (the_FW      : in out FW.device;
+   290.                   Q_operand   : in KDF9.Q_register;
+   291.                   set_offline : in Boolean) is
+   292.    begin
+   293.       PIA(the_FW, Q_operand, set_offline);
+   294.    end PIE;
+   295.
+   296.    overriding
+   297.    procedure PIF (the_FW      : in out FW.device;
+   298.                   Q_operand   : in KDF9.Q_register;
+   299.                   set_offline : in Boolean) is
+   300.    begin
+   301.       PIB(the_FW, Q_operand, set_offline);
+   302.    end PIF;
+   303.
+   304.    overriding
+   305.    procedure PIG (the_FW      : in out FW.device;
+   306.                   Q_operand   : in KDF9.Q_register;
+   307.                   set_offline : in Boolean) is
+   308.    begin
+   309.       PIC(the_FW, Q_operand, set_offline);
+   310.    end PIG;
+   311.
+   312.    overriding
+   313.    procedure PIH (the_FW      : in out FW.device;
+   314.                   Q_operand   : in KDF9.Q_register;
+   315.                   set_offline : in Boolean) is
+   316.    begin
+   317.       PID(the_FW, Q_operand, set_offline);
+   318.    end PIH;
+   319.
+   320.    -- neat strips off any enclosing non-graphic characters from s.
+   321.    function neat (s : String)
+   322.    return String is
+   323.       l : Positive := 1;
+   324.       r : Natural  := 0;
+   325.    begin
+   326.       for i in s'Range loop
+   327.          l := i;
+   328.       exit when s(i) > SP and s(i) /= DEL;
    329.       end loop;
-   330.       return s(l..r);  -- s(1..0) yields the null string when s is the null string.
-   331.    end neat;
-   332.
-   333.    overriding
-   334.    procedure do_output_housekeeping (the_FW   : in out FW.device;
-   335.                                      written,
-   336.                                      fetched  : in KDF9.word) is
-   337.    begin
-   338.       flush(the_FW.stream);
-   339.       add_in_the_IO_CPU_time(the_FW, fetched);
-   340.       correct_transfer_time(the_FW, written);
-   341.       the_FW.byte_count := the_FW.byte_count + fetched;
-   342.    end do_output_housekeeping;
-   343.
-   344.    underlined : Boolean := False;
-   345.
-   346.    procedure put_symbols (the_FW         : in out FW.device;
-   347.                           Q_operand      : in KDF9.Q_register;
-   348.                           transfer_to_EM : in Boolean) is
-   349.       start_address : constant KDF9.address := Q_operand.I;
-   350.       end_address   : constant KDF9.address := Q_operand.M;
-   351.       fill   : KDF9.word := 0;
-   352.       size   : KDF9.word := 0;
-   353.       symbol : KDF9_char_sets.symbol;
-   354.       char   : Character;
-   355.    begin
-   356.       check_addresses_and_lockouts(start_address, end_address);
-   357.       set_the_duration_of_the_pause(the_FW);
-   358.       the_FW.mode := the_flexowriter_is_writing;
-   359.       set_text_style_to_plain(the_FW.output);
-   360.       set_text_colour_to_red(the_FW.output);
-   361.
-   362.       -- Ensure that any prompt occupies the buffer alone.
-   363.       flush(the_FW.output);
-   364.
-   365.    word_loop:
-   366.       for w in start_address .. end_address loop
-   367.          for c in KDF9_char_sets.symbol_index'Range loop
-   368.             case the_FW.mode is
-   369.
-   370.                when the_flexowriter_is_writing =>
-   371.                   symbol := fetch_symbol(w, c);
-   372.                   size := size + 1;
+   330.       for i in reverse s'Range loop
+   331.          r := i;
+   332.       exit when s(i) > SP and s(i) /= DEL;
+   333.       end loop;
+   334.       return s(l..r);  -- s(1..0) yields the null string when s is the null string.
+   335.    end neat;
+   336.
+   337.    overriding
+   338.    procedure do_output_housekeeping (the_FW   : in out FW.device;
+   339.                                      written,
+   340.                                      fetched  : in KDF9.word) is
+   341.    begin
+   342.       flush(the_FW.stream);
+   343.       add_in_the_IO_CPU_time(the_FW, fetched);
+   344.       correct_transfer_time(the_FW, written);
+   345.       the_FW.byte_count := the_FW.byte_count + fetched;
+   346.    end do_output_housekeeping;
+   347.
+   348.    underlined : Boolean := False;
+   349.
+   350.    procedure put_symbols (the_FW         : in out FW.device;
+   351.                           Q_operand      : in KDF9.Q_register;
+   352.                           transfer_to_EM : in Boolean) is
+   353.       start_address : constant KDF9.address := Q_operand.I;
+   354.       end_address   : constant KDF9.address := Q_operand.M;
+   355.       fill   : KDF9.word := 0;
+   356.       size   : KDF9.word := 0;
+   357.       symbol : KDF9_char_sets.symbol;
+   358.       char   : Character;
+   359.    begin
+   360.       check_addresses_and_lockouts(start_address, end_address);
+   361.       set_the_duration_of_the_pause(the_FW);
+   362.       the_FW.mode := the_flexowriter_is_writing;
+   363.       set_text_style_to_plain(the_FW.output);
+   364.       set_text_colour_to_red(the_FW.output);
+   365.
+   366.       -- Ensure that any prompt occupies the buffer alone.
+   367.       flush(the_FW.output);
+   368.
+   369.    word_loop:
+   370.       for w in start_address .. end_address loop
+   371.          for c in KDF9_char_sets.symbol_index'Range loop
+   372.             case the_FW.mode is
    373.
-   374.                   if symbol = KDF9_char_sets.Word_Filler then
-   375.                      fill := fill + 1;
-   376.
-   377.                   elsif symbol = KDF9_char_sets.Case_Shift then
-   378.                      the_FW.current_case := KDF9_char_sets.Case_Shift;
-   379.                      the_FW.shifts := the_FW.shifts + 1;
+   374.                when the_flexowriter_is_writing =>
+   375.                   symbol := fetch_symbol(w, c);
+   376.                   size := size + 1;
+   377.
+   378.                   if symbol = KDF9_char_sets.Word_Filler then
+   379.                      fill := fill + 1;
    380.
-   381.                   elsif  symbol = KDF9_char_sets.Case_Normal then
-   382.                      the_FW.current_case := KDF9_char_sets.Case_Normal;
+   381.                   elsif symbol = KDF9_char_sets.Case_Shift then
+   382.                      the_FW.current_case := KDF9_char_sets.Case_Shift;
    383.                      the_FW.shifts := the_FW.shifts + 1;
    384.
-   385.                   else
-   386.
-   387.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
-   388.                         char := TP_CN(symbol);
-   389.                      else
-   390.                         char := TP_CS(symbol);
-   391.                      end if;
-   392.
-   393.                      if char = ';' then
-   394.
-   395.                         declare
-   396.                            the_prompt : constant String := contents(the_FW.output);
-   397.                         begin
-   398.                            -- Must flush AFTER saving the prompt and BEFORE going black.
-   399.                            flush(the_FW.output, the_pause);
-   400.                            set_text_colour_to_black(the_FW.output);
-   401.                            set_text_style_to_plain(the_FW.output);
-   402.                            put_byte(';', the_FW.output);
+   385.                   elsif  symbol = KDF9_char_sets.Case_Normal then
+   386.                      the_FW.current_case := KDF9_char_sets.Case_Normal;
+   387.                      the_FW.shifts := the_FW.shifts + 1;
+   388.
+   389.                   else
+   390.
+   391.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
+   392.                         char := TP_CN(symbol);
+   393.                      else
+   394.                         char := TP_CS(symbol);
+   395.                      end if;
+   396.
+   397.                      if char = ';' then
+   398.
+   399.                         declare
+   400.                            the_prompt : constant String := contents(the_FW.output);
+   401.                         begin
+   402.                            -- Must flush AFTER saving the prompt and BEFORE going black.
    403.                            flush(the_FW.output, the_pause);
-   404.
-   405.                            inject_a_response(the_FW, neat(the_prompt), size);
-   406.
-   407.                            the_FW.mode := the_flexowriter_is_reading;
-   408.                            set_text_style_to_plain(the_FW.output);
-   409.                         end;
+   404.                            set_text_colour_to_black(the_FW.output);
+   405.                            set_text_style_to_plain(the_FW.output);
+   406.                            put_byte(';', the_FW.output);
+   407.                            flush(the_FW.output, the_pause);
+   408.
+   409.                            inject_a_response(the_FW, neat(the_prompt), size);
    410.
-   411.                      elsif flexowriter_output_is_wanted then
-   412.
-   413.                         if char = '_' then
-   414.                            underlined := True;
-   415.                            do_not_put_byte(char, the_FW.output);
-   416.                            flush(the_FW.output, the_pause);
-   417.                         else
-   418.                            if underlined then
-   419.                               set_text_style_to_underline(the_FW.output);
-   420.                            end if;
-   421.                            put_char(char, the_FW.output);
+   411.                            the_FW.mode := the_flexowriter_is_reading;
+   412.                            set_text_style_to_plain(the_FW.output);
+   413.                         end;
+   414.
+   415.                      elsif flexowriter_output_is_wanted then
+   416.
+   417.                         if char = '_' then
+   418.                            underlined := True;
+   419.                            do_not_put_byte(char, the_FW.output);
+   420.                            flush(the_FW.output, the_pause);
+   421.                         else
    422.                            if underlined then
-   423.                               flush(the_FW.output, the_pause);
-   424.                               set_text_style_to_plain(the_FW.output);
-   425.                               set_text_colour_to_red(the_FW.output);
-   426.                               underlined := False;
-   427.                            end if;
-   428.                         end if;
-   429.
-   430.                      else
-   431.                         do_not_put_byte(char, the_FW.output);
-   432.                      end if;
+   423.                               set_text_style_to_underline(the_FW.output);
+   424.                            end if;
+   425.                            put_char(char, the_FW.output);
+   426.                            if underlined then
+   427.                               flush(the_FW.output, the_pause);
+   428.                               set_text_style_to_plain(the_FW.output);
+   429.                               set_text_colour_to_red(the_FW.output);
+   430.                               underlined := False;
+   431.                            end if;
+   432.                         end if;
    433.
-   434.                      exit word_loop when transfer_to_EM and symbol = KDF9_char_sets.End_Message;
-   435.                   end if;
-   436.
-   437.                when the_flexowriter_is_reading =>
-   438.                   get_char(char, the_FW.stream);
-   439.                   if case_of(char) /= both and case_of(char) /= the_FW.current_case then
-   440.                      store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
-   441.                      size := size + 1;
-   442.                      the_FW.current_case := the_FW.current_case xor 1;
-   443.                      back_off(the_FW.stream);
-   444.                   else
-   445.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
-   446.                         symbol := CN_TR(char);
-   447.                      else
-   448.                         symbol := CS_TR(char);
-   449.                      end if;
-   450.                      store_symbol(symbol, w, c);
-   451.                      size := size + 1;
-   452.                      if transfer_to_EM and symbol = KDF9_char_sets.End_Message then
-   453.                         for d in 1 .. 7-c loop
-   454.                            store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
-   455.                         end loop;
-   456.                         exit word_loop;
-   457.                      end if;
-   458.                   end if;
-   459.
-   460.             end case;
-   461.          end loop;
-   462.       end loop word_loop;
+   434.                      else
+   435.                         do_not_put_byte(char, the_FW.output);
+   436.                      end if;
+   437.
+   438.                      exit word_loop when transfer_to_EM and symbol = KDF9_char_sets.End_Message;
+   439.                   end if;
+   440.
+   441.                when the_flexowriter_is_reading =>
+   442.                   get_char(char, the_FW.stream);
+   443.                   if case_of(char) not in both | the_FW.current_case then
+   444.                      store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
+   445.                      size := size + 1;
+   446.                      the_FW.current_case := the_FW.current_case xor 1;
+   447.                      back_off(the_FW.stream);
+   448.                   else
+   449.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
+   450.                         symbol := CN_TR(char);
+   451.                      else
+   452.                         symbol := CS_TR(char);
+   453.                      end if;
+   454.                      store_symbol(symbol, w, c);
+   455.                      size := size + 1;
+   456.                      if transfer_to_EM and symbol = KDF9_char_sets.End_Message then
+   457.                         for d in 1 .. 7-c loop
+   458.                            store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
+   459.                         end loop;
+   460.                         exit word_loop;
+   461.                      end if;
+   462.                   end if;
    463.
-   464.       flush(the_FW.output, the_pause);
-   465.       set_text_style_to_plain(the_FW.output);
-   466.       set_text_colour_to_black(the_FW.output);
-   467.       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
-   468.       flush(the_FW.output);
-   469.    exception
-   470.       when end_of_stream =>
-   471.          flush(the_FW.output);
-   472.          set_text_colour_to_black(the_FW.output);
-   473.          set_text_style_to_plain(the_FW.output);
-   474.          do_output_housekeeping(the_FW, written => size-fill, fetched => size);
-   475.    end put_symbols;
-   476.
-   477.    overriding
-   478.    procedure write (the_FW    : in out FW.device;
-   479.                     Q_operand : in KDF9.Q_register) is
-   480.    begin
-   481.       put_symbols(the_FW, Q_operand, transfer_to_EM => False);
-   482.    end write;
-   483.
-   484.    overriding
-   485.    procedure write_to_EM (the_FW    : in out FW.device;
-   486.                           Q_operand : in KDF9.Q_register) is
-   487.    begin
-   488.       put_symbols(the_FW, Q_operand, transfer_to_EM => True);
-   489.    end write_to_EM;
-   490.
-   491.    -- TWQq
-   492.    overriding
-   493.    procedure POA (the_FW      : in out FW.device;
-   494.                   Q_operand   : in KDF9.Q_register;
-   495.                   set_offline : in Boolean) is
-   496.    begin
-   497.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   498.       write(the_FW, Q_operand);
-   499.       lock_out_relative_addresses(Q_operand);
-   500.       reset(the_FW.stream);
-   501.    end POA;
-   502.
-   503.    -- TWEQq
-   504.    overriding
-   505.    procedure POB (the_FW      : in out FW.device;
-   506.                   Q_operand   : in KDF9.Q_register;
-   507.                   set_offline : in Boolean) is
-   508.    begin
-   509.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   510.       write_to_EM(the_FW, Q_operand);
-   511.       lock_out_relative_addresses(Q_operand);
-   512.       -- reset(the_FW.stream);
-   513.    end POB;
-   514.
-   515.    procedure put_words (the_FW         : in out FW.device;
-   516.                         Q_operand      : in KDF9.Q_register;
-   517.                         transfer_to_EM : in Boolean := False) is
-   518.       start_address : constant KDF9.address := Q_operand.I;
-   519.       end_address   : constant KDF9.address := Q_operand.M;
-   520.       size : KDF9.word := 0;
-   521.       word : KDF9.word;
-   522.       char : Character;
-   523.    begin
-   524.       check_addresses_and_lockouts(start_address, end_address);
-   525.       set_the_duration_of_the_pause(the_FW);
-   526.       the_FW.mode := the_flexowriter_is_writing;
-   527.       set_text_style_to_plain(the_FW.output);
-   528.       set_text_colour_to_red(the_FW.output);
-   529.    word_loop:
-   530.       for w in start_address .. end_address loop
-   531.          case the_FW.mode is
-   532.
-   533.             when the_flexowriter_is_writing =>
-   534.                word := fetch_word(w) and 8#377#;
-   535.                size := size + 1;
-   536.                char := Character'Val(word);
-   537.
-   538.                if word = KDF9_char_sets.Semi_Colon_tape_bits then
-   539.                   -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
-   540.                   --    and change from writing to reading after the output of any word that has
-   541.                   --       the KDF9 FW tape code for a semicolon in its least significant 8 bits.
-   542.                   declare
-   543.                      the_prompt : constant String := contents(the_FW.output);
-   544.                   begin
-   545.                      -- Must flush AFTER saving the prompt and BEFORE going black.
-   546.                      flush(the_FW.output, the_pause);
-   547.                      set_text_colour_to_black(the_FW.output);
-   548.                      set_text_style_to_plain(the_FW.output);
-   549.                      put_byte(';', the_FW.output);
+   464.             end case;
+   465.          end loop;
+   466.       end loop word_loop;
+   467.
+   468.       flush(the_FW.output, the_pause);
+   469.       set_text_style_to_plain(the_FW.output);
+   470.       set_text_colour_to_black(the_FW.output);
+   471.       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   472.       flush(the_FW.output);
+   473.    exception
+   474.       when end_of_stream =>
+   475.          flush(the_FW.output);
+   476.          set_text_colour_to_black(the_FW.output);
+   477.          set_text_style_to_plain(the_FW.output);
+   478.          do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   479.    end put_symbols;
+   480.
+   481.    overriding
+   482.    procedure write (the_FW    : in out FW.device;
+   483.                     Q_operand : in KDF9.Q_register) is
+   484.    begin
+   485.       put_symbols(the_FW, Q_operand, transfer_to_EM => False);
+   486.    end write;
+   487.
+   488.    overriding
+   489.    procedure write_to_EM (the_FW    : in out FW.device;
+   490.                           Q_operand : in KDF9.Q_register) is
+   491.    begin
+   492.       put_symbols(the_FW, Q_operand, transfer_to_EM => True);
+   493.    end write_to_EM;
+   494.
+   495.    -- TWQq
+   496.    overriding
+   497.    procedure POA (the_FW      : in out FW.device;
+   498.                   Q_operand   : in KDF9.Q_register;
+   499.                   set_offline : in Boolean) is
+   500.    begin
+   501.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   502.       write(the_FW, Q_operand);
+   503.       lock_out_relative_addresses(Q_operand);
+   504.       reset(the_FW.stream);
+   505.    end POA;
+   506.
+   507.    -- TWEQq
+   508.    overriding
+   509.    procedure POB (the_FW      : in out FW.device;
+   510.                   Q_operand   : in KDF9.Q_register;
+   511.                   set_offline : in Boolean) is
+   512.    begin
+   513.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   514.       write_to_EM(the_FW, Q_operand);
+   515.       lock_out_relative_addresses(Q_operand);
+   516.       -- reset(the_FW.stream);
+   517.    end POB;
+   518.
+   519.    procedure put_words (the_FW         : in out FW.device;
+   520.                         Q_operand      : in KDF9.Q_register;
+   521.                         transfer_to_EM : in Boolean := False) is
+   522.       start_address : constant KDF9.address := Q_operand.I;
+   523.       end_address   : constant KDF9.address := Q_operand.M;
+   524.       size : KDF9.word := 0;
+   525.       word : KDF9.word;
+   526.       char : Character;
+   527.    begin
+   528.       check_addresses_and_lockouts(start_address, end_address);
+   529.       set_the_duration_of_the_pause(the_FW);
+   530.       the_FW.mode := the_flexowriter_is_writing;
+   531.       set_text_style_to_plain(the_FW.output);
+   532.       set_text_colour_to_red(the_FW.output);
+   533.    word_loop:
+   534.       for w in start_address .. end_address loop
+   535.          case the_FW.mode is
+   536.
+   537.             when the_flexowriter_is_writing =>
+   538.                word := fetch_word(w) and 8#377#;
+   539.                size := size + 1;
+   540.                char := Character'Val(word);
+   541.
+   542.                if word = KDF9_char_sets.Semi_Colon_tape_bits then
+   543.                   -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
+   544.                   --    and change from writing to reading after the output of any word that has
+   545.                   --       the KDF9 FW tape code for a semicolon in its least significant 8 bits.
+   546.                   declare
+   547.                      the_prompt : constant String := contents(the_FW.output);
+   548.                   begin
+   549.                      -- Must flush AFTER saving the prompt and BEFORE going black.
    550.                      flush(the_FW.output, the_pause);
-   551.
-   552.                      inject_a_response(the_FW, neat(the_prompt), size);
-   553.
-   554.                      the_FW.mode := the_flexowriter_is_reading;
-   555.                      set_text_style_to_plain(the_FW.output);
-   556.                   end;
-   557.                elsif flexowriter_output_is_wanted then
-   558.
-   559.                         if char = '_' then
-   560.                            underlined := True;
-   561.                            do_not_put_byte(char, the_FW.output);
-   562.                            flush(the_FW.output, the_pause);
-   563.                         else
-   564.                            if underlined then
-   565.                               set_text_style_to_underline(the_FW.output);
-   566.                            end if;
-   567.                            put_char(char, the_FW.output);
+   551.                      set_text_colour_to_black(the_FW.output);
+   552.                      set_text_style_to_plain(the_FW.output);
+   553.                      put_byte(';', the_FW.output);
+   554.                      flush(the_FW.output, the_pause);
+   555.
+   556.                      inject_a_response(the_FW, neat(the_prompt), size);
+   557.
+   558.                      the_FW.mode := the_flexowriter_is_reading;
+   559.                      set_text_style_to_plain(the_FW.output);
+   560.                   end;
+   561.                elsif flexowriter_output_is_wanted then
+   562.
+   563.                         if char = '_' then
+   564.                            underlined := True;
+   565.                            do_not_put_byte(char, the_FW.output);
+   566.                            flush(the_FW.output, the_pause);
+   567.                         else
    568.                            if underlined then
-   569.                               flush(the_FW.output, the_pause);
-   570.                               set_text_style_to_plain(the_FW.output);
-   571.                               set_text_colour_to_red(the_FW.output);
-   572.                               underlined := False;
-   573.                            end if;
-   574.                         end if;
-   575.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   576.                end if;
-   577.
-   578.             when the_flexowriter_is_reading =>
-   579.                get_char(char, the_FW.stream);
-   580.                size := size + 1;
-   581.                word := KDF9.word(Character'Pos(char));
-   582.                store_word(word, w);
-   583.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   584.
-   585.          end case;
-   586.       end loop word_loop;
-   587.
-   588.       flush(the_FW.output);
-   589.       set_text_colour_to_black(the_FW.output);
-   590.       set_text_style_to_plain(the_FW.output);
-   591.       do_output_housekeeping(the_FW, written => size, fetched => size);
-   592.    exception
-   593.       when end_of_stream =>
-   594.          flush(the_FW.output);
-   595.          set_text_colour_to_black(the_FW.output);
-   596.          set_text_style_to_plain(the_FW.output);
-   597.          do_output_housekeeping(the_FW, written => size, fetched => size);
-   598.    end put_words;
-   599.
-   600.    overriding
-   601.    procedure words_write (the_FW    : in out FW.device;
-   602.                           Q_operand : in KDF9.Q_register) is
-   603.    begin
-   604.       put_words(the_FW, Q_operand, transfer_to_EM => False);
-   605.    end words_write;
-   606.
-   607.    overriding
-   608.    procedure words_write_to_EM (the_FW    : in out FW.device;
-   609.                                 Q_operand : in KDF9.Q_register) is
-   610.    begin
-   611.       put_words(the_FW, Q_operand, transfer_to_EM => True);
-   612.    end words_write_to_EM;
-   613.
-   614.    -- TWCQq
-   615.    overriding
-   616.    procedure POC (the_FW      : in out FW.device;
-   617.                   Q_operand   : in KDF9.Q_register;
-   618.                   set_offline : in Boolean) is
-   619.    begin
-   620.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   621.       words_write(the_FW, Q_operand);
-   622.       lock_out_relative_addresses(Q_operand);
-   623.    end POC;
-   624.
-   625.    -- TWECQq
-   626.    overriding
-   627.    procedure POD (the_FW      : in out FW.device;
-   628.                   Q_operand   : in KDF9.Q_register;
-   629.                   set_offline : in Boolean) is
-   630.    begin
-   631.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   632.       words_write_to_EM(the_FW, Q_operand);
-   633.       lock_out_relative_addresses(Q_operand);
-   634.    end POD;
-   635.
-   636.    overriding
-   637.    procedure Finalize (the_FW : in out FW.device) is
-   638.       total : constant KDF9.word := the_FW.output.bytes_moved+the_FW.stream.bytes_moved + the_FW.shifts;
-   639.    begin
-   640.       close(
-   641.            the_FW,
-   642.            "transferred",
-   643.            total,
-   644.            "character" & plurality(total)
-   645.           );
-   646.    end Finalize;
-   647.
-   648.    -- This is the monitor console Flexowriter.
-   649.
-   650.    type FW_access is access FW.device;
+   569.                               set_text_style_to_underline(the_FW.output);
+   570.                            end if;
+   571.                            put_char(char, the_FW.output);
+   572.                            if underlined then
+   573.                               flush(the_FW.output, the_pause);
+   574.                               set_text_style_to_plain(the_FW.output);
+   575.                               set_text_colour_to_red(the_FW.output);
+   576.                               underlined := False;
+   577.                            end if;
+   578.                         end if;
+   579.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   580.                end if;
+   581.
+   582.             when the_flexowriter_is_reading =>
+   583.                get_char(char, the_FW.stream);
+   584.                size := size + 1;
+   585.                word := KDF9.word(Character'Pos(char));
+   586.                store_word(word, w);
+   587.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   588.
+   589.          end case;
+   590.       end loop word_loop;
+   591.
+   592.       flush(the_FW.output);
+   593.       set_text_colour_to_black(the_FW.output);
+   594.       set_text_style_to_plain(the_FW.output);
+   595.       do_output_housekeeping(the_FW, written => size, fetched => size);
+   596.    exception
+   597.       when end_of_stream =>
+   598.          flush(the_FW.output);
+   599.          set_text_colour_to_black(the_FW.output);
+   600.          set_text_style_to_plain(the_FW.output);
+   601.          do_output_housekeeping(the_FW, written => size, fetched => size);
+   602.    end put_words;
+   603.
+   604.    overriding
+   605.    procedure words_write (the_FW    : in out FW.device;
+   606.                           Q_operand : in KDF9.Q_register) is
+   607.    begin
+   608.       put_words(the_FW, Q_operand, transfer_to_EM => False);
+   609.    end words_write;
+   610.
+   611.    overriding
+   612.    procedure words_write_to_EM (the_FW    : in out FW.device;
+   613.                                 Q_operand : in KDF9.Q_register) is
+   614.    begin
+   615.       put_words(the_FW, Q_operand, transfer_to_EM => True);
+   616.    end words_write_to_EM;
+   617.
+   618.    -- TWCQq
+   619.    overriding
+   620.    procedure POC (the_FW      : in out FW.device;
+   621.                   Q_operand   : in KDF9.Q_register;
+   622.                   set_offline : in Boolean) is
+   623.    begin
+   624.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   625.       words_write(the_FW, Q_operand);
+   626.       lock_out_relative_addresses(Q_operand);
+   627.    end POC;
+   628.
+   629.    -- TWECQq
+   630.    overriding
+   631.    procedure POD (the_FW      : in out FW.device;
+   632.                   Q_operand   : in KDF9.Q_register;
+   633.                   set_offline : in Boolean) is
+   634.    begin
+   635.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   636.       words_write_to_EM(the_FW, Q_operand);
+   637.       lock_out_relative_addresses(Q_operand);
+   638.    end POD;
+   639.
+   640.    overriding
+   641.    procedure Finalize (the_FW : in out FW.device) is
+   642.       total : constant KDF9.word := the_FW.output.bytes_moved+the_FW.stream.bytes_moved + the_FW.shifts;
+   643.    begin
+   644.       close(
+   645.            the_FW,
+   646.            "transferred",
+   647.            total,
+   648.            "character" & plurality(total)
+   649.           );
+   650.    end Finalize;
    651.
-   652.    FW0 : FW_access with Warnings => Off;
+   652.    -- This is the monitor console Flexowriter.
    653.
-   654.    already_enabled : Boolean := False;
+   654.    type FW_access is access FW.device;
    655.
-   656.    procedure enable (b : in KDF9.buffer_number) is
-   657.    begin
-   658.       if already_enabled then
-   659.          trap_operator_error("more than one FW unit has been configured");
-   660.       end if;
-   661.       if b /= 0 then
-   662.          trap_operator_error("FW0 must be on buffer 0");
-   663.       end if;
-   664.       FW0 := new FW.device (number => b, unit => 0);
-   665.       already_enabled := True;
-   666.    end enable;
-   667.
-   668. end IOC.slow.shift.FW;
-   669.
+   656.    FW0 : FW_access with Warnings => Off;
+   657.
+   658.    already_enabled : Boolean := False;
+   659.
+   660.    procedure enable (b : in KDF9.buffer_number) is
+   661.    begin
+   662.       if already_enabled then
+   663.          trap_operator_error("more than one FW unit has been configured");
+   664.       end if;
+   665.       if b /= 0 then
+   666.          trap_operator_error("FW0 must be on buffer 0");
+   667.       end if;
+   668.       FW0 := new FW.device (number => b, unit => 0);
+   669.       already_enabled := True;
+   670.    end enable;
+   671.
+   672. end IOC.slow.shift.FW;
 
 Compiling: ../Source/ioc-slow-shift-fw.ads
-Source file time stamp: 2021-02-15 01:22:26
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21010,152 +21072,149 @@ Compiled at: 2021-02-21 15:54:08
     21.    function a_LF_was_just_read (the_FW : FW.device)
     22.    return Boolean;
     23.
-    24.    function a_LF_was_just_written (the_FW : FW.device)
-    25.    return Boolean;
-    26.
-    27.    -- TRQq
-    28.    overriding
-    29.    procedure PIA (the_FW      : in out FW.device;
-    30.                   Q_operand   : in KDF9.Q_register;
-    31.                   set_offline : in Boolean);
-    32.
-    33.    -- TREQq
-    34.    overriding
-    35.    procedure PIB (the_FW      : in out FW.device;
-    36.                   Q_operand   : in KDF9.Q_register;
-    37.                   set_offline : in Boolean);
-    38.
-    39.    -- TRCQq character read
-    40.    overriding
-    41.    procedure PIC (the_FW      : in out FW.device;
-    42.                   Q_operand   : in KDF9.Q_register;
-    43.                   set_offline : in Boolean);
-    44.
-    45.    -- TRECQq character read to End_Message
-    46.    overriding
-    47.    procedure PID (the_FW      : in out FW.device;
-    48.                   Q_operand   : in KDF9.Q_register;
-    49.                   set_offline : in Boolean);
-    50.
-    51.    -- as PIA
-    52.    overriding
-    53.    procedure PIE (the_FW      : in out FW.device;
-    54.                   Q_operand   : in KDF9.Q_register;
-    55.                   set_offline : in Boolean);
-    56.
-    57.    -- as PIB
-    58.    overriding
-    59.    procedure PIF (the_FW      : in out FW.device;
-    60.                   Q_operand   : in KDF9.Q_register;
-    61.                   set_offline : in Boolean);
-    62.
-    63.    -- as PIC
-    64.    overriding
-    65.    procedure PIG (the_FW      : in out FW.device;
-    66.                   Q_operand   : in KDF9.Q_register;
-    67.                   set_offline : in Boolean);
-    68.
-    69.    -- as PID
-    70.    overriding
-    71.    procedure PIH (the_FW      : in out FW.device;
-    72.                   Q_operand   : in KDF9.Q_register;
-    73.                   set_offline : in Boolean);
-    74.
-    75.    -- TWQq
-    76.    overriding
-    77.    procedure POA (the_FW      : in out FW.device;
-    78.                   Q_operand   : in KDF9.Q_register;
-    79.                   set_offline : in Boolean);
-    80.
-    81.    -- TWEQq
-    82.    overriding
-    83.    procedure POB (the_FW      : in out FW.device;
-    84.                   Q_operand   : in KDF9.Q_register;
-    85.                   set_offline : in Boolean);
-    86.
-    87.    -- NB the following assumes that page 285 of the Manual is erroneous,
-    88.    -- and that POC and POD for the Flexowriter are analogous to the tape punch,
-    89.    -- as other sources, such as the "Usecode Digest", do in fact indicate.
-    90.
-    91.    -- TWCQq character write
-    92.    overriding
-    93.    procedure POC (the_FW      : in out FW.device;
-    94.                   Q_operand   : in KDF9.Q_register;
-    95.                   set_offline : in Boolean);
-    96.
-    97.    -- TWECQq character write to End_Message
-    98.    overriding
-    99.    procedure POD (the_FW      : in out FW.device;
-   100.                   Q_operand   : in KDF9.Q_register;
-   101.                   set_offline : in Boolean);
-   102.
-   103.    procedure enable (b : in KDF9.buffer_number);
-   104.
-   105. private
+    24.    -- TRQq
+    25.    overriding
+    26.    procedure PIA (the_FW      : in out FW.device;
+    27.                   Q_operand   : in KDF9.Q_register;
+    28.                   set_offline : in Boolean);
+    29.
+    30.    -- TREQq
+    31.    overriding
+    32.    procedure PIB (the_FW      : in out FW.device;
+    33.                   Q_operand   : in KDF9.Q_register;
+    34.                   set_offline : in Boolean);
+    35.
+    36.    -- TRCQq character read
+    37.    overriding
+    38.    procedure PIC (the_FW      : in out FW.device;
+    39.                   Q_operand   : in KDF9.Q_register;
+    40.                   set_offline : in Boolean);
+    41.
+    42.    -- TRECQq character read to End_Message
+    43.    overriding
+    44.    procedure PID (the_FW      : in out FW.device;
+    45.                   Q_operand   : in KDF9.Q_register;
+    46.                   set_offline : in Boolean);
+    47.
+    48.    -- as PIA
+    49.    overriding
+    50.    procedure PIE (the_FW      : in out FW.device;
+    51.                   Q_operand   : in KDF9.Q_register;
+    52.                   set_offline : in Boolean);
+    53.
+    54.    -- as PIB
+    55.    overriding
+    56.    procedure PIF (the_FW      : in out FW.device;
+    57.                   Q_operand   : in KDF9.Q_register;
+    58.                   set_offline : in Boolean);
+    59.
+    60.    -- as PIC
+    61.    overriding
+    62.    procedure PIG (the_FW      : in out FW.device;
+    63.                   Q_operand   : in KDF9.Q_register;
+    64.                   set_offline : in Boolean);
+    65.
+    66.    -- as PID
+    67.    overriding
+    68.    procedure PIH (the_FW      : in out FW.device;
+    69.                   Q_operand   : in KDF9.Q_register;
+    70.                   set_offline : in Boolean);
+    71.
+    72.    -- TWQq
+    73.    overriding
+    74.    procedure POA (the_FW      : in out FW.device;
+    75.                   Q_operand   : in KDF9.Q_register;
+    76.                   set_offline : in Boolean);
+    77.
+    78.    -- TWEQq
+    79.    overriding
+    80.    procedure POB (the_FW      : in out FW.device;
+    81.                   Q_operand   : in KDF9.Q_register;
+    82.                   set_offline : in Boolean);
+    83.
+    84.    -- NB the following assumes that page 285 of the Manual is erroneous,
+    85.    -- and that POC and POD for the Flexowriter are analogous to the tape punch,
+    86.    -- as other sources, such as the "Usecode Digest", do in fact indicate.
+    87.
+    88.    -- TWCQq character write
+    89.    overriding
+    90.    procedure POC (the_FW      : in out FW.device;
+    91.                   Q_operand   : in KDF9.Q_register;
+    92.                   set_offline : in Boolean);
+    93.
+    94.    -- TWECQq character write to End_Message
+    95.    overriding
+    96.    procedure POD (the_FW      : in out FW.device;
+    97.                   Q_operand   : in KDF9.Q_register;
+    98.                   set_offline : in Boolean);
+    99.
+   100.    procedure enable (b : in KDF9.buffer_number);
+   101.
+   102. private
+   103.
+   104.    type flexowriter_mode is
+   105.       (the_flexowriter_is_reading, the_flexowriter_is_writing);
    106.
-   107.    type flexowriter_mode is
-   108.       (the_flexowriter_is_reading, the_flexowriter_is_writing);
-   109.
-   110.    -- The Flexowriter has separate input and output streams, to accommodate the console I/O API
-   111.    --    of MS Windows, which requires separate pseudo-devices for input and output.
-   112.    type device is new IOC.slow.shift.device with
-   113.       record
-   114.          output : host_IO.stream;
-   115.          mode   : FW.flexowriter_mode;
-   116.          shifts : KDF9.word := 0;
-   117.       end record;
+   107.    -- The Flexowriter has separate input and output streams, to accommodate the console I/O API
+   108.    --    of MS Windows, which requires separate pseudo-devices for input and output.
+   109.    type device is new IOC.slow.shift.device with
+   110.       record
+   111.          output : host_IO.stream;
+   112.          mode   : FW.flexowriter_mode;
+   113.          shifts : KDF9.word := 0;
+   114.       end record;
+   115.
+   116.    overriding
+   117.    procedure Initialize (the_FW : in out FW.device);
    118.
    119.    overriding
-   120.    procedure Initialize (the_FW : in out FW.device);
+   120.    procedure Finalize (the_FW : in out FW.device);
    121.
    122.    overriding
-   123.    procedure Finalize (the_FW : in out FW.device);
-   124.
-   125.    overriding
-   126.    function kind (the_FW : FW.device)
-   127.    return IOC.device_kind
-   128.    is (FW_kind);
-   129.
-   130.    overriding
-   131.    function quantum (the_FW : FW.device)
-   132.    return KDF9.us
-   133.    is (1E6 / 10);
-   134.
-   135.    overriding
-   136.    procedure write (the_FW    : in out FW.device;
-   137.                     Q_operand : in KDF9.Q_register);
-   138.
+   123.    function kind (the_FW : FW.device)
+   124.    return IOC.device_kind
+   125.    is (FW_kind);
+   126.
+   127.    overriding
+   128.    function quantum (the_FW : FW.device)
+   129.    return KDF9.us
+   130.    is (1E6 / 10);
+   131.
+   132.    overriding
+   133.    procedure write (the_FW    : in out FW.device;
+   134.                     Q_operand : in KDF9.Q_register);
+   135.
+   136.    overriding
+   137.    procedure write_to_EM (the_FW    : in out FW.device;
+   138.                           Q_operand : in KDF9.Q_register);
    139.    overriding
-   140.    procedure write_to_EM (the_FW    : in out FW.device;
+   140.    procedure words_write (the_FW    : in out FW.device;
    141.                           Q_operand : in KDF9.Q_register);
-   142.    overriding
-   143.    procedure words_write (the_FW    : in out FW.device;
-   144.                           Q_operand : in KDF9.Q_register);
-   145.
-   146.    overriding
-   147.    procedure words_write_to_EM (the_FW    : in out FW.device;
-   148.                                 Q_operand : in KDF9.Q_register);
-   149.
-   150.    overriding
-   151.    procedure do_output_housekeeping (the_FW   : in out FW.device;
-   152.                                      written,
-   153.                                      fetched  : in KDF9.word);
-   154.
-   155. end IOC.slow.shift.FW;
+   142.
+   143.    overriding
+   144.    procedure words_write_to_EM (the_FW    : in out FW.device;
+   145.                                 Q_operand : in KDF9.Q_register);
+   146.
+   147.    overriding
+   148.    procedure do_output_housekeeping (the_FW   : in out FW.device;
+   149.                                      written,
+   150.                                      fetched  : in KDF9.word);
+   151.
+   152. end IOC.slow.shift.FW;
 
- 669 lines: No errors
+ 672 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-gp.adb
-Source file time stamp: 2021-02-19 16:40:08
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21360,12 +21419,12 @@ Compiled at: 2021-02-21 15:54:08
    205. end IOC.slow.shift.GP;
 
 Compiling: ../Source/ioc-slow-shift-gp.ads
-Source file time stamp: 2021-02-15 01:18:52
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21449,12 +21508,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-si.adb
-Source file time stamp: 2021-02-19 16:40:08
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21686,12 +21745,12 @@ Compiled at: 2021-02-21 15:54:08
    232. end IOC.slow.shift.SI;
 
 Compiling: ../Source/ioc-slow-shift-si.ads
-Source file time stamp: 2021-02-15 01:22:44
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21847,12 +21906,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21888,12 +21947,12 @@ Compiled at: 2021-02-21 15:54:08
     36. end IOC.slow.unit;
 
 Compiling: ../Source/ioc-slow-unit.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:22
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21940,12 +21999,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cp.adb
-Source file time stamp: 2021-02-15 01:11:41
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a card punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22160,13 +22219,13 @@ Compiled at: 2021-02-21 15:54:08
    215. end IOC.slow.unit.CP;
 
 Compiling: ../Source/ioc-slow-unit-cp.ads
-Source file time stamp: 2021-02-15 01:23:08
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a card punch buffer.
      2. -- Card punches are "unit record" devices: they cannot transfer less than a whole card.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22275,12 +22334,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cr.adb
-Source file time stamp: 2021-02-19 16:40:08
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a card reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22540,13 +22599,13 @@ Compiled at: 2021-02-21 15:54:08
    260. end IOC.slow.unit.CR;
 
 Compiling: ../Source/ioc-slow-unit-cr.ads
-Source file time stamp: 2021-02-15 01:23:20
-Compiled at: 2021-02-21 15:54:08
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a card reader buffer.
      2. -- Card readers are "unit record" devices: they cannot transfer less than a whole card.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22654,12 +22713,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-lp.adb
-Source file time stamp: 2021-02-15 01:12:25
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a lineprinter buffer.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22848,13 +22907,13 @@ Compiled at: 2021-02-21 15:54:09
    189. end IOC.slow.unit.LP;
 
 Compiling: ../Source/ioc-slow-unit-lp.ads
-Source file time stamp: 2021-02-15 01:23:30
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Emulation of a lineprinter buffer.
      2. -- Lineprinters are "unit record" devices: they cannot transfer less than a whole line.
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22927,12 +22986,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/environmental_value_of.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Get the value of an environment variable.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22962,12 +23021,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tod_clock.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23046,12 +23105,12 @@ Compiled at: 2021-02-21 15:54:09
     79. end KDF9.TOD_clock;
 
 Compiling: ../Source/kdf9-tod_clock.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23088,12 +23147,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd.adb
-Source file time stamp: 2021-02-20 23:52:36
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23251,12 +23310,12 @@ Compiled at: 2021-02-21 15:54:09
    158. end KDF9.TSD;
 
 Compiling: ../Source/kdf9-tsd.ads
-Source file time stamp: 2021-02-11 19:57:06
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23307,12 +23366,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-timing.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Implement the timing OUTs of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23383,12 +23442,12 @@ Compiled at: 2021-02-21 15:54:09
     71. end KDF9.TSD.timing;
 
 Compiling: ../Source/kdf9-tsd-timing.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Implement the timing OUTs of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23422,12 +23481,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/finalize_ee9.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Shut down processing in preparation for a dignified exit.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23467,12 +23526,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/postscript.adb
-Source file time stamp: 2021-02-19 21:33:06
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Elementary Encapsulated PostScript (EPS) line drawing.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23711,12 +23770,12 @@ Compiled at: 2021-02-21 15:54:09
    239.
 
 Compiling: ../Source/postscript.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Elementary Encapsulated PostScript (EPS) line drawing.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23802,12 +23861,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/settings-io.adb
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Settings-reader I/O support.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23852,172 +23911,171 @@ Compiled at: 2021-02-21 15:54:09
     45.    begin
     46.       loop
     47.         look_ahead(file, next_char, end_line);
-    48.       exit when end_line or else
-    49.                   (next_char /= ' ' and next_char /= HT);
-    50.          get(file, next_char);
-    51.       end loop;
-    52.       if next_char = comment_flag_character then
-    53.          while not end_of_line(file) loop
-    54.             get(file, next_char);
-    55.          end loop;
-    56.       end if;
-    57.    end skip_to_next_non_blank;
-    58.
-    59.    procedure ensure_not_at_end_of_line (file : File_Type) is
-    60.    begin
-    61.       skip_to_next_non_blank (file);
-    62.       if end_of_line(file) then
-    63.          raise Data_Error;
-    64.       end if;
-    65.    end ensure_not_at_end_of_line;
-    66.
-    67.    procedure skip_to_next_nonempty_line (file : in File_Type) is
-    68.       flag     : Character;
-    69.       end_line : Boolean;
-    70.    begin
-    71.       loop
-    72.          look_ahead(file, flag, end_line);
-    73.          if end_line                      or else
-    74.                flag = comment_flag_character then
-    75.             Skip_Line(file);
-    76.             line_number := line_number + 1;
-    77.          else
-    78.             exit;
-    79.          end if;
-    80.       end loop;
-    81.       if flag = comment_flag_character then
-    82.          raise Data_Error;
-    83.       end if;
-    84.    end skip_to_next_nonempty_line;
-    85.
-    86.    digit_offset : constant := Character'Pos('0');
-    87.
-    88.    procedure get_octal (file : in File_Type; value : out KDF9.word) is
-    89.       next_char : Character;
-    90.       last_char : Character := '_';
-    91.       place     : Natural   := 0;
-    92.       end_line  : Boolean   := False;
-    93.    begin
-    94.       value := 0;
-    95.       ensure_not_at_end_of_line(file);
-    96.       get(file, next_char);
-    97.       if next_char = '#' then
-    98.          get(file, next_char);
-    99.       else
-   100.          raise Data_Error;
-   101.       end if;
-   102.       loop
-   103.          if next_char in '0' .. '7' then
-   104.             value := value*8 + KDF9.word(Character'Pos(next_char)-digit_offset);
-   105.             place := place + 1;
-   106.             if place > 16 then
-   107.                raise Data_Error;
-   108.             end if;
-   109.          elsif next_char = '_' then
-   110.             if place = 0 then
-   111.                raise Data_Error;
-   112.             end if;
-   113.          else
-   114.             if last_char = '_' or place = 0 then
-   115.                raise Data_Error;
-   116.             end if;
-   117.             exit;
-   118.          end if;
-   119.          last_char := next_char;
-   120.          look_ahead(file, next_char, end_line);
-   121.       exit when end_line;
-   122.          if next_char in '0' .. '7' or next_char = '_' then
-   123.             get(file, next_char);
-   124.          else
-   125.             if last_char = '_' or place = 0 then
-   126.                raise Data_Error;
-   127.             end if;
-   128.             exit;
-   129.          end if;
-   130.       end loop;
-   131.    end get_octal;
-   132.
-   133.    procedure get_decimal (file : in File_Type; value : out KDF9.word) is
-   134.       next_char : Character;
-   135.       last_char : Character := '_';
-   136.       place     : Natural   := 0;
-   137.       end_line  : Boolean   := False;
-   138.    begin
-   139.       value := 0;
-   140.       ensure_not_at_end_of_line(file);
-   141.       get(file, next_char);
-   142.       if next_char not in '0' .. '9' then
-   143.          raise Program_Error with "get_decimal " & next_char;
-   144.       end if;
-   145.       loop
-   146.          if next_char in '0' .. '9' then
-   147.             value := value*10 + KDF9.word(Character'Pos(next_char)-digit_offset);
-   148.             place := place + 1;
-   149.             if place > 15 then
-   150.                raise Data_Error;
-   151.             end if;
-   152.          elsif next_char = '_' then
-   153.             if place = 0 then
-   154.                raise Data_Error;
-   155.             end if;
-   156.          else
-   157.             if last_char = '_' or place = 0 then
-   158.                raise Data_Error;
-   159.             end if;
-   160.       exit;
-   161.          end if;
-   162.          last_char := next_char;
-   163.          look_ahead(file, next_char, end_line);
-   164.       exit when end_line;
-   165.          if next_char in '0' .. '9' or next_char = '_' then
-   166.             get(file, next_char);
-   167.          else
-   168.             if last_char = '_' or place = 0 then
-   169.                raise Data_Error;
-   170.             end if;
-   171.       exit;
-   172.          end if;
-   173.       end loop;
-   174.    end get_decimal;
-   175.
-   176.    procedure get_word (file : in File_Type; value : out KDF9.word) is
-   177.       next_char : Character;
-   178.       end_line  : Boolean;
-   179.    begin
-   180.       ensure_not_at_end_of_line(file);
-   181.       look_ahead(file, next_char, end_line);
-   182.       pragma Unreferenced(end_line);
-   183.       if next_char = '#' then
-   184.          get_octal(file, value);
-   185.       else
-   186.          get_decimal(file, value);
-   187.       end if;
-   188.    end get_word;
-   189.
-   190.    procedure get_char (file : in File_Type; value : out Character) is
-   191.       end_line : Boolean;
-   192.       char     : Character;
-   193.    begin
-   194.       ensure_not_at_end_of_line(file);
-   195.       look_ahead(file, char, end_line);
-   196.       if end_line then
-   197.          raise Data_Error;
-   198.       end if;
-   199.       if char /= ' ' then
-   200.          get(file, value);
-   201.       end if;
-   202.    end get_char;
-   203.
-   204. end settings.IO;
-   205.
+    48.       exit when end_line or else (next_char not in ' ' | HT);
+    49.          get(file, next_char);
+    50.       end loop;
+    51.       if next_char = comment_flag_character then
+    52.          while not end_of_line(file) loop
+    53.             get(file, next_char);
+    54.          end loop;
+    55.       end if;
+    56.    end skip_to_next_non_blank;
+    57.
+    58.    procedure ensure_not_at_end_of_line (file : File_Type) is
+    59.    begin
+    60.       skip_to_next_non_blank (file);
+    61.       if end_of_line(file) then
+    62.          raise Data_Error;
+    63.       end if;
+    64.    end ensure_not_at_end_of_line;
+    65.
+    66.    procedure skip_to_next_nonempty_line (file : in File_Type) is
+    67.       flag     : Character;
+    68.       end_line : Boolean;
+    69.    begin
+    70.       loop
+    71.          look_ahead(file, flag, end_line);
+    72.          if end_line                      or else
+    73.                flag = comment_flag_character then
+    74.             Skip_Line(file);
+    75.             line_number := line_number + 1;
+    76.          else
+    77.             exit;
+    78.          end if;
+    79.       end loop;
+    80.       if flag = comment_flag_character then
+    81.          raise Data_Error;
+    82.       end if;
+    83.    end skip_to_next_nonempty_line;
+    84.
+    85.    digit_offset : constant := Character'Pos('0');
+    86.
+    87.    procedure get_octal (file : in File_Type; value : out KDF9.word) is
+    88.       next_char : Character;
+    89.       last_char : Character := '_';
+    90.       place     : Natural   := 0;
+    91.       end_line  : Boolean   := False;
+    92.    begin
+    93.       value := 0;
+    94.       ensure_not_at_end_of_line(file);
+    95.       get(file, next_char);
+    96.       if next_char = '#' then
+    97.          get(file, next_char);
+    98.       else
+    99.          raise Data_Error;
+   100.       end if;
+   101.       loop
+   102.          if next_char in '0' .. '7' then
+   103.             value := value*8 + KDF9.word(Character'Pos(next_char)-digit_offset);
+   104.             place := place + 1;
+   105.             if place > 16 then
+   106.                raise Data_Error;
+   107.             end if;
+   108.          elsif next_char = '_' then
+   109.             if place = 0 then
+   110.                raise Data_Error;
+   111.             end if;
+   112.          else
+   113.             if last_char = '_' or place = 0 then
+   114.                raise Data_Error;
+   115.             end if;
+   116.             exit;
+   117.          end if;
+   118.          last_char := next_char;
+   119.          look_ahead(file, next_char, end_line);
+   120.       exit when end_line;
+   121.          if next_char in '0' .. '7' or next_char = '_' then
+   122.             get(file, next_char);
+   123.          else
+   124.             if last_char = '_' or place = 0 then
+   125.                raise Data_Error;
+   126.             end if;
+   127.             exit;
+   128.          end if;
+   129.       end loop;
+   130.    end get_octal;
+   131.
+   132.    procedure get_decimal (file : in File_Type; value : out KDF9.word) is
+   133.       next_char : Character;
+   134.       last_char : Character := '_';
+   135.       place     : Natural   := 0;
+   136.       end_line  : Boolean   := False;
+   137.    begin
+   138.       value := 0;
+   139.       ensure_not_at_end_of_line(file);
+   140.       get(file, next_char);
+   141.       if next_char not in '0' .. '9' then
+   142.          raise Program_Error with "get_decimal " & next_char;
+   143.       end if;
+   144.       loop
+   145.          if next_char in '0' .. '9' then
+   146.             value := value*10 + KDF9.word(Character'Pos(next_char)-digit_offset);
+   147.             place := place + 1;
+   148.             if place > 15 then
+   149.                raise Data_Error;
+   150.             end if;
+   151.          elsif next_char = '_' then
+   152.             if place = 0 then
+   153.                raise Data_Error;
+   154.             end if;
+   155.          else
+   156.             if last_char = '_' or place = 0 then
+   157.                raise Data_Error;
+   158.             end if;
+   159.       exit;
+   160.          end if;
+   161.          last_char := next_char;
+   162.          look_ahead(file, next_char, end_line);
+   163.       exit when end_line;
+   164.          if next_char in '0' .. '9' or next_char = '_' then
+   165.             get(file, next_char);
+   166.          else
+   167.             if last_char = '_' or place = 0 then
+   168.                raise Data_Error;
+   169.             end if;
+   170.       exit;
+   171.          end if;
+   172.       end loop;
+   173.    end get_decimal;
+   174.
+   175.    procedure get_word (file : in File_Type; value : out KDF9.word) is
+   176.       next_char : Character;
+   177.       end_line  : Boolean;
+   178.    begin
+   179.       ensure_not_at_end_of_line(file);
+   180.       look_ahead(file, next_char, end_line);
+   181.       pragma Unreferenced(end_line);
+   182.       if next_char = '#' then
+   183.          get_octal(file, value);
+   184.       else
+   185.          get_decimal(file, value);
+   186.       end if;
+   187.    end get_word;
+   188.
+   189.    procedure get_char (file : in File_Type; value : out Character) is
+   190.       end_line : Boolean;
+   191.       char     : Character;
+   192.    begin
+   193.       ensure_not_at_end_of_line(file);
+   194.       look_ahead(file, char, end_line);
+   195.       if end_line then
+   196.          raise Data_Error;
+   197.       end if;
+   198.       if char /= ' ' then
+   199.          get(file, value);
+   200.       end if;
+   201.    end get_char;
+   202.
+   203. end settings.IO;
+   204.
 
 Compiling: ../Source/settings-io.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Settings-reader I/O support.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24077,19 +24135,19 @@ Compiled at: 2021-02-21 15:54:09
     60.
     61. end settings.IO;
 
- 205 lines: No errors
+ 204 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/generic_sets.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Powersets of a discrete member type.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24134,12 +24192,12 @@ Compiled at: 2021-02-21 15:54:09
     45. end generic_sets;
 
 Compiling: ../Source/generic_sets.ads
-Source file time stamp: 2021-02-17 14:13:06
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- Powersets of a discrete member type.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24189,13 +24247,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-decoding.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- The "compressed_opcode" values are effective opcodes, partially decoded from the first syllable,
      2. --   and combined with opcode bits of the second syllable, where appropriate (e.g. in jumps).
      3. --
-     4. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -24491,12 +24549,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-dispatcher.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24764,12 +24822,12 @@ Compiled at: 2021-02-21 15:54:09
    268. end IOC.dispatcher;
 
 Compiling: ../Source/ioc-dispatcher.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:23
 
      1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24899,12 +24957,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-egdon.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the API (OUTs) of the EGDON Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24928,12 +24986,12 @@ Compiled at: 2021-02-21 15:54:09
     24. end KDF9.EGDON;
 
 Compiling: ../Source/kdf9-egdon.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the API (OUTs) of the EGDON Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24960,12 +25018,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-processes.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25196,18 +25254,18 @@ Compiled at: 2021-02-21 15:54:09
    231.       push(number);
    232.    exception
    233.       when others =>
-   234.          trap_failing_OUT(97, name & " = '" & value & "', not a valid integer");
+   234.          trap_failing_OUT(97, name & " = «"& value & "», not a valid integer");
    235.    end do_OUT_97;
    236.
    237. end KDF9.TSD.processes;
 
 Compiling: ../Source/kdf9-tsd-processes.ads
-Source file time stamp: 2021-02-13 00:29:10
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement OUTs 0.. 2 and 5..7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25247,12 +25305,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/disassembly.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25878,12 +25936,12 @@ Compiled at: 2021-02-21 15:54:09
    626. end disassembly;
 
 Compiling: ../Source/disassembly.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:09
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25923,12 +25981,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-diagnostics.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Provide diagnostic output of the state of all the buffers.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25965,62 +26023,58 @@ Compiled at: 2021-02-21 15:54:10
     37.          the_buffer.initiation_time /= KDF9.us'Last    then
     38.          output_line;
     39.          output_line("Current state of buffer #" & oct_of(the_buffer.number, 2));
-    40.          output_line(
-    41.                      "   device: " & the_buffer.device_name
-    42.                    & "     kind: " & the_buffer.kind'Image
-    43.                    & "     unit:"  & the_buffer.unit'Image
-    44.                     );
-    45.          output_line("  is_busy: " & the_buffer.is_busy'Image);
-    46.          output_line("operation: " & the_buffer.operation'Image);
-    47.          output_line(" off_line: " & the_buffer.is_offline'Image);
-    48.          output_line(" abnormal: " & the_buffer.is_abnormal'Image);
-    49.          output_line(" Director: " & the_buffer.is_for_Director'Image);
-    50.          output_line(" priority:"  & the_buffer.priority_level'Image);
-    51.          output_line("initiated:"  & the_buffer.initiation_time'Image);
-    52.          output_line("xfer_time:"  & the_buffer.transfer_time'Image);
-    53.          output_line("completes:"  & the_buffer.completion_time'Image);
-    54.          Q := the_buffer.control_word;
-    55.          output_line(
-    56.                      "  control: "
-    57.                    & "Q"
-    58.                    & Q.C'Image
-    59.                    &"/"
-    60.                    & Q.I'Image
-    61.                    & "/"
-    62.                    & Q.M'Image
-    63.                     );
-    64.          if Q.I <= max_address               and then
-    65.              Q.M <= max_address              and then
-    66.                 Q.I <= the_buffer.control_word.M then
-    67.             output_line(
-    68.                         "locked in:"
-    69.                       & group(Q.I)'Image
-    70.                       & ".."
-    71.                       & group(Q.M)'Image
-    72.                       & " is "
-    73.                       & there_are_locks_in_physical_addresses(Q)'Image
-    74.                        );
-    75.          end if;
-    76.          output_line("order ICR:"  & the_buffer.order_count'Image);
-    77.          output_line("    order: " & disassembly.the_full_name_of(the_buffer.decoded_order));
-    78.          output_line("@ address: " & oct_of(the_buffer.order_address));
-    79.       end if;
-    80.    end loop;
-    81. end IOC.diagnostics;
+    40.          output_line("   device: " & the_buffer.device_name);
+    41.          output_line("  is_busy: " & the_buffer.is_busy'Image);
+    42.          output_line("operation: " & the_buffer.operation'Image);
+    43.          output_line(" off_line: " & the_buffer.is_offline'Image);
+    44.          output_line(" abnormal: " & the_buffer.is_abnormal'Image);
+    45.          output_line(" Director: " & the_buffer.is_for_Director'Image);
+    46.          output_line(" priority:"  & the_buffer.priority_level'Image);
+    47.          output_line("initiated:"  & the_buffer.initiation_time'Image);
+    48.          output_line("xfer_time:"  & the_buffer.transfer_time'Image);
+    49.          output_line("completes:"  & the_buffer.completion_time'Image);
+    50.          Q := the_buffer.control_word;
+    51.          output_line(
+    52.                      "  control: "
+    53.                    & "Q"
+    54.                    & Q.C'Image
+    55.                    &"/"
+    56.                    & Q.I'Image
+    57.                    & "/"
+    58.                    & Q.M'Image
+    59.                     );
+    60.          if Q.I <= max_address               and then
+    61.              Q.M <= max_address              and then
+    62.                 Q.I <= the_buffer.control_word.M then
+    63.             output_line(
+    64.                         "locked in:"
+    65.                       & group(Q.I)'Image
+    66.                       & ".."
+    67.                       & group(Q.M)'Image
+    68.                       & " is "
+    69.                       & there_are_locks_in_physical_addresses(Q)'Image
+    70.                        );
+    71.          end if;
+    72.          output_line("order ICR:"  & the_buffer.order_count'Image);
+    73.          output_line("    order: " & disassembly.the_full_name_of(the_buffer.decoded_order));
+    74.          output_line("@ address: " & oct_of(the_buffer.order_address));
+    75.       end if;
+    76.    end loop;
+    77. end IOC.diagnostics;
 
- 81 lines: No errors
+ 77 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/file_interfacing.adb
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26060,12 +26114,12 @@ Compiled at: 2021-02-21 15:54:10
     40. end file_interfacing;
 
 Compiling: ../Source/file_interfacing.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26101,12 +26155,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/plotter.adb
-Source file time stamp: 2021-02-17 20:27:15
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26308,12 +26362,12 @@ Compiled at: 2021-02-21 15:54:10
    202. end plotter;
 
 Compiling: ../Source/plotter.ads
-Source file time stamp: 2021-02-11 00:34:42
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26392,12 +26446,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr-tsd_outs.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26511,12 +26565,12 @@ Compiled at: 2021-02-21 15:54:10
    114. end IOC.fast.DR.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-dr-tsd_outs.ads
-Source file time stamp: 2021-02-13 13:53:24
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26551,12 +26605,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd-tsd_outs.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26791,12 +26845,12 @@ Compiled at: 2021-02-21 15:54:10
    235. end IOC.fast.FD.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-fd-tsd_outs.ads
-Source file time stamp: 2021-02-13 13:53:24
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26837,12 +26891,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape-tsd_outs.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26884,18 +26938,18 @@ Compiled at: 2021-02-21 15:54:10
     42.          if W = 0 then
     43.             log_API_message("OUT 4: requested a ZERO tape  and got "
     44.                           & device_name_of(buffer(B).all)
-    45.                           & " with TSN '"
+    45.                           & " with TSN «"
     46.                           & to_string(S)
-    47.                           & "'"
+    47.                           & "»"
     48.                            );
     49.          else
-    50.             log_API_message("OUT 4: requested  '" --a tape labelled '"
+    50.             log_API_message("OUT 4: requested  «"
     51.                           & String(label)
-    52.                           & "'  and got "
+    52.                           & "»  and got "
     53.                           & device_name_of(buffer(B).all)
-    54.                           & " with TSN '"
+    54.                           & " with TSN «"
     55.                           & to_string(S)
-    56.                           & "'"
+    56.                           & "»"
     57.                            );
     58.          end if;
     59.       end;
@@ -26916,13 +26970,13 @@ Compiled at: 2021-02-21 15:54:10
     74.          push(S);
     75.          push(KDF9.word(B));
     76.          the_trace_operand := KDF9.word(B);
-    77.          log_API_message("OUT 10: requested '" -- a tape labelled '"
+    77.          log_API_message("OUT 10: requested «"
     78.                        & String(label)
-    79.                        & "' and got "
+    79.                        & "» and got "
     80.                        & device_name_of(buffer(B).all)
-    81.                        & " with TSN '"
+    81.                        & " with TSN «"
     82.                        & to_string(S)
-    83.                        & "'"
+    83.                        & "»"
     84.                         );
     85.       end;
     86.       set_state_of(buffer(B), allocated => True);
@@ -26931,12 +26985,12 @@ Compiled at: 2021-02-21 15:54:10
     89. end IOC.fast.tape.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-tape-tsd_outs.ads
-Source file time stamp: 2021-02-15 17:45:04
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:24
 
      1. -- Implement the magnetic tape API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26968,12 +27022,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-peripherals.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:25
 
      1. -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27190,12 +27244,12 @@ Compiled at: 2021-02-21 15:54:10
    217. end KDF9.TSD.peripherals;
 
 Compiling: ../Source/kdf9-tsd-peripherals.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:10
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:25
 
      1. -- Implement 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27232,12 +27286,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-spooling.adb
-Source file time stamp: 2021-02-20 23:51:07
-Compiled at: 2021-02-21 15:54:11
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:25
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27328,7 +27382,7 @@ Compiled at: 2021-02-21 15:54:11
     91.                          ((S = KDF9_char_sets.Semi_Colon) and (c /= 7 or  w = Q.M)) then
     92.                    trap_failing_OUT(this_OUT, "invalid data for OUT 8 to FW");
     93.                 end if;
-    94.          exit word_loop when S = KDF9_char_sets.Semi_Colon or S = KDF9_char_sets.End_Message;
+    94.          exit word_loop when S in KDF9_char_sets.Semi_Colon | KDF9_char_sets.End_Message;
     95.              end loop;
     96.          end loop word_loop;
     97.
@@ -27453,12 +27507,12 @@ Compiled at: 2021-02-21 15:54:11
    216. end KDF9.TSD.spooling;
 
 Compiling: ../Source/kdf9-tsd-spooling.ads
-Source file time stamp: 2021-02-11 00:34:41
-Compiled at: 2021-02-21 15:54:11
+Source file time stamp: 2021-04-01 23:49:55
+Compiled at: 2021-04-10 15:59:25
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or

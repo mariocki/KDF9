@@ -1,6 +1,6 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -232,8 +232,8 @@ private
                        even_parity_mark => Character'Pos('e'),
                        odd_parity_mark  => Character'Pos('o'));
 
-   subtype tape_gap_kind is tape.basis_kind
-      with Static_Predicate => tape_gap_kind in GAP_slice | WIPE_slice;
+   subtype gap_kind is tape.basis_kind
+      with Static_Predicate => gap_kind in GAP_slice | WIPE_slice;
 
    subtype tape_mark_kind is tape.basis_kind
       with Static_Predicate => tape_mark_kind in odd_parity_mark | even_parity_mark;
@@ -283,39 +283,39 @@ private
       end record;
 
    even_parity_tape_mark : constant tape.slice := (even_parity_mark,
-                                                 is_first       => True,
-                                                 is_last        => True,
-                                                 is_LBM_flagged => True,
-                                                 size           => 1,
-                                                 data           => tape_mark_data);
+                                                   is_first       => True,
+                                                   is_last        => True,
+                                                   is_LBM_flagged => True,
+                                                   size           => 1,
+                                                   data           => tape_mark_data);
 
    odd_parity_tape_mark  : constant tape.slice := (odd_parity_mark,
-                                                 is_first       => True,
-                                                 is_last        => True,
-                                                 is_LBM_flagged => True,
-                                                 size           => 1,
-                                                 data           => tape_mark_data);
+                                                   is_first       => True,
+                                                   is_last        => True,
+                                                   is_LBM_flagged => True,
+                                                   size           => 1,
+                                                   data           => tape_mark_data);
 
    a_NULL_slice          : constant tape.slice := (NULL_slice,
-                                                 is_first       => False,
-                                                 is_last        => False,
-                                                 is_LBM_flagged => False,
-                                                 size           => 0,
-                                                 data           => erased_gap_data);
+                                                   is_first       => False,
+                                                   is_last        => False,
+                                                   is_LBM_flagged => False,
+                                                   size           => 0,
+                                                   data           => erased_gap_data);
 
    a_WIPE_slice          : constant tape.slice := (WIPE_slice,
-                                                 is_first       => True,
-                                                 is_last        => True,
-                                                 is_LBM_flagged => False,
-                                                 size           => 0,
-                                                 data           => erased_gap_data);
+                                                   is_first       => True,
+                                                   is_last        => True,
+                                                   is_LBM_flagged => False,
+                                                   size           => 0,
+                                                   data           => erased_gap_data);
 
    a_GAP_slice           : constant tape.slice := (GAP_slice,
-                                                 is_first       => True,
-                                                 is_last        => True,
-                                                 is_LBM_flagged => False,
-                                                 size           => 0,
-                                                 data           => erased_gap_data);
+                                                   is_first       => True,
+                                                   is_last        => True,
+                                                   is_LBM_flagged => False,
+                                                   size           => 0,
+                                                   data           => erased_gap_data);
 
    package MT_slice_IO is new Ada.Direct_IO(tape.slice);
    use MT_slice_IO;
@@ -404,7 +404,7 @@ private
    overriding
    function quantum (the_deck : MT_deck)
    return KDF9.us
-   is (1E6 / 40E3);
+   is (1E6 / 40E3);  -- ch/s
 
    overriding
    procedure handle_any_abnormality (the_deck : in out MT_deck;
@@ -423,7 +423,7 @@ private
    overriding
    function quantum (the_deck : ST_deck)
    return KDF9.us
-   is (1E6 / 15E3);
+   is (1E6 / 16E3);  -- ch/s
 
    overriding
    procedure handle_any_abnormality (the_deck : in out ST_deck;

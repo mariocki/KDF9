@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -245,6 +245,7 @@ package body state_display is
       if the_RFIR(caused_by_RESET)  then log("RESET, "); end if;
       if interval >= 2**20          then log("CLOCK, "); end if;
       log_line(trimmed(KDF9.us'Image(interval/32*32)) & " KDF9 us since last CLOCK");
+      log_new_line;
    end show_Director_registers;
 
    procedure show_V_and_T is
@@ -265,12 +266,11 @@ package body state_display is
       end if;
    end show_V_and_T;
 
-   procedure show_NEST (when_empty : Boolean := True) is
+   procedure show_NEST is
    begin
       if the_NEST_depth = 0 then
-         if when_empty then
-            log_line("The NEST is empty.");
-         end if;
+         log_line("The NEST is empty.");
+         return;
       else
          log_line("NEST:");
          for i in reverse KDF9.NEST_depth loop
@@ -284,12 +284,11 @@ package body state_display is
       end if;
    end show_NEST;
 
-   procedure show_SJNS (when_empty : Boolean := True) is
+   procedure show_SJNS is
    begin
       if the_SJNS_depth = 0 then
-         if when_empty then
-            log_line("The SJNS is empty.");
-         end if;
+         log_line("The SJNS is empty.");
+         return;
       else
          log_line("SJNS:");
       end if;
@@ -330,7 +329,6 @@ package body state_display is
       log_new_line;
       if the_execution_mode = boot_mode then
          show_Director_registers;
-         log_new_line;
       end if;
       show_SJNS;
       log_new_line;
@@ -582,12 +580,15 @@ package body state_display is
                 False
          );
 
+      need_new_line : Boolean := False;
+
    begin  -- short_witness
       log_new_line;
       show_execution_context;
       if the_CPU_state = Director_state then
          show_Director_registers;
       end if;
+
       if it_uses_JB(INS.compressed_opcode)                     and then
             INS.kind in two_syllable_order | normal_jump_order and then
                the_SJNS_depth > 0                                  then
@@ -597,6 +598,7 @@ package body state_display is
                 & "; SJNS depth: " & just_right(the_SJNS_depth'Image, 3)
                  );
       end if;
+
       if INS.Qq /= 0 and then
             INS_uses_Qq  then
          log(just_right("Q" & trimmed(INS.Qq'Image), 3) & ": ");
@@ -604,6 +606,7 @@ package body state_display is
          log("  = ");
          show_Q_in_decimal(the_Q_store(INS.Qq));
          log_new_line;
+         need_new_line := True;
       end if;
       if INS.Qk /= 0                       and then
             INS.kind in two_syllable_order and then
@@ -614,10 +617,14 @@ package body state_display is
          log("  = ");
          show_Q_in_decimal(the_Q_store(INS.Qk));
          log_new_line;
+         need_new_line := True;
+      end if;
+      if need_new_line then
          log_new_line;
       end if;
+
       show_V_and_T;
-      show_NEST(when_empty => False);
+      show_NEST;
       log_rule;
    end short_witness;
 
@@ -1246,16 +1253,16 @@ package body state_display is
 
    procedure show_retrospective_traces is
    begin
-      if the_peripheral_trace_is_enabled then
+      if peripheral_tracing_is_enabled then
          pragma Debug(IOC.diagnostics);
       end if;
-      if the_interrupt_trace_is_enabled then
+      if interrupt_tracing_is_enabled then
          show_interrupt_FIFO;
       end if;
-      if the_peripheral_trace_is_enabled then
+      if peripheral_tracing_is_enabled then
          show_IOC_FIFO;
       end if;
-      if the_retrospective_trace_is_enabled then
+      if retrospective_tracing_is_enabled then
          show_retro_FIFO;
       end if;
    end show_retrospective_traces;
@@ -1290,7 +1297,7 @@ package body state_display is
             end if;
 
             if the_INS_plot_is_wanted or the_profile_is_wanted then
-               if the_histogram_is_enabled then
+               if histogramming_is_enabled then
                   show_frequency_plots;
                end if;
             end if;
@@ -1322,7 +1329,7 @@ package body state_display is
    increment   : constant := 8;
    jump_tab    : constant := 12;
    first_tab   : constant := 16;
-   last_column : constant := 80;
+   last_column : constant := 96;
 
    function is_non_blank (first : in KDF9.address)
    return Boolean is
@@ -1508,7 +1515,7 @@ package body state_display is
          last_address : KDF9.address := first;
          this_word, last_word : KDF9.word;
       begin
-         if last = first or last = 0 then
+         if last in first | 0 then
             show_word(last);
             return;
          end if;
@@ -1545,23 +1552,22 @@ package body state_display is
    -- Flag 6 is set if the word is thought to be code, but not a target.
    -- Flag 7 is set if the word is thought to be addressed as data.
 
-   is_a_code_word : constant KDF9.syllable_index := 6;
-   is_a_data_word : constant KDF9.syllable_index := 7;
-
    package word_flags is new generic_sets(member => KDF9.syllable_index);
    use word_flags;
 
-   all_jump_targets : constant word_flags.set := (0 .. 5 => True, 6|7 => False);
+   is_a_code_word   : constant KDF9.syllable_index := 6;
+   is_a_data_word   : constant KDF9.syllable_index := 7;
+   all_jump_targets : constant word_flags.set := (6|7 => False, others => True);
 
-   analysis_flags : array (KDF9.order_word_number) of word_flags.set;
+   analysis_flags   : array (KDF9.order_word_number) of word_flags.set;
 
    function "/" (word : KDF9.order_word_number; flag : KDF9.syllable_index)
    return Boolean
-   is (analysis_flags(word)(flag));
+   is (analysis_flags(word)/flag);
 
    function is_a_jump_target (the_point : in KDF9.syllable_address)
    return Boolean
-   is (analysis_flags(the_point.order_word_number)(the_point.syllable_index));
+   is (analysis_flags(the_point.order_word_number)/the_point.syllable_index);
 
    function is_a_jump_target (the_operand : in KDF9.order_word_number)
    return Boolean
@@ -1600,346 +1606,372 @@ package body state_display is
       unmark_as_a_code_word(the_operand);
    end mark_as_a_data_word;
 
-   procedure mark_all_code_blocks_and_data_blocks is
-
-      procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
-         address : KDF9.syllable_address := the_beginning;
-      begin
-         if address.syllable_index > 5 then
-            return;  -- We have blundered into non-code words.
-         end if;
-         -- Mark the first syllable of the block.
-         mark_as_a_jump_target(the_beginning);
-         -- Mark the destinations of all jumps in the block as code.
-         loop
-         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-         exit when address.order_word_number = 8191;
-            set_NIA_to(address);
-            decode_the_next_order;
-            if is_an_invalid_order(INS)                                                  or else
-                  (address.order_word_number/is_a_data_word and address.syllable_index = 0) then
-               return;
-            else
-               -- Assuming a valid code word, act on it.
-               mark_as_a_code_word(address.order_word_number);
-               case INS.kind is
-                  when normal_jump_order =>
-                     if not is_a_jump_target((INS.target.order_word_number, INS.target.syllable_index)) then
-                        -- Mark the jump's destination recursively.
-                        -- N.B. EXIT is actioned only if it is of EXIT ARr type.
-                        mark_all_code_blocks((INS.target.order_word_number, INS.target.syllable_index));
-                     end if;
-                     increment_by_3(address);
-                     if INS.compressed_opcode = JSr  then
-                        -- Mark its return point.
-                        mark_as_a_jump_target(address);
-                     end if;
-                  when one_syllable_order =>
-                     increment_by_1(address);
-                  when two_syllable_order =>
-                     if INS.compressed_opcode = JCqNZS then
-                        -- Mark the preceding word.
-                        mark_as_a_jump_target((address.order_word_number-1, 0));
-                     end if;
-                     increment_by_2(address);
-                  when data_access_order =>
-                     increment_by_3(address);
-               end case;
-            end if;
-         end loop;
-      end mark_all_code_blocks;
-
-      procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
-         address : KDF9.syllable_address := the_beginning;
-      begin
-         if address.syllable_index > 5 then
-            return;  -- We have blundered into non-code words.
-         end if;
-         the_code_block_handler: loop
-         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-         exit when address.order_word_number = 8191;
-            -- Process orders, starting at an established code word.
-            set_NIA_to(address); -- **
-            decode_the_next_order;
-            if (is_an_invalid_order(INS)                         or else
-                  address.order_word_number/is_a_data_word)     and then
-                     not (address.order_word_number/is_a_code_word) then
-               -- This word is data: make sure it is not designated as code;
-               --    and find the start of the next code block.
-               for a in address.order_word_number .. 8190 loop
-                  address := (a, 0);
-                  exit when is_a_jump_target(a);
-                  unmark_as_a_code_word(a);
-                  mark_as_a_data_word(a);
-               end loop;
-
-               exit the_code_block_handler
-                  when address.order_word_number = 8190;
-
-               -- Find the syllable at which the block starts.
-               for s in KDF9.syllable_index'(0) .. 5 loop
-                  address.syllable_index := s;
-                  exit when is_a_jump_target(address);
-               end loop;
-
-            else
-
-               -- Assuming a valid code word, act on it.
-               case INS.kind is
-                  when data_access_order =>
-                     if INS.operand < 8192 then
-                        declare
-                           operand : constant KDF9.order_word_number
-                                   := KDF9.order_word_number(INS.operand);
-                        begin
-                           if INS.compressed_opcode /= KDF9.decoding.SET and then
-                                 not is_a_jump_target(operand)               then
-                              mark_as_a_data_word(operand);
-                           end if;
-                        end;
-                     end if;
-                     increment_by_3(address);
-                  when one_syllable_order =>
-                     increment_by_1(address);
-                  when two_syllable_order =>
-                     increment_by_2(address);
-                  when normal_jump_order =>
-                     increment_by_3(address);
-               end case;
-            end if;
-
-            exit the_code_block_handler
-               when address.order_word_number = KDF9.order_word_number'Last;
-
-         end loop the_code_block_handler;
-      end mark_all_data_blocks;
-
-      procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
-         address : KDF9.syllable_address := the_beginning;
-         locus   : KDF9.order_word_number;
-      begin
-         if address.syllable_index > 5 then
-            return;  -- We have blundered into non-code words.
-         end if;
-         -- Unmark the first instruction of the block.
-         unmark_as_a_data_word(address.order_word_number);
-
-         -- Unmark data marks on destinations of jumps.
-         loop
-         -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-         exit when address.order_word_number = 8191;
-            set_NIA_to(address);
-            decode_the_next_order;
-            if is_an_invalid_order(INS)                          or else
-                  address.order_word_number/is_a_data_word       or else
-                     not (address.order_word_number/is_a_code_word) then
-               -- We have reached the end of the code block.
-               return;
-            else
-               -- Assuming a valid code word, act on it.
-               case INS.kind is
-                  when normal_jump_order =>
-                     locus := address.order_word_number;
-                     increment_by_3(address);
-                     if INS.target.order_word_number/is_a_data_word    then
-                        -- UNmark the jump's destination recursively.
-                        reset_wrong_data_marks((INS.target.order_word_number, INS.target.syllable_index));
-                     end if;
-                     if INS.compressed_opcode /= Jr          and then
-                           INS.compressed_opcode /= EXIT_n   and then
-                              locus /= address.order_word_number then
-                        -- It flows on, so the next word cannot be data.
-                        unmark_as_a_data_word(address.order_word_number);
-                     elsif not (address.order_word_number/is_a_data_word) then
-                        -- The next syllable starts a block, iff it is not the end of a block.
-                        set_NIA_to(address);
-                        decode_the_next_order;
-                        if not is_an_invalid_order(INS) then
-                           mark_as_a_jump_target(address);
-                        end if;
-                     end if;
-                  when one_syllable_order =>
-                     increment_by_1(address);
-                  when two_syllable_order =>
-                     increment_by_2(address);
-                  when data_access_order =>
-                     increment_by_3(address);
-               end case;
-            end if;
-            exit when address.order_word_number = KDF9.order_word_number'Last;
-         end loop;
-      end reset_wrong_data_marks;
-
-      procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
-         start_point : KDF9.syllable_address;
-      begin
-         mark_as_a_jump_target(address);
+   procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
+      address : KDF9.syllable_address := the_beginning;
+   begin
+      if address.syllable_index > 5 then
+         return;  -- We have blundered into non-code words.
+      end if;
+      -- Mark the first syllable of the block.
+      mark_as_a_jump_target(the_beginning);
+      -- Mark the destinations of all jumps in the block as code.
+      loop
+      -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+      exit when address.order_word_number = 8191;
          set_NIA_to(address);
          decode_the_next_order;
-         if INS.kind =normal_jump_order then
+         if is_an_invalid_order(INS)                                                  or else
+               (address.order_word_number/is_a_data_word and address.syllable_index = 0) then
+            return;
+         else
+            -- Assuming a valid code word, act on it.
+            mark_as_a_code_word(address.order_word_number);
+            case INS.kind is
+               when normal_jump_order =>
+                  if not is_a_jump_target((INS.target.order_word_number, INS.target.syllable_index)) then
+                     -- Mark the jump's destination recursively.
+                     -- N.B. EXIT is actioned only if it is of EXIT ARr type.
+                     mark_all_code_blocks((INS.target.order_word_number, INS.target.syllable_index));
+                  end if;
+                  increment_by_3(address);
+                  if INS.compressed_opcode = JSr  then
+                     -- Mark its return point.
+                     mark_as_a_jump_target(address);
+                  end if;
+               when one_syllable_order =>
+                  increment_by_1(address);
+               when two_syllable_order =>
+                  if INS.compressed_opcode = JCqNZS then
+                     -- Mark the preceding word.
+                     mark_as_a_jump_target((address.order_word_number-1, 0));
+                  end if;
+                  increment_by_2(address);
+               when data_access_order =>
+                  increment_by_3(address);
+            end case;
+         end if;
+      end loop;
+   end mark_all_code_blocks;
+
+   procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
+      address : KDF9.syllable_address := the_beginning;
+   begin
+      if address.syllable_index > 5 then
+         return;  -- We have blundered into non-code words.
+      end if;
+
+   the_code_block_handler: loop
+      -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+   exit the_code_block_handler when address.order_word_number = 8191;
+
+         -- Deal with the possibility that we actually have a word of instruction code.
+         set_NIA_to(address);
+         decode_the_next_order;
+
+         if (is_an_invalid_order(INS)                         or else
+               address.order_word_number/is_a_data_word)     and then
+                  not (address.order_word_number/is_a_code_word) then
+
+            -- This word is data: make sure it is not designated as code;
+            --    and find the start of the next code block.
+            for a in address.order_word_number .. 8190 loop
+               address := (a, 0);
+            exit when is_a_jump_target(a);
+               unmark_as_a_code_word(a);
+               mark_as_a_data_word(a);
+            end loop;
+   exit the_code_block_handler when address.order_word_number = 8190;
+            -- Find the syllable at which the block starts.
+            for s in KDF9.syllable_index'(0) .. 5 loop
+               address.syllable_index := s;
+            exit when is_a_jump_target(address);
+            end loop;
+
+         else
+
+            -- We have a order, so act on it.
+            case INS.kind is
+               when data_access_order =>
+                  -- Note the operand word as data, not code.
+                  if INS.operand < 8192 then
+                     declare
+                        operand : constant KDF9.order_word_number
+                                := KDF9.order_word_number(INS.operand);
+                     begin
+                        if INS.compressed_opcode /= KDF9.decoding.SET and then
+                              not is_a_jump_target(operand)               then
+                           mark_as_a_data_word(operand);
+                        end if;
+                     end;
+                  end if;
+                  increment_by_3(address);
+               when one_syllable_order =>
+                  increment_by_1(address);
+               when two_syllable_order =>
+                  increment_by_2(address);
+               when normal_jump_order =>
+                  increment_by_3(address);
+            end case;
+         end if;
+
+      exit the_code_block_handler when address.order_word_number = KDF9.order_word_number'Last;
+      end loop the_code_block_handler;
+   end mark_all_data_blocks;
+
+   procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
+      address : KDF9.syllable_address := the_beginning;
+      locus   : KDF9.order_word_number;
+   begin
+      if address.syllable_index > 5 then
+         return;  -- We have blundered into non-code words.
+      end if;
+      -- Unmark the first instruction of the block.
+      unmark_as_a_data_word(address.order_word_number);
+
+      -- Unmark data marks on destinations of jumps.
+      loop
+      -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+      exit when address.order_word_number = 8191;
+         set_NIA_to(address);
+         decode_the_next_order;
+
+         if is_an_invalid_order(INS)                          or else
+               address.order_word_number/is_a_data_word       or else
+                  not (address.order_word_number/is_a_code_word) then
+            -- We have reached the end of the code block.
+            return;
+
+         else
+
+            -- We have a valid order, so act on it.
+            case INS.kind is
+               when normal_jump_order =>
+                  locus := address.order_word_number;
+                  increment_by_3(address);
+                  if INS.target.order_word_number/is_a_data_word    then
+                     -- UNmark the jump's destination recursively.
+                     reset_wrong_data_marks((INS.target.order_word_number, INS.target.syllable_index));
+                  end if;
+                  if INS.compressed_opcode /= Jr          and then
+                        INS.compressed_opcode /= EXIT_n   and then
+                           locus /= address.order_word_number then
+                     -- The order flows on, so the next word cannot be data.
+                     unmark_as_a_data_word(address.order_word_number);
+                  elsif not (address.order_word_number/is_a_data_word) then
+                     -- The next syllable starts a block, iff it is not the end of a block.
+                     set_NIA_to(address);
+                     decode_the_next_order;
+                     if not is_an_invalid_order(INS) then
+                        mark_as_a_jump_target(address);
+                     end if;
+                  end if;
+               when one_syllable_order =>
+                  increment_by_1(address);
+               when two_syllable_order =>
+                  increment_by_2(address);
+               when data_access_order =>
+                  increment_by_3(address);
+            end case;
+         end if;
+      exit when address.order_word_number = KDF9.order_word_number'Last;
+      end loop;
+   end reset_wrong_data_marks;
+
+   procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
+      start_point : KDF9.syllable_address;
+   begin
+      mark_as_a_jump_target(address);
+      set_NIA_to(address);
+      decode_the_next_order;
+      if INS.kind = normal_jump_order then
          start_point := (INS.target.order_word_number, INS.target.syllable_index);
          mark_all_code_blocks(start_point);
          mark_all_data_blocks(start_point);
          reset_wrong_data_marks(start_point);
+      end if;
+   end mark_the_words_reachable_from;
+
+   procedure markup_a_problem_program is
+   begin
+      if the_initial_jump_was_corrupted then
+         -- We cannot sensibly locate the order words using E0  ...
+         log_new_line;
+         log_line("The initial jump, in E0U, has been corrupted!");
+         log_new_line;
+         show_core_as_syllables((0, syllable_index => 0), (0, syllable_index => 5));
+         --  ... so restore it to the value it had on loading.
+         restore_the_initial_jump;
+         log_line("E0U has been restored to the value it had on loading.");
+         log_new_line;
+      end if;
+
+      -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
+
+      mark_the_words_reachable_from((0, syllable_index => 0));
+      mark_the_words_reachable_from((4, syllable_index => 0));
+      mark_the_words_reachable_from((4, syllable_index => 3));
+
+      -- Mark the words between E0 and P0 as data, skipping E4.
+      mark_as_a_data_word(1);
+      mark_as_a_data_word(2);
+      mark_as_a_data_word(3);
+      set_NIA_to((0, syllable_index => 0));
+      decode_the_next_order;
+      for d in 5 .. INS.target.order_word_number-1 loop
+         mark_as_a_data_word(d);
+      end loop;
+
+      the_program_has_been_analysed := True;
+   end markup_a_problem_program;
+
+   -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
+   procedure markup_a_Director (pre_run : in Boolean) is
+
+--        procedure deal_with_a_3_syllable_order (address : in KDF9.syllable_address) is
+--        begin
+--           set_NIA_to(address);
+--           decode_the_next_order;
+--
+--           if INS.kind = normal_jump_order then
+--              mark_the_words_reachable_from(address);
+--           elsif INS.kind = data_access_order then
+--              -- Mark a feasible operand as data.
+--              if INS.operand < 8192 then
+--                 declare
+--                    operand : constant KDF9.order_word_number := KDF9.order_word_number(INS.operand);
+--                 begin
+--                    if INS.compressed_opcode /= KDF9.decoding.SET and then
+--                          not is_a_jump_target(operand)               then
+--                       mark_as_a_data_word(operand);
+--                    end if;
+--                 end;
+--              end if;
+--           else
+--              -- Treat it as code.
+--              mark_as_a_jump_target(address);
+--           end if;
+--        end deal_with_a_3_syllable_order;
+--
+--        procedure show_flags (a : in KDF9.order_word_number) is
+--        begin
+--           log_line(a'Image & ":  "
+--            & (if analysis_flags(a)(is_a_code_word) then "CODE " else "DATA ")
+--            & (if analysis_flags(a)(0) then "T" else " ")
+--            & (if analysis_flags(a)(1) then "T" else " ")
+--            & (if analysis_flags(a)(2) then "T" else " ")
+--            & (if analysis_flags(a)(3) then "T" else " ")
+--            & (if analysis_flags(a)(4) then "T" else " ")
+--            & (if analysis_flags(a)(5) then "T" else " ")
+--             );
+--        end show_flags;
+
+   begin
+      the_program_has_been_analysed := False;
+      BA := 0;  -- Director starts at physical word 0.
+
+      -- It does not have a jump in E0U, unlike problem programs.
+      -- Instead it has a fixed sequence of orders to reset the hardware.
+      -- Before intialization, it is: K4; SHL+63; =+Q0; with the code: #3740416437675016.
+      -- After intialization,  it is: Q0; SHL+63; =+Q0; with the code: #3620716437675016.
+
+       -- Check that we do actually have a Director to examine.
+
+      if pre_run then
+         if fetch_word(0) /= 8#3740416437675016# then
+            log_line("The loaded program is not a Director bootstrap!");
+            return;
+         else
+            log_line("The loaded program is a Director bootstrap.");
          end if;
-      end mark_the_words_reachable_from;
 
-      procedure markup_a_problem_program is
-      begin
-         if the_initial_jump_was_corrupted then
-            -- We cannot sensibly locate the order words using E0  ...
-            log_new_line;
-            log_line("The initial jump, in E0U, has been corrupted!");
-            log_new_line;
-            show_core_as_syllables((0, 0), (5, 0));
-            --  ... so restore it to the value it had on loading.
-            restore_the_initial_jump;
-            log_line("E0U has been restored to the value it had on loading.");
-            log_new_line;
-         end if;
-
-         -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
-
-         mark_the_words_reachable_from((0, 0));
-         mark_the_words_reachable_from((0, 4));
-         mark_the_words_reachable_from((1, 4));
-
-         -- Mark the words between E0 and P0 as data, skipping E4.
-         mark_as_a_data_word(1);
-         mark_as_a_data_word(2);
-         mark_as_a_data_word(3);
-         set_NIA_to((0, 0));
-         decode_the_next_order;
-         for d in 5 .. INS.target.order_word_number-1 loop
-            mark_as_a_data_word(d);
+         -- The jumps in E2 and E4 are absent until after Director's initialzation,
+         --    so they are not present in a pre-run state.
+         -- All 9 words of the bootstrap are filled with instructions.
+         for w in order_word_number'(0) .. 8 loop
+            mark_as_a_code_word(w);
          end loop;
-
+         mark_as_a_jump_target((0, 0));
          the_program_has_been_analysed := True;
-      end markup_a_problem_program;
-
-      -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
-      procedure markup_a_Director is
-
-      begin
-         BA := 0;  -- Director starts at physical word 0.
-
-         mark_as_a_code_word(0);
-         mark_as_a_code_word(1);
-         mark_as_a_code_word(2);
-         mark_as_a_data_word(3);
-         mark_as_a_code_word(4);
-
-         for a in nominated_address .. 3200 loop  -- 3200 was the size of the Eldon 2 Director.
-            -- mark_as_a_code_word(a);
-            -- mark_as_a_jump_target((a, 0));
-            set_NIA_to((a, 0));
-            decode_the_next_order;
-            if INS.kind = normal_jump_order then
-               mark_the_words_reachable_from((a, 0));
-            elsif INS.kind = data_access_order then
-               if INS.operand < 8192 then
-                  declare
-                     operand : constant KDF9.order_word_number
-                             := KDF9.order_word_number(INS.operand);
-                  begin
-                     if INS.compressed_opcode /= KDF9.decoding.SET and then
-                           not is_a_jump_target(operand)               then
-                        mark_as_a_data_word(operand);
-                     end if;
-                  end;
-               end if;
-             else
-                mark_as_a_jump_target((a, 0));
-            end if;
-            set_NIA_to((a, 3));
-            decode_the_next_order;
-            if INS.kind = normal_jump_order then
-               mark_the_words_reachable_from((a, 3));
-            elsif INS.kind = data_access_order then
-               if INS.operand < 8192 then
-                  declare
-                     operand : constant KDF9.order_word_number
-                             := KDF9.order_word_number(INS.operand);
-                  begin
-                     if INS.compressed_opcode /= KDF9.decoding.SET and then
-                           not is_a_jump_target(operand)               then
-                        mark_as_a_data_word(operand);
-                     end if;
-                  end;
-               end if;
-             else
-                mark_as_a_jump_target((a, 3));
-            end if;
-         end loop;
-
-         -- Mark all orders reachable from the initial jump(s).
-
-         set_NIA_to((order_word_number => 2, syllable_index => 0));
-         decode_the_next_order;
-         if INS.kind /= normal_jump_order then
-            log_line("An initial jump, in E2U, has not been found!");
-         else
-            mark_the_words_reachable_from((0, 2));
-            -- Mark the words between E4 and P0 as data.
-            set_NIA_to((0, 2));
-            decode_the_next_order;
-            for d in 5 .. INS.target.order_word_number-1 loop
-               mark_as_a_data_word(d);
-            end loop;
-            the_program_has_been_analysed := True;
-         end if;
-
-         set_NIA_to((0, 4));
-         decode_the_next_order;
-         if INS.kind /= normal_jump_order then
-            log_line("An expected jump, in E4U, has not been found!");
-            return;
-         else
-            mark_the_words_reachable_from((0, 4));
-            the_program_has_been_analysed := True;
-         end if;
-
-         set_NIA_to((1, 4));
-         decode_the_next_order;
-         if INS.kind /= normal_jump_order then
-            log_line("An expected jump, in E4L, has not been found!");
-            return;
-         else
-            mark_the_words_reachable_from((1, 4));
-            the_program_has_been_analysed := True;
-         end if;
-      end markup_a_Director;
-
-   begin -- mark_all_code_blocks_and_data_blocks
-      if the_program_has_been_analysed then
          return;
       end if;
 
-      clear_all_analysis_flags;
+      if fetch_word(0) /= 8#3620716437675016# then
+         log_line("The loaded program is not a Director!");
+         return;
+      else
+         log_line("The loaded program is a Director.");
+      end if;
 
+      -- An initialised Director has a number of jumps in words 2 and 4, but not word 0.
+      -- Give up if these are absent.
+
+      set_NIA_to((2, syllable_index => 0));
+      decode_the_next_order;
+      if INS.kind /= normal_jump_order then
+         log_line("An expected jump, in E2U, has not been found!");
+         return;
+      end if;
+      mark_as_a_jump_target((2, syllable_index => 0));
+      mark_the_words_reachable_from((2, syllable_index => 0));
+      mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+      set_NIA_to((4, syllable_index => 0));
+      decode_the_next_order;
+      if INS.kind /= normal_jump_order then
+         log_line("An expected jump, in E4U, has not been found!");
+         return;
+      end if;
+      mark_as_a_jump_target((4, syllable_index => 0));
+      mark_the_words_reachable_from((4, syllable_index => 0));
+      mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+
+      set_NIA_to((4, syllable_index => 3));
+      decode_the_next_order;
+      if INS.kind /= normal_jump_order then
+         log_line("An expected jump, in E4L, has not been found!");
+         return;
+      end if;
+      mark_as_a_jump_target((4, syllable_index => 3));
+      mark_the_words_reachable_from((4, syllable_index => 3));
+      mark_as_a_jump_target((INS.target.order_word_number, INS.target.syllable_index));
+
+      -- E0 is marked because interrupts cause a jump to it, in effect.
+      mark_as_a_jump_target((0, syllable_index => 0));
+
+      -- Mark E3 and E5 through AP0 - 1 as data words.
+      mark_as_a_data_word(3);
+      set_NIA_to((2, 0));
+      decode_the_next_order;
+      for d in 5 .. INS.target.order_word_number-1 loop
+         mark_as_a_data_word(d);
+      end loop;
+
+      the_program_has_been_analysed := True;
+   end markup_a_Director;
+
+   procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean) is
+   begin
+      clear_all_analysis_flags;
       if the_execution_mode = boot_mode  then
-         markup_a_Director;
+         markup_a_Director(pre_run);
       else
          markup_a_problem_program;
       end if;
-
-      if nominated_address < invalid_address then
-         mark_the_words_reachable_from((nominated_address, 0));
+      -- Do a second marking for (e.g.) an overlaid area of a Director, at a specified address.
+      if root_address < 8191 then
+         mark_the_words_reachable_from((root_address, 0));
       end if;
-
    end mark_all_code_blocks_and_data_blocks;
 
    procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
                                     octal_option : in Boolean) is
 
       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
-      saved_CIA   : constant KDF9.syllable_address := CIA;
-      last_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
-      comparator  : KDF9.word := last_word;
-      this_word   : KDF9.word;
+      prev_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
+      comparator  : KDF9.word := prev_word;
       address     : KDF9.syllable_address;
+      this_word   : KDF9.word;
 
-      procedure show_a_block_of_orders is
+      procedure show_a_block_of_orders (address : in out KDF9.syllable_address) is
 
          function is_a_store_order (decoded : KDF9.decoded_order)
          return Boolean
@@ -1952,7 +1984,8 @@ package body state_display is
                    when TO_MkMq   | TO_MkMqQ
                       | TO_MkMqH  | TO_MkMqQH
                       | TO_MkMqN  | TO_MkMqQN
-                      | TO_MkMqHN | TO_MkMqQHN => True,
+                      | TO_MkMqHN | TO_MkMqQHN
+                      | TO_Kq     | TO_LINK    => True,
                    when others                 => False
                 )
              elsif decoded.kind = data_access_order then
@@ -1989,32 +2022,36 @@ package body state_display is
             end if;
          end set_at_new_line;
 
-      last_nz_location : KDF9.syllable_address;
+         last_nz_location : KDF9.syllable_address;
 
       begin -- show_a_block_of_orders
          this_word := fetch_word(KDF9.address(address.order_word_number));
 
-         if this_word+1 < 2 or this_word = six_DUMMIES then
-            -- The word is not worth logging.
+         if this_word in not 0 | 0 | six_DUMMIES then
+            -- The word is not worth logging.  Step on.
             address := (address.order_word_number+1, 0);
             return;
          end if;
 
-         -- Log useful information about data words.
+         -- Handle data words.
          if address.order_word_number/is_a_data_word then
             set_at_new_line;
          end if;
          loop
             if address.order_word_number/is_a_data_word then
                last_nz_location := address;
+
                -- Display a line of data.
                log(oct_or_dec_of(address, octal_option) & ": ");
                set_line_at(jump_tab);
                show_in_various_formats(fetch_word(KDF9.address(address.order_word_number)),
                                        column => jump_tab);
                log_new_line;
+
+               -- Skip over any following zero words (DUMMY0 or uninitialized V stores).
                loop
                   if address.order_word_number = last.order_word_number then
+                     -- The whole block has been processed.
                      return;
                   end if;
                   address := (address.order_word_number+1, 0);
@@ -2025,35 +2062,42 @@ package body state_display is
                   log_new_line;
                end if;
             else
+               -- We have found an instruction word.
                log_new_line;
-               exit;
+         exit;
             end if;
          end loop;
 
+         -- Handle instruction words.
          loop
          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
          exit when address.order_word_number = 8191;
             this_word := fetch_word(KDF9.address(address.order_word_number));
-            if this_word = comparator and this_word = last_word then
-               -- The word is not worth logging.
+
+            -- Suppress output of more than 1 of a block of equal values.
+            if this_word = comparator and this_word = prev_word then
+               -- The word is not worth logging.  Step on.
                address := (address.order_word_number+1, 0);
                return;
             end if;
 
-            if this_word+1 < 2 or this_word = six_DUMMIES then
+            if this_word in not 0 | 0 | six_DUMMIES then
+               -- Take this word as the new basis for comparison.
                comparator := this_word;
             end if;
 
+            -- This updates the Instruction word buffers.  Nasty side effect that has to be undone!
             set_NIA_to(address);
             decode_the_next_order;
             if is_an_invalid_order(INS) then
-               -- The word is not worth logging.
+               -- The word is not worth logging.  Step on.
                address := (address.order_word_number+1, 0);
                return;
             end if;
 
             if is_a_jump_target(address) then
-               -- Start a code paragraph, with its address for easy reference.
+               -- Jumps go at the start of a fresh line for best visibility.
+               -- Label the jump with its address at the start of the line for easy reference.
                set_at_new_line;
                log(oct_or_dec_of(address, octal_option) & ": ");
                log_new_line;
@@ -2067,22 +2111,25 @@ package body state_display is
                   case INS.compressed_opcode is
                      when JCqNZS =>
                         set_line_at(jump_tab);
-                     when  CT_PMB_PMC_BUSY_Qq
-                        |  PAR_Qq
-                        |  PMF_PMG_Qq
-                        |  PIA_PIC_CLO_TLO_Qq
-                        |  PIB_PID_Qq
-                        |  PIE_PIG_Qq
-                        |  PIF_PIH_Qq
-                        |  POA_POC_POE_POF_PMH_Qq
-                        |  POB_POD_Qq
-                        |  POG_POL_Qq
-                        |  POH_POK_Qq
-                        |  PMA_PMK_INT_Qq
-                        |  PMA_PMK_INT_Qq+1
-                        |  PMD_PME_PML_Qq
-                        |  PMD_PME_PML_Qq+1 =>
+                     when CT_PMB_PMC_BUSY_Qq
+                        | PAR_Qq
+                        | PMF_PMG_Qq
+                        | PIA_PIC_CLO_TLO_Qq
+                        | PIB_PID_Qq
+                        | PIE_PIG_Qq
+                        | PIF_PIH_Qq
+                        | POA_POC_POE_POF_PMH_Qq
+                        | POB_POD_Qq
+                        | POG_POL_Qq
+                        | POH_POK_Qq
+                        | PMA_PMK_INT_Qq
+                        | PMA_PMK_INT_Qq+1
+                        | PMD_PME_PML_Qq
+                        | PMD_PME_PML_Qq+1 =>
                         set_line_at(first_tab);
+                     when TO_Kq
+                        | TO_LINK =>
+                        set_line_at(jump_tab);
                      when others =>
                         if panel_logger.column < first_tab then
                            set_line_at_minimum(first_tab);
@@ -2105,51 +2152,56 @@ package body state_display is
             end case;
 
             if address.order_word_number = last.order_word_number then
+               -- All done with this block.
                log_new_line;
                return;
             end if;
 
-            if (address.order_word_number+1)/is_a_data_word or
-                  address.order_word_number > last.order_word_number then
+            if (address.order_word_number+1)/is_a_data_word then
+               -- We have reached the end of the orders and are about to run into data.
                return;
             end if;
 
             if is_a_store_order(INS)                   or else
-                  INS.compressed_opcode = JCqNZS                or else
+                  INS.compressed_opcode = JCqNZS       or else
                      INS.kind = normal_jump_order      or else
                         panel_logger.column > last_column then
+               -- Make store to core and jump orders end their line for best visibility.
                log_new_line;
-            elsif this_word = comparator and this_word /= last_word then
+            elsif this_word = comparator and this_word /= prev_word then
+               -- Display the placeholder of a suppressed group of equal words.
                log_new_line;
                log_line("==========  #"
                       & oct_of(KDF9.syllable(this_word and 255))
                       & "  ==========");
                address := (address.order_word_number+1, 0);
-               if address.order_word_number > last.order_word_number or
-                     address.order_word_number/is_a_data_word then
+               if address.order_word_number > last.order_word_number or else
+                     address.order_word_number/is_a_data_word           then
+                  -- We have reached the end of the orders or are about to run into data.
                   return;
                end if;
             end if;
-
-            last_word := this_word;
+            prev_word := this_word;
 
          end loop;
 
       end show_a_block_of_orders;
 
-   begin
+   begin -- show_core_as_Usercode
+      if not the_program_has_been_analysed then
+         mark_all_code_blocks_and_data_blocks(pre_run => False);
+      end if;
       if the_program_has_been_analysed then
          log_line("Core store interpreted as instructions.");
-         BA := 0; -- Ensure that physical store is examined when running in boot mode.
+          -- Ensure that physical store is examined when running in boot mode.
+         BA := 0;
          address := first;
          loop
-            show_a_block_of_orders;
+            show_a_block_of_orders(address);
             exit when address.order_word_number >= last.order_word_number;
          end loop;
          log_new_line;
          log_rule;
-         CIA := saved_CIA;
-         decode_the_next_order;
       else
          log_line(" ... Core store cannot be interpreted as instructions!");
          log_new_line;

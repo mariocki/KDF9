@@ -1,6 +1,6 @@
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This program is an auxiliary of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or
@@ -124,29 +124,29 @@ procedure mtp is
       begin
          -- Fail a too-short parameter.
          if argument'Length < 3 then
-            complain("'" & argument & "' is too short");
+            complain("«" & argument & "» is too short");
          end if;
 
          -- Fail a too-long parameter.
          if argument'Length > 6 then
-            complain("'" & argument & "' is too long");
+            complain("«" & argument & "» is too long");
          end if;
 
          -- Fail a non-MT parameter.
          if argument(1..2) not in "MT" | "ST" or else
                argument(3) not in '0' .. '7'     then
-            complain("'" & argument & "' is not a valid MT unit");
+            complain("«" & argument & "» is not a valid MT unit");
          end if;
 
          -- Fail an impossible analysis suffix.
          if argument'Length >= 4 then
             if argument(4) not in option_flags then
-               complain("'" & argument(4) & "' is not a valid option");
+               complain("«" & argument(4) & "» is not a valid option");
             end if;
             if argument(4) = 'T' then
                the_mode := plain_text_printing;
                if argument'Length > 4 then
-                  complain("'" & argument & "' is not a valid parameter (too long)");
+                  complain("«" & argument & "» is not a valid parameter (too long)");
                end if;
                return;
             end if;
@@ -158,19 +158,19 @@ procedure mtp is
 
          -- Handle despooling parameter(s).
          if argument'Length < 6 then
-            complain("'" & argument & "' is not a valid OUT8 despooling parameter (too short)");
+            complain("«" & argument & "» is not a valid OUT8 despooling parameter (too short)");
          end if;
 
          the_mode := OUT8_despooling;
          if argument(4) not in slot_names then
-               complain("'" & argument(5) & "' is not a valid TSD slot");
+               complain("«" & argument(5) & "» is not a valid TSD slot");
          end if;
          slot_id := argument(4);
          if argument(5) not in '1' | '3' | '5' | '7' then
-            complain("'" & argument(5..6) & "' is not a valid OUT8 stream number");
+            complain("«" & argument(5..6) & "» is not a valid OUT8 stream number");
          end if;
          if argument(6) not in '0' .. '7' then
-            complain("'" & argument(5..6) & "' is not a valid OUT8 stream number");
+            complain("«" & argument(5..6) & "» is not a valid OUT8 stream number");
          end if;
          stream_id := argument(5..6);
          an_LP_stream     := stream_id(1) in '3' | '7';
@@ -675,11 +675,11 @@ begin -- mtp
                return;
             else
                print_line(
-                          "TAPE LABEL TSN '"
+                          "TAPE LABEL TSN «"
                         & the_data(1..8)
-                        & "', IDENTIFIER '"
+                        & "», IDENTIFIER «"
                         & the_data(9..slice_size)
-                        & "'"
+                        & "»"
                          );
                print_line;
             end if;

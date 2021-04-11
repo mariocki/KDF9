@@ -1,6 +1,6 @@
 -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -91,7 +91,7 @@ package body KDF9.TSD.spooling is
                          ((S = KDF9_char_sets.Semi_Colon) and (c /= 7 or  w = Q.M)) then
                    trap_failing_OUT(this_OUT, "invalid data for OUT 8 to FW");
                 end if;
-         exit word_loop when S = KDF9_char_sets.Semi_Colon or S = KDF9_char_sets.End_Message;
+         exit word_loop when S in KDF9_char_sets.Semi_Colon | KDF9_char_sets.End_Message;
              end loop;
          end loop word_loop;
 

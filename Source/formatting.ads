@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -82,7 +82,7 @@ package formatting is
    function oct_of (N : KDF9.word)
    return String;
 
-   -- Return "L', R'", or "L'" if R' is empty: "'" indicates removal of trailing blanks.
+   -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
    function "-" (L, R : String)
    return String;
 

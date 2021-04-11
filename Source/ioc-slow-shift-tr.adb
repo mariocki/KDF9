@@ -1,6 +1,6 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -272,7 +272,7 @@ package body IOC.slow.shift.TR is
       if the_reader.is_open then
          the_reader.current_case := KDF9_char_sets.Case_Normal;
       else
-         trap_operator_error("'" & next_file_name & "' cannot be found");
+         trap_operator_error("«" & next_file_name & "» cannot be found");
       end if;
    end reattach;
 
@@ -285,9 +285,8 @@ package body IOC.slow.shift.TR is
    end reset_loader_usage;
 
    -- This emulates the Director's program load from a designated  paper tape reader.
-   -- Once the loading is done, the tape reader is reattached to TR<unit>.
-
-   procedure load_a_program  (program_file_name : in String) is
+   -- Once the loading is done, the tape reader is reattached to TR0.
+   procedure load_a_program (program_file_name : in String) is
 
       -- This is the call sign for a program on Disc or Drum.
       CN_LS_D_LS : constant KDF9.word := (KDF9.word(Case_Normal)  * 2**18)
@@ -357,7 +356,10 @@ package body IOC.slow.shift.TR is
       -- Check for an unconditional jump at the start of the B block.
       if (fetch_word(0)/ 2**32 and 2#1111_0000_1111_0000#) /= 2#1000_0000_1011_0000# then
          -- The file is not a valid program tape.
-         trap_invalid_paper_tape("no jump was found in E0H");
+         trap_invalid_paper_tape("no jump was found in E0U: " & oct_of(fetch_word(0)));
+      else
+         -- Preserve the initial jump in case of corruption by a buggy program.
+         save_the_initial_jump;
       end if;
 
       -- At this point, E0 contains the first word of the B block, so get the rest of it in E1-E7.
@@ -376,9 +378,6 @@ package body IOC.slow.shift.TR is
       read_KDF9_tape_code(TR0.all, descriptor, loading_code => True);
 
       -- Set up the rest of the stored image.
-
-      -- Preserve the initial jump in case of corruption by a buggy program.
-      save_the_initial_jump;
 
       -- Set the (virtual) date in E7.
       store_word(todays_date_28n_years_ago, 7);
@@ -403,6 +402,20 @@ package body IOC.slow.shift.TR is
       clear_IOC_FIFO;
       reset_loader_usage(0);
    end load_a_program;
+
+   -- This emulates action of a Director call program, including:
+   --    1. Moving the JP0 order from E0U to E2U.
+   --    2. Inserting the interrupt handling code into E0 and E1, and
+   --    3. setting NIA to (4, 0) instead of (0, 0).
+   procedure load_a_bare_Director (program_file_name : in String) is
+
+   begin -- load_a_bare_Director
+      load_a_program(program_file_name);
+      store_halfword(fetch_halfword(0, index => 0), 2, index => 0);
+      store_word(8#3620716437675016#, 0); -- #171 #016 #164 #177 #172 #016: Q0; SHL+63; =+Q0;
+      store_word(8#6114000037240052#, 1); -- #304 #300 #000 #175 #100 #052: SETB140000;; =K1; ERASE
+      set_NIA_to((4, 0));
+   end load_a_bare_Director;
 
    -- TR0 is the hardware bootstrap device for reading initial orders.
    procedure boot_the_KDF9 (program_file_name : in String) is

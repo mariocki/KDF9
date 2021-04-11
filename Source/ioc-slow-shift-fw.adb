@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,18 +26,13 @@ use  host_IO;
 
 package body IOC.slow.shift.FW is
 
-   use  KDF9_char_sets;
-   use  Ada.Characters.Latin_1;
-
    function a_LF_was_just_read (the_FW : FW.device)
    return Boolean
    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
 
-   function a_LF_was_just_written (the_FW : FW.device)
-   return Boolean
-   is (the_FW.mode = the_flexowriter_is_writing and then a_LF_was_just_written(the_FW.stream));
-
    max_text_length : constant Positive := 64;  -- This is arbitrary, but seems reasonable.
+   min_text_length : constant Positive :=  2;  -- This is arbitrary, but seems reasonable.
+
    type interaction is
       record
          text           : String(1 .. max_text_length);
@@ -46,7 +41,8 @@ package body IOC.slow.shift.FW is
       end record;
 
    max_interactions : constant Positive := 16; -- This is arbitrary, but seems reasonable.
-   interactions     : array (1 .. max_interactions) of IOC.slow.shift.FW.interaction;
+
+   interactions     : array (1 .. max_interactions) of FW.interaction;
    next_interaction : Positive := 1;
    last_interaction : Natural  := 0;
 
@@ -90,6 +86,18 @@ package body IOC.slow.shift.FW is
 
    overriding
    procedure Initialize (the_FW : in out FW.device) is
+
+      procedure complain (part_1         : in String;
+                          part_2, part_3 : in String := "")
+      with No_Return is
+         complaint : constant String := part_1 & part_2 & part_3;
+      begin
+         raise operator_error with complaint;
+      end complain;
+
+      the_data         : String(1 .. max_text_length+1);
+      the_data_length  : Natural;
+
       interaction_file : Ada.Text_IO.File_Type;
    begin
       ensure_UI_is_open;
@@ -102,28 +110,29 @@ package body IOC.slow.shift.FW is
          response_list_loop:
             while not End_of_File(interaction_file) loop
                if last_interaction = max_interactions then
-                  log_line("The file FW0 contains too many interactions!");
-                  raise Ada.Text_IO.Data_Error;
+                  complain("The file FW0 contains too many prompts");
                end if;
                last_interaction := last_interaction + 1;
+
+               Get_line(interaction_file, the_data, the_data_length);
+            exit response_list_loop when the_data_length = 0;
+               if the_data_length > max_text_length then
+                  complain("This FW0 prompt is too long: «", the_data, "»");
+               end if;
+               if the_data_length < min_text_length then
+                  complain("This FW0 prompt is too short: «", the_data(1..the_data_length), "»");
+               end if;
+
                declare
-                  interaction       : String  := Get_Line(interaction_file);
-                  the_prompt_length : Natural := 0;
+                  interaction : String  := the_data(1..the_data_length);
+                  prompt_length : Natural := 0;
                begin
-                  if interaction'Length > max_text_length then
-                     log_line(
-                              "The file FW0 contains an overlong string: '"
-                            & interaction
-                            & "'!"
-                             );
-                     raise Ada.Text_IO.Data_Error;
-                  end if;
-
-                  exit response_list_loop when interaction'Length = 0;
-
                   for p in 1 .. interaction'Length loop
                      if interaction(p) = ';' then
-                        the_prompt_length := p;
+                        if prompt_length /= 0 then
+                           complain("This FW0 prompt: «", interaction, "» has 2 semicolons");
+                        end if;
+                        prompt_length := p;
                      elsif interaction(p) = LF_surrogate then
                         -- Convert '®' to LF to allow for multi-line prompts.
                         interaction(p) := LF;
@@ -133,25 +142,20 @@ package body IOC.slow.shift.FW is
                      end if;
                   end loop;
 
-                  if the_prompt_length = 0 then
-                     log_line(
-                              "The file FW0 contains the string: '"
-                            & interaction
-                            & "' without the semicolon!"
-                             );
-                     raise Ada.Text_IO.Data_Error;
+                  if prompt_length = 0 then
+                     complain("This FW0 prompt: «", interaction, "» has no semicolon");
                   end if;
 
                   interactions(last_interaction).text(1 .. interaction'Length) := interaction;
-                  interactions(last_interaction).prompt_length := the_prompt_length;
+                  interactions(last_interaction).prompt_length := prompt_length;
                   interactions(last_interaction).total_length := interaction'Length;
                end;
             end loop response_list_loop;
          exception
             when Name_Error =>
-               null;
+               complain("The file FW0 is absent");
             when Use_Error =>
-               log_line("The file FW0 exists, but cannot be read!");
+               complain("The file FW0 exists, but cannot be read");
          end;
       end if;
       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
@@ -186,7 +190,7 @@ package body IOC.slow.shift.FW is
          begin
             if the.prompt_length = the.total_length then
                -- A null response, so terminate the program.
-               raise exceptions.quit_request with "at the prompt: '" & the_prompt & "'";
+               raise exceptions.quit_request with "at the prompt: «"& the_prompt & "»";
             end if;
             next_interaction := next_interaction + 1;
             if the.text(1..the.prompt_length-1) = the_prompt and then
@@ -321,11 +325,11 @@ package body IOC.slow.shift.FW is
    begin
       for i in s'Range loop
          l := i;
-      exit when s(i) > ' ' and s(i) /= DEL;
+      exit when s(i) > SP and s(i) /= DEL;
       end loop;
       for i in reverse s'Range loop
          r := i;
-      exit when s(i) > ' ' and s(i) /= DEL;
+      exit when s(i) > SP and s(i) /= DEL;
       end loop;
       return s(l..r);  -- s(1..0) yields the null string when s is the null string.
    end neat;
@@ -436,7 +440,7 @@ package body IOC.slow.shift.FW is
 
                when the_flexowriter_is_reading =>
                   get_char(char, the_FW.stream);
-                  if case_of(char) /= both and case_of(char) /= the_FW.current_case then
+                  if case_of(char) not in both | the_FW.current_case then
                      store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
                      size := size + 1;
                      the_FW.current_case := the_FW.current_case xor 1;
@@ -666,4 +670,3 @@ package body IOC.slow.shift.FW is
    end enable;
 
 end IOC.slow.shift.FW;
-

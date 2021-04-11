@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -739,8 +739,8 @@ package body KDF9.microcode is
 
          when JCqNZS =>
             if CIA.syllable_index = 5 then
-               -- KDF9 did not actually detect this error, and the JCqNZS instruction often worked,
-               --    unless broken-into by an interrupt, which returned to the word following that
+               -- KDF9 did not actually detect this error, and the JCqNZS instruction would work
+               --    until broken-into by an interrupt, which returned to the word following that
                --       containing the first syllable of the JCqNZS instruction.
                -- I see no case for reproducing this behaviour.
                trap_illegal_instruction ("JCqNZS instruction at syllable 5");
@@ -1505,7 +1505,7 @@ package body KDF9.microcode is
             if the_signature_is_enabled then
                update_the_digital_signature;
             end if;
-            if the_histogram_is_enabled then
+            if histogramming_is_enabled then
                add_INS_to_the_histogram;
                add_CIA_to_the_profile;
             end if;

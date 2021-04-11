@@ -1,6 +1,6 @@
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -137,7 +137,7 @@ package body dumping is
          Usercode_wanted := Usercode_wanted or d.format_set/Usercode_flag;
       end loop;
       if Usercode_wanted then
-         mark_all_code_blocks_and_data_blocks;
+         mark_all_code_blocks_and_data_blocks(pre_run => flag = initial_flag);
       end if;
       for d of dumping_areas loop
          if d.format_set/flag then

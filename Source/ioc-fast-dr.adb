@@ -1,6 +1,6 @@
 -- Emulation of a drum store.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -151,11 +151,13 @@ package body IOC.fast.DR is
       end if;
    end increment;
 
+   a_zero_sector   : constant DR.sector := (others => SP);
+
    procedure read_drum (the_DR    : in out DR.device;
                         Q_operand : in KDF9.Q_register) is
       end_address  : constant KDF9.address := Q_operand.M;
       next_address : KDF9.address := Q_operand.I;
-      the_sector   : DR.sector := (others => Character'Val(0));
+      the_sector   : DR.sector := a_zero_sector;
       symbol_nr    : KDF9_char_sets.symbol_index;
       size         : KDF9.word := 0;
       the_index    : KDF9.word;
@@ -208,13 +210,13 @@ package body IOC.fast.DR is
                               Q_operand : in KDF9.Q_register) is
       end_address  : constant KDF9.address := Q_operand.M;
       next_address : KDF9.address := Q_operand.I;
-      the_sector   : DR.sector := (others => Character'Val(0));
-      at_EM     : Boolean := False;
-      symbol_nr : KDF9_char_sets.symbol_index;
-      size      : KDF9.word := 0;
-      the_index : KDF9.word;
+      the_sector   : DR.sector := a_zero_sector;
+      at_EM        : Boolean := False;
+      symbol_nr    : KDF9_char_sets.symbol_index;
+      size         : KDF9.word := 0;
+      the_index    : KDF9.word;
       latency,
-      busy_time : KDF9.us;
+      busy_time    : KDF9.us;
    begin
       check_addresses_and_lockouts(next_address, end_address);
       the_index := validated_drum_address(the_DR, Q_operand.C);
@@ -311,12 +313,12 @@ package body IOC.fast.DR is
                          Q_operand : in KDF9.Q_register) is
       end_address  : constant KDF9.address := Q_operand.M;
       next_address : KDF9.address := Q_operand.I;
-      the_sector   : DR.sector := (others => Character'Val(0));
-      symbol_nr : KDF9_char_sets.symbol_index;
-      size      : KDF9.word := 0;
-      the_index : KDF9.word;
+      the_sector   : DR.sector := a_zero_sector;
+      symbol_nr    : KDF9_char_sets.symbol_index;
+      size         : KDF9.word := 0;
+      the_index    : KDF9.word;
       latency,
-      busy_time : KDF9.us;
+      busy_time    : KDF9.us;
    begin
       check_addresses_and_lockouts(next_address, end_address);
       the_index := validated_drum_address(the_DR, Q_operand.C);
@@ -361,13 +363,13 @@ package body IOC.fast.DR is
                                Q_operand : in KDF9.Q_register) is
       end_address  : constant KDF9.address := Q_operand.M;
       next_address : KDF9.address := Q_operand.I;
-      the_sector   : DR.sector := (others => Character'Val(0));
-      at_EM     : Boolean := False;
-      size      : KDF9.word := 0;
-      symbol_nr : KDF9_char_sets.symbol_index;
-      the_index : KDF9.word;
+      the_sector   : DR.sector := a_zero_sector;
+      at_EM        : Boolean := False;
+      size         : KDF9.word := 0;
+      symbol_nr    : KDF9_char_sets.symbol_index;
+      the_index    : KDF9.word;
       latency,
-      busy_time : KDF9.us;
+      busy_time    : KDF9.us;
    begin
       check_addresses_and_lockouts(next_address, end_address);
       the_index := validated_drum_address(the_DR, Q_operand.C);
@@ -413,7 +415,7 @@ package body IOC.fast.DR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      POA(the_DR, Q_operand, Set_offline);
+      POA(the_DR, Q_operand, set_offline);
    end POC;
 
    overriding
@@ -421,16 +423,13 @@ package body IOC.fast.DR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      POB(the_DR, Q_operand, Set_offline);
+      POB(the_DR, Q_operand, set_offline);
    end POD;
 
    procedure write_zeroes (the_DR      : in out DR.device;
-                           Q_operand   : in KDF9.Q_register;
-                           set_offline : in Boolean) is
-      pragma Unreferenced(set_offline);
+                           Q_operand   : in KDF9.Q_register) is
       start_address : constant KDF9.address := Q_operand.I;
       end_address   : constant KDF9.address := Q_operand.M;
-      the_sector    : constant DR.sector := (others => Character'Val(0));
       size      : KDF9.word := 0;
       the_index : KDF9.word;
       latency,
@@ -444,7 +443,7 @@ package body IOC.fast.DR is
             trap_failing_IO_operation(the_DR, "writing more would exceed the storage available");
          end if;
          validate_the_sector_number(the_DR, the_index);
-         put(the_DR, the_sector, the_index);
+         put(the_DR, a_zero_sector, the_index);
          size := size + bytes_per_sector;
          the_index := the_index + 1;
       end loop;
@@ -458,9 +457,10 @@ package body IOC.fast.DR is
    procedure POE (the_DR      : in out DR.device;
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
+      pragma Unreferenced(set_offline);
    begin
       validate_transfer(the_DR, Q_operand);
-      write_zeroes(the_DR, Q_operand, set_offline);
+      write_zeroes(the_DR, Q_operand);
    end POE;
 
    overriding
@@ -468,7 +468,7 @@ package body IOC.fast.DR is
                   Q_operand   : in KDF9.Q_register;
                   set_offline : in Boolean) is
    begin
-      POE(the_DR, Q_operand, Set_offline);
+      POE(the_DR, Q_operand, set_offline);
    end POF;
 
    overriding

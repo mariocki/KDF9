@@ -1,3 +1,4 @@
+ST30000 ; TL 5000 ;
 V9; W0;
 YS26000;
 RESTART; J999; J999;
@@ -24,6 +25,7 @@ PROGRAM;                   (main program);
       SETAV6; =RM9;
       SETAV3; =I9;
       TWQ9;                (write result to Flexowriter);
+      INTQ9;
 
 999;  ZERO; OUT;           (terminate run);
 

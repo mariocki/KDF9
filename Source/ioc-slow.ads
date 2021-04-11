@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -42,8 +42,9 @@ private
 
    type device is abstract new IOC.device with
       record
-         is_transcribing : Boolean := True;
-         byte_count      : KDF9.word := 0;
+         is_transcribing   : Boolean := True;
+         is_reading_a_file : Boolean := True;
+         byte_count        : KDF9.word := 0;
       end record;
 
    overriding
@@ -75,11 +76,10 @@ private
                                   set_offline  : in Boolean;
                                   operation    : in IOC.transfer_kind := some_other_operation);
 
-   -- Read a character from the stream and deal with any input file concatenation.
+   procedure deal_with_end_of_data (the_buffer : in out slow.device);
+
+   -- Read a raw byte from the stream and deal with any input file concatenation.
    procedure get_char_from_stream (char       : out Character;
                                    the_buffer : in out slow.device);
 
-   -- Read a raw byte from the stream and deal with any input file concatenation.
-   procedure get_byte_from_stream (byte       : out Character;
-                                   the_buffer : in out slow.device);
 end IOC.slow;

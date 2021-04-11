@@ -6,7 +6,7 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -128,19 +128,6 @@ package body HCI is
          log_ee9_status(message, skip, True);
       end if;
    end log_API_message;
-
-   procedure hoot (message : in String := "") is
-   begin
-      panel_logger.log(message & Character'Val (7));  -- Append a BEL to the message.
-   end hoot;
-
-   procedure show (message : in String) is
-   begin
-      if debugging_is_enabled then
-         panel_logger.show(message);
-         flush;
-      end if;
-   end show;
 
    procedure show_line (message : in String) is
    begin

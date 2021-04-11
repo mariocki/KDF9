@@ -1,4 +1,4 @@
--- This file is an auxiliary of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -27,6 +27,8 @@ use  Ada.Characters.Latin_1;
 use  KDF9_char_sets;
 use  OS_specifics;
 use  POSIX;
+
+with KDF9_char_sets.framed;
 
 procedure a2b is
 
@@ -61,17 +63,17 @@ procedure a2b is
 
       -- Fail any non-flag parameter.
       if argument_1(1) /= '-'  then
-         complain("The parameter '" & argument_1 & "' is invalid");
+         complain("The parameter «"& argument_1 & "» is invalid");
       end if;
 
       -- Fail a too-short flag parameter.
       if argument_1'Length < 4 then
-         complain("The parameter '" & argument_1 & "' is too short");
+         complain("The parameter «"& argument_1 & "» is too short");
       end if;
 
       -- Fail a too-long flag parameter.
       if argument_1'Length > 4 then
-         complain("The parameter '" & argument_1 & "' is too long");
+         complain("The parameter «"& argument_1 & "» is too long");
       end if;
 
       -- Check for a conversion parameter.
@@ -82,13 +84,13 @@ procedure a2b is
                      CLI.Argument(2)(1) in load_medium_flag_set then
             load_medium := CLI.Argument(2)(1);
          elsif CLI.Argument_Count = 2 then
-            complain("The parameter '" & CLI.Argument(2) & "' is invalid");
+            complain("The parameter «"& CLI.Argument(2) & "» is invalid");
          end if;
          return;
       end if;
 
       -- The flag is invalid.
-      complain("The parameter '" & argument_1 & "' is unrecognized");
+      complain("The parameter «"& argument_1 & "» is unrecognized");
    end check_flag_setting;
 
    type word is mod 2**48;
@@ -125,35 +127,6 @@ procedure a2b is
    return symbol
    is (CN_TR(c) or CS_TR(c));
 
-   function framed (s : symbol)
-   return Natural is
-      parity_bits  : constant syllable := 2#00_010_000#;
-      channel_bits : constant syllable := 2#10_000_000#;
-
-      function channel_8
-      return syllable
-      is (if s = 8#000# then channel_bits else 0);
-
-      function parity
-      return syllable is
-         frame  : syllable := syllable(symbol'Pos(s));
-         parity : syllable := 0;
-      begin -- parity
-         if s = 0 then return parity_bits; end if;
-         while frame /= 0 loop
-            parity := parity xor (frame mod 2);
-            frame  := frame / 2;
-         end loop;
-         return (if parity = 0 then 0 else parity_bits);
-      end parity;
-
-      low_4_bits : constant syllable := syllable(s and 2#001_111#);
-      top_2_bits : constant syllable := syllable(s and 2#110_000#);
-
-   begin -- framed
-      return syllable'Pos(channel_8 or (top_2_bits*2) or parity or low_4_bits);
-   end framed;
-
    procedure convert_Latin_1_to_paper_tape_code is
       input, output : String(1..1);
       bytes_in, bytes_out : Integer;
@@ -161,7 +134,7 @@ procedure a2b is
       loop
          bytes_in := POSIX.read(0, input, 1);
       exit when bytes_in /= 1;
-         output(1) := Character'Val(framed(abs input(1)));
+         output(1) := framed(abs input(1));
          bytes_out := POSIX.write(1, output, 1);
       exit when bytes_out /= 1;
       end loop;
@@ -190,7 +163,7 @@ procedure a2b is
       exit main_loop when last = 0;
          for c in 1 .. 8 loop
             s := symbol((w / 64**(8-c)) and 8#77#);
-            char(c) := Character'Val(framed(s));
+            char(c) := framed(s);
          end loop;
          bytes_out := POSIX.write(1, char, 8);
       exit main_loop when bytes_in < 1 or bytes_out < 8 or last < 6;
@@ -383,7 +356,7 @@ procedure a2b is
          the_tape(i) := abs(input(i));
       end loop;
       for i in 1..64 loop
-         output(i) := Character'Val(framed(the_tape(i)));
+         output(i) := framed(the_tape(i));
       end loop;
       bytes_out := POSIX.write(1, output, 64);
       if parity_count /= 0 then

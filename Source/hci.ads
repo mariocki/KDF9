@@ -6,7 +6,7 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -65,10 +65,6 @@ package HCI is
 
    procedure log_API_message (message  : in String;
                               skip     : in Natural := 1);
-
-   procedure hoot (message : in String := "");
-
-   procedure show (message : in String);
 
    procedure show_line (message : in String);
 

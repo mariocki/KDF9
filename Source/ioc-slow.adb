@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -90,8 +90,6 @@ package body IOC.slow is
    end reattach;
 
    procedure deal_with_end_of_data (the_buffer : in out slow.device) is
-      BEL      : constant String := (1 => Character'Val(7));   -- Audible prompt
-      response : response_kind;
 
       procedure reattach_the_text_file (name : in String) is
       begin
@@ -108,6 +106,8 @@ package body IOC.slow is
             raise operator_error;
          end if;
       end reattach_the_text_file;
+
+      response : response_kind;
 
    begin
       output_line(BEL & "");
@@ -127,6 +127,7 @@ package body IOC.slow is
             raise end_of_stream;
          elsif response = here_response then
             reattach(the_buffer, OS_specifics.UI_in_name);
+            the_buffer.is_reading_a_file := False;
             return;
          elsif response = at_response then
             declare
@@ -137,7 +138,7 @@ package body IOC.slow is
                return;
             exception
                when operator_error =>
-                  output_line(BEL & "ee9: The file '" & here & next & "' could not be found");
+                  output_line(BEL & "ee9: The file «"& here & next & "» could not be found");
             end;
          elsif response = name_response then
             declare
@@ -147,7 +148,7 @@ package body IOC.slow is
                return;
             exception
                when operator_error =>
-                  output_line(BEL & "ee9: The file '" & next & "' could not be found");
+                  output_line(BEL & "ee9: The file «"& next & "» could not be found");
             end;
          end if;
       end loop;
@@ -164,20 +165,6 @@ package body IOC.slow is
                           busy_time => time_needed,
                           operation => start_slow_transfer.operation);
    end start_slow_transfer;
-
-   procedure get_byte_from_stream (byte       : out Character;
-                                   the_buffer : in out slow.device) is
-   begin
-      loop
-         begin
-            get_byte(byte, the_buffer.stream);
-            return;
-         exception
-            when end_of_stream =>
-               deal_with_end_of_data(the_buffer);
-         end;
-      end loop;
-   end get_byte_from_stream;
 
    procedure get_char_from_stream (char       : out Character;
                                    the_buffer : in out slow.device) is

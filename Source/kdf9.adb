@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (6.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -411,7 +411,7 @@ package body KDF9 is
    empty_SJNS : constant SJNS := (others => (0, 0));
    empty_Q_s  : constant Q_store := (others => (0, 0, 0));
 
-   procedure reset_the_CPU_state is
+   procedure reset_the_CPU_state (initial_entry : KDF9.syllable_address) is
    begin
       the_context := 0;
       for bank of register_bank loop
@@ -428,7 +428,7 @@ package body KDF9 is
          reset_the_internal_registers(Director_state);
       end if;
       -- Setting NIA must follow program loading, as it fetches E0 into the IWBs.
-      set_NIA_to((0, 0));
+      set_NIA_to(initial_entry);
    end reset_the_CPU_state;
 
    procedure reset_the_program_state is
@@ -474,7 +474,7 @@ package body KDF9 is
                the_RFIR(caused_by_NOUV) := False;
             end if;
 
-         when test_program_mode =>
+         when privileged_mode =>
             -- Interrupts other than LOV and RESET are ignored.
             -- There is no need to accurately emulate the address placed by the hardware in JB.
             case caused_by_this is
@@ -523,7 +523,7 @@ package body KDF9 is
    procedure check_for_a_clock_interrupt is
       interval : KDF9.us;
    begin
-      -- Clock ticks are ignored in program_mode and test_program_mode.
+      -- Clock ticks are ignored in program_mode and privileged_mode.
       -- In boot_mode:
       --    they are actioned in program_state;
       --    they are deferred in Director_state: Director will eventually find the time for itself.
@@ -542,7 +542,7 @@ package body KDF9 is
          when program_mode =>
             -- The unprivileged program has attempted a privileged operation.
             raise LIV_exception with "%Director-only instruction";
-         when test_program_mode =>
+         when privileged_mode =>
             -- The privileged program is allowed to use privileged instructions.
             return;
          when boot_mode =>
@@ -572,7 +572,7 @@ package body KDF9 is
       -- The program has failed in a manner that could cause a LIV interrupt.
       case the_execution_mode is
          when program_mode
-            | test_program_mode =>
+            | privileged_mode =>
             raise LIV_exception with "%" & the_message;
          when boot_mode =>
             if the_CPU_state = program_state then
@@ -981,7 +981,7 @@ package body KDF9 is
    return Boolean
    is (
        (decoded.kind = data_access_order and then (decoded.order.syllable_0 and 2#101#) > 2#100#)
-         or else (decoded.kind = normal_jump_order and decoded.target.syllable_index > 5)
+         or else (decoded.kind = normal_jump_order and then decoded.target.syllable_index > 5)
             -- 0 is now treated as a valid DUMMY0 order for KAlgol
                or else decoded.order.syllable_0 = 8#006#
                   or else decoded.order.syllable_0 = 8#040#

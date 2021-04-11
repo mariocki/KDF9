@@ -1,4 +1,4 @@
-TSD=${DIRECTOR:-Binary/KKT40E007UPU}
+export TSD=${DIRECTOR:-Binary/KKT40E007UPU}
 cp FW0 FW0_copy
 
 cp FW0_for_Director FW0
@@ -8,10 +8,10 @@ miscellany=-m$2
 
 if [ "$mode" = "-d" ]
 then
-        ee9 -sb -df -TRkk -TPll  +${TSD};
+        ee9 -sb -df  "$miscellany" -TRkk -TPll  +${TSD};
 elif [ $mode = -df ]
 then
-   time ee9 -sb -df -TRkk -TPll  +${TSD};
+   time ee9 -sb -df  "$miscellany" -TRkk -TPll  +${TSD};
 elif [ $miscellany = -m ]
 then
         ee9 -sb "$mode" -TRkk -TPll  +${TSD};
