@@ -1,4 +1,6 @@
--- This file is an auxiliary of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+-- Convert a 6-bit KDF9 character to an 8-channel paper tape code frame.
+--
+-- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -11,8 +13,6 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
-
--- Convert a 6-bit KDF9 character to an 8-channel paper tape code frame.
 
 function KDF9_char_sets.framed (symbol : KDF9_char_sets.symbol)
 return Character is

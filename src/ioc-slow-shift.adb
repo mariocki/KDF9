@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -35,35 +35,6 @@ package body IOC.slow.shift is
       correct_transfer_time(the_device, read_in);
       the_device.byte_count := the_device.byte_count + read_in;
    end do_input_housekeeping;
-
-   procedure get_byte_from_stream (byte       : out Character;
-                                   the_device : in out shift.device) is
-   begin
-      loop
-         begin
-            get_byte(byte, the_device.stream);
-            if the_device.is_reading_a_file then
-               -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
-               return;
-            end if;
-            -- Reading from the terminal, the byte is in Latin-1 and must be converted.
-            -- This may entail interpolating shift characters.
-            if case_of(byte) not in both | the_device.current_case then
-               byte := framed(CN_TR(next_case(the_device.current_case)));
-               the_device.current_case := the_device.current_case xor 1;
-               back_off(the_device.stream);
-            elsif the_device.current_case = KDF9_char_sets.Case_Normal then
-               byte := framed(CN_TR(byte));
-            else
-               byte := framed(CS_TR(byte));
-            end if;
-            return;
-         exception
-            when end_of_stream =>
-               deal_with_end_of_data(the_device);
-         end;
-      end loop;
-   end get_byte_from_stream;
 
    procedure get_symbols (the_device    : in out shift.device;
                           Q_operand     : in KDF9.Q_register;
@@ -121,22 +92,75 @@ package body IOC.slow.shift is
       get_symbols(the_device, Q_operand, reading_to_EM => True);
    end read_to_EM;
 
+   procedure get_frame_from_stream (frame      : out Character;
+                                    the_device : in out shift.device) is
+   begin
+      loop
+         begin
+            get_byte(frame, the_device.stream);
+            if the_device.is_reading_a_file then
+               -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
+               return;
+            end if;
+            -- Reading from the terminal, the frame is in Latin-1 and must be converted.
+            -- This may entail interpolating a shift character.
+            if case_of(frame) not in both | the_device.current_case then
+               frame := framed(CN_TR(next_case(the_device.current_case)));
+               the_device.current_case := the_device.current_case xor 1;
+               back_off(the_device.stream);
+            elsif the_device.current_case = KDF9_char_sets.Case_Normal then
+               frame := framed(CN_TR(frame));
+            else
+               frame := framed(CS_TR(frame));
+            end if;
+            return;
+         exception
+            when end_of_stream =>
+               deal_with_end_of_data(the_device);
+         end;
+      end loop;
+   end get_frame_from_stream;
+
    procedure get_words (the_device    : in out shift.device;
                         Q_operand     : in KDF9.Q_register;
                         reading_to_EM : in Boolean) is
+
+      function deframed (byte : Character)
+      return KDF9.word is
+         data : KDF9.word;
+      begin -- deframed
+         -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+         data := KDF9.word(Character'Pos(byte));
+         return  (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
+              or (data and 2#0110_0000#)/2  -- D41-D42 -> D42-D43
+              or (data and 2#0001_0000#)*4  -- D43     -> D41
+              or (data and 2#1000_0000#);   -- D40     -> D40
+      end deframed;
+
       start_address : constant KDF9.address := Q_operand.I;
-      end_address   : constant KDF9.address := Q_operand.M;
-      size : KDF9.word := 0;
-      word : KDF9.word;
-      char : Character;
-   begin
+      end_address : constant KDF9.address := Q_operand.M;
+      size        : KDF9.word := 0;
+      word        : KDF9.word;
+      done        : Boolean;
+      char        : Character;
+
+   begin -- get_words
       check_addresses_and_lockouts(start_address, end_address);
       for w in start_address .. end_address loop
-         get_char_from_stream(char, the_device);
-         word := KDF9.word(Character'Pos(char));
-         size := size + 1;
+         if the_device.is_transcribing then
+            -- "transcribing" actually means "transparent" for character mode input.
+            get_char_from_stream(char, the_device);
+            word := KDF9.word(Character'Pos(char));
+            done := char = E_M;
+         else
+            -- KDF9 mode.
+            get_frame_from_stream(char, the_device);
+            word := deframed(char);
+            done := KDF9_char_sets.symbol(word and 8#77#) = End_Message;
+         end if;
          store_word(word, w);
-      exit when reading_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+         size := size + 1;
+      exit when reading_to_EM and done;
       end loop;
       do_input_housekeeping(the_device, read_in => size, stored => size);
    exception
@@ -212,24 +236,42 @@ package body IOC.slow.shift is
    procedure put_words (the_device    : in out shift.device;
                         Q_operand     : in KDF9.Q_register;
                         writing_to_EM : in Boolean) is
+
+      function reframed (byte : Character)
+      return Character is
+         data : KDF9.word:= KDF9.word(Character'Pos(byte));
+      begin -- reframed
+         -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+         data := (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
+              or (data and 2#0011_0000#)*2  -- D42-D43 -> D41-D42
+              or (data and 2#0100_0000#)/4  -- D41     -> D43
+              or (data and 2#1000_0000#);   -- D40     -> D40
+         return Character'Val(Natural(data));
+      end reframed;
+
       start_address : constant KDF9.address := Q_operand.I;
       end_address   : constant KDF9.address := Q_operand.M;
       size : KDF9.word := 0;
-      word : KDF9.word;
+      done : Boolean;
       char : Character;
-   begin
+
+   begin -- put_words
       check_addresses_and_lockouts(start_address, end_address);
       for w in start_address .. end_address loop
-         word := fetch_word(w) and 8#377#;
-         char := Character'Val(word);
+         char := Character'Val(fetch_word(w) and 8#377#);
+         if the_device.is_transcribing then
+            -- "transcribing" actually means "transparent Latin-1" for character mode transfers.
+            done := char = E_M;
+         else
+            -- KDF9 mode.
+            char := reframed(char);
+            done := KDF9_char_sets.symbol(Character'Pos(char) mod 64) = End_Message;
+         end if;
          put_byte(char, the_device.stream);
          size := size + 1;
-      exit when writing_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+      exit when writing_to_EM and done;
       end loop;
       do_output_housekeeping(the_device, written => size, fetched => size);
-   exception
-      when end_of_stream =>
-         do_output_housekeeping(the_device, written => size, fetched => size);
    end put_words;
 
    procedure words_write (the_device : in out shift.device;

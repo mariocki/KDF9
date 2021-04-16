@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -33,9 +33,9 @@ package IOC.slow.shift is
 
    -- Read a character from the stream and deal with any input file concatenation.
    -- If the buffer is reading from a file, deliver the character found; otherwise:
-   --    convert the character from Latin-1 to the corresponding paper tape 8-bit code.
-   procedure get_byte_from_stream (byte       : out Character;
-                                   the_device : in out shift.device);
+   --    convert the character from Latin-1 to the corresponding paper tape 8-bit code frame.
+   procedure get_frame_from_stream (frame      : out Character;
+                                    the_device : in out shift.device);
 
 private
 

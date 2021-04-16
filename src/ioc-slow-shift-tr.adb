@@ -1,6 +1,6 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -71,7 +71,7 @@ package body IOC.slow.shift.TR is
    word_loop:
       loop
          loop
-            get_byte_from_stream(byte, the_TR);
+            get_frame_from_stream(byte, the_TR);
             octet := KDF9.syllable(Character'Pos(byte));
          exit when octet not in NUL_frame | DEL_frame;
          end loop;
