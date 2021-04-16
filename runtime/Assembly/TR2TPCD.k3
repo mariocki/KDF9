@@ -1,0 +1,36 @@
+V20; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test TR to TP in character mode);
+      V1 = Q 0/AV8/AV8;
+      V2 = Q 0/AV8/AV8;
+      V3 = Q 0/AV11/AV18;
+      V11 = B022;
+      V12 = B164;
+      V13 = B140;
+      V14 = B220;
+      V15 = B137;
+      V16 = B113;
+      V17 = B011;
+      V18 = B022;
+
+      V1; =Q1; SET B02; SET 5; OUT; =C1;
+      V2; =Q2; SET B01; SET 5; OUT; =C2;
+
+1;    PICQ1;
+      POCQ2;
+      PARQ1;
+      J1NTR;
+
+
+999;  V3; =Q3; C2 TO Q3;
+      POCQ3;
+      SET 120; =M3;
+      PGAPQ3;
+
+      C1; SET 6; OUT;
+      C2; SET 6; OUT;
+
+      ZERO; OUT;
+
+FINISH;
+|
