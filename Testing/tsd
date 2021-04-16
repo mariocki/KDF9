@@ -53,3 +53,10 @@ case $3 in
          echo ===
       fi
 esac
+
+if [ x"$mode"x = x-dxx ]
+then
+   echo The full external trace is in:
+   ls -l trace.txt
+   echo
+fi

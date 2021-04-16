@@ -1,4 +1,4 @@
-Version V6p2e of ee9 for Linux, built on Sat 10 Apr 2021 03:59:18 PM PDT.
+Version V6p2r of ee9 for Linux, built on Tue 13 Apr 2021 01:35:35 PM PDT.
 mk9 'ee9' build: optimised and with full language checks, using configuration options:
 
 pragma Unsuppress(All_Checks);
@@ -20,12 +20,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ee9.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- This is the "main program" for the entire emulator.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -276,7 +276,7 @@ Compiled at: 2021-04-10 15:59:18
    251.    impose_all_flag_settings;
    252.    revise_the_IOC_configuration;
    253.    log_line(
-   254.             "This is ee9 6.2e, compiled by "
+   254.             "This is ee9 6.2r, compiled by "
    255.           & Standard'Compiler_Version
    256.           & " on "
    257.           & GNAT.Source_Info.Compilation_ISO_Date
@@ -311,12 +311,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/exceptions.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- Declare the exceptions used in emulation-mode control.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -384,12 +384,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/execute.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- This is the emulation-mode coordinate module.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -612,8 +612,8 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/hci.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- Provide operations supporting replicated human-readable output:
      2. --    1: to an interactive user interface for transient display, and
@@ -623,7 +623,7 @@ Compiled at: 2021-04-10 15:59:18
      6. --
      7. -- Also provide operations allowing synchronization with the user.
      8. --
-     9. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     9. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
     10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
     11. --
     12. -- The ee9 program is free software; you can redistribute it and/or
@@ -785,8 +785,8 @@ Compiled at: 2021-04-10 15:59:18
    168. end HCI;
 
 Compiling: ../Source/hci.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- Provide operations supporting replicated human-readable output:
      2. --    1: to an interactive user interface for transient display, and
@@ -796,7 +796,7 @@ Compiled at: 2021-04-10 15:59:18
      6. --
      7. -- Also provide operations allowing synchronization with the user.
      8. --
-     9. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     9. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
     10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
     11. --
     12. -- The ee9 program is free software; you can redistribute it and/or
@@ -877,13 +877,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -1781,13 +1781,13 @@ Compiled at: 2021-04-10 15:59:18
    899. end IOC;
 
 Compiling: ../Source/ioc.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:35
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2286,13 +2286,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-equipment.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Data supporting the definition of a KDF9 I/O equipment configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2376,13 +2376,13 @@ Compiled at: 2021-04-10 15:59:18
     85. end IOC.equipment;
 
 Compiling: ../Source/ioc-equipment.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:18
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Enable the devices included in the chosen KDF9 I/O configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2481,12 +2481,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow.adb
-Source file time stamp: 2021-04-07 01:29:37
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2669,12 +2669,12 @@ Compiled at: 2021-04-10 15:59:19
    183. end IOC.slow;
 
 Compiling: ../Source/ioc-slow.ads
-Source file time stamp: 2021-04-08 00:00:02
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2765,12 +2765,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift.adb
-Source file time stamp: 2021-04-10 00:48:04
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-16 19:12:04
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2806,284 +2806,326 @@ Compiled at: 2021-04-10 15:59:19
     36.       the_device.byte_count := the_device.byte_count + read_in;
     37.    end do_input_housekeeping;
     38.
-    39.    procedure get_byte_from_stream (byte       : out Character;
-    40.                                    the_device : in out shift.device) is
-    41.    begin
-    42.       loop
-    43.          begin
-    44.             get_byte(byte, the_device.stream);
-    45.             if the_device.is_reading_a_file then
-    46.                -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
-    47.                return;
-    48.             end if;
-    49.             -- Reading from the terminal, the byte is in Latin-1 and must be converted.
-    50.             -- This may entail interpolating shift characters.
-    51.             if case_of(byte) not in both | the_device.current_case then
-    52.                byte := framed(CN_TR(next_case(the_device.current_case)));
-    53.                the_device.current_case := the_device.current_case xor 1;
-    54.                back_off(the_device.stream);
-    55.             elsif the_device.current_case = KDF9_char_sets.Case_Normal then
-    56.                byte := framed(CN_TR(byte));
-    57.             else
-    58.                byte := framed(CS_TR(byte));
-    59.             end if;
-    60.             return;
-    61.          exception
-    62.             when end_of_stream =>
-    63.                deal_with_end_of_data(the_device);
-    64.          end;
-    65.       end loop;
-    66.    end get_byte_from_stream;
-    67.
-    68.    procedure get_symbols (the_device    : in out shift.device;
-    69.                           Q_operand     : in KDF9.Q_register;
-    70.                           reading_to_EM : in Boolean) is
-    71.       start_address : constant KDF9.address := Q_operand.I;
-    72.       end_address   : constant KDF9.address := Q_operand.M;
-    73.       fill   : KDF9.word := 0;
-    74.       size   : KDF9.word := 0;
-    75.       symbol : KDF9_char_sets.symbol;
-    76.       char   : Character;
-    77.    begin
-    78.       check_addresses_and_lockouts(start_address, end_address);
-    79.    word_loop:
-    80.       for w in start_address .. end_address loop
-    81.          store_word(0, w);
-    82.          for c in KDF9_char_sets.symbol_index'Range loop
-    83.             get_char_from_stream(char, the_device);
-    84.             size := size + 1;
-    85.             if char = KDF9_char_sets.W_F then
-    86.                -- Filler was suppressed on normal input from the slow devices.
-    87.                fill := fill + 1;
-    88.             elsif case_of(char) /= both                   and then
-    89.                      case_of(char) /= the_device.current_case then
-    90.                store_symbol(CN_TR(next_case(the_device.current_case)), w, c);
-    91.                the_device.current_case := the_device.current_case xor 1;
-    92.                back_off(the_device.stream);
-    93.             else
-    94.                symbol := CN_TR(char) or CS_TR(char);
-    95.                store_symbol(symbol, w, c);
-    96.                if reading_to_EM and symbol = KDF9_char_sets.End_Message then
-    97.                   for d in 1 .. 7-c loop
-    98.                      store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
-    99.                   end loop;
-   100.                   exit word_loop;
-   101.                end if;
-   102.             end if;
-   103.          end loop;
-   104.       end loop word_loop;
-   105.       do_input_housekeeping(the_device, read_in => size, stored => size-fill);
-   106.    exception
-   107.       when end_of_stream =>
-   108.          flush(the_device.stream);
-   109.          do_input_housekeeping(the_device, read_in => size, stored => size-fill);
-   110.    end get_symbols;
-   111.
-   112.    procedure read (the_device : in out shift.device;
-   113.                    Q_operand  : in KDF9.Q_register) is
-   114.    begin
-   115.       get_symbols(the_device, Q_operand, reading_to_EM => False);
-   116.    end read;
-   117.
-   118.    procedure read_to_EM (the_device : in out shift.device;
-   119.                          Q_operand  : in KDF9.Q_register) is
-   120.    begin
-   121.       get_symbols(the_device, Q_operand, reading_to_EM => True);
-   122.    end read_to_EM;
+    39.    procedure get_symbols (the_device    : in out shift.device;
+    40.                           Q_operand     : in KDF9.Q_register;
+    41.                           reading_to_EM : in Boolean) is
+    42.       start_address : constant KDF9.address := Q_operand.I;
+    43.       end_address   : constant KDF9.address := Q_operand.M;
+    44.       fill   : KDF9.word := 0;
+    45.       size   : KDF9.word := 0;
+    46.       symbol : KDF9_char_sets.symbol;
+    47.       char   : Character;
+    48.    begin
+    49.       check_addresses_and_lockouts(start_address, end_address);
+    50.    word_loop:
+    51.       for w in start_address .. end_address loop
+    52.          store_word(0, w);
+    53.          for c in KDF9_char_sets.symbol_index'Range loop
+    54.             get_char_from_stream(char, the_device);
+    55.             size := size + 1;
+    56.             if char = KDF9_char_sets.W_F then
+    57.                -- Filler was suppressed on normal input from the slow devices.
+    58.                fill := fill + 1;
+    59.             elsif case_of(char) /= both                   and then
+    60.                      case_of(char) /= the_device.current_case then
+    61.                store_symbol(CN_TR(next_case(the_device.current_case)), w, c);
+    62.                the_device.current_case := the_device.current_case xor 1;
+    63.                back_off(the_device.stream);
+    64.             else
+    65.                symbol := CN_TR(char) or CS_TR(char);
+    66.                store_symbol(symbol, w, c);
+    67.                if reading_to_EM and symbol = KDF9_char_sets.End_Message then
+    68.                   for d in 1 .. 7-c loop
+    69.                      store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
+    70.                   end loop;
+    71.                   exit word_loop;
+    72.                end if;
+    73.             end if;
+    74.          end loop;
+    75.       end loop word_loop;
+    76.       do_input_housekeeping(the_device, read_in => size, stored => size-fill);
+    77.    exception
+    78.       when end_of_stream =>
+    79.          flush(the_device.stream);
+    80.          do_input_housekeeping(the_device, read_in => size, stored => size-fill);
+    81.    end get_symbols;
+    82.
+    83.    procedure read (the_device : in out shift.device;
+    84.                    Q_operand  : in KDF9.Q_register) is
+    85.    begin
+    86.       get_symbols(the_device, Q_operand, reading_to_EM => False);
+    87.    end read;
+    88.
+    89.    procedure read_to_EM (the_device : in out shift.device;
+    90.                          Q_operand  : in KDF9.Q_register) is
+    91.    begin
+    92.       get_symbols(the_device, Q_operand, reading_to_EM => True);
+    93.    end read_to_EM;
+    94.
+    95.    procedure get_frame_from_stream (frame      : out Character;
+    96.                                     the_device : in out shift.device) is
+    97.    begin
+    98.       loop
+    99.          begin
+   100.             get_byte(frame, the_device.stream);
+   101.             if the_device.is_reading_a_file then
+   102.                -- Assume file, in KDF9 paper tape code, contains all needed shift characters.
+   103.                return;
+   104.             end if;
+   105.             -- Reading from the terminal, the frame is in Latin-1 and must be converted.
+   106.             -- This may entail interpolating a shift character.
+   107.             if case_of(frame) not in both | the_device.current_case then
+   108.                frame := framed(CN_TR(next_case(the_device.current_case)));
+   109.                the_device.current_case := the_device.current_case xor 1;
+   110.                back_off(the_device.stream);
+   111.             elsif the_device.current_case = KDF9_char_sets.Case_Normal then
+   112.                frame := framed(CN_TR(frame));
+   113.             else
+   114.                frame := framed(CS_TR(frame));
+   115.             end if;
+   116.             return;
+   117.          exception
+   118.             when end_of_stream =>
+   119.                deal_with_end_of_data(the_device);
+   120.          end;
+   121.       end loop;
+   122.    end get_frame_from_stream;
    123.
    124.    procedure get_words (the_device    : in out shift.device;
    125.                         Q_operand     : in KDF9.Q_register;
    126.                         reading_to_EM : in Boolean) is
-   127.       start_address : constant KDF9.address := Q_operand.I;
-   128.       end_address   : constant KDF9.address := Q_operand.M;
-   129.       size : KDF9.word := 0;
-   130.       word : KDF9.word;
-   131.       char : Character;
-   132.    begin
-   133.       check_addresses_and_lockouts(start_address, end_address);
-   134.       for w in start_address .. end_address loop
-   135.          get_char_from_stream(char, the_device);
-   136.          word := KDF9.word(Character'Pos(char));
-   137.          size := size + 1;
-   138.          store_word(word, w);
-   139.       exit when reading_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   140.       end loop;
-   141.       do_input_housekeeping(the_device, read_in => size, stored => size);
-   142.    exception
-   143.       when end_of_stream =>
-   144.          flush(the_device.stream);
-   145.          do_input_housekeeping(the_device, read_in => size, stored => size);
-   146.    end get_words;
-   147.
-   148.    procedure words_read (the_device : in out shift.device;
-   149.                          Q_operand  : in KDF9.Q_register) is
-   150.    begin
-   151.       get_words(the_device, Q_operand, reading_to_EM => False);
-   152.    end words_read;
-   153.
-   154.    procedure words_read_to_EM (the_device : in out shift.device;
-   155.                                Q_operand  : in KDF9.Q_register) is
-   156.    begin
-   157.       get_words(the_device, Q_operand, reading_to_EM => True);
-   158.    end words_read_to_EM;
-   159.
-   160.    procedure put_symbols (the_device    : in out shift.device;
-   161.                           Q_operand     : in KDF9.Q_register;
-   162.                           writing_to_EM : in Boolean) is
-   163.       start_address : constant KDF9.address := Q_operand.I;
-   164.       end_address   : constant KDF9.address := Q_operand.M;
-   165.       fill   : KDF9.word := 0;
-   166.       size   : KDF9.word := 0;
-   167.       symbol : KDF9_char_sets.symbol;
-   168.       char   : Character;
-   169.    begin
-   170.       check_addresses_and_lockouts(start_address, end_address);
-   171.    word_loop:
-   172.       for w in start_address .. end_address loop
-   173.          for c in KDF9_char_sets.symbol_index'Range loop
-   174.             symbol := fetch_symbol(w, c);
-   175.             size := size + 1;
-   176.             if symbol = KDF9_char_sets.Word_Filler then
-   177.                -- Filler was suppressed on normal output to the slow devices.
-   178.                fill := fill + 1;
-   179.             elsif symbol = KDF9_char_sets.Case_Shift then
-   180.                the_device.current_case := KDF9_char_sets.Case_Shift;
-   181.             elsif  symbol = KDF9_char_sets.Case_Normal then
-   182.                the_device.current_case := KDF9_char_sets.Case_Normal;
-   183.             else
-   184.                if the_device.current_case = KDF9_char_sets.Case_Normal then
-   185.                   char := TP_CN(symbol);
-   186.                else
-   187.                   char := TP_CS(symbol);
-   188.                end if;
-   189.                put_char(char, the_device.stream);
-   190.                exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
-   191.             end if;
-   192.          end loop;
-   193.       end loop word_loop;
-   194.       do_output_housekeeping(the_device, written => size-fill, fetched => size);
-   195.    exception
-   196.       when end_of_stream =>
-   197.          do_output_housekeeping(the_device, written => size-fill, fetched => size);
-   198.    end put_symbols;
-   199.
-   200.    procedure write (the_device : in out shift.device;
-   201.                     Q_operand  : in KDF9.Q_register) is
-   202.    begin
-   203.       put_symbols(the_device, Q_operand, writing_to_EM => False);
-   204.    end write;
-   205.
-   206.    procedure write_to_EM (the_device : in out shift.device;
-   207.                           Q_operand  : in KDF9.Q_register) is
-   208.    begin
-   209.       put_symbols(the_device, Q_operand, writing_to_EM => True);
-   210.    end write_to_EM;
-   211.
-   212.    procedure put_words (the_device    : in out shift.device;
-   213.                         Q_operand     : in KDF9.Q_register;
-   214.                         writing_to_EM : in Boolean) is
-   215.       start_address : constant KDF9.address := Q_operand.I;
-   216.       end_address   : constant KDF9.address := Q_operand.M;
-   217.       size : KDF9.word := 0;
-   218.       word : KDF9.word;
-   219.       char : Character;
-   220.    begin
-   221.       check_addresses_and_lockouts(start_address, end_address);
-   222.       for w in start_address .. end_address loop
-   223.          word := fetch_word(w) and 8#377#;
-   224.          char := Character'Val(word);
-   225.          put_byte(char, the_device.stream);
-   226.          size := size + 1;
-   227.       exit when writing_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   228.       end loop;
-   229.       do_output_housekeeping(the_device, written => size, fetched => size);
-   230.    exception
-   231.       when end_of_stream =>
-   232.          do_output_housekeeping(the_device, written => size, fetched => size);
-   233.    end put_words;
-   234.
-   235.    procedure words_write (the_device : in out shift.device;
-   236.                           Q_operand  : in KDF9.Q_register) is
-   237.    begin
-   238.       put_words(the_device, Q_operand, writing_to_EM => False);
-   239.    end words_write;
-   240.
-   241.    procedure words_write_to_EM (the_device : in out shift.device;
-   242.                                 Q_operand  : in KDF9.Q_register) is
-   243.    begin
-   244.       put_words(the_device, Q_operand, writing_to_EM => True);
-   245.    end words_write_to_EM;
-   246.
-   247.    procedure output_a_gap (the_device   : in out shift.device;
-   248.                            Q_operand    : in KDF9.Q_register;
-   249.                            set_offline  : in Boolean;
-   250.                            word_mode    : in Boolean := False;
-   251.                            text_mode    : in Boolean := False) is
-   252.       length : constant KDF9.word :=  KDF9.word(Q_operand.M) * (if word_mode then 8 else 1);
-   253.       char   : constant Character := Character'Val(0);
-   254.       size   : KDF9.word := 0;
-   255.    begin
-   256.       require_positive_count(Q_operand.M);
-   257.       for i in 1 .. length loop
-   258.          size := size + 1;
-   259.          if text_mode then
-   260.             do_not_put_byte(char, the_device.stream);
-   261.          else
-   262.             put_byte(char, the_device.stream);
-   263.          end if;
-   264.       end loop;
-   265.       start_data_transfer(
-   266.                           the_device,
-   267.                           (Q_operand.C, 0, Q_operand.M),
-   268.                           set_offline,
-   269.                           busy_time => IO_elapsed_time(the_device, length)
-   270.                          );
-   271.       do_output_housekeeping(the_device, written => length, fetched => 0);
-   272.    exception
-   273.       when end_of_stream =>
-   274.          do_output_housekeeping(the_device, written => size, fetched => 0);
-   275.    end output_a_gap;
+   127.
+   128.       function deframed (byte : Character)
+   129.       return KDF9.word is
+   130.          data : KDF9.word;
+   131.       begin -- deframed
+   132.          -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+   133.          data := KDF9.word(Character'Pos(byte));
+   134.          return  (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
+   135.               or (data and 2#0110_0000#)/2  -- D41-D42 -> D42-D43
+   136.               or (data and 2#0001_0000#)*4  -- D43     -> D41
+   137.               or (data and 2#1000_0000#);   -- D40     -> D40
+   138.       end deframed;
+   139.
+   140.       start_address : constant KDF9.address := Q_operand.I;
+   141.       end_address : constant KDF9.address := Q_operand.M;
+   142.       size        : KDF9.word := 0;
+   143.       word        : KDF9.word;
+   144.       done        : Boolean;
+   145.       char        : Character;
+   146.
+   147.    begin -- get_words
+   148.       check_addresses_and_lockouts(start_address, end_address);
+   149.       for w in start_address .. end_address loop
+   150.          if the_device.is_transcribing then
+   151.             -- "transcribing" actually means "transparent" for character mode input.
+   152.             get_char_from_stream(char, the_device);
+   153.             word := KDF9.word(Character'Pos(char));
+   154.             done := char = E_M;
+   155.          else
+   156.             -- KDF9 mode.
+   157.             get_frame_from_stream(char, the_device);
+   158.             word := deframed(char);
+   159.             done := KDF9_char_sets.symbol(word and 8#77#) = End_Message;
+   160.          end if;
+   161.          store_word(word, w);
+   162.          size := size + 1;
+   163.       exit when reading_to_EM and done;
+   164.       end loop;
+   165.       do_input_housekeeping(the_device, read_in => size, stored => size);
+   166.    exception
+   167.       when end_of_stream =>
+   168.          flush(the_device.stream);
+   169.          do_input_housekeeping(the_device, read_in => size, stored => size);
+   170.    end get_words;
+   171.
+   172.    procedure words_read (the_device : in out shift.device;
+   173.                          Q_operand  : in KDF9.Q_register) is
+   174.    begin
+   175.       get_words(the_device, Q_operand, reading_to_EM => False);
+   176.    end words_read;
+   177.
+   178.    procedure words_read_to_EM (the_device : in out shift.device;
+   179.                                Q_operand  : in KDF9.Q_register) is
+   180.    begin
+   181.       get_words(the_device, Q_operand, reading_to_EM => True);
+   182.    end words_read_to_EM;
+   183.
+   184.    procedure put_symbols (the_device    : in out shift.device;
+   185.                           Q_operand     : in KDF9.Q_register;
+   186.                           writing_to_EM : in Boolean) is
+   187.       start_address : constant KDF9.address := Q_operand.I;
+   188.       end_address   : constant KDF9.address := Q_operand.M;
+   189.       fill   : KDF9.word := 0;
+   190.       size   : KDF9.word := 0;
+   191.       symbol : KDF9_char_sets.symbol;
+   192.       char   : Character;
+   193.    begin
+   194.       check_addresses_and_lockouts(start_address, end_address);
+   195.    word_loop:
+   196.       for w in start_address .. end_address loop
+   197.          for c in KDF9_char_sets.symbol_index'Range loop
+   198.             symbol := fetch_symbol(w, c);
+   199.             size := size + 1;
+   200.             if symbol = KDF9_char_sets.Word_Filler then
+   201.                -- Filler was suppressed on normal output to the slow devices.
+   202.                fill := fill + 1;
+   203.             elsif symbol = KDF9_char_sets.Case_Shift then
+   204.                the_device.current_case := KDF9_char_sets.Case_Shift;
+   205.             elsif  symbol = KDF9_char_sets.Case_Normal then
+   206.                the_device.current_case := KDF9_char_sets.Case_Normal;
+   207.             else
+   208.                if the_device.current_case = KDF9_char_sets.Case_Normal then
+   209.                   char := TP_CN(symbol);
+   210.                else
+   211.                   char := TP_CS(symbol);
+   212.                end if;
+   213.                put_char(char, the_device.stream);
+   214.                exit word_loop when writing_to_EM and symbol = KDF9_char_sets.End_Message;
+   215.             end if;
+   216.          end loop;
+   217.       end loop word_loop;
+   218.       do_output_housekeeping(the_device, written => size-fill, fetched => size);
+   219.    exception
+   220.       when end_of_stream =>
+   221.          do_output_housekeeping(the_device, written => size-fill, fetched => size);
+   222.    end put_symbols;
+   223.
+   224.    procedure write (the_device : in out shift.device;
+   225.                     Q_operand  : in KDF9.Q_register) is
+   226.    begin
+   227.       put_symbols(the_device, Q_operand, writing_to_EM => False);
+   228.    end write;
+   229.
+   230.    procedure write_to_EM (the_device : in out shift.device;
+   231.                           Q_operand  : in KDF9.Q_register) is
+   232.    begin
+   233.       put_symbols(the_device, Q_operand, writing_to_EM => True);
+   234.    end write_to_EM;
+   235.
+   236.    procedure put_words (the_device    : in out shift.device;
+   237.                         Q_operand     : in KDF9.Q_register;
+   238.                         writing_to_EM : in Boolean) is
+   239.
+   240.       function reframed (byte : Character)
+   241.       return Character is
+   242.          data : KDF9.word:= KDF9.word(Character'Pos(byte));
+   243.       begin -- reframed
+   244.          -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+   245.          data := (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
+   246.               or (data and 2#0011_0000#)*2  -- D42-D43 -> D41-D42
+   247.               or (data and 2#0100_0000#)/4  -- D41     -> D43
+   248.               or (data and 2#1000_0000#);   -- D40     -> D40
+   249.          return Character'Val(Natural(data));
+   250.       end reframed;
+   251.
+   252.       start_address : constant KDF9.address := Q_operand.I;
+   253.       end_address   : constant KDF9.address := Q_operand.M;
+   254.       size : KDF9.word := 0;
+   255.       done : Boolean;
+   256.       char : Character;
+   257.
+   258.    begin -- put_words
+   259.       check_addresses_and_lockouts(start_address, end_address);
+   260.       for w in start_address .. end_address loop
+   261.          char := Character'Val(fetch_word(w) and 8#377#);
+   262.          if the_device.is_transcribing then
+   263.             -- "transcribing" actually means "transparent Latin-1" for character mode transfers.
+   264.             done := char = E_M;
+   265.          else
+   266.             -- KDF9 mode.
+   267.             char := reframed(char);
+   268.             done := KDF9_char_sets.symbol(Character'Pos(char) mod 64) = End_Message;
+   269.          end if;
+   270.          put_byte(char, the_device.stream);
+   271.          size := size + 1;
+   272.       exit when writing_to_EM and done;
+   273.       end loop;
+   274.       do_output_housekeeping(the_device, written => size, fetched => size);
+   275.    end put_words;
    276.
-   277.    procedure do_output_housekeeping (the_device : in out shift.device;
-   278.                                      written,
-   279.                                      fetched    : in KDF9.word) is
-   280.    begin
-   281.       flush(the_device.stream);
-   282.       add_in_the_IO_CPU_time(the_device, fetched);
-   283.       correct_transfer_time(the_device, written);
-   284.       the_device.byte_count := the_device.byte_count + fetched;
-   285.    end do_output_housekeeping;
-   286.
-   287.    procedure set_case (the_device  : in out shift.device;
-   288.                        the_setting : in KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal) is
-   289.    begin
-   290.       the_device.current_case := the_setting;
-   291.    end set_case;
-   292.
-   293.    function uses_Latin_1 (the_device : in shift.device)
-   294.    return Boolean
-   295.    is (the_device.is_transcribing);
-   296.
-   297.    overriding
-   298.    procedure Finalize (the_device : in out shift.device) is
-   299.    begin
-   300.       close(
-   301.             the_device,
-   302.             "transferred",
-   303.             the_device.byte_count,
-   304.             "character" & plurality(the_device.byte_count)
-   305.            );
-   306.    end Finalize;
-   307.
-   308. end IOC.slow.shift;
+   277.    procedure words_write (the_device : in out shift.device;
+   278.                           Q_operand  : in KDF9.Q_register) is
+   279.    begin
+   280.       put_words(the_device, Q_operand, writing_to_EM => False);
+   281.    end words_write;
+   282.
+   283.    procedure words_write_to_EM (the_device : in out shift.device;
+   284.                                 Q_operand  : in KDF9.Q_register) is
+   285.    begin
+   286.       put_words(the_device, Q_operand, writing_to_EM => True);
+   287.    end words_write_to_EM;
+   288.
+   289.    procedure output_a_gap (the_device   : in out shift.device;
+   290.                            Q_operand    : in KDF9.Q_register;
+   291.                            set_offline  : in Boolean;
+   292.                            word_mode    : in Boolean := False;
+   293.                            text_mode    : in Boolean := False) is
+   294.       length : constant KDF9.word :=  KDF9.word(Q_operand.M) * (if word_mode then 8 else 1);
+   295.       char   : constant Character := Character'Val(0);
+   296.       size   : KDF9.word := 0;
+   297.    begin
+   298.       require_positive_count(Q_operand.M);
+   299.       for i in 1 .. length loop
+   300.          size := size + 1;
+   301.          if text_mode then
+   302.             do_not_put_byte(char, the_device.stream);
+   303.          else
+   304.             put_byte(char, the_device.stream);
+   305.          end if;
+   306.       end loop;
+   307.       start_data_transfer(
+   308.                           the_device,
+   309.                           (Q_operand.C, 0, Q_operand.M),
+   310.                           set_offline,
+   311.                           busy_time => IO_elapsed_time(the_device, length)
+   312.                          );
+   313.       do_output_housekeeping(the_device, written => length, fetched => 0);
+   314.    exception
+   315.       when end_of_stream =>
+   316.          do_output_housekeeping(the_device, written => size, fetched => 0);
+   317.    end output_a_gap;
+   318.
+   319.    procedure do_output_housekeeping (the_device : in out shift.device;
+   320.                                      written,
+   321.                                      fetched    : in KDF9.word) is
+   322.    begin
+   323.       flush(the_device.stream);
+   324.       add_in_the_IO_CPU_time(the_device, fetched);
+   325.       correct_transfer_time(the_device, written);
+   326.       the_device.byte_count := the_device.byte_count + fetched;
+   327.    end do_output_housekeeping;
+   328.
+   329.    procedure set_case (the_device  : in out shift.device;
+   330.                        the_setting : in KDF9_char_sets.letter_case := KDF9_char_sets.Case_Normal) is
+   331.    begin
+   332.       the_device.current_case := the_setting;
+   333.    end set_case;
+   334.
+   335.    function uses_Latin_1 (the_device : in shift.device)
+   336.    return Boolean
+   337.    is (the_device.is_transcribing);
+   338.
+   339.    overriding
+   340.    procedure Finalize (the_device : in out shift.device) is
+   341.    begin
+   342.       close(
+   343.             the_device,
+   344.             "transferred",
+   345.             the_device.byte_count,
+   346.             "character" & plurality(the_device.byte_count)
+   347.            );
+   348.    end Finalize;
+   349.
+   350. end IOC.slow.shift;
 
 Compiling: ../Source/ioc-slow-shift.ads
-Source file time stamp: 2021-04-07 23:59:54
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3116,9 +3158,9 @@ Compiled at: 2021-04-10 15:59:19
     33.
     34.    -- Read a character from the stream and deal with any input file concatenation.
     35.    -- If the buffer is reading from a file, deliver the character found; otherwise:
-    36.    --    convert the character from Latin-1 to the corresponding paper tape 8-bit code.
-    37.    procedure get_byte_from_stream (byte       : out Character;
-    38.                                    the_device : in out shift.device);
+    36.    --    convert the character from Latin-1 to the corresponding paper tape 8-bit code frame.
+    37.    procedure get_frame_from_stream (frame      : out Character;
+    38.                                     the_device : in out shift.device);
     39.
     40. private
     41.
@@ -3173,19 +3215,19 @@ Compiled at: 2021-04-10 15:59:19
     90.
     91. end IOC.slow.shift;
 
- 308 lines: No errors
+ 350 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tp.adb
-Source file time stamp: 2021-04-10 00:48:04
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3403,12 +3445,12 @@ Compiled at: 2021-04-10 15:59:19
    218. end IOC.slow.shift.TP;
 
 Compiling: ../Source/ioc-slow-shift-tp.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3505,12 +3547,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tr.adb
-Source file time stamp: 2021-04-07 00:31:29
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3581,7 +3623,7 @@ Compiled at: 2021-04-10 15:59:19
     71.    word_loop:
     72.       loop
     73.          loop
-    74.             get_byte_from_stream(byte, the_TR);
+    74.             get_frame_from_stream(byte, the_TR);
     75.             octet := KDF9.syllable(Character'Pos(byte));
     76.          exit when octet not in NUL_frame | DEL_frame;
     77.          end loop;
@@ -3947,12 +3989,12 @@ Compiled at: 2021-04-10 15:59:19
    437. end IOC.slow.shift.TR;
 
 Compiling: ../Source/ioc-slow-shift-tr.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4075,12 +4117,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/say_goodbye.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- Finalize emulation with a helpful message derived from exception information.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4155,12 +4197,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/settings.adb
-Source file time stamp: 2021-04-07 01:30:39
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5220,12 +5262,12 @@ Compiled at: 2021-04-10 15:59:19
   1060. end settings;
 
 Compiling: ../Source/settings.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:36
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5399,12 +5441,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/break_in.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- This communicates a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5468,12 +5510,12 @@ Compiled at: 2021-04-10 15:59:19
     64. end break_in;
 
 Compiling: ../Source/break_in.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:19
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- This conveys a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5506,12 +5548,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/dumping.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5716,12 +5758,12 @@ Compiled at: 2021-04-10 15:59:20
    205. end dumping;
 
 Compiling: ../Source/dumping.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5844,12 +5886,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- The machine-state manipulations used by the CPU microcode.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -6879,12 +6921,12 @@ Compiled at: 2021-04-10 15:59:20
   1030. end KDF9;
 
 Compiling: ../Source/kdf9.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- The architecturally-defined data and register formats of the KDF9 computer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -7619,12 +7661,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-microcode.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9225,12 +9267,12 @@ Compiled at: 2021-04-10 15:59:20
   1601. end KDF9.microcode;
 
 Compiling: ../Source/kdf9-microcode.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9259,12 +9301,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/state_display.adb
-Source file time stamp: 2021-04-09 15:03:29
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11536,12 +11578,12 @@ Compiled at: 2021-04-10 15:59:20
   2272. end state_display;
 
 Compiling: ../Source/state_display.ads
-Source file time stamp: 2021-04-09 14:50:58
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11650,12 +11692,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/generic_logger.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide operations supporting replicated output to a list of logging interfaces.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11756,12 +11798,12 @@ Compiled at: 2021-04-10 15:59:20
    101. end generic_logger;
 
 Compiling: ../Source/generic_logger.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide operations supporting replicated output to a list of logging interfaces.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11846,12 +11888,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Define an abstract log output device.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11904,12 +11946,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging-file.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide logging output to a named text file.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12017,12 +12059,12 @@ Compiled at: 2021-04-10 15:59:20
    108. end logging.file;
 
 Compiling: ../Source/logging-file.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide logging output to a named text file.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12095,12 +12137,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/logging-panel.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide logging output to an interactive terminal/control panel.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12237,12 +12279,12 @@ Compiled at: 2021-04-10 15:59:20
    137. end logging.panel;
 
 Compiling: ../Source/logging-panel.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:20
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:37
 
      1. -- Provide logging output to an interactive terminal/control panel.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12320,12 +12362,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-the_locker_of.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Identify the buffer that caused a store lockout.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -12370,13 +12412,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-cpu.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
      2. --   Ada types; and for types used in the internal functioning of the microcode.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -13465,13 +13507,13 @@ Compiled at: 2021-04-10 15:59:21
   1090. end KDF9.CPU;
 
 Compiling: ../Source/kdf9-cpu.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
      2. --   Ada types; and for types used in the internal functioning of the microcode.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -13941,12 +13983,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-phu_store.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- The K5 operation data formats.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14009,12 +14051,12 @@ Compiled at: 2021-04-10 15:59:21
     63. end KDF9.PHU_store;
 
 Compiling: ../Source/kdf9-phu_store.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- The K5 operation data formats.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14099,12 +14141,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/tracing.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14700,12 +14742,12 @@ Compiled at: 2021-04-10 15:59:21
    596. end tracing;
 
 Compiling: ../Source/tracing.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -14938,12 +14980,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/formatting.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Provide basic data-formatting operations for KDF9 data types.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15194,12 +15236,12 @@ Compiled at: 2021-04-10 15:59:21
    251. end formatting;
 
 Compiling: ../Source/formatting.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Provide basic data-formatting operations for KDF9 data types.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15341,12 +15383,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/host_io.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Buffered I/O streams to support KDF9 device I/O.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15702,12 +15744,12 @@ Compiled at: 2021-04-10 15:59:21
    356. end host_IO;
 
 Compiling: ../Source/host_io.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Buffered I/O streams to support KDF9 device I/O.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -15893,12 +15935,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-store.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- KDF9 core store operations.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16139,12 +16181,12 @@ Compiled at: 2021-04-10 15:59:21
    241. end KDF9.store;
 
 Compiling: ../Source/kdf9-store.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- KDF9 core store operations.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16299,12 +16341,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-absent.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Handle attempted usage of a buffer with No Device attached.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16513,12 +16555,12 @@ Compiled at: 2021-04-10 15:59:21
    209.
 
 Compiling: ../Source/ioc-absent.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Handle attempted usage of a buffer with No Device attached.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16709,12 +16751,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16746,12 +16788,12 @@ Compiled at: 2021-04-10 15:59:21
     32. end IOC.fast;
 
 Compiling: ../Source/ioc-fast.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16806,12 +16848,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Emulation of a drum store.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17358,12 +17400,12 @@ Compiled at: 2021-04-10 15:59:21
    547. end IOC.fast.DR;
 
 Compiling: ../Source/ioc-fast-dr.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:21
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:38
 
      1. -- Emulation of a drum store buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17534,12 +17576,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18420,12 +18462,12 @@ Compiled at: 2021-04-10 15:59:22
    881. end IOC.fast.FD;
 
 Compiling: ../Source/ioc-fast-fd.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18676,12 +18718,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -19916,12 +19958,12 @@ Compiled at: 2021-04-10 15:59:22
   1235. end IOC.fast.tape;
 
 Compiling: ../Source/ioc-fast-tape.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20369,12 +20411,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-fw.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21046,12 +21088,12 @@ Compiled at: 2021-04-10 15:59:22
    672. end IOC.slow.shift.FW;
 
 Compiling: ../Source/ioc-slow-shift-fw.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21209,12 +21251,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-gp.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21419,12 +21461,12 @@ Compiled at: 2021-04-10 15:59:22
    205. end IOC.slow.shift.GP;
 
 Compiling: ../Source/ioc-slow-shift-gp.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21508,12 +21550,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-si.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21745,12 +21787,12 @@ Compiled at: 2021-04-10 15:59:22
    232. end IOC.slow.shift.SI;
 
 Compiling: ../Source/ioc-slow-shift-si.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21906,12 +21948,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21947,12 +21989,12 @@ Compiled at: 2021-04-10 15:59:22
     36. end IOC.slow.unit;
 
 Compiling: ../Source/ioc-slow-unit.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:22
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21999,12 +22041,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cp.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a card punch buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22219,13 +22261,13 @@ Compiled at: 2021-04-10 15:59:23
    215. end IOC.slow.unit.CP;
 
 Compiling: ../Source/ioc-slow-unit-cp.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:39
 
      1. -- Emulation of a card punch buffer.
      2. -- Card punches are "unit record" devices: they cannot transfer less than a whole card.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22334,12 +22376,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cr.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Emulation of a card reader buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22599,13 +22641,13 @@ Compiled at: 2021-04-10 15:59:23
    260. end IOC.slow.unit.CR;
 
 Compiling: ../Source/ioc-slow-unit-cr.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Emulation of a card reader buffer.
      2. -- Card readers are "unit record" devices: they cannot transfer less than a whole card.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22713,12 +22755,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-lp.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Emulation of a lineprinter buffer.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22907,13 +22949,13 @@ Compiled at: 2021-04-10 15:59:23
    189. end IOC.slow.unit.LP;
 
 Compiling: ../Source/ioc-slow-unit-lp.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Emulation of a lineprinter buffer.
      2. -- Lineprinters are "unit record" devices: they cannot transfer less than a whole line.
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22986,12 +23028,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/environmental_value_of.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Get the value of an environment variable.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23021,12 +23063,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tod_clock.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23105,12 +23147,12 @@ Compiled at: 2021-04-10 15:59:23
     79. end KDF9.TOD_clock;
 
 Compiling: ../Source/kdf9-tod_clock.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23147,12 +23189,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23310,12 +23352,12 @@ Compiled at: 2021-04-10 15:59:23
    158. end KDF9.TSD;
 
 Compiling: ../Source/kdf9-tsd.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23366,12 +23408,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-timing.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the timing OUTs of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23442,12 +23484,12 @@ Compiled at: 2021-04-10 15:59:23
     71. end KDF9.TSD.timing;
 
 Compiling: ../Source/kdf9-tsd-timing.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the timing OUTs of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23481,12 +23523,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/finalize_ee9.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Shut down processing in preparation for a dignified exit.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23526,12 +23568,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/postscript.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Elementary Encapsulated PostScript (EPS) line drawing.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23770,12 +23812,12 @@ Compiled at: 2021-04-10 15:59:23
    239.
 
 Compiling: ../Source/postscript.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Elementary Encapsulated PostScript (EPS) line drawing.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23861,12 +23903,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/settings-io.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Settings-reader I/O support.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24070,12 +24112,12 @@ Compiled at: 2021-04-10 15:59:23
    204.
 
 Compiling: ../Source/settings-io.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Settings-reader I/O support.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24142,12 +24184,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/generic_sets.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Powersets of a discrete member type.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24192,12 +24234,12 @@ Compiled at: 2021-04-10 15:59:23
     45. end generic_sets;
 
 Compiling: ../Source/generic_sets.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Powersets of a discrete member type.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24247,13 +24289,13 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-decoding.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- The "compressed_opcode" values are effective opcodes, partially decoded from the first syllable,
      2. --   and combined with opcode bits of the second syllable, where appropriate (e.g. in jumps).
      3. --
-     4. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -24549,12 +24591,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-dispatcher.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24822,12 +24864,12 @@ Compiled at: 2021-04-10 15:59:23
    268. end IOC.dispatcher;
 
 Compiling: ../Source/ioc-dispatcher.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:23
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24957,12 +24999,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-egdon.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the API (OUTs) of the EGDON Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -24986,12 +25028,12 @@ Compiled at: 2021-04-10 15:59:24
     24. end KDF9.EGDON;
 
 Compiling: ../Source/kdf9-egdon.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement the API (OUTs) of the EGDON Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25018,12 +25060,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-processes.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25260,12 +25302,12 @@ Compiled at: 2021-04-10 15:59:24
    237. end KDF9.TSD.processes;
 
 Compiling: ../Source/kdf9-tsd-processes.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:40
 
      1. -- Implement OUTs 0.. 2 and 5..7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25305,12 +25347,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/disassembly.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25936,12 +25978,12 @@ Compiled at: 2021-04-10 15:59:24
    626. end disassembly;
 
 Compiling: ../Source/disassembly.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25981,12 +26023,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-diagnostics.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Provide diagnostic output of the state of all the buffers.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26069,12 +26111,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/file_interfacing.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26114,12 +26156,12 @@ Compiled at: 2021-04-10 15:59:24
     40. end file_interfacing;
 
 Compiling: ../Source/file_interfacing.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26155,12 +26197,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/plotter.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26362,12 +26404,12 @@ Compiled at: 2021-04-10 15:59:24
    202. end plotter;
 
 Compiling: ../Source/plotter.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26446,12 +26488,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr-tsd_outs.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26565,12 +26607,12 @@ Compiled at: 2021-04-10 15:59:24
    114. end IOC.fast.DR.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-dr-tsd_outs.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26605,12 +26647,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd-tsd_outs.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26845,12 +26887,12 @@ Compiled at: 2021-04-10 15:59:24
    235. end IOC.fast.FD.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-fd-tsd_outs.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26891,12 +26933,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape-tsd_outs.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26985,12 +27027,12 @@ Compiled at: 2021-04-10 15:59:24
     89. end IOC.fast.tape.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-tape-tsd_outs.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:24
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement the magnetic tape API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27022,12 +27064,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-peripherals.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:25
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27244,12 +27286,12 @@ Compiled at: 2021-04-10 15:59:25
    217. end KDF9.TSD.peripherals;
 
 Compiling: ../Source/kdf9-tsd-peripherals.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:25
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:41
 
      1. -- Implement 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27286,12 +27328,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-spooling.adb
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:25
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:42
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27507,12 +27549,12 @@ Compiled at: 2021-04-10 15:59:25
    216. end KDF9.TSD.spooling;
 
 Compiling: ../Source/kdf9-tsd-spooling.ads
-Source file time stamp: 2021-04-01 23:49:55
-Compiled at: 2021-04-10 15:59:25
+Source file time stamp: 2021-04-14 21:35:16
+Compiled at: 2021-04-13 13:35:42
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (6.2e), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or

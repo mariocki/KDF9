@@ -1,6 +1,6 @@
 V40; W0;
 RESTART; J999; J999;
-PROGRAM;                   (test TP to SI0);
+PROGRAM;                   (test TR to TP in normal mode);
       V1 = Q 0/AV8/AV8;
       V2 = Q 0/AV3/AV3;
       V3 = B0264600057531102;

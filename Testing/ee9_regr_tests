@@ -111,7 +111,8 @@ echo; echo
 echo Running Kidsgrove compiler and runtime tests:
 echo ============================================
 echo
-ee9_test_run KAlgol "kids_tests ahipr a" >> ee9_regr_tests_log.txt; echo
+ee9_test_run KAlgol "kids_tests ahipr a" >> ee9_regr_tests_log.txt
+echo
 
 cp settings_1.copy settings_1.txt
 cp settings_2.copy settings_2.txt
