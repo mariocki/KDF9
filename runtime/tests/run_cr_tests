@@ -55,44 +55,6 @@ XYZ{}|\Øxyz{}|\Ø
         .
 ++++
 
-echo "The following tests use this data:"
-echo "===="
-cat $crdata
-echo "===="
-cat <<++++
-
-The output to CP0 should look like this:
-=====
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
-0123456701234567
-89_º;+-.89_º;+-.
-@ABCDEFG@ABCDEFG
-HIJKLMNOHIJKLMNO
-PQRSTUVWPQRSTUVW
-XYZ{}|\ØXYZ{}|\Ø
-        .
-" ®©¬#%'................................................................COLUMN80________________________________________________________________________COL. 160
-:=()£*,/:=()£*,/
-0123456701234567
-89_º;+-.89_º;+-.
-@ABCDEFG@ABCDEFG
-HIJKLMNOHIJKLMNO
-PQRSTUVWPQRSTUVW
-XYZ{}|
-        .
-=====
-the penultimate input line:
-XYZ{}|\Øxyz{}|\Ø
-should be punched out like this:
-XYZ{}|
-because the second set of 8 lines is read/punched to EM.
-An alphanumeric read/write omits everything after "COLUMN80".
-___________________________________________________________
-
-
-++++
-
 >${LOGS}/cr_test.log
 
 echo "TEST PIA PIB - POA 160-column binary write:"
