@@ -1,0 +1,80 @@
+diff --git b/src/ee9.adb a/src/ee9.adb
+index ec2da14..4d34d4f 100644
+--- b/src/ee9.adb
++++ a/src/ee9.adb
+@@ -26,6 +26,7 @@ with IOC.equipment;
+ with IOC.slow.shift.TP;
+ with IOC.slow.shift.TR;
+ with settings;
++with get_runtime_paths;
+ 
+ with execute;
+ with say_goodbye;
+@@ -42,7 +43,7 @@ procedure ee9 is
+ 
+    package CLI renames Ada.Command_Line;
+ 
+-   the_log_file_name : constant String := "KDF9_log.txt";
++   the_log_file_name : constant String := get_runtime_paths & "logs/KDF9.log";
+ 
+    a_command_line_error_is_detected : exception;
+ 
+diff --git b/src/host_io.adb a/src/host_io.adb
+index 14059bb..57781b5 100644
+--- b/src/host_io.adb
++++ a/src/host_io.adb
+@@ -17,6 +17,7 @@
+ with Ada.Characters.Latin_1;
+ --
+ with OS_specifics;
++with get_runtime_paths;
+ 
+ use  Ada.Characters.Latin_1;
+ --
+@@ -50,7 +51,7 @@ package body host_IO is
+                    mode       : in POSIX.access_mode) is
+       fd : Integer;
+    begin -- open
+-      fd := POSIX.open(file_name, mode);
++      fd := POSIX.open(get_runtime_paths & file_name, mode);
+       open(the_stream, file_name, mode, fd);
+    exception
+       when POSIX_IO_error =>
+diff --git b/src/ioc-slow-shift-fw.adb a/src/ioc-slow-shift-fw.adb
+index 9795a1d..750e4cf 100644
+--- b/src/ioc-slow-shift-fw.adb
++++ a/src/ioc-slow-shift-fw.adb
+@@ -52,7 +52,7 @@ package body IOC.slow.shift.FW is
+ 
+    -- These are the ANSI SGR terminal escape codes for styling FW output.
+    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
+-   black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
++   black_font_code : constant String := ESC & "[0m" & ESC & "[39m";
+    underline_code  : constant String := ESC & "[4m";
+    plain_font_code : constant String := ESC & "[0m";
+ 
+diff --git b/src/to_9_from_1934.adb a/src/to_9_from_1934.adb
+index 1b0bea1..81492a8 100644
+--- b/src/to_9_from_1934.adb
++++ a/src/to_9_from_1934.adb
+@@ -22,6 +22,7 @@ with HCI;
+ with host_IO;
+ with POSIX;
+ with plotter;
++with get_runtime_paths;
+ 
+ use  HCI;
+ use  host_IO;
+@@ -147,9 +148,9 @@ procedure to_9_from_1934 is
+ 
+ begin -- to_9_from_1934
+ 
+-   open(the_1900_stream, "Assembly/wabbit_data_1900", read_mode);
+-   open(the_KDF9_stream, "Assembly/wabbit_data_kdf9", write_mode);
+-   truncate(the_KDF9_stream, to_length => 0);
++   open(the_1900_stream, get_runtime_paths & "Assembly/wabbit_data_1900", read_mode);
++   open(the_KDF9_stream, get_runtime_paths & "Assembly/wabbit_data_kdf9", write_mode);
++   truncate(the_KDF9_stream);
+ 
+    get_byte(t, the_1900_stream);
+    log_line("The input is for an ICT 1900 Series plotter type 1934/" & plotter_type(t));

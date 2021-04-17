@@ -90,6 +90,6 @@ a2b -r2p <Data/KAB00.bin >Binary/KAB00DH--USU
 echo "Compiling Binaries."
 for f in Assembly/[1A-Z]*.k3; do
     p=$(basename $f .k3)
-    ucc $p -q
+    ucc $p
 done
 echo "Done."

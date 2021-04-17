@@ -33,9 +33,7 @@ if [[ "$#" -gt 0 ]]; then
     -h | --help)
         echo "UCC - Compiles a Usercode file to a Binary."
         echo
-        echo "Usage: ucc [OPTION] USERCODEFILE"
-        echo
-        echo "   -q                quiet mode."
+        echo "Usage: ucc USERCODEFILE"
         echo
         echo "Note: USERCODEFILE must exist in ${USERCODE}"
         echo
@@ -57,7 +55,6 @@ if [ -f "${USERCODE}/$name.k3" ]; then
         more ${USERCODE}/"$name-listing.txt"
         exit 1
     fi
-    rm -f /tmp/a.out /tmp/mt.out
     exit 0
 else
     echo "$(basename "$0"): there is no file named "$name.k3" in the ${USERCODE} folder!"
