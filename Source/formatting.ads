@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -130,7 +130,11 @@ package formatting is
    function to_string (P : KDF9.pair)
    return pair_as_byte_string;
 
+   -- Like to_string, but with glyphs for format effectors.
+   function to_glyphs (N : in KDF9.word)
+   return word_as_byte_string;
+
    -- Take a string and ignore it.
-   procedure discard (S : String);
+   -- procedure discard (S : String);
 
 end formatting;

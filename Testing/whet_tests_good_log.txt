@@ -32,7 +32,7 @@ LP0:
 ===
 
 RAN/EL/008M50S/008M56S===
-Digital signature of traced orders = #3755315062014254.
+Digital signature of traced orders = #3755315075153754.
 FLUID DONE
 
 TP0:
@@ -217,27 +217,33 @@ ROW 10 SHOULD BE 1.23456789º +1
 
 
 RAN/EL/000M32S/000M35S===
-Digital signature of traced orders = #7606563365674365.
+Digital signature of traced orders = #7606563365132661.
 MATMULT DONE
 
 TP0:
 ===
 
-RAN/EL/000M04S/000M10S  SIZE    422
+RAN/EL/000M05S/000M13S  SIZE    494
 ===
 
 LP0:
 ===
 
-RAN/EL/186M43S/186M55S===
-Digital signature of traced orders = #4255204233365116.
-TP1:
-===
-
-The first 7 solutions:
+THE FIRST  9 SOLUTIONS:
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I       I           I
  - - - - - - - - - - - -     - - - -     
 I       I   I       I   I           I   I
@@ -252,7 +258,18 @@ I       I           I   I               I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I   I       I       I
  - - - - - - - - - -     - -     - -     
 I   I           I           I       I   I
@@ -267,7 +284,18 @@ I       I           I               I   I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I   I               I
  - - - - - - - - - -     - - - - - -     
 I   I           I           I       I   I
@@ -282,7 +310,18 @@ I       I           I               I   I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I   I               I
  - - - - - - - - - -         - - - - - - 
 I   I           I       I   I           I
@@ -297,7 +336,18 @@ I       I   I           I   I           I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I   I               I
  - - - - - - - - - -     - - - -     - - 
 I   I           I           I   I   I   I
@@ -312,7 +362,18 @@ I           I       I               I   I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I       I   I       I
  - - - - - - - - - -     - -             
 I   I               I   I       I       I
@@ -327,7 +388,18 @@ I           I   I               I   I   I
  - - - - - - - - - - - - - - - - - - - - 
 
 
- - - - - - - - - - - - - - - - - - - - - 
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
 I                   I       I   I       I
  - - - - - - - - - -             - -     
 I   I               I       I       I   I
@@ -342,7 +414,78 @@ I           I   I               I   I   I
  - - - - - - - - - - - - - - - - - - - - 
 
 
-===
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - -         
+I   I               I   I       I       I
+     - - - -     - -     - -     - - - - 
+I           I   I           I   I       I
+ - - - -     - - - -     - - - -     - - 
+I   I   I   I   I   I   I   I   I   I   I
+         - -         - -                 
+I   I   I       I           I   I   I   I
+ - -     - -     - - - - - -             
+I           I       I           I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - -         
+I   I               I   I       I       I
+     - - - -     - -     - -     - - - - 
+I           I   I           I   I       I
+ - - - -     - - - -     - - - -     - - 
+I   I   I   I   I   I   I   I   I   I   I
+         - -         - -                 
+I   I       I   I           I   I   I   I
+ - -     - -     - - - - - -             
+I       I           I           I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+SOLUTION COUNT = 10
+
+
+
+RAN/EL/238M45S/238M54S===
+Digital signature of traced orders = #3576534237447450.
+TP1:
+===
+===
 PENTOMINO DONE
 
 TP0:
@@ -370,7 +513,7 @@ COUNT =         6
 +8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +1.02625487529º-11
 
 RAN/EL/198M14S/198M14S===
-Digital signature of traced orders = #3402651640546021.
+Digital signature of traced orders = #3402651654620421.
 WEEHAAVIE DONE
 
 TP0:
@@ -408,7 +551,7 @@ N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
 RAN/EL/006M57S/006M59S===
-Digital signature of traced orders = #7636155453113124.
+Digital signature of traced orders = #3113657561134733.
 WHETSTONE DONE
 
 TP0:

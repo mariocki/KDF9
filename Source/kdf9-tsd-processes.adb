@@ -1,6 +1,6 @@
 -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,19 +19,17 @@ with IOC;
 with IOC.fast.DR.TSD_OUTs;
 with IOC.fast.FD.TSD_OUTs;
 with IOC.slow.shift.TR;
-with KDF9_char_sets;
 with KDF9.CPU;
 with KDF9.store;
 with KDF9.TSD.peripherals;
 
-with environmental_value_of;
+with imported_value_of;
 
 use  dumping;
 use  IOC;
 use  IOC.fast.DR.TSD_OUTs;
 use  IOC.fast.FD.TSD_OUTs;
 use  IOC.slow.shift.TR;
-use  KDF9_char_sets;
 use  KDF9.store;
 use  KDF9.TSD.peripherals;
 
@@ -129,7 +127,7 @@ package body KDF9.TSD.processes is
 
       declare
          program_name : constant String := trimmed(to_string(P));
-         overlay_name : constant String := environmental_value_of("KDF9_BINARY", default => "Binary")
+         overlay_name : constant String := imported_value_of("KDF9_BINARY", default => "Binary")
                                          & "/"
                                          & program_name;
       begin
@@ -223,7 +221,7 @@ package body KDF9.TSD.processes is
    procedure do_OUT_97 is
       P      : constant KDF9.word := pop;
       name   : constant String    := trimmed(to_string(P));
-      value  : constant String    := environmental_value_of(name, "0");
+      value  : constant String    := imported_value_of(name, "0");
       number : KDF9.word;
    begin
       number := KDF9.word'Value(value);

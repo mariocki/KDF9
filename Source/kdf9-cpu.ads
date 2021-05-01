@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -56,11 +56,14 @@ package KDF9.CPU is
    --    sign(Remainder) = sign(R) and |Remainder| < |R|, i.e. Remainder = L mod R;
    --    Quotient = (L - Remainder) / R.
 
-   procedure do_DIVI (L : in KDF9.word;
-                      R : in KDF9.word;
-                      Quotient, Remainder : out KDF9.word);
+   procedure do_DIVI (
+                      L         : in KDF9.word;
+                      R         : in KDF9.word;
+                      Quotient,
+                      Remainder : out KDF9.word
+                     );
 
-   -- Signed single-length integer substrate division is removed from consideration.
+   -- Inherited signed single-length integer division is removed from the type.
 
    function "/" (L, R : CPU.signed)
    return KDF9.word is abstract;
@@ -71,12 +74,6 @@ package KDF9.CPU is
    -- Contract a double-word, setting the V bit if necessary.
 
    function contracted (P : KDF9.pair)
-   return KDF9.word
-      with Inline;
-
-   -- Contract a double-word, represented by its components, setting the V bit if necessary.
-
-   function contracted (msw, lsw : KDF9.word)
    return KDF9.word
       with Inline;
 
@@ -105,8 +102,8 @@ package KDF9.CPU is
    return KDF9.word
       with Inline;
 
-   -- cardinality yields the number of 1-bits in W.
-   function cardinality (W : KDF9.word)
+   -- number_of_1_bits_in counts the number of bits in W with value 1.
+   function number_of_1_bits_in (W : KDF9.word)
    return KDF9.word
       with Inline;
 
@@ -158,15 +155,15 @@ package KDF9.CPU is
    function "*" (L, R : KDF9.word)
    return KDF9.pair;
 
-   -- 96 / 48 -> 48-bit, for DIVD, DIVR and DIVDF.
-
-   procedure do_DIVD (L : in KDF9.pair;
+   procedure do_DIVD (
+                      L : in KDF9.pair;
                       R : in KDF9.word;
                       Q : out KDF9.word
                      );
 
-   procedure do_DIVR (L : in KDF9.pair;
-                      R : in KDF9.word;
+   procedure do_DIVR (
+                      L         : in KDF9.pair;
+                      R         : in KDF9.word;
                       Quotient,
                       Remainder : out KDF9.word
                      );
@@ -441,24 +438,6 @@ package KDF9.CPU is
       with Inline;
 
    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
-   return KDF9.word
-      with Inline;
-
-   -- scale_up may set the V bit.
-
-   function scale_up (W : KDF9.word; amount : Natural)
-   return KDF9.word
-      with Inline;
-
-   -- scale_down_and_round rounds correctly.
-
-   function scale_down_and_round (W : KDF9.word; amount : Natural)
-   return KDF9.word
-      with Inline;
-
-   -- scale_down never rounds.
-
-   function scale_down (W : KDF9.word; amount : Natural)
    return KDF9.word
       with Inline;
 

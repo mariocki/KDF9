@@ -1,6 +1,6 @@
 -- Implement the API (OUTs) of the EGDON Director.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@ package body KDF9.EGDON is
 
    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word) is
    begin
-      trap_failing_OUT(OUT_number, "EGDON OUTs are not yet implemented");
+      trap_unimplemented_feature("EGDON OUT" & OUT_number'Image);
    end do_an_EGDON_OUT;
 
 end KDF9.EGDON;

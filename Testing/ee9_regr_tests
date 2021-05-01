@@ -90,6 +90,8 @@ echo
 /bin/sh ee9_test_case HIG $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case LOG $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case DMP $1 >> ee9_regr_tests_log.txt; echo
+/bin/sh ee9_test_case REM $1 >> ee9_regr_tests_log.txt; echo
+/bin/sh ee9_test_case DVD $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case ACK $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case HLT $1 >> ee9_regr_tests_log.txt; echo
 /bin/sh ee9_test_case HKT $1 >> ee9_regr_tests_log.txt; echo

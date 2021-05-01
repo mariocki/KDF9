@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -506,8 +506,10 @@ package body KDF9 is
                   raise LOV_exception with message;
                when caused_by_RESET  =>
                   raise RESET_exception with message;
-               when others =>
-                  raise emulation_failure with "invalid RFI in effect_interrupt";
+               when EXITD_flag =>
+                  raise emulation_failure with "invalid EXITD RFI in effect_interrupt";
+               when caused_by_CLOCK =>
+                  raise emulation_failure with "invalid CLOCK RFI in effect_interrupt";
             end case;
       end case;
    end effect_interrupt;

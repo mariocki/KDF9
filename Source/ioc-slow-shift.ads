@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,11 +16,13 @@
 
 with KDF9_char_sets;
 
+use  KDF9_char_sets;
+
 package IOC.slow.shift is
 
    --
-   -- Abstract common functionality of Case Normal / Case Shift devices, e.g.,
-   --    the paper tape reader (TR), punch (TP) and console Flexowriter (FW).
+   -- Abstract common functionality of Case Normal / Case Shift devices, i.e.,
+   --    the BSI interface (SI) paper tape reader (TR), punch (TP) and console Flexowriter (FW).
    --
 
    type device is abstract new IOC.slow.device with private;

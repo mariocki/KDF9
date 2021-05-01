@@ -2,7 +2,7 @@
 -- It is separated out to allow use in programs other than ee9
 --    without dragging in all the dependencies of IOC.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@ with Ada.Characters.Latin_1;
 
 use  Ada.Characters.Latin_1;
 
-package IOC_tape_data is
+package IOC_tape_data is -- NB NOT a child of IOC!
 
    -- 81 is efficient for both card images and full 160-column print lines with final LS or PC.
    slice_size_limit : constant := 81;

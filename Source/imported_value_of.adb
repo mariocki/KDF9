@@ -1,4 +1,4 @@
--- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
+-- Get the value of an environment variable.
 --
 -- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
@@ -14,28 +14,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-package IOC.slow.unit is
+with Ada.Environment_Variables;
 
-   --
-   -- This is the root type for all unit-record I/O device types.
-   --
-
-   type device is abstract new IOC.slow.device with private;
-
-private
-
-   type device is abstract new IOC.slow.device with
-      record
-         unit_count : KDF9.word := 0;
-      end record;
-
-   overriding
-   function IO_elapsed_time_total (the_buffer : unit.device)
-   return KDF9.us;
-
-   overriding
-   function atomic_item_count (the_buffer : unit.device;
-                               Q_operand  : KDF9.Q_register)
-   return KDF9.word;
-
-end IOC.slow.unit;
+function imported_value_of (name : in String; default : in String := "")
+return String is
+begin
+   return Ada.Environment_Variables.Value(name, default);
+end imported_value_of;

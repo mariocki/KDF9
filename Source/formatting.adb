@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -234,6 +234,19 @@ package body formatting is
       end loop;
       return result;
    end to_string;
+
+   -- Like to_string, but with glyphs for format effectors.
+   function to_glyphs (N : in KDF9.word)
+   return word_as_byte_string is
+      word   : KDF9.word := N;
+      glyphs : word_as_byte_string;
+   begin
+      for i in reverse 1..8 loop
+         glyphs(i) := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
+         word := word / 64;
+      end loop;
+      return glyphs;
+   end to_glyphs;
 
    -- Return the result of applying to_string to each word of a double-word.
    function to_string (P : KDF9.pair)

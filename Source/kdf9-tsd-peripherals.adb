@@ -1,6 +1,6 @@
 -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,14 +18,12 @@ with IOC;
 with IOC.fast.tape.TSD_OUTs;
 with IOC.slow.shift.SI;
 with IOC.slow.shift.TR;
-with KDF9_char_sets;
 with KDF9.store;
 
 use  IOC;
 use  IOC.fast.tape.TSD_OUTs;
 use  IOC.slow.shift.SI;
 use  IOC.slow.shift.TR;
-use  KDF9_char_sets;
 use  KDF9.store;
 
 package body KDF9.TSD.peripherals is

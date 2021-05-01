@@ -1,6 +1,6 @@
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -15,6 +15,8 @@
 --
 
 with System;
+--
+private with KDF9_char_sets;
 
 package KDF9 is
 
@@ -28,16 +30,15 @@ package KDF9 is
    -- The 48-bit word, considered as an unsigned integer.
    --
 
-   type word is mod 2**48;  -- Let the compiler choose the best Size for this.
+   type word is mod 2**48;
 
-   word_mask : constant := 8#7777777777777777#;
-   min_word  : constant := 8#4000000000000000#;
-   max_word  : constant := 8#3777777777777777#;
-
-   all_zero_bits : constant KDF9.word := 0;
-   sign_bit      : constant KDF9.word := KDF9.min_word;
-   not_sign_bit  : constant KDF9.word := KDF9.max_word;
-   all_one_bits  : constant KDF9.word := KDF9.word_mask;
+   word_mask     : constant := 8#7777777777777777#;
+   min_word      : constant := 8#4000000000000000#;
+   max_word      : constant := 8#3777777777777777#;
+   all_zero_bits : constant := 0;
+   sign_bit      : constant := KDF9.min_word;
+   not_sign_bit  : constant := KDF9.max_word;
+   all_one_bits  : constant := KDF9.word_mask;
 
 
    --
@@ -720,6 +721,8 @@ package KDF9 is
       with Inline;
 
 private
+
+   use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
 
    the_elapsed_time    : KDF9.us := 0;
    the_last_delay_time : KDF9.us := 0;
