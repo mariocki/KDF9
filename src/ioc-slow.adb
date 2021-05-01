@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,7 +16,7 @@
 
 with HCI;
 with OS_specifics;
-with environmental_value_of;
+with imported_value_of;
 
 use HCI;
 
@@ -131,7 +131,7 @@ package body IOC.slow is
             return;
          elsif response = at_response then
             declare
-               here : constant String := environmental_value_of("KDF9_DATA", default => "Data") & "/";
+               here : constant String := imported_value_of("KDF9_DATA", default => "Data") & "/";
                next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
             begin
                reattach_the_text_file(here & next);

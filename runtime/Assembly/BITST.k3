@@ -1,0 +1,28 @@
+V9; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+
+   V1 = 0;
+   V2 = 1;
+   V3 = 0;
+   V4 = 5;
+
+   SET 48; =RC1;
+1;
+   V1; SHL+1; V2; OR; DUP; =V1;
+   BITS; M+I1; M1; J999±; ERASE;
+   DC1; J1C1NZ;
+
+   SET 16; =RC2; I2=+2;
+2;
+   V3; SHL+3; V4; OR; DUP; =V3;
+   BITS; M+I2; M2; J999±; ERASE;
+   DC2; J2C2NZ;
+
+
+ZERO; OUT;
+
+999; MRWDQ0;
+
+FINISH;
+|

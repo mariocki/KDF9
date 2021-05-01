@@ -1,6 +1,6 @@
 -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,14 +17,12 @@
 with IOC;
 with IOC.dispatcher;
 with IOC.slow.shift.FW;
-with KDF9_char_sets;
 with KDF9.store;
 with KDF9.TSD.peripherals;
 
 use  IOC;
 use  IOC.dispatcher;
 use  IOC.slow.shift.FW;
-use  KDF9_char_sets;
 use  KDF9.store;
 use  KDF9.TSD.peripherals;
 

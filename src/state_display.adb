@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -120,16 +120,10 @@ package body state_display is
       end loop;
    end show_in_syllables_form;
 
-   procedure show_as_characters (the_word : in KDF9.word) is
-      word : KDF9.word := the_word;
-      data : String(1 .. 8);
+   procedure show_as_glyphs (the_word : in KDF9.word) is
    begin
-      for b of reverse data loop
-         b := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
-         word := shift_logical(word, -6);
-      end loop;
-      log(data);
-   end show_as_characters;
+      log("«" & to_glyphs(the_word) & "»");
+   end show_as_glyphs;
 
    procedure log_padded_string (text  : in String;
                                 width : in Positive := 1) is
@@ -171,9 +165,8 @@ package body state_display is
       tab_log_to(column);
       log(" = ");
       show_in_syllables_form(the_word);
-      log("= """);
-      show_as_characters(the_word);
-      log("""");
+      log("= ");
+      show_as_glyphs(the_word);
    end show_in_various_formats;
 
    procedure show_progress is

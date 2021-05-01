@@ -1,6 +1,6 @@
 -- Implement the API (OUTs) of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,9 +14,12 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with formatting;
 with IOC.fast.DR.TSD_OUTs;
 with IOC.fast.FD.TSD_OUTs;
 with IOC.fast.tape.TSD_OUTs;
+with KDF9.CPU;
+with KDF9.store;
 with KDF9.TSD.peripherals;
 with KDF9.TSD.processes;
 with KDF9.TSD.spooling;
@@ -24,9 +27,11 @@ with KDF9.TSD.timing;
 with settings;
 with tracing;
 
+use  formatting;
 use  IOC.fast.DR.TSD_OUTs;
 use  IOC.fast.FD.TSD_OUTs;
 use  IOC.fast.tape.TSD_OUTs;
+use  KDF9.store;
 use  KDF9.TSD.peripherals;
 use  KDF9.TSD.processes;
 use  KDF9.TSD.spooling;
@@ -42,7 +47,63 @@ package body KDF9.TSD is
       push(OUT_number);
    end restore_the_IO_OUT_operands;
 
-   procedure remove_the_IO_OUT_operands renames pop_pair;
+   procedure do_OUT_95 is
+      Q             : constant KDF9.Q_register := as_Q(pop);
+      start_address : constant KDF9.address := Q.I;
+      end_address   :          KDF9.address := Q.M;
+   begin
+      the_trace_operand := as_word(Q);
+      validate_address_range(start_address, end_address);
+
+      if Q.C / 2 > 0 then
+         log_new_line;
+      end if;
+
+      end_address := KDF9.address'Min(end_address, start_address + 9);
+
+      declare
+         size : constant Positive := Positive(end_address - start_address + 1) * 8;
+         next : Positive := 1;
+         text : String(1 .. size);
+         char : KDF9_char_sets.symbol;
+      begin
+      word_loop:
+         for w in start_address .. end_address loop
+            for c in KDF9_char_sets.symbol_index'Range loop
+               char := fetch_symbol(w, c);
+               text(next) := to_CP(char);
+               next := next + 1;
+            end loop;
+         end loop word_loop;
+         log(text);
+      end;
+
+      if Q.C mod 2 = 1  then
+         log_new_line;
+      end if;
+   end do_OUT_95;
+
+   procedure do_OUT_96 is
+      use KDF9.CPU;
+      P    : constant KDF9.word := pop;
+      text : constant String    := to_glyphs(P);
+   begin
+      the_trace_operand := P;
+      log_line("N1 = "
+             & resign(P)'Image
+             & " "
+             & as_fraction(P)'Image
+             & " "
+             & host_float(as_f48(P))'Image
+             & " #"
+             & oct_of(P)
+             & " «"
+             & text
+             & "»");
+      push(P);
+   end do_OUT_96;
+
+   procedure remove_the_IO_OUT_operands renames KDF9.pop_pair;
 
    -- Emulate a subset of the Time Sharing Director's OUT API.
    procedure do_a_TSD_OUT (OUT_number : in KDF9.word) is
@@ -123,11 +184,15 @@ package body KDF9.TSD is
          when 47 =>
             do_OUT_47;
 
-         when 70 =>
-            -- This is not a genuine TSD OUT, it is an expedient for debugging KAlgol,
-            --   so ee9 simply erases its parameters from N1 and N2.
-            ensure_that_the_NEST_holds_2_operands;
-            pop_pair;
+         when 95 =>
+            -- This is not a genuine TSD OUT, it prints the 8-character text in N1.
+            ensure_that_the_NEST_holds_an_operand;
+            do_OUT_95;
+
+         when 96 =>
+            -- This is not a genuine TSD OUT, it prints the integer value in N1.
+            ensure_that_the_NEST_holds_an_operand;
+            do_OUT_96;
 
          when 97 =>
             -- This is not a genuine TSD OUT, it gets an integer value from the command line.

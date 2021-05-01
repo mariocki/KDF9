@@ -1,6 +1,6 @@
 -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -13,6 +13,7 @@
 -- received a copy of the GNU General Public License distributed with
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
+
 with plotter;
 with postscript;
 

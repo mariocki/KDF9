@@ -1,6 +1,6 @@
 -- The architecturally-defined character codes of the KDF9 computer.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@ with Ada.Characters.Latin_1;
 
 use  Ada.Characters.Latin_1;
 
-package KDF9_char_sets is
+package KDF9_char_sets is -- NB NOT a child of KDF9!
 
    --
    -- The KDF9 character. Each symbol occupies six bits, and they are packed 8 per word.
@@ -50,7 +50,7 @@ package KDF9_char_sets is
    End_Message_tape_bits : constant := 8#175#;
 
    --
-   -- KDF9 <=> ISO Latin-1 character code inter-relationaships.
+   -- KDF9 <=> ISO Latin-1 character code inter-relationships.
    --
 
    type output_code_table is array (KDF9_char_sets.symbol) of Character;

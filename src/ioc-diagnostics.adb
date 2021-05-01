@@ -1,6 +1,6 @@
 -- Provide diagnostic output of the state of all the buffers.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -29,7 +29,7 @@ begin
          output("there are locks in group" & g'Image & " PHY" & Q_part'(32*g)'Image);
          B := the_locker_of(32*g, F);
          output(", locked by" & B'Image & ":");
-         if F then output_line(buffer(B).device_name); else output_line(""); end if;
+         if F then output_line(buffer(B).device_name); else output_line("??"); end if;
       end if;
    end loop;
    for the_buffer of buffer loop

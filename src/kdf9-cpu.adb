@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,10 +16,6 @@
 --
 --
 
-with exceptions;
-
-use  exceptions;
-
 package body KDF9.CPU is
 
 --
@@ -30,57 +26,6 @@ package body KDF9.CPU is
    --
 --
 --
-
-   -- Count the leading zeros of the absolute value of y, omitting the sign bit.
-   -- If y is 0, return 47.
-   function nr_leading_zeros (y : KDF9.word)
-   return Natural is
-      x : CPU.u_64;
-      r : Natural;
-   begin
-      if y = 0 then return 47; end if;
-      if resign(y) < 0 then
-         x := CPU.u_64(16#FFFF_FFFF_FFFF# and not y);
-      else
-         x := CPU.u_64(y);
-      end if;
-      -- Only 48 bits of x need be tested.
-      if (x and 16#FFFF_0000_0000#) /= 0 then
-         r := 32; x := shift_right(x, 32);
-      elsif (x and 16#FFFF_0000#) /= 0 then
-         r := 16; x := shift_right(x, 16);
-      else
-         r := 0;
-      end if;
-      if (x and 16#FF00#) /= 0 then
-         r := r + 8; x := shift_right(x, 8);
-      end if;
-      if (x and 16#F0#) /= 0 then
-         r := r + 4; x := shift_right(x, 4);
-      end if;
-      if (x and 16#C#) /= 0 then
-         r := r + 2; x := shift_right(x, 2);
-      end if;
-      if (x and 16#2#) /= 0 then
-         r := r + 1;
-      end if;
-      r := 47 - r - 1;  -- -1 discounts the sign bit.
-      return r;
-   end nr_leading_zeros;
-
-   function nr_one_bits (u : CPU.u_64)
-   return CPU.u_64 is
-      n : CPU.u_64 := shift_right(u, 1) and 16#77_77_77_77_77_77_77_77#;
-      x : CPU.u_64 := u - n;
-   begin
-      n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
-      x := x - n;
-      n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
-      x := x - n;
-      x := (x + shift_right(x, 4)) and 16#0F_0F_0F_0F_0F_0F_0F_0F#;
-      x := x * 16#01_01_01_01_01_01_01_01#;
-      return shift_right(x, CPU.u_64'Size-8);
-   end nr_one_bits;
 
    KDF9_max_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'Last);
    KDF9_min_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'First);
@@ -98,18 +43,14 @@ package body KDF9.CPU is
       return as_word(unsign(s));
    end as_word;
 
-   function contracted (msw, lsw : KDF9.word)
+   function contracted (P : KDF9.pair)
    return KDF9.word is
    begin
-      if resign(lsw) < 0 or (msw+1) > 1 then
+      if resign(P.lsw) < 0 or (P.msw+1) > 1 then
          the_V_bit_is_set := True;
       end if;
-      return (lsw and not_sign_bit) or (msw and sign_bit);
+      return (P.lsw and not_sign_bit) or (P.msw and sign_bit);
    end contracted;
-
-   function contracted (P : KDF9.pair)
-   return KDF9.word
-   is (contracted(msw => P.msw, lsw => P.lsw));
 
    function shift_time (amount : Natural)
    return KDF9.us
@@ -125,7 +66,7 @@ package body KDF9.CPU is
 
    function shift_word_right (W : KDF9.word; amount : word_shift_length)
    return KDF9.word
-   is (KDF9.word(shift_right(CPU.u_64(W), amount)));  -- This cannot be out of range.
+   is (KDF9.word(shift_right(CPU.u_64(W), amount)));
 
    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
    return KDF9.word
@@ -142,11 +83,11 @@ package body KDF9.CPU is
       -- Circular shifts were implemented by duplicating the operand, doing a double-length
       --    shift of the two words, and selecting the appropriate word from the result.
    is (
-       if abs L > 95 then 0
-       elsif L < -48 then shift_word_right(W, Natural(-L-48))
-       elsif L > +48 then shift_word_left(W, Natural(+L-48))
-       elsif L < 0   then rotate_word_right(W, Natural(-L))
-       else               rotate_word_left(W, Natural(L))
+       if abs L > 95  then 0
+       elsif  L < -48 then shift_word_right(W, Natural(-L-48))
+       elsif  L > +48 then shift_word_left(W, Natural(+L-48))
+       elsif  L < 0   then rotate_word_right(W, Natural(-L))
+       else                rotate_word_left(W, Natural(L))
       );
 
    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
@@ -157,10 +98,6 @@ package body KDF9.CPU is
        elsif  L < 0  then shift_word_right(W, Natural(-L))
        else               shift_word_left(W, Natural(L))
       );
-
-   function shift_pair_left (P : KDF9.pair; L : Natural)
-   return KDF9.pair
-      with Inline;
 
    function shift_pair_left (P : KDF9.pair; L : Natural)
    return KDF9.pair is
@@ -178,10 +115,6 @@ package body KDF9.CPU is
       end if;
       return result;
    end shift_pair_left;
-
-   function shift_pair_right (P : KDF9.pair; L : Natural)
-   return KDF9.pair
-      with Inline;
 
    function shift_pair_right (P : KDF9.pair; L : Natural)
    return KDF9.pair is
@@ -267,7 +200,7 @@ package body KDF9.CPU is
          end if;
          return shift_word_left(W, M);
       else
-         if shift_word_right(W, 47-M) /= all_zero_bits or
+         if shift_word_right(W, 47-M) /= KDF9.word'(all_zero_bits) or
                resign(shift_word_left(W, M)) < 0 then
             -- See EE Report K/GD.y.80., ¶ 1.1.
             the_V_bit_is_set := True;
@@ -289,13 +222,14 @@ package body KDF9.CPU is
       crossover : KDF9.word;
    begin
       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+      -- D0 of P.lsw is effectively ignored.
       if L < 48 then
-         result.lsw := shift_word_left(P.lsw, L) and KDF9.max_word;
-         crossover  := shift_word_right(P.lsw and KDF9.max_word, 47-L);
+         result.lsw := shift_word_left(P.lsw, L) and KDF9.not_sign_bit;
+         crossover  := shift_word_right(P.lsw and KDF9.not_sign_bit, 47-L);
          result.msw := scale_up(P.msw, L) or crossover;
       else
          result.lsw := 0;
-         result.msw := scale_up(P.msw, 47) or P.lsw;
+         result.msw := (P.msw and KDF9.sign_bit) or (P.lsw and KDF9.not_sign_bit);
          result.msw := scale_up(result.msw, Natural'Min(L, 94)-47);
      end if;
       return result;
@@ -307,16 +241,15 @@ package body KDF9.CPU is
       crossover : KDF9.word;
    begin
       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+      -- D0 of P.lsw is effectively ignored.
       -- SHAD-n does NOT round, according to the Manual.
       if L < 48 then
          result.msw := scale_down(P.msw, L);
-         crossover  := shift_word_left(P.msw, 47-L) and KDF9.max_word;
-         -- It is not clear whether D0 of the lsw should be cleared before or after shifting.
-         -- I now clear it before shifting for compatibility with D. Holdsworth's "kdf9".
-         result.lsw := shift_word_right(P.lsw and KDF9.max_word, L) or crossover;
+         crossover  := shift_word_left(P.msw, 47-L) and KDF9.not_sign_bit;
+         result.lsw := shift_word_right(P.lsw and KDF9.not_sign_bit, L) or crossover;
       else
          result.msw := scale_down(P.msw, 47);
-         result.lsw := shift_word_right(P.msw, Natural'Min(L, +94)-47) and KDF9.max_word;
+         result.lsw := shift_word_right(P.msw, Natural'Min(L, +94)-47) and KDF9.not_sign_bit;
       end if;
       return result;
    end scale_down;
@@ -328,6 +261,43 @@ package body KDF9.CPU is
        elsif L > 0 then scale_up(P, Natural(L))
        else             P -- See ¶1.1 of EE Report K/GD.y.80: this avoids clearing D0 of P.lsw.
       );
+
+   -- Count the leading zeros of the absolute value of y, omitting the sign bit.
+   -- If y is 0, return 47.
+   function nr_leading_zeros (y : KDF9.word)
+   return Natural is
+      x : CPU.u_64;
+      r : Natural;
+   begin
+      if y = 0 then return 47; end if;
+      if resign(y) < 0 then
+         x := CPU.u_64(16#FFFF_FFFF_FFFF# and not y);
+      else
+         x := CPU.u_64(y);
+      end if;
+      -- Only 48 bits of x need be tested.
+      if (x and 16#FFFF_0000_0000#) /= 0 then
+         r := 32; x := shift_right(x, 32);
+      elsif (x and 16#FFFF_0000#) /= 0 then
+         r := 16; x := shift_right(x, 16);
+      else
+         r := 0;
+      end if;
+      if (x and 16#FF00#) /= 0 then
+         r := r + 8; x := shift_right(x, 8);
+      end if;
+      if (x and 16#F0#) /= 0 then
+         r := r + 4; x := shift_right(x, 4);
+      end if;
+      if (x and 16#C#) /= 0 then
+         r := r + 2; x := shift_right(x, 2);
+      end if;
+      if (x and 16#2#) /= 0 then
+         r := r + 1;
+      end if;
+      r := 47 - r - 1;  -- -1 discounts the sign bit.
+      return r;
+   end nr_leading_zeros;
 
    procedure normalize (fraction, exponent : in out KDF9.word) is
       sign_flag  : constant KDF9.word := shift_word_right(fraction and sign_bit, 1);
@@ -372,7 +342,7 @@ package body KDF9.CPU is
    return KDF9.word
     -- shift_word_left must be used instead of scale_up to avoid a spurious overflow.
    is (
-       (shift_word_left(as_word(mantissa), 8) and KDF9.max_word)
+       (shift_word_left(as_word(mantissa), 8) and KDF9.not_sign_bit)
           or
        (as_word(mantissa) and sign_bit)
       );
@@ -398,10 +368,6 @@ package body KDF9.CPU is
    return CPU.f48
    is (normalized(full_fraction => fraction_word(R), scaler => scaler(R)));
 
-   function cardinality (W : KDF9.word)
-   return KDF9.word
-   is (KDF9.word(nr_one_bits(CPU.u_64(W))));
-
    function "-" (I : CPU.signed)
    return KDF9.word
    is (as_word(-CPU.s_64(I)));
@@ -422,9 +388,12 @@ package body KDF9.CPU is
    return KDF9.word
    is (contracted(KDF9.pair'(unsign(L) * unsign(R))));
 
-   procedure do_DIVI (L : in KDF9.word;
-                      R : in KDF9.word;
-                      Quotient, Remainder : out KDF9.word) is
+   procedure do_DIVI (
+                      L         : in KDF9.word;
+                      R         : in KDF9.word;
+                      Quotient,
+                      Remainder : out KDF9.word
+                     ) is
    begin
       if R /= 0 then
          Remainder := as_word(CPU.s_64(resign(L)) mod CPU.s_64(resign(R)));
@@ -469,10 +438,10 @@ package body KDF9.CPU is
       carry, sum : CPU.s_64;
       result     : KDF9.pair;
    begin
-      sum := CPU.s_64(L.lsw) + CPU.s_64(R.lsw);
+      sum := CPU.s_64(L.lsw and KDF9.not_sign_bit) + CPU.s_64(R.lsw and KDF9.not_sign_bit);
       if unsign(sum) > KDF9.max_word then -- carry into msw
          carry := 1;
-         result.lsw := KDF9.word(unsign(sum) and KDF9.max_word);
+         result.lsw := KDF9.word(unsign(sum) and KDF9.not_sign_bit);
       else
          carry := 0;
          result.lsw := KDF9.word(sum);
@@ -488,10 +457,10 @@ package body KDF9.CPU is
       negative : CPU.s_64;
       result   : KDF9.pair;
    begin
-      negative := - CPU.s_64(J.lsw);
+      negative := - CPU.s_64(J.lsw and KDF9.not_sign_bit);
       if unsign(negative) > KDF9.max_word then -- borrow from msw
          borrow := 1;
-         result.lsw := KDF9.word(unsign(negative) and KDF9.max_word);
+         result.lsw := KDF9.word(unsign(negative) and KDF9.not_sign_bit);
       else
          borrow := 0;
          result.lsw := KDF9.word(negative);
@@ -507,10 +476,10 @@ package body KDF9.CPU is
       difference : CPU.s_64;
       result     : KDF9.pair;
    begin
-      difference := CPU.s_64(L.lsw) - CPU.s_64(R.lsw);
+      difference := CPU.s_64(L.lsw and KDF9.not_sign_bit) - CPU.s_64(R.lsw and KDF9.not_sign_bit);
       if unsign(difference) > KDF9.max_word then -- borrow from msw
          borrow := 1;
-         result.lsw := KDF9.word(unsign(difference) and KDF9.max_word);
+         result.lsw := KDF9.word(unsign(difference) and KDF9.not_sign_bit);
       else
          borrow := 0;
          result.lsw := KDF9.word(difference);
@@ -532,12 +501,12 @@ package body KDF9.CPU is
             return (L, 0);
          else
             -- L*R = -R.
-            return - (R, 0);
+            return -(R, 0);
          end if;
       end if;
       if R = sign_bit then
          -- L*R = -L.
-         return - (L, 0);
+         return -(L, 0);
       end if;
       -- Now it is safe to take absolute values, as they cannot overflow.
       S := scale_down(abs resign(L), 24);
@@ -571,19 +540,70 @@ package body KDF9.CPU is
    return KDF9.word
    is (as_word(CPU.fraction(f)));
 
-   procedure do_DIVD (L : in KDF9.pair;
+   procedure long_division (
+                            L : in KDF9.pair;
+                            R : in KDF9.word;
+                            Q : out KDF9.word
+                           ) is
+      N  : KDF9.pair := L;
+      D  : KDF9.word;
+      Ls,
+      Rs,
+      Qs : CPU.f_64;
+      normalizer_N : Natural;
+      normalizer_R : Natural;
+      normalizer_Q : Integer;
+   begin
+      -- Normalize the dividend.
+      normalizer_N := nr_leading_zeros(N.msw);
+      if normalizer_N < 47 then
+         -- N.msw contains significant bits.
+         N := scale_up(N, normalizer_N);
+      else
+         -- All of the significant bits are in N.lsw, which is non-zero.
+         N := scale_up(N, 47);
+         normalizer_N := nr_leading_zeros(N.msw);
+         N := scale_up(N, normalizer_N);
+         normalizer_N := normalizer_N + 47;
+      end if;
+
+      -- Normalize the divisor.
+      normalizer_R := nr_leading_zeros(R);
+      D := scale_up(R, normalizer_R);
+
+      -- Scale Ls and Rs so that the Ada fractional division cannot overflow.
+      Ls := scale_down(to_f_64(N.msw), 2);
+      Rs := scale_down(to_f_64(D), 1);
+
+      Qs := Ls / Rs;  -- Ada fractional division rounds, correctly for KDF9 DIV and DIVD.
+
+      -- Rescale the quotient.
+      normalizer_Q := 1 + normalizer_R - normalizer_N;
+      if normalizer_Q <= 0 then
+         -- Overflow is impossible.
+         Qs := scale_down(Qs, -normalizer_Q);
+         Q := to_word(Qs);
+      else
+         -- If Qs >= 0.5, then L/R >= 1.0 is not a representable result fraction.
+         -- If Qs < -0.5, then L/R < -1.0 is not a representable result fraction.
+         the_V_bit_is_set := Qs >= 0.5 or Qs < -0.5;
+         Q := scale_up(to_word(Qs), normalizer_Q);  -- A guess at the result for overflow ?? !!
+      end if;
+   end long_division;
+
+   procedure do_DIVD (
+                      L : in KDF9.pair;
                       R : in KDF9.word;
                       Q : out KDF9.word
                      ) is
-      to_normalize_L : Natural;
-      to_normalize_R : Natural;
-      to_normalize_Q : Integer;
-      N              : KDF9.pair;
-      D              : KDF9.word;
-      Ls, Rs, Qs     : CPU.f_64;
+      N : KDF9.pair;
    begin
-      -- Deal very quickly with a zero result.
-      if (L.msw or L.lsw) = 0 then
+      N.msw := L.msw;
+      -- Ignore an invalid D0 in the lsw of the dividend.
+      N.lsw := L.lsw and KDF9.not_sign_bit;
+
+      -- Deal quickly with a zero dividend, giving a zero result.
+      if (N.msw or N.lsw) = 0 then
          Q := 0;
          return;
       end if;
@@ -591,150 +611,76 @@ package body KDF9.CPU is
       -- Deal with division by 0.
       if R = 0 then
          the_V_bit_is_set := True;
-         Q := L.msw;  -- This is a guess at the result for division by zero ?? !!
+         Q := N.msw;  -- A guess at the result for division by zero ?? !!
          return;
       end if;
 
-      -- Check for an invalid numerator; D0 of L.lsw must be 0.
-      if resign(L.lsw) < 0 then -- L is not a valid double-length number.
-         the_V_bit_is_set := True;
-         Q := L.msw;  -- This is a guess at the result for an invalid numerator ?? !!
-         return;
-      end if;
-
-      to_normalize_L := nr_leading_zeros(L.msw);
-      if to_normalize_L > 46 then -- insignificant top half
-         N := scale_up(L, 47);
-         to_normalize_L := nr_leading_zeros(N.msw);
-         N := scale_up(N, to_normalize_L);
-         to_normalize_L := to_normalize_L + 47;
-      else
-         N := scale_up(L, to_normalize_L);
-      end if;
-
-      to_normalize_R := nr_leading_zeros(R);
-      D := scale_up(R, to_normalize_R);
-
-      -- Scale Ls and Rs so that the Ada fractional division cannot overflow.
-      Ls := scale_down(to_f_64(N.msw), 2);
-      Rs := scale_down(to_f_64(D), 1);
-
-      Qs := Ls / Rs;  -- "/" cannot overflow here.
-
-      to_normalize_Q := 1 + to_normalize_R - to_normalize_L;
-
-      if to_normalize_Q <= 0 then
-         -- Overflow is impossible.
-         Qs := scale_down(Qs, -to_normalize_Q);
-         Q := to_word(Qs);
-      else
-         -- If Qs >= 0.5, then L/R >= 1.0 is not a representable result fraction.
-         -- If Qs < -0.5, then L/R < -1.0 is not a representable result fraction.
-         if Qs >= 0.5 or Qs < -0.5 then
-            the_V_bit_is_set := True;
-            Q := L.msw / R;  -- This is a guess at the result when it overflows ?? !!
-            return;
-         end if;
-         Q := scale_up(to_word(Qs), to_normalize_Q);
-      end if;
+      long_division(N, R, Q);
    end do_DIVD;
 
-   procedure do_DIVR (L : in KDF9.pair;
-                      R : in KDF9.word;
-                      Quotient, Remainder : out KDF9.word
+   procedure do_DIVR (
+                      L         : in KDF9.pair;
+                      R         : in KDF9.word;
+                      Quotient,
+                      Remainder : out KDF9.word
                      ) is
-      correction_count_limit : constant := 3;
-      correction_count       : Natural  := 0;
-      V  : constant Boolean := the_V_bit_is_set;
       N  : KDF9.pair := L;
       D  : KDF9.word := R;
-      S  : KDF9.word := +1;
-      P,
+      S  : Integer   := 1;
       T  : KDF9.pair;
    begin
+      -- Ignore an invalid D0 in the lsw of the dividend.
+      N.lsw := N.lsw and KDF9.not_sign_bit;
+
+      -- Deal quickly with a zero dividend, giving a zero result.
       if (N.msw or N.lsw) = 0 then
          Quotient  := 0;
          Remainder := 0;
          return;
       end if;
 
-      if D = 0 then
+      -- Deal with division by 0.
+      if R = 0 then
          the_V_bit_is_set := True;
-         Quotient  := L.msw;  -- This is a guess at the result for division by zero ?? !!
-         Remainder := L.lsw;  -- This is a guess at the result for division by zero ?? !!
-         return;
-      end if;
-
-      -- Check for an invalid numerator; D0 of N1 must be 0.
-      if resign(L.lsw) < 0 then -- L is not a valid double-length number.
-         the_V_bit_is_set := True;
-         Quotient  := L.msw;  -- This is a guess at the result for invalid numerator ?? !!
-         Remainder := L.lsw;  -- This is a guess at the result for invalid numerator ?? !!
+         -- A guess at the results for division by zero ?? !!
+         Quotient  := N.msw;
+         Remainder := 0;
          return;
       end if;
 
       -- Convert to an unsigned division problem, and note whether it needs to be be converted back.
-      if resign(N.msw) < 0 then -- L is negative.
+      if resign(N.msw) < 0 then
          N := - N;
          S := - S;
       end if;
-
-      if resign(D) < 0 then  -- R is negative.
+      if resign(R) < 0 then
          D := - D;
          S := - S;
       end if;
 
       -- Check for inevitable overflow, and deal with it separately.
       if N.msw > D then
-         Quotient := N.msw / D * S;  -- This is a guess at the result when it overflows ?? !!
-         T := L - (msw => Quotient*R, lsw => 0);
-         Remainder := T.msw;         -- This is a guess at the result when it overflows ?? !!
          the_V_bit_is_set := True;
+         -- A guess at the results for overflow ?? !!
+         Quotient := (if S < 0 then -(N.msw / D) else N.msw / D);
+         T := L - (msw => Quotient*R, lsw => 0);
+         Remainder := T.msw;
          return;
       end if;
 
-      -- Overflow should not now be possible.
-      -- Ensure that an overflow in DIVD is trapped as a failure
-      the_V_bit_is_set := False;
-      do_DIVD(N, D, Quotient);
-      if the_V_bit_is_set then
-         raise emulation_failure with "DIVR overflows in DIVD";
-      end if;
-      -- Restore the input value of the overflow register.
-      the_V_bit_is_set := V;
+      -- Overflow is now impossible, but the result may be rounded.
+      long_division(N, D, Quotient);
 
-      -- Adjust Quotient until the difference between N and Quotient*D fits in one word.
-      correction_count := 0;
+      -- Undo any rounding effected by do_DIVD.
       loop
-         P := Quotient * D;
-         T := N - P;
+         T := N - Quotient * D;
       exit when T.msw = 0;
-         correction_count := correction_count + 1;
-         if correction_count > correction_count_limit then
-             raise emulation_failure with "DIVR exceeds correction_count_limit A";
-         end if;
          Quotient := Quotient + 1;
       end loop;
+      Quotient  := Quotient + T.lsw / D;
 
-      Remainder := T.lsw;
-
-      -- Adjust Quotient and Remainder until Remainder is less than the divisor in absolute value.
-      correction_count := 0;
-      while Remainder >= D loop
-         correction_count := correction_count + 1;
-         if resign(Remainder) > 0 then
-            Remainder := Remainder - D;
-            Quotient := Quotient + 1;
-         else
-            Remainder := Remainder + D;
-            Quotient := Quotient - 1;
-         end if;
-         if correction_count > correction_count_limit then
-             raise emulation_failure with "DIVR exceeds correction_count_limit B";
-         end if;
-      end loop;
-
-      Quotient  := Quotient * S;
+      -- Correct the sign of the quotient and compute the remainder.
+      Quotient  := (if S < 0 then -Quotient else Quotient);
       Remainder := contracted(L - Quotient*R);
    end do_DIVR;
 
@@ -861,13 +807,13 @@ package body KDF9.CPU is
       end if;
       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
       --    scaled so that the division cannot overflow.
-      Ls := scale_down(fraction_word(L), 3);
+      Ls := scale_down(fraction_word(L), 2);
       Rs := scale_down(fraction_word(R), 1);
       N := abs as_fraction(Ls);  -- Ls is scaled down by 1/8, so "abs" cannot overflow.
       D := abs as_fraction(Rs);  -- Rs is scaled down by 1/2, so "abs" cannot overflow.
-      -- E is increased by 2 to compensate the quotient's scaling by 1/4.
-      E := scaler(L) - scaler(R) + 2;
-      F := as_word(N / D);  -- "/" cannot overflow here.
+      -- E is increased by 1 to compensate the quotient's scaling by 1/2.
+      E := scaler(L) - scaler(R) + 1;
+      F := as_word(N / D);
       if resign(KDF9.word(L) xor KDF9.word(R)) < 0 then
          -- The result is negative.
          F := -F;
@@ -893,8 +839,13 @@ package body KDF9.CPU is
    end "<";
 
    function fraction_pair (DF : CPU.f96)
-   return KDF9.pair
-   is (scale_up((msw => scale_down(fraction_word(DF.msw), 8), lsw => fraction_word(DF.lsw)), 8));
+   return KDF9.pair is
+      P : KDF9.pair;
+   begin
+      P.msw := scale_down(fraction_word(DF.msw), 8);
+      P.lsw := fraction_word(DF.lsw) and KDF9.not_sign_bit;
+      return scale_up(P, 8);
+   end fraction_pair;
 
    function scaler (DF : CPU.f96)
    return KDF9.word
@@ -1030,24 +981,38 @@ package body KDF9.CPU is
       return as_f96(LR);
    end "*";
 
-   function "/" (L : CPU.f96;
-                 R : CPU.f48)
+   function "/" (L : CPU.f96; R : CPU.f48)
    return CPU.f48 is  -- aka DIVDF
       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
       --    scaled so that the division cannot overflow.
-      Ls     : constant KDF9.pair := scale_down(fraction_pair(L), 3);
-      Rs     : constant KDF9.word := scale_down(fraction_word(R), 1);
-      -- E is increased by 2 to compensate the quotient's scaling by 1/4.
-      E      : constant KDF9.word := scaler(L) - scaler(R) + 2;
-      F      : KDF9.word;
+      Ls : constant KDF9.pair := scale_down(fraction_pair(L), 2);
+      Rs : constant KDF9.word := scale_down(fraction_word(R), 1);
+      -- E is increased by 1 to compensate the quotient's scaling by 1/2.
+      E : constant KDF9.word  := scaler(L) - scaler(R) + 1;
+      F : KDF9.word;
    begin
       if R = 0 then
          the_V_bit_is_set := True;
          return L.msw;  -- ?? This result is not well defined in the Manual.
       end if;
-      do_DIVD(Ls, Rs, F);  -- Division cannot overflow here.
+      do_DIVD(Ls, Rs, F);
       return normalized(full_fraction => F, scaler => E);
    end "/";
+
+   function number_of_1_bits_in (W : KDF9.word)
+   return KDF9.word is
+      u : constant CPU.u_64 := CPU.u_64(W);
+      n :          CPU.u_64 := shift_right(u, 1) and 16#77_77_77_77_77_77_77_77#;
+      x :          CPU.u_64 := u - n;
+   begin
+      n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
+      x := x - n;
+      n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
+      x := x - n;
+      x := (x + shift_right(x, 4)) and 16#0F_0F_0F_0F_0F_0F_0F_0F#;
+      x := x * 16#01_01_01_01_01_01_01_01#;
+      return KDF9.word(shift_right(x, CPU.u_64'Size-8));
+   end number_of_1_bits_in;
 
    procedure push (F : in CPU.f48) is
    begin

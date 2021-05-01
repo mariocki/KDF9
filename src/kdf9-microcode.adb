@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (6.2r), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -71,7 +71,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 2;
 
          when BITS =>
-            write_top(cardinality(read_top));
+            write_top(number_of_1_bits_in(read_top));
             the_CPU_delta := the_CPU_delta + 27;
 
          when XF =>
@@ -117,7 +117,7 @@ package body KDF9.microcode is
          when TOB =>
             ensure_that_the_NEST_holds_2_operands;
             A := pop;      -- the value
-            bit_count := cardinality(A);
+            bit_count := number_of_1_bits_in(A);
             B := read_top; -- the radixes
             C := 0;
 
@@ -262,13 +262,13 @@ package body KDF9.microcode is
             elsif resign(B) > resign(A) then
                write_top(KDF9.word'(1));
             else
-               write_top(all_one_bits);
+               write_top(KDF9.word'(all_one_bits));
             end if;
             the_CPU_delta := the_CPU_delta + 3;
 
          when ZERO =>
             ensure_that_the_NEST_has_room_for_a_result;
-            push(all_zero_bits);
+            push(KDF9.word'(all_zero_bits));
             the_CPU_delta := the_CPU_delta + 2;
 
          when DUP =>
@@ -305,9 +305,9 @@ package body KDF9.microcode is
             A := read_top;
             if resign(A) < 0 then
                write_top(A and not_sign_bit);
-               push(all_one_bits);
+               push(KDF9.word'(all_one_bits));
             else
-               push(all_zero_bits);
+               push(KDF9.word'(all_zero_bits));
             end if;
             the_CPU_delta := the_CPU_delta + 3;
 
@@ -315,7 +315,7 @@ package body KDF9.microcode is
             ensure_that_the_NEST_holds_2_operands;
             A := pop;
             B := read_top;
-            write_top(contracted(msw => A, lsw => B));
+            write_top(contracted(KDF9.pair'(msw => A, lsw => B)));
             the_CPU_delta := the_CPU_delta + 2;
 
          when REVD =>
@@ -412,7 +412,7 @@ package body KDF9.microcode is
          when FRB =>
             ensure_that_the_NEST_holds_2_operands;
             A := pop;      -- the value
-            bit_count := cardinality(A);
+            bit_count := number_of_1_bits_in(A);
             B := read_top; -- the radixes
             C := 0;
 
@@ -471,9 +471,9 @@ package body KDF9.microcode is
             ensure_that_the_NEST_holds_2_operands;
             XY := pop;
             if KDF9.word(XY.lsw) = KDF9.word(XY.msw) then
-               push(all_zero_bits);
+               push(KDF9.word'(all_zero_bits));
             elsif XY.lsw < XY.msw then
-               push(all_one_bits);
+               push(KDF9.word'(all_one_bits));
             else
                push(KDF9.word(1));
             end if;
@@ -1098,7 +1098,7 @@ package body KDF9.microcode is
             fail_in_problem_program_state;
             case INS.Qq is
                when K0 =>
-                  if read_top /= all_zero_bits then
+                  if read_top /= KDF9.word'(all_zero_bits) then
                      for w in all_zero_bits .. read_top mod 8 loop
                         POSIX.output_line("BLEEP!");
                      end loop;
@@ -1133,7 +1133,7 @@ package body KDF9.microcode is
 
          when LINK =>
             if the_CPU_state = Director_state and the_SJNS_depth = 0 then -- clear out JB
-               push(all_zero_bits);
+               push(KDF9.word'(all_zero_bits));
                the_SJNS_depth := 0 - 1;
             else
                ensure_that_the_NEST_has_room_for_a_result;
@@ -1213,7 +1213,7 @@ package body KDF9.microcode is
 
          when JrEQZ =>
             ensure_that_the_NEST_holds_an_operand;
-             if pop = all_zero_bits then
+             if pop = KDF9.word'(all_zero_bits) then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 11;
             else
@@ -1240,7 +1240,7 @@ package body KDF9.microcode is
 
          when JrNEZ =>
             ensure_that_the_NEST_holds_an_operand;
-            if pop /= all_zero_bits then
+            if pop /= KDF9.word'(all_zero_bits) then
                set_NIA_to_the_INS_target_address;
                the_CPU_delta := the_CPU_delta + 11;
             else
