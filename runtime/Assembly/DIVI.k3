@@ -1,0 +1,49 @@
+V9; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+
+   V1 = B4000000000000007;
+   V2 = B2000000000000701;
+   V3 = B0000000000000007;
+   V4 = B2000000000000701;
+
+   SET -1; SET +5; JS666;
+   SET -1; SET -5; JS666;
+
+   SET 1; SET +5; JS666;
+   SET 1; SET -5; JS666;
+
+   ZERO; NOT; SET+16; JS666;
+   ZERO; NOT; SET-16; JS666;
+   SET +1;    SET+16; JS666;
+   SET +1;    SET-16; JS666;
+
+   ZERO; NOT; SET+12; JS666;
+   ZERO; NOT; SET-12; JS666;
+   SET +1;    SET+12; JS666;
+   SET +1;    SET-12; JS666;
+
+   V1; SET +5; JS666;
+   V1; SET -5; JS666;
+   V2; SET +5; JS666;
+   V2; SET -5; JS666;
+
+   V3; SET +5; JS666;
+   V3; SET -5; JS666;
+   V4; SET +5; JS666;
+   V4; SET -5; JS666;
+
+   ZERO; OUT;
+
+666;
+      DUPD; =V8; =V9;
+      DIVI; REV; V8; XD; CONT; +; V9; NEV;
+   J999NEZ;
+      VR;
+   EXIT 1;
+
+999;
+   V8; V9; MRWDQ0;
+
+FINISH;
+|

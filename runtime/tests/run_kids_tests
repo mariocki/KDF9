@@ -31,58 +31,69 @@ export EE9REGTEST=1
 SOURCE=${KDF9RUNTIME}/Assembly
 BINARY=${KDF9RUNTIME}/Binary
 
-trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt" 0 1 2 3
+#trap "rm -f ${LOGS}/kids_test.log ${LOGS}/kids_test_diff.txt" 0 1 2 3
 
-opts="-d=t -m=prh -nc"
+opts="-d=t -m=ahipr -nc"
 
 >${LOGS}/kids_test.log
 
+echo "TEST kids FLUID"
 kids FLUID FLUID_data $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/FLUID.k3 ${Binary}/FLUID ${SOURCE}/FLUID-listing.txt
 
-kids HAAVIE $opts >>${LOGS}/kids_test.log
-fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
-rm -f ${SOURCE}/HAAVIE.k3 ${Binary}/HAAVIE ${SOURCE}/HAAVIE-listing.txt
-
+echo "TEST kids HANOI"
 kids HANOI HANOI_data $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/HANOI.k3 ${Binary}/HANOI ${SOURCE}/HANOI-listing.txt
 
+echo "TEST kids INPUT"
 kids INPUT INPUT_data $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/INPUT.k3 ${Binary}/INPUT ${SOURCE}/INPUT-listing.txt
 
+echo "TEST kids MANORBOYX"
 kids MANORBOYX $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/MANORBOYX.k3 ${Binary}/MANORBOYX ${SOURCE}/MANORBOYX-listing.txt
 
+echo "TEST kids MATMULT"
 kids MATMULT $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/MATMULT.k3 ${Binary}/MATMULT ${SOURCE}/MATMULT-listing.txt
 
+echo "TEST kids PALSQR"
 kids PALSQR $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/PALSQR.k3 ${Binary}/PALSQR ${SOURCE}/PALSQR-listing.txt
 
+echo "TEST kids PENTOMINO"
 kids PENTOMINO PENTOMINO_data $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/PENTOMINO.k3 ${Binary}/PENTOMINO ${SOURCE}/PENTOMINO-listing.txt
 
+echo "TEST kids QSORT"
 kids QSORT $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/QSORT.k3 ${Binary}/QSORT ${SOURCE}/QSORT-listing.txt
 
+echo "TEST kids WEEHAAVIE"
+kids WEEHAAVIE $opts >>${LOGS}/kids_test.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
+rm -f ${SOURCE}/WEEHAAVIE.k3 ${Binary}/WEEHAAVIE ${SOURCE}/WEEHAAVIE-listing.txt
+
+echo "TEST kids WHETSTONE"
 kids WHETSTONE $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/WHETSTONE.k3 ${Binary}/WHETSTONE ${SOURCE}/WHETSTONE-listing.txt
 
+echo "TEST kids ZELLER"
 kids ZELLER ZELLER_data $opts >>${LOGS}/kids_test.log
 fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/kids_test.log
 rm -f ${SOURCE}/ZELLER.k3 ${Binary}/ZELLER ${SOURCE}/ZELLER-listing.txt
 
 echo
-diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log kids_regr_tests_good.log >${LOGS}/kids_test.diff
+diff -diwB --strip-trailing-cr ${LOGS}/kids_test.log ${TESTS}/kids_regr_tests_good.log >${LOGS}/kids_test.diff
 if [ -s ${LOGS}/kids_test.diff ]; then
    echo "These are the unexpected variances for this run:"
    echo "==="

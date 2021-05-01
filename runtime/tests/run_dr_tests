@@ -28,7 +28,7 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/dr_test.log ${LOGS}/dr_test.diff ${KDF9RUNTIME}/settings_1.txt" 0 1 2 3
+#trap "rm -f ${LOGS}/dr_test.log ${LOGS}/dr_test.diff ${KDF9RUNTIME}/settings_1.txt" 0 1 2 3
 
 opt="-d=t -m=ahipr"
 
@@ -97,6 +97,20 @@ echo "TEST TDROUTS   11, 12, 13, 14." >>${LOGS}/dr_test.log
 >${KDF9RUNTIME}/DR0
 ucc TDROUTS
 nine_test TDROUTS ${opt}k
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
+
+echo "TEST TDROUTFAILS   13."
+echo "TEST TDROUTFAILS   13." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDROUTFAILS
+VARIABLE=3 nine_test TDROUTFAILS ${opt}k
+fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
+
+echo "TEST TDROUTFAILS   11, 13."
+echo "TEST TDROUTFAILS   11, 13." >>${LOGS}/dr_test.log
+>${KDF9RUNTIME}/DR0
+ucc TDROUTFAILS
+VARIABLE=6 nine_test TDROUTFAILS ${opt}k
 fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/dr_test.log
 
 echo

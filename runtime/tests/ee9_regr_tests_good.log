@@ -9,8 +9,6 @@ TEST POG POH - PIE 80-column alphanumeric read:
 TEST POL POK (sic) - PIG 80-column alphanumeric character-per-word read:
 
 These tests ran as expected.
-
-
 +++++++++++++++++++ BEGIN  Test Case MT +++++++++++++++++++
 TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:
 TEST B - GAP in unWIPEd area - should fail "Impossible I/O operation":
@@ -29,17 +27,15 @@ TEST TRO - like TEST T but without WPR - should fail:
 TEST OUT 2 - should end normally:
 
 These tests ran as expected.
-
-
 +++++++++++++++++++ BEGIN  Test Case DR +++++++++++++++++++
 TEST TDRUM     POA, PIA.
 TEST TDRUMR2EM POA, PIB.
 TEST TDRUMW2EM POB, PIA.
 TEST TDROUTS   11, 12, 13, 14.
+TEST TDROUTFAILS   13.
+TEST TDROUTFAILS   11, 13.
 
 These tests ran as expected.
-
-
 +++++++++++++++++++ BEGIN  Test Case FD +++++++++++++++++++
 TEST TDISC     POA, PIA, PMA, PMF.
 TEST TDISCOR   POA, PIA, PMA, PMF.
@@ -47,36 +43,41 @@ TEST TDISCEM   POB, PIA, PMA.
 TEST TDISCFH   POC, PIC done.
 TEST TDISCFHNS POC, POK, PIC, PIG.
 TEST TFDOUTS 41, 42, 43, 44, 45.
+TEST TFDOUTFAILS 41 with no discs reserved.
+TEST TFDOUTFAILS 44, 45 too many 45s.
 
-These tests ran as expected.
-
-
+These are the unexpected variances for this run:
+===
+12c12
+< Digital signature of traced orders = #7720236665716610.
+---
+> Digital signature of traced orders = #5117365631055154.
+===
 +++++++++++++++++++ BEGIN  Test Case HIG +++++++++++++++++++
 The signature of this test should be #6442100001003204. It was as follows:
 Digital signature of traced orders = #6442100001003204.
 ------------------- END OF Test Case HIG -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case LOG +++++++++++++++++++
 The signature of this test should be #2012100001003204. It was as follows:
 Digital signature of traced orders = #2012100001003204.
 ------------------- END OF Test Case LOG -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case DMP +++++++++++++++++++
 The signature of this test should be #5132117202617243. It was as follows:
 Digital signature of traced orders = #5132117202617243.
 ------------------- END OF Test Case DMP -------------------
-
-
++++++++++++++++++++ BEGIN  Test Case REM +++++++++++++++++++
+The signature of this test should be #1361462532433030. It was as follows:
+Digital signature of traced orders = #1361462532433030.
+------------------- END OF Test Case REM -------------------
++++++++++++++++++++ BEGIN  Test Case DVD +++++++++++++++++++
+The signature of this test should be #3165330512763021. It was as follows:
+Digital signature of traced orders = #3165330512763021.
+------------------- END OF Test Case DVD -------------------
 +++++++++++++++++++ BEGIN  Test Case ACK +++++++++++++++++++
 The signature of this test should be #4657410657321314. It was as follows:
 Digital signature of traced orders = #4657410657321314.
 ------------------- END OF Test Case ACK -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case HLT +++++++++++++++++++
-
 TP0:
 ===
 AEFDBC
@@ -100,10 +101,7 @@ ABCDEABCDEABCDEABCDEABCDEABCDEABCDE
 The signature of this test should be #6151525720423034. It was as follows:
 Digital signature of traced orders = #6151525720423034.
 ------------------- END OF Test Case HLT -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case HKT +++++++++++++++++++
-
 TP0:
 ===
 AEFDBC
@@ -127,16 +125,12 @@ ABCDEABCDEABCDEABCDEABCDEABCDEABCDE
 The signature of this test should be #6151525720423034. It was as follows:
 Digital signature of traced orders = #6151525720423034.
 ------------------- END OF Test Case HKT -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case MOB +++++++++++++++++++
-
 TP0:
 ===
 
 RAN/EL/000M01S/000M03S  SIZE     60
 ===
-
 LP0:
 ===
 
@@ -145,10 +139,7 @@ RAN/EL/000M46S/000M48S===
 The signature of this test should be #1407535531421151. It was as follows:
 Digital signature of traced orders = #1407535531421151.
 ------------------- END OF Test Case MOB -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case GPR +++++++++++++++++++
-
 TP0:
 ===
 
@@ -185,18 +176,14 @@ The 28th prime is 107
 The 29th prime is 109
 The 30th prime is 113
 ===
-
 LP0:
 ===
 
 RAN/EL/021M43S/021M47S===
 The signature of this test should be #2462534671215633. It was as follows:
-Digital signature of traced orders = #2462534671215633.
+Digital signature of traced orders = #2635267543557744.
 ------------------- END OF Test Case GPR -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case FLU +++++++++++++++++++
-
 TP0:
 ===
 
@@ -225,18 +212,14 @@ Propagation of an Impulse into a Viscous-locking Medium
 
     1.0000            0.0000                0.00000            0.48394
 ===
-
 LP0:
 ===
 
 RAN/EL/008M50S/008M56S===
 The signature of this test should be #3755315062014254. It was as follows:
-Digital signature of traced orders = #3755315062014254.
+Digital signature of traced orders = #3755315075153754.
 ------------------- END OF Test Case FLU -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case WBM +++++++++++++++++++
-
 TP0:
 ===
 
@@ -256,7 +239,6 @@ IDENTIFIER c NOT USED
 DECLARED ON LINE   2
 RAN/EL/000M05S/000M15S  SIZE    603
 ===
-
 LP0:
 ===
 
@@ -273,18 +255,13 @@ N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
 RAN/EL/006M57S/006M59S===
 The signature of this test should be #7636155453113124. It was as follows:
-Digital signature of traced orders = #7636155453113124.
+Digital signature of traced orders = #3113657561134733.
 ------------------- END OF Test Case WBM -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case RLT +++++++++++++++++++
 The signature of this test should be #3506450617016266. It was as follows:
 Digital signature of traced orders = #3506450617016266.
 ------------------- END OF Test Case RLT -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case TO4 +++++++++++++++++++
-
 TP0:
 ===
 TEST A
@@ -327,16 +304,11 @@ FINISH
 The signature of this test should be #3257037520362447. It was as follows:
 Digital signature of traced orders = #3257037520362447.
 ------------------- END OF Test Case TO4 -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case TOX +++++++++++++++++++
 The signature of this test should be #5346716617576440. It was as follows:
 Digital signature of traced orders = #5346716617576440.
 ------------------- END OF Test Case TOX -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case MTW +++++++++++++++++++
-
 TP0:
 ===
 
@@ -356,18 +328,14 @@ IDENTIFIER c NOT USED
 DECLARED ON LINE   2
 RAN/EL/000M05S/000M16S  SIZE    613
 ===
-
 LP0:
 ===
 
 RAN/EL/006M57S/007M04S===
 The signature of this test should be #1610433227767503. It was as follows:
-Digital signature of traced orders = #1610433227767503.
+Digital signature of traced orders = #2374020431503051.
 ------------------- END OF Test Case MTW -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case INP +++++++++++++++++++
-
 TP0:
 ===
 
@@ -406,7 +374,6 @@ Hello World.
            0  0.000000000    
 Farewell, Cruel World.
 ===
-
 LP0:
 ===
 
@@ -414,47 +381,15 @@ RAN/EL/000M03S/000M13S===
 The signature of this test should be #3301160711524477. It was as follows:
 Digital signature of traced orders = #3301160711524477.
 ------------------- END OF Test Case INP -------------------
-
-
-+++++++++++++++++++ BEGIN  Test Case HQP +++++++++++++++++++
-The Usercode is in Assembly/WEEHAAVIE.k3 and the KDF9 executable is in Binary/WEEHAAVIE
-
-
-LP0:
-===
-EPSILON = 1.00000000000º-10
-MMAX =  20
-COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
-COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
-COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
-COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
-COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
-FINISHED ENDS 0
-===
-The signature of this test should be #4230330426172712. It was as follows:
-Digital signature of traced orders = #4230330426172712.
-------------------- END OF Test Case HQP -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case WAB +++++++++++++++++++
 The signature of this test should be #6071426761537263. It was as follows:
-Digital signature of traced orders = #6071426761537263.
+Digital signature of traced orders = #0443730464215342.
 ------------------- END OF Test Case WAB -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case FLO +++++++++++++++++++
 The signature of this test should be #3271342634660173. It was as follows:
 Digital signature of traced orders = #3271342634660173.
 ------------------- END OF Test Case FLO -------------------
-
-
 +++++++++++++++++++ BEGIN  Test Case 1DH +++++++++++++++++++
-
 LP0:
 ===
 CASE 1 GENERAL DELTAR ON DESK-H;                                                                                     
@@ -1427,7 +1362,43 @@ NODE-RADII
               
 ===
 The signature of this test should be #7671706436245512. It was as follows:
-Digital signature of traced orders = #7671706436245512.
+Digital signature of traced orders = #7063030114236754.
 ------------------- END OF Test Case 1DH -------------------
++++++++++++++++++++ BEGIN  Test Case KAlgol +++++++++++++++++++
+TEST kids FLUID
+TEST kids HANOI
+TEST kids INPUT
+TEST kids MANORBOYX
+TEST kids MATMULT
+TEST kids PALSQR
+TEST kids PENTOMINO
+TEST kids QSORT
+TEST kids WEEHAAVIE
+TEST kids WHETSTONE
+TEST kids ZELLER
 
-
+These are the unexpected variances for this run:
+===
+1d0
+< Compilation successful.
+32d32
+< Compilation successful.
+48d49
+< Compilation successful.
+85d87
+< Compilation successful.
+93d96
+< Compilation successful.
+135d139
+< Compilation successful.
+175d180
+< Compilation successful.
+434d440
+< Compilation successful.
+443d450
+< Compilation successful.
+462d470
+< Compilation successful.
+481d490
+< Compilation successful.
+===

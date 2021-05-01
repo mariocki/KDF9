@@ -28,7 +28,7 @@ export TESTS=${KDF9RUNTIME}/tests
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log /tmp/whetoutput" 0 1 2 3
+#trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log /tmp/whetoutput" 0 1 2 3
 
 function runtest() {
    whet $1 -d=t -m=prh >>${LOGS}/whet_test.log

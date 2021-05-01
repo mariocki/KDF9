@@ -119,6 +119,10 @@ ${TESTS}/ee9_test_case LOG >>${LOGS}/ee9_test_case.log
 echo
 ${TESTS}/ee9_test_case DMP >>${LOGS}/ee9_test_case.log
 echo
+${TESTS}/ee9_test_case REM >>${LOGS}/ee9_test_case.log
+echo
+${TESTS}/ee9_test_case DVD >>${LOGS}/ee9_test_case.log
+echo
 ${TESTS}/ee9_test_case ACK >>${LOGS}/ee9_test_case.log
 echo
 ${TESTS}/ee9_test_case HLT >>${LOGS}/ee9_test_case.log
@@ -143,8 +147,6 @@ ${TESTS}/ee9_test_case MTW >>${LOGS}/ee9_test_case.log
 echo
 ${TESTS}/ee9_test_case INP >>${LOGS}/ee9_test_case.log
 echo
-${TESTS}/ee9_test_case HQP >>${LOGS}/ee9_test_case.log
-echo
 ${TESTS}/ee9_test_case WAB n >>${LOGS}/ee9_test_case.log
 echo
 ${TESTS}/ee9_test_case FLO >>${LOGS}/ee9_test_case.log
@@ -152,7 +154,15 @@ echo
 ${TESTS}/ee9_test_case 1DH >>${LOGS}/ee9_test_case.log
 echo
 
-diff -diwB --strip-trailing-cr -I 'The Usercode*' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log >${LOGS}/ee9_test_case.diff
+echo
+echo
+echo "Running Kidsgrove compiler and runtime tests:"
+echo "============================================"
+echo
+${TESTS}/ee9_test_run KAlgol "run_kids_tests ahipr a" >>${LOGS}/ee9_test_case.log
+echo
+
+diff -diwB --strip-trailing-cr -I 'The Usercode*' -I 'Compilation successful.' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log >${LOGS}/ee9_test_case.diff
 
 if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]; then
     echo

@@ -1,0 +1,57 @@
+V999; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test seek and I/O logic);
+   V1 = Q 12345/AV2/AV3;
+   V2 = P VARIABLE;
+   V3 = Q 33/AV8/AV9;
+   V4 = Q 33/AV100/AV100;
+
+   V2; SET 97; OUT; SET 1; -;
+   DUP; J111GEZ;
+   MRWDQ0;
+111;
+   DUP; SET 9; -; J222LTZ;
+   MRWDQ0;
+222;
+   =LINK;
+   EXIT AR666;
+*666;
+   J1; DUMMY; DUMMY; DUMMY;
+  *J2; DUMMY; DUMMY; DUMMY;
+  *J3; DUMMY; DUMMY; DUMMY;
+  *J4; DUMMY; DUMMY; DUMMY;
+  *J5; DUMMY; DUMMY; DUMMY;
+  *J6; DUMMY; DUMMY; DUMMY;
+  *J7; DUMMY; DUMMY; DUMMY;
+
+1;  (ask for available space without a drum being configured);
+   SET 14; OUT;
+
+2;  (ask for impossible amount of storage);
+   SET 32767; SET 13; OUT;
+
+3;  (ask for storage twice);
+   SET 1; SET 13; OUT;
+   SET 1; SET 13; OUT;
+
+4;  (try to write before OUT 13 is obeyed);
+   Q0; SET 11; OUT;
+
+
+5;  (try to read before OUT 13 is obeyed);
+   Q0; SET 12; OUT;
+
+
+6;  (try an excessive write transfer);
+   SET 32;  SET 13; OUT;
+   V3; SET 11; OUT;
+
+
+7;  (try an excessive read transfer);
+   SET 32;  SET 13; OUT;
+   V4; SET 12; OUT;
+
+   MRWDQ0;
+
+FINISH;
+|

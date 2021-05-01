@@ -29,64 +29,7 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #7326126223160150.
-The Usercode is in Assembly/HAAVIE.k3 and the KDF9 executable is in Binary/HAAVIE
-
-
-LP0:
-===
-THIS IS THE HAAVIE QUADRATURE PROGRAM.
-
-
-MMAX = 20
-
-EPSILON = 0.00000000010
-
-INTEGRAL(0,1,X) =                         0.50000000000: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(0,1,X'UP'2) =                    0.33333333333: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(0,1,X'UP'9) =                    0.10000000000: RELATIVE ERROR:  2.27373675443º-12
-
-INTEGRAL(0,1,EXP(X)) =                    1.71828182846: RELATIVE ERROR:  2.11721892581º-12
-
-INTEGRAL(1,E,LN(X)) =                     1.00000000000: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(1,E,ARCTAN(X)) =                 0.43882457312: RELATIVE ERROR:  4.14514025644º-12
-
-INTEGRAL(0,PI/2,COS(X)) =                 1.00000000000: RELATIVE ERROR:  3.63797880709º-12
-
-INTEGRAL(0,4.3,EXP(-X'MULT'X)) =          0.88622692440: RELATIVE ERROR:  6.15752925174º-12
-
-INTEGRAL(1,10,LN(X)) =                    14.0258509299: RELATIVE ERROR: -2.07501353053º-12
-
-INTEGRAL(0,20,X'UP'(1/2)/(EXP(X-4)+1)) =  5.77072601703: RELATIVE ERROR:  8.64935696638º-10
-
-INTEGRAL(1,2,EXP(X)) =                    4.67077427047: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(0,PI/4,SIN(X)) =                 0.29289321882: RELATIVE ERROR:  1.86312548744º-11
-
-INTEGRAL(PI/4,PI/2,SIN(X)) =              0.70710678119: RELATIVE ERROR:  5.14487896862º-12
-
-INTEGRAL(0,PI/2,SIN(X)) =                 1.00000000000: RELATIVE ERROR:  3.63797880709º-12
-
-INTEGRAL(PI/2,PI,SIN(X)) =                0.99999999999: RELATIVE ERROR: -1.27329258248º-11
-
-INTEGRAL(0,PI,SIN(X)) =                   1.99999999999: RELATIVE ERROR: -7.27595761418º-12
-
-INTEGRAL(0,2PI,SIN(X)) =                  0.00000000000: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(0,1,1/(1+X'MULT'X)) =            0.78539816340: RELATIVE ERROR:  1.15800462004º-11
-
-INTEGRAL(EPS,1,X'UP'(-X)) =               1.29128599746: RELATIVE ERROR:  3.07088972447º-10
-
-INTEGRAL(0,1,LN(1+X)/(1+X'UP'2)) =        0.27219826129: RELATIVE ERROR:  0.00000000000    
-
-INTEGRAL(0,1,(X+X)/(1+X'MULT'X)) =        0.69314718056: RELATIVE ERROR:  2.62424699193º-12
-
-FINISHED ENDS 0
-===
-Digital signature of traced orders = #4657733754527710.
+Digital signature of traced orders = #5677321647775661.
 The Usercode is in Assembly/HANOI.k3 and the KDF9 executable is in Binary/HANOI
 
 
@@ -103,7 +46,7 @@ MOVE A DISC FROM B TO C
 MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6000350027713151.
+Digital signature of traced orders = #4672116012330012.
 The Usercode is in Assembly/INPUT.k3 and the KDF9 executable is in Binary/INPUT
 
 
@@ -141,7 +84,7 @@ HELLO WORLD.
 FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5646207611462650.
+Digital signature of traced orders = #3371333056161767.
 The Usercode is in Assembly/MANORBOYX.k3 and the KDF9 executable is in Binary/MANORBOYX
 
 
@@ -150,7 +93,7 @@ LP0:
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6236344540707267.
+Digital signature of traced orders = #3637615157312232.
 The Usercode is in Assembly/MATMULT.k3 and the KDF9 executable is in Binary/MATMULT
 
 
@@ -193,7 +136,7 @@ ROW 10 SHOULD BE 1.23456789º +1
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5472073451072624.
+Digital signature of traced orders = #2664147257751506.
 The Usercode is in Assembly/PALSQR.k3 and the KDF9 executable is in Binary/PALSQR
 
 
@@ -231,17 +174,17 @@ LP0:
    30693   942060249
 
 
-CPU TIME IN SECONDS:        94
+CPU TIME IN SECONDS:       101
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0755765322732576.
+Digital signature of traced orders = #3702062461441634.
 The Usercode is in Assembly/PENTOMINO.k3 and the KDF9 executable is in Binary/PENTOMINO
 
 
 LP0:
 ===
 
-THE FIRST 99 SOLUTIONS:
+THE FIRST  9 SOLUTIONS:
 
 
 
@@ -255,23 +198,276 @@ PIECE COUNT = 12
 
 PLACE COUNT = 63
 
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - - - -     
+I       I   I       I   I           I   I
+     - -     - -         - - - - - -     
+I   I           I   I       I       I   I
+     - -     - -     - -     - -     - - 
+I       I   I   I       I       I       I
+ - - - - - -     - - - - - - - -     - - 
+I           I   I               I   I   I
+         - -     - -     - - - - - -     
+I       I           I   I               I
+ - - - - - - - - - - - - - - - - - - - - 
 
-KALGOL TRACE 0000024/0000193
-FAIL 003 IN P288 NOT YET IMPLEMENTED
-VALUE 0000000000003366 OCTAL
-FINISHED ENDS 4
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I   I       I       I
+ - - - - - - - - - -     - -     - -     
+I   I           I           I       I   I
+     - - - -     - -     - - - -         
+I           I   I   I   I       I   I   I
+ - - - -             - -         - -     
+I       I   I   I   I           I   I   I
+     - - - - - -     - - - - - -     - - 
+I   I       I           I   I           I
+     - -     - - - - - -     - - - -     
+I       I           I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -     - - - - - -     
+I   I           I           I       I   I
+     - - - -     - -     - - - -     - - 
+I           I   I   I   I       I       I
+ - - - -             - -         - -     
+I       I   I   I   I           I   I   I
+     - - - - - -     - - - - - -     - - 
+I   I       I           I   I           I
+     - -     - - - - - -     - - - -     
+I       I           I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -         - - - - - - 
+I   I           I       I   I           I
+     - - - -     - -     - - - -         
+I           I       I   I       I       I
+ - - - -     - - - -     - -     - - - - 
+I       I   I   I   I   I   I       I   I
+     - - - -         - -     - -         
+I   I           I   I           I   I   I
+     - -     - -     - -     - - - -     
+I       I   I           I   I           I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I   I               I
+ - - - - - - - - - -     - - - -     - - 
+I   I           I           I   I   I   I
+     - - - -     - -     - -     - -     
+I           I   I   I   I   I           I
+ - - - -             - -     - - - - - - 
+I   I   I   I   I       I           I   I
+         - - - - - -     - -     - -     
+I   I   I           I       I   I   I   I
+ - -     - -         - - - - - -         
+I           I       I               I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I   I       I
+ - - - - - - - - - -     - -             
+I   I               I   I       I       I
+     - - - -     - -     - -     - -     
+I           I   I   I       I       I   I
+ - - - -     - -     - - - - - - - - - - 
+I   I   I   I   I       I           I   I
+         - -     - -     - - - -         
+I   I   I           I       I   I   I   I
+ - -     - -     - - - - - -             
+I           I   I               I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I   I       I
+ - - - - - - - - - -             - -     
+I   I               I       I       I   I
+     - - - -     - -     - -     - -     
+I           I   I   I   I       I       I
+ - - - -     - -     - - - - - - - - - - 
+I   I   I   I   I       I           I   I
+         - -     - -     - - - -         
+I   I   I           I       I   I   I   I
+ - -     - -     - - - - - -             
+I           I   I               I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - -         
+I   I               I   I       I       I
+     - - - -     - -     - -     - - - - 
+I           I   I           I   I       I
+ - - - -     - - - -     - - - -     - - 
+I   I   I   I   I   I   I   I   I   I   I
+         - -         - -                 
+I   I   I       I           I   I   I   I
+ - -     - -     - - - - - -             
+I           I       I           I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+- - - - - - - - - - - - - - - - - - - - 
+I                   I       I           I
+ - - - - - - - - - - - -     - -         
+I   I               I   I       I       I
+     - - - -     - -     - -     - - - - 
+I           I   I           I   I       I
+ - - - -     - - - -     - - - -     - - 
+I   I   I   I   I   I   I   I   I   I   I
+         - -         - -                 
+I   I       I   I           I   I   I   I
+ - -     - -     - - - - - -             
+I       I           I           I   I   I
+ - - - - - - - - - - - - - - - - - - - - 
+
+
+
+PRINT SOLUTION:
+
+BOARD LENGTH = 10
+
+BOARD WIDTH =  6
+
+PIECE COUNT = 12
+
+PLACE COUNT = 63
+
+SOLUTION COUNT = 10
+
+
+FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0174332755575625.
+Digital signature of traced orders = #3161473443017524.
 The Usercode is in Assembly/QSORT.k3 and the KDF9 executable is in Binary/QSORT
 
 
 LP0:
 ===
-CPU TIME IN SECONDS:      36
+CPU TIME IN SECONDS:      37
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #1357445241035444.
+Digital signature of traced orders = #7515250422162462.
+The Usercode is in Assembly/WEEHAAVIE.k3 and the KDF9 executable is in Binary/WEEHAAVIE
+
+
+LP0:
+===
+EPSILON = 1.00000000000º-10
+MMAX =  20
+COUNT =         6
++7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
+COUNT =        20
++1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
+COUNT =         6
++2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
+COUNT =         6
++6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
+COUNT =         6
++8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
+FINISHED ENDS 0
+===
+Digital signature of traced orders = #4230330426172712.
 The Usercode is in Assembly/WHETSTONE.k3 and the KDF9 executable is in Binary/WHETSTONE
 
 
@@ -288,10 +484,10 @@ N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
 N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
-THAT TOOK  21.7 SECONDS, FOR  46.1 KWIPS
+THAT TOOK  23.9 SECONDS, FOR  41.8 KWIPS
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0612254551173476.
+Digital signature of traced orders = #1664627544053247.
 The Usercode is in Assembly/ZELLER.k3 and the KDF9 executable is in Binary/ZELLER
 
 
@@ -356,4 +552,4 @@ IN 2040 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  76 YEARS OLD
 IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0205033734260700.
+Digital signature of traced orders = #1743315657650140.

@@ -32,7 +32,7 @@ WAB)
      signature=\#6071426761537263
      ;;
 HIG)
-     this_test="nine HiGuys"
+     this_test="nine HIGUYS"
      signature=\#6442100001003204
      ;;
 LOG)
@@ -43,20 +43,28 @@ DMP)
      this_test="nine DIVA"
      signature=\#5132117202617243
      ;;
+REM)
+     this_test="nine DIVR"
+     signature=\#1361462532433030
+     ;;
+DVD)
+     this_test="nine DIVD"
+     signature=\#3165330512763021
+     ;;
 FLO)
      this_test="nine FLOATT"
      signature=\#3271342634660173
      ;;
 ACK)
-     this_test="nine Ack38"
+     this_test="nine ACK38"
      signature=\#4657410657321314
      ;;
 HLT)
-     this_test="nine Leech LEECH_data9"
+     this_test="nine LEECH LEECH_data9"
      signature=\#6151525720423034
      ;;
 HKT)
-     this_test="nine Leech LEECH_data9_KDF9"
+     this_test="nine LEECH LEECH_data9_KDF9"
      encoding=-TR=kk
      signature=\#6151525720423034
      ;;
@@ -95,10 +103,6 @@ MTW)
 INP)
      this_test="whet INPUT"
      signature=\#3301160711524477
-     ;;
-HQP)
-     this_test="kids WEEHAAVIE"
-     signature=\#4230330426172712
      ;;
 *)
      echo "test case '$1'\;  UNKNOWN!"

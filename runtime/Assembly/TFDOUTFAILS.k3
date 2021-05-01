@@ -1,0 +1,66 @@
+V9; W0;
+RESTART; J999; J999;
+PROGRAM;                   (test seek and I/O logic);
+   V1 = Q 12345/AV2/AV3;
+   V2 = P VARIABLE;
+
+   V2; SET 97; OUT; SET 1; -;
+   DUP; J111GEZ;
+   MRWDQ0;
+111;
+   DUP; SET 9; -; J222LTZ;
+   MRWDQ0;
+222;
+   =LINK;
+   EXIT AR666;
+*666;
+   J1; DUMMY; DUMMY; DUMMY;
+  *J2; DUMMY; DUMMY; DUMMY;
+  *J3; DUMMY; DUMMY; DUMMY;
+  *J4; DUMMY; DUMMY; DUMMY;
+  *J5; DUMMY; DUMMY; DUMMY;
+  *J6; DUMMY; DUMMY; DUMMY;
+  *J7; DUMMY; DUMMY; DUMMY;
+  *J8; DUMMY; DUMMY; DUMMY;
+  *J9; DUMMY; DUMMY; DUMMY;
+
+1; (try to select when no discs have been reserved yet);
+   ZERO;  SET 43; OUT;
+
+2; (try to reserve more than 8 discs);
+   SET+6; SET 44; OUT;
+   SET+6; SET 44; OUT;
+
+3; (try to reserve more than 2 sets);
+   SET+1; SET 44; OUT;
+   SET+1; SET 44; OUT;
+   SET+1; SET 44; OUT;
+
+4; (try to release more sets than are reserved);
+   SET+1; SET 44; OUT;
+   ZERO;  SET 45; OUT;
+   ZERO;  SET 45; OUT;
+
+5; (try to select an unreserved set);
+   ZERO;  SET 43; OUT;
+
+6; (try to check xfer on an unreserved set);
+   SET 47; OUT;
+
+7; (try to select an impossible set);
+   SET+1; SET 44; OUT;
+   SET 7; SET 43; OUT;
+
+8; (try to read with no discs reserved);
+   V1; =Q9; SET 1; =C9;
+   Q9; SET 41; OUT;
+
+9; (try to transfer too much data);
+   SET+1; SET 44; OUT;
+   V1; =Q9;
+   Q9; SET 41; OUT;
+
+   MRWDQ0;
+
+FINISH;
+|
