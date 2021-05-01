@@ -39,7 +39,7 @@ GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnat
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
 
 .PHONY: all
-all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp to_9_from_1934
+all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
 
 .phony: ee9
 ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
@@ -68,12 +68,6 @@ mtp:
 	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/mtp.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
-
-.PHONY: to_9_from_1934
-to_9_from_1934:
-	gnatmake -j4 -c -i ${SRC}/to_9_from_1934.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
-	gnatbind ${SRC}/to_9_from_1934.ali ${SRC:%=-aO%/} -shared
-	gnatlink ${SRC}/to_9_from_1934.ali -o ${SRC}/to_9_from_1934
 
 .PHONY: kal3
 kal3:
