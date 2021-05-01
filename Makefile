@@ -94,7 +94,7 @@ clean:
 	$(RM) build.log
 	$(RM) ${SRC:%=%/*.ali}
 	$(RM) ${SRC:%=%/*.o}
-	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 ${SRC}/gnat.adc
+	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
 
 .PHONY: update
 update:
@@ -125,7 +125,7 @@ install: all
 	install -m 644 runtime/tests/*.log $(DESTDIR)$(prefix)/share/kdf9/tests
 	install -d $(DESTDIR)$(prefix)/share/kdf9/Whetstone
 	install -m 644 runtime/Whetstone/* $(DESTDIR)$(prefix)/share/kdf9/Whetstone
-	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/to_9_from_1934 $(DESTDIR)$(prefix)/bin/
+	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(DESTDIR)$(prefix)/bin/
 	install -m 755 scripts/* $(DESTDIR)$(prefix)/bin/
 	sed "s|%prefix%|$(prefix)|g" < scripts/kdf9_setup > $(DESTDIR)$(prefix)/bin/kdf9_setup
 	$(MAKE) -e -C ${KAL3} install
@@ -139,7 +139,6 @@ uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/a2b
 	$(RM) $(DESTDIR)$(prefix)/bin/kidopt
 	$(RM) $(DESTDIR)$(prefix)/bin/mtp
-	$(RM) $(DESTDIR)$(prefix)/bin/to_9_from_1934
 	for a in scripts/*; do $(RM) $(DESTDIR)$(prefix)/bin/`basename $$a`; done
 	$(MAKE) -e -C ${KAL3} uninstall
 	$(MAKE) -e -C ${KAL4} uninstall
