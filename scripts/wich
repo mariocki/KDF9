@@ -1,0 +1,44 @@
+SOURCE=${KIDSGROVE:-Kidsgrove}
+DATA=${KDF9_DATA:-Data}
+BINARY=${KDF9_BINARY:-Binary}
+USERCODE=${KDF9_USERCODE:-Assembly}
+
+trap "rm -f ${USERCODE}/$1.k3 ${USERCODE}/$1-listing.txt"   \
+      0 1 2 3
+
+if [ x$1x = xx ]
+then
+   echo; echo No program name was given.; echo
+   exit 1
+fi
+
+name=$1
+
+if [ ! -r ${SOURCE}/$name.a60 ]
+then
+   echo; echo ${SOURCE}/$name.a60 was not found.; echo
+   exit 2
+fi
+
+if [ -s settings_for_kalgol.txt ]
+then
+   cp settings_for_kalgol.txt settings_1.txt
+fi
+shift
+
+export KIDSGROVE_ASSEMBLY=n
+kalgol $name ${KIDSOPTS}
+
+peep $name  ${ST:-24000} ${TL:-99999}
+
+ucc $name-PEEP
+
+echo The executable is in ${BINARY}/$name-PEEP; echo
+
+if [ -s ${BINARY}/$name-PEEP ]
+then
+   cp settings_2.txt settings_1.txt
+   nine $name-PEEP $1 $2 $3 $4
+else
+   exit 3
+fi

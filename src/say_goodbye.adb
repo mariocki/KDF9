@@ -1,6 +1,6 @@
 -- Finalize emulation with a helpful message derived from exception information.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -31,6 +31,7 @@ procedure say_goodbye (
                        cause  : in String := "";
                        status : in Exit_Status := Failure
                       ) is
+
    function explanation
    return String is
       CR   : constant Character := Character'Val(16#D#);
@@ -52,6 +53,9 @@ procedure say_goodbye (
    end explanation;
 
 begin  -- say_goodbye
+   if the_log_is_wanted then
+      log_new_line;
+   end if;
    if reason = "" then
       finalize_ee9("Normal end of run");
    elsif reason'Length > 2 and then
@@ -59,6 +63,8 @@ begin  -- say_goodbye
       finalize_ee9(reason & " " & explanation);
    elsif reason'Length = 0 then
       finalize_ee9(explanation);
+   elsif explanation'Length = 0 then
+      finalize_ee9(reason);
    else
       finalize_ee9(reason & ": " & explanation);
    end if;

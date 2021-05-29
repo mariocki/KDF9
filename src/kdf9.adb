@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -627,7 +627,7 @@ package body KDF9 is
          the_link.syllable_index := the_link.syllable_index + 1;
       else
          the_link.syllable_index := 0;
-         the_link.order_word_number     := the_link.order_word_number + 1;
+         the_link.code_address     := the_link.code_address + 1;
       end if;
    end increment_by_1;
 
@@ -637,7 +637,7 @@ package body KDF9 is
          the_link.syllable_index := the_link.syllable_index + 2;
       else
          the_link.syllable_index := the_link.syllable_index - 4;
-         the_link.order_word_number     := the_link.order_word_number + 1;
+         the_link.code_address     := the_link.code_address + 1;
       end if;
    end increment_by_2;
 
@@ -647,7 +647,7 @@ package body KDF9 is
          the_link.syllable_index := the_link.syllable_index + 3;
       else
          the_link.syllable_index := the_link.syllable_index - 3;
-         the_link.order_word_number     := the_link.order_word_number + 1;
+         the_link.code_address     := the_link.code_address + 1;
       end if;
    end increment_by_3;
 
@@ -658,7 +658,7 @@ package body KDF9 is
 
    the_syllable_cache  : array (syllable_cache_range) of KDF9.syllable;
    the_cache_index     : syllable_cache_range   := 0;
-   the_cached_location : KDF9.order_word_number := 0;
+   the_cached_location : KDF9.code_address := 0;
 
    function NIA
    return KDF9.syllable_address
@@ -670,7 +670,7 @@ package body KDF9 is
       );
 
    function NIA_word_number
-   return KDF9.order_word_number
+   return KDF9.code_address
    is (the_cached_location - (if the_cache_index > 5 then 0 else 1));
 
    procedure trap_an_invalid_order_address (new_NIA : in KDF9.syllable_address)
@@ -692,16 +692,16 @@ package body KDF9 is
       shift       : constant := 8#400#;
       IWB0, IWB1  : KDF9.word;
    begin
-      if new_NIA.order_word_number = 8191 or else
+      if new_NIA.code_address = 8191 or else
             new_NIA.syllable_index > 5       then
          trap_an_invalid_order_address(new_NIA);
       end if;
 
-      IWB0 := fetch_word(KDF9.address(new_NIA.order_word_number) + 0);
-      IWB1 := fetch_word(KDF9.address(new_NIA.order_word_number) + 1);
+      IWB0 := fetch_word(KDF9.address(new_NIA.code_address) + 0);
+      IWB1 := fetch_word(KDF9.address(new_NIA.code_address) + 1);
 
       the_cache_index := syllable_cache_range(new_NIA.syllable_index);
-      the_cached_location := new_NIA.order_word_number + 1;
+      the_cached_location := new_NIA.code_address + 1;
 
       the_syllable_cache(5+0) := KDF9.syllable(IWB0 and mask);
       IWB0 := IWB0 / shift;
@@ -735,7 +735,7 @@ package body KDF9 is
 
    procedure set_IWB0_and_IWB1_for_a_JCqNZS_loop is
    begin
-      set_NIA_to((order_word_number => CIA.order_word_number-1, syllable_index => 0));
+      set_NIA_to((code_address => CIA.code_address-1, syllable_index => 0));
       fetching_normally := False;
    end set_IWB0_and_IWB1_for_a_JCqNZS_loop;
 
@@ -746,8 +746,8 @@ package body KDF9 is
 
    procedure continue_after_JCqNZS is
    begin
-      if CIA.syllable_index = 4 and the_cached_location = CIA.order_word_number then
-         set_NIA_to((order_word_number => CIA.order_word_number+1, syllable_index => 0));
+      if CIA.syllable_index = 4 and the_cached_location = CIA.code_address then
+         set_NIA_to((code_address => CIA.code_address+1, syllable_index => 0));
       end if;
       fetching_normally := True;
    end continue_after_JCqNZS;
@@ -768,10 +768,10 @@ package body KDF9 is
       if the_cache_index < 11 then
          the_cache_index := the_cache_index + 1;
       elsif fetching_normally then
-         set_NIA_to((order_word_number => CIA.order_word_number+1, syllable_index => 0));
+         set_NIA_to((code_address => CIA.code_address+1, syllable_index => 0));
          -- Part-overlapped order-word fetch: can happen only once per instruction,
          --    and only before the instruction is executed, so no need to ADD to the_CPU_delta.
-         if (CIA.order_word_number and 15) < 10 then
+         if (CIA.code_address and 15) < 10 then
             -- The fudge factor applied here gives the Whetstone Benchmark its historical run time.
             the_CPU_delta := the_IWB01_reload_time + 1;
          else
@@ -807,10 +807,10 @@ package body KDF9 is
    procedure process_syllable_0_of_INS is
    begin
       if the_cache_index > 5 then
-         CIA.order_word_number := the_cached_location;
+         CIA.code_address := the_cached_location;
          CIA.syllable_index   := KDF9.syllable_index(the_cache_index-6);
       else
-         CIA.order_word_number := the_cached_location - 1;
+         CIA.code_address := the_cached_location - 1;
          CIA.syllable_index   := KDF9.syllable_index(the_cache_index);
       end if;
       INS.order.syllable_0 := next_order_syllable;
@@ -840,10 +840,10 @@ package body KDF9 is
    begin
       decoded.target.syllable_index
          := KDF9.syllable_index(decoded.order.syllable_0 and syllable_nr_mask);
-      decoded.target.order_word_number
-         := KDF9.order_word_number(decoded.order.syllable_2)
-          + KDF9.order_word_number(decoded.Qk) * 2**8
-          + KDF9.order_word_number(decoded.order.syllable_0 and D4_mask) * 2**9;
+      decoded.target.code_address
+         := KDF9.code_address(decoded.order.syllable_2)
+          + KDF9.code_address(decoded.Qk) * 2**8
+          + KDF9.code_address(decoded.order.syllable_0 and D4_mask) * 2**9;
       if (decoded.compressed_opcode and D2_mask) /= 0 then -- not JrCq ...
          decoded.compressed_opcode := decoded.compressed_opcode and D0_thru_3_mask;
       else
@@ -980,18 +980,21 @@ package body KDF9 is
    is (E0U /= fetch_halfword(0, 0));
 
    function is_an_invalid_order (decoded : KDF9.decoded_order)
+   return Boolean is
+      syllable_0 : constant KDF9.syllable := decoded.order.syllable_0;
+   begin
+      return
+         (decoded.kind = data_access_order and then (syllable_0 and 2#101#) > 2#100#)     or else
+            (decoded.kind = normal_jump_order and then decoded.target.syllable_index > 5) or else
+               syllable_0 in 8#006# | 8#040# | 8#046# | 8#055# | 8#073# | 8#076# | 8#150#;
+   end is_an_invalid_order;
+
+   function is_an_unconditional_jump (decoded : KDF9.decoded_order)
    return Boolean
    is (
-       (decoded.kind = data_access_order and then (decoded.order.syllable_0 and 2#101#) > 2#100#)
-         or else (decoded.kind = normal_jump_order and then decoded.target.syllable_index > 5)
-            -- 0 is now treated as a valid DUMMY0 order for KAlgol
-               or else decoded.order.syllable_0 = 8#006#
-                  or else decoded.order.syllable_0 = 8#040#
-                     or else decoded.order.syllable_0 = 8#046#
-                        or else decoded.order.syllable_0 = 8#055#
-                           or else decoded.order.syllable_0 = 8#073#
-                              or else decoded.order.syllable_0 = 8#076#
-                                 or else decoded.order.syllable_0 = 8#150#
+       decoded.kind = normal_jump_order                   and then
+          decoded.order.syllable_0 in Jr | EXIT_n | EXITD and then
+             decoded.target.syllable_index < 6
       );
 
    the_signature_hash : KDF9.word := 0;

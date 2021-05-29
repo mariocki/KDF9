@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -50,11 +50,11 @@ package formatting is
    return String;
 
    -- Return N as up to 5 octal digits.
-   function oct_of (N : KDF9.order_word_number)
+   function oct_of (N : KDF9.code_address)
    return String;
 
    -- Return N as decimal digits, with zero suppression.
-   function dec_of (N : KDF9.order_word_number)
+   function dec_of (N : KDF9.code_address)
    return String ;
 
    -- Return N as 8 octal digits.
@@ -131,10 +131,10 @@ package formatting is
    return pair_as_byte_string;
 
    -- Like to_string, but with glyphs for format effectors.
-   function to_glyphs (N : in KDF9.word)
+   function glyphs_for (N : KDF9.word)
    return word_as_byte_string;
 
-   -- Take a string and ignore it.
-   -- procedure discard (S : String);
+   function glyphs_for (S : String)
+   return String;
 
 end formatting;

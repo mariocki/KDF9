@@ -1,6 +1,6 @@
 -- Buffered I/O streams to support KDF9 device I/O.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,7 +17,6 @@
 with Ada.Characters.Latin_1;
 --
 with OS_specifics;
-with get_runtime_paths;
 
 use  Ada.Characters.Latin_1;
 --
@@ -51,7 +50,7 @@ package body host_IO is
                    mode       : in POSIX.access_mode) is
       fd : Integer;
    begin -- open
-      fd := POSIX.open(get_runtime_paths & file_name, mode);
+      fd := POSIX.open(file_name, mode);
       open(the_stream, file_name, mode, fd);
    exception
       when POSIX_IO_error =>

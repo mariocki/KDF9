@@ -1,6 +1,6 @@
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,7 +26,6 @@ with IOC.equipment;
 with IOC.slow.shift.TP;
 with IOC.slow.shift.TR;
 with settings;
-with get_runtime_paths;
 
 with execute;
 with say_goodbye;
@@ -43,7 +42,7 @@ procedure ee9 is
 
    package CLI renames Ada.Command_Line;
 
-   the_log_file_name : constant String := get_runtime_paths & "logs/KDF9.log";
+   the_log_file_name : constant String := "KDF9_log.txt";
 
    a_command_line_error_is_detected : exception;
 
@@ -252,7 +251,7 @@ begin -- ee9
    impose_all_flag_settings;
    revise_the_IOC_configuration;
    log_line(
-            "This is ee9 6.3b, compiled by "
+            "This is ee9 7.0a, compiled by "
           & Standard'Compiler_Version
           & " on "
           & GNAT.Source_Info.Compilation_ISO_Date
@@ -271,7 +270,7 @@ exception
       close(the_log_file_name);
 
    when diagnostic : operator_error =>
-      say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
+      say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
 
    when error : others =>
       Put_Line(Standard_Error, "Failure in ee9: " & Exception_Information(error) & ".");

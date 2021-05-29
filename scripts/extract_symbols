@@ -1,0 +1,30 @@
+USERCODE=${KDF9_USERCODE:-Assembly}
+
+trap "rm -f extract_symbols.commands extract_symbols_tmp_?" 0 1 2 3
+
+if [ ! -r ${USERCODE}/$1-listing.txt ]
+then
+   echo Could not find $1-listing.txt in ${USERCODE}\; recompiling
+   ucc $1
+fi
+
+tr  "\\r" "\\n " < ${USERCODE}/$1-listing.txt  > extract_symbols_tmp_0
+a2b -l2a < extract_symbols_tmp_0 >extract_symbols_tmp_1
+cat >extract_symbols.commands <<++++
+1,\$s/^.+V#.=.([0-9]+).*$/Y#V \1/
+1,\$s/^.+Y#.=.([0-9]+).*$/Y#Y \1/
+1,\$s/^.+W0.=.E([0-9]+).*$/YW \1/
+1,\$s/^.+Y0.=.E([0-9]+).*$/YY \1/
+1,\$s/^.+Z0.=.E([0-9]+).*$/YZ \1/
+1,\$s/^.+Y(.)0.=.E([0-9]+).*$/Y \1 \2/
+1,\$s/^=== Start P0V-1; at address ([0-9]+)\/[0-7]+ ([0-9]+).*$//
+1,\$s/^=== Start (P[0-9]+)V([^;]+); at address ([0-9]+)\/[0-7]+.*$/Y\1 #\2 @\3/
+1,\$s/^[^Y].+$//
+++++
+sed -E -f extract_symbols.commands <extract_symbols_tmp_1 >extract_symbols_tmp_2
+tr -s "\\n" < extract_symbols_tmp_2 > settings_symbols.txt
+ex  settings_symbols.txt <<++++
+1d
+w
+q
+++++

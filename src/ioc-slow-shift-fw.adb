@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -30,7 +30,7 @@ package body IOC.slow.shift.FW is
    return Boolean
    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
 
-   max_text_length : constant Positive := 64;  -- This is arbitrary, but seems reasonable.
+   max_text_length : constant Positive := 64;  -- This is the limit imposed by NTSD and TSD.
    min_text_length : constant Positive :=  2;  -- This is arbitrary, but seems reasonable.
 
    type interaction is
@@ -52,7 +52,7 @@ package body IOC.slow.shift.FW is
 
    -- These are the ANSI SGR terminal escape codes for styling FW output.
    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-   black_font_code : constant String := ESC & "[0m" & ESC & "[39m";
+   black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
    underline_code  : constant String := ESC & "[4m";
    plain_font_code : constant String := ESC & "[0m";
 
@@ -89,20 +89,26 @@ package body IOC.slow.shift.FW is
 
       procedure complain (part_1         : in String;
                           part_2, part_3 : in String := "")
-      with No_Return is
-         complaint : constant String := part_1 & part_2 & part_3;
+      with
+         No_Return
+      is
+         left_quote  : constant String := (if part_2 /= "" then  " «" else "");
+         right_quote : constant String := (if part_2 /= "" then  "» " else "");
       begin
-         raise operator_error with complaint;
+         raise operator_error
+            with part_1 & left_quote & glyphs_for(part_2) & right_quote & part_3;
       end complain;
 
       the_data         : String(1 .. max_text_length+1);
       the_data_length  : Natural;
 
       interaction_file : Ada.Text_IO.File_Type;
-   begin
+
+   begin -- Initialize
       ensure_UI_is_open;
       the_FW.mode := the_flexowriter_is_writing;
       the_FW.device_name := device_name_of(the_FW);
+
       if the_FW.device_name = "FW0" then
          -- Attempt to open the command file for the console the_FW.
          begin
@@ -113,51 +119,57 @@ package body IOC.slow.shift.FW is
                   complain("The file FW0 contains too many prompts");
                end if;
                last_interaction := last_interaction + 1;
+               Get_Line(interaction_file, the_data, the_data_length);
 
-               Get_line(interaction_file, the_data, the_data_length);
             exit response_list_loop when the_data_length = 0;
-               if the_data_length > max_text_length then
-                  complain("This FW0 prompt is too long: «", the_data, "»");
-               end if;
-               if the_data_length < min_text_length then
-                  complain("This FW0 prompt is too short: «", the_data(1..the_data_length), "»");
-               end if;
 
                declare
-                  interaction : String  := the_data(1..the_data_length);
-                  prompt_length : Natural := 0;
+                  next   : FW.interaction renames interactions(last_interaction);
+                  this   : String  := the_data(1..the_data_length);
+                  length : Natural := 0;
                begin
-                  for p in 1 .. interaction'Length loop
-                     if interaction(p) = ';' then
-                        if prompt_length /= 0 then
-                           complain("This FW0 prompt: «", interaction, "» has 2 semicolons");
+                  if the_data_length > max_text_length then
+                     complain("The FW0 prompt", this, "is too long");
+                  end if;
+                  if the_data_length < min_text_length then
+                     complain("The FW0 prompt", this, "is too short");
+                  end if;
+
+                  for p in this'Range loop
+                     if this(p) = ';' then
+                        if length /= 0 then
+                           complain("The FW0 prompt", this, "contains 2 semicolons");
                         end if;
-                        prompt_length := p;
-                     elsif interaction(p) = LF_surrogate then
+                        length := p;
+                     elsif this(p) = LF_surrogate then
                         -- Convert '®' to LF to allow for multi-line prompts.
-                        interaction(p) := LF;
-                     elsif interaction(p) = FF_surrogate then
+                        this(p) := LF;
+                     elsif this(p) = FF_surrogate then
                         -- Convert '©' to FF to allow for multi-line prompts.
-                        interaction(p) := FF;
+                        this(p) := FF;
                      end if;
                   end loop;
 
-                  if prompt_length = 0 then
-                     complain("This FW0 prompt: «", interaction, "» has no semicolon");
+                  if length = 0 then
+                     complain("The FW0 prompt", this, "contains no semicolon");
                   end if;
 
-                  interactions(last_interaction).text(1 .. interaction'Length) := interaction;
-                  interactions(last_interaction).prompt_length := prompt_length;
-                  interactions(last_interaction).total_length := interaction'Length;
+                  next.text(1..this'Length) := this;
+                  next.prompt_length        := length;
+                  next.total_length         := this'Length;
                end;
+
             end loop response_list_loop;
+
          exception
+
             when Name_Error =>
                complain("The file FW0 is absent");
             when Use_Error =>
                complain("The file FW0 exists, but cannot be read");
          end;
       end if;
+
       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
       open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
       IOC.device(the_FW).Initialize;

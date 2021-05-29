@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -47,11 +47,11 @@ package tracing is
 
    -- Support for breakpoints.
 
-   package order_flags is new generic_sets(member => KDF9.order_word_number);
+   package order_flags is new generic_sets(member => KDF9.code_address);
 
    breakpoints : order_flags.set := order_flags.empty_set;
 
-   procedure set_breakpoints (first, last : in KDF9.order_word_number);
+   procedure set_breakpoints (first, last : in KDF9.code_address);
 
    procedure handle_breakpoint;
 
@@ -217,7 +217,7 @@ package tracing is
    procedure add_INS_to_the_histogram
       with Inline;
 
-   the_profile   : array (KDF9.order_word_number) of KDF9.order_counter;
+   the_profile   : array (KDF9.code_address) of KDF9.order_counter;
 
    procedure clear_the_profile;
 

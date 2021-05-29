@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -1323,7 +1323,7 @@ package body KDF9.microcode is
             if INS.target.syllable_index = 3 then  -- c.f. decode_a_jump_order.
                increment_by_3(RA);
             end if;
-            RA.order_word_number := RA.order_word_number+INS.target.order_word_number;
+            RA.code_address := RA.code_address+INS.target.code_address;
             set_NIA_to(RA);
             the_CPU_delta := the_CPU_delta + 12 + KDF9.us(INS.target.syllable_index mod 2);
 

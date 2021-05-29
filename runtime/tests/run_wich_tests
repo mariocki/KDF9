@@ -1,0 +1,76 @@
+SOURCE=${KDF9_USERCODE:-Assembly}
+BINARY=${KDF9_BINARY:-Binary}
+
+trap "rm -f wich_test_diff.txt"  \
+      0 1 2 3
+
+export KIDSMISC=wz
+export KIDSLIST=""
+>wich_tests_log.txt
+
+echo TEST wich FLUID
+wich FLUID FLUID_data t prh         >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/FLUID-PEEP.k3       ${BINARY}/FLUID-PEEP       ${SOURCE}/FLUID-PEEP-listing.txt
+
+echo TEST wich HANOI
+wich HANOI HANOI_data t prh         >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/HANOI-PEEP.k3       ${BINARY}/HANOI-PEEP       ${SOURCE}/HANOI-PEEP-listing.txt
+
+echo TEST wich INPUT
+wich INPUT INPUT_data t prh         >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/INPUT-PEEP.k3       ${BINARY}/INPUT-PEEP       ${SOURCE}/INPUT-PEEP-listing.txt
+
+echo TEST wich MANORBOYX
+wich MANORBOYX - t prh              >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/MANORBOYX-PEEP.k3   ${BINARY}/MANORBOYX-PEEP   ${SOURCE}/MANORBOYX-PEEP-listing.txt
+
+echo TEST wich MATMULT
+wich MATMULT - t prh                >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/MATMULT-PEEP.k3     ${BINARY}/MATMULT-PEEP     ${SOURCE}/MATMULT-PEEP-listing.txt
+
+echo TEST wich PALSQR
+wich PALSQR - t prh                 >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/PALSQR-PEEP.k3      ${BINARY}/PALSQR-PEEP      ${SOURCE}/PALSQR-PEEP-listing.txt
+
+echo TEST wich PENTOMINO
+wich PENTOMINO PENTOMINO_data t prh >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/PENTOMINO-PEEP.k3   ${BINARY}/PENTOMINO-PEEP   ${SOURCE}/PENTOMINO-PEEP-listing.txt
+
+echo TEST wich QSORT
+wich QSORT - t prh                  >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/QSORT-PEEP.k3       ${BINARY}/QSORT-PEEP       ${SOURCE}/QSORT-PEEP-listing.txt
+
+echo TEST wich WEEHAAVIE
+wich WEEHAAVIE - t prh              >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/WEEHAAVIE-PEEP.k3   ${BINARY}/WEEHAAVIE-PEEP   ${SOURCE}/WEEHAAVIE-PEEP-listing.txt
+
+echo TEST wich WHETSTONE
+wich WHETSTONE - t prh              >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/WHETSTONE-PEEP.k3   ${BINARY}/WHETSTONE-PEEP   ${SOURCE}/WHETSTONE-PEEP-listing.txt
+
+echo TEST wich ZELLER
+wich ZELLER ZELLER_data t prh       >>wich_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
+   rm ${SOURCE}/ZELLER-PEEP.k3      ${BINARY}/ZELLER-PEEP      ${SOURCE}/ZELLER-PEEP-listing.txt
+
+echo
+diff wich_tests_log.txt wich_tests_good_log.txt >wich_test_diff.txt
+if [ -s wich_test_diff.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more wich_test_diff.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi
