@@ -1,0 +1,12 @@
+ST 32; TL 9;
+V2; W0;
+RESTART; J999; J999;
+PROGRAM;                   (main program);
+   SET1; SET 47; FLOAT;
+   SETB403; SHC-10;
+   SET2; SET 47; FLOAT;
+   SET-1; SET47; FLOAT;
+   SET-2; SET47; FLOAT;
+999;  OUT;
+   FINISH;
+|
