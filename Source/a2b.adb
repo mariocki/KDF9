@@ -1,4 +1,4 @@
--- This file is an auxiliary of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -36,12 +36,14 @@ procedure a2b is
 
    command_error : exception;
 
-   procedure complain (about : in String) is
+   procedure complain (about : in String; with_reminder : in Boolean := True) is
    begin
       if about /= "" then
          output_line(about & ".");
       end if;
-      output_line("usage: a2b { -r2p | -L2p | -p2c | -p2L | -p2o | -p2r | -p2t}");
+      if with_reminder then
+         output_line("usage: a2b { -r2p | -L2p | -p2c | -p2L | -p2o | -p2r | -p2t}");
+      end if;
       CLI.Set_Exit_Status(CLI.Failure);
       raise command_error;
    end complain;
@@ -77,7 +79,7 @@ procedure a2b is
       end if;
 
       -- Check for a conversion parameter.
-      if argument_1 in "-r2p" | "-l2p" | "-p2c" | "-p2l" | "-p2o" | "-p2r" | "-p2t" | "-f2l" then
+      if argument_1 in "-r2p" | "-l2a" | "-l2p" | "-p2c" | "-p2l" | "-p2o" | "-p2r" | "-p2t" | "-f2l" then
          if argument_1 = "-p2c"                             and then
                CLI.Argument_Count = 2                       and then
                   CLI.Argument(2)'Length = 1                and then
@@ -299,7 +301,7 @@ procedure a2b is
                parity_count := parity_count + 1;
                output_line;
                output_line("Parity error: value was #" & oct_of(word(b))(15..16));
-               complain(about => "parity");
+               complain(about => "parity", with_reminder => False);
             end if;
             return symbol(top_2_bits/2 or low_4_bits);
          end sixbit;
@@ -332,7 +334,7 @@ procedure a2b is
       parity_count := 0;
       bytes_in := POSIX.read(0, input, 32);
       if bytes_in /= 32 then
-         complain("The input file is too short for a valid KDF9 object program");
+         complain("The program file is too short", with_reminder => False);
       end if;
 
       input(1..16) := input(17..32);
@@ -340,7 +342,7 @@ procedure a2b is
             abs input(2) /= Line_Shift                                         or else
                abs input(3) not in Upper_Case_D | Upper_Case_M | Upper_Case_P  or else
                   abs input(4) /= Line_Shift                                      then
-            complain("The input file does not have a valid A block");
+            complain("The program file does not have an A block", with_reminder => False);
       end if;
       the_tape(3) := (
                       case load_medium is
@@ -573,6 +575,30 @@ procedure a2b is
       end if;
    end convert_paper_tape_code_to_octal_listing;
 
+   subtype Latin_1_wierdos is Character
+      with Static_predicate => Latin_1_wierdos in '÷' | '×' | 'º' | '±' | '*';
+
+   ASCII_equivalent : constant array (Character) of Latin_1_wierdos
+                    := ('÷' => '%', '×' =>'X', 'º' => '~', '±' => '#', '*' => '$', others => '?');
+
+   procedure convert_Latin_1_to_ASCII is
+      input     : String(1..4096);
+      bytes_in  : Integer;
+      bytes_out : Integer;
+   begin
+     loop
+      bytes_in := POSIX.read(0, input, 4096);
+   exit when bytes_in < 1;
+      for b of input loop
+         if b in Latin_1_wierdos then
+            b := ASCII_equivalent(b);
+         end if;
+      end loop;
+      bytes_out := POSIX.write(1, input, bytes_in);
+   exit when bytes_out < bytes_in;
+      end loop;
+   end convert_Latin_1_to_ASCII;
+
    procedure do_the_requested_conversion is
       argument : constant String := To_Lower(CLI.Argument(1)(1..4));
    begin -- do_the_requested_conversion
@@ -592,6 +618,8 @@ procedure a2b is
          convert_paper_tape_code_to_octal_listing;
       elsif argument = "-f2l" then
          convert_Ferranti_code_to_Latin_1;
+      elsif argument = "-l2a" then
+         convert_Latin_1_to_ASCII;
       else
          complain("Something went wrong");
       end if;

@@ -1,6 +1,6 @@
 !begin
 !library A6, A12;
-!integer i, z, t1, layout;
+!integer i, j, z, t1, layout;
 !integer !array a[1:10000];
 
    !procedure sort (k, r); !value k, r; !integer k, r;
@@ -37,10 +37,9 @@
       !ALGOL;
 
    !integer !procedure random (z); !value z; !integer z;
-      !KDF9 2/0/0/0;
+      !KDF9 1/0/0/0;
       V0 = 131071;
-      V1 = 2147483647;
-      {z}; V0; XD; CONT; V1; AND; VR; !EXIT;
+      {z}; V0; XD; CONT; VR; SHL+12; SHL-12; !EXIT;
       !ALGOL;
 
 layout := format({ndddddddcc});
@@ -56,6 +55,9 @@ z := 1729;
 t1 := clock;
 sort(1, 10000);
 writetext(30, {CPU _ time _ in _ seconds:}); write(30, layout, clock - t1);
+
+!for i := 1 !step 1000 !until 10000 !do
+   output(30, a[i]);
 
 close(30);
 !end

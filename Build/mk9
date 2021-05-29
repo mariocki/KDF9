@@ -368,6 +368,7 @@ mtp)
 	fi
 	;;
 
+
 all)
    echo
    echo Building a2b, mtp, kal3, KAlgol and ee9.
@@ -379,12 +380,14 @@ all)
 	${BUILD}/mk9 ee9  ${OS} distro
 	;;
 
+
 distro)
    echo
    echo Building a distribution package for ${OS}.
 	${BUILD}/mk9 all ${OS}
 	${BUILD}/pk9 ${OS}
 	;;
+
 
 *)
    echo

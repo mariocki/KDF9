@@ -1,6 +1,6 @@
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -154,7 +154,7 @@ package body KDF9.store is
 
    function fetch_syllable (EA : KDF9.syllable_address)
    return KDF9.syllable is
-      address : constant KDF9.address := Q_part(EA.order_word_number) + BA;
+      address : constant KDF9.address := Q_part(EA.code_address) + BA;
       place   : constant Natural      := 40 - 8*Natural(EA.syllable_index);
    begin
       return KDF9.syllable(shift_word_right(core(address), place) and 8#377#);

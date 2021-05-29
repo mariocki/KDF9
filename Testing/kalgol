@@ -120,7 +120,8 @@ y)
       echo An object program could not be assembled.; echo
       exit 5
    fi
-   echo The Usercode is in ${USERCODE}/$name.k3 and the KDF9 executable is in ${BINARY}/$name; echo
+   echo The Usercode is in ${USERCODE}/$name.k3; echo
+   echo The executable is in ${BINARY}/$name; echo
    ;;
 *)
    ;;

@@ -1,4 +1,6 @@
-The Usercode is in Assembly/FLUID.k3 and the KDF9 executable is in Binary/FLUID
+The Usercode is in Assembly/FLUID.k3
+
+The executable is in Binary/FLUID
 
 
 LP0:
@@ -30,7 +32,9 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #5677321647775661.
-The Usercode is in Assembly/HANOI.k3 and the KDF9 executable is in Binary/HANOI
+The Usercode is in Assembly/HANOI.k3
+
+The executable is in Binary/HANOI
 
 
 LP0:
@@ -47,7 +51,9 @@ MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #4672116012330012.
-The Usercode is in Assembly/INPUT.k3 and the KDF9 executable is in Binary/INPUT
+The Usercode is in Assembly/INPUT.k3
+
+The executable is in Binary/INPUT
 
 
 LP0:
@@ -85,7 +91,9 @@ FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #3371333056161767.
-The Usercode is in Assembly/MANORBOYX.k3 and the KDF9 executable is in Binary/MANORBOYX
+The Usercode is in Assembly/MANORBOYX.k3
+
+The executable is in Binary/MANORBOYX
 
 
 LP0:
@@ -94,7 +102,9 @@ LP0:
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #3637615157312232.
-The Usercode is in Assembly/MATMULT.k3 and the KDF9 executable is in Binary/MATMULT
+The Usercode is in Assembly/MATMULT.k3
+
+The executable is in Binary/MATMULT
 
 
 LP0:
@@ -137,7 +147,9 @@ ROW 10 SHOULD BE 1.23456789º +1
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #2664147257751506.
-The Usercode is in Assembly/PALSQR.k3 and the KDF9 executable is in Binary/PALSQR
+The Usercode is in Assembly/PALSQR.k3
+
+The executable is in Binary/PALSQR
 
 
 LP0:
@@ -178,7 +190,9 @@ CPU TIME IN SECONDS:       101
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #3702062461441634.
-The Usercode is in Assembly/PENTOMINO.k3 and the KDF9 executable is in Binary/PENTOMINO
+The Usercode is in Assembly/PENTOMINO.k3
+
+The executable is in Binary/PENTOMINO
 
 
 LP0:
@@ -438,17 +452,31 @@ SOLUTION COUNT = 10
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #3161473443017524.
-The Usercode is in Assembly/QSORT.k3 and the KDF9 executable is in Binary/QSORT
+The Usercode is in Assembly/QSORT.k3
+
+The executable is in Binary/QSORT
 
 
 LP0:
 ===
-CPU TIME IN SECONDS:      37
+CPU TIME IN SECONDS:      39
 
++5.6343 6700 000 º+ 6;
++6.8637 1808 100 º+ 9;
++1.3740 9313 910 º+10;
++2.0619 3278 070 º+10;
++2.7473 4793 610 º+10;
++3.4350 6926 710 º+10;
++4.1211 5254 390 º+10;
++4.8091 1049 610 º+10;
++5.4968 3182 710 º+10;
++6.1846 7146 870 º+10;
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #7515250422162462.
-The Usercode is in Assembly/WEEHAAVIE.k3 and the KDF9 executable is in Binary/WEEHAAVIE
+Digital signature of traced orders = #6155311016362361.
+The Usercode is in Assembly/WEEHAAVIE.k3
+
+The executable is in Binary/WEEHAAVIE
 
 
 LP0:
@@ -468,7 +496,9 @@ COUNT =         6
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #4230330426172712.
-The Usercode is in Assembly/WHETSTONE.k3 and the KDF9 executable is in Binary/WHETSTONE
+The Usercode is in Assembly/WHETSTONE.k3
+
+The executable is in Binary/WHETSTONE
 
 
 LP0:
@@ -488,7 +518,9 @@ THAT TOOK  23.9 SECONDS, FOR  41.8 KWIPS
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #1664627544053247.
-The Usercode is in Assembly/ZELLER.k3 and the KDF9 executable is in Binary/ZELLER
+The Usercode is in Assembly/ZELLER.k3
+
+The executable is in Binary/ZELLER
 
 
 LP0:

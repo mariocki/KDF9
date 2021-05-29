@@ -5,14 +5,23 @@
 //        http://sw.ccs.bcs.org/KDF9/kal3.c
 //
 // Compilation:
-//    bison -vdy kal3.y
-//    gcc -g -o kal3 kal3.c y.tab.c
+//    bison -vd kal3.y
+//    gcc -g -o kal3 kal3.c kal3.tab.c
 //
 // KAL3 is an attempt to accept KDF9 Usercode both the original
 // paper tape version and EGDON's UCA3 which was normally input on cards.
 // Listings copy-typed from lineprinter POST listings should also be
 // OK, except that pound must be replaced by dollar (or asterisk), and *DIV
 // will be seen as a separate asterisk.  DIV is valid UCA3 for integer divide.
+
+// Two output files are produced.
+//     mt.out is what is loaded when taking programs from MT after search, i.e. B- and C-blocks
+//     a.out  is a paper tape binary program as acceptable by director
+
+// Switches:
+//   -a do not produce an A-block on the paper tape so that ee9 will accept it
+//   -v verbose -- produce listing on first pass as well as on 2nd
+//   -r round-up H0 to multiple of 32 words -- found in KAA01, but KALGOL has H0=e4500
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,7 +32,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#include "y.tab.h"
+#include "kal3.tab.h"
 
 extern int yylval;
 extern int yyparse ();
@@ -36,7 +45,7 @@ int yydebug;
 #define O_BINARY  0
 #endif
 
-#define MAXP  3000
+#define MAXP  4000
 #define MAXLAB  2000
 #define GUTTER  70
              // GUTTER is where the source listing is to the right of the code listing
@@ -51,6 +60,7 @@ int prtpos = 0;              // position of RH end of printing line
 int memaddr;
 int progstart = 8;           // location at which code is to commence -- reset by START directive
 int ptform = 0;              // set to 8 if using the rounding rules found in the PT Usercode compiler
+int ablk = 1;                // can be set to 0 by -a switch to remove A-block from binary paper tape
 
 int numvstores[MAXP];        // number of V-stores in each routine
 int *lablist[MAXP];          // addresses of labels in each routine
@@ -367,12 +377,13 @@ void ptbinout()
    if  ( fout < 0 )
       perror("a.out");
    else
-   {       // A-block generation suppressed to satisfy ee9 -- temp ??
-   // buff[16] = ptchar[075];                  // end-message
-   // buff[17] = 0;                            // blank tape
-   // buff[18] = 0;                            // blank tape
-   // buff[19] = 0;                            // blank tape
-   // writeprogname(fout, 20);
+   {  if  ( ablk != 0 )        // A-block generation not suppressed to satisfy ee9 -- temp ??
+      {  buff[16] = ptchar[075];                  // end-message
+         buff[17] = 0;                            // blank tape
+         buff[18] = 0;                            // blank tape
+         buff[19] = 0;                            // blank tape
+         writeprogname(fout, 20);
+      }
       corestore[44] = progstart>>8;            // filler word in B-block
       corestore[45] = progstart&255;           // filler word in B-block
       corestore[46] = (ystorebase - 1) >> 8;   // filler word in B-block
@@ -444,6 +455,8 @@ int main(int argc, char **argv)
          ptform = 8;                   // indicates surprising rouding up of addresses in KAA01
       else if  ( srcmarker[1] == 'v' ) // -v verbose lists on first pass as well as second
          listing = 1;
+      else if  ( srcmarker[1] == 'a' ) // suppress A-block output on paper tape for ee9
+         ablk = 0;
 
    loadfile((char *)srcmarker);     // deal with opening source text etc
 
@@ -459,7 +472,7 @@ int main(int argc, char **argv)
    j = 0;
    while  ( (wc = srcmarker[++i]) != 0 )
       if  ( wc <= 'Z' && wc >= 'A'  // if upper case letter
-        || wc >= '0' && wc <= '9' ) // if digit
+        || wc <= '9' && wc >= '0' ) // if digit
       if  ( j < 9 )                 // take 1st 9 u/c chars for the KDF9 program name
          progname[j++] = prtcode[srcmarker[i]];
 
@@ -488,6 +501,8 @@ int main(int argc, char **argv)
    currentRoutine = 0;
    listing = 1;
 
+   printf("\n\n%7o  V# = %d\n", numvstores[0], numvstores[0]);
+   printf("%7o  Y# = %d\n", numystores[0] % 32767, numystores[0] % 32767);
    printf("\n\n%7o  W0 = E%d\n", ystorebase, ystorebase);
    printf("%7o  Y0 = E%d\n", baseystores[0], baseystores[0]);
    for  ( i = 1; i<27; i++ )
@@ -495,6 +510,7 @@ int main(int argc, char **argv)
          printf("%7o Y%c0 = E%d\n", baseystores[i], i + ('A'-1), baseystores[i]);
    if  ( h0spec >= 0 )
       printf("%7o  H0 = E%d\n", h0spec, h0spec);
+      printf("%7o  Z0 = E%d\n", corestore[10]*256 + corestore[11]-1, corestore[10]*256 + corestore[11]-1);
    printf("\n\n");
 
    memaddr = 0;           // ready to plant initial jump
@@ -738,15 +754,15 @@ void newproutine(int pno, int v)
       {  if  ( pno != 0  ||  previous != 0 )      // just in case we meet P0; when already in P0
          {  int *ll = (int *)malloc((++currentmaxlab)*sizeof(int));
             int i;
-            if  ( pno > 0  &&  lablist[pno] != NULL )
-               printf("*** Routine P%dV%d already exists at address %d\n", pno, numvstores[pno], lablist[pno][0]/6);
             for  ( i = 0; i<currentmaxlab; i++ )
             {  ll[i] = currentlabs[i];
                currentlabs[i] = -1;
             }
             lablist[previous] = ll;
             maxlabno[previous] = currentmaxlab;
-            if  ( pno == 0 )                // a return to P0
+            if  ( pno > 0  &&  lablist[pno] != NULL )
+               printf("*** Routine P%dV%d already exists at address %d\n", pno, numvstores[pno], lablist[pno][0]/6);
+            else if  ( pno == 0 )           // a return to P0
             {  ll = lablist[0];             // need to copy back labels from previous P0 code
                currentmaxlab = maxlabno[0];
                for  ( i = 0; i<currentmaxlab; i++ )

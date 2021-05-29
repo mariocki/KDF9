@@ -1,6 +1,6 @@
 -- This is the emulation-mode coordinate module.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -137,6 +137,11 @@ execution_loop:
 
          when mode_change_request =>
             quit_if_requested;
+            if do_not_execute then
+               log_new_line;
+               log_line("Run abandoned as requested.");
+               return;
+            end if;
 
          when abandon_this_order =>
             null;  -- Just get on with it after an interrupt or nullified order.
@@ -146,10 +151,6 @@ execution_loop:
 
          when program_exit =>
             say_goodbye("", status => Success);
-            exit execution_loop;
-
-         when quit_request =>
-            say_goodbye("Run stopped by the user", status => Success);
             exit execution_loop;
 
          when time_expired =>
@@ -192,10 +193,6 @@ execution_loop:
             say_goodbye("Impossible I/O operation in Director", Exception_Message(diagnostic));
             exit execution_loop;
 
-         when diagnostic : operator_error =>
-            say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
-            exit execution_loop;
-
       end;
 
    end loop execution_loop;
@@ -209,7 +206,10 @@ exception  -- handler for execute
       say_goodbye("Invalid paper tape file supplied", Exception_Message(diagnostic));
 
    when diagnostic : operator_error =>
-      say_goodbye("The operator has made a mistake", Exception_Message(diagnostic));
+      say_goodbye("The KDF9 operator has made a mistake", Exception_Message(diagnostic));
+
+   when diagnostic : quit_request =>
+      say_goodbye("Run stopped by the user", Exception_Message(diagnostic), status => Success);
 
    when diagnostic : others =>
       say_goodbye("Apologies for this dismal failure", Exception_Message(diagnostic));

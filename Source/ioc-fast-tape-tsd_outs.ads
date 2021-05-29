@@ -1,6 +1,6 @@
 -- Implement the magnetic tape API (OUTs) of the EE Time Sharing Director.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or

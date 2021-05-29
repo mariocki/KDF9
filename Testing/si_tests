@@ -29,37 +29,37 @@ xyz    .xyz          |
 ++++
 
 
->si_test_log.txt
+>si_tests_log.txt
 >SI0
 >SI1
 
 echo
 echo TEST PIB/POB from SI0 to TP:
-echo TEST PIB/POB from SI0 to TP: >>si_test_log.txt
+echo TEST PIB/POB from SI0 to TP: >>si_tests_log.txt
 cp $data SI0
 ucc SI2TP; nine SI2TP - t ${opt}B
-cat TP0 >>si_test_log.txt
+cat TP0 >>si_tests_log.txt
 
 echo
 echo TEST PIC/POC from SI0 to TP:
-echo TEST PIC/POC from SI0 to TP: >>si_test_log.txt
+echo TEST PIC/POC from SI0 to TP: >>si_tests_log.txt
 cp $data SI0
 ucc SI2TPC; nine SI2TPC - t ${opt}B
-cat TP0 >>si_test_log.txt
+cat TP0 >>si_tests_log.txt
 
 echo
 echo TEST PIB/POB from TR to SI0:
-echo TEST PIB/POB from TR to SI0: >>si_test_log.txt
+echo TEST PIB/POB from TR to SI0: >>si_tests_log.txt
 >SI0
 ucc TR2SI; nine TR2SI SI0_data t ${opt}B
-cat SI0 >>si_test_log.txt
+cat SI0 >>si_tests_log.txt
 
 echo
 echo TEST PIC/POC from TR to SI0:
-echo TEST PIC/POC from TR to SI0: >>si_test_log.txt
+echo TEST PIC/POC from TR to SI0: >>si_tests_log.txt
 >SI0
 ucc TR2SIC; nine TR2SIC SI0_data t ${opt}B
-cat SI0 >>si_test_log.txt
+cat SI0 >>si_tests_log.txt
 
 cat >settings_1.txt <<++++
 K 15 SI 14 SI
@@ -67,20 +67,20 @@ K 15 SI 14 SI
 
 echo
 echo TEST PIC/POC from TR to SI1:
-echo TEST PIC/POC from TR to SI1: >>si_test_log.txt
+echo TEST PIC/POC from TR to SI1: >>si_tests_log.txt
 >SI1
 ucc TR2SI1C; nine TR2SI1C SI0_data t ${opt}n
-cat SI1 >>si_test_log.txt
+cat SI1 >>si_tests_log.txt
 
 echo
 echo TEST PIC/POC from SI1 to TP:
-echo TEST PIC/POC from SI1 to TP: >>si_test_log.txt
+echo TEST PIC/POC from SI1 to TP: >>si_tests_log.txt
 cp $data SI1
 ucc SI12TPC; nine SI12TPC - t ${opt}n
-cat TP0 >>si_test_log.txt
+cat TP0 >>si_tests_log.txt
 
 echo
-diff si_test_log.txt si_tests_good_log.txt >si_test_diffs.txt
+diff si_tests_log.txt si_tests_good_log.txt >si_test_diffs.txt
 if [ -s si_test_diffs.txt ]
 then
    echo These are the unexpected variances for this run:

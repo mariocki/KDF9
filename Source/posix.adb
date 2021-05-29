@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -186,9 +186,9 @@ package body POSIX is
       response := wrong_response;
 
       if C_reply_length = 0 then
-         response := quit_response;
-      elsif C.To_Ada(C_reply_string(1)) = LF then
          response := EOF_response;
+      elsif C.To_Ada(C_reply_string(1)) = LF then
+         response := LF_response;
       elsif C_reply_length = 2                         and then
                C.To_Ada(C_reply_string(2)) = LF        and then
                   C.To_Ada(C_reply_string(1)) in 'q' | 'Q' then

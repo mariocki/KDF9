@@ -1,6 +1,6 @@
 -- Settings-reader I/O support.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -133,13 +133,17 @@ package body settings.IO is
       next_char : Character;
       last_char : Character := '_';
       place     : Natural   := 0;
+      negative  : Boolean   := False;
       end_line  : Boolean   := False;
    begin
       value := 0;
       ensure_not_at_end_of_line(file);
       get(file, next_char);
-      if next_char not in '0' .. '9' then
-         raise Program_Error with "get_decimal " & next_char;
+      if next_char = '-' then
+         negative := True;
+         get(file, next_char);
+      elsif next_char not in '0' .. '9' then
+         raise Data_Error with "get_decimal " & next_char;
       end if;
       loop
          if next_char in '0' .. '9' then
@@ -170,6 +174,9 @@ package body settings.IO is
       exit;
          end if;
       end loop;
+      if negative then
+         value := - value;
+      end if;
    end get_decimal;
 
    procedure get_word (file : in File_Type; value : out KDF9.word) is
