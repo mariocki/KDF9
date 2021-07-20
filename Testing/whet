@@ -1,4 +1,4 @@
-BINARY=${KDF9_BINARY:-Binary}
+export KDF9_BINARY=${ADJUNCTS:-Adjuncts}
 SOURCE=${WHETSTONE:-Whetstone}
 
 if [ x"$1"x = xx ]
@@ -28,15 +28,15 @@ miscellany=-m$3
 
 if   [ "$mode" = -d ]
 then
-        ee9 +${BINARY}/KMW0201--UPU;
+        ee9 +${KDF9_BINARY}/KMW0201--UPU;
 elif [ "$mode" = -d- ]
 then
-        ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+        ee9 -sp -df "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
 elif [ "$mode" = -df ]
 then
-   time ee9 -sp -df "$miscellany" +${BINARY}/KMW0201--UPU;
+   time ee9 -sp -df "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
 else
-        ee9 -sp "$mode" "$miscellany" +${BINARY}/KMW0201--UPU;
+        ee9 -sp "$mode" "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
 fi
 
 case $miscellany in

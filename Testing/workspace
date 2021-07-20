@@ -1,0 +1,10 @@
+HERE=${1}
+export KDF9_USERCODE=${HERE}
+export KDF9_DATA=${HERE}
+export WHETSTONE=${HERE}
+export KIDSGROVE=${HERE}
+echo "ADJUNCTS      is now " ${ADJUNCTS}
+echo "KDF9_USERCODE is now " ${KDF9_USERCODE}
+echo "KDF9_DATA     is now " ${KDF9_DATA}
+echo "WHETSTONE     is now " ${WHETSTONE}
+echo "KIDSGROVE     is now " ${KIDSGROVE}

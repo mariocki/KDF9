@@ -1,4 +1,4 @@
-Version V7p0a of ee9 for Linux, built on Sat 29 May 2021 07:07:04 PM London.
+Version V8p0k of ee9 for Linux, built on Mon 28 Jun 2021 07:31:50 PM BST.
 mk9 'ee9' build: optimised and with full language checks, using configuration options:
 
 pragma Unsuppress(All_Checks);
@@ -13,19 +13,19 @@ pragma Restrictions(No_Implementation_Attributes);
 pragma Restrictions(No_Obsolescent_Features);
 
 Using the build command:
-gnatmake -aI../Source -aO../Build -funwind-tables -gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatyO -gnatw.Y -gnatw.N -fdata-sections -ffunction-sections -gnatf -mtune=native -O3 -flto -j1 ee9 -bargs -static -largs -Wl,--gc-sections -Wl,--as-needed -flto
+gnatmake -aI../Source -aO../Build -funwind-tables -gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatyO -gnatw.Y -gnatw.N -fdata-sections -ffunction-sections -gnatf -mtune=native -O3 -flto -j0 ee9 -bargs -static -largs -Wl,--gc-sections -Wl,--as-needed -flto
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ee9.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- This is the "main program" for the entire emulator.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -276,15 +276,15 @@ Compiled at: 2021-05-29 19:07:05
    251.    impose_all_flag_settings;
    252.    revise_the_IOC_configuration;
    253.    log_line(
-   254.             "This is ee9 7.0a, compiled by "
+   254.             "This is ee9 8.0k, compiled by "
    255.           & Standard'Compiler_Version
    256.           & " on "
    257.           & GNAT.Source_Info.Compilation_ISO_Date
    258.           & ".",
    259.             iff => the_log_is_wanted
    260.            );
-   261.    display_execution_modes(the_program_name);
-   262.
+   261.
+   262.    display_execution_modes(the_program_name);
    263.    execute(the_program_name);
    264.
    265.    close(the_log_file_name);
@@ -306,17 +306,20 @@ Compiled at: 2021-05-29 19:07:05
 
  280 lines: No errors
 
+
 GNAT 8.3.0
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/exceptions.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Declare the exceptions used in emulation-mode control.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -383,13 +386,264 @@ GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
+Compiling: /home/parallels/emulation/Source/hci.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
+
+     1. -- Provide operations supporting replicated human-readable output:
+     2. --    1: to an interactive user interface for transient display, and
+     3. --    2: to a file for persistent storage.
+     4. -- If no file has been opened, or if it has been explicitly closed,
+     5. --    output is to the interactive interface only.
+     6. --
+     7. -- Also provide operations allowing synchronization with the user.
+     8. --
+     9. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+    10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+    11. --
+    12. -- The ee9 program is free software; you can redistribute it and/or
+    13. -- modify it under terms of the GNU General Public License as published
+    14. -- by the Free Software Foundation; either version 3, or (at your option)
+    15. -- any later version. This program is distributed in the hope that it
+    16. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    17. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    18. -- See the GNU General Public License for more details. You should have
+    19. -- received a copy of the GNU General Public License distributed with
+    20. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    21. --
+    22.
+    23. with generic_logger;
+    24. with settings;
+    25.
+    26. use  settings;
+    27.
+    28. package body HCI is
+    29.
+    30.    package log_manager is new generic_logger(max_logger_list_size => 2);
+    31.
+    32.    cc_list : log_manager.replicator;
+    33.
+    34.    procedure tab_log (at_least : in Natural;
+    35.                       spacing  : in Positive := 6;
+    36.                       iff      : in Boolean := True) is
+    37.    begin
+    38.       cc_list.tab_log(at_least, spacing, iff);
+    39.    end tab_log;
+    40.
+    41.    procedure tab_log_to (column : in Positive;
+    42.                          iff    : in Boolean := True) is
+    43.    begin
+    44.       cc_list.tab_log_to(column, iff);
+    45.    end tab_log_to;
+    46.
+    47.    procedure log (char : in Character;
+    48.                   iff  : in Boolean := True) is
+    49.    begin
+    50.       cc_list.log(char, iff);
+    51.    end log;
+    52.
+    53.    procedure log (text : in String;
+    54.                   iff  : in Boolean := True) is
+    55.    begin
+    56.       cc_list.log(text, iff);
+    57.    end log;
+    58.
+    59.    procedure log_line (text : in String;
+    60.                        iff  : in Boolean := True) is
+    61.    begin
+    62.       if text /= "" then
+    63.          cc_list.log(text, iff);
+    64.       end if;
+    65.       log_new_line(iff);
+    66.    end log_line;
+    67.
+    68.    procedure log_new_line (iff : in Boolean := True) is
+    69.    begin
+    70.       cc_list.log_new_line(iff);
+    71.    end log_new_line;
+    72.
+    73.    procedure log_rule (start_a_new_line : in Boolean := False;
+    74.                        iff              : in Boolean := True) is
+    75.    begin
+    76.        if start_a_new_line then
+    77.           cc_list.log_new_line(iff);
+    78.        end if;
+    79.        log_line(String'(1..80 => '_'), iff);
+    80.    end log_rule;
+    81.
+    82.    procedure log_message (message : in String) is
+    83.    begin
+    84.       cc_list.log(message);
+    85.       cc_list.log_new_line;
+    86.    end log_message;
+    87.
+    88.    procedure log_title (message : in String) is
+    89.    begin
+    90.       cc_list.log_new_line;
+    91.       cc_list.log(message);
+    92.       cc_list.log_new_line;
+    93.    end log_title;
+    94.
+    95.    procedure log_ee9_status (message  : in String;
+    96.                              skip     : in Natural := 0;
+    97.                              complete : in Boolean := True;
+    98.                              iff      : in Boolean := True) is
+    99.    begin
+   100.       if not iff then return; end if;
+   101.       panel_logger.tab_log_to(1);
+   102.       for i in 1 .. skip loop
+   103.          log_new_line;
+   104.       end loop;
+   105.       if complete then
+   106.          log_line("ee9: " & message & ".");
+   107.       else
+   108.          log("ee9: " & message);
+   109.       end if;
+   110.    end log_ee9_status;
+   111.
+   112.    procedure log_API_message (message  : in String;
+   113.                               skip     : in Natural := 1) is
+   114.    begin
+   115.       if API_logging_is_wanted then
+   116.          log_ee9_status(message, skip, True);
+   117.       end if;
+   118.    end log_API_message;
+   119.
+   120.    procedure show_line (message : in String) is
+   121.    begin
+   122.       if debugging_is_enabled then
+   123.          panel_logger.show_line(message);
+   124.          flush;
+   125.       end if;
+   126.    end show_line;
+   127.
+   128.    procedure interact (reason : in String := "Mode") is
+   129.    begin
+   130.       panel_logger.interact(reason);
+   131.    end interact;
+   132.
+   133.    procedure open (logfile_name : in String) is
+   134.    begin
+   135.       cc_list.open(logfile_name);
+   136.    end open;
+   137.
+   138.    procedure close (logfile_name : in String) is
+   139.    begin
+   140.       cc_list.close(logfile_name);
+   141.    end close;
+   142.
+   143.    procedure flush (iff : in Boolean := True) is
+   144.    begin
+   145.       cc_list.flush(iff);
+   146.    end flush;
+   147.
+   148.    procedure log_to_file (message : in String) is
+   149.    begin
+   150.       file_logger.log(message);
+   151.       file_logger.log_new_line;
+   152.    end log_to_file;
+   153.
+   154. begin
+   155.    cc_list.set_logger_list((file_logger'Access, panel_logger'Access));
+   156. end HCI;
+
+Compiling: ../Source/hci.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
+
+     1. -- Provide operations supporting replicated human-readable output:
+     2. --    1: to an interactive user interface for transient display, and
+     3. --    2: to a file for persistent storage.
+     4. -- If no file has been opened, or if it has been explicitly closed,
+     5. --    output is to the interactive interface only.
+     6. --
+     7. -- Also provide operations allowing synchronization with the user.
+     8. --
+     9. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+    10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+    11. --
+    12. -- The ee9 program is free software; you can redistribute it and/or
+    13. -- modify it under terms of the GNU General Public License as published
+    14. -- by the Free Software Foundation; either version 3, or (at your option)
+    15. -- any later version. This program is distributed in the hope that it
+    16. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    17. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    18. -- See the GNU General Public License for more details. You should have
+    19. -- received a copy of the GNU General Public License distributed with
+    20. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    21. --
+    22.
+    23. with logging.file;
+    24. with logging.panel;
+    25.
+    26. use  logging.file;
+    27. use  logging.panel;
+    28.
+    29. package HCI is
+    30.
+    31.    file_logger  : aliased logging.file.output;
+    32.    panel_logger : aliased logging.panel.display;
+    33.
+    34.    procedure tab_log (at_least : in Natural;
+    35.                       spacing  : in Positive := 6;
+    36.                       iff      : in Boolean := True);
+    37.
+    38.    procedure tab_log_to (column : in Positive;
+    39.                          iff    : in Boolean := True);
+    40.
+    41.    procedure log (char : in Character;
+    42.                   iff  : in Boolean := True);
+    43.
+    44.    procedure log (text : in String;
+    45.                   iff  : in Boolean := True);
+    46.
+    47.    procedure log_line (text : in String;
+    48.                        iff  : in Boolean := True);
+    49.
+    50.    procedure log_new_line (iff : in Boolean := True);
+    51.
+    52.    procedure log_rule (start_a_new_line : in Boolean := False;
+    53.                        iff              : in Boolean := True);
+    54.
+    55.    procedure log_message (message : in String);
+    56.
+    57.    procedure log_title (message : in String);
+    58.
+    59.    procedure log_ee9_status (message  : in String;
+    60.                              skip     : in Natural := 0;
+    61.                              complete : in Boolean := True;
+    62.                              iff      : in Boolean := True);
+    63.
+    64.    procedure log_API_message (message  : in String;
+    65.                               skip     : in Natural := 1);
+    66.
+    67.    procedure show_line (message : in String);
+    68.
+    69.    procedure interact (reason : in String := "Mode");
+    70.
+    71.    procedure open  (logfile_name : in String);
+    72.
+    73.    procedure close (logfile_name : in String);
+    74.
+    75.    procedure flush (iff : in Boolean := True);
+    76.
+    77.    procedure log_to_file (message : in String);
+    78.
+    79. end HCI;
+
+ 156 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
 Compiling: /home/parallels/emulation/Source/execute.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- This is the emulation-mode coordinate module.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -611,279 +865,14 @@ GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
-Compiling: /home/parallels/emulation/Source/hci.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
-
-     1. -- Provide operations supporting replicated human-readable output:
-     2. --    1: to an interactive user interface for transient display, and
-     3. --    2: to a file for persistent storage.
-     4. -- If no file has been opened, or if it has been explicitly closed,
-     5. --    output is to the interactive interface only.
-     6. --
-     7. -- Also provide operations allowing synchronization with the user.
-     8. --
-     9. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-    10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-    11. --
-    12. -- The ee9 program is free software; you can redistribute it and/or
-    13. -- modify it under terms of the GNU General Public License as published
-    14. -- by the Free Software Foundation; either version 3, or (at your option)
-    15. -- any later version. This program is distributed in the hope that it
-    16. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    17. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    18. -- See the GNU General Public License for more details. You should have
-    19. -- received a copy of the GNU General Public License distributed with
-    20. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    21. --
-    22.
-    23. with generic_logger;
-    24. with settings;
-    25.
-    26. use  settings;
-    27.
-    28. package body HCI is
-    29.
-    30.    package log_manager is new generic_logger(max_logger_list_size => 2);
-    31.
-    32.    cc_list : log_manager.replicator;
-    33.
-    34.    procedure tab_log (at_least : in Natural;
-    35.                       spacing  : in Positive := 6;
-    36.                       iff      : in Boolean := True) is
-    37.    begin
-    38.       cc_list.tab_log(at_least, spacing, iff);
-    39.    end tab_log;
-    40.
-    41.    procedure tab_log_to (column : in Positive;
-    42.                          iff    : in Boolean := True) is
-    43.    begin
-    44.       cc_list.tab_log_to(column, iff);
-    45.    end tab_log_to;
-    46.
-    47.    procedure log (char : in Character;
-    48.                   iff  : in Boolean := True) is
-    49.    begin
-    50.       cc_list.log(char, iff);
-    51.    end log;
-    52.
-    53.    procedure log (text : in String;
-    54.                   iff  : in Boolean := True) is
-    55.    begin
-    56.       cc_list.log(text, iff);
-    57.    end log;
-    58.
-    59.    procedure log_line (text : in String;
-    60.                        iff  : in Boolean := True) is
-    61.    begin
-    62.       if text /= "" then
-    63.          cc_list.log(text, iff);
-    64.       end if;
-    65.       log_new_line(iff);
-    66.    end log_line;
-    67.
-    68.    procedure log_new_line (iff : in Boolean := True) is
-    69.    begin
-    70.       cc_list.log_new_line(iff);
-    71.    end log_new_line;
-    72.
-    73.    half_ruler : constant String (1 .. 40) := (others => '_');
-    74.    half_blank : constant String (1 .. 40) := (others => ' ');
-    75.    full_ruler : constant String (1 .. 80) := half_ruler & half_ruler;
-    76.
-    77.    procedure log_rule (start_a_new_line : in Boolean := False;
-    78.                        iff              : in Boolean := True) is
-    79.    begin
-    80.       if start_a_new_line then
-    81.          cc_list.log_new_line(iff);
-    82.       end if;
-    83.       log_line(full_ruler, iff);
-    84.    end log_rule;
-    85.
-    86.    procedure log_rule_half (second_half : in Boolean := False) is
-    87.    begin
-    88.       if second_half then
-    89.          log(half_blank);
-    90.       end if;
-    91.       log_line(half_ruler);
-    92.    end log_rule_half;
-    93.
-    94.    procedure log_message (message : in String) is
-    95.    begin
-    96.       cc_list.log(message);
-    97.       cc_list.log_new_line;
-    98.    end log_message;
-    99.
-   100.    procedure log_title (message : in String) is
-   101.    begin
-   102.       cc_list.log_new_line;
-   103.       cc_list.log(message);
-   104.       cc_list.log_new_line;
-   105.    end log_title;
-   106.
-   107.    procedure log_ee9_status (message  : in String;
-   108.                              skip     : in Natural := 0;
-   109.                              complete : in Boolean := True;
-   110.                              iff      : in Boolean := True) is
-   111.    begin
-   112.       if not iff then return; end if;
-   113.       panel_logger.tab_log_to(1);
-   114.       for i in 1 .. skip loop
-   115.          log_new_line;
-   116.       end loop;
-   117.       if complete then
-   118.          log_line("ee9: " & message & ".");
-   119.       else
-   120.          log("ee9: " & message);
-   121.       end if;
-   122.    end log_ee9_status;
-   123.
-   124.    procedure log_API_message (message  : in String;
-   125.                               skip     : in Natural := 1) is
-   126.    begin
-   127.       if API_logging_is_wanted then
-   128.          log_ee9_status(message, skip, True);
-   129.       end if;
-   130.    end log_API_message;
-   131.
-   132.    procedure show_line (message : in String) is
-   133.    begin
-   134.       if debugging_is_enabled then
-   135.          panel_logger.show_line(message);
-   136.          flush;
-   137.       end if;
-   138.    end show_line;
-   139.
-   140.    procedure interact (reason : in String := "Mode") is
-   141.    begin
-   142.       panel_logger.interact(reason);
-   143.    end interact;
-   144.
-   145.    procedure open (logfile_name : in String) is
-   146.    begin
-   147.       cc_list.open(logfile_name);
-   148.    end open;
-   149.
-   150.    procedure close (logfile_name : in String) is
-   151.    begin
-   152.       cc_list.close(logfile_name);
-   153.    end close;
-   154.
-   155.    procedure flush (iff : in Boolean := True) is
-   156.    begin
-   157.       cc_list.flush(iff);
-   158.    end flush;
-   159.
-   160.    procedure log_to_file (message : in String) is
-   161.    begin
-   162.       file_logger.log(message);
-   163.       file_logger.log_new_line;
-   164.    end log_to_file;
-   165.
-   166. begin
-   167.    cc_list.set_logger_list((file_logger'Access, panel_logger'Access));
-   168. end HCI;
-
-Compiling: ../Source/hci.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
-
-     1. -- Provide operations supporting replicated human-readable output:
-     2. --    1: to an interactive user interface for transient display, and
-     3. --    2: to a file for persistent storage.
-     4. -- If no file has been opened, or if it has been explicitly closed,
-     5. --    output is to the interactive interface only.
-     6. --
-     7. -- Also provide operations allowing synchronization with the user.
-     8. --
-     9. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-    10. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-    11. --
-    12. -- The ee9 program is free software; you can redistribute it and/or
-    13. -- modify it under terms of the GNU General Public License as published
-    14. -- by the Free Software Foundation; either version 3, or (at your option)
-    15. -- any later version. This program is distributed in the hope that it
-    16. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    17. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    18. -- See the GNU General Public License for more details. You should have
-    19. -- received a copy of the GNU General Public License distributed with
-    20. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    21. --
-    22.
-    23. with logging.file;
-    24. with logging.panel;
-    25.
-    26. use  logging.file;
-    27. use  logging.panel;
-    28.
-    29. package HCI is
-    30.
-    31.    file_logger  : aliased logging.file.output;
-    32.    panel_logger : aliased logging.panel.display;
-    33.
-    34.    procedure tab_log (at_least : in Natural;
-    35.                       spacing  : in Positive := 6;
-    36.                       iff      : in Boolean := True);
-    37.
-    38.    procedure tab_log_to (column : in Positive;
-    39.                          iff    : in Boolean := True);
-    40.
-    41.    procedure log (char : in Character;
-    42.                   iff  : in Boolean := True);
-    43.
-    44.    procedure log (text : in String;
-    45.                   iff  : in Boolean := True);
-    46.
-    47.    procedure log_line (text : in String;
-    48.                        iff  : in Boolean := True);
-    49.
-    50.    procedure log_new_line (iff : in Boolean := True);
-    51.
-    52.    procedure log_rule (start_a_new_line : in Boolean := False;
-    53.                        iff              : in Boolean := True);
-    54.
-    55.    procedure log_rule_half (second_half : in Boolean := False);
-    56.
-    57.    procedure log_message (message : in String);
-    58.
-    59.    procedure log_title (message : in String);
-    60.
-    61.    procedure log_ee9_status (message  : in String;
-    62.                              skip     : in Natural := 0;
-    63.                              complete : in Boolean := True;
-    64.                              iff      : in Boolean := True);
-    65.
-    66.    procedure log_API_message (message  : in String;
-    67.                               skip     : in Natural := 1);
-    68.
-    69.    procedure show_line (message : in String);
-    70.
-    71.    procedure interact (reason : in String := "Mode");
-    72.
-    73.    procedure open  (logfile_name : in String);
-    74.
-    75.    procedure close (logfile_name : in String);
-    76.
-    77.    procedure flush (iff : in Boolean := True);
-    78.
-    79.    procedure log_to_file (message : in String);
-    80.
-    81. end HCI;
-
- 168 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
 Compiling: /home/parallels/emulation/Source/ioc.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -1781,13 +1770,13 @@ Compiled at: 2021-05-29 19:07:05
    899. end IOC;
 
 Compiling: ../Source/ioc.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
      2. --    with fail-stop stubs for operations having device-specific behaviour.
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2281,18 +2270,15 @@ Compiled at: 2021-05-29 19:07:05
 
  899 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-equipment.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Data supporting the definition of a KDF9 I/O equipment configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2376,13 +2362,13 @@ Compiled at: 2021-05-29 19:07:05
     85. end IOC.equipment;
 
 Compiling: ../Source/ioc-equipment.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Enable the devices included in the chosen KDF9 I/O configuration.
      2. --
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -2479,14 +2465,17 @@ Compiled at: 2021-05-29 19:07:05
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/ioc-slow.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2675,12 +2664,12 @@ Compiled at: 2021-05-29 19:07:05
    189. end IOC.slow;
 
 Compiling: ../Source/ioc-slow.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of a KDF9 "slow", i.e. byte-by-byte, devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -2766,17 +2755,14 @@ Compiled at: 2021-05-29 19:07:05
 
  189 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3126,12 +3112,12 @@ Compiled at: 2021-05-29 19:07:05
    350. end IOC.slow.shift;
 
 Compiling: ../Source/ioc-slow-shift.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:05
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3228,14 +3214,17 @@ Compiled at: 2021-05-29 19:07:05
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tp.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3453,12 +3442,12 @@ Compiled at: 2021-05-29 19:07:06
    218. end IOC.slow.shift.TP;
 
 Compiling: ../Source/ioc-slow-shift-tp.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3555,12 +3544,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-tr.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -3995,12 +3984,12 @@ Compiled at: 2021-05-29 19:07:06
    435. end IOC.slow.shift.TR;
 
 Compiling: ../Source/ioc-slow-shift-tr.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a paper tape reader buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4118,17 +4107,14 @@ Compiled at: 2021-05-29 19:07:06
 
  435 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/say_goodbye.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Finalize emulation with a helpful message derived from exception information.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4207,14 +4193,459 @@ Compiled at: 2021-05-29 19:07:06
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/generic_logger.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide operations supporting replicated output to a list of logging interfaces.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. -- generic
+    18. --    max_logger_list_size : in Positive;
+    19. package body generic_logger is
+    20.
+    21.    not overriding
+    22.    procedure set_logger_list (logger : in out replicator; list : in distribution_list) is
+    23.    begin
+    24.       logger.data := (list'Length, list);
+    25.    end set_logger_list;
+    26.
+    27.    overriding
+    28.    procedure tab_log (logger   : in out replicator;
+    29.                       at_least : in Natural;
+    30.                       spacing  : in Positive;
+    31.                       iff      : in Boolean := True) is
+    32.    begin
+    33.       for l in logger.data.list'Range loop
+    34.          logger.data.list(l).tab_log(at_least, spacing, iff);
+    35.       end loop;
+    36.    end tab_log;
+    37.
+    38.    overriding
+    39.    procedure tab_log_to (logger : in out replicator;
+    40.                          column : in Positive;
+    41.                          iff    : in Boolean := True) is
+    42.    begin
+    43.       for l in logger.data.list'Range loop
+    44.          logger.data.list(l).tab_log_to(column, iff);
+    45.       end loop;
+    46.    end tab_log_to;
+    47.
+    48.    overriding
+    49.    procedure log (logger : in out replicator;
+    50.                   char   : in Character;
+    51.                   iff    : in Boolean := True) is
+    52.    begin
+    53.       for l in logger.data.list'Range loop
+    54.          logger.data.list(l).log(char, iff);
+    55.       end loop;
+    56.    end log;
+    57.
+    58.    overriding
+    59.    procedure log (logger : in out replicator;
+    60.                   text   : in String;
+    61.                   iff    : in Boolean := True) is
+    62.    begin
+    63.       for l in logger.data.list'Range loop
+    64.          logger.data.list(l).log(text, iff);
+    65.       end loop;
+    66.    end log;
+    67.
+    68.    overriding
+    69.    procedure log_new_line (logger : in out replicator;
+    70.                            iff    : in Boolean := True) is
+    71.    begin
+    72.       for l in logger.data.list'Range loop
+    73.          logger.data.list(l).log_new_line(iff);
+    74.       end loop;
+    75.    end log_new_line;
+    76.
+    77.    overriding
+    78.    procedure open (logger : in out replicator; log_name : in String) is
+    79.    begin
+    80.       for l in logger.data.list'Range loop
+    81.          logger.data.list(l).open(log_name);
+    82.       end loop;
+    83.    end open;
+    84.
+    85.    overriding
+    86.    procedure close (logger : in out replicator; log_name : in String) is
+    87.    begin
+    88.       for l in logger.data.list'Range loop
+    89.          logger.data.list(l).close(log_name);
+    90.       end loop;
+    91.    end close;
+    92.
+    93.    overriding
+    94.    procedure flush (logger : in out replicator; iff : in Boolean := True) is
+    95.    begin
+    96.       for l in logger.data.list'Range loop
+    97.          logger.data.list(l).flush(iff);
+    98.       end loop;
+    99.    end flush;
+   100.
+   101. end generic_logger;
+
+Compiling: ../Source/generic_logger.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide operations supporting replicated output to a list of logging interfaces.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with logging;
+    18.
+    19. generic
+    20.    max_logger_list_size : in Positive;
+    21. package generic_logger is
+    22.
+    23.    type distribution_list is array (Positive range <>) of access logging.output'Class;
+    24.
+    25.    type replicator is new logging.output with private;
+    26.
+    27.    not overriding
+    28.    procedure set_logger_list (logger : in out replicator; list : in distribution_list);
+    29.
+    30.    overriding
+    31.    procedure tab_log (logger   : in out replicator;
+    32.                       at_least : in Natural;
+    33.                       spacing  : in Positive;
+    34.                       iff      : in Boolean := True);
+    35.
+    36.    overriding
+    37.    procedure tab_log_to (logger : in out replicator;
+    38.                          column : in Positive;
+    39.                          iff    : in Boolean := True);
+    40.
+    41.    overriding
+    42.    procedure log (logger : in out replicator;
+    43.                   char   : in Character;
+    44.                   iff    : in Boolean := True);
+    45.
+    46.    overriding
+    47.    procedure log (logger : in out replicator;
+    48.                   text   : in String;
+    49.                   iff    : in Boolean := True);
+    50.
+    51.    overriding
+    52.    procedure log_new_line (logger : in out replicator;
+    53.                            iff    : in Boolean := True);
+    54.
+    55.    overriding
+    56.    procedure open  (logger : in out replicator; log_name : in String);
+    57.
+    58.    overriding
+    59.    procedure close (logger : in out replicator; log_name : in String);
+    60.
+    61.    overriding
+    62.    procedure flush (logger : in out replicator; iff : in Boolean := True);
+    63.
+    64. private
+    65.
+    66.    subtype logger_list_size is Natural range 0 .. max_logger_list_size;
+    67.
+    68.    -- This type is needed because tagged types cannot have discriminants.
+    69.    type replica_list (length : logger_list_size := 0) is
+    70.       record
+    71.          list : distribution_list(1 .. length);
+    72.       end record;
+    73.
+    74.    type replicator is new logging.output with
+    75.       record
+    76.          data : replica_list;
+    77.       end record;
+    78.
+    79. end generic_logger;
+
+ 101 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/logging.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Define an abstract log output device.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package logging is
+    18.
+    19.    type output is interface;
+    20.
+    21.    procedure tab_log (logger   : in out logging.output;
+    22.                       at_least : in Natural;
+    23.                       spacing  : in Positive;
+    24.                       iff      : in Boolean := True) is abstract;
+    25.
+    26.    procedure tab_log_to (logger : in out logging.output;
+    27.                          column : in Positive;
+    28.                          iff    : in Boolean := True) is abstract;
+    29.
+    30.    procedure log (logger : in out logging.output;
+    31.                   char   : in Character;
+    32.                   iff    : in Boolean := True) is abstract;
+    33.
+    34.    procedure log (logger : in out logging.output;
+    35.                   text   : in String;
+    36.                   iff    : in Boolean := True) is abstract;
+    37.
+    38.    procedure log_new_line (logger : in out logging.output;
+    39.                            iff    : in Boolean := True) is abstract;
+    40.
+    41.    procedure open  (logger : in out logging.output; log_name : in String) is abstract;
+    42.
+    43.    procedure close (logger : in out logging.output; log_name : in String) is abstract;
+    44.
+    45.    procedure flush (logger : in out logging.output; iff : in Boolean := True) is abstract;
+    46.
+    47. end logging;
+
+ 47 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/logging-file.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide logging output to a named text file.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Text_IO;
+    18. with Ada.Unchecked_Deallocation;
+    19. --
+    20. with file_interfacing;
+    21.
+    22. use  Ada.Text_IO;
+    23. --
+    24. use  file_interfacing;
+    25.
+    26. package body logging.file is
+    27.
+    28.    overriding
+    29.    procedure tab_log (logger   : in out file.output;
+    30.                       at_least : in Natural;
+    31.                       spacing  : in Positive;
+    32.                       iff      : in Boolean := True) is
+    33.       column_nr : constant Positive_Count := Col(logger.the_log.all) + Count(at_least);
+    34.       excess    : constant Count          := column_nr mod Count(spacing);
+    35.    begin
+    36.       if not iff or logger.log_file_is_shut then return; end if;
+    37.       Set_Col(logger.the_log.all, column_nr);
+    38.       if excess /= 0 then
+    39.          Set_Col(logger.the_log.all, column_nr + Count(spacing) - excess);
+    40.       end if;
+    41.    end tab_log;
+    42.
+    43.    overriding
+    44.    procedure tab_log_to (logger : in out file.output;
+    45.                          column : in Positive;
+    46.                          iff    : in Boolean := True) is
+    47.    begin
+    48.       if not iff or logger.log_file_is_shut then return; end if;
+    49.       Set_Col(logger.the_log.all, Positive_Count(column));
+    50.    end tab_log_to;
+    51.
+    52.    overriding
+    53.    procedure log_new_line (logger : in out file.output;
+    54.                            iff    : in Boolean := True) is
+    55.    begin
+    56.       if not iff or logger.log_file_is_shut then return; end if;
+    57.       New_Line(logger.the_log.all);
+    58.    end log_new_line;
+    59.
+    60.    overriding
+    61.    procedure log (logger : in out file.output;
+    62.                   char   : in Character;
+    63.                   iff    : in Boolean := True) is
+    64.    begin
+    65.       if not iff or logger.log_file_is_shut then return; end if;
+    66.       Put(logger.the_log.all, char);
+    67.    end log;
+    68.
+    69.    overriding
+    70.    procedure log (logger : in out file.output;
+    71.                   text   : in String;
+    72.                   iff    : in Boolean := True) is
+    73.    begin
+    74.       if not iff or logger.log_file_is_shut then return; end if;
+    75.       Put(logger.the_log.all, text);
+    76.    end log;
+    77.
+    78.    overriding
+    79.    procedure open (logger : in out file.output; logfile_name : in String) is
+    80.    begin
+    81.       if logger.log_file_is_shut then
+    82.          logger.the_log := new Ada.Text_IO.File_Type;
+    83.          file_interfacing.initialize(logger.the_log.all, out_file, logfile_name);
+    84.          logger.log_file_is_shut := False;
+    85.       end if;
+    86.    end open;
+    87.
+    88.    overriding
+    89.    procedure close (logger : in out file.output; logfile_name : in String) is
+    90.
+    91.       procedure free_log_file is
+    92.          new Ada.Unchecked_Deallocation(Ada.Text_IO.File_Type, File_Type_access);
+    93.
+    94.    begin
+    95.       if logger.log_file_is_shut then return; end if;
+    96.       file_interfacing.finalize(logger.the_log.all, logfile_name);
+    97.       free_log_file(logger.the_log);
+    98.       logger.log_file_is_shut := True;
+    99.    end close;
+   100.
+   101.    overriding
+   102.    procedure flush (logger : in out file.output; iff : in Boolean := True) is
+   103.    begin
+   104.       if not iff or logger.log_file_is_shut then return; end if;
+   105.       Flush(logger.the_log.all);
+   106.    end flush;
+   107.
+   108. end logging.file;
+
+Compiling: ../Source/logging-file.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide logging output to a named text file.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. private with Ada.Text_IO;
+    18.
+    19. package logging.file is
+    20.
+    21.    type output is new logging.output with private;
+    22.
+    23.    overriding
+    24.    procedure tab_log (logger   : in out file.output;
+    25.                       at_least : in Natural;
+    26.                       spacing  : in Positive;
+    27.                       iff      : in Boolean := True);
+    28.
+    29.    overriding
+    30.    procedure tab_log_to (logger : in out file.output;
+    31.                          column : in Positive;
+    32.                          iff    : in Boolean := True);
+    33.
+    34.    overriding
+    35.    procedure log (logger : in out file.output;
+    36.                   char   : in Character;
+    37.                   iff    : in Boolean := True);
+    38.
+    39.    overriding
+    40.    procedure log (logger : in out file.output;
+    41.                   text   : in String;
+    42.                   iff    : in Boolean := True);
+    43.
+    44.    overriding
+    45.    procedure log_new_line (logger : in out file.output;
+    46.                            iff    : in Boolean := True);
+    47.
+    48.    overriding
+    49.    procedure open  (logger : in out file.output; logfile_name : in String);
+    50.
+    51.    overriding
+    52.    procedure close (logger : in out file.output; logfile_name : in String);
+    53.
+    54.    overriding
+    55.    procedure flush (logger : in out file.output; iff    : in Boolean := True);
+    56.
+    57. private
+    58.
+    59.    type File_Type_access is access Ada.Text_IO.File_Type;
+    60.
+    61.    type output is new logging.output with
+    62.       record
+    63.          log_file_is_shut : Boolean := True;
+    64.          the_log          : file.File_Type_access;
+    65.       end record;
+    66.
+    67. end logging.file;
+
+ 108 lines: No errors
+
 
 Compiling: /home/parallels/emulation/Source/settings.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -4240,7 +4671,7 @@ Compiled at: 2021-05-29 19:07:06
     26. with KDF9.store;
     27. with postscript;
     28. with settings.IO;
-    29. with symbols;
+    29. with disassembly.symbols;
     30. with tracing;
     31.
     32. use  Ada.Exceptions;
@@ -4253,7 +4684,7 @@ Compiled at: 2021-05-29 19:07:06
     39. use  HCI;
     40. use  KDF9.store;
     41. use  settings.IO;
-    42. use  symbols;
+    42. use  disassembly.symbols;
     43. use  tracing;
     44.
     45. package body settings is
@@ -4270,1071 +4701,1063 @@ Compiled at: 2021-05-29 19:07:06
     56.       the_final_state_is_wanted        := True;
     57.       the_log_is_wanted                := True;
     58.       the_signature_is_wanted          := True;
-    59.       the_terminal_is_ANSI_compatible  := True;
-    60.       authentic_timing_is_enabled      := False;
-    61.       debugging_is_enabled             := False;
-    62.       histogramming_is_enabled         := False;
-    63.       interrupt_tracing_is_enabled     := False;
-    64.       peripheral_tracing_is_enabled    := False;
-    65.       retrospective_tracing_is_enabled := False;
-    66.       the_signature_is_enabled         := False;
-    67.    end reset_default_visibility_options;
-    68.
-    69.    function is_invalid_miscellany_flag (option : in Character)
-    70.    return Boolean is
-    71.    begin
-    72.       for f of miscellany_flags loop
-    73.          if f = option then
-    74.             return False;
-    75.          end if;
-    76.       end loop;
-    77.       if option = '-' then  -- Ignore hyphens to make the calling scripts easier.
-    78.          return False;
-    79.       end if;
-    80.       return True;
-    81.    end is_invalid_miscellany_flag;
-    82.
-    83.    procedure set_this_miscellany_flag (option : in Character) is
-    84.       use IOC.equipment;
-    85.    begin
-    86.       if is_invalid_miscellany_flag(option) then
-    87.          log_line(
-    88.                   "***** Error in a miscellany specification: «"
-    89.                 & option
-    90.                 & "»."
-    91.                  );
-    92.          return;
-    93.       end if;
-    94.       case option is
-    95.          when '-'        =>
-    96.             null;  -- Ignore hyphens, to make the calling scripts easier.
-    97.          when '.'        =>
-    98.             time_limit := 1_000_000;
-    99.          when '0' .. '9' =>
-   100.             time_limit := (Character'Pos(option) - Character'Pos('0') + 1) * 100_000_000;
-   101.          when 'a' | 'A' =>
-   102.             API_logging_is_wanted := False;
-   103.          when 'b' | 'B' =>
-   104.             choice(KDF9.buffer_number'(15)) := SI;
-   105.          when 'd' | 'D' =>
-   106.             debugging_is_enabled := True;
-   107.          when 'e' | 'E' =>
-   108.             the_log_is_wanted := False;
-   109.          when 'f' | 'F' =>
-   110.             the_final_state_is_wanted := False;
-   111.          when 'g' | 'G' =>
-   112.             choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
-   113.          when 'h' | 'H' =>
-   114.             histogramming_is_wanted := False;
-   115.          when 'i' | 'I' =>
-   116.             interrupt_tracing_is_wanted := False;
-   117.          when 'k' | 'K' =>
-   118.             choice(DR0_default) := DR;
-   119.          when 'm' | 'M' =>
-   120.             the_terminal_is_ANSI_compatible := False;
-   121.          when 'n' | 'N' =>
-   122.             noninteractive_usage_is_enabled := True;
-   123.             time_limit := offline_time_limit;
-   124.           when 'o' |'O' =>
-   125.             pre_overlay_state_is_enabled := True;
-   126.          when 'p' |'P' =>
-   127.             peripheral_tracing_is_wanted := False;
-   128.          when 'q' | 'Q' =>
-   129.             do_not_execute := True;
-   130.          when 'r' | 'R' =>
-   131.             retrospective_tracing_is_wanted := False;
-   132.          when 's' | 'S' =>
-   133.             the_signature_is_wanted := False;
-   134.          when 't' | 'T' =>
-   135.             authentic_timing_is_enabled := True;
-   136.          when 'w' | 'W' =>
-   137.             flexowriter_output_is_wanted := False;
-   138.          when 'x' | 'X' =>
-   139.             only_signature_tracing := True;
-   140.          when 'y' | 'Y' =>
-   141.             this_is_a_bare_Director := True;
-   142.          when 'z' | 'Z' =>
-   143.             API_logging_is_wanted           := False;
-   144.             debugging_is_enabled            := False;
-   145.             histogramming_is_wanted         := False;
-   146.             interrupt_tracing_is_wanted     := False;
-   147.             peripheral_tracing_is_wanted    := False;
-   148.             retrospective_tracing_is_wanted := False;
-   149.             the_final_state_is_wanted       := False;
-   150.             the_log_is_wanted               := False;
-   151.             the_signature_is_wanted         := False;
-   152.          when others =>
-   153.             null;
-   154.       end case;
-   155.       set_diagnostic_mode(the_diagnostic_mode);
-   156.    end set_this_miscellany_flag;
+    59.       authentic_timing_is_enabled      := False;
+    60.       debugging_is_enabled             := False;
+    61.       histogramming_is_enabled         := False;
+    62.       interrupt_tracing_is_enabled     := False;
+    63.       peripheral_tracing_is_enabled    := False;
+    64.       retrospective_tracing_is_enabled := False;
+    65.       the_signature_is_enabled         := False;
+    66.    end reset_default_visibility_options;
+    67.
+    68.    function is_invalid_miscellany_flag (option : in Character)
+    69.    return Boolean is
+    70.    begin
+    71.       for f of miscellany_flags loop
+    72.          if f = option then
+    73.             return False;
+    74.          end if;
+    75.       end loop;
+    76.       if option = '-' then  -- Ignore hyphens to make the calling scripts easier.
+    77.          return False;
+    78.       end if;
+    79.       return True;
+    80.    end is_invalid_miscellany_flag;
+    81.
+    82.    procedure set_this_miscellany_flag (option : in Character) is
+    83.       use IOC.equipment;
+    84.    begin
+    85.       if is_invalid_miscellany_flag(option) then
+    86.          log_line(
+    87.                   "***** Error in a miscellany specification: «"
+    88.                 & option
+    89.                 & "»."
+    90.                  );
+    91.          return;
+    92.       end if;
+    93.       case option is
+    94.          when '-'        =>
+    95.             null;  -- Ignore hyphens, to make the calling scripts easier.
+    96.          when '.'        =>
+    97.             time_limit := 1_000_000;
+    98.          when '0' .. '9' =>
+    99.             time_limit := (Character'Pos(option) - Character'Pos('0') + 1) * 100_000_000;
+   100.          when 'a' | 'A' =>
+   101.             API_logging_is_wanted := False;
+   102.          when 'b' | 'B' =>
+   103.             choice(KDF9.buffer_number'(15)) := SI;
+   104.          when 'd' | 'D' =>
+   105.             debugging_is_enabled := True;
+   106.          when 'e' | 'E' =>
+   107.             the_log_is_wanted := False;
+   108.          when 'f' | 'F' =>
+   109.             the_final_state_is_wanted := False;
+   110.          when 'g' | 'G' =>
+   111.             choice(if TP1_number = 0 then TP1_default else TP1_number) := GP;
+   112.          when 'h' | 'H' =>
+   113.             histogramming_is_wanted := False;
+   114.          when 'i' | 'I' =>
+   115.             interrupt_tracing_is_wanted := False;
+   116.          when 'k' | 'K' =>
+   117.             choice(DR0_default) := DR;
+   118.          when 'n' | 'N' =>
+   119.             noninteractive_usage_is_enabled := True;
+   120.             time_limit := offline_time_limit;
+   121.           when 'o' |'O' =>
+   122.             pre_overlay_state_is_enabled := True;
+   123.          when 'p' |'P' =>
+   124.             peripheral_tracing_is_wanted := False;
+   125.          when 'q' | 'Q' =>
+   126.             do_not_execute := True;
+   127.          when 'r' | 'R' =>
+   128.             retrospective_tracing_is_wanted := False;
+   129.          when 's' | 'S' =>
+   130.             the_signature_is_wanted := False;
+   131.          when 't' | 'T' =>
+   132.             authentic_timing_is_enabled := True;
+   133.          when 'w' | 'W' =>
+   134.             flexowriter_output_is_wanted := False;
+   135.          when 'x' | 'X' =>
+   136.             only_signature_tracing := True;
+   137.          when 'y' | 'Y' =>
+   138.             this_is_a_bare_Director := True;
+   139.          when 'z' | 'Z' =>
+   140.             API_logging_is_wanted           := False;
+   141.             debugging_is_enabled            := False;
+   142.             histogramming_is_wanted         := False;
+   143.             interrupt_tracing_is_wanted     := False;
+   144.             peripheral_tracing_is_wanted    := False;
+   145.             retrospective_tracing_is_wanted := False;
+   146.             the_final_state_is_wanted       := False;
+   147.             the_log_is_wanted               := False;
+   148.             the_signature_is_wanted         := False;
+   149.          when others =>
+   150.             null;
+   151.       end case;
+   152.       set_diagnostic_mode(the_diagnostic_mode);
+   153.    end set_this_miscellany_flag;
+   154.
+   155.    procedure display_execution_modes (for_this : in String := "") is
+   156.       needs_comma : Boolean := False;
    157.
-   158.    procedure display_execution_modes (for_this : in String := "") is
-   159.       needs_comma : Boolean := False;
-   160.
-   161.       procedure append_option (flag : in Boolean; name : in String) is
-   162.       begin
-   163.          if flag then
-   164.             if needs_comma then
-   165.                log(", ");
-   166.             end if;
-   167.             log(name);
-   168.             needs_comma := True;
-   169.          end if;
-   170.       end append_option;
-   171.
-   172.       function run_type (type_of_run : String)
-   173.       return String
-   174.       is (if for_this = "" then type_of_run else type_of_run & " " & for_this);
-   175.
-   176.    begin -- display_execution_modes
-   177.       if not the_log_is_wanted then return; end if;
-   178.       log_new_line;
-   179.       if for_this = "" then
-   180.          log("Resuming the run");
-   181.       else
-   182.          log(
-   183.              case the_execution_mode is
-   184.                when boot_mode        => (if this_is_a_bare_Director then
-   185.                                             "Running the bare " & run_type("Director")
-   186.                                          else
-   187.                                             "Booting the KDF9 " & run_type("Director")
-   188.                                         ),
-   189.                when program_mode     => "Running the KDF9 " & run_type("problem program"),
-   190.                when privileged_mode  => "Running the KDF9 " & run_type("privileged program")
-   191.             );
-   192.       end if;
-   193.       log(" in ");
-   194.       log(
-   195.           case the_diagnostic_mode is
-   196.              when trace_mode    =>
-   197.                 (if the_external_trace_is_enabled then "external trace mode" else "trace mode"),
-   198.              when fast_mode     => "fast mode",
-   199.              when pause_mode    => "pause mode",
-   200.              when external_mode => "external trace mode"
-   201.          );
-   202.       if the_diagnostic_mode = fast_mode then
-   203.          log_line(".");
-   204.          log_rule;
-   205.          return;
-   206.       end if;
-   207.
-   208.       if authentic_timing_is_enabled      or else
-   209.          debugging_is_enabled             or else
-   210.          histogramming_is_enabled         or else
-   211.          interrupt_tracing_is_enabled     or else
-   212.          noninteractive_usage_is_enabled  or else
-   213.          peripheral_tracing_is_enabled    or else
-   214.          retrospective_tracing_is_enabled or else
-   215.          the_external_trace_is_enabled    or else
-   216.          the_signature_is_enabled            then
-   217.
-   218.          log_line(", with option(s):");
-   219.          log("   ");
-   220.          append_option(authentic_timing_is_enabled,      "authentic timing");
-   221.          append_option(debugging_is_enabled,             "debugging output");
-   222.          append_option(histogramming_is_enabled,         "histogram(s)");
-   223.          append_option(interrupt_tracing_is_enabled,     "interrupt trace");
-   224.          append_option(noninteractive_usage_is_enabled,  "noninteractive");
-   225.          append_option(peripheral_tracing_is_enabled,    "peripheral trace");
-   226.          append_option(retrospective_tracing_is_enabled, "retro trace");
-   227.          append_option(the_external_trace_is_enabled,    "external trace");
-   228.          append_option(the_signature_is_enabled,         "signature hash");
-   229.       end if;
-   230.       log_line(".");
-   231.       log_rule;
-   232.    end display_execution_modes;
-   233.
-   234.    procedure quit_if_requested is
-   235.    begin
-   236.       if quit_was_requested then
-   237.          raise quit_request with ""; -- "" suppresses the default message.
+   158.       procedure append_option (flag : in Boolean; name : in String) is
+   159.       begin
+   160.          if flag then
+   161.             if needs_comma then
+   162.                log(", ");
+   163.             end if;
+   164.             log(name);
+   165.             needs_comma := True;
+   166.          end if;
+   167.       end append_option;
+   168.
+   169.       function run_type (type_of_run : String)
+   170.       return String
+   171.       is (if for_this = "" then type_of_run else type_of_run & " " & for_this);
+   172.
+   173.    begin -- display_execution_modes
+   174.       if not the_log_is_wanted then return; end if;
+   175.       log_new_line;
+   176.       if for_this = "" then
+   177.          log("Resuming the run");
+   178.       else
+   179.          log(
+   180.              case the_execution_mode is
+   181.                when boot_mode        => (if this_is_a_bare_Director then
+   182.                                             "Running the bare " & run_type("Director")
+   183.                                          else
+   184.                                             "Booting the KDF9 " & run_type("Director")
+   185.                                         ),
+   186.                when program_mode     => "Running the KDF9 " & run_type("problem program"),
+   187.                when privileged_mode  => "Running the KDF9 " & run_type("privileged program")
+   188.             );
+   189.       end if;
+   190.       log(" in ");
+   191.       log(
+   192.           case the_diagnostic_mode is
+   193.              when trace_mode    =>
+   194.                 (if the_external_trace_is_enabled then "external trace mode" else "trace mode"),
+   195.              when fast_mode     => "fast mode",
+   196.              when pause_mode    => "pause mode",
+   197.              when external_mode => "external trace mode"
+   198.          );
+   199.
+   200.       if authentic_timing_is_enabled      or else
+   201.          debugging_is_enabled             or else
+   202.          histogramming_is_enabled         or else
+   203.          interrupt_tracing_is_enabled     or else
+   204.          noninteractive_usage_is_enabled  or else
+   205.          peripheral_tracing_is_enabled    or else
+   206.          retrospective_tracing_is_enabled or else
+   207.          the_external_trace_is_enabled    or else
+   208.          the_signature_is_enabled            then
+   209.
+   210.          log_line(", with option(s):");
+   211.          log("   ");
+   212.          append_option(authentic_timing_is_enabled,      "authentic timing");
+   213.          append_option(debugging_is_enabled,             "debugging output");
+   214.          append_option(histogramming_is_enabled,         "histogram(s)");
+   215.          append_option(interrupt_tracing_is_enabled,     "interrupt trace");
+   216.          append_option(noninteractive_usage_is_enabled,  "noninteractive");
+   217.          append_option(peripheral_tracing_is_enabled,    "peripheral trace");
+   218.          append_option(retrospective_tracing_is_enabled, "retro trace");
+   219.          append_option(the_external_trace_is_enabled,    "external trace");
+   220.          append_option(the_signature_is_enabled,         "signature hash");
+   221.       end if;
+   222.       log_line(".");
+   223.       log_rule;
+   224.    end display_execution_modes;
+   225.
+   226.    procedure quit_if_requested is
+   227.    begin
+   228.       if quit_was_requested then
+   229.          raise quit_request with ""; -- "" suppresses the default message.
+   230.       end if;
+   231.    end quit_if_requested;
+   232.
+   233.    procedure change_diagnostic_mode_if_requested is
+   234.    begin
+   235.       if the_diagnostic_mode_changed then
+   236.          the_diagnostic_mode_changed := False;
+   237.          raise mode_change_request;
    238.       end if;
-   239.    end quit_if_requested;
+   239.    end change_diagnostic_mode_if_requested;
    240.
-   241.    procedure change_diagnostic_mode_if_requested is
-   242.    begin
-   243.       if the_diagnostic_mode_changed then
-   244.          the_diagnostic_mode_changed := False;
-   245.          raise mode_change_request;
-   246.       end if;
-   247.    end change_diagnostic_mode_if_requested;
-   248.
-   249.    procedure set_diagnostic_mode (a_diagnostic_mode : in settings.diagnostic_mode) is
-   250.       tracing_is_allowed    : constant Boolean := a_diagnostic_mode /= fast_mode;
-   251.       interrupts_can_happen : constant Boolean := the_execution_mode = boot_mode and tracing_is_allowed;
-   252.    begin
-   253.       if a_diagnostic_mode = external_mode then
-   254.          if (the_diagnostic_mode /= external_mode) and (not the_external_trace_is_enabled) then
-   255.             open(the_external_trace_file, the_external_trace_file_name);
-   256.          end if;
-   257.          the_diagnostic_mode := trace_mode;
-   258.          the_external_trace_is_enabled := True;
-   259.       else
-   260.          the_diagnostic_mode := a_diagnostic_mode;
-   261.       end if;
-   262.       histogramming_is_enabled         := histogramming_is_wanted         and tracing_is_allowed;
-   263.       interrupt_tracing_is_enabled     := interrupt_tracing_is_wanted     and interrupts_can_happen;
-   264.       peripheral_tracing_is_enabled    := peripheral_tracing_is_wanted    and tracing_is_allowed;
-   265.       retrospective_tracing_is_enabled := retrospective_tracing_is_wanted and tracing_is_allowed;
-   266.       the_signature_is_enabled         := the_signature_is_wanted         and tracing_is_allowed;
-   267.    end set_diagnostic_mode;
-   268.
-   269.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode) is
-   270.    begin
-   271.       the_execution_mode := an_execution_mode;
-   272.    end set_execution_mode;
+   241.    procedure set_diagnostic_mode (a_diagnostic_mode : in settings.diagnostic_mode) is
+   242.       tracing_is_allowed    : constant Boolean := a_diagnostic_mode /= fast_mode;
+   243.       interrupts_can_happen : constant Boolean := the_execution_mode = boot_mode and tracing_is_allowed;
+   244.    begin
+   245.       if a_diagnostic_mode = external_mode then
+   246.          if (the_diagnostic_mode /= external_mode) and (not the_external_trace_is_enabled) then
+   247.             open(the_external_trace_file, the_external_trace_file_name);
+   248.          end if;
+   249.          the_diagnostic_mode := trace_mode;
+   250.          the_external_trace_is_enabled := True;
+   251.       else
+   252.          the_diagnostic_mode := a_diagnostic_mode;
+   253.       end if;
+   254.       histogramming_is_enabled         := histogramming_is_wanted         and tracing_is_allowed;
+   255.       interrupt_tracing_is_enabled     := interrupt_tracing_is_wanted     and interrupts_can_happen;
+   256.       peripheral_tracing_is_enabled    := peripheral_tracing_is_wanted    and tracing_is_allowed;
+   257.       retrospective_tracing_is_enabled := retrospective_tracing_is_wanted and tracing_is_allowed;
+   258.       the_signature_is_enabled         := the_signature_is_wanted         and tracing_is_allowed;
+   259.    end set_diagnostic_mode;
+   260.
+   261.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode) is
+   262.    begin
+   263.       the_execution_mode := an_execution_mode;
+   264.    end set_execution_mode;
+   265.
+   266.    package diagnostic_mode_IO   is new Ada.Text_IO.Enumeration_IO(settings.diagnostic_mode);
+   267.
+   268.    package execution_mode_IO    is new Ada.Text_IO.Enumeration_IO(settings.execution_mode);
+   269.
+   270.    package authenticity_mode_IO is new Ada.Text_IO.Enumeration_IO(KDF9.authenticity_mode);
+   271.
+   272.    package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.kind);
    273.
-   274.    package diagnostic_mode_IO   is new Ada.Text_IO.Enumeration_IO(settings.diagnostic_mode);
+   274.    procedure get_settings_from_file (version : in String) is
    275.
-   276.    package execution_mode_IO    is new Ada.Text_IO.Enumeration_IO(settings.execution_mode);
-   277.
-   278.    package authenticity_mode_IO is new Ada.Text_IO.Enumeration_IO(KDF9.authenticity_mode);
-   279.
-   280.    package equipment_IO         is new Ada.Text_IO.Enumeration_IO(IOC.equipment.kind);
+   276.       the_settings_file_name : constant String := "settings_" & version & ".txt";
+   277.       HT                     : constant Character := Character'Val(9);
+   278.       counts_are_set : Boolean := False;
+   279.       settings_file  : File_Type;
+   280.       flag           : Character;
    281.
-   282.    procedure get_settings_from_file (version : in String) is
-   283.
-   284.       the_settings_file_name : constant String := "settings_" & version & ".txt";
-   285.       HT                     : constant Character := Character'Val(9);
-   286.       counts_are_set : Boolean := False;
-   287.       settings_file  : File_Type;
-   288.       flag           : Character;
-   289.
-   290.       procedure set_the_miscellany_flags is
-   291.          c  : Character := ' ';
-   292.       begin
-   293.          skip_to_next_non_blank(settings_file);
-   294.          if End_Of_Line(settings_file) then
-   295.             reset_default_visibility_options;
-   296.             return;
-   297.          end if;
-   298.          loop
-   299.             get(settings_file, c);
-   300.             if is_invalid_miscellany_flag(c) then
-   301.                if c not in  ' ' | HT  then
-   302.                   raise Data_Error;
-   303.                end if;
-   304.             else
-   305.                set_this_miscellany_flag(c);
-   306.             end if;
-   307.          exit when End_Of_Line(settings_file);
-   308.          end loop;
-   309.       exception
-   310.          when Data_Error =>
-   311.             if not End_Of_Line(settings_file) then
-   312.                Skip_Line(settings_file);
-   313.             end if;
-   314.             log_new_line;
-   315.             log_line(
-   316.                      "***** Error in a miscellany specification: "
-   317.                    & (if c = ' ' then "no option was given." else "invalid data «"& c & "».")
-   318.                     );
-   319.       end set_the_miscellany_flags;
-   320.
-   321.       procedure set_breakpoints is
-   322.          start, end_point : KDF9.code_address;
-   323.       begin
-   324.          begin
-   325.             get_word(settings_file, KDF9.word(start));
-   326.          exception
-   327.             when others =>
-   328.                log_new_line;
-   329.                log_line("***** Error in lower address; no breakpoint set.");
-   330.                return;
-   331.          end;
-   332.
-   333.          log_new_line;
-   334.          log_line(
-   335.                   "Lower breakpoint: "
-   336.                 & oct_of(KDF9.syllable_address'(start, 0))
-   337.                 & " ("
-   338.                 & dec_of(KDF9.syllable_address'(start, 0))
-   339.                 & ")",
-   340.                   iff => the_log_is_wanted
-   341.                  );
-   342.          breakpoints(start) := True;
-   343.
-   344.          begin
-   345.             get_word(settings_file, KDF9.word(end_point));
-   346.          exception
-   347.             when Data_Error =>
-   348.                log_line("      No upper address: one breakpoint set.", iff => the_log_is_wanted);
-   349.                set_breakpoints(start, start);
-   350.                return;
-   351.          end;
-   352.          log_line(
-   353.                   "Upper breakpoint: "
-   354.                 & oct_of(KDF9.syllable_address'(end_point, 5))
-   355.                 & " (" & dec_of(KDF9.syllable_address'(end_point, 5))
-   356.                 & ")",
-   357.                   iff => the_log_is_wanted
-   358.                  );
-   359.          set_breakpoints(start, end_point);
-   360.       exception
-   361.          when others =>
-   362.             log_line("***** Error setting breakpoints; ignored.");
-   363.       end set_breakpoints;
-   364.
-   365.       procedure set_store_points is
-   366.          start, end_point : KDF9.address;
-   367.       begin
-   368.          begin
-   369.             get_word(settings_file, KDF9.word(start));
-   370.          exception
-   371.             when others =>
-   372.                log_new_line;
-   373.                log_line("***** Error in lower address; no storepoint set.");
-   374.                return;
-   375.          end;
-   376.          log_new_line;
-   377.          log_line(
-   378.                   "Lower storepoint: #"
-   379.                 & oct_of(start)
-   380.                 & " ("
-   381.                 & dec_of(start)
-   382.                 & ")",
-   383.                   iff => the_log_is_wanted
-   384.                  );
-   385.          begin
-   386.             get_word(settings_file, KDF9.word(end_point));
-   387.          exception
-   388.             when Data_Error =>
-   389.                log_line("      No upper address: one storepoint set.", iff => the_log_is_wanted);
-   390.                set_store_points(start, start);
-   391.                return;
-   392.          end;
-   393.          log_line(
-   394.                   "Upper storepoint: #"
-   395.                 & oct_of(end_point)
-   396.                 & " ("
-   397.                 & dec_of(end_point)
-   398.                 & ")",
-   399.                   iff => the_log_is_wanted
-   400.                  );
-   401.          set_store_points(start, end_point);
-   402.       exception
-   403.          when others =>
-   404.             log_line("***** Error setting storepoints; ignored.");
-   405.       end set_store_points;
-   406.
-   407.       procedure set_watchpoints is
-   408.          start, end_point : KDF9.address;
-   409.       begin
-   410.          begin
-   411.             get_word(settings_file, KDF9.word(start));
-   412.          exception
-   413.             when others =>
-   414.                log_new_line;
-   415.                log_line("***** Error in lower address; no watchpoint set.");
-   416.                return;
-   417.          end;
-   418.          log_new_line;
-   419.          log_line(
-   420.                   "Lower watchpoint: #"
-   421.                 & oct_of(start)
-   422.                 & " ("
-   423.                 & dec_of(start)
-   424.                 & ")",
-   425.                   iff => the_log_is_wanted
-   426.                  );
-   427.          begin
-   428.             get_word(settings_file, KDF9.word(end_point));
-   429.          exception
-   430.             when Data_Error =>
-   431.                log_line("      No upper address: one watchpoint set.", iff => the_log_is_wanted);
-   432.                set_store_points(start, start);
-   433.                set_fetch_points(start, start);
-   434.                return;
-   435.          end;
-   436.          log_line("Upper watchpoint: #" & oct_of(end_point) & " (" & dec_of(end_point) & ")",
-   437.                   iff => the_log_is_wanted);
-   438.          set_fetch_points(start, end_point);
-   439.          set_store_points(start, end_point);
-   440.       exception
-   441.          when others =>
-   442.             log_line("***** Error setting watchpoints; ignored.");
-   443.       end set_watchpoints;
-   444.
-   445.       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
-   446.          use dumping.flag_support;
-   447.          epoch_flag   : constant Character := (if epoch = initial_flag then 'I' else 'F');
-   448.          format       : dumping.format_set := no_dumping_flags or epoch;
-   449.          first_address,
-   450.          last_address : KDF9.address := 0;
-   451.          bad_range    : Boolean := False;
-   452.          data         : KDF9.word;
-   453.          c            : Character;
-   454.          OK           : Boolean;
-   455.       begin
-   456.          log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
-   457.          while not End_Of_Line(settings_file) loop
-   458.             get(settings_file, c);
-   459.             log(c, iff => the_log_is_wanted);
-   460.          exit when c = ' ';
-   461.             if is_parameter_flag/dumping_flag(to_upper(c)) then
-   462.                format := format or dumping_flag(to_upper(c));
-   463.             else
-   464.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   465.                log_new_line;
-   466.                log_line("***** Error: «"& c & "» is not a valid dump type.");
-   467.                return;
-   468.             end if;
-   469.          end loop;
-   470.          log_new_line;
-   471.
-   472.          if (format and is_parameter_flag) /= no_dumping_flags then
-   473.             get_word(settings_file, data);
-   474.             if data > max_address                     or else
-   475.                   (format/Usercode_flag and data > 8191) then
-   476.                log_line(
-   477.                         "***** Error: Lower dump address  = #"
-   478.                       & oct_of(data)
-   479.                       & " =" & data'Image
-   480.                       & " is too large for this option."
-   481.                        );
-   482.                bad_range := True;
-   483.             else
-   484.                first_address := KDF9.address(data);
-   485.                last_address  := KDF9.address(data);
-   486.                log_line(
-   487.                         "      Lower dump address: #"
-   488.                       & oct_of(first_address)
-   489.                       & " (" & dec_of(first_address)
-   490.                       & ")",
-   491.                         iff => the_log_is_wanted
-   492.                        );
-   493.             end if;
-   494.
-   495.            skip_to_next_non_blank (settings_file);
-   496.
-   497.             if not end_of_line(settings_file) then
-   498.                get_word(settings_file, data);
-   499.                if data > max_address                     or else
-   500.                   (format/Usercode_flag and data > 8191) then
-   501.                   log_line(
-   502.                            "***** Error: Upper dump address: #"
-   503.                          & oct_of(data)
-   504.                          & " =" & data'Image
-   505.                          & " is too large for this option."
-   506.                           );
-   507.                   bad_range := True;
-   508.                else
-   509.                   last_address := KDF9.address(data);
-   510.                   log_line(
-   511.                            "      Upper dump address: #"
-   512.                          & oct_of(last_address)
-   513.                          & " ("
-   514.                          & dec_of(last_address)
-   515.                          & ")",
-   516.                            iff => the_log_is_wanted
-   517.                           );
-   518.                end if;
-   519.             end if;
-   520.
-   521.             if first_address > last_address then
-   522.                log_line(
-   523.                         "***** Error: Upper dump address: #"
-   524.                       & oct_of(last_address)
-   525.                       & " =" & last_address'Image
-   526.                       & " is less than lower dump address: #"
-   527.                       & oct_of(first_address)
-   528.                       & " =" & first_address'Image
-   529.                       & "."
-   530.                        );
-   531.                bad_range := True;
-   532.             end if;
-   533.          end if;
-   534.
-   535.          if not bad_range then
-   536.             request_a_dumping_area(format, first_address, last_address, OK);
-   537.             if not OK then
-   538.                log_line("***** Error: Too many dump specifications (ignored).");
-   539.             end if;
-   540.          end if;
+   282.       procedure set_the_miscellany_flags is
+   283.          c  : Character := ' ';
+   284.       begin
+   285.          skip_to_next_non_blank(settings_file);
+   286.          if End_Of_Line(settings_file) then
+   287.             reset_default_visibility_options;
+   288.             return;
+   289.          end if;
+   290.          loop
+   291.             get(settings_file, c);
+   292.             if is_invalid_miscellany_flag(c) then
+   293.                if c not in  ' ' | HT  then
+   294.                   raise Data_Error;
+   295.                end if;
+   296.             else
+   297.                set_this_miscellany_flag(c);
+   298.             end if;
+   299.          exit when End_Of_Line(settings_file);
+   300.          end loop;
+   301.       exception
+   302.          when Data_Error =>
+   303.             if not End_Of_Line(settings_file) then
+   304.                Skip_Line(settings_file);
+   305.             end if;
+   306.             log_new_line;
+   307.             log_line(
+   308.                      "***** Error in a miscellany specification: "
+   309.                    & (if c = ' ' then "no option was given." else "invalid data «"& c & "».")
+   310.                     );
+   311.       end set_the_miscellany_flags;
+   312.
+   313.       procedure set_breakpoints is
+   314.          start, end_point : KDF9.code_address;
+   315.       begin
+   316.          begin
+   317.             get_word(settings_file, KDF9.word(start));
+   318.          exception
+   319.             when others =>
+   320.                log_new_line;
+   321.                log_line("***** Error in lower address; no breakpoint set.");
+   322.                return;
+   323.          end;
+   324.
+   325.          log_new_line;
+   326.          log_line(
+   327.                   "Lower breakpoint: "
+   328.                 & oct_of(KDF9.syllable_address'(start, 0))
+   329.                 & " ("
+   330.                 & dec_of(KDF9.syllable_address'(start, 0))
+   331.                 & ")",
+   332.                   iff => the_log_is_wanted
+   333.                  );
+   334.          breakpoints(start) := True;
+   335.
+   336.          begin
+   337.             get_word(settings_file, KDF9.word(end_point));
+   338.          exception
+   339.             when Data_Error =>
+   340.                log_line("      No upper address: one breakpoint set.", iff => the_log_is_wanted);
+   341.                set_breakpoints(start, start);
+   342.                return;
+   343.          end;
+   344.          log_line(
+   345.                   "Upper breakpoint: "
+   346.                 & oct_of(KDF9.syllable_address'(end_point, 5))
+   347.                 & " (" & dec_of(KDF9.syllable_address'(end_point, 5))
+   348.                 & ")",
+   349.                   iff => the_log_is_wanted
+   350.                  );
+   351.          set_breakpoints(start, end_point);
+   352.       exception
+   353.          when others =>
+   354.             log_line("***** Error setting breakpoints; ignored.");
+   355.       end set_breakpoints;
+   356.
+   357.       procedure set_store_points is
+   358.          start, end_point : KDF9.address;
+   359.       begin
+   360.          begin
+   361.             get_word(settings_file, KDF9.word(start));
+   362.          exception
+   363.             when others =>
+   364.                log_new_line;
+   365.                log_line("***** Error in lower address; no storepoint set.");
+   366.                return;
+   367.          end;
+   368.          log_new_line;
+   369.          log_line(
+   370.                   "Lower storepoint: #"
+   371.                 & oct_of(start)
+   372.                 & " ("
+   373.                 & dec_of(start)
+   374.                 & ")",
+   375.                   iff => the_log_is_wanted
+   376.                  );
+   377.          begin
+   378.             get_word(settings_file, KDF9.word(end_point));
+   379.          exception
+   380.             when Data_Error =>
+   381.                log_line("      No upper address: one storepoint set.", iff => the_log_is_wanted);
+   382.                set_store_points(start, start);
+   383.                return;
+   384.          end;
+   385.          log_line(
+   386.                   "Upper storepoint: #"
+   387.                 & oct_of(end_point)
+   388.                 & " ("
+   389.                 & dec_of(end_point)
+   390.                 & ")",
+   391.                   iff => the_log_is_wanted
+   392.                  );
+   393.          set_store_points(start, end_point);
+   394.       exception
+   395.          when others =>
+   396.             log_line("***** Error setting storepoints; ignored.");
+   397.       end set_store_points;
+   398.
+   399.       procedure set_watchpoints is
+   400.          start, end_point : KDF9.address;
+   401.       begin
+   402.          begin
+   403.             get_word(settings_file, KDF9.word(start));
+   404.          exception
+   405.             when others =>
+   406.                log_new_line;
+   407.                log_line("***** Error in lower address; no watchpoint set.");
+   408.                return;
+   409.          end;
+   410.          log_new_line;
+   411.          log_line(
+   412.                   "Lower watchpoint: #"
+   413.                 & oct_of(start)
+   414.                 & " ("
+   415.                 & dec_of(start)
+   416.                 & ")",
+   417.                   iff => the_log_is_wanted
+   418.                  );
+   419.          begin
+   420.             get_word(settings_file, KDF9.word(end_point));
+   421.          exception
+   422.             when Data_Error =>
+   423.                log_line("      No upper address: one watchpoint set.", iff => the_log_is_wanted);
+   424.                set_store_points(start, start);
+   425.                set_fetch_points(start, start);
+   426.                return;
+   427.          end;
+   428.          log_line("Upper watchpoint: #" & oct_of(end_point) & " (" & dec_of(end_point) & ")",
+   429.                   iff => the_log_is_wanted);
+   430.          set_fetch_points(start, end_point);
+   431.          set_store_points(start, end_point);
+   432.       exception
+   433.          when others =>
+   434.             log_line("***** Error setting watchpoints; ignored.");
+   435.       end set_watchpoints;
+   436.
+   437.       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
+   438.          use dumping.flag_support;
+   439.          epoch_flag   : constant Character := (if epoch = initial_flag then 'I' else 'F');
+   440.          format       : dumping.format_set := no_dumping_flags or epoch;
+   441.          first_address,
+   442.          last_address : KDF9.address := 0;
+   443.          bad_range    : Boolean := False;
+   444.          data         : KDF9.word;
+   445.          c            : Character;
+   446.          OK           : Boolean;
+   447.       begin
+   448.          log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
+   449.          while not End_Of_Line(settings_file) loop
+   450.             get(settings_file, c);
+   451.             log(c, iff => the_log_is_wanted);
+   452.          exit when c = ' ';
+   453.             if is_parameter_flag/dumping_flag(to_upper(c)) then
+   454.                format := format or dumping_flag(to_upper(c));
+   455.             else
+   456.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   457.                log_new_line;
+   458.                log_line("***** Error: «"& c & "» is not a valid dump type.");
+   459.                return;
+   460.             end if;
+   461.          end loop;
+   462.          log_new_line;
+   463.
+   464.          if (format and is_parameter_flag) /= no_dumping_flags then
+   465.             get_word(settings_file, data);
+   466.             if data > max_address                     or else
+   467.                   (format/Usercode_flag and data > 8191) then
+   468.                log_line(
+   469.                         "***** Error: Lower dump address  = #"
+   470.                       & oct_of(data)
+   471.                       & " =" & data'Image
+   472.                       & " is too large for this option."
+   473.                        );
+   474.                bad_range := True;
+   475.             else
+   476.                first_address := KDF9.address(data);
+   477.                last_address  := KDF9.address(data);
+   478.                log_line(
+   479.                         "      Lower dump address: #"
+   480.                       & oct_of(first_address)
+   481.                       & " (" & dec_of(first_address)
+   482.                       & ")",
+   483.                         iff => the_log_is_wanted
+   484.                        );
+   485.             end if;
+   486.
+   487.            skip_to_next_non_blank (settings_file);
+   488.
+   489.             if not end_of_line(settings_file) then
+   490.                get_word(settings_file, data);
+   491.                if data > max_address                     or else
+   492.                   (format/Usercode_flag and data > 8191) then
+   493.                   log_line(
+   494.                            "***** Error: Upper dump address: #"
+   495.                          & oct_of(data)
+   496.                          & " =" & data'Image
+   497.                          & " is too large for this option."
+   498.                           );
+   499.                   bad_range := True;
+   500.                else
+   501.                   last_address := KDF9.address(data);
+   502.                   log_line(
+   503.                            "      Upper dump address: #"
+   504.                          & oct_of(last_address)
+   505.                          & " ("
+   506.                          & dec_of(last_address)
+   507.                          & ")",
+   508.                            iff => the_log_is_wanted
+   509.                           );
+   510.                end if;
+   511.             end if;
+   512.
+   513.             if first_address > last_address then
+   514.                log_line(
+   515.                         "***** Error: Upper dump address: #"
+   516.                       & oct_of(last_address)
+   517.                       & " =" & last_address'Image
+   518.                       & " is less than lower dump address: #"
+   519.                       & oct_of(first_address)
+   520.                       & " =" & first_address'Image
+   521.                       & "."
+   522.                        );
+   523.                bad_range := True;
+   524.             end if;
+   525.          end if;
+   526.
+   527.          if not bad_range then
+   528.             request_a_dumping_area(format, first_address, last_address, OK);
+   529.             if not OK then
+   530.                log_line("***** Error: Too many dump specifications (ignored).");
+   531.             end if;
+   532.          end if;
+   533.
+   534.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   535.       exception
+   536.          when others =>
+   537.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   538.             log_new_line;
+   539.             log_line("***** Error in a dump area specification (ignored)." );
+   540.       end set_specified_dumping_ranges;
    541.
-   542.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   543.       exception
-   544.          when others =>
-   545.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   546.             log_new_line;
-   547.             log_line("***** Error in a dump area specification (ignored)." );
-   548.       end set_specified_dumping_ranges;
-   549.
-   550.       procedure set_initial_dumping_ranges is
-   551.       begin
-   552.          set_specified_dumping_ranges(initial_flag);
-   553.       end set_initial_dumping_ranges;
-   554.
-   555.       procedure set_final_dumping_ranges is
-   556.       begin
-   557.          set_specified_dumping_ranges(final_flag);
-   558.       end set_final_dumping_ranges;
-   559.
-   560.       procedure set_histogram_options is
-   561.          c : Character;
-   562.       begin
-   563.          while not End_Of_Line(settings_file) loop
-   564.             get(settings_file, c);
-   565.          exit when c = ' ';
-   566.             if c not in 'P' | 'p' | 'T' | 't' then
-   567.                raise Data_Error;
-   568.             end if;
-   569.             if c in 'P' | 'p' then
-   570.                the_profile_is_wanted  := True;
-   571.                clear_the_profile;
-   572.             elsif c in  'T' | 't' then
-   573.                the_INS_plot_is_wanted := True;
-   574.                clear_the_histogram;
-   575.             end if;
-   576.          end loop;
-   577.          ensure_not_at_end_of_line(settings_file);
-   578.          get(settings_file, histogram_cutoff);
-   579.          if histogram_cutoff >= 100.0 or histogram_cutoff < 0.0 then
-   580.             raise Data_Error;
-   581.          end if;
-   582.          get(settings_file, c);
-   583.          if c /= '%' then
-   584.             raise Data_Error;
-   585.          end if;
-   586.       exception
-   587.          when others =>
-   588.             histogram_cutoff := cutoff_default;
-   589.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   590.             log_new_line;
-   591.             log_line("***** Error in the histogram option; default used.");
-   592.       end set_histogram_options;
-   593.
-   594.       procedure set_time_limit is
-   595.          begin
-   596.             begin
-   597.             get_decimal(settings_file, KDF9.word(time_limit));
-   598.          exception
-   599.             when others =>
-   600.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   601.                time_limit := offline_time_limit;
-   602.          end;
-   603.
-   604.          if not counts_are_set then
-   605.             high_count := time_limit;
-   606.          end if;
-   607.
-   608.          log_new_line;
-   609.          log_line("Time limit (in instructions) =" & time_limit'Image,
-   610.                   iff => the_log_is_wanted);
-   611.       end set_time_limit;
-   612.
-   613.       procedure set_tracing_counts is
+   542.       procedure set_initial_dumping_ranges is
+   543.       begin
+   544.          set_specified_dumping_ranges(initial_flag);
+   545.       end set_initial_dumping_ranges;
+   546.
+   547.       procedure set_final_dumping_ranges is
+   548.       begin
+   549.          set_specified_dumping_ranges(final_flag);
+   550.       end set_final_dumping_ranges;
+   551.
+   552.       procedure set_histogram_options is
+   553.          c : Character;
+   554.       begin
+   555.          while not End_Of_Line(settings_file) loop
+   556.             get(settings_file, c);
+   557.          exit when c = ' ';
+   558.             if c not in 'P' | 'p' | 'T' | 't' then
+   559.                raise Data_Error;
+   560.             end if;
+   561.             if c in 'P' | 'p' then
+   562.                the_profile_is_wanted  := True;
+   563.                clear_the_profile;
+   564.             elsif c in  'T' | 't' then
+   565.                the_INS_plot_is_wanted := True;
+   566.                clear_the_histogram;
+   567.             end if;
+   568.          end loop;
+   569.          ensure_not_at_end_of_line(settings_file);
+   570.          get(settings_file, histogram_cutoff);
+   571.          if histogram_cutoff >= 100.0 or histogram_cutoff < 0.0 then
+   572.             raise Data_Error;
+   573.          end if;
+   574.          get(settings_file, c);
+   575.          if c /= '%' then
+   576.             raise Data_Error;
+   577.          end if;
+   578.       exception
+   579.          when others =>
+   580.             histogram_cutoff := cutoff_default;
+   581.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   582.             log_new_line;
+   583.             log_line("***** Error in the histogram option; default used.");
+   584.       end set_histogram_options;
+   585.
+   586.       procedure set_time_limit is
+   587.          begin
+   588.             begin
+   589.             get_decimal(settings_file, KDF9.word(time_limit));
+   590.          exception
+   591.             when others =>
+   592.                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   593.                time_limit := offline_time_limit;
+   594.          end;
+   595.
+   596.          if not counts_are_set then
+   597.             high_count := time_limit;
+   598.          end if;
+   599.
+   600.          log_new_line;
+   601.          log_line("Time limit (in instructions) =" & time_limit'Image,
+   602.                   iff => the_log_is_wanted);
+   603.       end set_time_limit;
+   604.
+   605.       procedure set_tracing_counts is
+   606.
+   607.          procedure show_counts is
+   608.          begin
+   609.             if not the_log_is_wanted then return; end if;
+   610.             log_new_line;
+   611.             log_line("Lower tracing count:" & low_count'Image);
+   612.             log_line("Upper tracing count:" & high_count'Image);
+   613.          end show_counts;
    614.
-   615.          procedure show_counts is
-   616.          begin
-   617.             if not the_log_is_wanted then return; end if;
-   618.             log_new_line;
-   619.             log_line("Lower tracing count:" & low_count'Image);
-   620.             log_line("Upper tracing count:" & high_count'Image);
-   621.          end show_counts;
-   622.
-   623.       begin
-   624.          get_decimal(settings_file, KDF9.word(low_count));
-   625.          get_decimal(settings_file, KDF9.word(high_count));
-   626.          show_counts;
-   627.          if low_count > high_count then
-   628.             log_new_line;
-   629.             log_line("***** Error: Low count > high count.");
-   630.             raise Data_Error;
-   631.          end if;
-   632.          counts_are_set := True;
-   633.       exception
-   634.          when others =>
-   635.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   636.             low_count  := low_count_default;
-   637.             high_count := high_count_default;
-   638.             log_new_line;
-   639.             log_line("***** Error in a tracing count; defaults used.");
-   640.             show_counts;
-   641.       end set_tracing_counts;
-   642.
-   643.       procedure set_tracing_range is
-   644.
-   645.          procedure show_range is
-   646.          begin
-   647.             if not the_log_is_wanted then return; end if;
-   648.             log_new_line;
-   649.             log_line(
-   650.                      "Lower trace address: #"
-   651.                    & oct_of(KDF9.syllable_address'(low_bound, 0))
-   652.                    & " ("
-   653.                    & dec_of(KDF9.syllable_address'(low_bound, 0))
-   654.                    & ")"
-   655.                     );
-   656.             log_line(
-   657.                      "Upper trace address: #"
-   658.                    & oct_of(KDF9.syllable_address'(high_bound, 5))
-   659.                    & " ("
-   660.                    & dec_of(KDF9.syllable_address'(high_bound, 5))
-   661.                    & ")"
-   662.                     );
-   663.          end show_range;
-   664.
-   665.       begin
-   666.          get_word(settings_file, KDF9.word(low_bound));
-   667.          get_word(settings_file, KDF9.word(high_bound));
-   668.          if low_bound > high_bound then
-   669.             log_new_line;
-   670.             log_line("***** Error: Low bound > high bound.");
-   671.             raise Data_Error;
-   672.          end if;
-   673.          show_range;
-   674.       exception
-   675.          when others =>
-   676.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   677.             low_bound  := low_bound_default;
-   678.             high_bound := high_bound_default;
-   679.             log_new_line;
-   680.             log_line("***** Error in a tracing address; defaults used.");
-   681.             show_range;
-   682.       end set_tracing_range;
-   683.
-   684.       procedure set_diagnostic_mode is
-   685.          use diagnostic_mode_IO;
-   686.          the_diagnostic_mode : settings.diagnostic_mode;
-   687.       begin
-   688.          ensure_not_at_end_of_line(settings_file);
-   689.          get(settings_file, the_diagnostic_mode);
-   690.          set_diagnostic_mode(the_diagnostic_mode);
-   691.       exception
-   692.          when others =>
-   693.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   694.             set_diagnostic_mode(the_diagnostics_default);
-   695.             log_new_line;
-   696.             log_line("***** Error in the diagnostic mode; default used.");
-   697.       end set_diagnostic_mode;
-   698.
-   699.       procedure set_execution_mode is
-   700.          use execution_mode_IO;
-   701.       begin
-   702.          ensure_not_at_end_of_line(settings_file);
-   703.          get(settings_file, the_execution_mode);
-   704.       exception
-   705.          when others =>
-   706.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   707.             the_execution_mode := the_execution_default;
-   708.             log_new_line;
-   709.             log_line("***** Error in the testing mode; default used.");
-   710.       end set_execution_mode;
-   711.
-   712.       procedure set_authenticity is
-   713.          use authenticity_mode_IO;
-   714.       begin
-   715.          ensure_not_at_end_of_line(settings_file);
-   716.          get(settings_file, the_authenticity_mode);
-   717.          if the_authenticity_mode = authentic_time_mode then
-   718.             authentic_timing_is_enabled := True;
-   719.          end if;
-   720.       exception
-   721.          when others =>
-   722.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   723.             the_authenticity_mode := the_authenticity_default;
-   724.             log_new_line;
-   725.             log_line("***** Error in the authenticity mode; default used.");
-   726.       end set_authenticity;
-   727.
-   728.       procedure set_graph_plotting_pen is
-   729.          use postscript;
-   730.          use colour_IO;
-   731.          use  width_IO;
-   732.          the_colour   : pen_colour   := the_default_colour;
-   733.          the_pen_size : pen_tip_size := the_default_tip_size;
-   734.
-   735.          procedure show_pen_options is
-   736.          begin
-   737.             if not the_log_is_wanted then return; end if;
-   738.             log_new_line;
-   739.             if the_colour /= the_default_colour then
-   740.                log_line("The graph plotter pen colour is " & the_colour'Image & ".");
-   741.             end if;
-   742.             if the_pen_size /= the_default_tip_size then
-   743.                log_line("The graph plotter pen tip is " & the_pen_size'Image & ".");
+   615.       begin
+   616.          get_decimal(settings_file, KDF9.word(low_count));
+   617.          get_decimal(settings_file, KDF9.word(high_count));
+   618.          show_counts;
+   619.          if low_count > high_count then
+   620.             log_new_line;
+   621.             log_line("***** Error: Low count > high count.");
+   622.             raise Data_Error;
+   623.          end if;
+   624.          counts_are_set := True;
+   625.       exception
+   626.          when others =>
+   627.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   628.             low_count  := low_count_default;
+   629.             high_count := high_count_default;
+   630.             log_new_line;
+   631.             log_line("***** Error in a tracing count; defaults used.");
+   632.             show_counts;
+   633.       end set_tracing_counts;
+   634.
+   635.       procedure set_tracing_range is
+   636.
+   637.          procedure show_range is
+   638.          begin
+   639.             if not the_log_is_wanted then return; end if;
+   640.             log_new_line;
+   641.             log_line(
+   642.                      "Lower trace address: #"
+   643.                    & oct_of(KDF9.syllable_address'(low_bound, 0))
+   644.                    & " ("
+   645.                    & dec_of(KDF9.syllable_address'(low_bound, 0))
+   646.                    & ")"
+   647.                     );
+   648.             log_line(
+   649.                      "Upper trace address: #"
+   650.                    & oct_of(KDF9.syllable_address'(high_bound, 5))
+   651.                    & " ("
+   652.                    & dec_of(KDF9.syllable_address'(high_bound, 5))
+   653.                    & ")"
+   654.                     );
+   655.          end show_range;
+   656.
+   657.       begin
+   658.          get_word(settings_file, KDF9.word(low_bound));
+   659.          get_word(settings_file, KDF9.word(high_bound));
+   660.          if low_bound > high_bound then
+   661.             log_new_line;
+   662.             log_line("***** Error: Low bound > high bound.");
+   663.             raise Data_Error;
+   664.          end if;
+   665.          show_range;
+   666.       exception
+   667.          when others =>
+   668.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   669.             low_bound  := low_bound_default;
+   670.             high_bound := high_bound_default;
+   671.             log_new_line;
+   672.             log_line("***** Error in a tracing address; defaults used.");
+   673.             show_range;
+   674.       end set_tracing_range;
+   675.
+   676.       procedure set_diagnostic_mode is
+   677.          use diagnostic_mode_IO;
+   678.          the_diagnostic_mode : settings.diagnostic_mode;
+   679.       begin
+   680.          ensure_not_at_end_of_line(settings_file);
+   681.          get(settings_file, the_diagnostic_mode);
+   682.          set_diagnostic_mode(the_diagnostic_mode);
+   683.       exception
+   684.          when others =>
+   685.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   686.             set_diagnostic_mode(the_diagnostics_default);
+   687.             log_new_line;
+   688.             log_line("***** Error in the diagnostic mode; default used.");
+   689.       end set_diagnostic_mode;
+   690.
+   691.       procedure set_execution_mode is
+   692.          use execution_mode_IO;
+   693.       begin
+   694.          ensure_not_at_end_of_line(settings_file);
+   695.          get(settings_file, the_execution_mode);
+   696.       exception
+   697.          when others =>
+   698.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   699.             the_execution_mode := the_execution_default;
+   700.             log_new_line;
+   701.             log_line("***** Error in the testing mode; default used.");
+   702.       end set_execution_mode;
+   703.
+   704.       procedure set_authenticity is
+   705.          use authenticity_mode_IO;
+   706.       begin
+   707.          ensure_not_at_end_of_line(settings_file);
+   708.          get(settings_file, the_authenticity_mode);
+   709.          if the_authenticity_mode = authentic_time_mode then
+   710.             authentic_timing_is_enabled := True;
+   711.          end if;
+   712.       exception
+   713.          when others =>
+   714.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   715.             the_authenticity_mode := the_authenticity_default;
+   716.             log_new_line;
+   717.             log_line("***** Error in the authenticity mode; default used.");
+   718.       end set_authenticity;
+   719.
+   720.       procedure set_graph_plotting_pen is
+   721.          use postscript;
+   722.          use colour_IO;
+   723.          use  width_IO;
+   724.          the_colour   : pen_colour   := the_default_colour;
+   725.          the_pen_size : pen_tip_size := the_default_tip_size;
+   726.
+   727.          procedure show_pen_options is
+   728.          begin
+   729.             if not the_log_is_wanted then return; end if;
+   730.             log_new_line;
+   731.             if the_colour /= the_default_colour then
+   732.                log_line("The graph plotter pen colour is " & the_colour'Image & ".");
+   733.             end if;
+   734.             if the_pen_size /= the_default_tip_size then
+   735.                log_line("The graph plotter pen tip is " & the_pen_size'Image & ".");
+   736.             end if;
+   737.          end show_pen_options;
+   738.
+   739.          procedure configure_the_plotter is
+   740.          begin
+   741.             if the_colour /= the_default_colour or the_pen_size /= the_default_tip_size then
+   742.                set_the_pen_properties(the_colour, the_pen_size);
+   743.                show_pen_options;
    744.             end if;
-   745.          end show_pen_options;
+   745.          end configure_the_plotter;
    746.
-   747.          procedure configure_the_plotter is
-   748.          begin
-   749.             if the_colour /= the_default_colour or the_pen_size /= the_default_tip_size then
-   750.                set_the_pen_properties(the_colour, the_pen_size);
-   751.                show_pen_options;
-   752.             end if;
-   753.          end configure_the_plotter;
-   754.
-   755.       begin  -- set_graph_plotting_pen
+   747.       begin  -- set_graph_plotting_pen
+   748.          ensure_not_at_end_of_line(settings_file);
+   749.          begin
+   750.             Get(settings_file, the_colour);
+   751.          exception
+   752.             when others =>
+   753.                log_new_line;
+   754.                log_line("***** Error in the plotter pen the_colour; default used.");
+   755.          end;
    756.          ensure_not_at_end_of_line(settings_file);
    757.          begin
-   758.             Get(settings_file, the_colour);
+   758.             Get(settings_file, the_pen_size);
    759.          exception
    760.             when others =>
    761.                log_new_line;
-   762.                log_line("***** Error in the plotter pen the_colour; default used.");
+   762.                log_line("***** Error in the plotter pen tip; default used.");
    763.          end;
-   764.          ensure_not_at_end_of_line(settings_file);
-   765.          begin
-   766.             Get(settings_file, the_pen_size);
-   767.          exception
-   768.             when others =>
-   769.                log_new_line;
-   770.                log_line("***** Error in the plotter pen tip; default used.");
-   771.          end;
-   772.          configure_the_plotter;
-   773.       exception
-   774.          when Data_Error =>
-   775.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   776.             configure_the_plotter;
-   777.       end set_graph_plotting_pen;
-   778.
-   779.       procedure set_non_interactivity is
-   780.       begin
-   781.          noninteractive_usage_is_enabled := True;
-   782.          set_time_limit;
-   783.       end set_non_interactivity;
-   784.
-   785.       procedure save_poke_value is
-   786.          -- W: full Word, U: Upper halfword, L: Lower halfword, S: Syllable, C: Character
-   787.          address  : KDF9.address;
-   788.          sub_word : Character;
-   789.          position : KDF9.address;
-   790.          value    : KDF9.word;
-   791.          OK       : Boolean;
-   792.       begin
-   793.          begin
-   794.             get_word(settings_file, KDF9.word(address));
-   795.          exception
-   796.             when others =>
-   797.                log_line("***** Error in poke word address.");
-   798.                Skip_Line(settings_file);
-   799.                return;
-   800.          end;
-   801.
-   802.          get_char(settings_file, sub_word);
-   803.          if sub_word not in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w' then
-   804.             log_line(
-   805.                      "***** Error in (sub)word indicator; "
-   806.                    & sub_word
-   807.                    & " should be W, L, U, S, or C."
-   808.                     );
-   809.             Skip_Line(settings_file);
-   810.             return;
-   811.          end if;
-   812.
-   813.          if sub_word in 'S' | 's' | 'C' | 'c' then
-   814.             begin
-   815.                get_word(settings_file, KDF9.word(position));
-   816.                if (sub_word in 'S' | 's' and position > 5) or else
-   817.                   (sub_word in 'C' | 'c' and position > 7)    then
-   818.                   log_line(
-   819.                            "***** Error in position given for a "
-   820.                          & (if sub_word in 'S' | 's' then "syllable:" else "character:")
-   821.                          & position'Image
-   822.                          & " is too large, poke request ignored."
-   823.                           );
-   824.                   Skip_Line(settings_file);
-   825.                   return;
-   826.                end if;
-   827.             exception
-   828.                when others =>
-   829.                   log_line(
-   830.                            "***** Error in position given for a "
-   831.                          & (if sub_word in 'S' | 's' then "syllable" else "character")
-   832.                          & ", poke request ignored."
-   833.                           );
-   834.                   Skip_Line(settings_file);
-   835.                   return;
-   836.             end;
-   837.          else
-   838.             position := 0;
-   839.          end if;
-   840.
-   841.          begin
-   842.             get_word(settings_file, value);
-   843.          exception
-   844.             when others =>
-   845.                log_line("***** Error in poked value.");
-   846.                Skip_Line(settings_file);
-   847.                return;
-   848.          end;
-   849.
-   850.          if (sub_word in 'L' | 'l' | 'U' | 'u' and value > 2**24-1) or else
-   851.                (sub_word in 'S' | 's'          and value > 255)     or else
-   852.                   (sub_word in 'C' | 'c'       and value > 63)      then
-   853.             log_line(
-   854.                      "***** Error in poked value #"
-   855.                    & oct_of(value)
-   856.                    & ": out of range for a "
-   857.                    & (case sub_word is
-   858.                          when 'L' | 'l' | 'U' | 'u' => "halfword",
-   859.                          when 'S' | 's'             => "syllable",
-   860.                          when 'C' | 'c'             => "character",
-   861.                          when others                => "word")
-   862.                    & ", poke request ignored."
-   863.                     );
-   864.             Skip_Line(settings_file);
-   865.             return;
-   866.          end if;
+   764.          configure_the_plotter;
+   765.       exception
+   766.          when Data_Error =>
+   767.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   768.             configure_the_plotter;
+   769.       end set_graph_plotting_pen;
+   770.
+   771.       procedure set_non_interactivity is
+   772.       begin
+   773.          noninteractive_usage_is_enabled := True;
+   774.          set_time_limit;
+   775.       end set_non_interactivity;
+   776.
+   777.       procedure save_poke_value is
+   778.          -- W: full Word, U: Upper halfword, L: Lower halfword, S: Syllable, C: Character
+   779.          address  : KDF9.address;
+   780.          sub_word : Character;
+   781.          position : KDF9.address;
+   782.          value    : KDF9.word;
+   783.          OK       : Boolean;
+   784.       begin
+   785.          begin
+   786.             get_word(settings_file, KDF9.word(address));
+   787.          exception
+   788.             when others =>
+   789.                log_line("***** Error in poke word address.");
+   790.                Skip_Line(settings_file);
+   791.                return;
+   792.          end;
+   793.
+   794.          get_char(settings_file, sub_word);
+   795.          if sub_word not in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w' then
+   796.             log_line(
+   797.                      "***** Error in (sub)word indicator; "
+   798.                    & sub_word
+   799.                    & " should be W, L, U, S, or C."
+   800.                     );
+   801.             Skip_Line(settings_file);
+   802.             return;
+   803.          end if;
+   804.
+   805.          if sub_word in 'S' | 's' | 'C' | 'c' then
+   806.             begin
+   807.                get_word(settings_file, KDF9.word(position));
+   808.                if (sub_word in 'S' | 's' and position > 5) or else
+   809.                   (sub_word in 'C' | 'c' and position > 7)    then
+   810.                   log_line(
+   811.                            "***** Error in position given for a "
+   812.                          & (if sub_word in 'S' | 's' then "syllable:" else "character:")
+   813.                          & position'Image
+   814.                          & " is too large, poke request ignored."
+   815.                           );
+   816.                   Skip_Line(settings_file);
+   817.                   return;
+   818.                end if;
+   819.             exception
+   820.                when others =>
+   821.                   log_line(
+   822.                            "***** Error in position given for a "
+   823.                          & (if sub_word in 'S' | 's' then "syllable" else "character")
+   824.                          & ", poke request ignored."
+   825.                           );
+   826.                   Skip_Line(settings_file);
+   827.                   return;
+   828.             end;
+   829.          else
+   830.             position := 0;
+   831.          end if;
+   832.
+   833.          begin
+   834.             get_word(settings_file, value);
+   835.          exception
+   836.             when others =>
+   837.                log_line("***** Error in poked value.");
+   838.                Skip_Line(settings_file);
+   839.                return;
+   840.          end;
+   841.
+   842.          if (sub_word in 'L' | 'l' | 'U' | 'u' and value > 2**24-1) or else
+   843.                (sub_word in 'S' | 's'          and value > 255)     or else
+   844.                   (sub_word in 'C' | 'c'       and value > 63)      then
+   845.             log_line(
+   846.                      "***** Error in poked value #"
+   847.                    & oct_of(value)
+   848.                    & ": out of range for a "
+   849.                    & (case sub_word is
+   850.                          when 'L' | 'l' | 'U' | 'u' => "halfword",
+   851.                          when 'S' | 's'             => "syllable",
+   852.                          when 'C' | 'c'             => "character",
+   853.                          when others                => "word")
+   854.                    & ", poke request ignored."
+   855.                     );
+   856.             Skip_Line(settings_file);
+   857.             return;
+   858.          end if;
+   859.
+   860.          add_to_poke_list(address, sub_word, position, value, OK);
+   861.
+   862.          if not OK then
+   863.             log_line("***** Error setting up a poke: poke list full; request ignored.");
+   864.          end if;
+   865.
+   866.       exception
    867.
-   868.          add_to_poke_list(address, sub_word, position, value, OK);
-   869.
-   870.          if not OK then
-   871.             log_line("***** Error setting up a poke: poke list full; request ignored.");
-   872.          end if;
-   873.
-   874.       exception
-   875.
-   876.          when others =>
-   877.             null;  -- to skip line at end of input loop
-   878.
-   879.       end save_poke_value;
-   880.
-   881.       procedure set_KDF9_configuration is
-   882.          use equipment_IO;
-   883.          use IOC.equipment;
-   884.          d : IOC.equipment.kind := AD;
-   885.          b : KDF9.buffer_number;
-   886.       begin
-   887.          if version = "1" then
-   888.             for i in IOC.equipment.setup'Range loop
-   889.             exit when end_of_line(settings_file);
-   890.                get_word(settings_file, KDF9.word(b));
-   891.                ensure_not_at_end_of_line(settings_file);
-   892.                get(settings_file, d);
-   893.                IOC.equipment.choice(b) := d;
-   894.             end loop;
-   895.          else
+   868.          when others =>
+   869.             null;  -- to skip line at end of input loop
+   870.
+   871.       end save_poke_value;
+   872.
+   873.       procedure set_KDF9_configuration is
+   874.          use equipment_IO;
+   875.          use IOC.equipment;
+   876.          d : IOC.equipment.kind := AD;
+   877.          b : KDF9.buffer_number;
+   878.       begin
+   879.          if version = "1" then
+   880.             for i in IOC.equipment.setup'Range loop
+   881.             exit when end_of_line(settings_file);
+   882.                get_word(settings_file, KDF9.word(b));
+   883.                ensure_not_at_end_of_line(settings_file);
+   884.                get(settings_file, d);
+   885.                IOC.equipment.choice(b) := d;
+   886.             end loop;
+   887.          else
+   888.             log_new_line;
+   889.             log_line("The previous KDF9 configuration is still being used.");
+   890.          end if;
+   891.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   892.       exception
+   893.          when others =>
+   894.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
+   895.             IOC.equipment.choice := IOC.equipment.default;
    896.             log_new_line;
-   897.             log_line("The previous KDF9 configuration is still being used.");
-   898.          end if;
-   899.          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   900.       exception
-   901.          when others =>
-   902.             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
-   903.             IOC.equipment.choice := IOC.equipment.default;
-   904.             log_new_line;
-   905.             log_line("***** Error in the device configuration; defaults used.");
-   906.       end set_KDF9_configuration;
-   907.
-   908.       procedure set_symbols is
-   909.          c : Character := ' ';
-   910.          w : KDF9.word;
-   911.          a : KDF9.address;
-   912.          v : KDF9.address;
-   913.          p : Natural;
-   914.       begin
-   915.          if End_Of_Line(settings_file) then
-   916.             clear_all_symbol_definitions;
-   917.             return;
-   918.          end if;
-   919.          get(settings_file, c);
-   920.          if    c = '#' then
-   921.             get(settings_file, c);
-   922.             get_word(settings_file, KDF9.word(a));
-   923.             if c = 'V' then
-   924.                declare_P0(a);
-   925.             elsif c = 'Y' then
-   926.                define_Y_size(if a = KDF9.address'Last then 0 else a);
-   927.             else
-   928.                raise Data_Error;
-   929.             end if;
-   930.          elsif c = 'W' then
-   931.             get_word(settings_file, KDF9.word(a));
-   932.             define_W0(a);
-   933.          elsif c = 'Y' then
-   934.             get_word(settings_file, KDF9.word(a));
-   935.             define_Y0(a);
-   936.          elsif c = 'Z' then
-   937.             get_word(settings_file, KDF9.word(a));
-   938.             define_Z0(a);
-   939.          elsif c = 'P' then
-   940.             loop
-   941.                skip_to_next_non_blank(settings_file);
-   942.                if End_Of_Line(settings_file) then
-   943.                   return;
-   944.                end if;
-   945.                get_word(settings_file, KDF9.word(p));
-   946.                skip_to_next_non_blank(settings_file);
-   947.                get(settings_file, c);
-   948.             exit when c /= '#';
-   949.                get_decimal(settings_file, w);
-   950.                v := KDF9.address(w+1);
+   897.             log_line("***** Error in the device configuration; defaults used.");
+   898.       end set_KDF9_configuration;
+   899.
+   900.       procedure set_symbols is
+   901.          c : Character := ' ';
+   902.          w : KDF9.word;
+   903.          a : KDF9.address;
+   904.          v : KDF9.address;
+   905.          p : Natural;
+   906.       begin
+   907.          if End_Of_Line(settings_file) then
+   908.             clear_all_symbol_definitions;
+   909.             return;
+   910.          end if;
+   911.          get(settings_file, c);
+   912.          if    c = '#' then
+   913.             get(settings_file, c);
+   914.             get_word(settings_file, KDF9.word(a));
+   915.             if c = 'V' then
+   916.                declare_P0(a);
+   917.             elsif c = 'Y' then
+   918.                define_Y_size(if a = KDF9.address'Last then 0 else a);
+   919.             else
+   920.                raise Data_Error;
+   921.             end if;
+   922.          elsif c = 'W' then
+   923.             get_word(settings_file, KDF9.word(a));
+   924.             define_W0(a);
+   925.          elsif c = 'Y' then
+   926.             get_word(settings_file, KDF9.word(a));
+   927.             define_Y0(a);
+   928.          elsif c = 'Z' then
+   929.             get_word(settings_file, KDF9.word(a));
+   930.             define_Z0(a);
+   931.          elsif c = 'P' then
+   932.             loop
+   933.                skip_to_next_non_blank(settings_file);
+   934.                if End_Of_Line(settings_file) then
+   935.                   return;
+   936.                end if;
+   937.                get_word(settings_file, KDF9.word(p));
+   938.                skip_to_next_non_blank(settings_file);
+   939.                get(settings_file, c);
+   940.             exit when c /= '#';
+   941.                get_decimal(settings_file, w);
+   942.                v := KDF9.address(w+1);
+   943.                skip_to_next_non_blank(settings_file);
+   944.                get(settings_file, c);
+   945.             exit when c /= '@';
+   946.                get_word(settings_file, KDF9.word(a));
+   947.                declare_Pp(p, v, a);
+   948.             end loop;
+   949.          elsif c = ' ' then
+   950.             loop
    951.                skip_to_next_non_blank(settings_file);
-   952.                get(settings_file, c);
-   953.             exit when c /= '@';
-   954.                get_word(settings_file, KDF9.word(a));
-   955.                declare_Pp(p, v, a);
-   956.             end loop;
-   957.          elsif c = ' ' then
-   958.             loop
-   959.                skip_to_next_non_blank(settings_file);
-   960.                if End_Of_Line(settings_file) then
-   961.                   return;
-   962.                end if;
-   963.                get(settings_file, c);
-   964.                if c not in 'A' .. 'Z'  then
-   965.                      raise Data_Error;
-   966.                end if;
-   967.                get_word(settings_file, KDF9.word(a));
-   968.                define_Yy0(c, a);
-   969.             end loop;
-   970.          else
-   971.             raise Data_Error;
-   972.          end if;
-   973.       exception
-   974.          when Data_Error =>
-   975.             if not End_Of_Line(settings_file) then
-   976.                Skip_Line(settings_file);
-   977.             end if;
-   978.             log_new_line;
-   979.             log_line(
-   980.                      "***** Error in a Y flag specification: "
-   981.                    & "invalid data after «"
-   982.                    & c
-   983.                    & "»."
-   984.                     );
-   985.       end set_symbols;
-   986.
-   987.       error_count : Natural := 0;
-   988.
-   989.    begin -- get_settings_from_file
-   990.
-   991.       do_not_execute := False;
-   992.       high_count := time_limit;
-   993.       open_options_file(settings_file, the_settings_file_name);
-   994.       if End_of_File(settings_file) then
-   995.          raise End_Error;
-   996.       end if;
-   997.
-   998.       loop
-   999.          skip_to_next_nonempty_line(settings_file);
-  1000.          get(settings_file, flag);
-  1001.          case flag is
-  1002.             when 'A' | 'a' =>
-  1003.                set_authenticity;
-  1004.             when 'B' | 'b' =>
-  1005.                set_breakpoints;
-  1006.             when 'C' | 'c' =>
-  1007.                set_tracing_counts;
-  1008.             when 'D' | 'd' =>
-  1009.                set_diagnostic_mode;
-  1010.             when 'F' | 'f' =>
-  1011.                set_final_dumping_ranges;
-  1012.             when 'G' | 'g' =>
-  1013.                set_graph_plotting_pen;
-  1014.             when 'H' | 'h' =>
-  1015.                set_histogram_options;
-  1016.             when 'I' | 'i' =>
-  1017.                set_initial_dumping_ranges;
-  1018.             when 'K' | 'k' =>
-  1019.                set_KDF9_configuration;
-  1020.             when 'L' | 'l' =>
-  1021.                set_time_limit;
-  1022.             when 'N' | 'n' =>
-  1023.                set_non_interactivity;
-  1024.                time_limit := offline_time_limit;
-  1025.             when 'O' |'o' =>
-  1026.                set_this_miscellany_flag(flag);
-  1027.             when 'P' | 'p' =>
-  1028.                save_poke_value;
-  1029.             when 'Q' | 'q' =>
-  1030.                do_not_execute := True;
-  1031.             when 'R' | 'r' =>
-  1032.                set_tracing_range;
-  1033.             when 'S' | 's' =>
-  1034.                set_store_points;
-  1035.             when 'T' | 't' =>
-  1036.                set_execution_mode;
-  1037.             when 'V' | 'v' =>
-  1038.                set_the_miscellany_flags;
-  1039.             when 'W' | 'w' =>
-  1040.                set_watchpoints;
-  1041.             when 'X' | 'x' =>
-  1042.                only_signature_tracing := True;
-  1043.             when 'Y' | 'y' =>
-  1044.                set_symbols;
-  1045.             when '-' | '/' =>
-  1046.                Skip_Line(settings_file);
-  1047.             when others =>
-  1048.                if error_count > 10 then
-  1049.                   log_new_line;
-  1050.                   log_line("There are too many invalid flags in " & the_settings_file_name & ".");
-  1051.                   raise operator_error;
-  1052.                end if;
-  1053.                error_count := error_count + 1;
-  1054.                log_line(
-  1055.                         "Invalid flag: """
-  1056.                       & flag
-  1057.                       & """ at line "
-  1058.                       & line_number'Image
-  1059.                       & " of the settings file!"
-  1060.                        );
-  1061.                log_line("The valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
-  1062.                Skip_Line(settings_file);
-  1063.                line_number := line_number + 1;
-  1064.          end case;
-  1065.       end loop;
-  1066.
-  1067.    exception
-  1068.
-  1069.       when Status_Error =>
-  1070.          log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
-  1071.          log_new_line;
-  1072.
-  1073.       when End_Error =>
-  1074.          close_options_file(settings_file, the_settings_file_name);
-  1075.
-  1076.       when operator_error  =>
-  1077.          trap_operator_error("Abandoning the run");
-  1078.
-  1079.       when Data_Error =>
-  1080.          close_options_file(settings_file, the_settings_file_name);
-  1081.          if error_count < 10 then
-  1082.             log_new_line;
-  1083.             log_line("***** Error: invalid data in the settings file.");
-  1084.             log_line(
-  1085.                      "Reading of settings abandoned at line "
-  1086.                    & line_number'Image
-  1087.                    & " of "
-  1088.                    & the_settings_file_name
-  1089.                    & "."
-  1090.                     );
-  1091.          else
-  1092.             raise;
-  1093.          end if;
-  1094.
-  1095.       when error : others =>
-  1096.          close_options_file(settings_file, the_settings_file_name);
-  1097.          log_new_line;
-  1098.          log_line(
-  1099.                   "Failure in ee9; unexpected exception: "
-  1100.                 & Exception_Information(error)
-  1101.                 & " in get_settings_from_file!"
-  1102.                  );
-  1103.          log_line(
-  1104.                   "Reading of settings abandoned at line "
-  1105.                 & line_number'Image
-  1106.                 & " of "
-  1107.                 & the_settings_file_name
-  1108.                 & "!"
-  1109.                  );
-  1110.          log_rule;
-  1111.          raise;
-  1112.
-  1113.    end get_settings_from_file;
-  1114.
-  1115. end settings;
+   952.                if End_Of_Line(settings_file) then
+   953.                   return;
+   954.                end if;
+   955.                get(settings_file, c);
+   956.                if c not in 'A' .. 'Z'  then
+   957.                      raise Data_Error;
+   958.                end if;
+   959.                get_word(settings_file, KDF9.word(a));
+   960.                define_Yy0(c, a);
+   961.             end loop;
+   962.          else
+   963.             raise Data_Error;
+   964.          end if;
+   965.       exception
+   966.          when Data_Error =>
+   967.             if not End_Of_Line(settings_file) then
+   968.                Skip_Line(settings_file);
+   969.             end if;
+   970.             log_new_line;
+   971.             log_line(
+   972.                      "***** Error in a Y flag specification: "
+   973.                    & "invalid data after «"
+   974.                    & c
+   975.                    & "»."
+   976.                     );
+   977.       end set_symbols;
+   978.
+   979.       error_count : Natural := 0;
+   980.
+   981.    begin -- get_settings_from_file
+   982.
+   983.       do_not_execute := False;
+   984.       high_count := time_limit;
+   985.       open_options_file(settings_file, the_settings_file_name);
+   986.       if End_of_File(settings_file) then
+   987.          raise End_Error;
+   988.       end if;
+   989.
+   990.       loop
+   991.          skip_to_next_nonempty_line(settings_file);
+   992.          get(settings_file, flag);
+   993.          case flag is
+   994.             when 'A' | 'a' =>
+   995.                set_authenticity;
+   996.             when 'B' | 'b' =>
+   997.                set_breakpoints;
+   998.             when 'C' | 'c' =>
+   999.                set_tracing_counts;
+  1000.             when 'D' | 'd' =>
+  1001.                set_diagnostic_mode;
+  1002.             when 'F' | 'f' =>
+  1003.                set_final_dumping_ranges;
+  1004.             when 'G' | 'g' =>
+  1005.                set_graph_plotting_pen;
+  1006.             when 'H' | 'h' =>
+  1007.                set_histogram_options;
+  1008.             when 'I' | 'i' =>
+  1009.                set_initial_dumping_ranges;
+  1010.             when 'K' | 'k' =>
+  1011.                set_KDF9_configuration;
+  1012.             when 'L' | 'l' =>
+  1013.                set_time_limit;
+  1014.             when 'N' | 'n' =>
+  1015.                set_non_interactivity;
+  1016.                time_limit := offline_time_limit;
+  1017.             when 'O' |'o' =>
+  1018.                set_this_miscellany_flag(flag);
+  1019.             when 'P' | 'p' =>
+  1020.                save_poke_value;
+  1021.             when 'Q' | 'q' =>
+  1022.                do_not_execute := True;
+  1023.             when 'R' | 'r' =>
+  1024.                set_tracing_range;
+  1025.             when 'S' | 's' =>
+  1026.                set_store_points;
+  1027.             when 'T' | 't' =>
+  1028.                set_execution_mode;
+  1029.             when 'V' | 'v' =>
+  1030.                set_the_miscellany_flags;
+  1031.             when 'W' | 'w' =>
+  1032.                set_watchpoints;
+  1033.             when 'X' | 'x' =>
+  1034.                only_signature_tracing := True;
+  1035.             when 'Y' | 'y' =>
+  1036.                set_symbols;
+  1037.             when '-' | '/' =>
+  1038.                Skip_Line(settings_file);
+  1039.             when others =>
+  1040.                if error_count > 10 then
+  1041.                   log_new_line;
+  1042.                   log_line("There are too many invalid flags in " & the_settings_file_name & ".");
+  1043.                   raise operator_error;
+  1044.                end if;
+  1045.                error_count := error_count + 1;
+  1046.                log_line(
+  1047.                         "Invalid flag: """
+  1048.                       & flag
+  1049.                       & """ at line "
+  1050.                       & line_number'Image
+  1051.                       & " of the settings file!"
+  1052.                        );
+  1053.                log_line("The valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
+  1054.                Skip_Line(settings_file);
+  1055.                line_number := line_number + 1;
+  1056.          end case;
+  1057.       end loop;
+  1058.
+  1059.    exception
+  1060.
+  1061.       when Status_Error =>
+  1062.          log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
+  1063.          log_new_line;
+  1064.
+  1065.       when End_Error =>
+  1066.          close_options_file(settings_file, the_settings_file_name);
+  1067.
+  1068.       when operator_error  =>
+  1069.          trap_operator_error("Abandoning the run");
+  1070.
+  1071.       when Data_Error =>
+  1072.          close_options_file(settings_file, the_settings_file_name);
+  1073.          if error_count < 10 then
+  1074.             log_new_line;
+  1075.             log_line("***** Error: invalid data in the settings file.");
+  1076.             log_line(
+  1077.                      "Reading of settings abandoned at line "
+  1078.                    & line_number'Image
+  1079.                    & " of "
+  1080.                    & the_settings_file_name
+  1081.                    & "."
+  1082.                     );
+  1083.          else
+  1084.             raise;
+  1085.          end if;
+  1086.
+  1087.       when error : others =>
+  1088.          close_options_file(settings_file, the_settings_file_name);
+  1089.          log_new_line;
+  1090.          log_line(
+  1091.                   "Failure in ee9; unexpected exception: "
+  1092.                 & Exception_Information(error)
+  1093.                 & " in get_settings_from_file!"
+  1094.                  );
+  1095.          log_line(
+  1096.                   "Reading of settings abandoned at line "
+  1097.                 & line_number'Image
+  1098.                 & " of "
+  1099.                 & the_settings_file_name
+  1100.                 & "!"
+  1101.                  );
+  1102.          log_rule;
+  1103.          raise;
+  1104.
+  1105.    end get_settings_from_file;
+  1106.
+  1107. end settings;
 
 Compiling: ../Source/settings.ads
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- execution mode, diagnostic mode, and other emulation-control settings
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5393,8 +5816,8 @@ Compiled at: 2021-05-29 19:07:06
     59.    --    they are both requested, and offered by the_diagnostic_mode.
     60.    -- These requests may be set by the miscellany and visibilty options.
     61.
-    62.    miscellany_flags  : constant String := "abdefghikmnopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
-    63.    miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|m|n|o|p|q|r|s|t|w|x|z|.|0..9}";
+    62.    miscellany_flags  : constant String := "abdefghiknopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
+    63.    miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|n|o|p|q|r|s|t|w|x|z|.|0..9}";
     64.
     65.    -- *_is_wanted  iff the facility is provided by default.
     66.    -- *_is_enabled iff the facility is wanted and not suppressed by other considerations,
@@ -5409,106 +5832,333 @@ Compiled at: 2021-05-29 19:07:06
     75.    retrospective_tracing_is_wanted,
     76.    the_final_state_is_wanted,
     77.    the_log_is_wanted,
-    78.    the_signature_is_wanted,
-    79.    the_terminal_is_ANSI_compatible : Boolean := True;
-    80.
-    81.    authentic_timing_is_enabled,
-    82.    debugging_is_enabled,
-    83.    do_not_execute,
-    84.    histogramming_is_enabled,
-    85.    interrupt_tracing_is_enabled,
-    86.    noninteractive_usage_is_enabled,
-    87.    peripheral_tracing_is_enabled,
-    88.    pre_overlay_state_is_enabled,
-    89.    retrospective_tracing_is_enabled,
-    90.    the_external_trace_is_enabled,
-    91.    the_signature_is_enabled        : Boolean := False;
-    92.
-    93.    procedure reset_default_visibility_options;
-    94.
-    95.    -- In boot_mode: a Director program is read from TR0 and executed
-    96.    --    in Director state, with full use of the emulated hardware.
-    97.    -- In program_mode: a user program is read from TR0 and executed
-    98.    --    in program state, with basic OUTs implemented by the emulator.
-    99.    -- In privileged_mode: a user program is read from TR0 and executed
-   100.    --    as in program state, but allowing orders that should LIV to succeed,
-   101.    --    this being useful for executing "hardware test" programs.
-   102.
-   103.    type execution_mode is (boot_mode, program_mode, privileged_mode);
-   104.
-   105.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode);
-   106.
-   107.    the_execution_default   : constant settings.execution_mode := program_mode;
-   108.    the_execution_mode      :          settings.execution_mode := the_execution_default;
-   109.
-   110.    this_is_a_bare_Director : Boolean := False;
-   111.
-   112.    --
-   113.    -- Tracing bound settings.
-   114.    --
-   115.
-   116.    -- time_limit bounds the number of KDF9 instructions executed.
-   117.
-   118.    time_limit_default : constant KDF9.order_counter := KDF9.order_counter'Last;
-   119.    time_slice         : constant KDF9.order_counter := 10_000;
-   120.    offline_time_limit : constant KDF9.order_counter := 10_000 * time_slice;
-   121.    time_limit         :          KDF9.order_counter := time_limit_default;
+    78.    the_signature_is_wanted         : Boolean := True;
+    79.
+    80.    authentic_timing_is_enabled,
+    81.    debugging_is_enabled,
+    82.    do_not_execute,
+    83.    histogramming_is_enabled,
+    84.    interrupt_tracing_is_enabled,
+    85.    noninteractive_usage_is_enabled,
+    86.    peripheral_tracing_is_enabled,
+    87.    pre_overlay_state_is_enabled,
+    88.    retrospective_tracing_is_enabled,
+    89.    the_external_trace_is_enabled,
+    90.    the_signature_is_enabled        : Boolean := False;
+    91.
+    92.    procedure reset_default_visibility_options;
+    93.
+    94.    -- In boot_mode: a Director program is read from TR0 and executed
+    95.    --    in Director state, with full use of the emulated hardware.
+    96.    -- In program_mode: a user program is read from TR0 and executed
+    97.    --    in program state, with basic OUTs implemented by the emulator.
+    98.    -- In privileged_mode: a user program is read from TR0 and executed
+    99.    --    as in program state, but allowing orders that should LIV to succeed,
+   100.    --    this being useful for executing "hardware test" programs.
+   101.
+   102.    type execution_mode is (boot_mode, program_mode, privileged_mode);
+   103.
+   104.    procedure set_execution_mode (an_execution_mode : in settings.execution_mode);
+   105.
+   106.    the_execution_default   : constant settings.execution_mode := program_mode;
+   107.    the_execution_mode      :          settings.execution_mode := the_execution_default;
+   108.
+   109.    this_is_a_bare_Director : Boolean := False;
+   110.
+   111.    --
+   112.    -- Tracing bound settings.
+   113.    --
+   114.
+   115.    -- time_limit bounds the number of KDF9 instructions executed.
+   116.
+   117.    time_limit_default : constant KDF9.order_counter := KDF9.order_counter'Last;
+   118.    time_slice         : constant KDF9.order_counter := 10_000;
+   119.    offline_time_limit : constant KDF9.order_counter := 10_000 * time_slice;
+   120.    time_limit         :          KDF9.order_counter := time_limit_default;
+   121.
    122.
-   123.
-   124.    -- low_bound and high_bound bound the static scope of tracing.
-   125.
-   126.    low_bound_default  : constant KDF9.code_address := 0;
-   127.    high_bound_default : constant KDF9.code_address := KDF9.code_address'Last;
-   128.    low_bound          :          KDF9.code_address := low_bound_default;
-   129.    high_bound         :          KDF9.code_address := high_bound_default;
-   130.
-   131.    -- low_count and high_count bound the dynamic scope of tracing.
-   132.
-   133.    low_count_default  : constant KDF9.order_counter := 0;
-   134.    high_count_default : constant KDF9.order_counter := time_limit_default;
-   135.    low_count          :          KDF9.order_counter := low_count_default;
-   136.    high_count         :          KDF9.order_counter := high_count_default;
-   137.
-   138.    -- Histogram bin frequencies less than histogram_cutoff are not logged.
-   139.    the_profile_is_wanted  :          Boolean := False;
-   140.    the_INS_plot_is_wanted :          Boolean := False;
-   141.    cutoff_default         : constant Long_Float := 0.0;
-   142.    histogram_cutoff       :          Long_Float := cutoff_default;
-   143.
-   144.    function is_invalid_miscellany_flag (option : in Character)
-   145.    return Boolean;
-   146.
-   147.    procedure set_this_miscellany_flag (option : in Character);
-   148.
-   149.    procedure get_settings_from_file (version : in String);
-   150.
-   151.    procedure display_execution_modes (for_this : in String := "");
-   152.
-   153.    procedure quit_if_requested;
-   154.
-   155.    quit_was_requested          : Boolean := False;
-   156.
-   157.    the_diagnostic_mode_changed : Boolean := False;
-   158.
-   159.    loading_was_successful      : Boolean := False;
-   160.
-   161.    mode_change_request         : exception;
-   162.
-   163. end settings;
+   123.    -- low_bound and high_bound bound the static scope of tracing.
+   124.
+   125.    low_bound_default  : constant KDF9.code_address := 0;
+   126.    high_bound_default : constant KDF9.code_address := KDF9.code_address'Last;
+   127.    low_bound          :          KDF9.code_address := low_bound_default;
+   128.    high_bound         :          KDF9.code_address := high_bound_default;
+   129.
+   130.    -- low_count and high_count bound the dynamic scope of tracing.
+   131.
+   132.    low_count_default  : constant KDF9.order_counter := 0;
+   133.    high_count_default : constant KDF9.order_counter := time_limit_default;
+   134.    low_count          :          KDF9.order_counter := low_count_default;
+   135.    high_count         :          KDF9.order_counter := high_count_default;
+   136.
+   137.    -- Histogram bin frequencies less than histogram_cutoff are not logged.
+   138.    the_profile_is_wanted  :          Boolean := False;
+   139.    the_INS_plot_is_wanted :          Boolean := False;
+   140.    cutoff_default         : constant Long_Float := 0.0;
+   141.    histogram_cutoff       :          Long_Float := cutoff_default;
+   142.
+   143.    function is_invalid_miscellany_flag (option : in Character)
+   144.    return Boolean;
+   145.
+   146.    procedure set_this_miscellany_flag (option : in Character);
+   147.
+   148.    procedure get_settings_from_file (version : in String);
+   149.
+   150.    procedure display_execution_modes (for_this : in String := "");
+   151.
+   152.    procedure quit_if_requested;
+   153.
+   154.    quit_was_requested          : Boolean := False;
+   155.
+   156.    the_diagnostic_mode_changed : Boolean := False;
+   157.
+   158.    loading_was_successful      : Boolean := False;
+   159.
+   160.    mode_change_request         : exception;
+   161.
+   162. end settings;
 
- 1115 lines: No errors
+ 1107 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/logging-panel.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide logging output to an interactive terminal/control panel.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with POSIX;
+    18. with settings;
+    19.
+    20. use  POSIX;
+    21. use  settings;
+    22.
+    23. package body logging.panel is
+    24.
+    25.    not overriding
+    26.    function column (logger : panel.display)
+    27.    return Positive
+    28.    is (logger.column_number);
+    29.
+    30.    overriding
+    31.    procedure tab_log (logger   : in out panel.display;
+    32.                       at_least : in Natural;
+    33.                       spacing  : in Positive;
+    34.                       iff      : in Boolean := True) is
+    35.       new_col : constant Natural := logger.column_number + at_least;
+    36.       deficit : constant Natural := (spacing - new_col mod spacing) mod spacing;
+    37.    begin
+    38.       if not iff then return; end if;
+    39.       for i in logger.column_number .. (new_col + deficit) loop
+    40.          POSIX.output(' ');
+    41.       end loop;
+    42.       logger.column_number := new_col + deficit;
+    43.    end tab_log;
+    44.
+    45.    overriding
+    46.    procedure tab_log_to (logger : in out panel.display;
+    47.                          column : in Positive;
+    48.                          iff    : in Boolean := True) is
+    49.    begin
+    50.       if not iff then return; end if;
+    51.       if column < logger.column_number then
+    52.          logger.log_new_line;
+    53.       end if;
+    54.       for i in logger.column_number .. column-1 loop
+    55.          POSIX.output(' ');
+    56.       end loop;
+    57.       logger.column_number := column;
+    58.    end tab_log_to;
+    59.
+    60.    overriding
+    61.    procedure log (logger : in out panel.display;
+    62.                   char   : in Character;
+    63.                   iff    : in Boolean := True) is
+    64.    begin
+    65.       if not iff then return; end if;
+    66.       POSIX.output(char);
+    67.       logger.column_number := logger.column_number + 1;
+    68.    end log;
+    69.
+    70.    overriding
+    71.    procedure log (logger : in out panel.display;
+    72.                   text   : in String;
+    73.                   iff    : in Boolean := True) is
+    74.    begin
+    75.       if not iff then return; end if;
+    76.       if text /= "" then
+    77.          POSIX.output(text);
+    78.       end if;
+    79.       logger.column_number := logger.column_number + text'Length;
+    80.    end log;
+    81.
+    82.    overriding
+    83.    procedure log_new_line (logger : in out panel.display;
+    84.                            iff    : in Boolean := True) is
+    85.    begin
+    86.       if not iff then return; end if;
+    87.       POSIX.output_line;
+    88.       logger.column_number := 1;
+    89.    end log_new_line;
+    90.
+    91.    not overriding
+    92.    procedure show_line (logger : in out panel.display; message : in String := "") is
+    93.    begin
+    94.       if message /= "" then
+    95.          logger.log(message);
+    96.       end if;
+    97.       logger.log_new_line;
+    98.    end show_line;
+    99.
+   100.    not overriding
+   101.    procedure interact (logger : in out panel.display; reason : in String := "Mode") is
+   102.       old_mode : constant settings.diagnostic_mode := the_diagnostic_mode;
+   103.       response : response_kind;
+   104.       choice   : Character;
+   105.    begin
+   106.    interaction_loop:
+   107.       loop
+   108.          logger.column_number := 1;
+   109.          POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
+   110.          if response = name_response then
+   111.             case choice is
+   112.                when 'q' | 'Q' =>
+   113.                   quit_was_requested := True;
+   114.                   exit interaction_loop;
+   115.                when 'd' | 'D' =>
+   116.                   debugging_is_enabled := not debugging_is_enabled;
+   117.                   exit interaction_loop;
+   118.                when 'f' | 'F' =>
+   119.                   set_diagnostic_mode(fast_mode);
+   120.                   exit interaction_loop;
+   121.                when 'p' | 'P' =>
+   122.                   set_diagnostic_mode(pause_mode);
+   123.                   exit interaction_loop;
+   124.                when 't' | 'T' =>
+   125.                   set_diagnostic_mode(trace_mode);
+   126.                   exit interaction_loop;
+   127.                when others =>
+   128.                   null; -- An invalid choice, try again.
+   129.             end case;
+   130.          elsif response = EOF_response then
+   131.             exit;
+   132.          end if;
+   133.       end loop interaction_loop;
+   134.       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
+   135.    end interact;
+   136.
+   137. end logging.panel;
+
+Compiling: ../Source/logging-panel.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide logging output to an interactive terminal/control panel.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package logging.panel is
+    18.
+    19.    type display is new logging.output with private;
+    20.
+    21.    not overriding
+    22.    function column (logger : panel.display)
+    23.    return Positive;
+    24.
+    25.    overriding
+    26.    procedure tab_log (logger   : in out panel.display;
+    27.                       at_least : in Natural;
+    28.                       spacing  : in Positive;
+    29.                       iff      : in Boolean := True);
+    30.
+    31.    overriding
+    32.    procedure tab_log_to (logger : in out panel.display;
+    33.                          column : in Positive;
+    34.                          iff    : in Boolean := True);
+    35.
+    36.    overriding
+    37.    procedure log (logger : in out panel.display;
+    38.                   char   : in Character;
+    39.                   iff    : in Boolean := True);
+    40.
+    41.    overriding
+    42.    procedure log (logger : in out panel.display;
+    43.                   text   : in String;
+    44.                   iff    : in Boolean := True);
+    45.
+    46.    overriding
+    47.    procedure log_new_line (logger : in out panel.display;
+    48.                            iff    : in Boolean := True);
+    49.
+    50.    not overriding
+    51.    procedure show_line (logger : in out panel.display; message : in String := "");
+    52.
+    53.    not overriding
+    54.    procedure interact (logger : in out panel.display; reason : in String := "Mode");
+    55.
+    56.    overriding
+    57.    procedure open (logger : in out panel.display; logfile_name : in String) is null;
+    58.
+    59.    overriding
+    60.    procedure close (logger : in out panel.display; logfile_name : in String) is null;
+    61.
+    62.    overriding
+    63.    procedure flush (logger : in out panel.display; iff : in Boolean := True) is null;
+    64.
+    65. private
+    66.
+    67.    type display is new logging.output with
+    68.       record
+    69.          column_number : Positive := 1;
+    70.       end record;
+    71.
+    72. end logging.panel;
+
+ 137 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/break_in.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- This communicates a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5572,12 +6222,12 @@ Compiled at: 2021-05-29 19:07:06
     64. end break_in;
 
 Compiling: ../Source/break_in.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- This conveys a break-in to the microcode.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5605,17 +6255,14 @@ Compiled at: 2021-05-29 19:07:06
 
  64 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/dumping.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5824,12 +6471,12 @@ Compiled at: 2021-05-29 19:07:06
    209. end dumping;
 
 Compiling: ../Source/dumping.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Provide support for diagnostic core-dumping area descriptions.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -5954,14 +6601,17 @@ Compiled at: 2021-05-29 19:07:06
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/kdf9.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- The machine-state manipulations used by the CPU microcode.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -6996,12 +7646,12 @@ Compiled at: 2021-05-29 19:07:06
   1035. end KDF9;
 
 Compiling: ../Source/kdf9.ads
-Source file time stamp: 2021-05-28 23:57:58
-Compiled at: 2021-05-29 19:07:06
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- The architecturally-defined data and register formats of the KDF9 computer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -7736,17 +8386,14 @@ Compiled at: 2021-05-29 19:07:06
 
  1035 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/kdf9-microcode.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:07
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -8666,7 +9313,7 @@ Compiled at: 2021-05-29 19:07:07
    920.          when NEG1_TO_Iq =>
    921.             the_CPU_delta := the_CPU_delta + 3;
    922.             if INS.Qq /= 0 then
-   923.                the_Q_store(INS.Qq).I := - 1;
+   923.                the_Q_store(INS.Qq).I := 8#177777#;  -- i.e. -1
    924.             end if;
    925.
    926.          when POS2_TO_Iq =>
@@ -8678,7 +9325,7 @@ Compiled at: 2021-05-29 19:07:07
    932.          when NEG2_TO_Iq =>
    933.             the_CPU_delta := the_CPU_delta + 3;
    934.             if INS.Qq /= 0 then
-   935.                the_Q_store(INS.Qq).I := - 2;
+   935.                the_Q_store(INS.Qq).I := 8#177776#;  -- i.e. -2
    936.             end if;
    937.
    938.          when CqTOQk =>
@@ -9347,12 +9994,12 @@ Compiled at: 2021-05-29 19:07:07
   1601. end KDF9.microcode;
 
 Compiling: ../Source/kdf9-microcode.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- KDF9 ISP emulation - CPU microcode routines.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9379,14 +10026,427 @@ Compiled at: 2021-05-29 19:07:07
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/ioc-absent.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Handle attempted usage of a buffer with No Device attached.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package body IOC.absent is
+    18.
+    19.    procedure disavow (the_device  : in out absent.device;
+    20.                       Q_operand   : in KDF9.Q_register;
+    21.                       set_offline : in Boolean) is
+    22.       pragma Unreferenced(Q_operand);
+    23.       pragma Unreferenced(set_offline);
+    24.    begin
+    25.       trap_operator_error("there is no device on buffer #" & oct_of(the_device.number, 2));
+    26.    end disavow;
+    27.
+    28.    overriding
+    29.    procedure PIA (the_device  : in out absent.device;
+    30.                   Q_operand   : in KDF9.Q_register;
+    31.                   set_offline : in Boolean) is
+    32.    begin disavow(the_device, Q_operand, set_offline); end PIA;
+    33.
+    34.    overriding
+    35.    procedure PIB (the_device  : in out absent.device;
+    36.                   Q_operand   : in KDF9.Q_register;
+    37.                   set_offline : in Boolean) is
+    38.    begin disavow(the_device, Q_operand, set_offline); end PIB;
+    39.
+    40.    overriding
+    41.    procedure PIC (the_device  : in out absent.device;
+    42.                   Q_operand   : in KDF9.Q_register;
+    43.                   set_offline : in Boolean) is
+    44.    begin disavow(the_device, Q_operand, set_offline); end PIC;
+    45.
+    46.    overriding
+    47.    procedure PID (the_device  : in out absent.device;
+    48.                   Q_operand   : in KDF9.Q_register;
+    49.                   set_offline : in Boolean) is
+    50.    begin disavow(the_device, Q_operand, set_offline); end PID;
+    51.
+    52.    overriding
+    53.    procedure PIE (the_device  : in out absent.device;
+    54.                   Q_operand   : in KDF9.Q_register;
+    55.                   set_offline : in Boolean) is
+    56.    begin disavow(the_device, Q_operand, set_offline); end PIE;
+    57.
+    58.    overriding
+    59.    procedure PIF (the_device  : in out absent.device;
+    60.                   Q_operand   : in KDF9.Q_register;
+    61.                   set_offline : in Boolean) is
+    62.    begin disavow(the_device, Q_operand, set_offline); end PIF;
+    63.
+    64.    overriding
+    65.    procedure PIG (the_device  : in out absent.device;
+    66.                   Q_operand   : in KDF9.Q_register;
+    67.                   set_offline : in Boolean) is
+    68.    begin disavow(the_device, Q_operand, set_offline); end PIG;
+    69.
+    70.    overriding
+    71.    procedure PIH (the_device  : in out absent.device;
+    72.                   Q_operand   : in KDF9.Q_register;
+    73.                   set_offline : in Boolean) is
+    74.    begin disavow(the_device, Q_operand, set_offline); end PIH;
+    75.
+    76.    overriding
+    77.    procedure PMA (the_device  : in out absent.device;
+    78.                   Q_operand   : in KDF9.Q_register;
+    79.                   set_offline : in Boolean) is
+    80.    begin disavow(the_device, Q_operand, set_offline); end PMA;
+    81.
+    82.    overriding
+    83.    procedure PMB (the_device  : in out absent.device;
+    84.                   Q_operand   : in KDF9.Q_register;
+    85.                   set_offline : in Boolean) is
+    86.    begin disavow(the_device, Q_operand, set_offline); end PMB;
+    87.
+    88.    overriding
+    89.    procedure PMC (the_device  : in out absent.device;
+    90.                   Q_operand   : in KDF9.Q_register;
+    91.                   set_offline : in Boolean) is
+    92.    begin disavow(the_device, Q_operand, set_offline); end PMC;
+    93.    overriding
+    94.    procedure PMD (the_device  : in out absent.device;
+    95.                   Q_operand   : in KDF9.Q_register;
+    96.                   set_offline : in Boolean) is
+    97.    begin disavow(the_device, Q_operand, set_offline); end PMD;
+    98.
+    99.    overriding
+   100.    procedure PME (the_device  : in out absent.device;
+   101.                   Q_operand   : in KDF9.Q_register;
+   102.                   set_offline : in Boolean) is
+   103.    begin disavow(the_device, Q_operand, set_offline); end PME;
+   104.
+   105.    overriding
+   106.    procedure PMF (the_device  : in out absent.device;
+   107.                   Q_operand   : in KDF9.Q_register;
+   108.                   set_offline : in Boolean) is
+   109.    begin disavow(the_device, Q_operand, set_offline); end PMF;
+   110.
+   111.
+   112.    overriding
+   113.    procedure PMG (the_device  : in out absent.device;
+   114.                   Q_operand   : in KDF9.Q_register;
+   115.                   set_offline : in Boolean) is
+   116.    begin disavow(the_device, Q_operand, set_offline); end PMG;
+   117.
+   118.    overriding
+   119.    procedure PMK (the_device  : in out absent.device;
+   120.                   Q_operand   : in KDF9.Q_register;
+   121.                   set_offline : in Boolean) is
+   122.    begin disavow(the_device, Q_operand, set_offline); end PMK;
+   123.
+   124.    overriding
+   125.    procedure PML (the_device  : in out absent.device;
+   126.                   Q_operand   : in KDF9.Q_register;
+   127.                   set_offline : in Boolean) is
+   128.    begin disavow(the_device, Q_operand, set_offline); end PML;
+   129.
+   130.    overriding
+   131.    procedure POA (the_device  : in out absent.device;
+   132.                   Q_operand   : in KDF9.Q_register;
+   133.                   set_offline : in Boolean) is
+   134.    begin disavow(the_device, Q_operand, set_offline); end POA;
+   135.
+   136.    overriding
+   137.    procedure POB (the_device  : in out absent.device;
+   138.                   Q_operand   : in KDF9.Q_register;
+   139.                   set_offline : in Boolean) is
+   140.    begin disavow(the_device, Q_operand, set_offline); end POB;
+   141.
+   142.    overriding
+   143.    procedure POC (the_device  : in out absent.device;
+   144.                   Q_operand   : in KDF9.Q_register;
+   145.                   set_offline : in Boolean) is
+   146.    begin disavow(the_device, Q_operand, set_offline); end POC;
+   147.
+   148.    overriding
+   149.    procedure POD (the_device  : in out absent.device;
+   150.                   Q_operand   : in KDF9.Q_register;
+   151.                   set_offline : in Boolean) is
+   152.    begin disavow(the_device, Q_operand, set_offline); end POD;
+   153.
+   154.    overriding
+   155.    procedure POE (the_device  : in out absent.device;
+   156.                   Q_operand   : in KDF9.Q_register;
+   157.                   set_offline : in Boolean) is
+   158.    begin disavow(the_device, Q_operand, set_offline); end POE;
+   159.
+   160.    overriding
+   161.    procedure POF (the_device  : in out absent.device;
+   162.                   Q_operand   : in KDF9.Q_register;
+   163.                   set_offline : in Boolean) is
+   164.    begin disavow(the_device, Q_operand, set_offline); end POF;
+   165.
+   166.    overriding
+   167.    procedure POG (the_device  : in out absent.device;
+   168.                   Q_operand   : in KDF9.Q_register;
+   169.                   set_offline : in Boolean) is
+   170.    begin disavow(the_device, Q_operand, set_offline); end POG;
+   171.
+   172.    overriding
+   173.    procedure POH (the_device  : in out absent.device;
+   174.                   Q_operand   : in KDF9.Q_register;
+   175.                   set_offline : in Boolean) is
+   176.    begin disavow(the_device, Q_operand, set_offline); end POH;
+   177.
+   178.    overriding
+   179.    procedure POK (the_device  : in out absent.device;
+   180.                   Q_operand   : in KDF9.Q_register;
+   181.                   set_offline : in Boolean) is
+   182.    begin disavow(the_device, Q_operand, set_offline); end POK;
+   183.
+   184.    overriding
+   185.    procedure POL (the_device  : in out absent.device;
+   186.                   Q_operand   : in KDF9.Q_register;
+   187.                   set_offline : in Boolean) is
+   188.    begin disavow(the_device, Q_operand, set_offline); end POL;
+   189.
+   190.    overriding
+   191.    procedure Initialize (the_device : in out absent.device) is
+   192.    begin
+   193.       install(the_device);
+   194.    end Initialize;
+   195.
+   196.    type AD_access is access absent.device;
+   197.    AD_list : array (IOC.unit_number range 0..14) of AD_access with Warnings => Off;
+   198.
+   199.     -- This cannot overflow, because there must be at least 2 non-AD buffers: FW0 and TR0.
+   200.    unit : IOC.unit_number := 0;
+   201.
+   202.    procedure enable (b : in KDF9.buffer_number) is
+   203.    begin
+   204.       AD_list(unit) := new absent.device(number => b, unit => unit);
+   205.        unit := unit + 1;
+   206.    end enable;
+   207.
+   208. end IOC.absent;
+   209.
+
+Compiling: ../Source/ioc-absent.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Handle attempted usage of a buffer with No Device attached.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package IOC.absent is
+    18.
+    19.    type device is new IOC.device with null record;
+    20.
+    21.    -- All the operations of an absent device terminate the run.
+    22.
+    23.    overriding
+    24.    procedure PIA (the_device  : in out absent.device;
+    25.                   Q_operand   : in KDF9.Q_register;
+    26.                   set_offline : in Boolean);
+    27.
+    28.    overriding
+    29.    procedure PIB (the_device  : in out absent.device;
+    30.                   Q_operand   : in KDF9.Q_register;
+    31.                   set_offline : in Boolean);
+    32.
+    33.    overriding
+    34.    procedure PIC (the_device  : in out absent.device;
+    35.                   Q_operand   : in KDF9.Q_register;
+    36.                   set_offline : in Boolean);
+    37.
+    38.    overriding
+    39.    procedure PID (the_device  : in out absent.device;
+    40.                   Q_operand   : in KDF9.Q_register;
+    41.                   set_offline : in Boolean);
+    42.
+    43.    overriding
+    44.    procedure PIE (the_device  : in out absent.device;
+    45.                   Q_operand   : in KDF9.Q_register;
+    46.                   set_offline : in Boolean);
+    47.
+    48.    overriding
+    49.    procedure PIF (the_device  : in out absent.device;
+    50.                   Q_operand   : in KDF9.Q_register;
+    51.                   set_offline : in Boolean);
+    52.
+    53.    overriding
+    54.    procedure PIG (the_device  : in out absent.device;
+    55.                   Q_operand   : in KDF9.Q_register;
+    56.                   set_offline : in Boolean);
+    57.
+    58.    overriding
+    59.    procedure PIH (the_device  : in out absent.device;
+    60.                   Q_operand   : in KDF9.Q_register;
+    61.                   set_offline : in Boolean);
+    62.
+    63.    overriding
+    64.    procedure PMA (the_device  : in out absent.device;
+    65.                   Q_operand   : in KDF9.Q_register;
+    66.                   set_offline : in Boolean);
+    67.
+    68.    overriding
+    69.    procedure PMB (the_device  : in out absent.device;
+    70.                   Q_operand   : in KDF9.Q_register;
+    71.                   set_offline : in Boolean);
+    72.
+    73.    overriding
+    74.    procedure PMC (the_device  : in out absent.device;
+    75.                   Q_operand   : in KDF9.Q_register;
+    76.                   set_offline : in Boolean);
+    77.    overriding
+    78.    procedure PMD (the_device  : in out absent.device;
+    79.                   Q_operand   : in KDF9.Q_register;
+    80.                   set_offline : in Boolean);
+    81.
+    82.    overriding
+    83.    procedure PME (the_device  : in out absent.device;
+    84.                   Q_operand   : in KDF9.Q_register;
+    85.                   set_offline : in Boolean);
+    86.
+    87.    overriding
+    88.    procedure PMF (the_device  : in out absent.device;
+    89.                   Q_operand   : in KDF9.Q_register;
+    90.                   set_offline : in Boolean);
+    91.
+    92.    overriding
+    93.    procedure PMG (the_device  : in out absent.device;
+    94.                   Q_operand   : in KDF9.Q_register;
+    95.                   set_offline : in Boolean);
+    96.
+    97.    overriding
+    98.    procedure PMK (the_device  : in out absent.device;
+    99.                   Q_operand   : in KDF9.Q_register;
+   100.                   set_offline : in Boolean);
+   101.
+   102.    overriding
+   103.    procedure PML (the_device  : in out absent.device;
+   104.                   Q_operand   : in KDF9.Q_register;
+   105.                   set_offline : in Boolean);
+   106.
+   107.    overriding
+   108.    procedure POA (the_device  : in out absent.device;
+   109.                   Q_operand   : in KDF9.Q_register;
+   110.                   set_offline : in Boolean);
+   111.
+   112.    overriding
+   113.    procedure POB (the_device  : in out absent.device;
+   114.                   Q_operand   : in KDF9.Q_register;
+   115.                   set_offline : in Boolean);
+   116.
+   117.    overriding
+   118.    procedure POC (the_device  : in out absent.device;
+   119.                   Q_operand   : in KDF9.Q_register;
+   120.                   set_offline : in Boolean);
+   121.
+   122.    overriding
+   123.    procedure POD (the_device  : in out absent.device;
+   124.                   Q_operand   : in KDF9.Q_register;
+   125.                   set_offline : in Boolean);
+   126.
+   127.    overriding
+   128.    procedure POE (the_device  : in out absent.device;
+   129.                   Q_operand   : in KDF9.Q_register;
+   130.                   set_offline : in Boolean);
+   131.
+   132.    overriding
+   133.    procedure POF (the_device  : in out absent.device;
+   134.                   Q_operand   : in KDF9.Q_register;
+   135.                   set_offline : in Boolean);
+   136.
+   137.    overriding
+   138.    procedure POG (the_device  : in out absent.device;
+   139.                   Q_operand   : in KDF9.Q_register;
+   140.                   set_offline : in Boolean);
+   141.
+   142.    overriding
+   143.    procedure POH (the_device  : in out absent.device;
+   144.                   Q_operand   : in KDF9.Q_register;
+   145.                   set_offline : in Boolean);
+   146.
+   147.    overriding
+   148.    procedure POK (the_device  : in out absent.device;
+   149.                   Q_operand   : in KDF9.Q_register;
+   150.                   set_offline : in Boolean);
+   151.
+   152.    overriding
+   153.    procedure POL (the_device  : in out absent.device;
+   154.                   Q_operand   : in KDF9.Q_register;
+   155.                   set_offline : in Boolean);
+   156.
+   157.    -- Register the absence of a device in case of future attempted access to buffer b.
+   158.    procedure enable (b : in KDF9.buffer_number);
+   159.
+   160. private
+   161.
+   162.    overriding
+   163.    procedure Initialize (the_device : in out absent.device);
+   164.
+   165.    overriding
+   166.    function is_open (the_device : absent.device)
+   167.    return Boolean
+   168.    is (False);
+   169.
+   170.    overriding
+   171.    function kind (the_device : absent.device)
+   172.    return IOC.device_kind
+   173.    is (AD_kind);
+   174.
+   175.    overriding
+   176.    function quantum (the_device : absent.device)
+   177.    return KDF9.us
+   178.    is (0);
+   179.
+   180.    overriding
+   181.    procedure add_in_the_IO_CPU_time (the_device  : in absent.device;
+   182.                                      bytes_moved : in KDF9.word)
+   183.    is null;
+   184.
+   185. end IOC.absent;
+
+ 209 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/state_display.adb
-Source file time stamp: 2021-05-29 00:28:40
-Compiled at: 2021-05-29 19:07:07
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -9419,7 +10479,7 @@ Compiled at: 2021-05-29 19:07:07
     33. with KDF9.store;
     34. with logging.file;
     35. with settings;
-    36. with symbols;
+    36. with disassembly.symbols;
     37. with tracing;
     38.
     39. with IOC.diagnostics;
@@ -9442,7 +10502,7 @@ Compiled at: 2021-05-29 19:07:07
     56. use  KDF9.store;
     57. use  logging.file;
     58. use  settings;
-    59. use  symbols;
+    59. use  disassembly.symbols;
     60. use  tracing;
     61.
     62. package body state_display is
@@ -10659,1052 +11719,1053 @@ Compiled at: 2021-05-29 19:07:07
   1273.    begin
   1274.       if the_final_state_is_wanted then
   1275.          if loading_was_successful then
-  1276.             -- make sure there is at least one NL after any FW output.
-  1277.             if the_log_is_wanted then
-  1278.                log_new_line;
-  1279.                log_rule;
-  1280.             else
-  1281.                log_new_line;
-  1282.             end if;
-  1283.             log_line("Final State: " & because & ".");
-  1284.             if not the_log_is_wanted then return; end if;
-  1285.             long_witness;
-  1286.             log_rule;
-  1287.
-  1288.             if nr_of_post_dumping_areas /= 0 then
-  1289.                log_title("Post-run Dump:");
-  1290.                print_postrun_dump_areas;
-  1291.             end if;
-  1292.
-  1293.             if the_INS_plot_is_wanted or the_profile_is_wanted then
-  1294.                if histogramming_is_enabled then
-  1295.                   show_frequency_plots;
-  1296.                end if;
-  1297.             end if;
-  1298.
-  1299.             show_retrospective_traces;
-  1300.
+  1276.
+  1277.             -- make sure there is at least one NL after any FW output.
+  1278.             if the_log_is_wanted then
+  1279.                log_new_line;
+  1280.                log_rule;
+  1281.             else
+  1282.                log_new_line;
+  1283.             end if;
+  1284.             log_line("Final State: " & because & ".");
+  1285.             if not the_log_is_wanted then return; end if;
+  1286.             long_witness;
+  1287.             log_rule;
+  1288.
+  1289.             if nr_of_post_dumping_areas /= 0 then
+  1290.                log_title("Post-run Dump:");
+  1291.                print_postrun_dump_areas;
+  1292.             end if;
+  1293.
+  1294.             if the_INS_plot_is_wanted or the_profile_is_wanted then
+  1295.                if histogramming_is_enabled then
+  1296.                   show_frequency_plots;
+  1297.                end if;
+  1298.             end if;
+  1299.
+  1300.             show_retrospective_traces;
   1301.             if the_signature_is_enabled then
   1302.                log_title("Digital signature of traced orders = #"
   1303.                        & oct_of(the_digital_signature)
   1304.                        & ".");
   1305.             end if;
-  1306.          else
-  1307.             log_line("ee9: " & because & ".");
-  1308.             show_all_prerun_dump_areas;
-  1309.             return;
-  1310.          end if;
-  1311.       end if;
-  1312.    end show_final_state;
-  1313.
-  1314.    procedure show_all_prerun_dump_areas is
-  1315.    begin
-  1316.       if the_log_is_wanted and nr_of_pre_dumping_areas /= 0 then
-  1317.          log_title("Pre-run Dump:");
-  1318.          print_prerun_dump_areas;
-  1319.          remove_prerun_dump_areas;
-  1320.       end if;
-  1321.    end show_all_prerun_dump_areas;
-  1322.
-  1323.    increment   : constant := 3;
-  1324.    jump_tab    : constant := 4;
-  1325.    first_tab   : constant := 7;
-  1326.    last_column : constant := 96;
-  1327.
-  1328.    function is_non_blank (first : in KDF9.address)
-  1329.    return Boolean is
-  1330.       result : Boolean := False;
-  1331.    begin
-  1332.       for address in first .. first+increment-1 loop
-  1333.          result := result or (fetch_word(address) /= 0);
-  1334.       end loop;
-  1335.       return result;
-  1336.    end is_non_blank;
-  1337.
-  1338.    subtype converted_word is String(1..8);
-  1339.
-  1340.    type convertor is
-  1341.       not null access function (address : KDF9.address) return converted_word;
-  1342.
-  1343.    procedure show_core (first, last : in KDF9.address;
-  1344.                         head, side  : in String;
-  1345.                         converted   : in convertor) is
-  1346.
-  1347.       procedure show_group (first : in KDF9.address) is
-  1348.          address : KDF9.address := first;
-  1349.       begin
-  1350.          while address <= first+increment-1 loop
-  1351.             log(converted(address));
-  1352.             address := address + 1;
-  1353.             exit when address < first;
-  1354.          end loop;
-  1355.       end show_group;
-  1356.
-  1357.       address : KDF9.address := first;
-  1358.
-  1359.    begin
-  1360.       if (last-first+1) < 1 then
-  1361.          return;
-  1362.       end if;
-  1363.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  1364.       log_title("Core store [#" & oct_of(first) & " .. #" & oct_of(last) & "] interpreted as " & head & ":");
-  1365.       while address <= last loop
-  1366.          if is_non_blank(address) then
-  1367.             log_octal(KDF9.field_of_16_bits(address));
-  1368.             log(":");
-  1369.             tab_log_to(jump_tab);
-  1370.             log(side);
-  1371.             log(" """);
-  1372.             show_group(address);
-  1373.             log("""");
-  1374.             log_new_line;
-  1375.          else
-  1376.             log_line("========  blank  ========");
-  1377.          end if;
-  1378.       exit when address >= KDF9.address'Last - increment;
-  1379.          address := address + increment;
-  1380.       end loop;
-  1381.       log_new_line;
-  1382.    end show_core;
-  1383.
-  1384.    function encoding_of (address : KDF9.address; code_table : output_code_table)
-  1385.    return converted_word is
-  1386.       result : converted_word;
-  1387.    begin
-  1388.       for b in KDF9_char_sets.symbol_index loop
-  1389.          result(Natural(b)+1) := glyph_for(code_table(fetch_symbol(address, b)));
-  1390.       end loop;
-  1391.       return result;
-  1392.    end encoding_of;
-  1393.
-  1394.    current_case : KDF9_char_sets.symbol := KDF9_char_sets.Case_Normal;
-  1395.
-  1396.    function interpretation_of (address : KDF9.address)
-  1397.    return converted_word is
-  1398.       result : converted_word;
-  1399.       symbol : KDF9_char_sets.symbol;
-  1400.       char   : Character;
-  1401.    begin
-  1402.       for b in KDF9_char_sets.symbol_index loop
-  1403.          symbol := fetch_symbol(address, b);
-  1404.          if current_case = KDF9_char_sets.Case_Normal then
-  1405.             char := TP_CN(symbol);
-  1406.          else
-  1407.             char := TP_CS(symbol);
-  1408.          end if;
-  1409.          if symbol = KDF9_char_sets.Case_Normal then
-  1410.             current_case := KDF9_char_sets.Case_Normal;
-  1411.          elsif symbol = KDF9_char_sets.Case_Shift then
-  1412.             current_case := KDF9_char_sets.Case_Shift;
-  1413.          end if;
-  1414.          result(Natural(b)+1) := glyph_for(char);
-  1415.       end loop;
-  1416.       return result;
-  1417.    end interpretation_of;
-  1418.
-  1419.    function case_visible (address : KDF9.address)
-  1420.    return converted_word
-  1421.    is (interpretation_of(address));
-  1422.
-  1423.    function case_normal (address : KDF9.address)
-  1424.    return converted_word
-  1425.    is (encoding_of(address, code_table => TP_CN));
-  1426.
-  1427.    function case_shift (address : KDF9.address)
-  1428.    return converted_word
-  1429.    is (encoding_of(address, code_table => TP_CS));
-  1430.
-  1431.    function printer_code (address : KDF9.address)
-  1432.    return converted_word
-  1433.    is (encoding_of(address, code_table => to_LP));
-  1434.
-  1435.    function card_code (address : KDF9.address)
-  1436.    return converted_word
-  1437.    is (encoding_of(address, code_table => to_CP));
-  1438.
-  1439.    function Latin_1_code (address : KDF9.address)
-  1440.    return converted_word
-  1441.    is (converted_word'(1..7 => Space,
-  1442.                        8    => glyph_for(Character'Val(fetch_word(address) and 8#377#))));
-  1443.
-  1444.    procedure show_core_in_case_visible (first, last : in KDF9.address) is
-  1445.    begin
-  1446.       show_core(first, last,
-  1447.                 head => "characters in TR/TP code with case shifting",
-  1448.                 side => "  ",
-  1449.                 converted => case_visible'Access);
-  1450.    end show_core_in_case_visible;
-  1451.
-  1452.    procedure show_core_in_case_normal (first, last : in KDF9.address) is
-  1453.    begin
-  1454.       show_core(first, last,
-  1455.                 head => "characters in TR/TP Normal Case code",
-  1456.                 side => "NC",
-  1457.                 converted => case_normal'Access);
-  1458.    end show_core_in_case_normal;
-  1459.
-  1460.    procedure show_core_in_case_shift (first, last : in KDF9.address) is
-  1461.    begin
-  1462.       show_core(first, last,
-  1463.                 head => "characters in TR/TP Shift Case code",
-  1464.                 side => "SC",
-  1465.                 converted => case_shift'Access);
-  1466.    end show_core_in_case_shift;
-  1467.
-  1468.    procedure show_core_in_print_code (first, last : in KDF9.address) is
-  1469.    begin
-  1470.       show_core(first, last,
-  1471.                 head => "characters in LP code",
-  1472.                 side => "LP",
-  1473.                 converted => printer_code'Access);
-  1474.    end show_core_in_print_code;
-  1475.
-  1476.    procedure show_core_in_card_code (first, last : in KDF9.address) is
-  1477.    begin
-  1478.       show_core(first, last,head => "characters in CR/CP code",
-  1479.                 side => "CP",
-  1480.                 converted => card_code'Access);
-  1481.    end show_core_in_card_code;
-  1482.
-  1483.    procedure show_core_in_Latin_1 (first, last : in KDF9.address) is
-  1484.    begin
-  1485.       show_core(first, last,
-  1486.                 head => "words with bits 40-47 of each in Latin-1 code",
-  1487.                 side => "L1",
-  1488.                 converted => Latin_1_code'Access);
-  1489.    end show_core_in_Latin_1;
-  1490.
-  1491.    procedure show_core_in_tape_code (first, last : in KDF9.address) is
-  1492.    begin
-  1493.       show_core_in_case_visible(first, last);
-  1494.    end show_core_in_tape_code;
-  1495.
-  1496.    procedure show_core_as_word_forms (first, last  : KDF9.address) is
-  1497.
-  1498.       procedure show_word (address : KDF9.address) is
-  1499.          word : constant KDF9.word := fetch_word(address);
-  1500.       begin
-  1501.          log_octal(KDF9.field_of_16_bits(address));
-  1502.          log(":");
-  1503.          tab_log_to(jump_tab);
-  1504.          show_in_various_formats(word, column => jump_tab);
-  1505.          log_new_line;
-  1506.       end show_word;
-  1507.
-  1508.       procedure show_word_group (first, last  : KDF9.address) is
-  1509.          last_address : KDF9.address := first;
-  1510.          this_word, last_word : KDF9.word;
-  1511.       begin
-  1512.          if last in first | 0 then
-  1513.             show_word(last);
-  1514.             return;
-  1515.          end if;
-  1516.          this_word := fetch_word(first);
-  1517.          last_word := this_word;
-  1518.          show_word(first);
-  1519.          for address in first+1 .. last-1 loop
-  1520.             this_word := fetch_word(address);
-  1521.             if this_word = last_word and address = last_address+1 then
-  1522.                log_line("==========  ditto  ========");
-  1523.             elsif this_word /= last_word then
-  1524.                show_word(address);
-  1525.                last_word := this_word;
-  1526.                last_address := address;
-  1527.             end if;
-  1528.          end loop;
-  1529.          if last > first then
-  1530.             show_word(last);
-  1531.          end if;
-  1532.       end show_word_group;
-  1533.
-  1534.    begin
-  1535.       if first > last then
-  1536.          return;
-  1537.       end if;
-  1538.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  1539.       log_title("Core store interpreted as 48-bit words:");
-  1540.       show_word_group(first, last);
-  1541.       log_new_line;
-  1542.    end show_core_as_word_forms;
-  1543.
-  1544.    -- Each word of code space is described by a set of flags.
-  1545.    -- Flags 0 .. 5 are set iff a jump order has that syllable as target.
-  1546.    -- Flag 6 is set if the word is thought to be code, but not a target.
-  1547.    -- Flag 7 is set if the word is thought to be addressed as data.
-  1548.
-  1549.    package word_flags is new generic_sets(member => KDF9.syllable_index);
-  1550.    use word_flags;
-  1551.
-  1552.    is_a_code_word   : constant KDF9.syllable_index := 6;
-  1553.    is_a_data_word   : constant KDF9.syllable_index := 7;
-  1554.    all_jump_targets : constant word_flags.set := (6|7 => False, others => True);
-  1555.
-  1556.    analysis_flags   : array (KDF9.code_address) of word_flags.set;
-  1557.
-  1558.    function "/" (word : KDF9.code_address; flag : KDF9.syllable_index)
-  1559.    return Boolean
-  1560.    is (analysis_flags(word)/flag);
-  1561.
-  1562. --         procedure show_flags (a : in KDF9.code_address) is
-  1563. --         begin
-  1564. --            log_line(a'Image & ":  "
-  1565. --             & (if analysis_flags(a)(is_a_code_word) then "CODE " else "DATA ")
-  1566. --             & (if analysis_flags(a)(0) then "T" else " ")
-  1567. --             & (if analysis_flags(a)(1) then "T" else " ")
-  1568. --             & (if analysis_flags(a)(2) then "T" else " ")
-  1569. --             & (if analysis_flags(a)(3) then "T" else " ")
-  1570. --             & (if analysis_flags(a)(4) then "T" else " ")
-  1571. --             & (if analysis_flags(a)(5) then "T" else " ")
-  1572. --              );
-  1573. --         end show_flags;
-  1574.
-  1575.    function is_a_jump_target (the_point : in KDF9.syllable_address)
-  1576.    return Boolean
-  1577.    is (analysis_flags(the_point.code_address)/the_point.syllable_index);
-  1578.
-  1579.    function is_a_jump_target (the_operand : in KDF9.code_address)
-  1580.    return Boolean
-  1581.    is ((analysis_flags(the_operand) and all_jump_targets) /= empty_set);
-  1582.
-  1583.    procedure clear_all_analysis_flags is
-  1584.    begin
-  1585.       analysis_flags := (others => empty_set);
-  1586.    end clear_all_analysis_flags;
-  1587.
-  1588.    procedure unmark_as_a_data_word (the_operand : in KDF9.code_address) is
-  1589.    begin
-  1590.       analysis_flags(the_operand)(is_a_data_word) := False;
-  1591.    end unmark_as_a_data_word;
-  1592.
-  1593.    procedure unmark_as_a_code_word (the_operand : in KDF9.code_address) is
-  1594.    begin
-  1595.       analysis_flags(the_operand)(is_a_code_word) := False;
-  1596.    end unmark_as_a_code_word;
-  1597.
-  1598.    procedure mark_as_a_code_word (the_operand : in KDF9.code_address) is
-  1599.    begin
-  1600.       analysis_flags(the_operand)(is_a_code_word) := True;
-  1601.       unmark_as_a_data_word(the_operand);
-  1602.    end mark_as_a_code_word;
-  1603.
-  1604.    procedure mark_as_a_jump_target (the_point : in KDF9.syllable_address) is
-  1605.    begin
-  1606.       analysis_flags(the_point.code_address)(the_point.syllable_index) := True;
-  1607.       mark_as_a_code_word(the_point.code_address);
-  1608.    end mark_as_a_jump_target;
-  1609.
-  1610.    procedure mark_as_a_data_word (the_operand : in KDF9.code_address) is
-  1611.    begin
-  1612.       analysis_flags(the_operand)(is_a_data_word) := True;
-  1613.       unmark_as_a_code_word(the_operand);
-  1614.    end mark_as_a_data_word;
-  1615.
-  1616.    procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
-  1617.       address : KDF9.syllable_address := the_beginning;
-  1618.    begin
-  1619.       if address.code_address < 2 then
-  1620.          return;  -- We already know this is code.
-  1621.       end if;
-  1622.       if address.syllable_index > 5 then
-  1623.          return;  -- We have blundered into non-code words.
-  1624.       end if;
-  1625.       if is_a_jump_target(address) then
-  1626.          return;  -- We have already handled this word.
-  1627.       end if;
-  1628.       -- Mark the first syllable of the block.
-  1629.       mark_as_a_jump_target(the_beginning);
-  1630.       -- Mark the destinations of all jumps in the block as code.
-  1631.       loop
-  1632.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1633.       exit when address.code_address = 8191;
-  1634.          set_NIA_to(address);
-  1635.          decode_the_next_order;
-  1636.          if is_an_invalid_order(INS)                                                  or else
-  1637.                (address.code_address/is_a_data_word and address.syllable_index = 0) then
-  1638.             mark_as_a_data_word(address.code_address);
-  1639.             return;
-  1640.          else
-  1641.             -- Assuming a valid code word, act on it.
-  1642.             mark_as_a_code_word(address.code_address);
-  1643.             case INS.kind is
-  1644.                when normal_jump_order =>
-  1645.                   if not is_a_jump_target(INS.target) then
-  1646.                      -- Mark the jump's destination recursively.
-  1647.                      -- N.B. EXIT is actioned only if it is of EXIT ARr type.
-  1648.                      mark_all_code_blocks(INS.target);
-  1649.                   end if;
-  1650.                   increment_by_3(address);
-  1651.                   if is_an_unconditional_jump(INS) then
-  1652.                      -- What follows is either data or a jump target.
-  1653.                      return;
-  1654.                   end if;
-  1655.                when one_syllable_order =>
-  1656.                   increment_by_1(address);
-  1657.                   if INS.order.syllable_0 = 0 then
-  1658.                      -- This assumes that a valid code word does not contain DUMMY0.
-  1659.                      -- That may not be true of code generated by KAlgol.
-  1660.                      return;
-  1661.                   end if;
-  1662.                when two_syllable_order =>
-  1663.                   if INS.compressed_opcode = JCqNZS then
-  1664.                      -- Mark the preceding word.
-  1665.                      mark_as_a_jump_target((address.code_address-1, 0));
-  1666.                   end if;
-  1667.                   increment_by_2(address);
-  1668.                when data_access_order =>
-  1669.                   increment_by_3(address);
-  1670.             end case;
-  1671.          end if;
-  1672.       end loop;
-  1673.    end mark_all_code_blocks;
-  1674.
-  1675.    procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
-  1676.       address : KDF9.syllable_address := the_beginning;
-  1677.    begin
-  1678.       if address.syllable_index > 5 then
-  1679.          return;  -- We have blundered into non-code words.
-  1680.       end if;
-  1681.
-  1682.    the_code_block_handler: loop
-  1683.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1684.    exit the_code_block_handler when address.code_address = 8191;
-  1685.
-  1686.          -- Deal with the possibility that we actually have a word of instruction code.
-  1687.          set_NIA_to(address);
-  1688.          decode_the_next_order;
-  1689.
-  1690.          if (is_an_invalid_order(INS)                         or else
-  1691.                address.code_address/is_a_data_word)     and then
-  1692.                   not (address.code_address/is_a_code_word) then
-  1693.
-  1694.             -- This word is data: make sure it is not designated as code;
-  1695.             --    and find the start of the next code block.
-  1696.             for a in address.code_address .. 8190 loop
-  1697.                address := (a, 0);
-  1698.             exit when is_a_jump_target(a);
-  1699.                unmark_as_a_code_word(a);
-  1700.                mark_as_a_data_word(a);
-  1701.             end loop;
-  1702.    exit the_code_block_handler when address.code_address = 8190;
-  1703.             -- Find the syllable at which the block starts.
-  1704.             for s in KDF9.syllable_index'(0) .. 5 loop
-  1705.                address.syllable_index := s;
-  1706.             exit when is_a_jump_target(address);
-  1707.             end loop;
-  1708.
-  1709.          else
-  1710.
-  1711.             -- We have a order, so act on it.
-  1712.             case INS.kind is
-  1713.                when data_access_order =>
-  1714.                   -- Note the operand word as data, not code.
-  1715.                   if INS.operand < 8192 then
-  1716.                      declare
-  1717.                         operand : constant KDF9.code_address
-  1718.                                 := KDF9.code_address(INS.operand);
-  1719.                      begin
-  1720.                         if INS.compressed_opcode /= KDF9.decoding.SET and then
-  1721.                               not is_a_jump_target(operand)               then
-  1722.                            mark_as_a_data_word(operand);
-  1723.                         end if;
-  1724.                      end;
-  1725.                   end if;
-  1726.                   increment_by_3(address);
-  1727.                when one_syllable_order =>
-  1728.                   increment_by_1(address);
-  1729.                when two_syllable_order =>
-  1730.                   increment_by_2(address);
-  1731.                when normal_jump_order =>
-  1732.                   increment_by_3(address);
-  1733.             end case;
-  1734.          end if;
-  1735.
-  1736.       exit the_code_block_handler when address.code_address = KDF9.code_address'Last;
-  1737.       end loop the_code_block_handler;
-  1738.    end mark_all_data_blocks;
-  1739.
-  1740.    procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
-  1741.       address : KDF9.syllable_address := the_beginning;
-  1742.       locus   : KDF9.code_address;
-  1743.    begin
-  1744.       if address.syllable_index > 5 then
-  1745.          return;  -- We have blundered into non-code words.
-  1746.       end if;
-  1747.       -- Unmark the first instruction of the block.
-  1748.       unmark_as_a_data_word(address.code_address);
-  1749.
-  1750.       -- Unmark data marks on destinations of jumps.
-  1751.       loop
-  1752.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  1753.       exit when address.code_address = 8191;
-  1754.          set_NIA_to(address);
-  1755.          decode_the_next_order;
-  1756.
-  1757.          if is_an_invalid_order(INS)                          or else
-  1758.                address.code_address/is_a_data_word       or else
-  1759.                   not (address.code_address/is_a_code_word) then
-  1760.             -- We have reached the end of the code block.
-  1761.             return;
-  1762.
-  1763.          else
-  1764.
-  1765.             -- We have a valid order, so act on it.
-  1766.             case INS.kind is
-  1767.                when normal_jump_order =>
-  1768.                   locus := address.code_address;
-  1769.                   increment_by_3(address);
-  1770.                   if INS.target.code_address/is_a_data_word    then
-  1771.                      -- UNmark the jump's destination recursively.
-  1772.                      reset_wrong_data_marks(INS.target);
-  1773.                   end if;
-  1774.                   if INS.compressed_opcode /= Jr          and then
-  1775.                         INS.compressed_opcode /= EXIT_n   and then
-  1776.                            locus /= address.code_address then
-  1777.                      -- The order flows on, so the next word cannot be data.
-  1778.                      unmark_as_a_data_word(address.code_address);
-  1779.                   elsif not (address.code_address/is_a_data_word) then
-  1780.                      -- The next syllable starts a block, iff it is not the end of a block.
-  1781.                      set_NIA_to(address);
-  1782.                      decode_the_next_order;
-  1783.                      if not is_an_invalid_order(INS) then
-  1784.                         mark_as_a_jump_target(address);
-  1785.                      end if;
-  1786.                   end if;
-  1787.                when one_syllable_order =>
-  1788.                   increment_by_1(address);
-  1789.                when two_syllable_order =>
-  1790.                   increment_by_2(address);
-  1791.                when data_access_order =>
-  1792.                   increment_by_3(address);
-  1793.             end case;
-  1794.          end if;
-  1795.       exit when address.code_address = KDF9.code_address'Last;
-  1796.       end loop;
-  1797.    end reset_wrong_data_marks;
-  1798.
-  1799.    procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
-  1800.       start_point : KDF9.syllable_address;
-  1801.    begin
-  1802.       mark_as_a_jump_target(address);
-  1803.       set_NIA_to(address);
-  1804.       decode_the_next_order;
-  1805.       if INS.kind = normal_jump_order then
-  1806.          start_point := INS.target;
-  1807.          mark_all_code_blocks(start_point);
-  1808.          mark_all_data_blocks(start_point);
-  1809.          reset_wrong_data_marks(start_point);
-  1810.       end if;
-  1811.    end mark_the_words_reachable_from;
-  1812.
-  1813.    procedure mark_all_jump_targets (start_point : in KDF9.syllable_address) is
-  1814.       address : KDF9.syllable_address := start_point;
-  1815.    begin
-  1816.       mark_as_a_jump_target(address);
-  1817.       loop
-  1818.       exit when address.code_address > 8190;
-  1819.       exit when address.code_address/is_a_data_word;
-  1820.          set_NIA_to(address);
-  1821.          decode_the_next_order;
-  1822.          case INS.kind is
-  1823.             when data_access_order =>
-  1824.                increment_by_3(address);
-  1825.             when one_syllable_order =>
-  1826.                increment_by_1(address);
-  1827.             when two_syllable_order =>
-  1828.                increment_by_2(address);
-  1829.             when normal_jump_order =>
-  1830.                if INS.kind = normal_jump_order then
-  1831.                   mark_as_a_jump_target(INS.target);
-  1832.                end if;
-  1833.                increment_by_3(address);
-  1834.          end case;
-  1835.       end loop;
-  1836.    end mark_all_jump_targets;
-  1837.
-  1838.    procedure do_symbol_table_based_markup is
-  1839.       subtype own is KDF9.code_address;
-  1840.       V_list : constant V_definition_list := the_V_definition_list;
-  1841.       non_Vs : constant non_V_store_table := the_non_V_store_table;
-  1842.    begin
-  1843.       for e in V_list'First .. v_list'Last-1 loop
-  1844.          -- Mark the V stores of P[e].
-  1845.          for a in own(V_list(e).V_address) .. own(V_list(e).P_address-1) loop
-  1846.             mark_as_a_data_word(own(a));
-  1847.          end loop;
-  1848.          -- Mark the order words of P[e].
-  1849.          for a in own(V_list(e).P_address) .. own(V_list(e+1).V_address-1) loop
-  1850.             mark_as_a_code_word(own(a));
-  1851.          end loop;
-  1852.          mark_all_jump_targets((own(V_list(e).P_address), 0));
-  1853.       end loop;
-  1854.       -- Mark the global data words.
-  1855.       for a in own(non_Vs.W_base) .. own(KDF9.address'Min(8191, non_Vs.Z_base)) loop
-  1856.          mark_as_a_data_word(own(a));
-  1857.       end loop;
-  1858.    end do_symbol_table_based_markup;
-  1859.
+  1306.
+  1307.          else
+  1308.
+  1309.             log_line("ee9: " & because & ".");
+  1310.             show_all_prerun_dump_areas;
+  1311.          end if;
+  1312.       end if;
+  1313.    end show_final_state;
+  1314.
+  1315.    procedure show_all_prerun_dump_areas is
+  1316.    begin
+  1317.       if the_log_is_wanted and nr_of_pre_dumping_areas /= 0 then
+  1318.          log_title("Pre-run Dump:");
+  1319.          print_prerun_dump_areas;
+  1320.          remove_prerun_dump_areas;
+  1321.       end if;
+  1322.    end show_all_prerun_dump_areas;
+  1323.
+  1324.    increment   : constant := 3;
+  1325.    jump_tab    : constant := 4;
+  1326.    first_tab   : constant := 7;
+  1327.    last_column : constant := 96;
+  1328.
+  1329.    function is_non_blank (first : in KDF9.address)
+  1330.    return Boolean is
+  1331.       result : Boolean := False;
+  1332.    begin
+  1333.       for address in first .. first+increment-1 loop
+  1334.          result := result or (fetch_word(address) /= 0);
+  1335.       end loop;
+  1336.       return result;
+  1337.    end is_non_blank;
+  1338.
+  1339.    subtype converted_word is String(1..8);
+  1340.
+  1341.    type convertor is
+  1342.       not null access function (address : KDF9.address) return converted_word;
+  1343.
+  1344.    procedure show_core (first, last : in KDF9.address;
+  1345.                         head, side  : in String;
+  1346.                         converted   : in convertor) is
+  1347.
+  1348.       procedure show_group (first : in KDF9.address) is
+  1349.          address : KDF9.address := first;
+  1350.       begin
+  1351.          while address <= first+increment-1 loop
+  1352.             log(converted(address));
+  1353.             address := address + 1;
+  1354.             exit when address < first;
+  1355.          end loop;
+  1356.       end show_group;
+  1357.
+  1358.       address : KDF9.address := first;
+  1359.
+  1360.    begin
+  1361.       if (last-first+1) < 1 then
+  1362.          return;
+  1363.       end if;
+  1364.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  1365.       log_title("Core store [#" & oct_of(first) & " .. #" & oct_of(last) & "] interpreted as " & head & ":");
+  1366.       while address <= last loop
+  1367.          if is_non_blank(address) then
+  1368.             log_octal(KDF9.field_of_16_bits(address));
+  1369.             log(":");
+  1370.             tab_log_to(jump_tab);
+  1371.             log(side);
+  1372.             log(" """);
+  1373.             show_group(address);
+  1374.             log("""");
+  1375.             log_new_line;
+  1376.          else
+  1377.             log_line("========  blank  ========");
+  1378.          end if;
+  1379.       exit when address >= KDF9.address'Last - increment;
+  1380.          address := address + increment;
+  1381.       end loop;
+  1382.       log_new_line;
+  1383.    end show_core;
+  1384.
+  1385.    function encoding_of (address : KDF9.address; code_table : output_code_table)
+  1386.    return converted_word is
+  1387.       result : converted_word;
+  1388.    begin
+  1389.       for b in KDF9_char_sets.symbol_index loop
+  1390.          result(Natural(b)+1) := glyph_for(code_table(fetch_symbol(address, b)));
+  1391.       end loop;
+  1392.       return result;
+  1393.    end encoding_of;
+  1394.
+  1395.    current_case : KDF9_char_sets.symbol := KDF9_char_sets.Case_Normal;
+  1396.
+  1397.    function interpretation_of (address : KDF9.address)
+  1398.    return converted_word is
+  1399.       result : converted_word;
+  1400.       symbol : KDF9_char_sets.symbol;
+  1401.       char   : Character;
+  1402.    begin
+  1403.       for b in KDF9_char_sets.symbol_index loop
+  1404.          symbol := fetch_symbol(address, b);
+  1405.          if current_case = KDF9_char_sets.Case_Normal then
+  1406.             char := TP_CN(symbol);
+  1407.          else
+  1408.             char := TP_CS(symbol);
+  1409.          end if;
+  1410.          if symbol = KDF9_char_sets.Case_Normal then
+  1411.             current_case := KDF9_char_sets.Case_Normal;
+  1412.          elsif symbol = KDF9_char_sets.Case_Shift then
+  1413.             current_case := KDF9_char_sets.Case_Shift;
+  1414.          end if;
+  1415.          result(Natural(b)+1) := glyph_for(char);
+  1416.       end loop;
+  1417.       return result;
+  1418.    end interpretation_of;
+  1419.
+  1420.    function case_visible (address : KDF9.address)
+  1421.    return converted_word
+  1422.    is (interpretation_of(address));
+  1423.
+  1424.    function case_normal (address : KDF9.address)
+  1425.    return converted_word
+  1426.    is (encoding_of(address, code_table => TP_CN));
+  1427.
+  1428.    function case_shift (address : KDF9.address)
+  1429.    return converted_word
+  1430.    is (encoding_of(address, code_table => TP_CS));
+  1431.
+  1432.    function printer_code (address : KDF9.address)
+  1433.    return converted_word
+  1434.    is (encoding_of(address, code_table => to_LP));
+  1435.
+  1436.    function card_code (address : KDF9.address)
+  1437.    return converted_word
+  1438.    is (encoding_of(address, code_table => to_CP));
+  1439.
+  1440.    function Latin_1_code (address : KDF9.address)
+  1441.    return converted_word
+  1442.    is (converted_word'(1..7 => Space,
+  1443.                        8    => glyph_for(Character'Val(fetch_word(address) and 8#377#))));
+  1444.
+  1445.    procedure show_core_in_case_visible (first, last : in KDF9.address) is
+  1446.    begin
+  1447.       show_core(first, last,
+  1448.                 head => "characters in TR/TP code with case shifting",
+  1449.                 side => "  ",
+  1450.                 converted => case_visible'Access);
+  1451.    end show_core_in_case_visible;
+  1452.
+  1453.    procedure show_core_in_case_normal (first, last : in KDF9.address) is
+  1454.    begin
+  1455.       show_core(first, last,
+  1456.                 head => "characters in TR/TP Normal Case code",
+  1457.                 side => "NC",
+  1458.                 converted => case_normal'Access);
+  1459.    end show_core_in_case_normal;
+  1460.
+  1461.    procedure show_core_in_case_shift (first, last : in KDF9.address) is
+  1462.    begin
+  1463.       show_core(first, last,
+  1464.                 head => "characters in TR/TP Shift Case code",
+  1465.                 side => "SC",
+  1466.                 converted => case_shift'Access);
+  1467.    end show_core_in_case_shift;
+  1468.
+  1469.    procedure show_core_in_print_code (first, last : in KDF9.address) is
+  1470.    begin
+  1471.       show_core(first, last,
+  1472.                 head => "characters in LP code",
+  1473.                 side => "LP",
+  1474.                 converted => printer_code'Access);
+  1475.    end show_core_in_print_code;
+  1476.
+  1477.    procedure show_core_in_card_code (first, last : in KDF9.address) is
+  1478.    begin
+  1479.       show_core(first, last,head => "characters in CR/CP code",
+  1480.                 side => "CP",
+  1481.                 converted => card_code'Access);
+  1482.    end show_core_in_card_code;
+  1483.
+  1484.    procedure show_core_in_Latin_1 (first, last : in KDF9.address) is
+  1485.    begin
+  1486.       show_core(first, last,
+  1487.                 head => "words with bits 40-47 of each in Latin-1 code",
+  1488.                 side => "L1",
+  1489.                 converted => Latin_1_code'Access);
+  1490.    end show_core_in_Latin_1;
+  1491.
+  1492.    procedure show_core_in_tape_code (first, last : in KDF9.address) is
+  1493.    begin
+  1494.       show_core_in_case_visible(first, last);
+  1495.    end show_core_in_tape_code;
+  1496.
+  1497.    procedure show_core_as_word_forms (first, last  : KDF9.address) is
+  1498.
+  1499.       procedure show_word (address : KDF9.address) is
+  1500.          word : constant KDF9.word := fetch_word(address);
+  1501.       begin
+  1502.          log_octal(KDF9.field_of_16_bits(address));
+  1503.          log(":");
+  1504.          tab_log_to(jump_tab);
+  1505.          show_in_various_formats(word, column => jump_tab);
+  1506.          log_new_line;
+  1507.       end show_word;
+  1508.
+  1509.       procedure show_word_group (first, last  : KDF9.address) is
+  1510.          last_address : KDF9.address := first;
+  1511.          this_word, last_word : KDF9.word;
+  1512.       begin
+  1513.          if last in first | 0 then
+  1514.             show_word(last);
+  1515.             return;
+  1516.          end if;
+  1517.          this_word := fetch_word(first);
+  1518.          last_word := this_word;
+  1519.          show_word(first);
+  1520.          for address in first+1 .. last-1 loop
+  1521.             this_word := fetch_word(address);
+  1522.             if this_word = last_word and address = last_address+1 then
+  1523.                log_line("==========  ditto  ========");
+  1524.             elsif this_word /= last_word then
+  1525.                show_word(address);
+  1526.                last_word := this_word;
+  1527.                last_address := address;
+  1528.             end if;
+  1529.          end loop;
+  1530.          if last > first then
+  1531.             show_word(last);
+  1532.          end if;
+  1533.       end show_word_group;
+  1534.
+  1535.    begin
+  1536.       if first > last then
+  1537.          return;
+  1538.       end if;
+  1539.       BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  1540.       log_title("Core store interpreted as 48-bit words:");
+  1541.       show_word_group(first, last);
+  1542.       log_new_line;
+  1543.    end show_core_as_word_forms;
+  1544.
+  1545.    -- Each word of code space is described by a set of flags.
+  1546.    -- Flags 0 .. 5 are set iff a jump order has that syllable as target.
+  1547.    -- Flag 6 is set if the word is thought to be code, but not a target.
+  1548.    -- Flag 7 is set if the word is thought to be addressed as data.
+  1549.
+  1550.    package word_flags is new generic_sets(member => KDF9.syllable_index);
+  1551.    use word_flags;
+  1552.
+  1553.    is_a_code_word   : constant KDF9.syllable_index := 6;
+  1554.    is_a_data_word   : constant KDF9.syllable_index := 7;
+  1555.    all_jump_targets : constant word_flags.set := (6|7 => False, others => True);
+  1556.
+  1557.    analysis_flags   : array (KDF9.code_address) of word_flags.set;
+  1558.
+  1559.    function "/" (word : KDF9.code_address; flag : KDF9.syllable_index)
+  1560.    return Boolean
+  1561.    is (analysis_flags(word)/flag);
+  1562.
+  1563. --         procedure show_flags (a : in KDF9.code_address) is
+  1564. --         begin
+  1565. --            log_line(a'Image & ":  "
+  1566. --             & (if analysis_flags(a)(is_a_code_word) then "CODE " else "DATA ")
+  1567. --             & (if analysis_flags(a)(0) then "T" else " ")
+  1568. --             & (if analysis_flags(a)(1) then "T" else " ")
+  1569. --             & (if analysis_flags(a)(2) then "T" else " ")
+  1570. --             & (if analysis_flags(a)(3) then "T" else " ")
+  1571. --             & (if analysis_flags(a)(4) then "T" else " ")
+  1572. --             & (if analysis_flags(a)(5) then "T" else " ")
+  1573. --              );
+  1574. --         end show_flags;
+  1575.
+  1576.    function is_a_jump_target (the_point : in KDF9.syllable_address)
+  1577.    return Boolean
+  1578.    is (analysis_flags(the_point.code_address)/the_point.syllable_index);
+  1579.
+  1580.    function is_a_jump_target (the_operand : in KDF9.code_address)
+  1581.    return Boolean
+  1582.    is ((analysis_flags(the_operand) and all_jump_targets) /= empty_set);
+  1583.
+  1584.    procedure clear_all_analysis_flags is
+  1585.    begin
+  1586.       analysis_flags := (others => empty_set);
+  1587.    end clear_all_analysis_flags;
+  1588.
+  1589.    procedure unmark_as_a_data_word (the_operand : in KDF9.code_address) is
+  1590.    begin
+  1591.       analysis_flags(the_operand)(is_a_data_word) := False;
+  1592.    end unmark_as_a_data_word;
+  1593.
+  1594.    procedure unmark_as_a_code_word (the_operand : in KDF9.code_address) is
+  1595.    begin
+  1596.       analysis_flags(the_operand)(is_a_code_word) := False;
+  1597.    end unmark_as_a_code_word;
+  1598.
+  1599.    procedure mark_as_a_code_word (the_operand : in KDF9.code_address) is
+  1600.    begin
+  1601.       analysis_flags(the_operand)(is_a_code_word) := True;
+  1602.       unmark_as_a_data_word(the_operand);
+  1603.    end mark_as_a_code_word;
+  1604.
+  1605.    procedure mark_as_a_jump_target (the_point : in KDF9.syllable_address) is
+  1606.    begin
+  1607.       analysis_flags(the_point.code_address)(the_point.syllable_index) := True;
+  1608.       mark_as_a_code_word(the_point.code_address);
+  1609.    end mark_as_a_jump_target;
+  1610.
+  1611.    procedure mark_as_a_data_word (the_operand : in KDF9.code_address) is
+  1612.    begin
+  1613.       analysis_flags(the_operand)(is_a_data_word) := True;
+  1614.       unmark_as_a_code_word(the_operand);
+  1615.    end mark_as_a_data_word;
+  1616.
+  1617.    procedure mark_all_code_blocks (the_beginning : in KDF9.syllable_address) is
+  1618.       address : KDF9.syllable_address := the_beginning;
+  1619.    begin
+  1620.       if address.code_address < 2 then
+  1621.          return;  -- We already know this is code.
+  1622.       end if;
+  1623.       if address.syllable_index > 5 then
+  1624.          return;  -- We have blundered into non-code words.
+  1625.       end if;
+  1626.       if is_a_jump_target(address) then
+  1627.          return;  -- We have already handled this word.
+  1628.       end if;
+  1629.       -- Mark the first syllable of the block.
+  1630.       mark_as_a_jump_target(the_beginning);
+  1631.       -- Mark the destinations of all jumps in the block as code.
+  1632.       loop
+  1633.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1634.       exit when address.code_address = 8191;
+  1635.          set_NIA_to(address);
+  1636.          decode_the_next_order;
+  1637.          if is_an_invalid_order(INS)                                                  or else
+  1638.                (address.code_address/is_a_data_word and address.syllable_index = 0) then
+  1639.             mark_as_a_data_word(address.code_address);
+  1640.             return;
+  1641.          else
+  1642.             -- Assuming a valid code word, act on it.
+  1643.             mark_as_a_code_word(address.code_address);
+  1644.             case INS.kind is
+  1645.                when normal_jump_order =>
+  1646.                   if not is_a_jump_target(INS.target) then
+  1647.                      -- Mark the jump's destination recursively.
+  1648.                      -- N.B. EXIT is actioned only if it is of EXIT ARr type.
+  1649.                      mark_all_code_blocks(INS.target);
+  1650.                   end if;
+  1651.                   increment_by_3(address);
+  1652.                   if is_an_unconditional_jump(INS) then
+  1653.                      -- What follows is either data or a jump target.
+  1654.                      return;
+  1655.                   end if;
+  1656.                when one_syllable_order =>
+  1657.                   increment_by_1(address);
+  1658.                   if INS.order.syllable_0 = 0 then
+  1659.                      -- This assumes that a valid code word does not contain DUMMY0.
+  1660.                      -- That may not be true of code generated by KAlgol.
+  1661.                      return;
+  1662.                   end if;
+  1663.                when two_syllable_order =>
+  1664.                   if INS.compressed_opcode = JCqNZS then
+  1665.                      -- Mark the preceding word.
+  1666.                      mark_as_a_jump_target((address.code_address-1, 0));
+  1667.                   end if;
+  1668.                   increment_by_2(address);
+  1669.                when data_access_order =>
+  1670.                   increment_by_3(address);
+  1671.             end case;
+  1672.          end if;
+  1673.       end loop;
+  1674.    end mark_all_code_blocks;
+  1675.
+  1676.    procedure mark_all_data_blocks (the_beginning : in KDF9.syllable_address) is
+  1677.       address : KDF9.syllable_address := the_beginning;
+  1678.    begin
+  1679.       if address.syllable_index > 5 then
+  1680.          return;  -- We have blundered into non-code words.
+  1681.       end if;
+  1682.
+  1683.    the_code_block_handler: loop
+  1684.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1685.    exit the_code_block_handler when address.code_address = 8191;
+  1686.
+  1687.          -- Deal with the possibility that we actually have a word of instruction code.
+  1688.          set_NIA_to(address);
+  1689.          decode_the_next_order;
+  1690.
+  1691.          if (is_an_invalid_order(INS)                         or else
+  1692.                address.code_address/is_a_data_word)     and then
+  1693.                   not (address.code_address/is_a_code_word) then
+  1694.
+  1695.             -- This word is data: make sure it is not designated as code;
+  1696.             --    and find the start of the next code block.
+  1697.             for a in address.code_address .. 8190 loop
+  1698.                address := (a, 0);
+  1699.             exit when is_a_jump_target(a);
+  1700.                unmark_as_a_code_word(a);
+  1701.                mark_as_a_data_word(a);
+  1702.             end loop;
+  1703.    exit the_code_block_handler when address.code_address = 8190;
+  1704.             -- Find the syllable at which the block starts.
+  1705.             for s in KDF9.syllable_index'(0) .. 5 loop
+  1706.                address.syllable_index := s;
+  1707.             exit when is_a_jump_target(address);
+  1708.             end loop;
+  1709.
+  1710.          else
+  1711.
+  1712.             -- We have a order, so act on it.
+  1713.             case INS.kind is
+  1714.                when data_access_order =>
+  1715.                   -- Note the operand word as data, not code.
+  1716.                   if INS.operand < 8192 then
+  1717.                      declare
+  1718.                         operand : constant KDF9.code_address
+  1719.                                 := KDF9.code_address(INS.operand);
+  1720.                      begin
+  1721.                         if INS.compressed_opcode /= KDF9.decoding.SET and then
+  1722.                               not is_a_jump_target(operand)               then
+  1723.                            mark_as_a_data_word(operand);
+  1724.                         end if;
+  1725.                      end;
+  1726.                   end if;
+  1727.                   increment_by_3(address);
+  1728.                when one_syllable_order =>
+  1729.                   increment_by_1(address);
+  1730.                when two_syllable_order =>
+  1731.                   increment_by_2(address);
+  1732.                when normal_jump_order =>
+  1733.                   increment_by_3(address);
+  1734.             end case;
+  1735.          end if;
+  1736.
+  1737.       exit the_code_block_handler when address.code_address = KDF9.code_address'Last;
+  1738.       end loop the_code_block_handler;
+  1739.    end mark_all_data_blocks;
+  1740.
+  1741.    procedure reset_wrong_data_marks (the_beginning : in KDF9.syllable_address) is
+  1742.       address : KDF9.syllable_address := the_beginning;
+  1743.       locus   : KDF9.code_address;
+  1744.    begin
+  1745.       if address.syllable_index > 5 then
+  1746.          return;  -- We have blundered into non-code words.
+  1747.       end if;
+  1748.       -- Unmark the first instruction of the block.
+  1749.       unmark_as_a_data_word(address.code_address);
+  1750.
+  1751.       -- Unmark data marks on destinations of jumps.
+  1752.       loop
+  1753.       -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  1754.       exit when address.code_address = 8191;
+  1755.          set_NIA_to(address);
+  1756.          decode_the_next_order;
+  1757.
+  1758.          if is_an_invalid_order(INS)                          or else
+  1759.                address.code_address/is_a_data_word       or else
+  1760.                   not (address.code_address/is_a_code_word) then
+  1761.             -- We have reached the end of the code block.
+  1762.             return;
+  1763.
+  1764.          else
+  1765.
+  1766.             -- We have a valid order, so act on it.
+  1767.             case INS.kind is
+  1768.                when normal_jump_order =>
+  1769.                   locus := address.code_address;
+  1770.                   increment_by_3(address);
+  1771.                   if INS.target.code_address/is_a_data_word    then
+  1772.                      -- UNmark the jump's destination recursively.
+  1773.                      reset_wrong_data_marks(INS.target);
+  1774.                   end if;
+  1775.                   if INS.compressed_opcode /= Jr          and then
+  1776.                         INS.compressed_opcode /= EXIT_n   and then
+  1777.                            locus /= address.code_address then
+  1778.                      -- The order flows on, so the next word cannot be data.
+  1779.                      unmark_as_a_data_word(address.code_address);
+  1780.                   elsif not (address.code_address/is_a_data_word) then
+  1781.                      -- The next syllable starts a block, iff it is not the end of a block.
+  1782.                      set_NIA_to(address);
+  1783.                      decode_the_next_order;
+  1784.                      if not is_an_invalid_order(INS) then
+  1785.                         mark_as_a_jump_target(address);
+  1786.                      end if;
+  1787.                   end if;
+  1788.                when one_syllable_order =>
+  1789.                   increment_by_1(address);
+  1790.                when two_syllable_order =>
+  1791.                   increment_by_2(address);
+  1792.                when data_access_order =>
+  1793.                   increment_by_3(address);
+  1794.             end case;
+  1795.          end if;
+  1796.       exit when address.code_address = KDF9.code_address'Last;
+  1797.       end loop;
+  1798.    end reset_wrong_data_marks;
+  1799.
+  1800.    procedure mark_the_words_reachable_from (address : in KDF9.syllable_address) is
+  1801.       start_point : KDF9.syllable_address;
+  1802.    begin
+  1803.       mark_as_a_jump_target(address);
+  1804.       set_NIA_to(address);
+  1805.       decode_the_next_order;
+  1806.       if INS.kind = normal_jump_order then
+  1807.          start_point := INS.target;
+  1808.          mark_all_code_blocks(start_point);
+  1809.          mark_all_data_blocks(start_point);
+  1810.          reset_wrong_data_marks(start_point);
+  1811.       end if;
+  1812.    end mark_the_words_reachable_from;
+  1813.
+  1814.    procedure mark_all_jump_targets (start_point : in KDF9.syllable_address) is
+  1815.       address : KDF9.syllable_address := start_point;
+  1816.    begin
+  1817.       mark_as_a_jump_target(address);
+  1818.       loop
+  1819.       exit when address.code_address > 8190;
+  1820.       exit when address.code_address/is_a_data_word;
+  1821.          set_NIA_to(address);
+  1822.          decode_the_next_order;
+  1823.          case INS.kind is
+  1824.             when data_access_order =>
+  1825.                increment_by_3(address);
+  1826.             when one_syllable_order =>
+  1827.                increment_by_1(address);
+  1828.             when two_syllable_order =>
+  1829.                increment_by_2(address);
+  1830.             when normal_jump_order =>
+  1831.                if INS.kind = normal_jump_order then
+  1832.                   mark_as_a_jump_target(INS.target);
+  1833.                end if;
+  1834.                increment_by_3(address);
+  1835.          end case;
+  1836.       end loop;
+  1837.    end mark_all_jump_targets;
+  1838.
+  1839.    procedure do_symbol_table_based_markup is
+  1840.       subtype own is KDF9.code_address;
+  1841.       V_list : V_definition_list renames V_store_base(0..last_P_number);
+  1842.       non_Vs : non_V_store_table renames the_WYZ_table;
+  1843.    begin
+  1844.       for e in V_list'First .. V_list'Last-1 loop
+  1845.          -- Mark the V stores of P[e].
+  1846.          for a in own(V_list(e).V_address) .. own(V_list(e).P_address-1) loop
+  1847.             mark_as_a_data_word(own(a));
+  1848.          end loop;
+  1849.          -- Mark the order words of P[e].
+  1850.          for a in own(V_list(e).P_address) .. own(V_list(e+1).V_address-1) loop
+  1851.             mark_as_a_code_word(own(a));
+  1852.          end loop;
+  1853.          mark_all_jump_targets((own(V_list(e).P_address), 0));
+  1854.       end loop;
+  1855.       -- Mark the global data words.
+  1856.       for a in own(non_Vs.W_base) .. own(KDF9.address'Min(8191, non_Vs.Z_base)) loop
+  1857.          mark_as_a_data_word(own(a));
+  1858.       end loop;
+  1859.    end do_symbol_table_based_markup;
   1860.
-  1861.    procedure markup_a_problem_program is
-  1862.    begin
-  1863.       if the_initial_jump_was_corrupted then
-  1864.          -- We cannot sensibly locate the order words using E0  ...
-  1865.          log_new_line;
-  1866.          log_line("The initial jump, in E0U, has been corrupted!");
-  1867.          log_new_line;
-  1868.          show_core_as_syllables((0, syllable_index => 0), (0, syllable_index => 5));
-  1869.          --  ... so restore it to the value it had on loading.
-  1870.          restore_the_initial_jump;
-  1871.          log_line("E0U has been restored to the value it had on loading.");
-  1872.          log_new_line;
-  1873.       end if;
-  1874.
-  1875.       if the_V_definition_list_length = 0 then
-  1876.          -- There is no symbol table, so we have to do a flow analysis.
-  1877.          -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
-  1878.
-  1879.          mark_the_words_reachable_from((0, syllable_index => 0));
-  1880.          mark_the_words_reachable_from((4, syllable_index => 0));
-  1881.          mark_the_words_reachable_from((4, syllable_index => 3));
-  1882.
-  1883.          -- Mark the words between E0 and P0 as data, skipping E4.
-  1884.          mark_as_a_data_word(1);
-  1885.          mark_as_a_data_word(2);
-  1886.          mark_as_a_data_word(3);
-  1887.          set_NIA_to((0, syllable_index => 0));
-  1888.          decode_the_next_order;
-  1889.          for d in 5 .. INS.target.code_address-1 loop
-  1890.             mark_as_a_data_word(d);
-  1891.          end loop;
-  1892.
-  1893.       else
-  1894.          -- We have a symbol table, enable 100% accurate markup.
-  1895.          do_symbol_table_based_markup;
-  1896.          mark_as_a_code_word(0);
-  1897.          mark_as_a_data_word(1);
-  1898.          mark_as_a_data_word(2);
-  1899.          mark_as_a_data_word(3);
-  1900.          mark_as_a_code_word(4);
-  1901.          mark_as_a_data_word(5);
-  1902.          mark_as_a_data_word(6);
-  1903.          mark_as_a_data_word(7);
-  1904.       end if;
-  1905.
-  1906.       the_program_has_been_analysed := True;
-  1907.    end markup_a_problem_program;
-  1908.
-  1909.    -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
-  1910.    procedure markup_a_Director (pre_run : in Boolean) is
-  1911.    begin
-  1912.       the_program_has_been_analysed := False;
-  1913.       BA := 0;  -- Director starts at physical word 0.
-  1914.
-  1915.       -- It does not have a jump in E0U, unlike problem programs.
-  1916.       -- Instead it has a fixed sequence of orders to reset the hardware.
-  1917.       -- Before intialization, it is: K4; SHL+63; =+Q0; with the code: #3740416437675016.
-  1918.       -- After intialization,  it is: Q0; SHL+63; =+Q0; with the code: #3620716437675016.
-  1919.
-  1920.        -- Check that we do actually have a Director to examine.
-  1921.
-  1922.       if pre_run then
-  1923.          if fetch_word(0) /= 8#3740416437675016# then
-  1924.             log_line("The loaded program is not a Director bootstrap!");
-  1925.             return;
-  1926.          else
-  1927.             log_line("The loaded program is a Director bootstrap.");
-  1928.          end if;
-  1929.
-  1930.          -- The jumps in E2 and E4 are absent until after Director's initialzation,
-  1931.          --    so they are not present in a pre-run state.
-  1932.          -- All 9 words of the bootstrap are filled with instructions.
-  1933.          for w in code_address'(0) .. 8 loop
-  1934.             mark_as_a_code_word(w);
-  1935.          end loop;
-  1936.          mark_as_a_jump_target((0, 0));
-  1937.          the_program_has_been_analysed := True;
-  1938.          return;
-  1939.       end if;
-  1940.
-  1941.       if fetch_word(0) /= 8#3620716437675016# then
-  1942.          log_line("The loaded program is not a Director!");
-  1943.          return;
-  1944.       else
-  1945.          log_line("The loaded program is a Director.");
-  1946.       end if;
-  1947.
-  1948.       -- An initialised Director has a number of jumps in words 2 and 4, but not word 0.
-  1949.       -- Give up if these are absent.
-  1950.
-  1951.       set_NIA_to((2, syllable_index => 0));
-  1952.       decode_the_next_order;
-  1953.       if INS.kind /= normal_jump_order then
-  1954.          log_line("An expected jump, in E2U, has not been found!");
-  1955.          return;
-  1956.       end if;
-  1957.       mark_as_a_jump_target((2, syllable_index => 0));
-  1958.       mark_the_words_reachable_from((2, syllable_index => 0));
-  1959.       mark_as_a_jump_target(INS.target);
-  1960.       set_NIA_to((4, syllable_index => 0));
-  1961.       decode_the_next_order;
-  1962.       if INS.kind /= normal_jump_order then
-  1963.          log_line("An expected jump, in E4U, has not been found!");
-  1964.          return;
-  1965.       end if;
-  1966.       mark_as_a_jump_target((4, syllable_index => 0));
-  1967.       mark_the_words_reachable_from((4, syllable_index => 0));
-  1968.       mark_as_a_jump_target(INS.target);
-  1969.
-  1970.       set_NIA_to((4, syllable_index => 3));
-  1971.       decode_the_next_order;
-  1972.       if INS.kind /= normal_jump_order then
-  1973.          log_line("An expected jump, in E4L, has not been found!");
-  1974.          return;
-  1975.       end if;
-  1976.       mark_as_a_jump_target((4, syllable_index => 3));
-  1977.       mark_the_words_reachable_from((4, syllable_index => 3));
-  1978.       mark_as_a_jump_target(INS.target);
-  1979.
-  1980.       -- E0 is marked because interrupts cause a jump to it, in effect.
-  1981.       mark_as_a_jump_target((0, syllable_index => 0));
-  1982.
-  1983.       -- Mark E3 and E5 through AP0 - 1 as data words.
-  1984.       mark_as_a_data_word(3);
-  1985.       set_NIA_to((2, 0));
-  1986.       decode_the_next_order;
-  1987.       for d in 5 .. INS.target.code_address-1 loop
-  1988.          mark_as_a_data_word(d);
-  1989.       end loop;
-  1990.
-  1991.       the_program_has_been_analysed := True;
-  1992.    end markup_a_Director;
-  1993.
-  1994.    procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean) is
-  1995.    begin
-  1996.       clear_all_analysis_flags;
-  1997.       if the_execution_mode = boot_mode  then
-  1998.          markup_a_Director(pre_run);
-  1999.       else
-  2000.          markup_a_problem_program;
-  2001.       end if;
-  2002.    end mark_all_code_blocks_and_data_blocks;
-  2003.
-  2004.    procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
-  2005.                                     octal_option : in Boolean) is
-  2006.
-  2007.       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
-  2008.       prev_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
-  2009.       comparator  : KDF9.word := prev_word;
-  2010.       address     : KDF9.syllable_address;
-  2011.       this_word   : KDF9.word;
-  2012.
-  2013.       procedure show_a_block_of_orders (address : in out KDF9.syllable_address) is
-  2014.
-  2015.          function is_a_store_order (decoded : KDF9.decoded_order)
-  2016.          return Boolean
-  2017.          is (
-  2018.              if decoded.kind = one_syllable_order then
-  2019.                 False
-  2020.              elsif decoded.kind = two_syllable_order then
-  2021.                 (
-  2022.                  case decoded.compressed_opcode is
-  2023.                    when TO_MkMq   | TO_MkMqQ
-  2024.                       | TO_MkMqH  | TO_MkMqQH
-  2025.                       | TO_MkMqN  | TO_MkMqQN
-  2026.                       | TO_MkMqHN | TO_MkMqQHN
-  2027.                       | TO_Kq     | TO_LINK    => True,
-  2028.                    when others                 => False
-  2029.                 )
-  2030.              elsif decoded.kind = data_access_order then
-  2031.                 (
-  2032.                  case decoded.compressed_opcode is
-  2033.                     when TO_EaMq | TO_EaMqQ => True,
-  2034.                     when others             => False
-  2035.                 )
-  2036.              else
-  2037.                 False
-  2038.             );
-  2039.
-  2040.          procedure set_line_at_minimum (tab : in Natural) is
-  2041.          begin
-  2042.             if panel_logger.column < tab then
-  2043.                tab_log_to(tab);
-  2044.             end if;
-  2045.          end set_line_at_minimum;
-  2046.
-  2047.          procedure set_line_at (tab : in Natural) is
-  2048.          begin
-  2049.             if panel_logger.column > tab then
-  2050.                log_new_line;
-  2051.             end if;
-  2052.             if panel_logger.column < tab then
-  2053.                tab_log_to(tab);
-  2054.             end if;
-  2055.          end set_line_at;
-  2056.
-  2057.          procedure set_at_new_line is
-  2058.          begin
-  2059.             if panel_logger.column > 1 then
-  2060.                log_new_line;
-  2061.             end if;
-  2062.          end set_at_new_line;
-  2063.
-  2064.          last_nz_location : KDF9.syllable_address;
-  2065.
-  2066.       begin -- show_a_block_of_orders
-  2067.          this_word := fetch_word(KDF9.address(address.code_address));
-  2068.
-  2069.          -- Handle data words and dummy words.
-  2070.          if address.code_address/is_a_data_word then
-  2071.             set_at_new_line;
-  2072.          elsif this_word in not 0 | 0 | six_DUMMIES then
-  2073.             -- The word is not worth logging.  Step on.
-  2074.             address := (address.code_address+1, 0);
-  2075.             return;
-  2076.          end if;
-  2077.
-  2078.          loop
-  2079.             if address.code_address/is_a_data_word then
-  2080.                last_nz_location := address;
-  2081.
-  2082.                -- Display a line of data.
-  2083.                log(oct_or_dec_of(address, octal_option) & ": ");
-  2084.                set_line_at(jump_tab);
-  2085.                show_in_various_formats(fetch_word(KDF9.address(address.code_address)),
-  2086.                                        column => jump_tab);
-  2087.                log_new_line;
-  2088.
-  2089.                -- Skip over any following zero words (DUMMY0 or uninitialized V stores).
-  2090.                loop
-  2091.                   if address.code_address = last.code_address then
-  2092.                      -- The whole block has been processed.
-  2093.                      return;
-  2094.                   end if;
-  2095.                   address := (address.code_address+1, 0);
-  2096.                exit when fetch_word(KDF9.address(address.code_address)) /= 0;
-  2097.                end loop;
-  2098.                if address.code_address > last_nz_location.code_address+1 then
-  2099.                   log("========  zeros  ========");
-  2100.                   log_new_line;
-  2101.                end if;
-  2102.             else
-  2103.                -- We have found an instruction word.
-  2104.                log_new_line;
-  2105.          exit;
-  2106.             end if;
-  2107.          end loop;
-  2108.
-  2109.          -- Handle instruction words.
-  2110.          loop
-  2111.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
-  2112.          exit when address.code_address = 8191;
-  2113.             this_word := fetch_word(KDF9.address(address.code_address));
-  2114.
-  2115.             -- Suppress output of more than 1 of a block of equal values.
-  2116.             if this_word = comparator and this_word = prev_word then
-  2117.                -- The word is not worth logging.  Step on.
-  2118.                address := (address.code_address+1, 0);
-  2119.                return;
-  2120.             end if;
-  2121.
-  2122.             if this_word in not 0 | 0 | six_DUMMIES then
-  2123.                -- Take this word as the new basis for comparison.
-  2124.                comparator := this_word;
-  2125.             end if;
-  2126.
-  2127.             -- This updates the Instruction word buffers.  Nasty side effect that has to be undone!
-  2128.             set_NIA_to(address);
-  2129.             decode_the_next_order;
-  2130.             if is_an_invalid_order(INS) then
-  2131.                -- The word is not worth logging.  Step on.
-  2132.                address := (address.code_address+1, 0);
-  2133.                return;
-  2134.             end if;
-  2135.
-  2136.             if is_a_jump_target(address) then
-  2137.                -- Jumps go at the start of a fresh line for best visibility.
-  2138.                -- Label the jump with its address at the start of the line for easy reference.
-  2139.                set_at_new_line;
-  2140.                log(oct_or_dec_of(address, octal_option) & ": ");
-  2141.                log_new_line;
-  2142.             end if;
-  2143.
-  2144.             -- Set the tab position appropriately for the order type.
-  2145.             case INS.kind is
-  2146.                when one_syllable_order | data_access_order =>
-  2147.                   set_line_at_minimum(first_tab);
-  2148.                when two_syllable_order =>
-  2149.                   case INS.compressed_opcode is
-  2150.                      when JCqNZS =>
-  2151.                         set_line_at(jump_tab);
-  2152.                      when CT_PMB_PMC_BUSY_Qq
-  2153.                         | PAR_Qq
-  2154.                         | PMF_PMG_Qq
-  2155.                         | PIA_PIC_CLO_TLO_Qq
-  2156.                         | PIB_PID_Qq
-  2157.                         | PIE_PIG_Qq
-  2158.                         | PIF_PIH_Qq
-  2159.                         | POA_POC_POE_POF_PMH_Qq
-  2160.                         | POB_POD_Qq
-  2161.                         | POG_POL_Qq
-  2162.                         | POH_POK_Qq
-  2163.                         | PMA_PMK_INT_Qq
-  2164.                         | PMA_PMK_INT_Qq+1
-  2165.                         | PMD_PME_PML_Qq
-  2166.                         | PMD_PME_PML_Qq+1 =>
-  2167.                         set_line_at(first_tab);
-  2168.                      when TO_Kq =>
-  2169.                         set_line_at(jump_tab);
-  2170.                      when others =>
-  2171.                         if panel_logger.column < first_tab then
-  2172.                            set_line_at_minimum(first_tab);
-  2173.                         end if;
-  2174.                   end case;
-  2175.                when normal_jump_order =>
-  2176.                   set_line_at(jump_tab);
-  2177.             end case;
-  2178.
-  2179.             -- Show the order in pseudo-Usercode format.
-  2180.             log(the_full_name_of(INS, octal_option));
-  2181.             log(closer(INS, address, octal_option));
-  2182.
-  2183.             case INS.kind is
-  2184.                when one_syllable_order =>
-  2185.                   increment_by_1(address);
-  2186.                when two_syllable_order =>
-  2187.                   increment_by_2(address);
-  2188.                when normal_jump_order | data_access_order =>
-  2189.                   increment_by_3(address);
-  2190.             end case;
-  2191.
-  2192.             if address.code_address = last.code_address then
-  2193.                -- All done with this block.
-  2194.                log_new_line;
-  2195.                return;
-  2196.             end if;
-  2197.
-  2198.             if (address.code_address+1)/is_a_data_word then
-  2199.                -- We have reached the end of the orders and are about to run into data.
-  2200.                return;
-  2201.             end if;
-  2202.
-  2203.             if is_a_store_order(INS)                                                 or else
-  2204.                   (INS.kind = two_syllable_order and INS.compressed_opcode = JCqNZS) or else
-  2205.                      INS.kind = normal_jump_order                                    or else
-  2206.                         panel_logger.column > last_column                               then
-  2207.                -- Make store to core and jump orders end their line for best visibility.
-  2208.                log_new_line;
-  2209.             elsif this_word = comparator and this_word /= prev_word then
-  2210.                -- Display the placeholder of a suppressed group of equal words.
-  2211.                log_new_line;
-  2212.                log_line("==========  #"
-  2213.                       & oct_of(KDF9.syllable(this_word and 255))
-  2214.                       & "  ==========");
-  2215.                address := (address.code_address+1, 0);
-  2216.                if address.code_address > last.code_address or else
-  2217.                      address.code_address/is_a_data_word           then
-  2218.                   -- We have reached the end of the orders or are about to run into data.
-  2219.                   return;
-  2220.                end if;
-  2221.             end if;
-  2222.             prev_word := this_word;
-  2223.
-  2224.          end loop;
-  2225.
-  2226.       end show_a_block_of_orders;
-  2227.
-  2228.    begin -- show_core_as_Usercode
-  2229.       if not the_program_has_been_analysed then
-  2230.          mark_all_code_blocks_and_data_blocks(pre_run => False);
-  2231.       end if;
-  2232.       if the_program_has_been_analysed then
-  2233.          log_line("Core store interpreted as instructions.");
-  2234.           -- Ensure that physical store is examined when running in boot mode.
-  2235.          BA := 0;
-  2236.          address := first;
-  2237.          loop
-  2238.             show_a_block_of_orders(address);
-  2239.             exit when address.code_address >= last.code_address;
-  2240.          end loop;
-  2241.          log_new_line;
-  2242.          log_rule;
-  2243.       else
-  2244.          log_line(" ... Core store cannot be interpreted as instructions!");
-  2245.          log_new_line;
-  2246.       end if;
-  2247.
-  2248.       -- Restore NIA to its correct value for execution.
-  2249.       set_NIA_to((0, syllable_index => 0));
-  2250.    end show_core_as_Usercode;
-  2251.
-  2252.    procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
-  2253.
-  2254.       address     :   KDF9.syllable_address;
-  2255.
-  2256.       procedure show_a_block is
-  2257.
-  2258.          procedure set_line_at (tab : Natural) is
-  2259.          begin  -- set_line_at
-  2260.             if panel_logger.column > tab then
-  2261.                log_new_line;
-  2262.             end if;
-  2263.             if panel_logger.column < tab then
-  2264.                tab_log_to(tab);
-  2265.             end if;
-  2266.          end set_line_at;
-  2267.
-  2268.       begin  -- show_a_block
-  2269.          loop
-  2270.             if address.syllable_index = 0 then
-  2271.                log_new_line;
-  2272.                log(oct_of(address) & ": ");
-  2273.                set_line_at(jump_tab);
-  2274.             end if;
-  2275.             log(oct_of(fetch_syllable(address)) &  "; ");
-  2276.             increment_by_1(address);
-  2277.          exit when address.code_address > last.code_address;
-  2278.          end loop;
-  2279.          log_new_line;
-  2280.       end show_a_block;
-  2281.
-  2282.     begin  -- show_core_as_syllables
-  2283.        BA := 0; -- Ensure that physical store is examined when running in boot mode.
-  2284.       log_line("Core store interpreted as order syllables.");
-  2285.       address := first;
-  2286.       loop
-  2287.          show_a_block;
-  2288.          exit when address.code_address > last.code_address;
-  2289.       end loop;
-  2290.       log_new_line;
-  2291.       log_rule;
-  2292.    end show_core_as_syllables;
-  2293.
-  2294.    procedure poke (address    : in KDF9.address;
-  2295.                    sub_word   : in sub_word_flag;
-  2296.                    position   : in KDF9.address;
-  2297.                    value      : in KDF9.word) is
-  2298.    begin
-  2299.       case sub_word is
-  2300.          when 'W' | 'w' =>
-  2301.             store_word(value, address);
-  2302.          when 'U' | 'u' =>
-  2303.             store_halfword(value*2**24, address, 0);
-  2304.          when 'L' | 'l' =>
-  2305.             store_halfword(value*2**24, address, 1);
-  2306.          when 'S' | 's' =>
-  2307.             store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
-  2308.          when 'C' | 'c' =>
-  2309.             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
-  2310.       end case;
-  2311.    end poke;
-  2312.
-  2313. end state_display;
+  1861.
+  1862.    procedure markup_a_problem_program is
+  1863.    begin
+  1864.       if the_initial_jump_was_corrupted then
+  1865.          -- We cannot sensibly locate the order words using E0  ...
+  1866.          log_new_line;
+  1867.          log_line("The initial jump, in E0U, has been corrupted!");
+  1868.          log_new_line;
+  1869.          show_core_as_syllables((0, syllable_index => 0), (0, syllable_index => 5));
+  1870.          --  ... so restore it to the value it had on loading.
+  1871.          restore_the_initial_jump;
+  1872.          log_line("E0U has been restored to the value it had on loading.");
+  1873.          log_new_line;
+  1874.       end if;
+  1875.
+  1876.       if last_P_number = 0 then
+  1877.          -- There is no symbol table, so we have to do a flow analysis.
+  1878.          -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
+  1879.
+  1880.          mark_the_words_reachable_from((0, syllable_index => 0));
+  1881.          mark_the_words_reachable_from((4, syllable_index => 0));
+  1882.          mark_the_words_reachable_from((4, syllable_index => 3));
+  1883.
+  1884.          -- Mark the words between E0 and P0 as data, skipping E4.
+  1885.          mark_as_a_data_word(1);
+  1886.          mark_as_a_data_word(2);
+  1887.          mark_as_a_data_word(3);
+  1888.          set_NIA_to((0, syllable_index => 0));
+  1889.          decode_the_next_order;
+  1890.          for d in 5 .. INS.target.code_address-1 loop
+  1891.             mark_as_a_data_word(d);
+  1892.          end loop;
+  1893.
+  1894.       else
+  1895.          -- We have a symbol table, enable 100% accurate markup.
+  1896.          do_symbol_table_based_markup;
+  1897.          mark_as_a_code_word(0);
+  1898.          mark_as_a_data_word(1);
+  1899.          mark_as_a_data_word(2);
+  1900.          mark_as_a_data_word(3);
+  1901.          mark_as_a_code_word(4);
+  1902.          mark_as_a_data_word(5);
+  1903.          mark_as_a_data_word(6);
+  1904.          mark_as_a_data_word(7);
+  1905.       end if;
+  1906.
+  1907.       the_program_has_been_analysed := True;
+  1908.    end markup_a_problem_program;
+  1909.
+  1910.    -- This analysis assumes that the Director has much the same structure as KKT40E007UPU.
+  1911.    procedure markup_a_Director (pre_run : in Boolean) is
+  1912.    begin
+  1913.       the_program_has_been_analysed := False;
+  1914.       BA := 0;  -- Director starts at physical word 0.
+  1915.
+  1916.       -- It does not have a jump in E0U, unlike problem programs.
+  1917.       -- Instead it has a fixed sequence of orders to reset the hardware.
+  1918.       -- Before intialization, it is: K4; SHL+63; =+Q0; with the code: #3740416437675016.
+  1919.       -- After intialization,  it is: Q0; SHL+63; =+Q0; with the code: #3620716437675016.
+  1920.
+  1921.        -- Check that we do actually have a Director to examine.
+  1922.
+  1923.       if pre_run then
+  1924.          if fetch_word(0) /= 8#3740416437675016# then
+  1925.             log_line("The loaded program is not a Director bootstrap!");
+  1926.             return;
+  1927.          else
+  1928.             log_line("The loaded program is a Director bootstrap.");
+  1929.          end if;
+  1930.
+  1931.          -- The jumps in E2 and E4 are absent until after Director's initialzation,
+  1932.          --    so they are not present in a pre-run state.
+  1933.          -- All 9 words of the bootstrap are filled with instructions.
+  1934.          for w in code_address'(0) .. 8 loop
+  1935.             mark_as_a_code_word(w);
+  1936.          end loop;
+  1937.          mark_as_a_jump_target((0, 0));
+  1938.          the_program_has_been_analysed := True;
+  1939.          return;
+  1940.       end if;
+  1941.
+  1942.       if fetch_word(0) /= 8#3620716437675016# then
+  1943.          log_line("The loaded program is not a Director!");
+  1944.          return;
+  1945.       else
+  1946.          log_line("The loaded program is a Director.");
+  1947.       end if;
+  1948.
+  1949.       -- An initialised Director has a number of jumps in words 2 and 4, but not word 0.
+  1950.       -- Give up if these are absent.
+  1951.
+  1952.       set_NIA_to((2, syllable_index => 0));
+  1953.       decode_the_next_order;
+  1954.       if INS.kind /= normal_jump_order then
+  1955.          log_line("An expected jump, in E2U, has not been found!");
+  1956.          return;
+  1957.       end if;
+  1958.       mark_as_a_jump_target((2, syllable_index => 0));
+  1959.       mark_the_words_reachable_from((2, syllable_index => 0));
+  1960.       mark_as_a_jump_target(INS.target);
+  1961.       set_NIA_to((4, syllable_index => 0));
+  1962.       decode_the_next_order;
+  1963.       if INS.kind /= normal_jump_order then
+  1964.          log_line("An expected jump, in E4U, has not been found!");
+  1965.          return;
+  1966.       end if;
+  1967.       mark_as_a_jump_target((4, syllable_index => 0));
+  1968.       mark_the_words_reachable_from((4, syllable_index => 0));
+  1969.       mark_as_a_jump_target(INS.target);
+  1970.
+  1971.       set_NIA_to((4, syllable_index => 3));
+  1972.       decode_the_next_order;
+  1973.       if INS.kind /= normal_jump_order then
+  1974.          log_line("An expected jump, in E4L, has not been found!");
+  1975.          return;
+  1976.       end if;
+  1977.       mark_as_a_jump_target((4, syllable_index => 3));
+  1978.       mark_the_words_reachable_from((4, syllable_index => 3));
+  1979.       mark_as_a_jump_target(INS.target);
+  1980.
+  1981.       -- E0 is marked because interrupts cause a jump to it, in effect.
+  1982.       mark_as_a_jump_target((0, syllable_index => 0));
+  1983.
+  1984.       -- Mark E3 and E5 through AP0 - 1 as data words.
+  1985.       mark_as_a_data_word(3);
+  1986.       set_NIA_to((2, 0));
+  1987.       decode_the_next_order;
+  1988.       for d in 5 .. INS.target.code_address-1 loop
+  1989.          mark_as_a_data_word(d);
+  1990.       end loop;
+  1991.
+  1992.       the_program_has_been_analysed := True;
+  1993.    end markup_a_Director;
+  1994.
+  1995.    procedure mark_all_code_blocks_and_data_blocks (pre_run : in Boolean) is
+  1996.    begin
+  1997.       clear_all_analysis_flags;
+  1998.       if the_execution_mode = boot_mode  then
+  1999.          markup_a_Director(pre_run);
+  2000.       else
+  2001.          markup_a_problem_program;
+  2002.       end if;
+  2003.    end mark_all_code_blocks_and_data_blocks;
+  2004.
+  2005.    procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
+  2006.                                     octal_option : in Boolean) is
+  2007.
+  2008.       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
+  2009.       prev_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
+  2010.       comparator  : KDF9.word := prev_word;
+  2011.       address     : KDF9.syllable_address;
+  2012.       this_word   : KDF9.word;
+  2013.
+  2014.       procedure show_a_block_of_orders (address : in out KDF9.syllable_address) is
+  2015.
+  2016.          function is_a_store_order (decoded : KDF9.decoded_order)
+  2017.          return Boolean
+  2018.          is (
+  2019.              if decoded.kind = one_syllable_order then
+  2020.                 False
+  2021.              elsif decoded.kind = two_syllable_order then
+  2022.                 (
+  2023.                  case decoded.compressed_opcode is
+  2024.                    when TO_MkMq   | TO_MkMqQ
+  2025.                       | TO_MkMqH  | TO_MkMqQH
+  2026.                       | TO_MkMqN  | TO_MkMqQN
+  2027.                       | TO_MkMqHN | TO_MkMqQHN
+  2028.                       | TO_Kq     | TO_LINK    => True,
+  2029.                    when others                 => False
+  2030.                 )
+  2031.              elsif decoded.kind = data_access_order then
+  2032.                 (
+  2033.                  case decoded.compressed_opcode is
+  2034.                     when TO_EaMq | TO_EaMqQ => True,
+  2035.                     when others             => False
+  2036.                 )
+  2037.              else
+  2038.                 False
+  2039.             );
+  2040.
+  2041.          procedure set_line_at_minimum (tab : in Natural) is
+  2042.          begin
+  2043.             if panel_logger.column < tab then
+  2044.                tab_log_to(tab);
+  2045.             end if;
+  2046.          end set_line_at_minimum;
+  2047.
+  2048.          procedure set_line_at (tab : in Natural) is
+  2049.          begin
+  2050.             if panel_logger.column > tab then
+  2051.                log_new_line;
+  2052.             end if;
+  2053.             if panel_logger.column < tab then
+  2054.                tab_log_to(tab);
+  2055.             end if;
+  2056.          end set_line_at;
+  2057.
+  2058.          procedure set_at_new_line is
+  2059.          begin
+  2060.             if panel_logger.column > 1 then
+  2061.                log_new_line;
+  2062.             end if;
+  2063.          end set_at_new_line;
+  2064.
+  2065.          last_nz_location : KDF9.syllable_address;
+  2066.
+  2067.       begin -- show_a_block_of_orders
+  2068.          this_word := fetch_word(KDF9.address(address.code_address));
+  2069.
+  2070.          -- Handle data words and dummy words.
+  2071.          if address.code_address/is_a_data_word then
+  2072.             set_at_new_line;
+  2073.          elsif this_word in not 0 | 0 | six_DUMMIES then
+  2074.             -- The word is not worth logging.  Step on.
+  2075.             address := (address.code_address+1, 0);
+  2076.             return;
+  2077.          end if;
+  2078.
+  2079.          loop
+  2080.             if address.code_address/is_a_data_word then
+  2081.                last_nz_location := address;
+  2082.
+  2083.                -- Display a line of data.
+  2084.                log(oct_or_dec_of(address, octal_option) & ": ");
+  2085.                set_line_at(jump_tab);
+  2086.                show_in_various_formats(fetch_word(KDF9.address(address.code_address)),
+  2087.                                        column => jump_tab);
+  2088.                log_new_line;
+  2089.
+  2090.                -- Skip over any following zero words (DUMMY0 or uninitialized V stores).
+  2091.                loop
+  2092.                   if address.code_address = last.code_address then
+  2093.                      -- The whole block has been processed.
+  2094.                      return;
+  2095.                   end if;
+  2096.                   address := (address.code_address+1, 0);
+  2097.                exit when fetch_word(KDF9.address(address.code_address)) /= 0;
+  2098.                end loop;
+  2099.                if address.code_address > last_nz_location.code_address+1 then
+  2100.                   log("========  zeros  ========");
+  2101.                   log_new_line;
+  2102.                end if;
+  2103.             else
+  2104.                -- We have found an instruction word.
+  2105.                log_new_line;
+  2106.          exit;
+  2107.             end if;
+  2108.          end loop;
+  2109.
+  2110.          -- Handle instruction words.
+  2111.          loop
+  2112.          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
+  2113.          exit when address.code_address = 8191;
+  2114.             this_word := fetch_word(KDF9.address(address.code_address));
+  2115.
+  2116.             -- Suppress output of more than 1 of a block of equal values.
+  2117.             if this_word = comparator and this_word = prev_word then
+  2118.                -- The word is not worth logging.  Step on.
+  2119.                address := (address.code_address+1, 0);
+  2120.                return;
+  2121.             end if;
+  2122.
+  2123.             if this_word in not 0 | 0 | six_DUMMIES then
+  2124.                -- Take this word as the new basis for comparison.
+  2125.                comparator := this_word;
+  2126.             end if;
+  2127.
+  2128.             -- This updates the Instruction word buffers.  Nasty side effect that has to be undone!
+  2129.             set_NIA_to(address);
+  2130.             decode_the_next_order;
+  2131.             if is_an_invalid_order(INS) then
+  2132.                -- The word is not worth logging.  Step on.
+  2133.                address := (address.code_address+1, 0);
+  2134.                return;
+  2135.             end if;
+  2136.
+  2137.             if is_a_jump_target(address) then
+  2138.                -- Jumps go at the start of a fresh line for best visibility.
+  2139.                -- Label the jump with its address at the start of the line for easy reference.
+  2140.                set_at_new_line;
+  2141.                log(oct_or_dec_of(address, octal_option) & ": ");
+  2142.                log_new_line;
+  2143.             end if;
+  2144.
+  2145.             -- Set the tab position appropriately for the order type.
+  2146.             case INS.kind is
+  2147.                when one_syllable_order | data_access_order =>
+  2148.                   set_line_at_minimum(first_tab);
+  2149.                when two_syllable_order =>
+  2150.                   case INS.compressed_opcode is
+  2151.                      when JCqNZS =>
+  2152.                         set_line_at(jump_tab);
+  2153.                      when CT_PMB_PMC_BUSY_Qq
+  2154.                         | PAR_Qq
+  2155.                         | PMF_PMG_Qq
+  2156.                         | PIA_PIC_CLO_TLO_Qq
+  2157.                         | PIB_PID_Qq
+  2158.                         | PIE_PIG_Qq
+  2159.                         | PIF_PIH_Qq
+  2160.                         | POA_POC_POE_POF_PMH_Qq
+  2161.                         | POB_POD_Qq
+  2162.                         | POG_POL_Qq
+  2163.                         | POH_POK_Qq
+  2164.                         | PMA_PMK_INT_Qq
+  2165.                         | PMA_PMK_INT_Qq+1
+  2166.                         | PMD_PME_PML_Qq
+  2167.                         | PMD_PME_PML_Qq+1 =>
+  2168.                         set_line_at(first_tab);
+  2169.                      when TO_Kq =>
+  2170.                         set_line_at(jump_tab);
+  2171.                      when others =>
+  2172.                         if panel_logger.column < first_tab then
+  2173.                            set_line_at_minimum(first_tab);
+  2174.                         end if;
+  2175.                   end case;
+  2176.                when normal_jump_order =>
+  2177.                   set_line_at(jump_tab);
+  2178.             end case;
+  2179.
+  2180.             -- Show the order in pseudo-Usercode format.
+  2181.             log(the_full_name_of(INS, octal_option));
+  2182.             log(closer(INS, address, octal_option));
+  2183.
+  2184.             case INS.kind is
+  2185.                when one_syllable_order =>
+  2186.                   increment_by_1(address);
+  2187.                when two_syllable_order =>
+  2188.                   increment_by_2(address);
+  2189.                when normal_jump_order | data_access_order =>
+  2190.                   increment_by_3(address);
+  2191.             end case;
+  2192.
+  2193.             if address.code_address = last.code_address then
+  2194.                -- All done with this block.
+  2195.                log_new_line;
+  2196.                return;
+  2197.             end if;
+  2198.
+  2199.             if (address.code_address+1)/is_a_data_word then
+  2200.                -- We have reached the end of the orders and are about to run into data.
+  2201.                return;
+  2202.             end if;
+  2203.
+  2204.             if is_a_store_order(INS)                                                 or else
+  2205.                   (INS.kind = two_syllable_order and INS.compressed_opcode = JCqNZS) or else
+  2206.                      INS.kind = normal_jump_order                                    or else
+  2207.                         panel_logger.column > last_column                               then
+  2208.                -- Make store to core and jump orders end their line for best visibility.
+  2209.                log_new_line;
+  2210.             elsif this_word = comparator and this_word /= prev_word then
+  2211.                -- Display the placeholder of a suppressed group of equal words.
+  2212.                log_new_line;
+  2213.                log_line("==========  #"
+  2214.                       & oct_of(KDF9.syllable(this_word and 255))
+  2215.                       & "  ==========");
+  2216.                address := (address.code_address+1, 0);
+  2217.                if address.code_address > last.code_address or else
+  2218.                      address.code_address/is_a_data_word           then
+  2219.                   -- We have reached the end of the orders or are about to run into data.
+  2220.                   return;
+  2221.                end if;
+  2222.             end if;
+  2223.             prev_word := this_word;
+  2224.
+  2225.          end loop;
+  2226.
+  2227.       end show_a_block_of_orders;
+  2228.
+  2229.    begin -- show_core_as_Usercode
+  2230.       if not the_program_has_been_analysed then
+  2231.          mark_all_code_blocks_and_data_blocks(pre_run => False);
+  2232.       end if;
+  2233.       if the_program_has_been_analysed then
+  2234.          log_line("Core store interpreted as instructions.");
+  2235.           -- Ensure that physical store is examined when running in boot mode.
+  2236.          BA := 0;
+  2237.          address := first;
+  2238.          loop
+  2239.             show_a_block_of_orders(address);
+  2240.             exit when address.code_address >= last.code_address;
+  2241.          end loop;
+  2242.          log_new_line;
+  2243.          log_rule;
+  2244.       else
+  2245.          log_line(" ... Core store cannot be interpreted as instructions!");
+  2246.          log_new_line;
+  2247.       end if;
+  2248.
+  2249.       -- Restore NIA to its correct value for execution.
+  2250.       set_NIA_to((0, syllable_index => 0));
+  2251.    end show_core_as_Usercode;
+  2252.
+  2253.    procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
+  2254.
+  2255.       address     :   KDF9.syllable_address;
+  2256.
+  2257.       procedure show_a_block is
+  2258.
+  2259.          procedure set_line_at (tab : Natural) is
+  2260.          begin  -- set_line_at
+  2261.             if panel_logger.column > tab then
+  2262.                log_new_line;
+  2263.             end if;
+  2264.             if panel_logger.column < tab then
+  2265.                tab_log_to(tab);
+  2266.             end if;
+  2267.          end set_line_at;
+  2268.
+  2269.       begin  -- show_a_block
+  2270.          loop
+  2271.             if address.syllable_index = 0 then
+  2272.                log_new_line;
+  2273.                log(oct_of(address) & ": ");
+  2274.                set_line_at(jump_tab);
+  2275.             end if;
+  2276.             log(oct_of(fetch_syllable(address)) &  "; ");
+  2277.             increment_by_1(address);
+  2278.          exit when address.code_address > last.code_address;
+  2279.          end loop;
+  2280.          log_new_line;
+  2281.       end show_a_block;
+  2282.
+  2283.     begin  -- show_core_as_syllables
+  2284.        BA := 0; -- Ensure that physical store is examined when running in boot mode.
+  2285.       log_line("Core store interpreted as order syllables.");
+  2286.       address := first;
+  2287.       loop
+  2288.          show_a_block;
+  2289.          exit when address.code_address > last.code_address;
+  2290.       end loop;
+  2291.       log_new_line;
+  2292.       log_rule;
+  2293.    end show_core_as_syllables;
+  2294.
+  2295.    procedure poke (address    : in KDF9.address;
+  2296.                    sub_word   : in sub_word_flag;
+  2297.                    position   : in KDF9.address;
+  2298.                    value      : in KDF9.word) is
+  2299.    begin
+  2300.       case sub_word is
+  2301.          when 'W' | 'w' =>
+  2302.             store_word(value, address);
+  2303.          when 'U' | 'u' =>
+  2304.             store_halfword(value*2**24, address, 0);
+  2305.          when 'L' | 'l' =>
+  2306.             store_halfword(value*2**24, address, 1);
+  2307.          when 'S' | 's' =>
+  2308.             store_syllable(KDF9.syllable(value), address, KDF9.syllable_index(position));
+  2309.          when 'C' | 'c' =>
+  2310.             store_symbol(KDF9_char_sets.symbol(value), address, KDF9_char_sets.symbol_index(position));
+  2311.       end case;
+  2312.    end poke;
+  2313.
+  2314. end state_display;
 
 Compiling: ../Source/state_display.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Provide the comprehensive machine-state display panel KDF9 never had.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -11806,5046 +12867,16 @@ Compiled at: 2021-05-29 19:07:07
    102.
    103. end state_display;
 
- 2313 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/generic_logger.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide operations supporting replicated output to a list of logging interfaces.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. -- generic
-    18. --    max_logger_list_size : in Positive;
-    19. package body generic_logger is
-    20.
-    21.    not overriding
-    22.    procedure set_logger_list (logger : in out replicator; list : in distribution_list) is
-    23.    begin
-    24.       logger.data := (list'Length, list);
-    25.    end set_logger_list;
-    26.
-    27.    overriding
-    28.    procedure tab_log (logger   : in out replicator;
-    29.                       at_least : in Natural;
-    30.                       spacing  : in Positive;
-    31.                       iff      : in Boolean := True) is
-    32.    begin
-    33.       for l in logger.data.list'Range loop
-    34.          logger.data.list(l).tab_log(at_least, spacing, iff);
-    35.       end loop;
-    36.    end tab_log;
-    37.
-    38.    overriding
-    39.    procedure tab_log_to (logger : in out replicator;
-    40.                          column : in Positive;
-    41.                          iff    : in Boolean := True) is
-    42.    begin
-    43.       for l in logger.data.list'Range loop
-    44.          logger.data.list(l).tab_log_to(column, iff);
-    45.       end loop;
-    46.    end tab_log_to;
-    47.
-    48.    overriding
-    49.    procedure log (logger : in out replicator;
-    50.                   char   : in Character;
-    51.                   iff    : in Boolean := True) is
-    52.    begin
-    53.       for l in logger.data.list'Range loop
-    54.          logger.data.list(l).log(char, iff);
-    55.       end loop;
-    56.    end log;
-    57.
-    58.    overriding
-    59.    procedure log (logger : in out replicator;
-    60.                   text   : in String;
-    61.                   iff    : in Boolean := True) is
-    62.    begin
-    63.       for l in logger.data.list'Range loop
-    64.          logger.data.list(l).log(text, iff);
-    65.       end loop;
-    66.    end log;
-    67.
-    68.    overriding
-    69.    procedure log_new_line (logger : in out replicator;
-    70.                            iff    : in Boolean := True) is
-    71.    begin
-    72.       for l in logger.data.list'Range loop
-    73.          logger.data.list(l).log_new_line(iff);
-    74.       end loop;
-    75.    end log_new_line;
-    76.
-    77.    overriding
-    78.    procedure open (logger : in out replicator; log_name : in String) is
-    79.    begin
-    80.       for l in logger.data.list'Range loop
-    81.          logger.data.list(l).open(log_name);
-    82.       end loop;
-    83.    end open;
-    84.
-    85.    overriding
-    86.    procedure close (logger : in out replicator; log_name : in String) is
-    87.    begin
-    88.       for l in logger.data.list'Range loop
-    89.          logger.data.list(l).close(log_name);
-    90.       end loop;
-    91.    end close;
-    92.
-    93.    overriding
-    94.    procedure flush (logger : in out replicator; iff : in Boolean := True) is
-    95.    begin
-    96.       for l in logger.data.list'Range loop
-    97.          logger.data.list(l).flush(iff);
-    98.       end loop;
-    99.    end flush;
-   100.
-   101. end generic_logger;
-
-Compiling: ../Source/generic_logger.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide operations supporting replicated output to a list of logging interfaces.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with logging;
-    18.
-    19. generic
-    20.    max_logger_list_size : in Positive;
-    21. package generic_logger is
-    22.
-    23.    type distribution_list is array (Positive range <>) of access logging.output'Class;
-    24.
-    25.    type replicator is new logging.output with private;
-    26.
-    27.    not overriding
-    28.    procedure set_logger_list (logger : in out replicator; list : in distribution_list);
-    29.
-    30.    overriding
-    31.    procedure tab_log (logger   : in out replicator;
-    32.                       at_least : in Natural;
-    33.                       spacing  : in Positive;
-    34.                       iff      : in Boolean := True);
-    35.
-    36.    overriding
-    37.    procedure tab_log_to (logger : in out replicator;
-    38.                          column : in Positive;
-    39.                          iff    : in Boolean := True);
-    40.
-    41.    overriding
-    42.    procedure log (logger : in out replicator;
-    43.                   char   : in Character;
-    44.                   iff    : in Boolean := True);
-    45.
-    46.    overriding
-    47.    procedure log (logger : in out replicator;
-    48.                   text   : in String;
-    49.                   iff    : in Boolean := True);
-    50.
-    51.    overriding
-    52.    procedure log_new_line (logger : in out replicator;
-    53.                            iff    : in Boolean := True);
-    54.
-    55.    overriding
-    56.    procedure open  (logger : in out replicator; log_name : in String);
-    57.
-    58.    overriding
-    59.    procedure close (logger : in out replicator; log_name : in String);
-    60.
-    61.    overriding
-    62.    procedure flush (logger : in out replicator; iff : in Boolean := True);
-    63.
-    64. private
-    65.
-    66.    subtype logger_list_size is Natural range 0 .. max_logger_list_size;
-    67.
-    68.    -- This type is needed because tagged types cannot have discriminants.
-    69.    type replica_list (length : logger_list_size := 0) is
-    70.       record
-    71.          list : distribution_list(1 .. length);
-    72.       end record;
-    73.
-    74.    type replicator is new logging.output with
-    75.       record
-    76.          data : replica_list;
-    77.       end record;
-    78.
-    79. end generic_logger;
-
- 101 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/logging.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Define an abstract log output device.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package logging is
-    18.
-    19.    type output is interface;
-    20.
-    21.    procedure tab_log (logger   : in out logging.output;
-    22.                       at_least : in Natural;
-    23.                       spacing  : in Positive;
-    24.                       iff      : in Boolean := True) is abstract;
-    25.
-    26.    procedure tab_log_to (logger : in out logging.output;
-    27.                          column : in Positive;
-    28.                          iff    : in Boolean := True) is abstract;
-    29.
-    30.    procedure log (logger : in out logging.output;
-    31.                   char   : in Character;
-    32.                   iff    : in Boolean := True) is abstract;
-    33.
-    34.    procedure log (logger : in out logging.output;
-    35.                   text   : in String;
-    36.                   iff    : in Boolean := True) is abstract;
-    37.
-    38.    procedure log_new_line (logger : in out logging.output;
-    39.                            iff    : in Boolean := True) is abstract;
-    40.
-    41.    procedure open  (logger : in out logging.output; log_name : in String) is abstract;
-    42.
-    43.    procedure close (logger : in out logging.output; log_name : in String) is abstract;
-    44.
-    45.    procedure flush (logger : in out logging.output; iff : in Boolean := True) is abstract;
-    46.
-    47. end logging;
-
- 47 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/logging-file.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide logging output to a named text file.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Text_IO;
-    18. with Ada.Unchecked_Deallocation;
-    19. --
-    20. with file_interfacing;
-    21.
-    22. use  Ada.Text_IO;
-    23. --
-    24. use  file_interfacing;
-    25.
-    26. package body logging.file is
-    27.
-    28.    overriding
-    29.    procedure tab_log (logger   : in out file.output;
-    30.                       at_least : in Natural;
-    31.                       spacing  : in Positive;
-    32.                       iff      : in Boolean := True) is
-    33.       column_nr : constant Positive_Count := Col(logger.the_log.all) + Count(at_least);
-    34.       excess    : constant Count          := column_nr mod Count(spacing);
-    35.    begin
-    36.       if not iff or logger.log_file_is_shut then return; end if;
-    37.       Set_Col(logger.the_log.all, column_nr);
-    38.       if excess /= 0 then
-    39.          Set_Col(logger.the_log.all, column_nr + Count(spacing) - excess);
-    40.       end if;
-    41.    end tab_log;
-    42.
-    43.    overriding
-    44.    procedure tab_log_to (logger : in out file.output;
-    45.                          column : in Positive;
-    46.                          iff    : in Boolean := True) is
-    47.    begin
-    48.       if not iff or logger.log_file_is_shut then return; end if;
-    49.       Set_Col(logger.the_log.all, Positive_Count(column));
-    50.    end tab_log_to;
-    51.
-    52.    overriding
-    53.    procedure log_new_line (logger : in out file.output;
-    54.                            iff    : in Boolean := True) is
-    55.    begin
-    56.       if not iff or logger.log_file_is_shut then return; end if;
-    57.       New_Line(logger.the_log.all);
-    58.    end log_new_line;
-    59.
-    60.    overriding
-    61.    procedure log (logger : in out file.output;
-    62.                   char   : in Character;
-    63.                   iff    : in Boolean := True) is
-    64.    begin
-    65.       if not iff or logger.log_file_is_shut then return; end if;
-    66.       Put(logger.the_log.all, char);
-    67.    end log;
-    68.
-    69.    overriding
-    70.    procedure log (logger : in out file.output;
-    71.                   text   : in String;
-    72.                   iff    : in Boolean := True) is
-    73.    begin
-    74.       if not iff or logger.log_file_is_shut then return; end if;
-    75.       Put(logger.the_log.all, text);
-    76.    end log;
-    77.
-    78.    overriding
-    79.    procedure open (logger : in out file.output; logfile_name : in String) is
-    80.    begin
-    81.       if logger.log_file_is_shut then
-    82.          logger.the_log := new Ada.Text_IO.File_Type;
-    83.          file_interfacing.initialize(logger.the_log.all, out_file, logfile_name);
-    84.          logger.log_file_is_shut := False;
-    85.       end if;
-    86.    end open;
-    87.
-    88.    overriding
-    89.    procedure close (logger : in out file.output; logfile_name : in String) is
-    90.
-    91.       procedure free_log_file is
-    92.          new Ada.Unchecked_Deallocation(Ada.Text_IO.File_Type, File_Type_access);
-    93.
-    94.    begin
-    95.       if logger.log_file_is_shut then return; end if;
-    96.       file_interfacing.finalize(logger.the_log.all, logfile_name);
-    97.       free_log_file(logger.the_log);
-    98.       logger.log_file_is_shut := True;
-    99.    end close;
-   100.
-   101.    overriding
-   102.    procedure flush (logger : in out file.output; iff : in Boolean := True) is
-   103.    begin
-   104.       if not iff or logger.log_file_is_shut then return; end if;
-   105.       Flush(logger.the_log.all);
-   106.    end flush;
-   107.
-   108. end logging.file;
-
-Compiling: ../Source/logging-file.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide logging output to a named text file.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. private with Ada.Text_IO;
-    18.
-    19. package logging.file is
-    20.
-    21.    type output is new logging.output with private;
-    22.
-    23.    overriding
-    24.    procedure tab_log (logger   : in out file.output;
-    25.                       at_least : in Natural;
-    26.                       spacing  : in Positive;
-    27.                       iff      : in Boolean := True);
-    28.
-    29.    overriding
-    30.    procedure tab_log_to (logger : in out file.output;
-    31.                          column : in Positive;
-    32.                          iff    : in Boolean := True);
-    33.
-    34.    overriding
-    35.    procedure log (logger : in out file.output;
-    36.                   char   : in Character;
-    37.                   iff    : in Boolean := True);
-    38.
-    39.    overriding
-    40.    procedure log (logger : in out file.output;
-    41.                   text   : in String;
-    42.                   iff    : in Boolean := True);
-    43.
-    44.    overriding
-    45.    procedure log_new_line (logger : in out file.output;
-    46.                            iff    : in Boolean := True);
-    47.
-    48.    overriding
-    49.    procedure open  (logger : in out file.output; logfile_name : in String);
-    50.
-    51.    overriding
-    52.    procedure close (logger : in out file.output; logfile_name : in String);
-    53.
-    54.    overriding
-    55.    procedure flush (logger : in out file.output; iff    : in Boolean := True);
-    56.
-    57. private
-    58.
-    59.    type File_Type_access is access Ada.Text_IO.File_Type;
-    60.
-    61.    type output is new logging.output with
-    62.       record
-    63.          log_file_is_shut : Boolean := True;
-    64.          the_log          : file.File_Type_access;
-    65.       end record;
-    66.
-    67. end logging.file;
-
- 108 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/logging-panel.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide logging output to an interactive terminal/control panel.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with POSIX;
-    18. with settings;
-    19.
-    20. use  POSIX;
-    21. use  settings;
-    22.
-    23. package body logging.panel is
-    24.
-    25.    not overriding
-    26.    function column (logger : panel.display)
-    27.    return Positive
-    28.    is (logger.column_number);
-    29.
-    30.    overriding
-    31.    procedure tab_log (logger   : in out panel.display;
-    32.                       at_least : in Natural;
-    33.                       spacing  : in Positive;
-    34.                       iff      : in Boolean := True) is
-    35.       new_col : constant Natural := logger.column_number + at_least;
-    36.       deficit : constant Natural := (spacing - new_col mod spacing) mod spacing;
-    37.    begin
-    38.       if not iff then return; end if;
-    39.       for i in logger.column_number .. (new_col + deficit) loop
-    40.          POSIX.output(' ');
-    41.       end loop;
-    42.       logger.column_number := new_col + deficit;
-    43.    end tab_log;
-    44.
-    45.    overriding
-    46.    procedure tab_log_to (logger : in out panel.display;
-    47.                          column : in Positive;
-    48.                          iff    : in Boolean := True) is
-    49.    begin
-    50.       if not iff then return; end if;
-    51.       if column < logger.column_number then
-    52.          logger.log_new_line;
-    53.       end if;
-    54.       for i in logger.column_number .. column-1 loop
-    55.          POSIX.output(' ');
-    56.       end loop;
-    57.       logger.column_number := column;
-    58.    end tab_log_to;
-    59.
-    60.    overriding
-    61.    procedure log (logger : in out panel.display;
-    62.                   char   : in Character;
-    63.                   iff    : in Boolean := True) is
-    64.    begin
-    65.       if not iff then return; end if;
-    66.       POSIX.output(char);
-    67.       logger.column_number := logger.column_number + 1;
-    68.    end log;
-    69.
-    70.    overriding
-    71.    procedure log (logger : in out panel.display;
-    72.                   text   : in String;
-    73.                   iff    : in Boolean := True) is
-    74.    begin
-    75.       if not iff then return; end if;
-    76.       if text /= "" then
-    77.          POSIX.output(text);
-    78.       end if;
-    79.       logger.column_number := logger.column_number + text'Length;
-    80.    end log;
-    81.
-    82.    overriding
-    83.    procedure log_new_line (logger : in out panel.display;
-    84.                            iff    : in Boolean := True) is
-    85.    begin
-    86.       if not iff then return; end if;
-    87.       POSIX.output_line;
-    88.       logger.column_number := 1;
-    89.    end log_new_line;
-    90.
-    91.    not overriding
-    92.    procedure show_line (logger : in out panel.display; message : in String := "") is
-    93.    begin
-    94.       if message /= "" then
-    95.          logger.log(message);
-    96.       end if;
-    97.       logger.log_new_line;
-    98.    end show_line;
-    99.
-   100.    not overriding
-   101.    procedure interact (logger : in out panel.display; reason : in String := "Mode") is
-   102.       old_mode : constant settings.diagnostic_mode := the_diagnostic_mode;
-   103.       response : response_kind;
-   104.       choice   : Character;
-   105.    begin
-   106.    interaction_loop:
-   107.       loop
-   108.          logger.column_number := 1;
-   109.          POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
-   110.          if response = name_response then
-   111.             case choice is
-   112.                when 'q' | 'Q' =>
-   113.                   quit_was_requested := True;
-   114.                   exit interaction_loop;
-   115.                when 'd' | 'D' =>
-   116.                   debugging_is_enabled := not debugging_is_enabled;
-   117.                   exit interaction_loop;
-   118.                when 'f' | 'F' =>
-   119.                   set_diagnostic_mode(fast_mode);
-   120.                   exit interaction_loop;
-   121.                when 'p' | 'P' =>
-   122.                   set_diagnostic_mode(pause_mode);
-   123.                   exit interaction_loop;
-   124.                when 't' | 'T' =>
-   125.                   set_diagnostic_mode(trace_mode);
-   126.                   exit interaction_loop;
-   127.                when others =>
-   128.                   null; -- An invalid choice, try again.
-   129.             end case;
-   130.          elsif response = EOF_response then
-   131.             exit;
-   132.          end if;
-   133.       end loop interaction_loop;
-   134.       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
-   135.    end interact;
-   136.
-   137. end logging.panel;
-
-Compiling: ../Source/logging-panel.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Provide logging output to an interactive terminal/control panel.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package logging.panel is
-    18.
-    19.    type display is new logging.output with private;
-    20.
-    21.    not overriding
-    22.    function column (logger : panel.display)
-    23.    return Positive;
-    24.
-    25.    overriding
-    26.    procedure tab_log (logger   : in out panel.display;
-    27.                       at_least : in Natural;
-    28.                       spacing  : in Positive;
-    29.                       iff      : in Boolean := True);
-    30.
-    31.    overriding
-    32.    procedure tab_log_to (logger : in out panel.display;
-    33.                          column : in Positive;
-    34.                          iff    : in Boolean := True);
-    35.
-    36.    overriding
-    37.    procedure log (logger : in out panel.display;
-    38.                   char   : in Character;
-    39.                   iff    : in Boolean := True);
-    40.
-    41.    overriding
-    42.    procedure log (logger : in out panel.display;
-    43.                   text   : in String;
-    44.                   iff    : in Boolean := True);
-    45.
-    46.    overriding
-    47.    procedure log_new_line (logger : in out panel.display;
-    48.                            iff    : in Boolean := True);
-    49.
-    50.    not overriding
-    51.    procedure show_line (logger : in out panel.display; message : in String := "");
-    52.
-    53.    not overriding
-    54.    procedure interact (logger : in out panel.display; reason : in String := "Mode");
-    55.
-    56.    overriding
-    57.    procedure open (logger : in out panel.display; logfile_name : in String) is null;
-    58.
-    59.    overriding
-    60.    procedure close (logger : in out panel.display; logfile_name : in String) is null;
-    61.
-    62.    overriding
-    63.    procedure flush (logger : in out panel.display; iff : in Boolean := True) is null;
-    64.
-    65. private
-    66.
-    67.    type display is new logging.output with
-    68.       record
-    69.          column_number : Positive := 1;
-    70.       end record;
-    71.
-    72. end logging.panel;
-
- 137 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/ioc-the_locker_of.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Identify the buffer that caused a store lockout.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. function IOC.the_locker_of (address : KDF9.Q_part; found : out Boolean)
-    18. return KDF9.Q_part is
-    19.    candidate_time   : KDF9.us     := KDF9.us'Last;
-    20.    candidate_number : KDF9.Q_part := 0;
-    21. begin
-    22.    -- Select the buffer actively doing DMA in the_group;
-    23.    --    if there is more than one, choose the buffer with the earliest completion time.
-    24.    -- The latter case should not arise in practice, but is allowed by the hardware.
-    25.    found := False;
-    26.    for b in buffer'Range loop
-    27.       if buffer(b) /= null                                               and then
-    28.             buffer(b).is_busy                                            and then
-    29.                buffer(b).operation in input_operation | output_operation and then
-    30.                   buffer(b).completion_time < candidate_time             and then
-    31.                      group(address) in group(buffer(b).control_word.I)
-    32.                                     .. group(buffer(b).control_word.M)       then
-    33.          found := True;
-    34.          candidate_number := b;
-    35.          candidate_time   := buffer(b).completion_time;
-    36.       end if;
-    37.    end loop;
-    38.    return candidate_number;
-    39. end IOC.the_locker_of;
-
- 39 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-cpu.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
-     2. --   Ada types; and for types used in the internal functioning of the microcode.
-     3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     6. --
-     7. -- The ee9 program is free software; you can redistribute it and/or
-     8. -- modify it under terms of the GNU General Public License as published
-     9. -- by the Free Software Foundation; either version 3, or (at your option)
-    10. -- any later version. This program is distributed in the hope that it
-    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    13. -- See the GNU General Public License for more details. You should have
-    14. -- received a copy of the GNU General Public License distributed with
-    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    16. --
-    17. --
-    18.
-    19. package body KDF9.CPU is
-    20.
-    21. --
-    22. --
-    23.    --
-    24.    -- KDF9 Arithmetic Control (AC) primitives representing Shift Control and associated units.
-    25.    -- These units implement shifting, multiplication, division, and floating-point arithmetic.
-    26.    --
-    27. --
-    28. --
-    29.
-    30.    KDF9_max_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'Last);
-    31.    KDF9_min_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'First);
-    32.
-    33.    function as_word (u : CPU.u_64)
-    34.    return KDF9.word
-    35.    is (KDF9.word(u and KDF9.word_mask));
-    36.
-    37.    function as_word (s : CPU.s_64)
-    38.    return KDF9.word is
-    39.    begin
-    40.       if s > KDF9_max_signed or s < KDF9_min_signed then
-    41.          the_V_bit_is_set := True;
-    42.       end if;
-    43.       return as_word(unsign(s));
-    44.    end as_word;
-    45.
-    46.    function contracted (P : KDF9.pair)
-    47.    return KDF9.word is
-    48.    begin
-    49.       if resign(P.lsw) < 0 or (P.msw+1) > 1 then
-    50.          the_V_bit_is_set := True;
-    51.       end if;
-    52.       return (P.lsw and not_sign_bit) or (P.msw and sign_bit);
-    53.    end contracted;
-    54.
-    55.    function shift_time (amount : Natural)
-    56.    return KDF9.us
-    57.    is (KDF9.us(amount/16 + amount/8 mod 2 + (if amount mod 8 > 0 then 1 else 0)));
-    58.
-    59.    function normalize_time (amount : Natural)
-    60.    return KDF9.us
-    61.    is (KDF9.us(amount/8 + (if amount mod 8 > 0 then 1 else 0)));
-    62.
-    63.    function shift_word_left (W : KDF9.word; amount : word_shift_length)
-    64.    return KDF9.word
-    65.    is (as_word(shift_left(CPU.u_64(W), amount)));
-    66.
-    67.    function shift_word_right (W : KDF9.word; amount : word_shift_length)
-    68.    return KDF9.word
-    69.    is (KDF9.word(shift_right(CPU.u_64(W), amount)));
-    70.
-    71.    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
-    72.    return KDF9.word
-    73.    is (shift_word_left(W, amount) or shift_word_right(W, 48-amount));
-    74.
-    75.    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
-    76.    return KDF9.word
-    77.    is (shift_word_right(W, amount) or shift_word_left(W, 48-amount));
-    78.
-    79.    function shift_circular (W : KDF9.word; L : CPU.signed_Q_part)
-    80.    return KDF9.word
-    81.       -- The logic here conforms to ¶1.1 of EE Report K/GD.y.80, entitled
-    82.       --    "KDF 9: SHIFTING AND SHIFT CONTROL".
-    83.       -- Circular shifts were implemented by duplicating the operand, doing a double-length
-    84.       --    shift of the two words, and selecting the appropriate word from the result.
-    85.    is (
-    86.        if abs L > 95  then 0
-    87.        elsif  L < -48 then shift_word_right(W, Natural(-L-48))
-    88.        elsif  L > +48 then shift_word_left(W, Natural(+L-48))
-    89.        elsif  L < 0   then rotate_word_right(W, Natural(-L))
-    90.        else                rotate_word_left(W, Natural(L))
-    91.       );
-    92.
-    93.    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
-    94.    return KDF9.word
-    95.    is
-    96.       (
-    97.        if abs L > 47 then 0
-    98.        elsif  L < 0  then shift_word_right(W, Natural(-L))
-    99.        else               shift_word_left(W, Natural(L))
-   100.       );
-   101.
-   102.    function shift_pair_left (P : KDF9.pair; L : Natural)
-   103.    return KDF9.pair is
-   104.       result    : KDF9.pair;
-   105.       crossover : KDF9.word;
-   106.    begin
-   107.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
-   108.       if L < 48 then
-   109.          result.lsw := shift_word_left(P.lsw, L);
-   110.          crossover  := shift_word_right(P.lsw, 48-L);
-   111.          result.msw := shift_word_left(P.msw, L) or crossover;
-   112.       else
-   113.          result.lsw := 0;
-   114.          result.msw := shift_word_left(P.lsw, L-48);
-   115.       end if;
-   116.       return result;
-   117.    end shift_pair_left;
-   118.
-   119.    function shift_pair_right (P : KDF9.pair; L : Natural)
-   120.    return KDF9.pair is
-   121.       result    : KDF9.pair;
-   122.       crossover : KDF9.word;
-   123.    begin
-   124.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
-   125.       if L < 48 then
-   126.          result.msw := shift_word_right(P.msw, L);
-   127.          crossover  := shift_word_left(P.msw, 48-L);
-   128.          result.lsw := shift_word_right(P.lsw, L) or crossover;
-   129.       else
-   130.          result.msw := 0;
-   131.          result.lsw := shift_word_right(P.msw, L-48);
-   132.       end if;
-   133.       return result;
-   134.    end shift_pair_right;
-   135.
-   136.    function shift_logical (P : KDF9.pair; L : CPU.signed_Q_part)
-   137.    return KDF9.pair
-   138.    is (
-   139.        if    L > 0 then shift_pair_left(P, Natural(L))
-   140.        elsif L < 0 then shift_pair_right(P, Natural(-L))
-   141.        else        P
-   142.       );
-   143.
-   144.    function scale_down (W : KDF9.word; amount : Natural)
-   145.    return KDF9.word is
-   146.       unrounded, clearing : CPU.u_64;
-   147.    begin
-   148.       if amount = 0 then
-   149.          return W;
-   150.       elsif amount > 46 then
-   151.          if resign(W) < 0 then
-   152.             return KDF9.all_one_bits;
-   153.          else
-   154.             return 0;
-   155.          end if;
-   156.       else
-   157.          -- It is undefined whether the intrinsic shift_right_arithmetic function,
-   158.          --    operating on CPU.u_64, yields a rounded result.
-   159.          -- So, any rounding it might do is completely suppressed.
-   160.          unrounded := shift_right_arithmetic(shift_left(CPU.u_64(W),16), 16);
-   161.          clearing  := - shift_left(1, amount);
-   162.          return as_word(shift_right_arithmetic(unrounded and clearing, amount));
-   163.       end if;
-   164.    end scale_down;
-   165.
-   166.    function scale_down_and_round (W : KDF9.word; amount : Natural)
-   167.    return KDF9.word is
-   168.       unrounded, clearing, rounding : CPU.u_64;
-   169.    begin
-   170.       if amount = 0 then
-   171.          return W;
-   172.       elsif amount > 46 then
-   173.          if resign(W) < 0 then
-   174.             return KDF9.all_one_bits;
-   175.          else
-   176.             return 0;
-   177.          end if;
-   178.       else
-   179.          -- It is undefined whether the intrinsic shift_right_arithmetic,
-   180.          --    operating on CPU.u_64, yields a rounded result.
-   181.          -- So, any rounding it might do is suppressed,
-   182.          --    and correct rounding is explicitly computed.
-   183.          unrounded := shift_right_arithmetic(shift_left(CPU.u_64(W),16), 16);
-   184.          rounding  := shift_right(unrounded, amount-1) and 1;
-   185.          clearing  := - shift_left(1, amount);
-   186.          unrounded := unrounded and clearing;
-   187.          return as_word(shift_right_arithmetic(unrounded, amount) + rounding);
-   188.       end if;
-   189.    end scale_down_and_round;
-   190.
-   191.    function scale_up (W : KDF9.word; amount : Natural)
-   192.    return KDF9.word is
-   193.       M : constant Natural := Natural'Min(amount, 47);
-   194.    begin
-   195.       if resign(W) < 0 then
-   196.          if scale_down(W, 47-M) /= all_one_bits or
-   197.                resign(shift_word_left(W, M)) >= 0 then
-   198.             -- See EE Report K/GD.y.80., ¶ 1.1.
-   199.             the_V_bit_is_set := True;
-   200.          end if;
-   201.          return shift_word_left(W, M);
-   202.       else
-   203.          if shift_word_right(W, 47-M) /= KDF9.word'(all_zero_bits) or
-   204.                resign(shift_word_left(W, M)) < 0 then
-   205.             -- See EE Report K/GD.y.80., ¶ 1.1.
-   206.             the_V_bit_is_set := True;
-   207.          end if;
-   208.          return shift_word_left(W, M);
-   209.       end if;
-   210.    end scale_up;
-   211.
-   212.    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
-   213.    return KDF9.word
-   214.    is (
-   215.        if L < 0 then scale_down_and_round(I, Natural(-L))
-   216.        else          scale_up(I, Natural(L))
-   217.       );
-   218.
-   219.    function scale_up (P : KDF9.pair; L : Natural)
-   220.    return KDF9.pair is
-   221.       result    : KDF9.pair;
-   222.       crossover : KDF9.word;
-   223.    begin
-   224.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
-   225.       -- D0 of P.lsw is effectively ignored.
-   226.       if L < 48 then
-   227.          result.lsw := shift_word_left(P.lsw, L) and KDF9.not_sign_bit;
-   228.          crossover  := shift_word_right(P.lsw and KDF9.not_sign_bit, 47-L);
-   229.          result.msw := scale_up(P.msw, L) or crossover;
-   230.       else
-   231.          result.lsw := 0;
-   232.          result.msw := (P.msw and KDF9.sign_bit) or (P.lsw and KDF9.not_sign_bit);
-   233.          result.msw := scale_up(result.msw, Natural'Min(L, 94)-47);
-   234.      end if;
-   235.       return result;
-   236.    end scale_up;
-   237.
-   238.    function scale_down (P : KDF9.pair; L : Natural)
-   239.    return KDF9.pair is
-   240.       result    : KDF9.pair;
-   241.       crossover : KDF9.word;
-   242.    begin
-   243.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
-   244.       -- D0 of P.lsw is effectively ignored.
-   245.       -- SHAD-n does NOT round, according to the Manual.
-   246.       if L < 48 then
-   247.          result.msw := scale_down(P.msw, L);
-   248.          crossover  := shift_word_left(P.msw, 47-L) and KDF9.not_sign_bit;
-   249.          result.lsw := shift_word_right(P.lsw and KDF9.not_sign_bit, L) or crossover;
-   250.       else
-   251.          result.msw := scale_down(P.msw, 47);
-   252.          result.lsw := shift_word_right(P.msw, Natural'Min(L, +94)-47) and KDF9.not_sign_bit;
-   253.       end if;
-   254.       return result;
-   255.    end scale_down;
-   256.
-   257.    function shift_arithmetic (P : KDF9.pair; L : CPU.signed_Q_part)
-   258.    return KDF9.pair
-   259.    is (
-   260.        if    L < 0 then scale_down(P, Natural(-L))
-   261.        elsif L > 0 then scale_up(P, Natural(L))
-   262.        else             P -- See ¶1.1 of EE Report K/GD.y.80: this avoids clearing D0 of P.lsw.
-   263.       );
-   264.
-   265.    -- Count the leading zeros of the absolute value of y, omitting the sign bit.
-   266.    -- If y is 0, return 47.
-   267.    function nr_leading_zeros (y : KDF9.word)
-   268.    return Natural is
-   269.       x : CPU.u_64;
-   270.       r : Natural;
-   271.    begin
-   272.       if y = 0 then return 47; end if;
-   273.       if resign(y) < 0 then
-   274.          x := CPU.u_64(16#FFFF_FFFF_FFFF# and not y);
-   275.       else
-   276.          x := CPU.u_64(y);
-   277.       end if;
-   278.       -- Only 48 bits of x need be tested.
-   279.       if (x and 16#FFFF_0000_0000#) /= 0 then
-   280.          r := 32; x := shift_right(x, 32);
-   281.       elsif (x and 16#FFFF_0000#) /= 0 then
-   282.          r := 16; x := shift_right(x, 16);
-   283.       else
-   284.          r := 0;
-   285.       end if;
-   286.       if (x and 16#FF00#) /= 0 then
-   287.          r := r + 8; x := shift_right(x, 8);
-   288.       end if;
-   289.       if (x and 16#F0#) /= 0 then
-   290.          r := r + 4; x := shift_right(x, 4);
-   291.       end if;
-   292.       if (x and 16#C#) /= 0 then
-   293.          r := r + 2; x := shift_right(x, 2);
-   294.       end if;
-   295.       if (x and 16#2#) /= 0 then
-   296.          r := r + 1;
-   297.       end if;
-   298.       r := 47 - r - 1;  -- -1 discounts the sign bit.
-   299.       return r;
-   300.    end nr_leading_zeros;
-   301.
-   302.    procedure normalize (fraction, exponent : in out KDF9.word) is
-   303.       sign_flag  : constant KDF9.word := shift_word_right(fraction and sign_bit, 1);
-   304.       normalizer : Natural;
-   305.    begin
-   306.       if fraction = 0 then
-   307.          exponent := 2#10_000_000#;  -- This yields 0 when biased positive.
-   308.          return;
-   309.       end if;
-   310.
-   311.       normalizer := nr_leading_zeros(fraction);
-   312.       exponent := exponent - KDF9.word(normalizer);
-   313.
-   314.       -- shift_word_left is used, not _arithmetic, as D[1..normalizer] = D0
-   315.       fraction := shift_word_left(fraction, normalizer);
-   316.
-   317.       the_CPU_delta := the_CPU_delta + normalize_time(normalizer);
-   318.
-   319.       -- scale_down_and_round may round up and overflow the fraction bits ...
-   320.       fraction := scale_down_and_round(fraction, 8);
-   321.       if (fraction and overflow_mask) /= shift_word_right(sign_flag, 7) then
-   322.           -- ... so re-normalize; scale_down cannot round here.
-   323.          fraction := scale_down(fraction, 1);
-   324.          the_CPU_delta := the_CPU_delta + normalize_time(1);
-   325.          exponent := exponent + 1;
-   326.          the_CPU_delta := the_CPU_delta + 1;
-   327.       end if;
-   328.       fraction := fraction and mantissa_mask;
-   329.
-   330.       if resign(exponent) < -128 then
-   331.          -- Deal with underflow.
-   332.          fraction := 0;
-   333.          exponent := 2#10_000_000#;  -- This yields 0 when biased positive.
-   334.       elsif resign(exponent) > +127 then
-   335.          -- Deal with overflow.
-   336.          the_V_bit_is_set := True;
-   337.          exponent := 2#01_111_111#;
-   338.       end if;
-   339.    end normalize;
-   340.
-   341.    function fraction_word (mantissa : CPU.f48)
-   342.    return KDF9.word
-   343.     -- shift_word_left must be used instead of scale_up to avoid a spurious overflow.
-   344.    is (
-   345.        (shift_word_left(as_word(mantissa), 8) and KDF9.not_sign_bit)
-   346.           or
-   347.        (as_word(mantissa) and sign_bit)
-   348.       );
-   349.
-   350.    function masked_mantissa (F : CPU.f48)
-   351.    return CPU.f48
-   352.    is (as_f48(as_word(F) and mantissa_mask));
-   353.
-   354.    function scaler (F : CPU.f48)
-   355.    return KDF9.word
-   356.    is ((shift_word_right(as_word(F), 39) and 2#11_111_111#) - 128);
-   357.
-   358.    function normalized (full_fraction, scaler : KDF9.word)
-   359.    return CPU.f48 is
-   360.       E : KDF9.word := scaler;
-   361.       F : KDF9.word := full_fraction;
-   362.    begin
-   363.       normalize(fraction => F, exponent => E);
-   364.       return CPU.f48(shift_word_left((E + 128) and 2#11_111_111#, 39) or F);
-   365.    end normalized;
-   366.
-   367.    function normalized  (R : CPU.f48)
-   368.    return CPU.f48
-   369.    is (normalized(full_fraction => fraction_word(R), scaler => scaler(R)));
-   370.
-   371.    function "-" (I : CPU.signed)
-   372.    return KDF9.word
-   373.    is (as_word(-CPU.s_64(I)));
-   374.
-   375.    function "abs" (I : CPU.signed)
-   376.    return KDF9.word
-   377.    is (as_word(abs CPU.s_64(I)));
-   378.
-   379.    function "+" (L, R : CPU.signed)
-   380.    return KDF9.word
-   381.    is (as_word(CPU.s_64(L) + CPU.s_64(R)));
-   382.
-   383.    function "-" (L, R : CPU.signed)
-   384.    return KDF9.word
-   385.    is (as_word(CPU.s_64(L) - CPU.s_64(R)));
-   386.
-   387.    function "*" (L, R : CPU.signed)
-   388.    return KDF9.word
-   389.    is (contracted(KDF9.pair'(unsign(L) * unsign(R))));
-   390.
-   391.    procedure do_DIVI (
-   392.                       L         : in KDF9.word;
-   393.                       R         : in KDF9.word;
-   394.                       Quotient,
-   395.                       Remainder : out KDF9.word
-   396.                      ) is
-   397.    begin
-   398.       if R /= 0 then
-   399.          Remainder := as_word(CPU.s_64(resign(L)) mod CPU.s_64(resign(R)));
-   400.          Quotient  :=
-   401.             as_word((CPU.s_64(resign(L)) - CPU.s_64(resign(Remainder))) / CPU.s_64(resign(R)));
-   402.       else
-   403.          the_V_bit_is_set := True;
-   404.          Quotient  := L;  -- ??
-   405.          Remainder := R;  -- ??
-   406.       end if;
-   407.    end do_DIVI;
-   408.
-   409.    function "*" (L, R : KDF9.word)
-   410.    return CPU.fraction is
-   411.    begin
-   412.       if L = sign_bit and R = sign_bit then
-   413.          the_V_bit_is_set := True;
-   414.          return as_fraction(sign_bit);  -- The only case is L = R = -1.0 = L*R.
-   415.       else
-   416.          return as_fraction(L) * as_fraction(R);
-   417.       end if;
-   418.    end "*";
-   419.
-   420.    function "/" (L, R : KDF9.word)
-   421.    return CPU.fraction is
-   422.    begin
-   423.       if R = 0 or L = sign_bit then
-   424.          the_V_bit_is_set := True;
-   425.          return as_fraction(L); -- ??
-   426.       elsif R = sign_bit then
-   427.          return -as_fraction(L);
-   428.       elsif abs as_fraction(L) < abs as_fraction(R) then  -- abs is safe now.
-   429.          return as_fraction(L) / as_fraction(R);
-   430.       else
-   431.          the_V_bit_is_set := True;
-   432.          return as_fraction(L); -- ??
-   433.       end if;
-   434.    end "/";
-   435.
-   436.    function "+" (L, R : KDF9.pair)
-   437.    return KDF9.pair is
-   438.       carry, sum : CPU.s_64;
-   439.       result     : KDF9.pair;
-   440.    begin
-   441.       sum := CPU.s_64(L.lsw and KDF9.not_sign_bit) + CPU.s_64(R.lsw and KDF9.not_sign_bit);
-   442.       if unsign(sum) > KDF9.max_word then -- carry into msw
-   443.          carry := 1;
-   444.          result.lsw := KDF9.word(unsign(sum) and KDF9.not_sign_bit);
-   445.       else
-   446.          carry := 0;
-   447.          result.lsw := KDF9.word(sum);
-   448.       end if;
-   449.       sum := CPU.s_64(resign(L.msw)) + CPU.s_64(resign(R.msw)) + carry;
-   450.       result.msw := as_word(sum);
-   451.       return result;
-   452.    end "+";
-   453.
-   454.    function "-" (J : KDF9.pair)
-   455.    return KDF9.pair is
-   456.       borrow,
-   457.       negative : CPU.s_64;
-   458.       result   : KDF9.pair;
-   459.    begin
-   460.       negative := - CPU.s_64(J.lsw and KDF9.not_sign_bit);
-   461.       if unsign(negative) > KDF9.max_word then -- borrow from msw
-   462.          borrow := 1;
-   463.          result.lsw := KDF9.word(unsign(negative) and KDF9.not_sign_bit);
-   464.       else
-   465.          borrow := 0;
-   466.          result.lsw := KDF9.word(negative);
-   467.       end if;
-   468.       negative := - CPU.s_64(resign(J.msw)) - borrow;
-   469.       result.msw := as_word(negative);
-   470.       return result;
-   471.    end "-";
-   472.
-   473.    function "-" (L, R : KDF9.pair)
-   474.    return KDF9.pair is
-   475.       borrow,
-   476.       difference : CPU.s_64;
-   477.       result     : KDF9.pair;
-   478.    begin
-   479.       difference := CPU.s_64(L.lsw and KDF9.not_sign_bit) - CPU.s_64(R.lsw and KDF9.not_sign_bit);
-   480.       if unsign(difference) > KDF9.max_word then -- borrow from msw
-   481.          borrow := 1;
-   482.          result.lsw := KDF9.word(unsign(difference) and KDF9.not_sign_bit);
-   483.       else
-   484.          borrow := 0;
-   485.          result.lsw := KDF9.word(difference);
-   486.       end if;
-   487.       difference := CPU.s_64(resign(L.msw)) - CPU.s_64(resign(R.msw)) - borrow;
-   488.       result.msw := as_word(difference);
-   489.       return result;
-   490.    end "-";
-   491.
-   492.    function "*" (L, R : KDF9.word)
-   493.    return KDF9.pair is
-   494.       S, T, U, V, W : KDF9.word;
-   495.       H, M, B       : KDF9.pair;
-   496.    begin
-   497.       if L = sign_bit then
-   498.          if R = L then
-   499.             -- L*R = (+1.0), which is not a valid fraction, so deal with overflow.
-   500.             the_V_bit_is_set := True;
-   501.             return (L, 0);
-   502.          else
-   503.             -- L*R = -R.
-   504.             return -(R, 0);
-   505.          end if;
-   506.       end if;
-   507.       if R = sign_bit then
-   508.          -- L*R = -L.
-   509.          return -(L, 0);
-   510.       end if;
-   511.       -- Now it is safe to take absolute values, as they cannot overflow.
-   512.       S := scale_down(abs resign(L), 24);
-   513.       T := abs resign(L) and halfword_mask;
-   514.       U := scale_down(abs resign(R), 24);
-   515.       V := abs resign(R) and halfword_mask;
-   516.       H := ((S*U)*2, 0);
-   517.       M := scale_down((KDF9.word'(S*V), 0), 1) + scale_down((KDF9.word'(T*U), 0), 1);
-   518.       M := scale_down(M, 22);
-   519.       W := rotate_word_left(KDF9.word'(T*V), 1);
-   520.       B := (W and 1, shift_word_right(W, 1));
-   521.       if resign(L xor R) < 0 then
-   522.          return - (H + M + B);
-   523.       else
-   524.          return    H + M + B;
-   525.       end if;
-   526.    end "*";
-   527.
-   528.    f_64_small : constant := 2.0**(-63);
-   529.    type f_64 is delta f_64_small range -1.0 .. +1.0 - f_64_small with Size => 64;
-   530.
-   531.    function scale_down (f : CPU.f_64; N : Natural)
-   532.    return f_64
-   533.    is (if N > 62 then 0.0 else f / 2**N);
-   534.
-   535.    function to_f_64 (w : KDF9.word)
-   536.    return CPU.f_64
-   537.    is (CPU.f_64(as_fraction(w)));
-   538.
-   539.    function to_word (f : CPU.f_64)
-   540.    return KDF9.word
-   541.    is (as_word(CPU.fraction(f)));
-   542.
-   543.    procedure long_division (
-   544.                             L : in KDF9.pair;
-   545.                             R : in KDF9.word;
-   546.                             Q : out KDF9.word
-   547.                            ) is
-   548.       N  : KDF9.pair := L;
-   549.       D  : KDF9.word;
-   550.       Ls,
-   551.       Rs,
-   552.       Qs : CPU.f_64;
-   553.       normalizer_N : Natural;
-   554.       normalizer_R : Natural;
-   555.       normalizer_Q : Integer;
-   556.    begin
-   557.       -- Normalize the dividend.
-   558.       normalizer_N := nr_leading_zeros(N.msw);
-   559.       if normalizer_N < 47 then
-   560.          -- N.msw contains significant bits.
-   561.          N := scale_up(N, normalizer_N);
-   562.       else
-   563.          -- All of the significant bits are in N.lsw, which is non-zero.
-   564.          N := scale_up(N, 47);
-   565.          normalizer_N := nr_leading_zeros(N.msw);
-   566.          N := scale_up(N, normalizer_N);
-   567.          normalizer_N := normalizer_N + 47;
-   568.       end if;
-   569.
-   570.       -- Normalize the divisor.
-   571.       normalizer_R := nr_leading_zeros(R);
-   572.       D := scale_up(R, normalizer_R);
-   573.
-   574.       -- Scale Ls and Rs so that the Ada fractional division cannot overflow.
-   575.       Ls := scale_down(to_f_64(N.msw), 2);
-   576.       Rs := scale_down(to_f_64(D), 1);
-   577.
-   578.       Qs := Ls / Rs;  -- Ada fractional division rounds, correctly for KDF9 DIV and DIVD.
-   579.
-   580.       -- Rescale the quotient.
-   581.       normalizer_Q := 1 + normalizer_R - normalizer_N;
-   582.       if normalizer_Q <= 0 then
-   583.          -- Overflow is impossible.
-   584.          Qs := scale_down(Qs, -normalizer_Q);
-   585.          Q := to_word(Qs);
-   586.       else
-   587.          -- If Qs >= 0.5, then L/R >= 1.0 is not a representable result fraction.
-   588.          -- If Qs < -0.5, then L/R < -1.0 is not a representable result fraction.
-   589.          the_V_bit_is_set := Qs >= 0.5 or Qs < -0.5;
-   590.          Q := scale_up(to_word(Qs), normalizer_Q);  -- A guess at the result for overflow ?? !!
-   591.       end if;
-   592.    end long_division;
-   593.
-   594.    procedure do_DIVD (
-   595.                       L : in KDF9.pair;
-   596.                       R : in KDF9.word;
-   597.                       Q : out KDF9.word
-   598.                      ) is
-   599.       N : KDF9.pair;
-   600.    begin
-   601.       N.msw := L.msw;
-   602.       -- Ignore an invalid D0 in the lsw of the dividend.
-   603.       N.lsw := L.lsw and KDF9.not_sign_bit;
-   604.
-   605.       -- Deal quickly with a zero dividend, giving a zero result.
-   606.       if (N.msw or N.lsw) = 0 then
-   607.          Q := 0;
-   608.          return;
-   609.       end if;
-   610.
-   611.       -- Deal with division by 0.
-   612.       if R = 0 then
-   613.          the_V_bit_is_set := True;
-   614.          Q := N.msw;  -- A guess at the result for division by zero ?? !!
-   615.          return;
-   616.       end if;
-   617.
-   618.       long_division(N, R, Q);
-   619.    end do_DIVD;
-   620.
-   621.    procedure do_DIVR (
-   622.                       L         : in KDF9.pair;
-   623.                       R         : in KDF9.word;
-   624.                       Quotient,
-   625.                       Remainder : out KDF9.word
-   626.                      ) is
-   627.       N  : KDF9.pair := L;
-   628.       D  : KDF9.word := R;
-   629.       S  : Integer   := 1;
-   630.       T  : KDF9.pair;
-   631.    begin
-   632.       -- Ignore an invalid D0 in the lsw of the dividend.
-   633.       N.lsw := N.lsw and KDF9.not_sign_bit;
-   634.
-   635.       -- Deal quickly with a zero dividend, giving a zero result.
-   636.       if (N.msw or N.lsw) = 0 then
-   637.          Quotient  := 0;
-   638.          Remainder := 0;
-   639.          return;
-   640.       end if;
-   641.
-   642.       -- Deal with division by 0.
-   643.       if R = 0 then
-   644.          the_V_bit_is_set := True;
-   645.          -- A guess at the results for division by zero ?? !!
-   646.          Quotient  := N.msw;
-   647.          Remainder := 0;
-   648.          return;
-   649.       end if;
-   650.
-   651.       -- Convert to an unsigned division problem, and note whether it needs to be be converted back.
-   652.       if resign(N.msw) < 0 then
-   653.          N := - N;
-   654.          S := - S;
-   655.       end if;
-   656.       if resign(R) < 0 then
-   657.          D := - D;
-   658.          S := - S;
-   659.       end if;
-   660.
-   661.       -- Check for inevitable overflow, and deal with it separately.
-   662.       if N.msw > D then
-   663.          the_V_bit_is_set := True;
-   664.          -- A guess at the results for overflow ?? !!
-   665.          Quotient := (if S < 0 then -(N.msw / D) else N.msw / D);
-   666.          T := L - (msw => Quotient*R, lsw => 0);
-   667.          Remainder := T.msw;
-   668.          return;
-   669.       end if;
-   670.
-   671.       -- Overflow is now impossible, but the result may be rounded.
-   672.       long_division(N, D, Quotient);
-   673.
-   674.       -- Undo any rounding effected by do_DIVD.
-   675.       loop
-   676.          T := N - Quotient * D;
-   677.       exit when T.msw = 0;
-   678.          Quotient := Quotient + 1;
-   679.       end loop;
-   680.       Quotient  := Quotient + T.lsw / D;
-   681.
-   682.       -- Correct the sign of the quotient and compute the remainder.
-   683.       Quotient  := (if S < 0 then -Quotient else Quotient);
-   684.       Remainder := contracted(L - Quotient*R);
-   685.    end do_DIVR;
-   686.
-   687.    function host_float (X : CPU.f48)
-   688.    return Long_Float is
-   689.       -- Warn if Long_Float does not have at least the range of a KDF9 floating point number.
-   690.       pragma Compile_Time_Warning(Long_Float'Last < 2.0**127,
-   691.                                   "Long_Float does not have enough range for KDF9 f.p.");
-   692.       -- Warn if Long_Float does not have at least the precision of a KDF9 floating point number.
-   693.       pragma Compile_Time_Warning(Long_Float'Small > 1.0/2.0**39,
-   694.                                   "Long_Float does not have enough precision for KDF9 f.p.");
-   695.       W : constant KDF9.word  := fraction_word(masked_mantissa(X));
-   696.       S : constant Long_Float := 2.0**Integer(resign(scaler(X)));
-   697.    begin
-   698.       return Long_Float(as_fraction(W)) * S;  -- Cannot overflow if warnings are absent.
-   699.    end host_float;
-   700.
-   701.    -- Round a 48-bit floating-point number to 24-bit format.
-   702.    function narrowed (R : CPU.f48)
-   703.    return CPU.f48
-   704.    is (normalized(fraction_word(R) + 2**23, scaler(R)));
-   705.
-   706.    overriding
-   707.    function "-" (R : CPU.f48)
-   708.    return CPU.f48 is
-   709.       -- F is made half of a true fraction to prevent overflow when negating:
-   710.       --    the result exponent is offset by 1, accordingly.
-   711.       E : constant KDF9.word := scaler(R) + 1;
-   712.       F : KDF9.word := scale_down_and_round(fraction_word(R), 1);
-   713.    begin
-   714.       F := as_word(CPU.u_64(-F));  -- "-" cannot overflow here.
-   715.       return normalized(full_fraction => F, scaler => E);
-   716.    end "-";
-   717.
-   718.    overriding
-   719.    function "abs" (R : CPU.f48)
-   720.    return CPU.f48
-   721.    is (if resign(KDF9.word(R)) < 0 then - R else + R);
-   722.
-   723.    overriding
-   724.    function "+" (L, R : CPU.f48)
-   725.    return CPU.f48 is
-   726.       -- B and D are made half of a true fraction to prevent overflow when
-   727.       --    adding; the result exponent is offset by 1, accordingly.
-   728.       A : constant KDF9.word := scaler(R);
-   729.       B : KDF9.word := scale_down(fraction_word(R), 1);
-   730.       C : constant KDF9.word := scaler(L);
-   731.       D : KDF9.word := scale_down(fraction_word(L), 1);
-   732.       E : KDF9.word;
-   733.       F : KDF9.word;
-   734.       N : Natural;
-   735.    begin
-   736.       if resign(A) >= resign(C) then
-   737.          N := Natural'Min(Natural(resign(A-C)), 48);
-   738.          D := scale_down_and_round(D, N);
-   739.          E := A + 1;
-   740.       else
-   741.          N := Natural'Min(Natural(resign(C-A)), 48);
-   742.          B := scale_down_and_round(B, N);
-   743.          E := C + 1;
-   744.       end if;
-   745.       the_CPU_delta := the_CPU_delta + shift_time(N);
-   746.       F := as_word(CPU.u_64(D + B));  -- "+" cannot overflow here.
-   747.       return normalized(full_fraction => F, scaler => E);
-   748.    end "+";
-   749.
-   750.    overriding
-   751.    function "-" (L, R : CPU.f48)
-   752.    return CPU.f48 is
-   753.       -- See "+".
-   754.       A : constant KDF9.word := scaler(R);
-   755.       B : KDF9.word := scale_down(fraction_word(R), 1);
-   756.       C : constant KDF9.word := scaler(L);
-   757.       D : KDF9.word := scale_down(fraction_word(L), 1);
-   758.       E : KDF9.word;
-   759.       F : KDF9.word;
-   760.       N : Natural;
-   761.    begin
-   762.       if resign(A) >= resign(C) then
-   763.          N := Natural'Min(Natural(resign(A-C)), 48);
-   764.          D := scale_down_and_round(D, N);
-   765.          E := A + 1;
-   766.       else
-   767.          N := Natural'Min(Natural(resign(C-A)), 48);
-   768.          B := scale_down_and_round(B, N);
-   769.          E := C + 1;
-   770.       end if;
-   771.       the_CPU_delta := the_CPU_delta + shift_time(N);
-   772.       F := as_word(CPU.u_64(D - B));  -- "-" cannot overflow here.
-   773.       return normalized(full_fraction => F, scaler => E);
-   774.    end "-";
-   775.
-   776.    overriding
-   777.    function "*" (L, R : CPU.f48)
-   778.    return CPU.f48 is
-   779.       B, D, E, F : KDF9.word;
-   780.    begin
-   781.       if (KDF9.word(L) or KDF9.word(R)) = 0 then
-   782.          return 0;
-   783.       end if;
-   784.       B := fraction_word(R);
-   785.       D := fraction_word(L);
-   786.       E := scaler(L) + scaler(R);
-   787.       if (B = sign_bit) and (B = D) then
-   788.           -- D*B = (+1), which is not a valid fraction, so treat specially.
-   789.           B := B / 2;
-   790.           D := D / 2;
-   791.           E := E + 2;
-   792.        end if;
-   793.       F := as_word(as_fraction(D) * as_fraction(B));  -- "*" cannot overflow here.
-   794.       return normalized(full_fraction => F, scaler => E);
-   795.    end "*";
-   796.
-   797.    overriding
-   798.    function "/" (L, R : CPU.f48)
-   799.    return CPU.f48 is
-   800.       D, N   : CPU.fraction;
-   801.       Ls, Rs : KDF9.word;
-   802.       E, F   : KDF9.word;
-   803.    begin
-   804.       if R = 0 then
-   805.          the_V_bit_is_set := True;
-   806.          return L;  -- ?? This result is not well defined in the Manual.
-   807.       end if;
-   808.       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
-   809.       --    scaled so that the division cannot overflow.
-   810.       Ls := scale_down(fraction_word(L), 2);
-   811.       Rs := scale_down(fraction_word(R), 1);
-   812.       N := abs as_fraction(Ls);  -- Ls is scaled down by 1/8, so "abs" cannot overflow.
-   813.       D := abs as_fraction(Rs);  -- Rs is scaled down by 1/2, so "abs" cannot overflow.
-   814.       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
-   815.       E := scaler(L) - scaler(R) + 1;
-   816.       F := as_word(N / D);
-   817.       if resign(KDF9.word(L) xor KDF9.word(R)) < 0 then
-   818.          -- The result is negative.
-   819.          F := -F;
-   820.       end if;
-   821.       return normalized(full_fraction => F, scaler => E);
-   822.    end "/";
-   823.
-   824.    overriding
-   825.    function "<" (L, R : CPU.f48)
-   826.    return Boolean is
-   827.       s : constant KDF9.word := KDF9.word(L) xor KDF9.word(R);
-   828.    begin
-   829.       if resign(s) < 0 then
-   830.          -- The signs differ: L<R iff L is negative.
-   831.          return resign(KDF9.word(L)) < 0;
-   832.       elsif resign(KDF9.word(L)) < 0 then
-   833.          -- L and R are both negative, so invert lexicographical order.
-   834.          return not (KDF9.word(L) < KDF9.word(R));
-   835.       else
-   836.          -- L and R are both non-negative: so use lexicographical order.
-   837.          return KDF9.word(L) < KDF9.word(R);
-   838.       end if;
-   839.    end "<";
-   840.
-   841.    function fraction_pair (DF : CPU.f96)
-   842.    return KDF9.pair is
-   843.       P : KDF9.pair;
-   844.    begin
-   845.       P.msw := scale_down(fraction_word(DF.msw), 8);
-   846.       P.lsw := fraction_word(DF.lsw) and KDF9.not_sign_bit;
-   847.       return scale_up(P, 8);
-   848.    end fraction_pair;
-   849.
-   850.    function scaler (DF : CPU.f96)
-   851.    return KDF9.word
-   852.    is (scaler(DF.msw));
-   853.
-   854.    function narrowed (DF : CPU.f96)
-   855.    return CPU.f48 is
-   856.       fraction : KDF9.pair := fraction_pair(DF) + (0, 2**46);
-   857.    begin
-   858.       reconstruct(fraction, scaler(DF));
-   859.       return CPU.f48(fraction.msw);
-   860.    end narrowed;
-   861.
-   862.    procedure reconstruct (frac   : in out KDF9.pair;
-   863.                           scaler : in KDF9.word) is
-   864.       KDF9_exponent :  KDF9.word := scaler + 128;
-   865.       normalizer    : Natural;
-   866.    begin
-   867.       if (frac.msw or frac.lsw) = 0 then
-   868.          return; -- frac is already normalized.
-   869.       end if;
-   870.
-   871.       normalizer := nr_leading_zeros(frac.msw);
-   872.
-   873.       if normalizer = 47 then  -- frac.msw is zero, so frac.lsw is non-zero.
-   874.          normalizer := 47 + nr_leading_zeros(frac.lsw);
-   875.       end if;
-   876.
-   877.       KDF9_exponent := KDF9_exponent - KDF9.word(normalizer);
-   878.
-   879.       frac := scale_up(frac, normalizer);
-   880.       the_CPU_delta := the_CPU_delta + shift_time(normalizer);
-   881.
-   882.       -- 96-bit shift_arithmetic does not round and so cannot overflow here.
-   883.       frac := scale_down(frac, 8);
-   884.       frac.lsw := scale_down(frac.lsw, 8);
-   885.       -- Clear both scaler fields.
-   886.       frac.msw := frac.msw and mantissa_mask;
-   887.       frac.lsw := frac.lsw and mantissa_mask;
-   888.       if resign(KDF9_exponent) < 0 then
-   889.          -- Deal with underflow.
-   890.          frac := (0, 0);
-   891.          return;
-   892.       elsif KDF9_exponent > 255 then
-   893.          -- Deal with overflow.
-   894.          the_V_bit_is_set := True;
-   895.          KDF9_exponent := 255;
-   896.       end if;
-   897.
-   898.       frac.msw := frac.msw or shift_word_left(KDF9_exponent and 8#377#, 39);
-   899.       if KDF9_exponent < 39 then
-   900.          frac.lsw := 0;
-   901.       else
-   902.          frac.lsw := frac.lsw or shift_word_left((KDF9_exponent-39) and 8#377#, 39);
-   903.       end if;
-   904.    end reconstruct;
-   905.
-   906.    function "-" (R : CPU.f96)
-   907.    return CPU.f96
-   908.    is (CPU.f96'(0, 0) - R);
-   909.
-   910.    function "+" (L, R : CPU.f96)
-   911.    return CPU.f96 is
-   912.       -- Scale fractions to prevent overflow; must adjust exponent accordingly.
-   913.       L_exponent : constant KDF9.word := scaler(L);
-   914.       R_exponent : constant KDF9.word := scaler(R);
-   915.       L_fraction : KDF9.pair := scale_down(fraction_pair(L), 1);
-   916.       R_fraction : KDF9.pair := scale_down(fraction_pair(R), 1);
-   917.       exponent   : KDF9.word;
-   918.       the_result : KDF9.pair;
-   919.       aligner    : Natural;
-   920.    begin
-   921.       if resign(R_exponent) >= resign(L_exponent) then
-   922.          aligner := Natural(resign(R_exponent-L_exponent));
-   923.          aligner := Natural'Min(95, aligner);
-   924.          L_fraction := scale_down(L_fraction, aligner);
-   925.          exponent := R_exponent + 1;
-   926.       else
-   927.          aligner := Natural(resign(L_exponent-R_exponent));
-   928.          aligner := Natural'Min(95, aligner);
-   929.          R_fraction := scale_down(R_fraction, aligner);
-   930.          exponent := L_exponent + 1;
-   931.       end if;
-   932.       the_CPU_delta := the_CPU_delta + shift_time(aligner);
-   933.       the_result := L_fraction + R_fraction;  -- "+" cannot overflow here.
-   934.       reconstruct(the_result, scaler => exponent);
-   935.       return as_f96(the_result);
-   936.    end "+";
-   937.
-   938.    function "-" (L, R : CPU.f96)
-   939.    return CPU.f96 is
-   940.       -- See "+".
-   941.       L_exponent : constant KDF9.word := scaler(L);
-   942.       R_exponent : constant KDF9.word := scaler(R);
-   943.       L_fraction : KDF9.pair := scale_down(fraction_pair(L), 1);
-   944.       R_fraction : KDF9.pair := scale_down(fraction_pair(R), 1);
-   945.       exponent   : KDF9.word;
-   946.       the_result : KDF9.pair;
-   947.       aligner    : Natural;
-   948.    begin
-   949.       if resign(R_exponent) >= resign(L_exponent) then
-   950.          aligner := Natural(resign(R_exponent-L_exponent));
-   951.          aligner := Natural'Min(95, aligner);
-   952.          L_fraction := scale_down(L_fraction, aligner);
-   953.          exponent := R_exponent + 1;
-   954.       else
-   955.          aligner := Natural(resign(L_exponent-R_exponent));
-   956.          aligner := Natural'Min(95, aligner);
-   957.          R_fraction := scale_down(R_fraction, aligner);
-   958.          exponent := L_exponent + 1;
-   959.       end if;
-   960.       the_CPU_delta := the_CPU_delta + shift_time(aligner);
-   961.       the_result := L_fraction - R_fraction;  -- "-" cannot overflow here.
-   962.       reconstruct(the_result, scaler => exponent);
-   963.       return as_f96(the_result);
-   964.    end "-";
-   965.
-   966.    function "*" (L, R : CPU.f48)
-   967.    return CPU.f96 is
-   968.       V_was_set : constant Boolean := the_V_bit_is_set;
-   969.       LR        : KDF9.pair;
-   970.    begin
-   971.       the_V_bit_is_set := False;
-   972.       LR := fraction_word(L) * fraction_word(R);
-   973.       if the_V_bit_is_set then
-   974.          -- The product is not a valid fixed-point fraction, but is actually OK,
-   975.          --    so restore the orginal overflow state, and  ...
-   976.          the_V_bit_is_set := V_was_set;
-   977.          --  ... construct +1.0 in double-precision floating-point.
-   978.          return as_f96((shift_word_left(2#0_10_000_001_1#, 38), 0));
-   979.       end if;
-   980.       reconstruct(LR, scaler => scaler(L) + scaler(R));
-   981.       return as_f96(LR);
-   982.    end "*";
-   983.
-   984.    function "/" (L : CPU.f96; R : CPU.f48)
-   985.    return CPU.f48 is  -- aka DIVDF
-   986.       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
-   987.       --    scaled so that the division cannot overflow.
-   988.       Ls : constant KDF9.pair := scale_down(fraction_pair(L), 2);
-   989.       Rs : constant KDF9.word := scale_down(fraction_word(R), 1);
-   990.       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
-   991.       E : constant KDF9.word  := scaler(L) - scaler(R) + 1;
-   992.       F : KDF9.word;
-   993.    begin
-   994.       if R = 0 then
-   995.          the_V_bit_is_set := True;
-   996.          return L.msw;  -- ?? This result is not well defined in the Manual.
-   997.       end if;
-   998.       do_DIVD(Ls, Rs, F);
-   999.       return normalized(full_fraction => F, scaler => E);
-  1000.    end "/";
-  1001.
-  1002.    function number_of_1_bits_in (W : KDF9.word)
-  1003.    return KDF9.word is
-  1004.       u : constant CPU.u_64 := CPU.u_64(W);
-  1005.       n :          CPU.u_64 := shift_right(u, 1) and 16#77_77_77_77_77_77_77_77#;
-  1006.       x :          CPU.u_64 := u - n;
-  1007.    begin
-  1008.       n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
-  1009.       x := x - n;
-  1010.       n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
-  1011.       x := x - n;
-  1012.       x := (x + shift_right(x, 4)) and 16#0F_0F_0F_0F_0F_0F_0F_0F#;
-  1013.       x := x * 16#01_01_01_01_01_01_01_01#;
-  1014.       return KDF9.word(shift_right(x, CPU.u_64'Size-8));
-  1015.    end number_of_1_bits_in;
-  1016.
-  1017.    procedure push (F : in CPU.f48) is
-  1018.    begin
-  1019.       push(KDF9.word(F));
-  1020.    end push;
-  1021.
-  1022.    function pop
-  1023.    return CPU.f48
-  1024.    is (CPU.f48(KDF9.word'(pop)));
-  1025.
-  1026.    function read_top
-  1027.    return CPU.f48
-  1028.    is (CPU.f48(KDF9.word'(read_top)));
-  1029.
-  1030.    procedure write_top (F : in CPU.f48) is
-  1031.    begin
-  1032.       write_top(KDF9.word(F));
-  1033.    end write_top;
-  1034.
-  1035.    procedure push (DF : in CPU.f96) is
-  1036.       AB : constant KDF9.pair := as_pair(DF);
-  1037.    begin
-  1038.       push(AB);
-  1039.    end push;
-  1040.
-  1041.    function pop
-  1042.    return CPU.f96
-  1043.    is (as_f96(pop));
-  1044.
-  1045.    function read_top
-  1046.    return CPU.f96
-  1047.    is (as_f96(read_top));
-  1048.
-  1049.    procedure write_top (DF : in CPU.f96) is
-  1050.       AB : constant KDF9.pair := as_pair(DF);
-  1051.    begin
-  1052.       write_top(AB);
-  1053.    end write_top;
-  1054.
-  1055. end KDF9.CPU;
-
-Compiling: ../Source/kdf9-cpu.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:07
-
-     1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
-     2. --   Ada types; and for types used in the internal functioning of the microcode.
-     3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     6. --
-     7. -- The ee9 program is free software; you can redistribute it and/or
-     8. -- modify it under terms of the GNU General Public License as published
-     9. -- by the Free Software Foundation; either version 3, or (at your option)
-    10. -- any later version. This program is distributed in the hope that it
-    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    13. -- See the GNU General Public License for more details. You should have
-    14. -- received a copy of the GNU General Public License distributed with
-    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    16. --
-    17.
-    18. with Ada.Unchecked_Conversion;
-    19.
-    20. package KDF9.CPU is
-    21.
-    22. --
-    23. --
-    24.    --
-    25.    -- 48-bit integer and fractional ALU types and operations
-    26.    --
-    27. --
-    28. --
-    29.
-    30.    type signed is range -2**47 .. +2**47 - 1 with Size => KDF9.word'Size;
-    31.
-    32.    function unsign is new Ada.Unchecked_Conversion (CPU.signed, KDF9.word);
-    33.
-    34.    function resign is new Ada.Unchecked_Conversion (KDF9.word, CPU.signed);
-    35.
-    36.    function "-" (I : CPU.signed)
-    37.    return KDF9.word
-    38.       with Inline;
-    39.
-    40.    function "abs" (I : CPU.signed)
-    41.    return KDF9.word
-    42.       with Inline;
-    43.
-    44.    function "+" (L, R : CPU.signed)
-    45.    return KDF9.word
-    46.       with Inline;
-    47.
-    48.    function "-" (L, R : CPU.signed)
-    49.    return KDF9.word
-    50.       with Inline;
-    51.
-    52.    function "*" (L, R : CPU.signed)
-    53.    return KDF9.word;
-    54.
-    55.    -- Determine the Quotient and Remainder of L/R, where:
-    56.    --    sign(Remainder) = sign(R) and |Remainder| < |R|, i.e. Remainder = L mod R;
-    57.    --    Quotient = (L - Remainder) / R.
-    58.
-    59.    procedure do_DIVI (
-    60.                       L         : in KDF9.word;
-    61.                       R         : in KDF9.word;
-    62.                       Quotient,
-    63.                       Remainder : out KDF9.word
-    64.                      );
-    65.
-    66.    -- Inherited signed single-length integer division is removed from the type.
-    67.
-    68.    function "/" (L, R : CPU.signed)
-    69.    return KDF9.word is abstract;
-    70.
-    71.    function "mod" (L, R : CPU.signed)
-    72.    return KDF9.word is abstract;
-    73.
-    74.    -- Contract a double-word, setting the V bit if necessary.
-    75.
-    76.    function contracted (P : KDF9.pair)
-    77.    return KDF9.word
-    78.       with Inline;
-    79.
-    80. --
-    81. --
-    82.    -- Shifting operations with KDF9 semantics.
-    83. --
-    84. --
-    85.
-    86.    type signed_Q_part is range  -2**15 .. +2**15 - 1 with Size => KDF9.Q_part'Size;
-    87.
-    88.    function resign is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
-    89.
-    90.    -- L>0 for left-shift, L<0 for right-shift.
-    91.
-    92.    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
-    93.    return KDF9.word
-    94.       with Inline;
-    95.
-    96.    function shift_circular (W : KDF9.word; L : CPU.signed_Q_part)
-    97.    return KDF9.word
-    98.       with Inline;
-    99.
-   100.    -- shift_arithmetic rounds the result correctly.
-   101.    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
-   102.    return KDF9.word
-   103.       with Inline;
-   104.
-   105.    -- number_of_1_bits_in counts the number of bits in W with value 1.
-   106.    function number_of_1_bits_in (W : KDF9.word)
-   107.    return KDF9.word
-   108.       with Inline;
-   109.
-   110. --
-   111. --
-   112.    -- A fraction is a word W interpreted as the value W / 2**47;
-   113. --
-   114. --
-   115.
-   116.    KDF9_small : constant := 2.0**(-47);
-   117.
-   118.    type fraction is delta KDF9_small range -1.0 .. +1.0 - KDF9_small with Size => KDF9.word'Size;
-   119.
-   120.    function as_fraction is new Ada.Unchecked_Conversion (KDF9.word, CPU.fraction);
-   121.
-   122.    function as_word     is new Ada.Unchecked_Conversion (CPU.fraction, KDF9.word);
-   123.
-   124.    -- These operations treat the KDF9.word operands as full-word fractions,
-   125.
-   126.    function "*" (L, R : KDF9.word)
-   127.    return CPU.fraction;
-   128.
-   129.    function "/" (L, R : KDF9.word)
-   130.    return CPU.fraction;
-   131.
-   132.
-   133. --
-   134. --
-   135.    --
-   136.    -- 48-bit integer and fractional ALU operations
-   137.    --
-   138. --
-   139. --
-   140.
-   141.    function "+" (L, R : KDF9.pair)
-   142.    return KDF9.pair
-   143.       with Inline;
-   144.
-   145.    function "-" (J : KDF9.pair)
-   146.    return KDF9.pair
-   147.       with Inline;
-   148.
-   149.    function "-" (L, R : KDF9.pair)
-   150.    return KDF9.pair
-   151.       with Inline;
-   152.
-   153.    -- 48 * 48 -> 96-bit, for XD, etc.
-   154.
-   155.    function "*" (L, R : KDF9.word)
-   156.    return KDF9.pair;
-   157.
-   158.    procedure do_DIVD (
-   159.                       L : in KDF9.pair;
-   160.                       R : in KDF9.word;
-   161.                       Q : out KDF9.word
-   162.                      );
-   163.
-   164.    procedure do_DIVR (
-   165.                       L         : in KDF9.pair;
-   166.                       R         : in KDF9.word;
-   167.                       Quotient,
-   168.                       Remainder : out KDF9.word
-   169.                      );
-   170.
-   171.    function shift_logical (P : KDF9.pair; L : CPU.signed_Q_part)
-   172.    return KDF9.pair
-   173.       with Inline;
-   174.
-   175.    function shift_arithmetic (P : KDF9.pair; L : CPU.signed_Q_part)
-   176.    return KDF9.pair
-   177.       with Inline;
-   178.
-   179.
-   180. --
-   181. --
-   182.    --
-   183.    -- 48-bit floating point ALU types and operations
-   184.    --
-   185. --
-   186. --
-   187.
-   188.    -- This is a substrate for KDF9 floating point, not an Ada f.p. type.
-   189.
-   190.    type f48 is mod 2**48 with Size => KDF9.word'Size;
-   191.
-   192.    -- Remove useless substrate modular operations not, and, or, xor and mod.
-   193.
-   194.    overriding
-   195.    function "not" (R : CPU.f48)
-   196.    return CPU.f48 is abstract;
-   197.
-   198.    overriding
-   199.    function "and" (L, R : CPU.f48)
-   200.    return CPU.f48 is abstract;
-   201.
-   202.    overriding
-   203.    function "or" (L, R : CPU.f48)
-   204.    return CPU.f48 is abstract;
-   205.
-   206.    overriding
-   207.    function "xor" (L, R : CPU.f48)
-   208.    return CPU.f48 is abstract;
-   209.
-   210.    overriding
-   211.    function "mod" (L, R : CPU.f48)
-   212.    return CPU.f48 is abstract;
-   213.
-   214.    function as_word is new Ada.Unchecked_Conversion (CPU.f48, KDF9.word);
-   215.
-   216.    function as_f48  is new Ada.Unchecked_Conversion (KDF9.word, CPU.f48);
-   217.
-   218.    procedure push (F : in CPU.f48);
-   219.
-   220.    function pop
-   221.    return CPU.f48
-   222.       with Inline;
-   223.
-   224.    procedure write_top (F : in CPU.f48)
-   225.       with Inline;
-   226.
-   227.    function read_top
-   228.    return CPU.f48
-   229.       with Inline;
-   230.
-   231.     -- Standardize a (possibly) non-normalized floating-point number.
-   232.
-   233.    function normalized  (R : CPU.f48)
-   234.    return CPU.f48;
-   235.
-   236.    -- Convert a 47-bit fraction to a rounded, standardized 39-bit mantissa,
-   237.    --    and adjust its exponent accordingly, setting overflow when necessary.
-   238.
-   239.    procedure normalize (fraction, exponent : in out KDF9.word)
-   240.       with Inline;
-   241.
-   242.    -- Convert a 39-bit mantissa to a 47-bit fraction, preserving the sign.
-   243.
-   244.    function fraction_word (mantissa : CPU.f48)
-   245.    return KDF9.word
-   246.       with Inline;
-   247.
-   248.    -- The floating-point number with the exponent field set to 0.
-   249.
-   250.    function masked_mantissa (F : CPU.f48)
-   251.    return CPU.f48
-   252.       with Inline;
-   253.
-   254.    -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
-   255.
-   256.    function scaler (F : CPU.f48)
-   257.    return KDF9.word
-   258.       with Inline;
-   259.
-   260.     -- Synthesize a normalized floating-point number from its components.
-   261.
-   262.    function normalized (full_fraction, scaler : KDF9.word)
-   263.    return CPU.f48
-   264.       with Inline;
-   265.
-   266.    -- Round a 48-bit floating-point number to 24-bit format.
-   267.
-   268.    function narrowed (R : CPU.f48)
-   269.    return CPU.f48;
-   270.
-   271.    overriding
-   272.    function "-" (R : CPU.f48)
-   273.    return CPU.f48;
-   274.
-   275.    overriding
-   276.    function "abs" (R : CPU.f48)
-   277.    return CPU.f48;
-   278.
-   279.    overriding
-   280.    function "+" (L, R : CPU.f48)
-   281.    return CPU.f48;
-   282.
-   283.    overriding
-   284.    function "-" (L, R : CPU.f48)
-   285.    return CPU.f48;
-   286.
-   287.    overriding
-   288.    function "*" (L, R : CPU.f48)
-   289.    return CPU.f48;
-   290.
-   291.    overriding
-   292.    function "/" (L, R : CPU.f48)
-   293.    return CPU.f48;
-   294.
-   295.    overriding
-   296.    function "<" (L, R : CPU.f48)
-   297.    return Boolean;
-   298.
-   299.    function host_float (X : CPU.f48)
-   300.    return Long_Float;
-   301.
-   302.    exponent_mask : constant KDF9.word := KDF9.word'(2#11_111_111#) * 2**39;
-   303.    mantissa_mask : constant KDF9.word := not exponent_mask;
-   304.    frac_msb_mask : constant KDF9.word := 2**46;  -- M.S.B. of a 47-bit fraction
-   305.    mant_msb_mask : constant KDF9.word := 2**38;  -- M.S.B. of a 39-bit mantissa
-   306.    overflow_mask : constant KDF9.word := 2**39;  -- bit set on rounding overflow
-   307.
-   308.
-   309. --
-   310. --
-   311.    --
-   312.    -- 96-bit floating point ALU types and operations
-   313.    --
-   314. --
-   315. --
-   316.
-   317.    type f96 is
-   318.       record
-   319.          msw, lsw : CPU.f48;
-   320.       end record;
-   321.
-   322.    function as_pair is new Ada.Unchecked_Conversion (CPU.f96, KDF9.pair);
-   323.
-   324.    function as_f96  is new Ada.Unchecked_Conversion (KDF9.pair, CPU.f96);
-   325.
-   326.    procedure push (DF : in CPU.f96)
-   327.       with Inline,
-   328.            Pre => the_NEST_depth < 15
-   329.                or else the_CPU_state = Director_state;
-   330.
-   331.    function pop
-   332.    return CPU.f96
-   333.       with Inline;
-   334.
-   335.    procedure write_top (DF : in CPU.f96)
-   336.       with Inline;
-   337.
-   338.    function read_top
-   339.    return CPU.f96
-   340.       with Inline;
-   341.
-   342.    -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
-   343.
-   344.    function scaler (DF : CPU.f96)
-   345.    return KDF9.word
-   346.       with Inline;
-   347.
-   348.    -- Round a 96-bit double-precision floating-point number to 48 bit format.
-   349.
-   350.    function narrowed (DF : CPU.f96)
-   351.    return CPU.f48
-   352.       with Inline;
-   353.
-   354.    -- Derive a 96-bit fraction from the double-precision floating-point number,
-   355.    --    with the mantissa bits in D9-D47 and D49-D87,
-   356.    --       and with D1-D8 copies of the sign, D48 zero, and D87-D95 zero.
-   357.
-   358.    function fraction_pair (DF : CPU.f96)
-   359.    return KDF9.pair
-   360.       with Inline;
-   361.
-   362.    -- Convert 96-bit fraction, and an algebraic scale-factor exponent,
-   363.    --    into a 96-bit floating point number, setting overflow when necessary.
-   364.
-   365.    procedure reconstruct (frac   : in out KDF9.pair;
-   366.                           scaler : in KDF9.word);
-   367.
-   368.    function "-" (R : CPU.f96)
-   369.    return CPU.f96;
-   370.
-   371.    function "+" (L, R : CPU.f96)
-   372.    return CPU.f96;
-   373.
-   374.    function "-" (L, R : CPU.f96)
-   375.    return CPU.f96;
-   376.
-   377.    function "*" (L, R : CPU.f48)
-   378.    return CPU.f96;
-   379.
-   380.    function "/" (L : CPU.f96;
-   381.                  R : CPU.f48)
-   382.    return CPU.f48;
-   383.
-   384. ------------------------------------------------------------------------------------------------
-   385.
-   386. --
-   387. --
-   388.    --
-   389.    -- These are the emulation host's register types and their operations.
-   390.    --
-   391. --
-   392. --
-   393.
-   394.    type u_64 is mod 2**64 with Size => 64;
-   395.
-   396.    pragma Provide_Shift_Operators (u_64);
-   397.
-   398.    function as_word (u : CPU.u_64)
-   399.    return KDF9.word
-   400.       with Inline;
-   401.
-   402.    type s_64 is range -2**63 .. +2**63-1 with Size => 64;
-   403.
-   404.    -- The signed as_word sets the V bit if necessary.
-   405.
-   406.    function as_word (s : CPU.s_64)
-   407.    return KDF9.word
-   408.       with Inline;
-   409.
-   410.    function unsign is new Ada.Unchecked_Conversion(CPU.s_64, CPU.u_64);
-   411.
-   412.    function resign is new Ada.Unchecked_Conversion(CPU.u_64, CPU.s_64);
-   413.
-   414. --
-   415. --
-   416.    --
-   417.    -- These are the 48-bit primitive, fixed-direction, shift operations.
-   418.    --
-   419. --
-   420. --
-   421.
-   422.    function shift_time (amount : Natural)
-   423.    return KDF9.us
-   424.       with Inline;
-   425.
-   426.    subtype word_shift_length is Natural range 0..48;
-   427.
-   428.    function shift_word_left (W : KDF9.word; amount : word_shift_length)
-   429.    return KDF9.word
-   430.       with Inline;
-   431.
-   432.    function shift_word_right (W : KDF9.word; amount : word_shift_length)
-   433.    return KDF9.word
-   434.       with Inline;
-   435.
-   436.    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
-   437.    return KDF9.word
-   438.       with Inline;
-   439.
-   440.    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
-   441.    return KDF9.word
-   442.       with Inline;
-   443.
-   444. end KDF9.CPU;
-
- 1055 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-phu_store.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- The K5 operation data formats.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Unchecked_Conversion;
-    18. --
-    19. with KDF9.CPU;
-    20.
-    21. package body KDF9.PHU_store is
-    22.
-    23.    function short_PHU (p : KDF9.priority)
-    24.    return KDF9.word is
-    25.
-    26.       use type KDF9.store.group_address;
-    27.
-    28.       type PHU_as_6_bits is mod 2**6
-    29.          with Size => 6;
-    30.
-    31.       function as_6_bits is new Ada.Unchecked_Conversion(Source => PHU_store.PHU_subset,
-    32.                                                          Target => short_PHU.PHU_as_6_bits);
-    33.
-    34.       the_reason    : PHU_store.blockage_kind;
-    35.       the_parameter : KDF9.buffer_number;
-    36.
-    37.    begin
-    38.       if not PHU(p).is_held_up then
-    39.          return 0;  -- All fields are non-significant.
-    40.       end if;
-    41.
-    42.       -- PHU(p).is_held_up, so other fields are valid.
-    43.       the_reason := PHU(p).blockage.reason;
-    44.       if the_reason = buffer_busy then
-    45.          the_parameter := PHU(p).blockage.buffer_nr;
-    46.       else
-    47.          -- This is next to useless, but is what the K5 order actually did.
-    48.          the_parameter := KDF9.buffer_number(PHU(p).blockage.group_nr mod 2**4);
-    49.       end if;
-    50.
-    51.       return KDF9.word(as_6_bits((the_parameter, the_reason, True)));
-    52.    end short_PHU;
-    53.
-    54.    function K5_operand
-    55.    return KDF9.word
-    56.    is (
-    57.        KDF9.CPU.shift_word_left(short_PHU(0), 48-06) or
-    58.        KDF9.CPU.shift_word_left(short_PHU(1), 48-12) or
-    59.        KDF9.CPU.shift_word_left(short_PHU(2), 48-18) or
-    60.        KDF9.CPU.shift_word_left(short_PHU(3), 48-24)
-    61.       );
-    62.
-    63. end KDF9.PHU_store;
-
-Compiling: ../Source/kdf9-phu_store.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- The K5 operation data formats.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with System;
-    18. --
-    19. with KDF9.store;
-    20.
-    21. package KDF9.PHU_store is
-    22.
-    23.    -- PHU, the Program Hold-Up register is internal to I/O Control.
-    24.    -- It has one element for each of the 4 program priority levels, 0..3.
-    25.    -- A subset of its content is exposed to Director by means of the K5 order.
-    26.
-    27.    type blockage_kind is (buffer_busy, locked_core) with Size => 1;
-    28.
-    29.    type PHU_reason (reason : PHU_store.blockage_kind := buffer_busy) is
-    30.       record
-    31.          case reason is
-    32.             when buffer_busy =>
-    33.                buffer_nr : KDF9.buffer_number;
-    34.                by_INTQq  : Boolean;
-    35.             when locked_core =>
-    36.                group_nr  : KDF9.store.group_address;
-    37.          end case;
-    38.       end record;
-    39.
-    40.    type PHU_register (is_held_up : Boolean := False) is
-    41.       record
-    42.          case is_held_up is
-    43.             when False =>
-    44.                null;
-    45.             when True =>
-    46.                blockage : PHU_reason;
-    47.          end case;
-    48.       end record;
-    49.
-    50.    idle_PHU : constant PHU_register := (is_held_up => False);
-    51.
-    52.    PHU : array (KDF9.priority) of PHU_store.PHU_register := (others => idle_PHU);
-    53.
-    54.    type PHU_subset is
-    55.       record
-    56.          parameter  : KDF9.buffer_number;
-    57.          reason     : PHU_store.blockage_kind;
-    58.          is_held_up : Boolean;
-    59.       end record
-    60.    with Size => 6, Bit_Order => System.Low_Order_First;
-    61.
-    62.    for  PHU_subset use
-    63.       record
-    64.          parameter  at 0 range 0 .. 3;
-    65.          reason     at 0 range 4 .. 4;
-    66.          is_held_up at 0 range 5 .. 5;
-    67.       end record;
-    68.
-    69.    -- A K5_operand is a KDF9 word, D00-D47, with the content:
-    70.    --    PHU_subset(0) in D00 .. D05
-    71.    --    PHU_subset(1) in D06 .. D11
-    72.    --    PHU_subset(2) in D12 .. D17
-    73.    --    PHU_subset(3) in D18 .. D23
-    74.    --    zeros         in D24 .. D47
-    75.
-    76.    function K5_operand
-    77.    return KDF9.word;
-    78.
-    79. end KDF9.PHU_store;
-
- 63 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/tracing.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with exceptions;
-    18. with formatting;
-    19. with HCI;
-    20. with KDF9.decoding;
-    21. with KDF9.store;
-    22. with state_display;
-    23.
-    24. use exceptions;
-    25. use formatting;
-    26. use HCI;
-    27. use KDF9;
-    28. use KDF9.decoding;
-    29. use KDF9.store;
-    30. use state_display;
-    31.
-    32. package body tracing is
-    33.
-    34.    procedure clear_the_histogram is
-    35.    begin
-    36.       the_histogram := (others => 0);
-    37.    end clear_the_histogram;
-    38.
-    39.    procedure clear_the_profile is
-    40.    begin
-    41.       the_profile := (others => 0);
-    42.    end clear_the_profile;
-    43.
-    44.    procedure set_breakpoints (first, last : in KDF9.code_address) is
-    45.    begin
-    46.       for p in first .. last loop
-    47.          breakpoints(p) := True;
-    48.       end loop;
-    49.    end set_breakpoints;
-    50.
-    51.    procedure handle_breakpoint is
-    52.    begin
-    53.       short_witness;
-    54.       interact;
-    55.       quit_if_requested;
-    56.       change_diagnostic_mode_if_requested;
-    57.    end handle_breakpoint;
-    58.
-    59.    procedure clear_all_watchpoints is
-    60.    begin
-    61.       fetchpoints := (others => False);
-    62.       storepoints := (others => False);
-    63.    end clear_all_watchpoints;
-    64.
-    65.    procedure set_fetch_points (first, last : in KDF9.address) is
-    66.    begin
-    67.       for p in first .. last loop
-    68.          fetchpoints(p) := True;
-    69.       end loop;
-    70.    end set_fetch_points;
-    71.
-    72.    procedure set_store_points (first, last : in KDF9.address) is
-    73.    begin
-    74.       for p in first .. last loop
-    75.          storepoints(p) := True;
-    76.       end loop;
-    77.    end set_store_points;
-    78.
-    79.    procedure clear_retro_FIFO is
-    80.    begin
-    81.       retro_FIFO_count := 0; retro_FIFO_index := 0;
-    82.    end clear_retro_FIFO;
-    83.
-    84.    procedure take_note_of (the_IAR   : in KDF9.syllable_address;
-    85.                            the_value : in KDF9.word) is
-    86.    begin
-    87.       if retrospective_tracing_is_enabled             and then
-    88.             ICR in low_count .. high_count            and then
-    89.                NIA_word_number in low_bound .. high_bound then
-    90.          declare
-    91.             the_note : constant retro_FIFO_entry
-    92.                      := (
-    93.                          location   => the_IAR,
-    94.                          order      => INS.order,
-    95.                          parameter  => the_value,
-    96.                          ICR_value  => ICR,
-    97.                          CPU_time   => the_CPU_time,
-    98.                          nested     => the_NEST_depth,
-    99.                          called     => the_SJNS_depth,
-   100.                          V          => the_V_bit_is_set,
-   101.                          T          => the_T_bit_is_set,
-   102.                          D          => the_CPU_state = Director_state,
-   103.                          level      => CPL
-   104.                         );
-   105.          begin
-   106.             if retro_FIFO_count = 0 then
-   107.                retro_FIFO(0) := the_note;
-   108.                retro_FIFO_count := 1;
-   109.             else
-   110.                retro_FIFO_index := retro_FIFO_index + 1;
-   111.                retro_FIFO(retro_FIFO_index) := the_note;
-   112.                if retro_FIFO_count < FIFO_size then
-   113.                   retro_FIFO_count := retro_FIFO_count + 1;
-   114.                end if;
-   115.             end if;
-   116.          end;
-   117.       end if;
-   118.    end take_note_of;
-   119.
-   120.    procedure take_note_of (the_value : in KDF9.word) is
-   121.    begin
-   122.       take_note_of(CIA, the_value);
-   123.    end take_note_of;
-   124.
-   125.    procedure clear_IOC_FIFO is
-   126.    begin
-   127.       IOC_FIFO_count := 0; IOC_FIFO_index := 0;
-   128.    end clear_IOC_FIFO;
-   129.
-   130.    procedure register_IO_event (the_note : in IOC_FIFO_entry) is
-   131.    begin
-   132.       if peripheral_tracing_is_enabled                and then
-   133.             ICR in low_count .. high_count            and then
-   134.                NIA_word_number in low_bound .. high_bound then
-   135.          if IOC_FIFO_count = 0 then
-   136.             IOC_FIFO(0) := the_note;
-   137.             IOC_FIFO_count := 1;
-   138.          else
-   139.             IOC_FIFO_index := IOC_FIFO_index + 1;
-   140.             IOC_FIFO(IOC_FIFO_index) := the_note;
-   141.             if IOC_FIFO_count < FIFO_size then
-   142.                IOC_FIFO_count := IOC_FIFO_count + 1;
-   143.             end if;
-   144.          end if;
-   145.       end if;
-   146.    end register_IO_event;
-   147.
-   148.    procedure take_note_of_IO_start (
-   149.                                     device_name     : in IOC.device_name;
-   150.                                     completion_time : in KDF9.us;
-   151.                                     control_word    : in KDF9.Q_register;
-   152.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
-   153.                                    )
-   154.    is
-   155.       the_note : constant  IOC_FIFO_entry
-   156.                :=
-   157.                 (
-   158.                  kind            => start_transfer,
-   159.                  ICR_value       => ICR,
-   160.                  order_address   => CIA,
-   161.                  decoded_order   => INS,
-   162.                  initiation_time => the_clock_time,
-   163.                  device_name     => take_note_of_IO_start.device_name,
-   164.                  completion_time => take_note_of_IO_start.completion_time,
-   165.                  is_for_Director => (the_CPU_state = Director_state),
-   166.                  priority_level  => CPL,
-   167.                  context         => the_context,
-   168.                  control_word    => take_note_of_IO_start.control_word,
-   169.                  operation       => take_note_of_IO_start.operation
-   170.                 );
-   171.    begin
-   172.       register_IO_event(the_note);
-   173.    end take_note_of_IO_start;
-   174.
-   175.    procedure take_note_of_IO_finis (
-   176.                                     ICR_value       : in KDF9.order_counter;
-   177.                                     order_address   : in KDF9.syllable_address;
-   178.                                     decoded_order   : in KDF9.decoded_order;
-   179.                                     initiation_time : in KDF9.us;
-   180.                                     device_name     : in IOC.device_name;
-   181.                                     is_for_Director : Boolean;
-   182.                                     priority_level  : in KDF9.priority;
-   183.                                     completion_time : in KDF9.us;
-   184.                                     control_word    : in KDF9.Q_register;
-   185.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
-   186.                                    )
-   187.    is
-   188.       the_note : constant  IOC_FIFO_entry
-   189.                :=
-   190.                 (
-   191.                  kind            => finis_transfer,
-   192.                  ICR_value       => take_note_of_IO_finis.ICR_value,
-   193.                  order_address   => take_note_of_IO_finis.order_address,
-   194.                  decoded_order   => take_note_of_IO_finis.decoded_order,
-   195.                  initiation_time => take_note_of_IO_finis.initiation_time,
-   196.                  device_name     => take_note_of_IO_finis.device_name,
-   197.                  is_for_Director => take_note_of_IO_finis.is_for_Director,
-   198.                  priority_level  => take_note_of_IO_finis.priority_level,
-   199.                  context         => the_context,
-   200.                  completion_time => take_note_of_IO_finis.completion_time,
-   201.                  control_word    => take_note_of_IO_finis.control_word,
-   202.                  operation       => take_note_of_IO_finis.operation
-   203.                 );
-   204.
-   205.    begin
-   206.       register_IO_event(the_note);
-   207.    end take_note_of_IO_finis;
-   208.
-   209.    procedure take_note_of_store_lockout (device_name : in IOC.device_name) is
-   210.       the_note : constant  IOC_FIFO_entry
-   211.                :=
-   212.                 (
-   213.                  kind            => store_lockout,
-   214.                  ICR_value       => ICR,
-   215.                  order_address   => CIA,
-   216.                  decoded_order   => INS,
-   217.                  initiation_time => the_clock_time,
-   218.                  device_name     => take_note_of_store_lockout.device_name,
-   219.                  is_for_Director => False,
-   220.                  priority_level  => CPL,
-   221.                  context         => the_context,
-   222.                  data_address    => the_locked_out_address,
-   223.                  operation       => IOC.some_other_operation
-   224.                 );
-   225.    begin
-   226.       register_IO_event(the_note);
-   227.    end take_note_of_store_lockout;
-   228.
-   229.    procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
-   230.                                           operation   : in IOC.transfer_kind := IOC.some_other_operation) is
-   231.       the_note : constant  IOC_FIFO_entry
-   232.                :=
-   233.                 (
-   234.                  kind            => buffer_lockout,
-   235.                  ICR_value       => ICR,
-   236.                  order_address   => CIA,
-   237.                  decoded_order   => INS,
-   238.                  initiation_time => the_clock_time,
-   239.                  device_name     => take_note_of_buffer_lockout.device_name,
-   240.                  is_for_Director => False,
-   241.                  priority_level  => CPL,
-   242.                  context         => the_context,
-   243.                  operation       => take_note_of_buffer_lockout.operation
-   244.                 );
-   245.    begin
-   246.       register_IO_event(the_note);
-   247.    end take_note_of_buffer_lockout;
-   248.
-   249.    procedure take_note_of_test (
-   250.                                 device_name : in IOC.device_name;
-   251.                                 Q_register  : in KDF9.Q_register;
-   252.                                 status      : in Boolean
-   253.                                )
-   254.    is
-   255.       the_note : constant  IOC_FIFO_entry
-   256.                :=
-   257.                 (
-   258.                  kind            => buffer_status,
-   259.                  ICR_value       => ICR+1,  -- ICR is not incremented until the end of an order.
-   260.                  order_address   => CIA,
-   261.                  decoded_order   => INS,
-   262.                  initiation_time => the_clock_time,
-   263.                  device_name     => take_note_of_test.device_name,
-   264.                  is_for_Director => (the_CPU_state = Director_state),
-   265.                  priority_level  => CPL,
-   266.                  context         => the_context,
-   267.                  Q_register      => take_note_of_test.Q_register,
-   268.                  status          => take_note_of_test.status,
-   269.                  operation       => IOC.some_other_operation
-   270.                 );
-   271.    begin
-   272.       register_IO_event(the_note);
-   273.    end take_note_of_test;
-   274.
-   275.    procedure clear_interrupt_FIFO is
-   276.    begin
-   277.       interrupt_FIFO_count := 0; interrupt_FIFO_index := 0;
-   278.    end clear_interrupt_FIFO;
-   279.
-   280.    procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
-   281.    is
-   282.       length  : constant Natural  := Natural'Min(message'Length, max_interrupt_message_length);
-   283.       content : constant String   := message(message'First .. message'First+length-1);
-   284.       padding : constant String   := (1 .. max_interrupt_message_length-length => ' ');
-   285.    begin
-   286.       declare
-   287.          the_note : constant interrupt_FIFO_entry
-   288.                   :=
-   289.                    (
-   290.                     interrupt_code => take_note_of_interrupt.interrupt_code,
-   291.                     ICR_value      => ICR,
-   292.                     order_address  => CIA,
-   293.                     busy_time      => the_clock_time,
-   294.                     priority_level => CPL,
-   295.                     context        => the_context,
-   296.                     message        => content & padding
-   297.                    );
-   298.       begin
-   299.          if interrupt_tracing_is_enabled                 and then
-   300.                ICR in low_count .. high_count            and then
-   301.                   NIA_word_number in low_bound .. high_bound then
-   302.             if interrupt_FIFO_count = 0 then
-   303.                interrupt_FIFO(0) := the_note;
-   304.                interrupt_FIFO_count := 1;
-   305.             else
-   306.                interrupt_FIFO_index := interrupt_FIFO_index + 1;
-   307.                interrupt_FIFO(interrupt_FIFO_index) := the_note;
-   308.                if interrupt_FIFO_count < FIFO_size then
-   309.                   interrupt_FIFO_count := interrupt_FIFO_count + 1;
-   310.                end if;
-   311.             end if;
-   312.          end if;
-   313.       end;
-   314.    end take_note_of_interrupt;
-   315.
-   316.    procedure add_INS_to_the_histogram is
-   317.       syllable_0 : KDF9.syllable := INS.order.syllable_0;
-   318.    begin
-   319.       if INS.kind = normal_jump_order then
-   320.          syllable_0 := (syllable_0 and 2#1111_0000#) or INS.Qq;
-   321.       elsif INS.kind = data_access_order then
-   322.          syllable_0 := (syllable_0 and 2#11_000_111#);
-   323.       end if;
-   324.       the_histogram(syllable_0) := the_histogram(syllable_0) + 1;
-   325.    end add_INS_to_the_histogram;
-   326.
-   327.    procedure add_CIA_to_the_profile is
-   328.    begin
-   329.       the_profile(CIA.code_address) := the_profile(CIA.code_address) + 1;
-   330.    end add_CIA_to_the_profile;
-   331.
-   332.    procedure preview_a_one_syllable_order is null;
-   333.
-   334.    procedure preview_a_two_syllable_order is
-   335.    begin
-   336.       case INS.compressed_opcode is
-   337.          when TO_MkMq
-   338.             | TO_MkMqQ
-   339.             | TO_MkMqH
-   340.             | TO_MkMqQH
-   341.             | TO_MkMqN
-   342.             | TO_MkMqQN
-   343.             | TO_MkMqHN
-   344.             | TO_MkMqQHN =>
-   345.             the_trace_operand := read_top;
-   346.          when others =>
-   347.             the_trace_operand := as_word(the_Q_store(INS.Qq));
-   348.       end case;
-   349.    end preview_a_two_syllable_order;
-   350.
-   351.    procedure preview_a_jump_order is
-   352.    begin
-   353.       case INS.compressed_opcode is
-   354.          when JrEQ
-   355.             | JrNE
-   356.             | JrGTZ
-   357.             | JrLTZ
-   358.             | JrEQZ
-   359.             | JrLEZ
-   360.             | JrGEZ
-   361.             | JrNEZ
-   362.             | OS_OUT =>
-   363.             if the_NEST_depth > 0 then
-   364.                the_trace_operand := read_top;
-   365.             end if;
-   366.          when JrEN
-   367.             | JrNEN =>
-   368.             the_trace_operand := KDF9.word(the_NEST_depth);
-   369.          when JrEJ
-   370.             | JrNEJ =>
-   371.             the_trace_operand := KDF9.word(the_SJNS_depth);
-   372.          when EXIT_n
-   373.             | EXITD =>
-   374.             if the_SJNS_depth > 0 then
-   375.                the_trace_operand := as_word(SJNS_top);
-   376.             else
-   377.                the_trace_operand := -1;
-   378.             end if;
-   379.          when JrCqZ
-   380.             | JrCqNZ =>
-   381.             the_trace_operand := as_word(the_Q_store(INS.Qq));
-   382.          when JrV
-   383.             | JrNV =>
-   384.             the_trace_operand := (if the_V_bit_is_set then 1 else 0);
-   385.          when JrTR
-   386.             | JrNTR =>
-   387.             the_trace_operand := (if the_T_bit_is_set then 1 else 0);
-   388.          when others =>
-   389.             null;
-   390.       end case;
-   391.    end preview_a_jump_order;
-   392.
-   393.    procedure preview_a_data_access_order is
-   394.    begin
-   395.       case INS.compressed_opcode is
-   396.          when TO_EaMq
-   397.             | TO_EaMqQ =>
-   398.             the_trace_operand := read_top;
-   399.          when others =>
-   400.             null;
-   401.       end case;
-   402.    end preview_a_data_access_order;
-   403.
-   404.    procedure look_back_at_a_one_syllable_order is
-   405.       AB : KDF9.pair;
-   406.    begin
-   407.       case INS.compressed_opcode is
-   408.          when XDF
-   409.             | XPLUSF
-   410.             | MINUSDF
-   411.             | PLUSDF
-   412.             | FLOATD
-   413.             | NEGDF
-   414.             | MAXF
-   415.             | PERM
-   416.             | CAB
-   417.             | MAX
-   418.             | XD
-   419.             | NEGD
-   420.             | DUPD
-   421.             | DIVI
-   422.             | STR
-   423.             | REVD
-   424.             | MINUSD
-   425.             | PLUSD
-   426.             | DIVR =>
-   427.             AB := read_top;
-   428.             the_trace_operand := AB.msw;
-   429.          when others =>
-   430.             if the_NEST_depth > 0 then
-   431.                the_trace_operand := read_top;
-   432.             end if;
-   433.       end case;
-   434.    end look_back_at_a_one_syllable_order;
-   435.
-   436.    procedure look_back_at_an_IO_order is null;
-   437.
-   438.    procedure look_back_at_a_two_syllable_order is
-   439.       AB : KDF9.pair;
-   440.    begin
-   441.       case INS.compressed_opcode is
-   442.          when MkMq
-   443.             | MkMqQ
-   444.             | MkMqH
-   445.             | MkMqQH
-   446.             | MkMqQN
-   447.             | MkMqHN
-   448.             | MkMqQHN
-   449.             | QCIMq
-   450.             | SHA
-   451.             | SHL
-   452.             | SHC
-   453.             | TO_Kq
-   454.             | Kk
-   455.             | LINK =>
-   456.             the_trace_operand := read_top;
-   457.          when TO_MkMq
-   458.             | TO_MkMqQ
-   459.             | TO_MkMqH
-   460.             | TO_MkMqQH
-   461.             | TO_MkMqN
-   462.             | TO_MkMqQN
-   463.             | TO_MkMqHN
-   464.             | TO_MkMqQHN =>
-   465.             null;
-   466.          when M_PLUS_Iq
-   467.             | M_MINUS_Iq
-   468.             | NCq
-   469.             | DCq
-   470.             | POS1_TO_Iq
-   471.             | NEG1_TO_Iq
-   472.             | POS2_TO_Iq
-   473.             | NEG2_TO_Iq
-   474.             | TO_RCIMq
-   475.             | ADD_TO_QCIMq
-   476.             | JCqNZS =>
-   477.             the_trace_operand := as_word(the_Q_store(INS.Qq));
-   478.          when CqTOQk
-   479.             | IqTOQk
-   480.             | MqTOQk
-   481.             | QqTOQk
-   482.             | CIqTOQk
-   483.             | IMqTOQk
-   484.             | CMqTOQk =>
-   485.             the_trace_operand := as_word(the_Q_store(INS.Qk));
-   486.          when SHLD
-   487.             | SHAD
-   488.             | MACC =>
-   489.             AB := read_top;
-   490.             the_trace_operand := AB.msw;
-   491.          when TO_LINK =>
-   492.             the_trace_operand := as_word(SJNS_top);
-   493.          when others =>
-   494.             look_back_at_an_IO_order;
-   495.       end case;
-   496.    end look_back_at_a_two_syllable_order;
-   497.
-   498.    procedure look_back_at_a_jump_order is
-   499.       BA_image  : constant String := "BA #" & oct_of(BA);
-   500.       NOL_image : constant String := "NOL"  & NOL'Image;
-   501.    begin
-   502.       case INS.compressed_opcode is
-   503.          when Jr =>
-   504.             the_trace_operand := as_word(SJNS_link(NIA));
-   505.          when JSr =>
-   506.             the_trace_operand := as_word(SJNS_top);
-   507.          when EXITD =>
-   508.             take_note_of_interrupt(EXITD_flag, BA_image & " " & NOL_image & " @ " & oct_of(NIA));
-   509.          when others =>
-   510.             null;
-   511.       end case;
-   512.    end look_back_at_a_jump_order;
-   513.
-   514.    procedure look_back_at_a_data_access_order is
-   515.    begin
-   516.       case INS.compressed_opcode is
-   517.          when EaMq
-   518.             | EaMqQ
-   519.             | SET =>
-   520.             the_trace_operand := read_top;
-   521.          when others =>
-   522.             null;
-   523.       end case;
-   524.    end look_back_at_a_data_access_order;
-   525.
-   526.    procedure act_on_any_fetchpoint is
-   527.       use type watch_flags.set;
-   528.    begin
-   529.       if fetchpoints/the_trace_address then
-   530.          log_new_line;
-   531.          log("Fetch watchhpoint: N1 := [#" & oct_of(the_trace_address) & "]");
-   532.          short_witness;
-   533.          interact;
-   534.          quit_if_requested;
-   535.          change_diagnostic_mode_if_requested;
-   536.       end if;
-   537.    end act_on_any_fetchpoint;
-   538.
-   539.    procedure act_on_any_storepoint is
-   540.       use type watch_flags.set;
-   541.    begin
-   542.       if storepoints/the_trace_address then
-   543.          log_new_line;
-   544.          log(
-   545.              "Store watchpoint: #"
-   546.            & oct_of(the_trace_address)
-   547.            & " := [N1] = #"
-   548.            & oct_of(the_trace_operand)
-   549.             );
-   550.          short_witness;
-   551.          interact;
-   552.          quit_if_requested;
-   553.          change_diagnostic_mode_if_requested;
-   554.       end if;
-   555.    end act_on_any_storepoint;
-   556.
-   557.    procedure act_on_any_two_syllable_order_watchpoints is
-   558.    begin
-   559.       case INS.compressed_opcode is
-   560.          when MkMq
-   561.             | MkMqQ
-   562.             | MkMqH
-   563.             | MkMqQH
-   564.             | MkMqQN
-   565.             | MkMqHN
-   566.             | MkMqQHN =>
-   567.             act_on_any_fetchpoint;
-   568.          when TO_MkMq
-   569.             | TO_MkMqQ
-   570.             | TO_MkMqH
-   571.             | TO_MkMqQH
-   572.             | TO_MkMqN
-   573.             | TO_MkMqQN
-   574.             | TO_MkMqHN
-   575.             | TO_MkMqQHN =>
-   576.             act_on_any_storepoint;
-   577.          when others =>
-   578.             null;
-   579.       end case;
-   580.    end act_on_any_two_syllable_order_watchpoints;
-   581.
-   582.    procedure act_on_any_data_access_order_watchpoints is
-   583.    begin
-   584.       case INS.compressed_opcode is
-   585.          when EaMq
-   586.             | EaMqQ =>
-   587.             act_on_any_fetchpoint;
-   588.          when TO_EaMq
-   589.             | TO_EaMqQ =>
-   590.             act_on_any_storepoint;
-   591.          when others =>
-   592.             null;
-   593.       end case;
-   594.    end act_on_any_data_access_order_watchpoints;
-   595.
-   596. end tracing;
-
-Compiling: ../Source/tracing.ads
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with generic_sets;
-    18. with IOC;
-    19. with KDF9;
-    20. with settings;
-    21.
-    22. use  settings;
-    23.
-    24. package tracing is
-    25.
-    26.    -- Support for significant-operand evaluation and tracing.
-    27.
-    28.    the_trace_operand : KDF9.word;
-    29.    the_trace_address : KDF9.address;
-    30.
-    31.    procedure preview_a_one_syllable_order;
-    32.
-    33.    procedure preview_a_two_syllable_order;
-    34.
-    35.    procedure preview_a_jump_order;
-    36.
-    37.    procedure preview_a_data_access_order;
-    38.
-    39.    procedure look_back_at_a_one_syllable_order;
-    40.
-    41.    procedure look_back_at_a_two_syllable_order;
-    42.
-    43.    procedure look_back_at_a_jump_order
-    44.       with Inline => False;
-    45.
-    46.    procedure look_back_at_a_data_access_order;
-    47.
-    48.    -- Support for breakpoints.
-    49.
-    50.    package order_flags is new generic_sets(member => KDF9.code_address);
-    51.
-    52.    breakpoints : order_flags.set := order_flags.empty_set;
-    53.
-    54.    procedure set_breakpoints (first, last : in KDF9.code_address);
-    55.
-    56.    procedure handle_breakpoint;
-    57.
-    58.    -- Support for watchpoints.
-    59.
-    60.    package watch_flags is new generic_sets(member => KDF9.address);
-    61.
-    62.    fetchpoints : watch_flags.set := watch_flags.empty_set;
-    63.    storepoints : watch_flags.set := watch_flags.empty_set;
-    64.
-    65.    procedure clear_all_watchpoints;
-    66.
-    67.    procedure set_fetch_points (first, last : in KDF9.address);
-    68.
-    69.    procedure set_store_points (first, last : in KDF9.address);
-    70.
-    71.    procedure act_on_any_two_syllable_order_watchpoints
-    72.       with Inline => False;
-    73.
-    74.    procedure act_on_any_data_access_order_watchpoints
-    75.       with Inline => False;
-    76.
-    77.
-    78.    --
-    79.    -- Retrospective tracing.
-    80.    --
-    81.
-    82.    FIFO_size : constant := 256;
-    83.
-    84.    type FIFO_index is mod FIFO_size;
-    85.
-    86.    -- Support for all-instruction retrospective tracing.
-    87.
-    88.    type retro_FIFO_entry is
-    89.       record
-    90.          location  : KDF9.syllable_address;
-    91.          order     : KDF9.syllable_group;
-    92.          parameter : KDF9.word;
-    93.          ICR_value : KDF9.order_counter;
-    94.          CPU_time  : KDF9.us;
-    95.          nested    : KDF9.NEST_depth;
-    96.          called    : KDF9.SJNS_depth;
-    97.          V, T, D   : Boolean;
-    98.          level     : KDF9.priority;
-    99.       end record;
-   100.
-   101.    retro_FIFO  : array (tracing.FIFO_index) of tracing.retro_FIFO_entry;
-   102.
-   103.    retro_FIFO_index : tracing.FIFO_index := 0;
-   104.
-   105.    retro_FIFO_count : Natural range 0 .. FIFO_size := 0;
-   106.
-   107.    procedure clear_retro_FIFO;
-   108.
-   109.    procedure take_note_of (the_value : in KDF9.word);
-   110.
-   111.    -- Support for retrospective peripheral I/O tracing.
-   112.
-   113.    type IOC_event_kind is (start_transfer,
-   114.                            finis_transfer,
-   115.                            buffer_lockout,
-   116.                            store_lockout,
-   117.                            buffer_status);
-   118.
-   119.
-   120.    type IOC_FIFO_entry (kind : IOC_event_kind := start_transfer) is
-   121.       record
-   122.          ICR_value       : KDF9.order_counter;
-   123.          order_address   : KDF9.syllable_address;
-   124.          decoded_order   : KDF9.decoded_order;
-   125.          initiation_time : KDF9.us;
-   126.          device_name     : IOC.device_name;
-   127.          is_for_Director : Boolean;
-   128.          priority_level  : KDF9.priority;
-   129.          context         : KDF9.context;
-   130.          operation       : IOC.transfer_kind := IOC.some_other_operation;
-   131.          case kind is
-   132.             when start_transfer | finis_transfer =>
-   133.                completion_time : KDF9.us;
-   134.                control_word    : KDF9.Q_register;
-   135.             when store_lockout =>
-   136.                data_address : KDF9.Q_part;
-   137.             when buffer_lockout =>
-   138.                null;
-   139.             when buffer_status =>
-   140.                Q_register : KDF9.Q_register;
-   141.                status     : Boolean;
-   142.          end case;
-   143.       end record;
-   144.
-   145.    IOC_FIFO  : array (tracing.FIFO_index) of tracing.IOC_FIFO_entry;
-   146.
-   147.    IOC_FIFO_index : tracing.FIFO_index := 0;
-   148.
-   149.    IOC_FIFO_count : Natural range 0 .. FIFO_size := 0;
-   150.
-   151.    procedure clear_IOC_FIFO;
-   152.
-   153.    procedure take_note_of_IO_start (
-   154.                                     device_name     : in IOC.device_name;
-   155.                                     completion_time : in KDF9.us;
-   156.                                     control_word    : in KDF9.Q_register;
-   157.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
-   158.                                    );
-   159.
-   160.    procedure take_note_of_IO_finis (
-   161.                                     ICR_value       : in KDF9.order_counter;
-   162.                                     order_address   : in KDF9.syllable_address;
-   163.                                     decoded_order   : in KDF9.decoded_order;
-   164.                                     initiation_time : in KDF9.us;
-   165.                                     device_name     : in IOC.device_name;
-   166.                                     is_for_Director : Boolean;
-   167.                                     priority_level  : in KDF9.priority;
-   168.                                     completion_time : in KDF9.us;
-   169.                                     control_word    : in KDF9.Q_register;
-   170.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
-   171.                                    );
-   172.
-   173.    procedure take_note_of_store_lockout  (device_name : in IOC.device_name);
-   174.
-   175.    procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
-   176.                                           operation   : in IOC.transfer_kind := IOC.some_other_operation);
-   177.
-   178.    procedure take_note_of_test (
-   179.                                 device_name : in IOC.device_name;
-   180.                                 Q_register  : in KDF9.Q_register;
-   181.                                 status      : in Boolean
-   182.                                 );
-   183.
-   184.
-   185.    -- Support for retrospective interrupt-request tracing.
-   186.
-   187.    max_interrupt_message_length : constant := 100;
-   188.    type interrupt_FIFO_entry is
-   189.       record
-   190.          interrupt_code : KDF9.interrupt_number;
-   191.          ICR_value      : KDF9.order_counter;
-   192.          order_address  : KDF9.syllable_address;
-   193.          busy_time      : KDF9.us;
-   194.          priority_level : KDF9.priority;
-   195.          context        : KDF9.context;
-   196.          message        : String (1..max_interrupt_message_length);
-   197.       end record;
-   198.
-   199.    interrupt_FIFO  : array (tracing.FIFO_index) of tracing.interrupt_FIFO_entry;
-   200.
-   201.    interrupt_FIFO_index : tracing.FIFO_index := 0;
-   202.
-   203.    interrupt_FIFO_count : Natural range 0 .. FIFO_size := 0;
-   204.
-   205.    procedure clear_interrupt_FIFO;
-   206.
-   207.    procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
-   208.       with Inline => False;
-   209.
-   210.
-   211.    -- Support for the instruction-type and instruction-word frequency histograms.
-   212.
-   213.    the_histogram : array (KDF9.syllable) of KDF9.order_counter;
-   214.
-   215.    procedure clear_the_histogram;
-   216.
-   217.    procedure add_INS_to_the_histogram
-   218.       with Inline;
-   219.
-   220.    the_profile   : array (KDF9.code_address) of KDF9.order_counter;
-   221.
-   222.    procedure clear_the_profile;
-   223.
-   224.    procedure add_CIA_to_the_profile
-   225.       with Inline;
-   226.
-   227. end tracing;
-
- 596 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/formatting.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Provide basic data-formatting operations for KDF9 data types.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Characters.Handling;
-    18. with Ada.Strings;
-    19. with Ada.Strings.Fixed;
-    20. --
-    21. with KDF9_char_sets;
-    22. with KDF9.CPU;
-    23.
-    24. use  Ada.Characters.Handling;
-    25. use  Ada.Strings;
-    26. use  Ada.Strings.Fixed;
-    27. --
-    28. use  KDF9_char_sets;
-    29. use  KDF9.CPU;
-    30.
-    31. package body formatting is
-    32.
-    33.    digit_map : constant array (KDF9.halfword range 0 .. 15) of Character := "0123456789ABCDEF";
-    34.
-    35.    -- Return N as 3 octal digits.
-    36.    function oct_of (N : KDF9.syllable)
-    37.    return String
-    38.    is (oct_of(KDF9.halfword(N))(6 .. 8));
-    39.
-    40.    -- Return N as 6 octal digits.
-    41.    function oct_of (N : KDF9.field_of_16_bits)
-    42.    return String is
-    43.       value : KDF9.field_of_16_bits := N;
-    44.       oct   : String(1 .. 6);
-    45.    begin
-    46.       for i in reverse oct'Range loop
-    47.          oct(i) := digit_map(KDF9.halfword(value mod 8));
-    48.          value := value / 8;
-    49.       end loop;
-    50.       return oct;
-    51.    end oct_of;
-    52.
-    53.    -- Return N as 1 .. min_digits octal digits, with (partial) zero suppression.
-    54.    function oct_of (N : KDF9.Q_part; min_digits : octal_width := 6)
-    55.    return String is
-    56.       oct : constant String(octal_width) := oct_of(KDF9.field_of_16_bits(N));
-    57.    begin
-    58.      if N = 0 then return (1..min_digits => '0'); end if;
-    59.      for i in 1 .. 6-min_digits loop
-    60.         if oct(i) /= '0' then
-    61.            return oct(i .. 6);
-    62.         end if;
-    63.       end loop;
-    64.       return oct(7-min_digits .. 6);
-    65.    end oct_of;
-    66.
-    67.    -- Return N as 1 .. 5 decimal digits, with zero suppression and sign when neagtive.
-    68.    function signed_dec_of (N : KDF9.Q_part)
-    69.    return String is
-    70.       dec : constant String := resign(N)'Image;
-    71.    begin
-    72.       return trimmed(dec);
-    73.    end signed_dec_of;
-    74.
-    75.    -- Return N as decimal digits, with zero suppression.
-    76.    function dec_of (N : KDF9.Q_part)
-    77.    return String is
-    78.       dec : constant String := N'Image;
-    79.    begin
-    80.       return trimmed(dec);
-    81.    end dec_of;
-    82.
-    83.    -- Return N as up to 5 octal digits.
-    84.    function oct_of (N : KDF9.code_address)
-    85.    return String is
-    86.       value : KDF9.code_address := N;
-    87.       j     : Positive := 5;
-    88.       oct   : String(1 .. 5);
-    89.    begin
-    90.       for i in reverse oct'Range loop
-    91.          oct(i) := digit_map(KDF9.halfword(value mod 8));
-    92.          value := value / 8;
-    93.       end loop;
-    94.       for i in oct'Range loop
-    95.          if oct(i) /= '0' then j := i; exit; end if;
-    96.       end loop;
-    97.       return oct(j..5);
-    98.    end oct_of;
-    99.
-   100.    -- Return N as decimal digits, with zero suppression.
-   101.    function dec_of (N : KDF9.code_address)
-   102.    return String
-   103.    is (trimmed(N'Image));
-   104.
-   105.    -- Return N as 8 octal digits.
-   106.    function oct_of (N : KDF9.halfword)
-   107.    return String is
-   108.       value : KDF9.halfword := N;
-   109.       oct   : String(1 .. 8);
-   110.    begin
-   111.       for i in reverse oct'Range loop
-   112.          oct(i) := digit_map(value mod 8);
-   113.          value := value / 8;
-   114.       end loop;
-   115.       return oct;
-   116.    end oct_of;
-   117.
-   118.    -- Return N as #wwwww/s, where w and s are octal digits.
-   119.    function oct_of (N : KDF9.SJNS_link)
-   120.    return String
-   121.    is (
-   122.        "#"
-   123.       &  oct_of(N.code_address)
-   124.       & '/'
-   125.       & digit_map(KDF9.halfword(N.syllable_index))
-   126.       );
-   127.
-   128.    -- Return N as #wwwww/s, where w and s are octal digits.
-   129.    function oct_of (N : KDF9.syllable_address)
-   130.    return String
-   131.    is (oct_of(KDF9.SJNS_link(N)));
-   132.
-   133.    -- Return N as dddd/d, where d is a decimal digit.
-   134.    function dec_of (N : KDF9.syllable_address)
-   135.    return String
-   136.    is (
-   137.        trimmed(N.code_address'Image)
-   138.             & '/'
-   139.             & digit_map(KDF9.halfword(N.syllable_index))
-   140.       );
-   141.
-   142.    -- Return N as #wwwww/s, where w and s are octal digits;
-   143.    --    or as dddd/s, where d is a decimal digit, according to octal_option.
-   144.    function oct_or_dec_of (N : KDF9.syllable_address; octal_option : Boolean)
-   145.    return String
-   146.    is (if octal_option then oct_of(N) else dec_of(N));
-   147.
-   148.    -- Return N as 16 octal digits
-   149.    function oct_of (N : KDF9.word)
-   150.    return String is
-   151.       value : KDF9.word := N;
-   152.       oct   : String(1 .. 16);
-   153.    begin
-   154.       for i in reverse oct'Range loop
-   155.          oct(i) := digit_map(KDF9.halfword(value mod 8));
-   156.          value := value / 8;
-   157.       end loop;
-   158.       return oct;
-   159.    end oct_of;
-   160.
-   161.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
-   162.    function "-" (L, R : String)
-   163.    return String is
-   164.       trim_R : constant String := trim(R, right);
-   165.    begin
-   166.       if trim_R /= "" then
-   167.          return trim(L, right) & ", " & trim_R;
-   168.       else
-   169.          return trim(L, right);
-   170.       end if;
-   171.    end "-";
-   172.
-   173.    -- Return S with all leading an trailing blanks removed.
-   174.    function trimmed (S : String)
-   175.    return String
-   176.    is (Trim(S, Ada.Strings.Both));
-   177.
-   178.    -- Return trimmed(S), right-just_right in a field of width at least W.
-   179.    function just_right (S : String; W : Positive := 3)
-   180.    return String is
-   181.      image   : constant String   := Trim(S, Ada.Strings.Both);
-   182.      columns : constant Positive := Positive'Max(W, image'Length);
-   183.    begin
-   184.      return Ada.Strings.Fixed.Tail(image, columns, ' ');
-   185.    end just_right;
-   186.
-   187.    -- Return trimmed(S), left-justified in a field of width at least W.
-   188.    function just_left (S : String; W : Positive := 3)
-   189.    return String is
-   190.      image   : constant String   := Trim(S, Ada.Strings.Both);
-   191.      columns : constant Positive := Positive'Max(W, image'Length);
-   192.    begin
-   193.      return Ada.Strings.Fixed.Head(image, columns, ' ');
-   194.    end just_left;
-   195.
-   196.    function plurality (count : KDF9.word; for_1 : String := ""; for_more : String := "s")
-   197.    return String
-   198.    is (if count /= 1 then for_more else for_1);
-   199.
-   200.    -- Return C converted to a 1-character string.
-   201.    function "+" (C : Character)
-   202.    return unit_string
-   203.    is ((1 => C));
-   204.
-   205.    -- Return C with all Latin-1 lower-case letters converted to upper-case.
-   206.    function to_upper (C : Character)
-   207.    return Character
-   208.    renames Ada.Characters.Handling.to_upper;
-   209.
-   210.    -- Return S with all Latin-1 lower-case letters converted to upper-case.
-   211.    function to_upper (S : String)
-   212.    return String
-   213.    renames Ada.Characters.Handling.to_upper;
-   214.
-   215.    -- Return C with all Latin-1 upper-case letters converted to lower-case.
-   216.    function to_lower (C : Character)
-   217.    return Character
-   218.    renames Ada.Characters.Handling.to_lower;
-   219.
-   220.    -- Return S with all Latin-1 upper-case letters converted to lower-case.
-   221.    function to_lower (S : String)
-   222.    return String
-   223.    renames Ada.Characters.Handling.to_lower;
-   224.
-   225.    -- Return the 8-character Latin-1 string representing the 8 Case Normal characters in N.
-   226.    function to_string (N : KDF9.word)
-   227.    return word_as_byte_string is
-   228.       word   : KDF9.word := N;
-   229.       result : word_as_byte_string;
-   230.    begin
-   231.       for i in reverse 1 .. 8 loop
-   232.          result(i) := KDF9_char_sets.TP_CN(KDF9_char_sets.symbol(word and 8#77#));
-   233.          word := word / 64;
-   234.       end loop;
-   235.       return result;
-   236.    end to_string;
-   237.
-   238.    -- Return the result of applying to_string to each word of a double-word.
-   239.    function to_string (P : KDF9.pair)
-   240.    return pair_as_byte_string is
-   241.       result : pair_as_byte_string;
-   242.    begin
-   243.       result(1 ..  8) := to_string(P.msw);
-   244.       result(9 .. 16) := to_string(P.lsw);
-   245.       return result;
-   246.    end to_string;
-   247.
-   248.    -- Like to_string, but with glyphs for format effectors.
-   249.    function glyphs_for (N : KDF9.word)
-   250.    return word_as_byte_string is
-   251.       word   : KDF9.word := N;
-   252.       glyphs : word_as_byte_string;
-   253.    begin
-   254.       for i in reverse 1..8 loop
-   255.          glyphs(i) := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
-   256.          word := word / 64;
-   257.       end loop;
-   258.       return glyphs;
-   259.    end glyphs_for;
-   260.
-   261.    function glyphs_for (S : String)
-   262.    return String is
-   263.       T : String (S'First..S'Last);
-   264.    begin
-   265.       for i in T'Range loop
-   266.          T(i) := glyph_for(S(i));
-   267.       end loop;
-   268.       return T;
-   269.    end glyphs_for;
-   270.
-   271. end formatting;
-
-Compiling: ../Source/formatting.ads
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Provide basic data-formatting operations for KDF9 data types.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with KDF9;
-    18.
-    19. use  KDF9;
-    20.
-    21. package formatting is
-    22.
-    23.    subtype unit_string         is String(1 .. 1);
-    24.    subtype word_as_byte_string is String(1 .. 8);
-    25.    subtype pair_as_byte_string is String(1 .. 16);
-    26.
-    27.    -- Return N as 3 octal digits.
-    28.    function oct_of (N : KDF9.syllable)
-    29.    return String;
-    30.
-    31.    -- Return N as 6 octal digits.
-    32.    function oct_of (N : KDF9.field_of_16_bits)
-    33.    return String;
-    34.
-    35.    subtype octal_width is Positive range 1 .. 6;
-    36.
-    37.    -- Return N as octal digits, with (partial) zero suppression.
-    38.    -- The first (6-min_digits) are elided if '0'; all remaining digits are returned.
-    39.    -- Up to 6 digits can be returned if the result is longer than min_digits.
-    40.    -- If N is 0, the String (1..min_digits => '0') is returned.
-    41.    function oct_of (N : KDF9.Q_part; min_digits : octal_width := 6)
-    42.    return String;
-    43.
-    44.    -- Return N as 1 .. 5 decimal digits, with zero suppression and sign when neagtive.
-    45.    function signed_dec_of (N : KDF9.Q_part)
-    46.    return String;
-    47.
-    48.    -- Return N as 1 .. 6 decimal digits, with zero suppression.
-    49.    function dec_of (N : KDF9.Q_part)
-    50.    return String;
-    51.
-    52.    -- Return N as up to 5 octal digits.
-    53.    function oct_of (N : KDF9.code_address)
-    54.    return String;
-    55.
-    56.    -- Return N as decimal digits, with zero suppression.
-    57.    function dec_of (N : KDF9.code_address)
-    58.    return String ;
-    59.
-    60.    -- Return N as 8 octal digits.
-    61.    function oct_of (N : KDF9.halfword)
-    62.    return String;
-    63.
-    64.    -- Return N as #wwwww/s, where w and s are octal digits.
-    65.    function oct_of (N : KDF9.SJNS_link)
-    66.    return String;
-    67.
-    68.    -- Return N as #wwwww/s, where w and s are octal digits.
-    69.    function oct_of (N : KDF9.syllable_address)
-    70.    return String;
-    71.
-    72.    -- Return N as dddd/d, where d is a decimal digit.
-    73.    function dec_of (N : KDF9.syllable_address)
-    74.    return String;
-    75.
-    76.    -- Return N as #wwwww/s, where w and s are octal digits;
-    77.    --    or as dddd/s, where d is a decimal digit, according to octal_option.
-    78.    function oct_or_dec_of (N : KDF9.syllable_address; octal_option : Boolean)
-    79.    return String;
-    80.
-    81.    -- Return N as 16 octal digits.
-    82.    function oct_of (N : KDF9.word)
-    83.    return String;
-    84.
-    85.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
-    86.    function "-" (L, R : String)
-    87.    return String;
-    88.
-    89.    -- Return S with all leading and trailing blanks removed.
-    90.    function trimmed (S : String)
-    91.    return String;
-    92.
-    93.    -- Return trimmed(S), right-justified in a field of width at least W.
-    94.    function just_right (S : String; W : Positive := 3)
-    95.    return String;
-    96.
-    97.    -- Return trimmed(S), left-justified in a field of width at least W.
-    98.    function just_left (S : String; W : Positive := 3)
-    99.    return String;
-   100.
-   101.    -- Return the (pluralizing) suffix if count /= 1.
-   102.    function plurality (count : KDF9.word; for_1 : String := ""; for_more : String := "s")
-   103.    return String;
-   104.
-   105.    -- Return C converted to a 1-character string.
-   106.    function "+" (C : Character)
-   107.    return unit_string;
-   108.
-   109.    -- Return C with all Latin-1 lower-case letters converted to upper-case.
-   110.    function to_upper (C : Character)
-   111.    return Character;
-   112.
-   113.    -- Return S with all Latin-1 lower-case letters converted to upper-case.
-   114.    function to_upper (S : String)
-   115.    return String;
-   116.
-   117.    -- Return C with all Latin-1 upper-case letters converted to lower-case.
-   118.    function to_lower (C : Character)
-   119.    return Character;
-   120.
-   121.    -- Return S with all Latin-1 upper-case letters converted to lower-case.
-   122.    function to_lower (S : String)
-   123.    return String;
-   124.
-   125.    -- Return the 8-character Latin-1 string representing the 8 Case Normal characters in N.
-   126.    function to_string (N : KDF9.word)
-   127.    return word_as_byte_string;
-   128.
-   129.    -- Return the result of applying to_string to each word of a double-word.
-   130.    function to_string (P : KDF9.pair)
-   131.    return pair_as_byte_string;
-   132.
-   133.    -- Like to_string, but with glyphs for format effectors.
-   134.    function glyphs_for (N : KDF9.word)
-   135.    return word_as_byte_string;
-   136.
-   137.    function glyphs_for (S : String)
-   138.    return String;
-   139.
-   140. end formatting;
-
- 271 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/host_io.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Buffered I/O streams to support KDF9 device I/O.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Characters.Latin_1;
-    18. --
-    19. with OS_specifics;
-    20.
-    21. use  Ada.Characters.Latin_1;
-    22. --
-    23. use  OS_specifics;
-    24.
-    25. package body host_IO is
-    26.
-    27.    function fd_of (the_stream : host_IO.stream)
-    28.    return Natural
-    29.    is (the_stream.fd);
-    30.
-    31.    procedure open (the_stream : in out host_IO.stream;
-    32.                    file_name  : in String;
-    33.                    mode       : in POSIX.access_mode;
-    34.                    fd         : in Integer) is
-    35.    begin
-    36.       if fd >= 0 then
-    37.          make_transparent(fd);
-    38.          the_stream.base_name := file_name(file_name'First .. file_name'First+2);
-    39.          the_stream.IO_mode := mode;
-    40.          the_stream.last_IO := read_mode;
-    41.          the_stream.fd := fd;
-    42.          the_stream.is_open := True;
-    43.       else
-    44.          the_stream.is_open := False;
-    45.       end if;
-    46.    end open;
-    47.
-    48.    procedure open (the_stream : in out host_IO.stream;
-    49.                    file_name  : in String;
-    50.                    mode       : in POSIX.access_mode) is
-    51.       fd : Integer;
-    52.    begin -- open
-    53.       fd := POSIX.open(file_name, mode);
-    54.       open(the_stream, file_name, mode, fd);
-    55.    exception
-    56.       when POSIX_IO_error =>
-    57.          trap_operator_error("«" & file_name & "» cannot be opened");
-    58.    end open;
-    59.
-    60.    procedure truncate (the_stream : in out host_IO.stream) is
-    61.    begin
-    62.       truncate(the_stream.fd);
-    63.    end truncate;
-    64.
-    65.    procedure close (the_stream : in out host_IO.stream) is
-    66.       response : Integer;
-    67.    begin
-    68.       if the_stream.is_open then
-    69.          flush(the_stream);
-    70.          response := close(the_stream.fd);
-    71.          pragma Unreferenced(response);
-    72.          the_stream.is_open := False;
-    73.       end if;
-    74.    end close;
-    75.
-    76.    procedure flush (the_stream  : in out host_IO.stream;
-    77.                     a_byte_time : in KDF9.us := 0) is
-    78.       response : Integer with Unreferenced;
-    79.    begin
-    80.       if the_stream.is_open      and then
-    81.             the_stream.next_byte > 0 then
-    82.          if the_stream.IO_mode > read_mode and the_stream.last_IO = write_mode then
-    83.             if a_byte_time = 0 then
-    84.                response := write(the_stream.fd, the_stream.buffer, the_stream.next_byte);
-    85.             else
-    86.                for p in 1 .. the_stream.next_byte loop
-    87.                   response := write(the_stream.fd, the_stream.buffer(p..p), 1);
-    88.                   KDF9.delay_by(a_byte_time);
-    89.                end loop;
-    90.             end if;
-    91.          end if;
-    92.          the_stream.next_byte := 0;
-    93.          the_stream.block_size := 0;
-    94.       end if;
-    95.    end flush;
-    96.
-    97.    function a_LF_was_just_read (the_stream : host_IO.stream)
-    98.    return Boolean
-    99.    is (
-   100.        the_stream.is_open                   and then
-   101.           the_stream.bytes_moved > 0        and then
-   102.              the_stream.last_IO = read_mode and then
-   103.                 the_stream.next_byte = 0    and then
-   104.                    the_stream.block_size = 0
-   105.       );
-   106.
-   107.    function a_LF_was_just_written (the_stream : host_IO.stream)
-   108.    return Boolean
-   109.    is (
-   110.        the_stream.is_open                    and then
-   111.           the_stream.bytes_moved > 0         and then
-   112.              the_stream.last_IO /= read_mode and then
-   113.                 the_stream.column = 0
-   114.       );
-   115.
-   116.    procedure reattach (the_stream : in out host_IO.stream;
-   117.                        file_name  : in String;
-   118.                        mode       : in POSIX.access_mode) is
-   119.    begin
-   120.       close(the_stream);
-   121.       open(the_stream, file_name, (if the_stream.IO_mode = rd_wr_mode then rd_wr_mode else mode));
-   122.       if the_stream.is_open then
-   123.          the_stream.last_char := ' ';
-   124.          the_stream.block_size := 0;
-   125.          the_stream.next_byte := 0;
-   126.          the_stream.position := 0;
-   127.       end if;
-   128.    end reattach;
-   129.
-   130.    function is_open (the_stream : host_IO.stream)
-   131.    return Boolean
-   132.    is (the_stream.is_open);
-   133.
-   134.    function bytes_moved (the_stream : host_IO.stream)
-   135.    return KDF9.word
-   136.    is (the_stream.bytes_moved);
-   137.
-   138.    function column (the_stream : host_IO.stream)
-   139.    return Natural
-   140.    is (the_stream.column);
-   141.
-   142.    procedure get_position (position   : out Natural;
-   143.                            the_stream : in out host_IO.stream) is
-   144.    begin
-   145.       flush(the_stream);
-   146.       position := the_stream.position;
-   147.    end get_position;
-   148.
-   149.    function buffer_is_empty (the_stream : host_IO.stream)
-   150.    return Boolean
-   151.    is (not the_stream.is_open or else the_stream.next_byte >= the_stream.block_size);
-   152.
-   153.    function buffer_is_full (the_stream : host_IO.stream)
-   154.    return Boolean
-   155.    is (the_stream.is_open and then the_stream.next_byte = the_stream.buffer'Last);
-   156.
-   157.    procedure set_position (position   : in Natural;
-   158.                            the_stream : in out host_IO.stream;
-   159.                            whence     : in POSIX.seek_origin := from_start) is
-   160.       response : POSIX.file_position with Warnings => Off;
-   161.    begin
-   162.       flush(the_stream);
-   163.       response := seek(the_stream.fd, POSIX.file_position(position), whence);
-   164.       the_stream.position := position;
-   165.    end set_position;
-   166.
-   167.    procedure clear (the_stream : in out host_IO.stream) is
-   168.    begin
-   169.       the_stream.next_byte := 0;
-   170.       the_stream.block_size := 0;
-   171.    end clear;
-   172.
-   173.    procedure reset (the_stream : in out host_IO.stream) is
-   174.    begin
-   175.       flush(the_stream);
-   176.       if the_stream.is_open then
-   177.          the_stream.last_IO := read_mode;
-   178.          the_stream.position := 0;
-   179.          the_stream.next_byte := 0;
-   180.          the_stream.block_size := 0;
-   181.       end if;
-   182.    end reset;
-   183.
-   184.    procedure back_off (the_stream : in out host_IO.stream) is
-   185.    begin
-   186.       if the_stream.is_open                   and then
-   187.             the_stream.next_byte > 0          and then
-   188.                the_stream.last_IO = read_mode     then
-   189.          the_stream.next_byte := the_stream.next_byte - 1;
-   190.          the_stream.position := the_stream.position - 1;
-   191.       else
-   192.          trap_operator_error(the_stream.base_name & "cannot back_off");
-   193.       end if;
-   194.    end back_off;
-   195.
-   196.    procedure get_byte (char       : out Character;
-   197.                        the_stream : in out host_IO.stream) is
-   198.       response : Integer;
-   199.    begin
-   200.       if buffer_is_empty(the_stream) then
-   201.          response := read(the_stream.fd, the_stream.buffer, the_stream.buffer'Size);
-   202.          the_stream.block_size := response;
-   203.          the_stream.next_byte := 0;
-   204.          if response <= 0 then
-   205.             raise end_of_stream;
-   206.          end if;
-   207.       end if;
-   208.       the_stream.next_byte := the_stream.next_byte + 1;
-   209.       the_stream.position := the_stream.position + 1;
-   210.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
-   211.       the_stream.last_IO := read_mode;
-   212.       char := the_stream.buffer(the_stream.next_byte);
-   213.       if char = LF then
-   214.          the_stream.column := 0;
-   215.       else
-   216.          the_stream.column := the_stream.column + 1;
-   217.       end if;
-   218.    end get_byte;
-   219.
-   220.    procedure get_bytes (the_string : out String;
-   221.                         the_stream : in out host_IO.stream;
-   222.                         uncounted  : in Boolean := True) is
-   223.       old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
-   224.    begin
-   225.       for b of the_string loop
-   226.          get_byte(b, the_stream);
-   227.       end loop;
-   228.       if uncounted then
-   229.          the_stream.bytes_moved := old_bytes_moved;
-   230.       end if;
-   231.    end get_bytes;
-   232.
-   233.    procedure get_char (char       : out Character;
-   234.                        the_stream : in out host_IO.stream) is
-   235.    begin
-   236.       get_byte(char, the_stream);
-   237.       if char = CR then
-   238.          char := LF;
-   239.          the_stream.last_char := CR;
-   240.       elsif char = LF and the_stream.last_char = CR then
-   241.          the_stream.last_char := LF;
-   242.          get_byte(char, the_stream);
-   243.       else
-   244.          the_stream.last_char := char;
-   245.       end if;
-   246.    end get_char;
-   247.
-   248.    procedure peek_at_char (char       : out Character;
-   249.                            the_stream : in out host_IO.stream) is
-   250.    begin
-   251.       get_char(char, the_stream);
-   252.       back_off(the_stream);
-   253.    end peek_at_char;
-   254.
-   255.    -- put_escape_code writes directly to the stream's device, avoiding the stream's buffers.
-   256.    procedure put_escape_code (the_string : in String;
-   257.                               the_stream : in out host_IO.stream) is
-   258.       response : Integer with Warnings => Off;
-   259.    begin
-   260.       if not the_stream.is_open then
-   261.          raise end_of_stream;
-   262.       end if;
-   263.       response := write(the_stream.fd,
-   264.                         the_string,
-   265.                         the_string'Length);
-   266.    end put_escape_code;
-   267.
-   268.    procedure put_byte (char       : in Character;
-   269.                        the_stream : in out host_IO.stream) is
-   270.       response : Integer with Warnings => Off;
-   271.    begin
-   272.       if the_stream.buffer_is_full then
-   273.          response := write(the_stream.fd,
-   274.                            the_stream.buffer,
-   275.                            the_stream.buffer'Size);
-   276.          the_stream.next_byte := 0;
-   277.       end if;
-   278.       the_stream.next_byte := the_stream.next_byte + 1;
-   279.       the_stream.position := the_stream.position + 1;
-   280.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
-   281.       the_stream.buffer(the_stream.next_byte) := char;
-   282.       the_stream.last_IO := write_mode;
-   283.       if char = LF then
-   284.          the_stream.column := 0;
-   285.       else
-   286.          the_stream.column := the_stream.column + 1;
-   287.       end if;
-   288.    end put_byte;
-   289.
-   290.    procedure do_not_put_byte (char       : in Character;
-   291.                               the_stream : in out host_IO.stream) is
-   292.    begin
-   293.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
-   294.       the_stream.last_IO := write_mode;
-   295.       if char = LF then
-   296.          the_stream.column := 0;
-   297.       else
-   298.          the_stream.column := the_stream.column + 1;
-   299.       end if;
-   300.    end do_not_put_byte;
-   301.
-   302.    procedure put_bytes (the_string : in String;
-   303.                         the_stream : in out host_IO.stream;
-   304.                         uncounted  : in Boolean := True) is
-   305.       old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
-   306.    begin
-   307.       for c of the_string loop
-   308.          put_byte(c, the_stream);
-   309.       end loop;
-   310.       if uncounted then
-   311.          the_stream.bytes_moved := old_bytes_moved;
-   312.       end if;
-   313.    end put_bytes;
-   314.
-   315.    procedure put_EOL (the_stream : in out host_IO.stream;
-   316.                       uncounted  : in Boolean := True) is
-   317.    begin
-   318.       put_bytes(NL, the_stream, uncounted);
-   319.    end put_EOL;
-   320.
-   321.    procedure put_char (char       : in Character;
-   322.                        the_stream : in out host_IO.stream) is
-   323.    begin
-   324.       if char = LF then
-   325.          put_EOL(the_stream, uncounted => False);
-   326.       else
-   327.          put_byte(char, the_stream);
-   328.       end if;
-   329.    end put_char;
-   330.
-   331.    procedure put_chars (the_string : in String;
-   332.                         the_stream : in out host_IO.stream) is
-   333.    begin
-   334.       for c of the_string loop
-   335.          put_char(c, the_stream);
-   336.       end loop;
-   337.    end put_chars;
-   338.
-   339.    function contents (the_stream : host_IO.stream)
-   340.    return String is
-   341.    begin
-   342.       return the_stream.buffer(1..the_stream.next_byte);
-   343.    end contents;
-   344.
-   345.    procedure inject (the_string : in String;
-   346.                      the_stream : in out host_IO.stream) is
-   347.       the_length : constant Natural := the_string'Length;
-   348.    begin
-   349.       if the_length > 0 and the_length < the_stream.buffer'Length then
-   350.          the_stream.block_size := the_length + 1;
-   351.          the_stream.buffer(1 .. the_length) := the_string;
-   352.          the_stream.buffer(the_length + 1)  := LF;
-   353.       end if;
-   354.    end inject;
-   355.
-   356. end host_IO;
-
-Compiling: ../Source/host_io.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Buffered I/O streams to support KDF9 device I/O.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with KDF9;
-    18. with POSIX;
-    19.
-    20. use  KDF9;
-    21. use  POSIX;
-    22.
-    23. package host_IO is
-    24.
-    25.    end_of_stream : exception;
-    26.
-    27.    type stream is tagged limited private;
-    28.
-    29.    function fd_of (the_stream : host_IO.stream)
-    30.    return Natural;
-    31.
-    32.    -- Open a stream with an established fd.
-    33.    procedure open (the_stream : in out host_IO.stream;
-    34.                    file_name  : in String;
-    35.                    mode       : in POSIX.access_mode;
-    36.                    fd         : in Integer);
-    37.
-    38.    -- Open a base file then use its fd to open a stream.
-    39.    procedure open (the_stream : in out host_IO.stream;
-    40.                    file_name  : in String;
-    41.                    mode       : in POSIX.access_mode)
-    42.       with Inline => False;
-    43.
-    44.    procedure truncate (the_stream : in out host_IO.stream);
-    45.
-    46.    procedure close (the_stream : in out host_IO.stream);
-    47.
-    48.    procedure flush (the_stream  : in out host_IO.stream;
-    49.                     a_byte_time : in KDF9.us := 0);
-    50.
-    51.    -- Reassign an open stream to another file.
-    52.    procedure reattach (the_stream : in out host_IO.stream;
-    53.                        file_name  : in String;
-    54.                        mode       : in POSIX.access_mode);
-    55.
-    56.    function is_open (the_stream : host_IO.stream)
-    57.    return Boolean;
-    58.
-    59.    function bytes_moved (the_stream : host_IO.stream)
-    60.    return KDF9.word;
-    61.
-    62.    function column (the_stream : host_IO.stream)
-    63.    return Natural;
-    64.
-    65.    procedure get_position (position   : out Natural;
-    66.                            the_stream : in out host_IO.stream);
-    67.
-    68.    procedure set_position (position   : in Natural;
-    69.                            the_stream : in out host_IO.stream;
-    70.                            whence     : in POSIX.seek_origin := from_start);
-    71.
-    72.    procedure clear (the_stream : in out host_IO.stream);
-    73.
-    74.    procedure reset (the_stream : in out host_IO.stream);
-    75.
-    76.    -- Arrange for the last-read byte to be read again.
-    77.    procedure back_off (the_stream : in out host_IO.stream)
-    78.       with Inline;
-    79.
-    80.    procedure get_byte (char       : out Character;
-    81.                        the_stream : in out host_IO.stream);
-    82.
-    83.    -- get_bytes iterates get_byte over the_string, for convenience.
-    84.    -- If uncounted then the output is not included in the_stream.bytes_moved.
-    85.    procedure get_bytes (the_string : out String;
-    86.                         the_stream : in out host_IO.stream;
-    87.                         uncounted  : in Boolean := True);
-    88.
-    89.    -- True iff the last get_byte obtained a LF.
-    90.    function a_LF_was_just_read (the_stream : host_IO.stream)
-    91.    return Boolean;
-    92.
-    93.    -- get_char differs from get_byte in the treatment of line terminators.
-    94.    -- CR, LF, and CRLF are all returned as a single LF character, so catering
-    95.    --    for old MacOS, MSDOS, and macOS/UNIX/Linux external text-file formats.
-    96.    procedure get_char (char       : out Character;
-    97.                        the_stream : in out host_IO.stream);
-    98.
-    99.    -- peek_at_char uses get_char to inspect the next char to be delivered,
-   100.    --    then invokes back_off so that it is left in the input stream.
-   101.    procedure peek_at_char (char       : out Character;
-   102.                            the_stream : in out host_IO.stream);
-   103.
-   104.    -- do_not_put_byte does the same as put_byte, except for actually writing it to the_stream.
-   105.    procedure do_not_put_byte (char       : in Character;
-   106.                               the_stream : in out host_IO.stream);
-   107.
-   108.    procedure put_byte (char       : in Character;
-   109.                        the_stream : in out host_IO.stream);
-   110.
-   111.    -- put_escape_code writes directly to the stream's device, avoiding the stream's buffers.
-   112.    procedure put_escape_code (the_string : in String;
-   113.                               the_stream : in out host_IO.stream);
-   114.
-   115.    -- put_bytes iterates put_byte over the_string, for convenience.
-   116.    -- If uncounted then the output is not included in the_stream.bytes_moved.
-   117.    procedure put_bytes (the_string : in String;
-   118.                         the_stream : in out host_IO.stream;
-   119.                         uncounted  : in Boolean := True);
-   120.
-   121.    -- put_EOL writes the host-appropriate line terminator (CRLF, or just LF)
-   122.    procedure put_EOL (the_stream : in out host_IO.stream;
-   123.                       uncounted  : in Boolean := True);
-   124.
-   125.    -- put_char differs from put_byte only in the treatment of line terminators.
-   126.    -- If char is LF, then put_EOL is used to output a host-appropriate line terminator.
-   127.    procedure put_char (char       : in Character;
-   128.                        the_stream : in out host_IO.stream);
-   129.
-   130.    -- put_chars iterates put_bytes over the_string, for convenience.
-   131.    procedure put_chars (the_string : in String;
-   132.                         the_stream : in out host_IO.stream);
-   133.
-   134.    -- True iff the last put_byte wrote out a LF.
-   135.    function a_LF_was_just_written (the_stream : host_IO.stream)
-   136.    return Boolean;
-   137.
-   138.    function buffer_is_empty (the_stream : host_IO.stream)
-   139.    return Boolean
-   140.       with Inline;
-   141.
-   142.    function buffer_is_full (the_stream : host_IO.stream)
-   143.    return Boolean
-   144.       with Inline;
-   145.
-   146.    -- Return the currently buffered output as a single string.
-   147.    function contents (the_stream : host_IO.stream)
-   148.    return String;
-   149.
-   150.    -- Make the_string appear to be input for the_stream (which must be empty).
-   151.    procedure inject (the_string : in String;
-   152.                      the_stream : in out host_IO.stream);
-   153.
-   154. private
-   155.
-   156.    -- N.B. in host_IO the term 'buffer' is used conventionally.
-   157.    -- It does NOT refer to a KDF9 DMA channel.
-   158.
-   159.    -- IO_buffer_size is enough for a full LP line, lacking any better criterion.
-   160.    IO_buffer_size : constant Positive := 161;
-   161.
-   162.    type stream is tagged limited
-   163.       record
-   164.          base_name   : String (1 .. 3) := "???";
-   165.          is_open     : Boolean := False;
-   166.          last_char   : Character := ' ';
-   167.          block_size,
-   168.          next_byte,
-   169.          saved_size,
-   170.          position,
-   171.          column      : Natural := 0;
-   172.          bytes_moved : KDF9.word := 0;
-   173.          fd          : Natural := Natural'Last;
-   174.          IO_mode     : POSIX.access_mode range read_mode .. rd_wr_mode;
-   175.          last_IO     : POSIX.access_mode range read_mode .. write_mode;
-   176.          buffer,
-   177.          look_behind : String(1 .. IO_buffer_size);
-   178.       end record;
-   179.
-   180. end host_IO;
-
- 356 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-store.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- KDF9 core store operations.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Unchecked_Conversion;
-    18. --
-    19. with formatting;
-    20. with KDF9.CPU;
-    21.
-    22. use formatting;
-    23. use  KDF9.CPU;
-    24.
-    25. package body KDF9.store is
-    26.
-    27.    -- diagnose_invalid_address avoids secondary stack usage in the address validation procedures.
-    28.    procedure diagnose_invalid_address (message : in String; address : in KDF9.word)
-    29.       with Inline => False;
-    30.
-    31.    procedure diagnose_invalid_address (message : in String; address : in KDF9.word) is
-    32.    begin
-    33.       trap_illegal_instruction(message & " =" & address'Image);
-    34.    end diagnose_invalid_address;
-    35.
-    36.    -- Check that EA, EA+BA are valid; LIV if invalid.
-    37.    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part)
-    38.       with Inline => True;
-    39.
-    40.    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part) is
-    41.       PA : constant KDF9.word := (KDF9.word(EA) + KDF9.word(BA)) and Q_part_mask;
-    42.    begin
-    43.       if EA > NOL and then the_CPU_state = program_state then
-    44.          diagnose_invalid_address("NOL < virtual address", KDF9.word(EA));
-    45.       end if;
-    46.       if PA > max_address and then the_CPU_state = program_state then
-    47.          diagnose_invalid_address("32K-1 < physical address", PA);
-    48.       end if;
-    49.    end validate_virtual_and_real_addresses;
-    50.
-    51.    procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
-    52.                                     address_2 : KDF9.Q_part := 0;
-    53.                                     solo      : Boolean     := True) is
-    54.    begin
-    55.       LOV_if_user_mode(
-    56.                        if solo
-    57.                        then "at #" & oct_of(address_1) & " (E" & dec_of(address_1) & ")"
-    58.                        else "in #" & oct_of(address_1) & "..#" & oct_of(address_2)
-    59.                       );
-    60.    end if_user_mode_then_LOV;
-    61.
-    62.    function group (PA : KDF9.Q_part)
-    63.    return KDF9.Q_part
-    64.    is (PA / group_size);
-    65.
-    66.    procedure check_address_and_lockout (EA : in KDF9.Q_part) is
-    67.       PA : constant KDF9.Q_part := EA + BA;
-    68.    begin
-    69.       validate_virtual_and_real_addresses(EA);
-    70.       if locked_out(group(PA)) then
-    71.          the_locked_out_address := PA;
-    72.          if the_CPU_state /= Director_state then
-    73.             if_user_mode_then_LOV(PA);
-    74.          end if;
-    75.       end if;
-    76.    end check_address_and_lockout;
-    77.
-    78.    procedure validate_address_range (EA1, EA2 : in KDF9.Q_part) is
-    79.    begin
-    80.       if EA1 > EA2 then
-    81.          diagnose_invalid_address("initial address > final address", KDF9.word(EA2));
-    82.       end if;
-    83.       validate_virtual_and_real_addresses(EA1);
-    84.       validate_virtual_and_real_addresses(EA2);
-    85.    end validate_address_range;
-    86.
-    87.    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part) is
-    88.        PA1 : constant KDF9.Q_part := EA1 + BA;
-    89.        PA2 : constant KDF9.Q_part := EA2 + BA;
-    90.    begin
-    91.       validate_address_range (EA1, EA2);
-    92.       if there_are_locks_in_physical_addresses(KDF9.Q_register'(C => 0, I => PA1, M => PA2)) then
-    93.          if the_CPU_state /= Director_state then
-    94.             if_user_mode_then_LOV(PA1, PA2, solo => False);
-    95.          end if;
-    96.       end if;
-    97.    end check_addresses_and_lockouts;
-    98.
-    99.    -- Check that A1+A2 is valid; trap if it is invalid.
-   100.    function valid_word_address (A1, A2 : in KDF9.Q_part)
-   101.    return KDF9.address is
-   102.       V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(A2)) and Q_part_mask;
-   103.    begin
-   104.       if V > max_address then
-   105.          diagnose_invalid_address("32K-1 < virtual address", V);
-   106.       end if;
-   107.       return KDF9.address(V);
-   108.    end valid_word_address;
-   109.
-   110.    function signed is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
-   111.    function design is new Ada.Unchecked_Conversion (CPU.signed_Q_part, KDF9.Q_part);
-   112.
-   113.    -- Check that A1+A2/2 is valid; trap if it is invalid.  A2 must be treated as a signed number.
-   114.    function valid_halfword_address (A1, A2 : in KDF9.Q_part)
-   115.    return KDF9.address is
-   116.       V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(design(signed(A2)/2))) and Q_part_mask;
-   117.    begin
-   118.       if V > max_address then
-   119.          diagnose_invalid_address("32K-1 < virtual address", V);
-   120.       end if;
-   121.       return KDF9.address(V);
-   122.    end valid_halfword_address;
-   123.
-   124.    function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
-   125.    return KDF9_char_sets.symbol
-   126.    is (KDF9_char_sets.symbol(shift_word_right(core(EA+BA), 42 - 6*Natural(index)) and 8#77#));
-   127.
-   128.    procedure store_symbol (value : in KDF9_char_sets.symbol;
-   129.                            EA    : in KDF9.address;
-   130.                            index : in KDF9_char_sets.symbol_index) is
-   131.       place  : constant Natural   := 42 - 6*Natural(index);
-   132.       mask   : constant KDF9.word := not shift_word_left(8#77#, place);
-   133.       symbol : constant KDF9.word := shift_word_left(KDF9.word(value), place);
-   134.    begin
-   135.       core(EA+BA) := (core(EA+BA) and mask) or symbol;
-   136.    end store_symbol;
-   137.
-   138.    function fetch_octet (EA : KDF9.address; index : KDF9_char_sets.octet_index)
-   139.    return KDF9_char_sets.octet is
-   140.       place : constant Natural := 40 - 8*Natural(index);
-   141.    begin
-   142.       return KDF9_char_sets.octet(shift_word_right(core(EA+BA), place) and 8#377#);
-   143.    end fetch_octet;
-   144.
-   145.    procedure store_octet  (value : in KDF9_char_sets.octet;
-   146.                            EA    : in KDF9.address;
-   147.                            index : in KDF9_char_sets.octet_index) is
-   148.       place : constant Natural   := 40 - 8*Natural(index);
-   149.       octet : constant KDF9.word := shift_word_left(KDF9.word(value), place);
-   150.       mask  : constant KDF9.word := not shift_word_left(8#377#, place);
-   151.    begin
-   152.       core(EA+BA) := (core(EA+BA) and mask) or octet;
-   153.    end store_octet;
-   154.
-   155.    function fetch_syllable (EA : KDF9.syllable_address)
-   156.    return KDF9.syllable is
-   157.       address : constant KDF9.address := Q_part(EA.code_address) + BA;
-   158.       place   : constant Natural      := 40 - 8*Natural(EA.syllable_index);
-   159.    begin
-   160.       return KDF9.syllable(shift_word_right(core(address), place) and 8#377#);
-   161.    end fetch_syllable;
-   162.
-   163.    procedure store_syllable (value : in KDF9.syllable;
-   164.                              EA    : in KDF9.address;
-   165.                              index : in KDF9.syllable_index) is
-   166.       place    : constant Natural   := 40 - 8*Natural(index);
-   167.       syllable : constant KDF9.word := shift_word_left(KDF9.word(value), place);
-   168.       mask     : constant KDF9.word := not shift_word_left(8#377#, place);
-   169.    begin
-   170.       core(EA+BA) := (core(EA+BA) and mask) or syllable;
-   171.    end store_syllable;
-   172.
-   173.    function fetch_halfword (EA : KDF9.address; index : KDF9.halfword_number)
-   174.    return KDF9.word
-   175.    is (shift_word_left(shift_word_right(core(EA+BA), 24 - 24*Natural(index)), 24));
-   176.
-   177.    procedure store_halfword (value : in KDF9.word;
-   178.                              EA    : in KDF9.address;
-   179.                              index : in KDF9.halfword_number) is
-   180.       place   : constant Natural   := 24 - 24*Natural(index);
-   181.       half    : constant KDF9.word := shift_word_left(shift_word_right(value, 24), place);
-   182.       mask    : constant KDF9.word := not shift_word_left(halfword_mask, place);
-   183.    begin
-   184.       core(EA+BA) := (core(EA+BA) and mask) or half;
-   185.    end store_halfword;
-   186.
-   187.    function fetch_word (EA : KDF9.address)
-   188.    return KDF9.word
-   189.    is (core(EA+BA));
-   190.
-   191.    procedure store_word (value : in KDF9.word; EA : in KDF9.address) is
-   192.    begin
-   193.       core(EA+BA) := value;
-   194.    end store_word;
-   195.
-   196.    function there_are_locks_in_relative_addresses (Q : KDF9.Q_register)
-   197.    return Boolean is
-   198.    begin
-   199.       validate_address_range (Q.I, Q.M);
-   200.       return there_are_locks_in_physical_addresses((0, Q.I+BA, Q.M+BA));
-   201.    end there_are_locks_in_relative_addresses;
-   202.
-   203.    function there_are_locks_in_physical_addresses (Q : KDF9.Q_register)
-   204.    return Boolean is
-   205.    begin
-   206.       for g in group(Q.I) .. group(Q.M) loop
-   207.          if locked_out(g) then
-   208.             the_locked_out_address := g * group_size;
-   209.             return True;
-   210.          end if;
-   211.       end loop;
-   212.       return False;
-   213.    end there_are_locks_in_physical_addresses;
-   214.
-   215.    function is_unlocked (G : KDF9.store.group_address)
-   216.    return Boolean is
-   217.    begin
-   218.       return not locked_out(KDF9.Q_part(G));
-   219.    end is_unlocked;
-   220.
-   221.    procedure lock_out_relative_addresses (Q : in KDF9.Q_register) is
-   222.    begin
-   223.       validate_address_range (Q.I, Q.M);
-   224.       lock_out_absolute_addresses((0, Q.I+BA, Q.M+BA));
-   225.    end lock_out_relative_addresses;
-   226.
-   227.    procedure lock_out_absolute_addresses (Q : in KDF9.Q_register) is
-   228.    begin
-   229.       for g in group(Q.I) .. group(Q.M) loop
-   230.          locked_out(g) := True;
-   231.       end loop;
-   232.    end lock_out_absolute_addresses;
-   233.
-   234.    procedure unlock_absolute_addresses (Q : in KDF9.Q_register) is
-   235.    begin
-   236.       for g in group(Q.I) .. group(Q.M) loop
-   237.          locked_out(g) := False;
-   238.       end loop;
-   239.    end unlock_absolute_addresses;
-   240.
-   241. end KDF9.store;
-
-Compiling: ../Source/kdf9-store.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- KDF9 core store operations.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with KDF9_char_sets;
-    18.
-    19. use  KDF9_char_sets;
-    20.
-    21. package KDF9.store is
-    22.
-    23.    --
-    24.    -- Relative addresses may be either virtual or physical.
-    25.    -- Virtual addresses are generated by problem programs and must be relativized by adding BA.
-    26.    -- These addresses must also be validated to ensure they do not breach store limits.
-    27.    -- Physical "relative" addresses are generated by Director, when BA is guaranteed to be 0,
-    28.    --   so it has no effect, thus allowing the relative address routines to be used.
-    29.    --
-    30.    -- Absolute addresses are generated by I/O Control, which may be doing a transfer for either
-    31.    --   a Director or a problem program, and must therefore ensure that BA is not added.
-    32.    --
-    33.
-    34.    --
-    35.    -- Parameters named EA are Effective "relative" Addresses.
-    36.    --
-    37.
-    38.    function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
-    39.    return KDF9_char_sets.symbol;
-    40.
-    41.    function fetch_octet (EA : KDF9.address; index : KDF9_char_sets.octet_index)
-    42.    return KDF9_char_sets.octet
-    43.       with Inline;
-    44.
-    45.    function fetch_syllable (EA : KDF9.syllable_address)
-    46.    return KDF9.syllable
-    47.       with Inline;
-    48.
-    49.    function fetch_halfword (EA : KDF9.address; index : KDF9.halfword_number)
-    50.    return KDF9.word
-    51.       with Inline;
-    52.
-    53.    function fetch_word (EA : KDF9.address)
-    54.    return KDF9.word
-    55.       with Inline;
-    56.
-    57.    procedure store_symbol (value : in KDF9_char_sets.symbol;
-    58.                            EA    : in KDF9.address;
-    59.                            index : in KDF9_char_sets.symbol_index)
-    60.       with Inline;
-    61.
-    62.    procedure store_octet  (value : in KDF9_char_sets.octet;
-    63.                            EA    : in KDF9.address;
-    64.                            index : in KDF9_char_sets.octet_index)
-    65.       with Inline;
-    66.
-    67.    procedure store_syllable (value : in KDF9.syllable;
-    68.                              EA    : in KDF9.address;
-    69.                              index : in KDF9.syllable_index)
-    70.       with Inline;
-    71.
-    72.    procedure store_halfword (value : in KDF9.word;
-    73.                              EA    : in KDF9.address;
-    74.                              index : in KDF9.halfword_number)
-    75.       with Inline;
-    76.
-    77.    procedure store_word (value : in KDF9.word; EA : in KDF9.address)
-    78.       with Inline;
-    79.
-    80.    -- Check that A1+A2 is a valid word address; LIV if it is invalid.
-    81.    function valid_word_address (A1, A2 : in KDF9.Q_part)
-    82.    return KDF9.address
-    83.       with Inline;
-    84.
-    85.    -- Check that A1+A2/2 is valid; LIV if it is invalid.  A2 is treated as a signed number.
-    86.    function valid_halfword_address (A1, A2 : in KDF9.Q_part)
-    87.    return KDF9.address
-    88.       with Inline;
-    89.
-    90.    -- If a store access is locked out, its physical address is left here.
-    91.    the_locked_out_address : KDF9.Q_part;
-    92.
-    93.    procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
-    94.                                     address_2 : KDF9.Q_part := 0;
-    95.                                     solo      : Boolean     := True)
-    96.       with Inline => False;
-    97.
-    98.    -- Check EA and lockout for EA.
-    99.    procedure check_address_and_lockout (EA : in KDF9.Q_part)
-   100.       with Inline;
-   101.
-   102.    -- Check that EA1, EA2, EA1+BA, EA2+BA are valid, and EA1 <= EA2.
-   103.    --    LIV in any invalid case.
-   104.    procedure validate_address_range (EA1, EA2 : in KDF9.Q_part);
-   105.
-   106.    -- Check EA1, EA2, and lockouts for EA1+BA .. EA2+BA.
-   107.    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part);
-   108.
-   109.    function there_are_locks_in_relative_addresses (Q : KDF9.Q_register)
-   110.    return Boolean;
-   111.
-   112.    function there_are_locks_in_physical_addresses (Q : KDF9.Q_register)
-   113.    return Boolean;
-   114.
-   115.    procedure lock_out_relative_addresses (Q : in KDF9.Q_register);
-   116.
-   117.    procedure lock_out_absolute_addresses (Q : in KDF9.Q_register);
-   118.
-   119.    procedure unlock_absolute_addresses (Q : in KDF9.Q_register);
-   120.
-   121.    -- The maximum size KDF9 core store has 32Kibiwords.
-   122.    max_address   : constant := 2**15 - 1;
-   123.
-   124.    -- The group size of 32 words is 1 physical core allocation unit and physical lockout unit.
-   125.    group_size : constant := 32;
-   126.
-   127.    type group_address is mod 1024;
-   128.
-   129.     -- is_unlocked yields True if the designated group is NOT locked out.
-   130.    function is_unlocked (G : KDF9.store.group_address)
-   131.    return Boolean;
-   132.
-   133.    function group (PA : KDF9.Q_part)
-   134.    return KDF9.Q_part
-   135.       with Inline;
-   136.
-   137. private
-   138.
-   139.    type word_array is array (KDF9.Q_part range <>) of KDF9.word
-   140.       with Component_Size => 64, Convention => C;
-   141.
-   142.    -- The core store of KDF9.  Must be zeroized before loading any software.
-   143.    core : word_array (KDF9.Q_part range 0 .. max_address) := (others => 0);
-   144.
-   145.    -- The lockout store has one bit for every group_size words.
-   146.    last_lockout : constant := max_address / group_size;
-   147.    locked_out   : array (KDF9.Q_part range 0 .. last_lockout) of Boolean := (others => False);
-   148.
-   149. end KDF9.store;
-
- 241 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/ioc-absent.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Handle attempted usage of a buffer with No Device attached.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package body IOC.absent is
-    18.
-    19.    procedure disavow (the_device  : in out absent.device;
-    20.                       Q_operand   : in KDF9.Q_register;
-    21.                       set_offline : in Boolean) is
-    22.       pragma Unreferenced(Q_operand);
-    23.       pragma Unreferenced(set_offline);
-    24.    begin
-    25.       trap_operator_error("there is no device on buffer #" & oct_of(the_device.number, 2));
-    26.    end disavow;
-    27.
-    28.    overriding
-    29.    procedure PIA (the_device  : in out absent.device;
-    30.                   Q_operand   : in KDF9.Q_register;
-    31.                   set_offline : in Boolean) is
-    32.    begin disavow(the_device, Q_operand, set_offline); end PIA;
-    33.
-    34.    overriding
-    35.    procedure PIB (the_device  : in out absent.device;
-    36.                   Q_operand   : in KDF9.Q_register;
-    37.                   set_offline : in Boolean) is
-    38.    begin disavow(the_device, Q_operand, set_offline); end PIB;
-    39.
-    40.    overriding
-    41.    procedure PIC (the_device  : in out absent.device;
-    42.                   Q_operand   : in KDF9.Q_register;
-    43.                   set_offline : in Boolean) is
-    44.    begin disavow(the_device, Q_operand, set_offline); end PIC;
-    45.
-    46.    overriding
-    47.    procedure PID (the_device  : in out absent.device;
-    48.                   Q_operand   : in KDF9.Q_register;
-    49.                   set_offline : in Boolean) is
-    50.    begin disavow(the_device, Q_operand, set_offline); end PID;
-    51.
-    52.    overriding
-    53.    procedure PIE (the_device  : in out absent.device;
-    54.                   Q_operand   : in KDF9.Q_register;
-    55.                   set_offline : in Boolean) is
-    56.    begin disavow(the_device, Q_operand, set_offline); end PIE;
-    57.
-    58.    overriding
-    59.    procedure PIF (the_device  : in out absent.device;
-    60.                   Q_operand   : in KDF9.Q_register;
-    61.                   set_offline : in Boolean) is
-    62.    begin disavow(the_device, Q_operand, set_offline); end PIF;
-    63.
-    64.    overriding
-    65.    procedure PIG (the_device  : in out absent.device;
-    66.                   Q_operand   : in KDF9.Q_register;
-    67.                   set_offline : in Boolean) is
-    68.    begin disavow(the_device, Q_operand, set_offline); end PIG;
-    69.
-    70.    overriding
-    71.    procedure PIH (the_device  : in out absent.device;
-    72.                   Q_operand   : in KDF9.Q_register;
-    73.                   set_offline : in Boolean) is
-    74.    begin disavow(the_device, Q_operand, set_offline); end PIH;
-    75.
-    76.    overriding
-    77.    procedure PMA (the_device  : in out absent.device;
-    78.                   Q_operand   : in KDF9.Q_register;
-    79.                   set_offline : in Boolean) is
-    80.    begin disavow(the_device, Q_operand, set_offline); end PMA;
-    81.
-    82.    overriding
-    83.    procedure PMB (the_device  : in out absent.device;
-    84.                   Q_operand   : in KDF9.Q_register;
-    85.                   set_offline : in Boolean) is
-    86.    begin disavow(the_device, Q_operand, set_offline); end PMB;
-    87.
-    88.    overriding
-    89.    procedure PMC (the_device  : in out absent.device;
-    90.                   Q_operand   : in KDF9.Q_register;
-    91.                   set_offline : in Boolean) is
-    92.    begin disavow(the_device, Q_operand, set_offline); end PMC;
-    93.    overriding
-    94.    procedure PMD (the_device  : in out absent.device;
-    95.                   Q_operand   : in KDF9.Q_register;
-    96.                   set_offline : in Boolean) is
-    97.    begin disavow(the_device, Q_operand, set_offline); end PMD;
-    98.
-    99.    overriding
-   100.    procedure PME (the_device  : in out absent.device;
-   101.                   Q_operand   : in KDF9.Q_register;
-   102.                   set_offline : in Boolean) is
-   103.    begin disavow(the_device, Q_operand, set_offline); end PME;
-   104.
-   105.    overriding
-   106.    procedure PMF (the_device  : in out absent.device;
-   107.                   Q_operand   : in KDF9.Q_register;
-   108.                   set_offline : in Boolean) is
-   109.    begin disavow(the_device, Q_operand, set_offline); end PMF;
-   110.
-   111.
-   112.    overriding
-   113.    procedure PMG (the_device  : in out absent.device;
-   114.                   Q_operand   : in KDF9.Q_register;
-   115.                   set_offline : in Boolean) is
-   116.    begin disavow(the_device, Q_operand, set_offline); end PMG;
-   117.
-   118.    overriding
-   119.    procedure PMK (the_device  : in out absent.device;
-   120.                   Q_operand   : in KDF9.Q_register;
-   121.                   set_offline : in Boolean) is
-   122.    begin disavow(the_device, Q_operand, set_offline); end PMK;
-   123.
-   124.    overriding
-   125.    procedure PML (the_device  : in out absent.device;
-   126.                   Q_operand   : in KDF9.Q_register;
-   127.                   set_offline : in Boolean) is
-   128.    begin disavow(the_device, Q_operand, set_offline); end PML;
-   129.
-   130.    overriding
-   131.    procedure POA (the_device  : in out absent.device;
-   132.                   Q_operand   : in KDF9.Q_register;
-   133.                   set_offline : in Boolean) is
-   134.    begin disavow(the_device, Q_operand, set_offline); end POA;
-   135.
-   136.    overriding
-   137.    procedure POB (the_device  : in out absent.device;
-   138.                   Q_operand   : in KDF9.Q_register;
-   139.                   set_offline : in Boolean) is
-   140.    begin disavow(the_device, Q_operand, set_offline); end POB;
-   141.
-   142.    overriding
-   143.    procedure POC (the_device  : in out absent.device;
-   144.                   Q_operand   : in KDF9.Q_register;
-   145.                   set_offline : in Boolean) is
-   146.    begin disavow(the_device, Q_operand, set_offline); end POC;
-   147.
-   148.    overriding
-   149.    procedure POD (the_device  : in out absent.device;
-   150.                   Q_operand   : in KDF9.Q_register;
-   151.                   set_offline : in Boolean) is
-   152.    begin disavow(the_device, Q_operand, set_offline); end POD;
-   153.
-   154.    overriding
-   155.    procedure POE (the_device  : in out absent.device;
-   156.                   Q_operand   : in KDF9.Q_register;
-   157.                   set_offline : in Boolean) is
-   158.    begin disavow(the_device, Q_operand, set_offline); end POE;
-   159.
-   160.    overriding
-   161.    procedure POF (the_device  : in out absent.device;
-   162.                   Q_operand   : in KDF9.Q_register;
-   163.                   set_offline : in Boolean) is
-   164.    begin disavow(the_device, Q_operand, set_offline); end POF;
-   165.
-   166.    overriding
-   167.    procedure POG (the_device  : in out absent.device;
-   168.                   Q_operand   : in KDF9.Q_register;
-   169.                   set_offline : in Boolean) is
-   170.    begin disavow(the_device, Q_operand, set_offline); end POG;
-   171.
-   172.    overriding
-   173.    procedure POH (the_device  : in out absent.device;
-   174.                   Q_operand   : in KDF9.Q_register;
-   175.                   set_offline : in Boolean) is
-   176.    begin disavow(the_device, Q_operand, set_offline); end POH;
-   177.
-   178.    overriding
-   179.    procedure POK (the_device  : in out absent.device;
-   180.                   Q_operand   : in KDF9.Q_register;
-   181.                   set_offline : in Boolean) is
-   182.    begin disavow(the_device, Q_operand, set_offline); end POK;
-   183.
-   184.    overriding
-   185.    procedure POL (the_device  : in out absent.device;
-   186.                   Q_operand   : in KDF9.Q_register;
-   187.                   set_offline : in Boolean) is
-   188.    begin disavow(the_device, Q_operand, set_offline); end POL;
-   189.
-   190.    overriding
-   191.    procedure Initialize (the_device : in out absent.device) is
-   192.    begin
-   193.       install(the_device);
-   194.    end Initialize;
-   195.
-   196.    type AD_access is access absent.device;
-   197.    AD_list : array (IOC.unit_number range 0..14) of AD_access with Warnings => Off;
-   198.
-   199.     -- This cannot overflow, because there must be at least 2 non-AD buffers: FW0 and TR0.
-   200.    unit : IOC.unit_number := 0;
-   201.
-   202.    procedure enable (b : in KDF9.buffer_number) is
-   203.    begin
-   204.       AD_list(unit) := new absent.device(number => b, unit => unit);
-   205.        unit := unit + 1;
-   206.    end enable;
-   207.
-   208. end IOC.absent;
-   209.
-
-Compiling: ../Source/ioc-absent.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
-
-     1. -- Handle attempted usage of a buffer with No Device attached.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package IOC.absent is
-    18.
-    19.    type device is new IOC.device with null record;
-    20.
-    21.    -- All the operations of an absent device terminate the run.
-    22.
-    23.    overriding
-    24.    procedure PIA (the_device  : in out absent.device;
-    25.                   Q_operand   : in KDF9.Q_register;
-    26.                   set_offline : in Boolean);
-    27.
-    28.    overriding
-    29.    procedure PIB (the_device  : in out absent.device;
-    30.                   Q_operand   : in KDF9.Q_register;
-    31.                   set_offline : in Boolean);
-    32.
-    33.    overriding
-    34.    procedure PIC (the_device  : in out absent.device;
-    35.                   Q_operand   : in KDF9.Q_register;
-    36.                   set_offline : in Boolean);
-    37.
-    38.    overriding
-    39.    procedure PID (the_device  : in out absent.device;
-    40.                   Q_operand   : in KDF9.Q_register;
-    41.                   set_offline : in Boolean);
-    42.
-    43.    overriding
-    44.    procedure PIE (the_device  : in out absent.device;
-    45.                   Q_operand   : in KDF9.Q_register;
-    46.                   set_offline : in Boolean);
-    47.
-    48.    overriding
-    49.    procedure PIF (the_device  : in out absent.device;
-    50.                   Q_operand   : in KDF9.Q_register;
-    51.                   set_offline : in Boolean);
-    52.
-    53.    overriding
-    54.    procedure PIG (the_device  : in out absent.device;
-    55.                   Q_operand   : in KDF9.Q_register;
-    56.                   set_offline : in Boolean);
-    57.
-    58.    overriding
-    59.    procedure PIH (the_device  : in out absent.device;
-    60.                   Q_operand   : in KDF9.Q_register;
-    61.                   set_offline : in Boolean);
-    62.
-    63.    overriding
-    64.    procedure PMA (the_device  : in out absent.device;
-    65.                   Q_operand   : in KDF9.Q_register;
-    66.                   set_offline : in Boolean);
-    67.
-    68.    overriding
-    69.    procedure PMB (the_device  : in out absent.device;
-    70.                   Q_operand   : in KDF9.Q_register;
-    71.                   set_offline : in Boolean);
-    72.
-    73.    overriding
-    74.    procedure PMC (the_device  : in out absent.device;
-    75.                   Q_operand   : in KDF9.Q_register;
-    76.                   set_offline : in Boolean);
-    77.    overriding
-    78.    procedure PMD (the_device  : in out absent.device;
-    79.                   Q_operand   : in KDF9.Q_register;
-    80.                   set_offline : in Boolean);
-    81.
-    82.    overriding
-    83.    procedure PME (the_device  : in out absent.device;
-    84.                   Q_operand   : in KDF9.Q_register;
-    85.                   set_offline : in Boolean);
-    86.
-    87.    overriding
-    88.    procedure PMF (the_device  : in out absent.device;
-    89.                   Q_operand   : in KDF9.Q_register;
-    90.                   set_offline : in Boolean);
-    91.
-    92.    overriding
-    93.    procedure PMG (the_device  : in out absent.device;
-    94.                   Q_operand   : in KDF9.Q_register;
-    95.                   set_offline : in Boolean);
-    96.
-    97.    overriding
-    98.    procedure PMK (the_device  : in out absent.device;
-    99.                   Q_operand   : in KDF9.Q_register;
-   100.                   set_offline : in Boolean);
-   101.
-   102.    overriding
-   103.    procedure PML (the_device  : in out absent.device;
-   104.                   Q_operand   : in KDF9.Q_register;
-   105.                   set_offline : in Boolean);
-   106.
-   107.    overriding
-   108.    procedure POA (the_device  : in out absent.device;
-   109.                   Q_operand   : in KDF9.Q_register;
-   110.                   set_offline : in Boolean);
-   111.
-   112.    overriding
-   113.    procedure POB (the_device  : in out absent.device;
-   114.                   Q_operand   : in KDF9.Q_register;
-   115.                   set_offline : in Boolean);
-   116.
-   117.    overriding
-   118.    procedure POC (the_device  : in out absent.device;
-   119.                   Q_operand   : in KDF9.Q_register;
-   120.                   set_offline : in Boolean);
-   121.
-   122.    overriding
-   123.    procedure POD (the_device  : in out absent.device;
-   124.                   Q_operand   : in KDF9.Q_register;
-   125.                   set_offline : in Boolean);
-   126.
-   127.    overriding
-   128.    procedure POE (the_device  : in out absent.device;
-   129.                   Q_operand   : in KDF9.Q_register;
-   130.                   set_offline : in Boolean);
-   131.
-   132.    overriding
-   133.    procedure POF (the_device  : in out absent.device;
-   134.                   Q_operand   : in KDF9.Q_register;
-   135.                   set_offline : in Boolean);
-   136.
-   137.    overriding
-   138.    procedure POG (the_device  : in out absent.device;
-   139.                   Q_operand   : in KDF9.Q_register;
-   140.                   set_offline : in Boolean);
-   141.
-   142.    overriding
-   143.    procedure POH (the_device  : in out absent.device;
-   144.                   Q_operand   : in KDF9.Q_register;
-   145.                   set_offline : in Boolean);
-   146.
-   147.    overriding
-   148.    procedure POK (the_device  : in out absent.device;
-   149.                   Q_operand   : in KDF9.Q_register;
-   150.                   set_offline : in Boolean);
-   151.
-   152.    overriding
-   153.    procedure POL (the_device  : in out absent.device;
-   154.                   Q_operand   : in KDF9.Q_register;
-   155.                   set_offline : in Boolean);
-   156.
-   157.    -- Register the absence of a device in case of future attempted access to buffer b.
-   158.    procedure enable (b : in KDF9.buffer_number);
-   159.
-   160. private
-   161.
-   162.    overriding
-   163.    procedure Initialize (the_device : in out absent.device);
-   164.
-   165.    overriding
-   166.    function is_open (the_device : absent.device)
-   167.    return Boolean
-   168.    is (False);
-   169.
-   170.    overriding
-   171.    function kind (the_device : absent.device)
-   172.    return IOC.device_kind
-   173.    is (AD_kind);
-   174.
-   175.    overriding
-   176.    function quantum (the_device : absent.device)
-   177.    return KDF9.us
-   178.    is (0);
-   179.
-   180.    overriding
-   181.    procedure add_in_the_IO_CPU_time (the_device  : in absent.device;
-   182.                                      bytes_moved : in KDF9.word)
-   183.    is null;
-   184.
-   185. end IOC.absent;
-
- 209 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
+ 2314 lines: No errors
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16877,12 +12908,12 @@ Compiled at: 2021-05-29 19:07:08
     32. end IOC.fast;
 
 Compiling: ../Source/ioc-fast.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of the common functionality of a KDF9 "fast", i.e. word-by-word, devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -16937,12 +12968,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr.adb
-Source file time stamp: 2021-05-28 23:25:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of a drum store.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17489,12 +13520,12 @@ Compiled at: 2021-05-29 19:07:08
    547. end IOC.fast.DR;
 
 Compiling: ../Source/ioc-fast-dr.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of a drum store buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -17663,14 +13694,17 @@ Compiled at: 2021-05-29 19:07:08
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18551,12 +14585,12 @@ Compiled at: 2021-05-29 19:07:08
    881. end IOC.fast.FD;
 
 Compiling: ../Source/ioc-fast-fd.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:08
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of a fixed disc drive.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -18802,17 +14836,14 @@ Compiled at: 2021-05-29 19:07:08
 
  881 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape.adb
-Source file time stamp: 2021-05-28 23:26:21
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20047,12 +16078,12 @@ Compiled at: 2021-05-29 19:07:09
   1235. end IOC.fast.tape;
 
 Compiling: ../Source/ioc-fast-tape.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20500,12 +16531,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-fw.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -20524,677 +16555,703 @@ Compiled at: 2021-05-29 19:07:09
     19. with HCI;
     20. with host_IO;
     21.
-    22. use  Ada.Text_IO;
-    23. --
-    24. use  HCI;
-    25. use  host_IO;
-    26.
-    27. package body IOC.slow.shift.FW is
+    22. with imported_value_of;
+    23.
+    24. use  Ada.Text_IO;
+    25. --
+    26. use  HCI;
+    27. use  host_IO;
     28.
-    29.    function a_LF_was_just_read (the_FW : FW.device)
-    30.    return Boolean
-    31.    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
-    32.
-    33.    max_text_length : constant Positive := 64;  -- This is the limit imposed by NTSD and TSD.
-    34.    min_text_length : constant Positive :=  2;  -- This is arbitrary, but seems reasonable.
-    35.
-    36.    type interaction is
-    37.       record
-    38.          text           : String(1 .. max_text_length);
-    39.          prompt_length,
-    40.          total_length   : Positive range 1 .. max_text_length;
-    41.       end record;
-    42.
-    43.    max_interactions : constant Positive := 16; -- This is arbitrary, but seems reasonable.
+    29. package body IOC.slow.shift.FW is
+    30.
+    31.    function a_LF_was_just_read (the_FW : FW.device)
+    32.    return Boolean
+    33.    is (the_FW.mode = the_flexowriter_is_reading and then a_LF_was_just_read(the_FW.stream));
+    34.
+    35.    max_text_length : constant Positive := 64;  -- This is the limit imposed by NTSD and TSD.
+    36.    min_text_length : constant Positive :=  2;  -- This is arbitrary, but seems reasonable.
+    37.
+    38.    type interaction is
+    39.       record
+    40.          text           : String(1 .. max_text_length);
+    41.          prompt_length,
+    42.          total_length   : Positive range 1 .. max_text_length;
+    43.       end record;
     44.
-    45.    interactions     : array (1 .. max_interactions) of FW.interaction;
-    46.    next_interaction : Positive := 1;
-    47.    last_interaction : Natural  := 0;
-    48.
-    49.     -- A '®' denotes LF, and the '©' denotes FF in an interaction text input.
-    50.    LF_surrogate     : constant Character := '®';
-    51.    FF_surrogate     : constant Character := '©';
-    52.
-    53.    -- These are the ANSI SGR terminal escape codes for styling FW output.
-    54.    red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-    55.    black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
-    56.    underline_code  : constant String := ESC & "[4m";
-    57.    plain_font_code : constant String := ESC & "[0m";
-    58.
-    59.    procedure set_text_colour_to_red (the_flexowriter_output : in out host_IO.stream) is
-    60.    begin
-    61.       if the_terminal_is_ANSI_compatible and realistic_FW_output_is_wanted then
-    62.          put_escape_code(red_font_code, the_flexowriter_output);
-    63.       end if;
-    64.    end set_text_colour_to_red;
-    65.
-    66.    procedure set_text_colour_to_black (the_flexowriter_output : in out host_IO.stream) is
-    67.    begin
-    68.       if the_terminal_is_ANSI_compatible then
-    69.          put_escape_code(black_font_code, the_flexowriter_output);
-    70.       end if;
-    71.    end set_text_colour_to_black;
-    72.
-    73.    procedure set_text_style_to_underline (the_flexowriter_output : in out host_IO.stream) is
-    74.    begin
-    75.       if the_terminal_is_ANSI_compatible then
-    76.          put_escape_code(underline_code, the_flexowriter_output);
-    77.       end if;
-    78.    end set_text_style_to_underline;
+    45.    max_interactions : constant Positive := 16; -- This is arbitrary, but seems reasonable.
+    46.
+    47.    interactions     : array (1 .. max_interactions) of FW.interaction;
+    48.    next_interaction : Positive := 1;
+    49.    last_interaction : Natural  := 0;
+    50.
+    51.     -- A '®' denotes LF, and the '©' denotes FF in an interaction text input.
+    52.    LF_surrogate     : constant Character := '®';
+    53.    FF_surrogate     : constant Character := '©';
+    54.
+    55.    -- These are the ANSI SGR terminal escape codes for styling FW output.
+    56.
+    57.    function escaped (name, default : String)
+    58.    return String is
+    59.       text   : constant String := imported_value_of(name, default);
+    60.       result : String (1..text'Length);
+    61.       i, j   : Positive;
+    62.    begin
+    63.       if text'Length < 6 then return ""; end if;
+    64.       i := text'First;
+    65.       j := 1;
+    66.       while i <= text'Last-2 loop
+    67.          if text(i..i+2) = "ESC" then
+    68.             result(j) := ESC;
+    69.             i := i + 3;
+    70.          else
+    71.             result(j) := text(i);
+    72.             i := i + 1;
+    73.          end if;
+    74.          j := j + 1;
+    75.       end loop;
+    76.       result(j..j+1) := text(i..i+1);
+    77.       return result(1..j+1);
+    78.    end escaped;
     79.
-    80.    procedure set_text_style_to_plain (the_flexowriter_output : in out host_IO.stream) is
-    81.    begin
-    82.       if the_terminal_is_ANSI_compatible then
-    83.          put_escape_code(plain_font_code, the_flexowriter_output);
-    84.       end if;
-    85.    end set_text_style_to_plain;
-    86.
-    87.    overriding
-    88.    procedure Initialize (the_FW : in out FW.device) is
-    89.
-    90.       procedure complain (part_1         : in String;
-    91.                           part_2, part_3 : in String := "")
-    92.       with
-    93.          No_Return
-    94.       is
-    95.          left_quote  : constant String := (if part_2 /= "" then  " «" else "");
-    96.          right_quote : constant String := (if part_2 /= "" then  "» " else "");
-    97.       begin
-    98.          raise operator_error
-    99.             with part_1 & left_quote & glyphs_for(part_2) & right_quote & part_3;
-   100.       end complain;
-   101.
-   102.       the_data         : String(1 .. max_text_length+1);
-   103.       the_data_length  : Natural;
-   104.
-   105.       interaction_file : Ada.Text_IO.File_Type;
-   106.
-   107.    begin -- Initialize
-   108.       ensure_UI_is_open;
-   109.       the_FW.mode := the_flexowriter_is_writing;
-   110.       the_FW.device_name := device_name_of(the_FW);
-   111.
-   112.       if the_FW.device_name = "FW0" then
-   113.          -- Attempt to open the command file for the console the_FW.
-   114.          begin
-   115.             Open(interaction_file, In_File, "FW0");
-   116.          response_list_loop:
-   117.             while not End_of_File(interaction_file) loop
-   118.                if last_interaction = max_interactions then
-   119.                   complain("The file FW0 contains too many prompts");
-   120.                end if;
-   121.                last_interaction := last_interaction + 1;
-   122.                Get_Line(interaction_file, the_data, the_data_length);
-   123.
-   124.             exit response_list_loop when the_data_length = 0;
-   125.
-   126.                declare
-   127.                   next   : FW.interaction renames interactions(last_interaction);
-   128.                   this   : String  := the_data(1..the_data_length);
-   129.                   length : Natural := 0;
-   130.                begin
-   131.                   if the_data_length > max_text_length then
-   132.                      complain("The FW0 prompt", this, "is too long");
-   133.                   end if;
-   134.                   if the_data_length < min_text_length then
-   135.                      complain("The FW0 prompt", this, "is too short");
-   136.                   end if;
+    80.    red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
+    81.    black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
+    82.    underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
+    83.    plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
+    84.
+    85.    procedure set_text_colour_to_red (the_flexowriter_output : in out host_IO.stream) is
+    86.    begin
+    87.       if realistic_FW_output_is_wanted and red_font /= "" then
+    88.          put_escape_code(red_font, the_flexowriter_output);
+    89.       end if;
+    90.    end set_text_colour_to_red;
+    91.
+    92.    procedure set_text_colour_to_black (the_flexowriter_output : in out host_IO.stream) is
+    93.    begin
+    94.       if black_font /= "" then
+    95.          put_escape_code(black_font, the_flexowriter_output);
+    96.       end if;
+    97.    end set_text_colour_to_black;
+    98.
+    99.    procedure set_text_style_to_underline (the_flexowriter_output : in out host_IO.stream) is
+   100.    begin
+   101.       if underline /= "" then
+   102.          put_escape_code(underline, the_flexowriter_output);
+   103.       end if;
+   104.    end set_text_style_to_underline;
+   105.
+   106.    procedure set_text_style_to_plain (the_flexowriter_output : in out host_IO.stream) is
+   107.    begin
+   108.       if plain_font /= "" then
+   109.          put_escape_code(plain_font, the_flexowriter_output);
+   110.       end if;
+   111.    end set_text_style_to_plain;
+   112.
+   113.    overriding
+   114.    procedure Initialize (the_FW : in out FW.device) is
+   115.
+   116.       procedure complain (part_1         : in String;
+   117.                           part_2, part_3 : in String := "")
+   118.       with
+   119.          No_Return
+   120.       is
+   121.          left_quote  : constant String := (if part_2 /= "" then  " «" else "");
+   122.          right_quote : constant String := (if part_2 /= "" then  "» " else "");
+   123.       begin
+   124.          raise operator_error
+   125.             with part_1 & left_quote & glyphs_for(part_2) & right_quote & part_3;
+   126.       end complain;
+   127.
+   128.       the_data         : String(1 .. max_text_length+1);
+   129.       the_data_length  : Natural;
+   130.
+   131.       interaction_file : Ada.Text_IO.File_Type;
+   132.
+   133.    begin -- Initialize
+   134.       ensure_UI_is_open;
+   135.       the_FW.mode := the_flexowriter_is_writing;
+   136.       the_FW.device_name := device_name_of(the_FW);
    137.
-   138.                   for p in this'Range loop
-   139.                      if this(p) = ';' then
-   140.                         if length /= 0 then
-   141.                            complain("The FW0 prompt", this, "contains 2 semicolons");
-   142.                         end if;
-   143.                         length := p;
-   144.                      elsif this(p) = LF_surrogate then
-   145.                         -- Convert '®' to LF to allow for multi-line prompts.
-   146.                         this(p) := LF;
-   147.                      elsif this(p) = FF_surrogate then
-   148.                         -- Convert '©' to FF to allow for multi-line prompts.
-   149.                         this(p) := FF;
-   150.                      end if;
-   151.                   end loop;
-   152.
-   153.                   if length = 0 then
-   154.                      complain("The FW0 prompt", this, "contains no semicolon");
-   155.                   end if;
-   156.
-   157.                   next.text(1..this'Length) := this;
-   158.                   next.prompt_length        := length;
-   159.                   next.total_length         := this'Length;
-   160.                end;
-   161.
-   162.             end loop response_list_loop;
+   138.       if the_FW.device_name = "FW0" then
+   139.          -- Attempt to open the command file for the console the_FW.
+   140.          begin
+   141.             Open(interaction_file, In_File, "FW0");
+   142.          response_list_loop:
+   143.             while not End_of_File(interaction_file) loop
+   144.                if last_interaction = max_interactions then
+   145.                   complain("The file FW0 contains too many prompts");
+   146.                end if;
+   147.                last_interaction := last_interaction + 1;
+   148.                Get_Line(interaction_file, the_data, the_data_length);
+   149.
+   150.             exit response_list_loop when the_data_length = 0;
+   151.
+   152.                declare
+   153.                   next   : FW.interaction renames interactions(last_interaction);
+   154.                   this   : String  := the_data(1..the_data_length);
+   155.                   length : Natural := 0;
+   156.                begin
+   157.                   if the_data_length > max_text_length then
+   158.                      complain("The FW0 prompt", this, "is too long");
+   159.                   end if;
+   160.                   if the_data_length < min_text_length then
+   161.                      complain("The FW0 prompt", this, "is too short");
+   162.                   end if;
    163.
-   164.          exception
-   165.
-   166.             when Name_Error =>
-   167.                complain("The file FW0 is absent");
-   168.             when Use_Error =>
-   169.                complain("The file FW0 exists, but cannot be read");
-   170.          end;
-   171.       end if;
-   172.
-   173.       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
-   174.       open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
-   175.       IOC.device(the_FW).Initialize;
-   176.       the_FW.current_case := KDF9_char_sets.Case_Normal;
-   177.    end Initialize;
+   164.                   for p in this'Range loop
+   165.                      if this(p) = ';' then
+   166.                         if length /= 0 then
+   167.                            complain("The FW0 prompt", this, "contains 2 semicolons");
+   168.                         end if;
+   169.                         length := p;
+   170.                      elsif this(p) = LF_surrogate then
+   171.                         -- Convert '®' to LF to allow for multi-line prompts.
+   172.                         this(p) := LF;
+   173.                      elsif this(p) = FF_surrogate then
+   174.                         -- Convert '©' to FF to allow for multi-line prompts.
+   175.                         this(p) := FF;
+   176.                      end if;
+   177.                   end loop;
    178.
-   179.    -- If authentic timing, the delay of length the_pause is inserted between characters output
-   180.    --    to the Flexowriter, with the aim of approximating the actual speed of its typing.
-   181.    the_pause  : KDF9.us := 0;
+   179.                   if length = 0 then
+   180.                      complain("The FW0 prompt", this, "contains no semicolon");
+   181.                   end if;
    182.
-   183.    procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
-   184.    begin
-   185.       if authentic_timing_is_enabled then
-   186.          the_pause := the_FW.quantum;
-   187.       else
-   188.          the_pause := 0;
-   189.       end if;
-   190.    end set_the_duration_of_the_pause;
+   183.                   next.text(1..this'Length) := this;
+   184.                   next.prompt_length        := length;
+   185.                   next.total_length         := this'Length;
+   186.                end;
+   187.
+   188.             end loop response_list_loop;
+   189.
+   190.          exception
    191.
-   192.    call_for_manual_input    : constant String (1..2) := (others => BEL);
-   193.
-   194.    procedure inject_a_response (the_FW     : in out FW.device;
-   195.                                 the_prompt : in String;
-   196.                                 the_size   : in out KDF9.word) is
-   197.    begin
-   198.       set_the_duration_of_the_pause(the_FW);
-   199.       for t in next_interaction .. last_interaction loop
-   200.          declare
-   201.             the : interaction renames interactions(t);
-   202.          begin
-   203.             if the.prompt_length = the.total_length then
-   204.                -- A null response, so terminate the program.
-   205.                raise exceptions.quit_request with "at the prompt: «"& the_prompt & "»";
-   206.             end if;
-   207.             next_interaction := next_interaction + 1;
-   208.             if the.text(1..the.prompt_length-1) = the_prompt and then
-   209.                   the.text(the.prompt_length-0) = ';'            then
-   210.                inject(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.stream);
-   211.                the_size := the_size + KDF9.word(the.total_length-the.prompt_length);
-   212.                put_chars(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.output);
-   213.                -- Human operators type much more slowly than KDF9 buffers!
-   214.                flush(the_FW.output, the_pause*10);
-   215.                the_FW.mode := the_flexowriter_is_reading;
-   216.                return;
-   217.             end if;
-   218.          end;
-   219.       end loop;
-   220.       -- No canned response is available, so control reverts to the terminal.
-   221.       -- Output an audible signal to notify the operator.
-   222.       if noninteractive_usage_is_enabled then
-   223.          raise input_is_impossible;
-   224.       end if;
-   225.       put_bytes(call_for_manual_input, the_FW.output);
-   226.       flush(the_FW.output, the_pause);
-   227.       the_FW.mode := the_flexowriter_is_reading;
-   228.    end inject_a_response;
-   229.
-   230.    -- TRQq
-   231.    overriding
-   232.    procedure PIA (the_FW      : in out FW.device;
-   233.                   Q_operand   : in KDF9.Q_register;
-   234.                   set_offline : in Boolean) is
-   235.    begin
-   236.       if noninteractive_usage_is_enabled then
-   237.          raise input_is_impossible;
-   238.       end if;
-   239.       put_bytes(call_for_manual_input, the_FW.output);
-   240.       flush(the_FW.output);
-   241.       the_FW.mode := the_flexowriter_is_reading;
-   242.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   243.       read(the_FW, Q_operand);
-   244.       lock_out_relative_addresses(Q_operand);
-   245.       reset(the_FW.stream);
-   246.    end PIA;
-   247.
-   248.    -- TREQq
-   249.    overriding
-   250.    procedure PIB (the_FW      : in out FW.device;
-   251.                   Q_operand   : in KDF9.Q_register;
-   252.                   set_offline : in Boolean) is
-   253.    begin
-   254.       if noninteractive_usage_is_enabled then
-   255.          raise input_is_impossible;
-   256.       end if;
-   257.       put_bytes(call_for_manual_input, the_FW.output);
-   258.       flush(the_FW.output);
-   259.       the_FW.mode := the_flexowriter_is_reading;
-   260.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   261.       read_to_EM(the_FW, Q_operand);
-   262.       lock_out_relative_addresses(Q_operand);
-   263.       reset(the_FW.stream);
-   264.    end PIB;
-   265.
-   266.    overriding
-   267.    procedure PIC (the_FW      : in out FW.device;
-   268.                   Q_operand   : in KDF9.Q_register;
-   269.                   set_offline : in Boolean) is
-   270.    begin
-   271.       if noninteractive_usage_is_enabled then
-   272.          raise input_is_impossible;
-   273.       end if;
-   274.       put_bytes(call_for_manual_input, the_FW.output);
-   275.       flush(the_FW.output);
-   276.       the_FW.mode := the_flexowriter_is_reading;
-   277.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   278.       words_read(the_FW, Q_operand);
-   279.       lock_out_relative_addresses(Q_operand);
-   280.       reset(the_FW.stream);
-   281.    end PIC;
-   282.
-   283.    overriding
-   284.    procedure PID (the_FW      : in out FW.device;
-   285.                   Q_operand   : in KDF9.Q_register;
-   286.                   set_offline : in Boolean) is
-   287.    begin
-   288.       if noninteractive_usage_is_enabled then
-   289.          raise input_is_impossible;
-   290.       end if;
-   291.       put_bytes(call_for_manual_input, the_FW.output);
-   292.       flush(the_FW.output);
-   293.       the_FW.mode := the_flexowriter_is_reading;
-   294.       start_slow_transfer(the_FW, Q_operand, set_offline);
-   295.       words_read_to_EM(the_FW, Q_operand);
-   296.       lock_out_relative_addresses(Q_operand);
-   297.       reset(the_FW.stream);
-   298.    end PID;
-   299.
-   300.    overriding
-   301.    procedure PIE (the_FW      : in out FW.device;
-   302.                   Q_operand   : in KDF9.Q_register;
-   303.                   set_offline : in Boolean) is
-   304.    begin
-   305.       PIA(the_FW, Q_operand, set_offline);
-   306.    end PIE;
-   307.
-   308.    overriding
-   309.    procedure PIF (the_FW      : in out FW.device;
-   310.                   Q_operand   : in KDF9.Q_register;
-   311.                   set_offline : in Boolean) is
-   312.    begin
-   313.       PIB(the_FW, Q_operand, set_offline);
-   314.    end PIF;
-   315.
-   316.    overriding
-   317.    procedure PIG (the_FW      : in out FW.device;
-   318.                   Q_operand   : in KDF9.Q_register;
-   319.                   set_offline : in Boolean) is
-   320.    begin
-   321.       PIC(the_FW, Q_operand, set_offline);
-   322.    end PIG;
-   323.
-   324.    overriding
-   325.    procedure PIH (the_FW      : in out FW.device;
-   326.                   Q_operand   : in KDF9.Q_register;
-   327.                   set_offline : in Boolean) is
-   328.    begin
-   329.       PID(the_FW, Q_operand, set_offline);
-   330.    end PIH;
-   331.
-   332.    -- neat strips off any enclosing non-graphic characters from s.
-   333.    function neat (s : String)
-   334.    return String is
-   335.       l : Positive := 1;
-   336.       r : Natural  := 0;
-   337.    begin
-   338.       for i in s'Range loop
-   339.          l := i;
-   340.       exit when s(i) > SP and s(i) /= DEL;
-   341.       end loop;
-   342.       for i in reverse s'Range loop
-   343.          r := i;
-   344.       exit when s(i) > SP and s(i) /= DEL;
-   345.       end loop;
-   346.       return s(l..r);  -- s(1..0) yields the null string when s is the null string.
-   347.    end neat;
-   348.
-   349.    overriding
-   350.    procedure do_output_housekeeping (the_FW   : in out FW.device;
-   351.                                      written,
-   352.                                      fetched  : in KDF9.word) is
-   353.    begin
-   354.       flush(the_FW.stream);
-   355.       add_in_the_IO_CPU_time(the_FW, fetched);
-   356.       correct_transfer_time(the_FW, written);
-   357.       the_FW.byte_count := the_FW.byte_count + fetched;
-   358.    end do_output_housekeeping;
-   359.
-   360.    underlined : Boolean := False;
-   361.
-   362.    procedure put_symbols (the_FW         : in out FW.device;
-   363.                           Q_operand      : in KDF9.Q_register;
-   364.                           transfer_to_EM : in Boolean) is
-   365.       start_address : constant KDF9.address := Q_operand.I;
-   366.       end_address   : constant KDF9.address := Q_operand.M;
-   367.       fill   : KDF9.word := 0;
-   368.       size   : KDF9.word := 0;
-   369.       symbol : KDF9_char_sets.symbol;
-   370.       char   : Character;
-   371.    begin
-   372.       check_addresses_and_lockouts(start_address, end_address);
-   373.       set_the_duration_of_the_pause(the_FW);
-   374.       the_FW.mode := the_flexowriter_is_writing;
-   375.       set_text_style_to_plain(the_FW.output);
-   376.       set_text_colour_to_red(the_FW.output);
-   377.
-   378.       -- Ensure that any prompt occupies the buffer alone.
-   379.       flush(the_FW.output);
-   380.
-   381.    word_loop:
-   382.       for w in start_address .. end_address loop
-   383.          for c in KDF9_char_sets.symbol_index'Range loop
-   384.             case the_FW.mode is
+   192.             when Name_Error =>
+   193.                complain("The file FW0 is absent");
+   194.             when Use_Error =>
+   195.                complain("The file FW0 exists, but cannot be read");
+   196.          end;
+   197.       end if;
+   198.
+   199.       open(the_FW.stream, the_FW.device_name, read_mode, UI_in_FD);
+   200.       open(the_FW.output, the_FW.device_name, write_mode, UI_out_FD);
+   201.       IOC.device(the_FW).Initialize;
+   202.       the_FW.current_case := KDF9_char_sets.Case_Normal;
+   203.    end Initialize;
+   204.
+   205.    -- If authentic timing, the delay of length the_pause is inserted between characters output
+   206.    --    to the Flexowriter, with the aim of approximating the actual speed of its typing.
+   207.    the_pause  : KDF9.us := 0;
+   208.
+   209.    procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
+   210.    begin
+   211.       if authentic_timing_is_enabled then
+   212.          the_pause := the_FW.quantum;
+   213.       else
+   214.          the_pause := 0;
+   215.       end if;
+   216.    end set_the_duration_of_the_pause;
+   217.
+   218.    call_for_manual_input    : constant String (1..2) := (others => BEL);
+   219.
+   220.    procedure inject_a_response (the_FW     : in out FW.device;
+   221.                                 the_prompt : in String;
+   222.                                 the_size   : in out KDF9.word) is
+   223.    begin
+   224.       set_the_duration_of_the_pause(the_FW);
+   225.       for t in next_interaction .. last_interaction loop
+   226.          declare
+   227.             the : interaction renames interactions(t);
+   228.          begin
+   229.             if the.prompt_length = the.total_length then
+   230.                -- A null response, so terminate the program.
+   231.                raise exceptions.quit_request with "at the prompt: «"& the_prompt & "»";
+   232.             end if;
+   233.             next_interaction := next_interaction + 1;
+   234.             if the.text(1..the.prompt_length-1) = the_prompt and then
+   235.                   the.text(the.prompt_length-0) = ';'            then
+   236.                inject(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.stream);
+   237.                the_size := the_size + KDF9.word(the.total_length-the.prompt_length);
+   238.                put_chars(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.output);
+   239.                -- Human operators type much more slowly than KDF9 buffers!
+   240.                flush(the_FW.output, the_pause*10);
+   241.                the_FW.mode := the_flexowriter_is_reading;
+   242.                return;
+   243.             end if;
+   244.          end;
+   245.       end loop;
+   246.       -- No canned response is available, so control reverts to the terminal.
+   247.       -- Output an audible signal to notify the operator.
+   248.       if noninteractive_usage_is_enabled then
+   249.          raise input_is_impossible;
+   250.       end if;
+   251.       put_bytes(call_for_manual_input, the_FW.output);
+   252.       flush(the_FW.output, the_pause);
+   253.       the_FW.mode := the_flexowriter_is_reading;
+   254.    end inject_a_response;
+   255.
+   256.    -- TRQq
+   257.    overriding
+   258.    procedure PIA (the_FW      : in out FW.device;
+   259.                   Q_operand   : in KDF9.Q_register;
+   260.                   set_offline : in Boolean) is
+   261.    begin
+   262.       if noninteractive_usage_is_enabled then
+   263.          raise input_is_impossible;
+   264.       end if;
+   265.       put_bytes(call_for_manual_input, the_FW.output);
+   266.       flush(the_FW.output);
+   267.       the_FW.mode := the_flexowriter_is_reading;
+   268.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   269.       read(the_FW, Q_operand);
+   270.       lock_out_relative_addresses(Q_operand);
+   271.       reset(the_FW.stream);
+   272.    end PIA;
+   273.
+   274.    -- TREQq
+   275.    overriding
+   276.    procedure PIB (the_FW      : in out FW.device;
+   277.                   Q_operand   : in KDF9.Q_register;
+   278.                   set_offline : in Boolean) is
+   279.    begin
+   280.       if noninteractive_usage_is_enabled then
+   281.          raise input_is_impossible;
+   282.       end if;
+   283.       put_bytes(call_for_manual_input, the_FW.output);
+   284.       flush(the_FW.output);
+   285.       the_FW.mode := the_flexowriter_is_reading;
+   286.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   287.       read_to_EM(the_FW, Q_operand);
+   288.       lock_out_relative_addresses(Q_operand);
+   289.       reset(the_FW.stream);
+   290.    end PIB;
+   291.
+   292.    overriding
+   293.    procedure PIC (the_FW      : in out FW.device;
+   294.                   Q_operand   : in KDF9.Q_register;
+   295.                   set_offline : in Boolean) is
+   296.    begin
+   297.       if noninteractive_usage_is_enabled then
+   298.          raise input_is_impossible;
+   299.       end if;
+   300.       put_bytes(call_for_manual_input, the_FW.output);
+   301.       flush(the_FW.output);
+   302.       the_FW.mode := the_flexowriter_is_reading;
+   303.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   304.       words_read(the_FW, Q_operand);
+   305.       lock_out_relative_addresses(Q_operand);
+   306.       reset(the_FW.stream);
+   307.    end PIC;
+   308.
+   309.    overriding
+   310.    procedure PID (the_FW      : in out FW.device;
+   311.                   Q_operand   : in KDF9.Q_register;
+   312.                   set_offline : in Boolean) is
+   313.    begin
+   314.       if noninteractive_usage_is_enabled then
+   315.          raise input_is_impossible;
+   316.       end if;
+   317.       put_bytes(call_for_manual_input, the_FW.output);
+   318.       flush(the_FW.output);
+   319.       the_FW.mode := the_flexowriter_is_reading;
+   320.       start_slow_transfer(the_FW, Q_operand, set_offline);
+   321.       words_read_to_EM(the_FW, Q_operand);
+   322.       lock_out_relative_addresses(Q_operand);
+   323.       reset(the_FW.stream);
+   324.    end PID;
+   325.
+   326.    overriding
+   327.    procedure PIE (the_FW      : in out FW.device;
+   328.                   Q_operand   : in KDF9.Q_register;
+   329.                   set_offline : in Boolean) is
+   330.    begin
+   331.       PIA(the_FW, Q_operand, set_offline);
+   332.    end PIE;
+   333.
+   334.    overriding
+   335.    procedure PIF (the_FW      : in out FW.device;
+   336.                   Q_operand   : in KDF9.Q_register;
+   337.                   set_offline : in Boolean) is
+   338.    begin
+   339.       PIB(the_FW, Q_operand, set_offline);
+   340.    end PIF;
+   341.
+   342.    overriding
+   343.    procedure PIG (the_FW      : in out FW.device;
+   344.                   Q_operand   : in KDF9.Q_register;
+   345.                   set_offline : in Boolean) is
+   346.    begin
+   347.       PIC(the_FW, Q_operand, set_offline);
+   348.    end PIG;
+   349.
+   350.    overriding
+   351.    procedure PIH (the_FW      : in out FW.device;
+   352.                   Q_operand   : in KDF9.Q_register;
+   353.                   set_offline : in Boolean) is
+   354.    begin
+   355.       PID(the_FW, Q_operand, set_offline);
+   356.    end PIH;
+   357.
+   358.    -- neat strips off any enclosing non-graphic characters from s.
+   359.    function neat (s : String)
+   360.    return String is
+   361.       l : Positive := 1;
+   362.       r : Natural  := 0;
+   363.    begin
+   364.       for i in s'Range loop
+   365.          l := i;
+   366.       exit when s(i) > SP and s(i) /= DEL;
+   367.       end loop;
+   368.       for i in reverse s'Range loop
+   369.          r := i;
+   370.       exit when s(i) > SP and s(i) /= DEL;
+   371.       end loop;
+   372.       return s(l..r);  -- s(1..0) yields the null string when s is the null string.
+   373.    end neat;
+   374.
+   375.    overriding
+   376.    procedure do_output_housekeeping (the_FW   : in out FW.device;
+   377.                                      written,
+   378.                                      fetched  : in KDF9.word) is
+   379.    begin
+   380.       flush(the_FW.stream);
+   381.       add_in_the_IO_CPU_time(the_FW, fetched);
+   382.       correct_transfer_time(the_FW, written);
+   383.       the_FW.byte_count := the_FW.byte_count + fetched;
+   384.    end do_output_housekeeping;
    385.
-   386.                when the_flexowriter_is_writing =>
-   387.                   symbol := fetch_symbol(w, c);
-   388.                   size := size + 1;
-   389.
-   390.                   if symbol = KDF9_char_sets.Word_Filler then
-   391.                      fill := fill + 1;
-   392.
-   393.                   elsif symbol = KDF9_char_sets.Case_Shift then
-   394.                      the_FW.current_case := KDF9_char_sets.Case_Shift;
-   395.                      the_FW.shifts := the_FW.shifts + 1;
-   396.
-   397.                   elsif  symbol = KDF9_char_sets.Case_Normal then
-   398.                      the_FW.current_case := KDF9_char_sets.Case_Normal;
-   399.                      the_FW.shifts := the_FW.shifts + 1;
-   400.
-   401.                   else
-   402.
-   403.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
-   404.                         char := TP_CN(symbol);
-   405.                      else
-   406.                         char := TP_CS(symbol);
-   407.                      end if;
-   408.
-   409.                      if char = ';' then
-   410.
-   411.                         declare
-   412.                            the_prompt : constant String := contents(the_FW.output);
-   413.                         begin
-   414.                            -- Must flush AFTER saving the prompt and BEFORE going black.
-   415.                            flush(the_FW.output, the_pause);
-   416.                            set_text_colour_to_black(the_FW.output);
-   417.                            set_text_style_to_plain(the_FW.output);
-   418.                            put_byte(';', the_FW.output);
-   419.                            flush(the_FW.output, the_pause);
-   420.
-   421.                            inject_a_response(the_FW, neat(the_prompt), size);
+   386.    underlined : Boolean := False;
+   387.
+   388.    procedure put_symbols (the_FW         : in out FW.device;
+   389.                           Q_operand      : in KDF9.Q_register;
+   390.                           transfer_to_EM : in Boolean) is
+   391.       start_address : constant KDF9.address := Q_operand.I;
+   392.       end_address   : constant KDF9.address := Q_operand.M;
+   393.       fill   : KDF9.word := 0;
+   394.       size   : KDF9.word := 0;
+   395.       symbol : KDF9_char_sets.symbol;
+   396.       char   : Character;
+   397.    begin
+   398.       check_addresses_and_lockouts(start_address, end_address);
+   399.       set_the_duration_of_the_pause(the_FW);
+   400.       the_FW.mode := the_flexowriter_is_writing;
+   401.       set_text_style_to_plain(the_FW.output);
+   402.       set_text_colour_to_red(the_FW.output);
+   403.
+   404.       -- Ensure that any prompt occupies the buffer alone.
+   405.       flush(the_FW.output);
+   406.
+   407.    word_loop:
+   408.       for w in start_address .. end_address loop
+   409.          for c in KDF9_char_sets.symbol_index'Range loop
+   410.             case the_FW.mode is
+   411.
+   412.                when the_flexowriter_is_writing =>
+   413.                   symbol := fetch_symbol(w, c);
+   414.                   size := size + 1;
+   415.
+   416.                   if symbol = KDF9_char_sets.Word_Filler then
+   417.                      fill := fill + 1;
+   418.
+   419.                   elsif symbol = KDF9_char_sets.Case_Shift then
+   420.                      the_FW.current_case := KDF9_char_sets.Case_Shift;
+   421.                      the_FW.shifts := the_FW.shifts + 1;
    422.
-   423.                            the_FW.mode := the_flexowriter_is_reading;
-   424.                            set_text_style_to_plain(the_FW.output);
-   425.                         end;
+   423.                   elsif  symbol = KDF9_char_sets.Case_Normal then
+   424.                      the_FW.current_case := KDF9_char_sets.Case_Normal;
+   425.                      the_FW.shifts := the_FW.shifts + 1;
    426.
-   427.                      elsif flexowriter_output_is_wanted then
+   427.                   else
    428.
-   429.                         if char = '_' then
-   430.                            underlined := True;
-   431.                            do_not_put_byte(char, the_FW.output);
-   432.                            flush(the_FW.output, the_pause);
-   433.                         else
-   434.                            if underlined then
-   435.                               set_text_style_to_underline(the_FW.output);
-   436.                            end if;
-   437.                            put_char(char, the_FW.output);
-   438.                            if underlined then
-   439.                               flush(the_FW.output, the_pause);
-   440.                               set_text_style_to_plain(the_FW.output);
-   441.                               set_text_colour_to_red(the_FW.output);
-   442.                               underlined := False;
-   443.                            end if;
-   444.                         end if;
-   445.
-   446.                      else
-   447.                         do_not_put_byte(char, the_FW.output);
-   448.                      end if;
-   449.
-   450.                      exit word_loop when transfer_to_EM and symbol = KDF9_char_sets.End_Message;
-   451.                   end if;
+   429.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
+   430.                         char := TP_CN(symbol);
+   431.                      else
+   432.                         char := TP_CS(symbol);
+   433.                      end if;
+   434.
+   435.                      if char = ';' then
+   436.
+   437.                         declare
+   438.                            the_prompt : constant String := contents(the_FW.output);
+   439.                         begin
+   440.                            -- Must flush AFTER saving the prompt and BEFORE going black.
+   441.                            flush(the_FW.output, the_pause);
+   442.                            set_text_colour_to_black(the_FW.output);
+   443.                            set_text_style_to_plain(the_FW.output);
+   444.                            put_byte(';', the_FW.output);
+   445.                            flush(the_FW.output, the_pause);
+   446.
+   447.                            inject_a_response(the_FW, neat(the_prompt), size);
+   448.
+   449.                            the_FW.mode := the_flexowriter_is_reading;
+   450.                            set_text_style_to_plain(the_FW.output);
+   451.                         end;
    452.
-   453.                when the_flexowriter_is_reading =>
-   454.                   get_char(char, the_FW.stream);
-   455.                   if case_of(char) not in both | the_FW.current_case then
-   456.                      store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
-   457.                      size := size + 1;
-   458.                      the_FW.current_case := the_FW.current_case xor 1;
-   459.                      back_off(the_FW.stream);
-   460.                   else
-   461.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
-   462.                         symbol := CN_TR(char);
-   463.                      else
-   464.                         symbol := CS_TR(char);
-   465.                      end if;
-   466.                      store_symbol(symbol, w, c);
-   467.                      size := size + 1;
-   468.                      if transfer_to_EM and symbol = KDF9_char_sets.End_Message then
-   469.                         for d in 1 .. 7-c loop
-   470.                            store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
-   471.                         end loop;
-   472.                         exit word_loop;
-   473.                      end if;
-   474.                   end if;
+   453.                      elsif flexowriter_output_is_wanted then
+   454.
+   455.                         if char = '_' then
+   456.                            underlined := True;
+   457.                            do_not_put_byte(char, the_FW.output);
+   458.                            flush(the_FW.output, the_pause);
+   459.                         else
+   460.                            if underlined then
+   461.                               set_text_style_to_underline(the_FW.output);
+   462.                            end if;
+   463.                            put_char(char, the_FW.output);
+   464.                            if underlined then
+   465.                               flush(the_FW.output, the_pause);
+   466.                               set_text_style_to_plain(the_FW.output);
+   467.                               set_text_colour_to_red(the_FW.output);
+   468.                               underlined := False;
+   469.                            end if;
+   470.                         end if;
+   471.
+   472.                      else
+   473.                         do_not_put_byte(char, the_FW.output);
+   474.                      end if;
    475.
-   476.             end case;
-   477.          end loop;
-   478.       end loop word_loop;
-   479.
-   480.       flush(the_FW.output, the_pause);
-   481.       set_text_style_to_plain(the_FW.output);
-   482.       set_text_colour_to_black(the_FW.output);
-   483.       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
-   484.       flush(the_FW.output);
-   485.    exception
-   486.       when end_of_stream =>
-   487.          flush(the_FW.output);
-   488.          set_text_colour_to_black(the_FW.output);
-   489.          set_text_style_to_plain(the_FW.output);
-   490.          do_output_housekeeping(the_FW, written => size-fill, fetched => size);
-   491.    end put_symbols;
-   492.
-   493.    overriding
-   494.    procedure write (the_FW    : in out FW.device;
-   495.                     Q_operand : in KDF9.Q_register) is
-   496.    begin
-   497.       put_symbols(the_FW, Q_operand, transfer_to_EM => False);
-   498.    end write;
-   499.
-   500.    overriding
-   501.    procedure write_to_EM (the_FW    : in out FW.device;
-   502.                           Q_operand : in KDF9.Q_register) is
-   503.    begin
-   504.       put_symbols(the_FW, Q_operand, transfer_to_EM => True);
-   505.    end write_to_EM;
-   506.
-   507.    -- TWQq
-   508.    overriding
-   509.    procedure POA (the_FW      : in out FW.device;
-   510.                   Q_operand   : in KDF9.Q_register;
-   511.                   set_offline : in Boolean) is
-   512.    begin
-   513.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   514.       write(the_FW, Q_operand);
-   515.       lock_out_relative_addresses(Q_operand);
-   516.       reset(the_FW.stream);
-   517.    end POA;
+   476.                      exit word_loop when transfer_to_EM and symbol = KDF9_char_sets.End_Message;
+   477.                   end if;
+   478.
+   479.                when the_flexowriter_is_reading =>
+   480.                   get_char(char, the_FW.stream);
+   481.                   if case_of(char) not in both | the_FW.current_case then
+   482.                      store_symbol(CN_TR(next_case(the_FW.current_case)), w, c);
+   483.                      size := size + 1;
+   484.                      the_FW.current_case := the_FW.current_case xor 1;
+   485.                      back_off(the_FW.stream);
+   486.                   else
+   487.                      if the_FW.current_case = KDF9_char_sets.Case_Normal then
+   488.                         symbol := CN_TR(char);
+   489.                      else
+   490.                         symbol := CS_TR(char);
+   491.                      end if;
+   492.                      store_symbol(symbol, w, c);
+   493.                      size := size + 1;
+   494.                      if transfer_to_EM and symbol = KDF9_char_sets.End_Message then
+   495.                         for d in 1 .. 7-c loop
+   496.                            store_symbol(KDF9_char_sets.Blank_Space, w, c+d);
+   497.                         end loop;
+   498.                         exit word_loop;
+   499.                      end if;
+   500.                   end if;
+   501.
+   502.             end case;
+   503.          end loop;
+   504.       end loop word_loop;
+   505.
+   506.       flush(the_FW.output, the_pause);
+   507.       set_text_style_to_plain(the_FW.output);
+   508.       set_text_colour_to_black(the_FW.output);
+   509.       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   510.       flush(the_FW.output);
+   511.    exception
+   512.       when end_of_stream =>
+   513.          flush(the_FW.output);
+   514.          set_text_colour_to_black(the_FW.output);
+   515.          set_text_style_to_plain(the_FW.output);
+   516.          do_output_housekeeping(the_FW, written => size-fill, fetched => size);
+   517.    end put_symbols;
    518.
-   519.    -- TWEQq
-   520.    overriding
-   521.    procedure POB (the_FW      : in out FW.device;
-   522.                   Q_operand   : in KDF9.Q_register;
-   523.                   set_offline : in Boolean) is
-   524.    begin
-   525.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   526.       write_to_EM(the_FW, Q_operand);
-   527.       lock_out_relative_addresses(Q_operand);
-   528.       -- reset(the_FW.stream);
-   529.    end POB;
-   530.
-   531.    procedure put_words (the_FW         : in out FW.device;
-   532.                         Q_operand      : in KDF9.Q_register;
-   533.                         transfer_to_EM : in Boolean := False) is
-   534.       start_address : constant KDF9.address := Q_operand.I;
-   535.       end_address   : constant KDF9.address := Q_operand.M;
-   536.       size : KDF9.word := 0;
-   537.       word : KDF9.word;
-   538.       char : Character;
-   539.    begin
-   540.       check_addresses_and_lockouts(start_address, end_address);
-   541.       set_the_duration_of_the_pause(the_FW);
-   542.       the_FW.mode := the_flexowriter_is_writing;
-   543.       set_text_style_to_plain(the_FW.output);
-   544.       set_text_colour_to_red(the_FW.output);
-   545.    word_loop:
-   546.       for w in start_address .. end_address loop
-   547.          case the_FW.mode is
-   548.
-   549.             when the_flexowriter_is_writing =>
-   550.                word := fetch_word(w) and 8#377#;
-   551.                size := size + 1;
-   552.                char := Character'Val(word);
-   553.
-   554.                if word = KDF9_char_sets.Semi_Colon_tape_bits then
-   555.                   -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
-   556.                   --    and change from writing to reading after the output of any word that has
-   557.                   --       the KDF9 FW tape code for a semicolon in its least significant 8 bits.
-   558.                   declare
-   559.                      the_prompt : constant String := contents(the_FW.output);
-   560.                   begin
-   561.                      -- Must flush AFTER saving the prompt and BEFORE going black.
-   562.                      flush(the_FW.output, the_pause);
-   563.                      set_text_colour_to_black(the_FW.output);
-   564.                      set_text_style_to_plain(the_FW.output);
-   565.                      put_byte(';', the_FW.output);
-   566.                      flush(the_FW.output, the_pause);
-   567.
-   568.                      inject_a_response(the_FW, neat(the_prompt), size);
-   569.
-   570.                      the_FW.mode := the_flexowriter_is_reading;
-   571.                      set_text_style_to_plain(the_FW.output);
-   572.                   end;
-   573.                elsif flexowriter_output_is_wanted then
+   519.    overriding
+   520.    procedure write (the_FW    : in out FW.device;
+   521.                     Q_operand : in KDF9.Q_register) is
+   522.    begin
+   523.       put_symbols(the_FW, Q_operand, transfer_to_EM => False);
+   524.    end write;
+   525.
+   526.    overriding
+   527.    procedure write_to_EM (the_FW    : in out FW.device;
+   528.                           Q_operand : in KDF9.Q_register) is
+   529.    begin
+   530.       put_symbols(the_FW, Q_operand, transfer_to_EM => True);
+   531.    end write_to_EM;
+   532.
+   533.    -- TWQq
+   534.    overriding
+   535.    procedure POA (the_FW      : in out FW.device;
+   536.                   Q_operand   : in KDF9.Q_register;
+   537.                   set_offline : in Boolean) is
+   538.    begin
+   539.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   540.       write(the_FW, Q_operand);
+   541.       lock_out_relative_addresses(Q_operand);
+   542.       reset(the_FW.stream);
+   543.    end POA;
+   544.
+   545.    -- TWEQq
+   546.    overriding
+   547.    procedure POB (the_FW      : in out FW.device;
+   548.                   Q_operand   : in KDF9.Q_register;
+   549.                   set_offline : in Boolean) is
+   550.    begin
+   551.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   552.       write_to_EM(the_FW, Q_operand);
+   553.       lock_out_relative_addresses(Q_operand);
+   554.       -- reset(the_FW.stream);
+   555.    end POB;
+   556.
+   557.    procedure put_words (the_FW         : in out FW.device;
+   558.                         Q_operand      : in KDF9.Q_register;
+   559.                         transfer_to_EM : in Boolean := False) is
+   560.       start_address : constant KDF9.address := Q_operand.I;
+   561.       end_address   : constant KDF9.address := Q_operand.M;
+   562.       size : KDF9.word := 0;
+   563.       word : KDF9.word;
+   564.       char : Character;
+   565.    begin
+   566.       check_addresses_and_lockouts(start_address, end_address);
+   567.       set_the_duration_of_the_pause(the_FW);
+   568.       the_FW.mode := the_flexowriter_is_writing;
+   569.       set_text_style_to_plain(the_FW.output);
+   570.       set_text_colour_to_red(the_FW.output);
+   571.    word_loop:
+   572.       for w in start_address .. end_address loop
+   573.          case the_FW.mode is
    574.
-   575.                         if char = '_' then
-   576.                            underlined := True;
-   577.                            do_not_put_byte(char, the_FW.output);
-   578.                            flush(the_FW.output, the_pause);
-   579.                         else
-   580.                            if underlined then
-   581.                               set_text_style_to_underline(the_FW.output);
-   582.                            end if;
-   583.                            put_char(char, the_FW.output);
-   584.                            if underlined then
-   585.                               flush(the_FW.output, the_pause);
-   586.                               set_text_style_to_plain(the_FW.output);
-   587.                               set_text_colour_to_red(the_FW.output);
-   588.                               underlined := False;
-   589.                            end if;
-   590.                         end if;
-   591.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
-   592.                end if;
+   575.             when the_flexowriter_is_writing =>
+   576.                word := fetch_word(w) and 8#377#;
+   577.                size := size + 1;
+   578.                char := Character'Val(word);
+   579.
+   580.                if word = KDF9_char_sets.Semi_Colon_tape_bits then
+   581.                   -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
+   582.                   --    and change from writing to reading after the output of any word that has
+   583.                   --       the KDF9 FW tape code for a semicolon in its least significant 8 bits.
+   584.                   declare
+   585.                      the_prompt : constant String := contents(the_FW.output);
+   586.                   begin
+   587.                      -- Must flush AFTER saving the prompt and BEFORE going black.
+   588.                      flush(the_FW.output, the_pause);
+   589.                      set_text_colour_to_black(the_FW.output);
+   590.                      set_text_style_to_plain(the_FW.output);
+   591.                      put_byte(';', the_FW.output);
+   592.                      flush(the_FW.output, the_pause);
    593.
-   594.             when the_flexowriter_is_reading =>
-   595.                get_char(char, the_FW.stream);
-   596.                size := size + 1;
-   597.                word := KDF9.word(Character'Pos(char));
-   598.                store_word(word, w);
-   599.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   594.                      inject_a_response(the_FW, neat(the_prompt), size);
+   595.
+   596.                      the_FW.mode := the_flexowriter_is_reading;
+   597.                      set_text_style_to_plain(the_FW.output);
+   598.                   end;
+   599.                elsif flexowriter_output_is_wanted then
    600.
-   601.          end case;
-   602.       end loop word_loop;
-   603.
-   604.       flush(the_FW.output);
-   605.       set_text_colour_to_black(the_FW.output);
-   606.       set_text_style_to_plain(the_FW.output);
-   607.       do_output_housekeeping(the_FW, written => size, fetched => size);
-   608.    exception
-   609.       when end_of_stream =>
-   610.          flush(the_FW.output);
-   611.          set_text_colour_to_black(the_FW.output);
-   612.          set_text_style_to_plain(the_FW.output);
-   613.          do_output_housekeeping(the_FW, written => size, fetched => size);
-   614.    end put_words;
-   615.
-   616.    overriding
-   617.    procedure words_write (the_FW    : in out FW.device;
-   618.                           Q_operand : in KDF9.Q_register) is
-   619.    begin
-   620.       put_words(the_FW, Q_operand, transfer_to_EM => False);
-   621.    end words_write;
-   622.
-   623.    overriding
-   624.    procedure words_write_to_EM (the_FW    : in out FW.device;
-   625.                                 Q_operand : in KDF9.Q_register) is
-   626.    begin
-   627.       put_words(the_FW, Q_operand, transfer_to_EM => True);
-   628.    end words_write_to_EM;
+   601.                         if char = '_' then
+   602.                            underlined := True;
+   603.                            do_not_put_byte(char, the_FW.output);
+   604.                            flush(the_FW.output, the_pause);
+   605.                         else
+   606.                            if underlined then
+   607.                               set_text_style_to_underline(the_FW.output);
+   608.                            end if;
+   609.                            put_char(char, the_FW.output);
+   610.                            if underlined then
+   611.                               flush(the_FW.output, the_pause);
+   612.                               set_text_style_to_plain(the_FW.output);
+   613.                               set_text_colour_to_red(the_FW.output);
+   614.                               underlined := False;
+   615.                            end if;
+   616.                         end if;
+   617.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   618.                end if;
+   619.
+   620.             when the_flexowriter_is_reading =>
+   621.                get_char(char, the_FW.stream);
+   622.                size := size + 1;
+   623.                word := KDF9.word(Character'Pos(char));
+   624.                store_word(word, w);
+   625.       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
+   626.
+   627.          end case;
+   628.       end loop word_loop;
    629.
-   630.    -- TWCQq
-   631.    overriding
-   632.    procedure POC (the_FW      : in out FW.device;
-   633.                   Q_operand   : in KDF9.Q_register;
-   634.                   set_offline : in Boolean) is
-   635.    begin
-   636.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   637.       words_write(the_FW, Q_operand);
-   638.       lock_out_relative_addresses(Q_operand);
-   639.    end POC;
-   640.
-   641.    -- TWECQq
+   630.       flush(the_FW.output);
+   631.       set_text_colour_to_black(the_FW.output);
+   632.       set_text_style_to_plain(the_FW.output);
+   633.       do_output_housekeeping(the_FW, written => size, fetched => size);
+   634.    exception
+   635.       when end_of_stream =>
+   636.          flush(the_FW.output);
+   637.          set_text_colour_to_black(the_FW.output);
+   638.          set_text_style_to_plain(the_FW.output);
+   639.          do_output_housekeeping(the_FW, written => size, fetched => size);
+   640.    end put_words;
+   641.
    642.    overriding
-   643.    procedure POD (the_FW      : in out FW.device;
-   644.                   Q_operand   : in KDF9.Q_register;
-   645.                   set_offline : in Boolean) is
-   646.    begin
-   647.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
-   648.       words_write_to_EM(the_FW, Q_operand);
-   649.       lock_out_relative_addresses(Q_operand);
-   650.    end POD;
-   651.
-   652.    overriding
-   653.    procedure Finalize (the_FW : in out FW.device) is
-   654.       total : constant KDF9.word := the_FW.output.bytes_moved+the_FW.stream.bytes_moved + the_FW.shifts;
-   655.    begin
-   656.       close(
-   657.            the_FW,
-   658.            "transferred",
-   659.            total,
-   660.            "character" & plurality(total)
-   661.           );
-   662.    end Finalize;
-   663.
-   664.    -- This is the monitor console Flexowriter.
-   665.
-   666.    type FW_access is access FW.device;
-   667.
-   668.    FW0 : FW_access with Warnings => Off;
-   669.
-   670.    already_enabled : Boolean := False;
-   671.
-   672.    procedure enable (b : in KDF9.buffer_number) is
-   673.    begin
-   674.       if already_enabled then
-   675.          trap_operator_error("more than one FW unit has been configured");
-   676.       end if;
-   677.       if b /= 0 then
-   678.          trap_operator_error("FW0 must be on buffer 0");
-   679.       end if;
-   680.       FW0 := new FW.device (number => b, unit => 0);
-   681.       already_enabled := True;
-   682.    end enable;
-   683.
-   684. end IOC.slow.shift.FW;
+   643.    procedure words_write (the_FW    : in out FW.device;
+   644.                           Q_operand : in KDF9.Q_register) is
+   645.    begin
+   646.       put_words(the_FW, Q_operand, transfer_to_EM => False);
+   647.    end words_write;
+   648.
+   649.    overriding
+   650.    procedure words_write_to_EM (the_FW    : in out FW.device;
+   651.                                 Q_operand : in KDF9.Q_register) is
+   652.    begin
+   653.       put_words(the_FW, Q_operand, transfer_to_EM => True);
+   654.    end words_write_to_EM;
+   655.
+   656.    -- TWCQq
+   657.    overriding
+   658.    procedure POC (the_FW      : in out FW.device;
+   659.                   Q_operand   : in KDF9.Q_register;
+   660.                   set_offline : in Boolean) is
+   661.    begin
+   662.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   663.       words_write(the_FW, Q_operand);
+   664.       lock_out_relative_addresses(Q_operand);
+   665.    end POC;
+   666.
+   667.    -- TWECQq
+   668.    overriding
+   669.    procedure POD (the_FW      : in out FW.device;
+   670.                   Q_operand   : in KDF9.Q_register;
+   671.                   set_offline : in Boolean) is
+   672.    begin
+   673.       start_slow_transfer(the_FW, Q_operand, set_offline, output_operation);
+   674.       words_write_to_EM(the_FW, Q_operand);
+   675.       lock_out_relative_addresses(Q_operand);
+   676.    end POD;
+   677.
+   678.    overriding
+   679.    procedure Finalize (the_FW : in out FW.device) is
+   680.       total : constant KDF9.word := the_FW.output.bytes_moved+the_FW.stream.bytes_moved + the_FW.shifts;
+   681.    begin
+   682.       close(
+   683.            the_FW,
+   684.            "transferred",
+   685.            total,
+   686.            "character" & plurality(total)
+   687.           );
+   688.    end Finalize;
+   689.
+   690.    -- This is the monitor console Flexowriter.
+   691.
+   692.    type FW_access is access FW.device;
+   693.
+   694.    FW0 : FW_access with Warnings => Off;
+   695.
+   696.    already_enabled : Boolean := False;
+   697.
+   698.    procedure enable (b : in KDF9.buffer_number) is
+   699.    begin
+   700.       if already_enabled then
+   701.          trap_operator_error("more than one FW unit has been configured");
+   702.       end if;
+   703.       if b /= 0 then
+   704.          trap_operator_error("FW0 must be on buffer 0");
+   705.       end if;
+   706.       FW0 := new FW.device (number => b, unit => 0);
+   707.       already_enabled := True;
+   708.    end enable;
+   709.
+   710. end IOC.slow.shift.FW;
 
 Compiling: ../Source/ioc-slow-shift-fw.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:50
 
      1. -- Emulation of a FlexoWriter buffer: monitor typewriter functionality.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21345,19 +17402,19 @@ Compiled at: 2021-05-29 19:07:09
    151.
    152. end IOC.slow.shift.FW;
 
- 684 lines: No errors
+ 710 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-gp.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21563,12 +17620,12 @@ Compiled at: 2021-05-29 19:07:09
    206. end IOC.slow.shift.GP;
 
 Compiling: ../Source/ioc-slow-shift-gp.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a Calcomp 564 graph plotter, switched to a tape punch buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21650,14 +17707,17 @@ Compiled at: 2021-05-29 19:07:09
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-shift-si.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -21889,12 +17949,12 @@ Compiled at: 2021-05-29 19:07:09
    232. end IOC.slow.shift.SI;
 
 Compiling: ../Source/ioc-slow-shift-si.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a standard interface buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22045,17 +18105,14 @@ Compiled at: 2021-05-29 19:07:09
 
  232 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22091,12 +18148,12 @@ Compiled at: 2021-05-29 19:07:09
     36. end IOC.slow.unit;
 
 Compiling: ../Source/ioc-slow-unit.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of the common functionality of "unit record" (i.e. LP, CP or CR) devices.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22141,349 +18198,17 @@ Compiled at: 2021-05-29 19:07:09
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
-
-Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cp.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
-
-     1. -- Emulation of a card punch buffer.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package body IOC.slow.unit.CP is
-    18.
-    19.    use KDF9_char_sets;
-    20.
-    21.    overriding
-    22.    procedure Initialize (the_CP : in out CP.device) is
-    23.    begin
-    24.       open(the_CP, write_mode);
-    25.    end Initialize;
-    26.
-    27.    procedure do_output_housekeeping (the_CP     : in out CP.device;
-    28.                                      fetched    : in KDF9.word) is
-    29.    begin
-    30.       correct_transfer_time(the_CP, actual_length => 1);
-    31.       add_in_the_IO_CPU_time(the_CP, fetched);
-    32.    end do_output_housekeeping;
-    33.
-    34.    procedure write_card (the_CP        : in out CP.device;
-    35.                          Q_operand     : in KDF9.Q_register;
-    36.                          max_words     : in KDF9.address;
-    37.                          writing_to_EM : in Boolean := False) is
-    38.       start_address : constant KDF9.address := Q_operand.I;
-    39.       end_address   : constant KDF9.address := Q_operand.M;
-    40.       size : KDF9.word := 0;
-    41.       char : Character;
-    42.       byte : KDF9_char_sets.symbol;
-    43.    begin
-    44.       check_addresses_and_lockouts(start_address, end_address);
-    45.    word_loop:
-    46.       for w in start_address .. KDF9.address'Min(end_address, start_address+max_words-1) loop
-    47.          for c in KDF9_char_sets.symbol_index'Range loop
-    48.             byte := fetch_symbol(w, c);
-    49.             size := size + 1;
-    50.             char := to_CP(byte);
-    51.             put_byte(char, the_CP.stream);
-    52.             exit word_loop when writing_to_EM and char = KDF9_char_sets.E_M;
-    53.          end loop;
-    54.       end loop word_loop;
-    55.       put_EOL(the_CP.stream);
-    56.       the_CP.unit_count := the_CP.unit_count + 1;
-    57.       do_output_housekeeping(the_CP, fetched => size);
-    58.    end write_card;
-    59.
-    60.    procedure words_write_card (the_CP        : in out CP.device;
-    61.                                Q_operand     : in KDF9.Q_register;
-    62.                                max_words     : in KDF9.address;
-    63.                                writing_to_EM : in Boolean := False) is
-    64.
-    65.       start_address : constant KDF9.address := Q_operand.I;
-    66.       end_address   : constant KDF9.address := Q_operand.M;
-    67.       size : KDF9.word := 0;
-    68.       char : Character;
-    69.       byte : KDF9_char_sets.symbol;
-    70.    begin
-    71.       check_addresses_and_lockouts(start_address, end_address);
-    72.       for w in start_address .. KDF9.address'Min(end_address, start_address+max_words-1) loop
-    73.          byte := KDF9_char_sets.symbol(fetch_word(w) and 8#77#);
-    74.          size := size + 1;
-    75.          char := to_CP(byte);
-    76.          put_byte(char, the_CP.stream);
-    77.       exit when writing_to_EM and char = KDF9_char_sets.E_M;
-    78.       end loop;
-    79.       put_EOL(the_CP.stream);
-    80.       the_CP.unit_count := the_CP.unit_count + 1;
-    81.       do_output_housekeeping(the_CP, fetched => size);
-    82.    end words_write_card;
-    83.
-    84.    overriding
-    85.    procedure POA (the_CP      : in out CP.device;
-    86.                   Q_operand   : in KDF9.Q_register;
-    87.                   set_offline : in Boolean) is
-    88.    begin
-    89.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-    90.       write_card(the_CP, Q_operand, max_words => 20);
-    91.       lock_out_relative_addresses(Q_operand);
-    92.    end POA;
-    93.
-    94.    overriding
-    95.    procedure POB (the_CP      : in out CP.device;
-    96.                   Q_operand   : in KDF9.Q_register;
-    97.                   set_offline : in Boolean) is
-    98.    begin
-    99.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   100.       write_card(the_CP, Q_operand, max_words => 20, writing_to_EM => True);
-   101.       lock_out_relative_addresses(Q_operand);
-   102.    end POB;
-   103.
-   104.    overriding
-   105.    procedure POC (the_CP      : in out CP.device;
-   106.                   Q_operand   : in KDF9.Q_register;
-   107.                   set_offline : in Boolean) is
-   108.    begin
-   109.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   110.       words_write_card(the_CP, Q_operand, max_words => 160);
-   111.       lock_out_relative_addresses(Q_operand);
-   112.    end POC;
-   113.
-   114.    overriding
-   115.    procedure POD (the_CP      : in out CP.device;
-   116.                   Q_operand   : in KDF9.Q_register;
-   117.                   set_offline : in Boolean) is
-   118.    begin
-   119.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   120.       words_write_card(the_CP, Q_operand, max_words => 160, writing_to_EM => True);
-   121.       lock_out_relative_addresses(Q_operand);
-   122.    end POD;
-   123.
-   124.    overriding
-   125.    procedure POE (the_CP      : in out CP.device;
-   126.                   Q_operand   : in KDF9.Q_register;
-   127.                   set_offline : in Boolean) is
-   128.    begin
-   129.       POC(the_CP, Q_operand, set_offline);
-   130.    end POE;
-   131.
-   132.    overriding
-   133.    procedure POF (the_CP      : in out CP.device;
-   134.                   Q_operand   : in KDF9.Q_register;
-   135.                   set_offline : in Boolean) is
-   136.    begin
-   137.       POA(the_CP, Q_operand, set_offline);
-   138.    end POF;
-   139.
-   140.    overriding
-   141.    procedure POG (the_CP      : in out CP.device;
-   142.                   Q_operand   : in KDF9.Q_register;
-   143.                   set_offline : in Boolean) is
-   144.    begin
-   145.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   146.       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => False);
-   147.       lock_out_relative_addresses(Q_operand);
-   148.    end POG;
-   149.
-   150.    overriding
-   151.    procedure POH (the_CP      : in out CP.device;
-   152.                   Q_operand   : in KDF9.Q_register;
-   153.                   set_offline : in Boolean) is
-   154.    begin
-   155.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   156.       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => True);
-   157.       lock_out_relative_addresses(Q_operand);
-   158.    end POH;
-   159.
-   160.    overriding
-   161.    procedure POK (the_CP      : in out CP.device;
-   162.                   Q_operand   : in KDF9.Q_register;
-   163.                   set_offline : in Boolean) is
-   164.    begin
-   165.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   166.       -- See the Manual, p289.
-   167.       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => True);
-   168.       lock_out_relative_addresses(Q_operand);
-   169.    end POK;
-   170.
-   171.    overriding
-   172.    procedure POL (the_CP      : in out CP.device;
-   173.                   Q_operand   : in KDF9.Q_register;
-   174.                   set_offline : in Boolean) is
-   175.    begin
-   176.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
-   177.       -- See the Manual, p289.
-   178.       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => False);
-   179.       lock_out_relative_addresses(Q_operand);
-   180.    end POL;
-   181.
-   182.    overriding
-   183.    procedure Finalize (the_CP : in out CP.device) is
-   184.    begin
-   185.       close(
-   186.             the_CP,
-   187.             "punched",
-   188.             the_CP.unit_count,
-   189.             "card" & plurality(the_CP.unit_count)
-   190.            );
-   191.    end Finalize;
-   192.
-   193.    type CP_access is access CP.device;
-   194.
-   195.    CP0 : CP_access with Warnings => Off;
-   196.    CP1 : CP_access with Warnings => Off;
-   197.
-   198.    unit : IOC.unit_number := 0;
-   199.
-   200.    procedure enable (b : in KDF9.buffer_number) is
-   201.    begin
-   202.       case unit is
-   203.          when 0 =>
-   204.             CP0 := new CP.device (number => b, unit => 0);
-   205.             CP0_number := b;
-   206.          when 1 =>
-   207.             CP1 := new CP.device (number => b, unit => 1);
-   208.             CP1_number := b;
-   209.          when others =>
-   210.             trap_operator_error("more than two CP units have been configured");
-   211.       end case;
-   212.       unit := unit + 1;
-   213.    end enable;
-   214.
-   215. end IOC.slow.unit.CP;
-
-Compiling: ../Source/ioc-slow-unit-cp.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:09
-
-     1. -- Emulation of a card punch buffer.
-     2. -- Card punches are "unit record" devices: they cannot transfer less than a whole card.
-     3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     6. --
-     7. -- The ee9 program is free software; you can redistribute it and/or
-     8. -- modify it under terms of the GNU General Public License as published
-     9. -- by the Free Software Foundation; either version 3, or (at your option)
-    10. -- any later version. This program is distributed in the hope that it
-    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    13. -- See the GNU General Public License for more details. You should have
-    14. -- received a copy of the GNU General Public License distributed with
-    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    16. --
-    17.
-    18. package IOC.slow.unit.CP is
-    19.
-    20.    type device is new IOC.slow.unit.device with private;
-    21.
-    22.    -- Punch binary mode.
-    23.    overriding
-    24.    procedure POA (the_CP      : in out CP.device;
-    25.                   Q_operand   : in KDF9.Q_register;
-    26.                   set_offline : in Boolean);
-    27.
-    28.    -- Punch binary mode to End Message.
-    29.    overriding
-    30.    procedure POB (the_CP      : in out CP.device;
-    31.                   Q_operand   : in KDF9.Q_register;
-    32.                   set_offline : in Boolean);
-    33.
-    34.    -- Punch binary character mode.
-    35.    overriding
-    36.    procedure POC (the_CP      : in out CP.device;
-    37.                   Q_operand   : in KDF9.Q_register;
-    38.                   set_offline : in Boolean);
-    39.
-    40.    -- Punch binary character mode to End Message.
-    41.    overriding
-    42.    procedure POD (the_CP      : in out CP.device;
-    43.                   Q_operand   : in KDF9.Q_register;
-    44.                   set_offline : in Boolean);
-    45.
-    46.    -- As POC.
-    47.    overriding
-    48.    procedure POE (the_CP      : in out CP.device;
-    49.                   Q_operand   : in KDF9.Q_register;
-    50.                   set_offline : in Boolean);
-    51.
-    52.    -- As POA.
-    53.    overriding
-    54.    procedure POF (the_CP      : in out CP.device;
-    55.                   Q_operand   : in KDF9.Q_register;
-    56.                   set_offline : in Boolean);
-    57.
-    58.    -- Punch alphanumeric mode.
-    59.    overriding
-    60.    procedure POG (the_CP      : in out CP.device;
-    61.                   Q_operand   : in KDF9.Q_register;
-    62.                   set_offline : in Boolean);
-    63.
-    64.    -- Punch alphanumeric mode to End Message.
-    65.    overriding
-    66.    procedure POH (the_CP      : in out CP.device;
-    67.                   Q_operand   : in KDF9.Q_register;
-    68.                   set_offline : in Boolean);
-    69.
-    70.    -- Punch alphanumeric character mode to End Message.
-    71.    overriding
-    72.    procedure POK (the_CP      : in out CP.device;
-    73.                   Q_operand   : in KDF9.Q_register;
-    74.                   set_offline : in Boolean);
-    75.
-    76.    -- Punch alphanumeric character mode.
-    77.    overriding
-    78.    procedure POL (the_CP      : in out CP.device;
-    79.                   Q_operand   : in KDF9.Q_register;
-    80.                   set_offline : in Boolean);
-    81.
-    82.    procedure enable (b : in KDF9.buffer_number);
-    83.
-    84. private
-    85.
-    86.    type device is new IOC.slow.unit.device with null record;
-    87.
-    88.    overriding
-    89.    procedure Initialize (the_CP : in out CP.device);
-    90.
-    91.    overriding
-    92.    procedure Finalize (the_CP : in out CP.device);
-    93.
-    94.    overriding
-    95.    function kind (the_CP : CP.device)
-    96.    return IOC.device_kind
-    97.    is (CP_kind);
-    98.
-    99.    overriding
-   100.    function quantum (the_CP : CP.device)
-   101.    return KDF9.us
-   102.    is (1E6 / (300 / 60)); -- 300 cards per minute.
-   103.
-   104. end IOC.slow.unit.CP;
-
- 215 lines: No errors
-
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cr.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a card reader buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -22743,13 +18468,13 @@ Compiled at: 2021-05-29 19:07:10
    260. end IOC.slow.unit.CR;
 
 Compiling: ../Source/ioc-slow-unit-cr.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a card reader buffer.
      2. -- Card readers are "unit record" devices: they cannot transfer less than a whole card.
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -22852,17 +18577,399 @@ Compiled at: 2021-05-29 19:07:10
 
  260 lines: No errors
 
+
+Compiling: /home/parallels/emulation/Source/ioc-slow-unit-cp.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Emulation of a card punch buffer.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package body IOC.slow.unit.CP is
+    18.
+    19.    use KDF9_char_sets;
+    20.
+    21.    overriding
+    22.    procedure Initialize (the_CP : in out CP.device) is
+    23.    begin
+    24.       open(the_CP, write_mode);
+    25.    end Initialize;
+    26.
+    27.    procedure do_output_housekeeping (the_CP     : in out CP.device;
+    28.                                      fetched    : in KDF9.word) is
+    29.    begin
+    30.       correct_transfer_time(the_CP, actual_length => 1);
+    31.       add_in_the_IO_CPU_time(the_CP, fetched);
+    32.    end do_output_housekeeping;
+    33.
+    34.    procedure write_card (the_CP        : in out CP.device;
+    35.                          Q_operand     : in KDF9.Q_register;
+    36.                          max_words     : in KDF9.address;
+    37.                          writing_to_EM : in Boolean := False) is
+    38.       start_address : constant KDF9.address := Q_operand.I;
+    39.       end_address   : constant KDF9.address := Q_operand.M;
+    40.       size : KDF9.word := 0;
+    41.       char : Character;
+    42.       byte : KDF9_char_sets.symbol;
+    43.    begin
+    44.       check_addresses_and_lockouts(start_address, end_address);
+    45.    word_loop:
+    46.       for w in start_address .. KDF9.address'Min(end_address, start_address+max_words-1) loop
+    47.          for c in KDF9_char_sets.symbol_index'Range loop
+    48.             byte := fetch_symbol(w, c);
+    49.             size := size + 1;
+    50.             char := to_CP(byte);
+    51.             put_byte(char, the_CP.stream);
+    52.             exit word_loop when writing_to_EM and char = KDF9_char_sets.E_M;
+    53.          end loop;
+    54.       end loop word_loop;
+    55.       put_EOL(the_CP.stream);
+    56.       the_CP.unit_count := the_CP.unit_count + 1;
+    57.       do_output_housekeeping(the_CP, fetched => size);
+    58.    end write_card;
+    59.
+    60.    procedure words_write_card (the_CP        : in out CP.device;
+    61.                                Q_operand     : in KDF9.Q_register;
+    62.                                max_words     : in KDF9.address;
+    63.                                writing_to_EM : in Boolean := False) is
+    64.
+    65.       start_address : constant KDF9.address := Q_operand.I;
+    66.       end_address   : constant KDF9.address := Q_operand.M;
+    67.       size : KDF9.word := 0;
+    68.       char : Character;
+    69.       byte : KDF9_char_sets.symbol;
+    70.    begin
+    71.       check_addresses_and_lockouts(start_address, end_address);
+    72.       for w in start_address .. KDF9.address'Min(end_address, start_address+max_words-1) loop
+    73.          byte := KDF9_char_sets.symbol(fetch_word(w) and 8#77#);
+    74.          size := size + 1;
+    75.          char := to_CP(byte);
+    76.          put_byte(char, the_CP.stream);
+    77.       exit when writing_to_EM and char = KDF9_char_sets.E_M;
+    78.       end loop;
+    79.       put_EOL(the_CP.stream);
+    80.       the_CP.unit_count := the_CP.unit_count + 1;
+    81.       do_output_housekeeping(the_CP, fetched => size);
+    82.    end words_write_card;
+    83.
+    84.    overriding
+    85.    procedure POA (the_CP      : in out CP.device;
+    86.                   Q_operand   : in KDF9.Q_register;
+    87.                   set_offline : in Boolean) is
+    88.    begin
+    89.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+    90.       write_card(the_CP, Q_operand, max_words => 20);
+    91.       lock_out_relative_addresses(Q_operand);
+    92.    end POA;
+    93.
+    94.    overriding
+    95.    procedure POB (the_CP      : in out CP.device;
+    96.                   Q_operand   : in KDF9.Q_register;
+    97.                   set_offline : in Boolean) is
+    98.    begin
+    99.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   100.       write_card(the_CP, Q_operand, max_words => 20, writing_to_EM => True);
+   101.       lock_out_relative_addresses(Q_operand);
+   102.    end POB;
+   103.
+   104.    overriding
+   105.    procedure POC (the_CP      : in out CP.device;
+   106.                   Q_operand   : in KDF9.Q_register;
+   107.                   set_offline : in Boolean) is
+   108.    begin
+   109.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   110.       words_write_card(the_CP, Q_operand, max_words => 160);
+   111.       lock_out_relative_addresses(Q_operand);
+   112.    end POC;
+   113.
+   114.    overriding
+   115.    procedure POD (the_CP      : in out CP.device;
+   116.                   Q_operand   : in KDF9.Q_register;
+   117.                   set_offline : in Boolean) is
+   118.    begin
+   119.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   120.       words_write_card(the_CP, Q_operand, max_words => 160, writing_to_EM => True);
+   121.       lock_out_relative_addresses(Q_operand);
+   122.    end POD;
+   123.
+   124.    overriding
+   125.    procedure POE (the_CP      : in out CP.device;
+   126.                   Q_operand   : in KDF9.Q_register;
+   127.                   set_offline : in Boolean) is
+   128.    begin
+   129.       POC(the_CP, Q_operand, set_offline);
+   130.    end POE;
+   131.
+   132.    overriding
+   133.    procedure POF (the_CP      : in out CP.device;
+   134.                   Q_operand   : in KDF9.Q_register;
+   135.                   set_offline : in Boolean) is
+   136.    begin
+   137.       POA(the_CP, Q_operand, set_offline);
+   138.    end POF;
+   139.
+   140.    overriding
+   141.    procedure POG (the_CP      : in out CP.device;
+   142.                   Q_operand   : in KDF9.Q_register;
+   143.                   set_offline : in Boolean) is
+   144.    begin
+   145.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   146.       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => False);
+   147.       lock_out_relative_addresses(Q_operand);
+   148.    end POG;
+   149.
+   150.    overriding
+   151.    procedure POH (the_CP      : in out CP.device;
+   152.                   Q_operand   : in KDF9.Q_register;
+   153.                   set_offline : in Boolean) is
+   154.    begin
+   155.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   156.       write_card(the_CP, Q_operand, max_words => 10, writing_to_EM => True);
+   157.       lock_out_relative_addresses(Q_operand);
+   158.    end POH;
+   159.
+   160.    overriding
+   161.    procedure POK (the_CP      : in out CP.device;
+   162.                   Q_operand   : in KDF9.Q_register;
+   163.                   set_offline : in Boolean) is
+   164.    begin
+   165.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   166.       -- See the Manual, p289.
+   167.       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => True);
+   168.       lock_out_relative_addresses(Q_operand);
+   169.    end POK;
+   170.
+   171.    overriding
+   172.    procedure POL (the_CP      : in out CP.device;
+   173.                   Q_operand   : in KDF9.Q_register;
+   174.                   set_offline : in Boolean) is
+   175.    begin
+   176.       start_slow_transfer(the_CP, Q_operand, set_offline, output_operation);
+   177.       -- See the Manual, p289.
+   178.       words_write_card(the_CP, Q_operand, max_words => 80, writing_to_EM => False);
+   179.       lock_out_relative_addresses(Q_operand);
+   180.    end POL;
+   181.
+   182.    overriding
+   183.    procedure Finalize (the_CP : in out CP.device) is
+   184.    begin
+   185.       close(
+   186.             the_CP,
+   187.             "punched",
+   188.             the_CP.unit_count,
+   189.             "card" & plurality(the_CP.unit_count)
+   190.            );
+   191.    end Finalize;
+   192.
+   193.    type CP_access is access CP.device;
+   194.
+   195.    CP0 : CP_access with Warnings => Off;
+   196.    CP1 : CP_access with Warnings => Off;
+   197.
+   198.    unit : IOC.unit_number := 0;
+   199.
+   200.    procedure enable (b : in KDF9.buffer_number) is
+   201.    begin
+   202.       case unit is
+   203.          when 0 =>
+   204.             CP0 := new CP.device (number => b, unit => 0);
+   205.             CP0_number := b;
+   206.          when 1 =>
+   207.             CP1 := new CP.device (number => b, unit => 1);
+   208.             CP1_number := b;
+   209.          when others =>
+   210.             trap_operator_error("more than two CP units have been configured");
+   211.       end case;
+   212.       unit := unit + 1;
+   213.    end enable;
+   214.
+   215. end IOC.slow.unit.CP;
+
+Compiling: ../Source/ioc-slow-unit-cp.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Emulation of a card punch buffer.
+     2. -- Card punches are "unit record" devices: they cannot transfer less than a whole card.
+     3. --
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     6. --
+     7. -- The ee9 program is free software; you can redistribute it and/or
+     8. -- modify it under terms of the GNU General Public License as published
+     9. -- by the Free Software Foundation; either version 3, or (at your option)
+    10. -- any later version. This program is distributed in the hope that it
+    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    13. -- See the GNU General Public License for more details. You should have
+    14. -- received a copy of the GNU General Public License distributed with
+    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    16. --
+    17.
+    18. package IOC.slow.unit.CP is
+    19.
+    20.    type device is new IOC.slow.unit.device with private;
+    21.
+    22.    -- Punch binary mode.
+    23.    overriding
+    24.    procedure POA (the_CP      : in out CP.device;
+    25.                   Q_operand   : in KDF9.Q_register;
+    26.                   set_offline : in Boolean);
+    27.
+    28.    -- Punch binary mode to End Message.
+    29.    overriding
+    30.    procedure POB (the_CP      : in out CP.device;
+    31.                   Q_operand   : in KDF9.Q_register;
+    32.                   set_offline : in Boolean);
+    33.
+    34.    -- Punch binary character mode.
+    35.    overriding
+    36.    procedure POC (the_CP      : in out CP.device;
+    37.                   Q_operand   : in KDF9.Q_register;
+    38.                   set_offline : in Boolean);
+    39.
+    40.    -- Punch binary character mode to End Message.
+    41.    overriding
+    42.    procedure POD (the_CP      : in out CP.device;
+    43.                   Q_operand   : in KDF9.Q_register;
+    44.                   set_offline : in Boolean);
+    45.
+    46.    -- As POC.
+    47.    overriding
+    48.    procedure POE (the_CP      : in out CP.device;
+    49.                   Q_operand   : in KDF9.Q_register;
+    50.                   set_offline : in Boolean);
+    51.
+    52.    -- As POA.
+    53.    overriding
+    54.    procedure POF (the_CP      : in out CP.device;
+    55.                   Q_operand   : in KDF9.Q_register;
+    56.                   set_offline : in Boolean);
+    57.
+    58.    -- Punch alphanumeric mode.
+    59.    overriding
+    60.    procedure POG (the_CP      : in out CP.device;
+    61.                   Q_operand   : in KDF9.Q_register;
+    62.                   set_offline : in Boolean);
+    63.
+    64.    -- Punch alphanumeric mode to End Message.
+    65.    overriding
+    66.    procedure POH (the_CP      : in out CP.device;
+    67.                   Q_operand   : in KDF9.Q_register;
+    68.                   set_offline : in Boolean);
+    69.
+    70.    -- Punch alphanumeric character mode to End Message.
+    71.    overriding
+    72.    procedure POK (the_CP      : in out CP.device;
+    73.                   Q_operand   : in KDF9.Q_register;
+    74.                   set_offline : in Boolean);
+    75.
+    76.    -- Punch alphanumeric character mode.
+    77.    overriding
+    78.    procedure POL (the_CP      : in out CP.device;
+    79.                   Q_operand   : in KDF9.Q_register;
+    80.                   set_offline : in Boolean);
+    81.
+    82.    procedure enable (b : in KDF9.buffer_number);
+    83.
+    84. private
+    85.
+    86.    type device is new IOC.slow.unit.device with null record;
+    87.
+    88.    overriding
+    89.    procedure Initialize (the_CP : in out CP.device);
+    90.
+    91.    overriding
+    92.    procedure Finalize (the_CP : in out CP.device);
+    93.
+    94.    overriding
+    95.    function kind (the_CP : CP.device)
+    96.    return IOC.device_kind
+    97.    is (CP_kind);
+    98.
+    99.    overriding
+   100.    function quantum (the_CP : CP.device)
+   101.    return KDF9.us
+   102.    is (1E6 / (300 / 60)); -- 300 cards per minute.
+   103.
+   104. end IOC.slow.unit.CP;
+
+ 215 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
+Compiling: /home/parallels/emulation/Source/ioc-the_locker_of.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Identify the buffer that caused a store lockout.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. function IOC.the_locker_of (address : KDF9.Q_part; found : out Boolean)
+    18. return KDF9.Q_part is
+    19.    candidate_time   : KDF9.us     := KDF9.us'Last;
+    20.    candidate_number : KDF9.Q_part := 0;
+    21. begin
+    22.    -- Select the buffer actively doing DMA in the_group;
+    23.    --    if there is more than one, choose the buffer with the earliest completion time.
+    24.    -- The latter case should not arise in practice, but is allowed by the hardware.
+    25.    found := False;
+    26.    for b in buffer'Range loop
+    27.       if buffer(b) /= null                                               and then
+    28.             buffer(b).is_busy                                            and then
+    29.                buffer(b).operation in input_operation | output_operation and then
+    30.                   buffer(b).completion_time < candidate_time             and then
+    31.                      group(address) in group(buffer(b).control_word.I)
+    32.                                     .. group(buffer(b).control_word.M)       then
+    33.          found := True;
+    34.          candidate_number := b;
+    35.          candidate_time   := buffer(b).completion_time;
+    36.       end if;
+    37.    end loop;
+    38.    return candidate_number;
+    39. end IOC.the_locker_of;
+
+ 39 lines: No errors
+
+
 Compiling: /home/parallels/emulation/Source/ioc-slow-unit-lp.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a lineprinter buffer.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23051,13 +19158,13 @@ Compiled at: 2021-05-29 19:07:10
    189. end IOC.slow.unit.LP;
 
 Compiling: ../Source/ioc-slow-unit-lp.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
 
      1. -- Emulation of a lineprinter buffer.
      2. -- Lineprinters are "unit record" devices: they cannot transfer less than a whole line.
      3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      6. --
      7. -- The ee9 program is free software; you can redistribute it and/or
@@ -23128,14 +19235,3914 @@ Compiled at: 2021-05-29 19:07:10
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-cpu.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
+     2. --   Ada types; and for types used in the internal functioning of the microcode.
+     3. --
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     6. --
+     7. -- The ee9 program is free software; you can redistribute it and/or
+     8. -- modify it under terms of the GNU General Public License as published
+     9. -- by the Free Software Foundation; either version 3, or (at your option)
+    10. -- any later version. This program is distributed in the hope that it
+    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    13. -- See the GNU General Public License for more details. You should have
+    14. -- received a copy of the GNU General Public License distributed with
+    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    16. --
+    17. --
+    18.
+    19. package body KDF9.CPU is
+    20.
+    21. --
+    22. --
+    23.    --
+    24.    -- KDF9 Arithmetic Control (AC) primitives representing Shift Control and associated units.
+    25.    -- These units implement shifting, multiplication, division, and floating-point arithmetic.
+    26.    --
+    27. --
+    28. --
+    29.
+    30.    KDF9_max_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'Last);
+    31.    KDF9_min_signed : constant CPU.s_64 := CPU.s_64(CPU.signed'First);
+    32.
+    33.    function as_word (u : CPU.u_64)
+    34.    return KDF9.word
+    35.    is (KDF9.word(u and KDF9.word_mask));
+    36.
+    37.    function as_word (s : CPU.s_64)
+    38.    return KDF9.word is
+    39.    begin
+    40.       if s > KDF9_max_signed or s < KDF9_min_signed then
+    41.          the_V_bit_is_set := True;
+    42.       end if;
+    43.       return as_word(unsign(s));
+    44.    end as_word;
+    45.
+    46.    function contracted (P : KDF9.pair)
+    47.    return KDF9.word is
+    48.    begin
+    49.       if resign(P.lsw) < 0 or (P.msw+1) > 1 then
+    50.          the_V_bit_is_set := True;
+    51.       end if;
+    52.       return (P.lsw and not_sign_bit) or (P.msw and sign_bit);
+    53.    end contracted;
+    54.
+    55.    function shift_time (amount : Natural)
+    56.    return KDF9.us
+    57.    is (KDF9.us(amount/16 + amount/8 mod 2 + (if amount mod 8 > 0 then 1 else 0)));
+    58.
+    59.    function normalize_time (amount : Natural)
+    60.    return KDF9.us
+    61.    is (KDF9.us(amount/8 + (if amount mod 8 > 0 then 1 else 0)));
+    62.
+    63.    function shift_word_left (W : KDF9.word; amount : word_shift_length)
+    64.    return KDF9.word
+    65.    is (as_word(shift_left(CPU.u_64(W), amount)));
+    66.
+    67.    function shift_word_right (W : KDF9.word; amount : word_shift_length)
+    68.    return KDF9.word
+    69.    is (KDF9.word(shift_right(CPU.u_64(W), amount)));
+    70.
+    71.    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
+    72.    return KDF9.word
+    73.    is (shift_word_left(W, amount) or shift_word_right(W, 48-amount));
+    74.
+    75.    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
+    76.    return KDF9.word
+    77.    is (shift_word_right(W, amount) or shift_word_left(W, 48-amount));
+    78.
+    79.    function shift_circular (W : KDF9.word; L : CPU.signed_Q_part)
+    80.    return KDF9.word
+    81.       -- The logic here conforms to ¶1.1 of EE Report K/GD.y.80, entitled
+    82.       --    "KDF 9: SHIFTING AND SHIFT CONTROL".
+    83.       -- Circular shifts were implemented by duplicating the operand, doing a double-length
+    84.       --    shift of the two words, and selecting the appropriate word from the result.
+    85.    is (
+    86.        if abs L > 95  then 0
+    87.        elsif  L < -48 then shift_word_right(W, Natural(-L-48))
+    88.        elsif  L > +48 then shift_word_left(W, Natural(+L-48))
+    89.        elsif  L < 0   then rotate_word_right(W, Natural(-L))
+    90.        else                rotate_word_left(W, Natural(L))
+    91.       );
+    92.
+    93.    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
+    94.    return KDF9.word
+    95.    is
+    96.       (
+    97.        if abs L > 47 then 0
+    98.        elsif  L < 0  then shift_word_right(W, Natural(-L))
+    99.        else               shift_word_left(W, Natural(L))
+   100.       );
+   101.
+   102.    function shift_pair_left (P : KDF9.pair; L : Natural)
+   103.    return KDF9.pair is
+   104.       result    : KDF9.pair;
+   105.       crossover : KDF9.word;
+   106.    begin
+   107.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+   108.       if L < 48 then
+   109.          result.lsw := shift_word_left(P.lsw, L);
+   110.          crossover  := shift_word_right(P.lsw, 48-L);
+   111.          result.msw := shift_word_left(P.msw, L) or crossover;
+   112.       else
+   113.          result.lsw := 0;
+   114.          result.msw := shift_word_left(P.lsw, L-48);
+   115.       end if;
+   116.       return result;
+   117.    end shift_pair_left;
+   118.
+   119.    function shift_pair_right (P : KDF9.pair; L : Natural)
+   120.    return KDF9.pair is
+   121.       result    : KDF9.pair;
+   122.       crossover : KDF9.word;
+   123.    begin
+   124.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+   125.       if L < 48 then
+   126.          result.msw := shift_word_right(P.msw, L);
+   127.          crossover  := shift_word_left(P.msw, 48-L);
+   128.          result.lsw := shift_word_right(P.lsw, L) or crossover;
+   129.       else
+   130.          result.msw := 0;
+   131.          result.lsw := shift_word_right(P.msw, L-48);
+   132.       end if;
+   133.       return result;
+   134.    end shift_pair_right;
+   135.
+   136.    function shift_logical (P : KDF9.pair; L : CPU.signed_Q_part)
+   137.    return KDF9.pair
+   138.    is (
+   139.        if    L > 0 then shift_pair_left(P, Natural(L))
+   140.        elsif L < 0 then shift_pair_right(P, Natural(-L))
+   141.        else        P
+   142.       );
+   143.
+   144.    function scale_down (W : KDF9.word; amount : Natural)
+   145.    return KDF9.word is
+   146.       unrounded, clearing : CPU.u_64;
+   147.    begin
+   148.       if amount = 0 then
+   149.          return W;
+   150.       elsif amount > 46 then
+   151.          if resign(W) < 0 then
+   152.             return KDF9.all_one_bits;
+   153.          else
+   154.             return 0;
+   155.          end if;
+   156.       else
+   157.          -- It is undefined whether the intrinsic shift_right_arithmetic function,
+   158.          --    operating on CPU.u_64, yields a rounded result.
+   159.          -- So, any rounding it might do is completely suppressed.
+   160.          unrounded := shift_right_arithmetic(shift_left(CPU.u_64(W),16), 16);
+   161.          clearing  := - shift_left(1, amount);
+   162.          return as_word(shift_right_arithmetic(unrounded and clearing, amount));
+   163.       end if;
+   164.    end scale_down;
+   165.
+   166.    function scale_down_and_round (W : KDF9.word; amount : Natural)
+   167.    return KDF9.word is
+   168.       unrounded, clearing, rounding : CPU.u_64;
+   169.    begin
+   170.       if amount = 0 then
+   171.          return W;
+   172.       elsif amount > 46 then
+   173.          if resign(W) < 0 then
+   174.             return KDF9.all_one_bits;
+   175.          else
+   176.             return 0;
+   177.          end if;
+   178.       else
+   179.          -- It is undefined whether the intrinsic shift_right_arithmetic,
+   180.          --    operating on CPU.u_64, yields a rounded result.
+   181.          -- So, any rounding it might do is suppressed,
+   182.          --    and correct rounding is explicitly computed.
+   183.          unrounded := shift_right_arithmetic(shift_left(CPU.u_64(W),16), 16);
+   184.          rounding  := shift_right(unrounded, amount-1) and 1;
+   185.          clearing  := - shift_left(1, amount);
+   186.          unrounded := unrounded and clearing;
+   187.          return as_word(shift_right_arithmetic(unrounded, amount) + rounding);
+   188.       end if;
+   189.    end scale_down_and_round;
+   190.
+   191.    function scale_up (W : KDF9.word; amount : Natural)
+   192.    return KDF9.word is
+   193.       M : constant Natural := Natural'Min(amount, 47);
+   194.    begin
+   195.       if resign(W) < 0 then
+   196.          if scale_down(W, 47-M) /= all_one_bits or
+   197.                resign(shift_word_left(W, M)) >= 0 then
+   198.             -- See EE Report K/GD.y.80., ¶ 1.1.
+   199.             the_V_bit_is_set := True;
+   200.          end if;
+   201.          return shift_word_left(W, M);
+   202.       else
+   203.          if shift_word_right(W, 47-M) /= KDF9.word'(all_zero_bits) or
+   204.                resign(shift_word_left(W, M)) < 0 then
+   205.             -- See EE Report K/GD.y.80., ¶ 1.1.
+   206.             the_V_bit_is_set := True;
+   207.          end if;
+   208.          return shift_word_left(W, M);
+   209.       end if;
+   210.    end scale_up;
+   211.
+   212.    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
+   213.    return KDF9.word
+   214.    is (
+   215.        if L < 0 then scale_down_and_round(I, Natural(-L))
+   216.        else          scale_up(I, Natural(L))
+   217.       );
+   218.
+   219.    function scale_up (P : KDF9.pair; L : Natural)
+   220.    return KDF9.pair is
+   221.       result    : KDF9.pair;
+   222.       crossover : KDF9.word;
+   223.    begin
+   224.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+   225.       -- D0 of P.lsw is effectively ignored.
+   226.       if L < 48 then
+   227.          result.lsw := shift_word_left(P.lsw, L) and KDF9.not_sign_bit;
+   228.          crossover  := shift_word_right(P.lsw and KDF9.not_sign_bit, 47-L);
+   229.          result.msw := scale_up(P.msw, L) or crossover;
+   230.       else
+   231.          result.lsw := 0;
+   232.          result.msw := (P.msw and KDF9.sign_bit) or (P.lsw and KDF9.not_sign_bit);
+   233.          result.msw := scale_up(result.msw, Natural'Min(L, 94)-47);
+   234.      end if;
+   235.       return result;
+   236.    end scale_up;
+   237.
+   238.    function scale_down (P : KDF9.pair; L : Natural)
+   239.    return KDF9.pair is
+   240.       result    : KDF9.pair;
+   241.       crossover : KDF9.word;
+   242.    begin
+   243.       -- The logic here conforms to ¶3.2 of EE Report K/GD.y.80.
+   244.       -- D0 of P.lsw is effectively ignored.
+   245.       -- SHAD-n does NOT round, according to the Manual.
+   246.       if L < 48 then
+   247.          result.msw := scale_down(P.msw, L);
+   248.          crossover  := shift_word_left(P.msw, 47-L) and KDF9.not_sign_bit;
+   249.          result.lsw := shift_word_right(P.lsw and KDF9.not_sign_bit, L) or crossover;
+   250.       else
+   251.          result.msw := scale_down(P.msw, 47);
+   252.          result.lsw := shift_word_right(P.msw, Natural'Min(L, +94)-47) and KDF9.not_sign_bit;
+   253.       end if;
+   254.       return result;
+   255.    end scale_down;
+   256.
+   257.    function shift_arithmetic (P : KDF9.pair; L : CPU.signed_Q_part)
+   258.    return KDF9.pair
+   259.    is (
+   260.        if    L < 0 then scale_down(P, Natural(-L))
+   261.        elsif L > 0 then scale_up(P, Natural(L))
+   262.        else             P -- See ¶1.1 of EE Report K/GD.y.80: this avoids clearing D0 of P.lsw.
+   263.       );
+   264.
+   265.    -- Count the leading zeros of the absolute value of y, omitting the sign bit.
+   266.    -- If y is 0, return 47.
+   267.    function nr_leading_zeros (y : KDF9.word)
+   268.    return Natural is
+   269.       x : CPU.u_64;
+   270.       r : Natural;
+   271.    begin
+   272.       if y = 0 then return 47; end if;
+   273.       if resign(y) < 0 then
+   274.          x := CPU.u_64(16#FFFF_FFFF_FFFF# and not y);
+   275.       else
+   276.          x := CPU.u_64(y);
+   277.       end if;
+   278.       -- Only 48 bits of x need be tested.
+   279.       if (x and 16#FFFF_0000_0000#) /= 0 then
+   280.          r := 32; x := shift_right(x, 32);
+   281.       elsif (x and 16#FFFF_0000#) /= 0 then
+   282.          r := 16; x := shift_right(x, 16);
+   283.       else
+   284.          r := 0;
+   285.       end if;
+   286.       if (x and 16#FF00#) /= 0 then
+   287.          r := r + 8; x := shift_right(x, 8);
+   288.       end if;
+   289.       if (x and 16#F0#) /= 0 then
+   290.          r := r + 4; x := shift_right(x, 4);
+   291.       end if;
+   292.       if (x and 16#C#) /= 0 then
+   293.          r := r + 2; x := shift_right(x, 2);
+   294.       end if;
+   295.       if (x and 16#2#) /= 0 then
+   296.          r := r + 1;
+   297.       end if;
+   298.       r := 47 - r - 1;  -- -1 discounts the sign bit.
+   299.       return r;
+   300.    end nr_leading_zeros;
+   301.
+   302.    procedure normalize (fraction, exponent : in out KDF9.word) is
+   303.       sign_flag  : constant KDF9.word := shift_word_right(fraction and sign_bit, 1);
+   304.       normalizer : Natural;
+   305.    begin
+   306.       if fraction = 0 then
+   307.          exponent := 2#10_000_000#;  -- This yields 0 when biased positive.
+   308.          return;
+   309.       end if;
+   310.
+   311.       normalizer := nr_leading_zeros(fraction);
+   312.       exponent := exponent - KDF9.word(normalizer);
+   313.
+   314.       -- shift_word_left is used, not _arithmetic, as D[1..normalizer] = D0
+   315.       fraction := shift_word_left(fraction, normalizer);
+   316.
+   317.       the_CPU_delta := the_CPU_delta + normalize_time(normalizer);
+   318.
+   319.       -- scale_down_and_round may round up and overflow the fraction bits ...
+   320.       fraction := scale_down_and_round(fraction, 8);
+   321.       if (fraction and overflow_mask) /= shift_word_right(sign_flag, 7) then
+   322.           -- ... so re-normalize; scale_down cannot round here.
+   323.          fraction := scale_down(fraction, 1);
+   324.          the_CPU_delta := the_CPU_delta + normalize_time(1);
+   325.          exponent := exponent + 1;
+   326.          the_CPU_delta := the_CPU_delta + 1;
+   327.       end if;
+   328.       fraction := fraction and mantissa_mask;
+   329.
+   330.       if resign(exponent) < -128 then
+   331.          -- Deal with underflow.
+   332.          fraction := 0;
+   333.          exponent := 2#10_000_000#;  -- This yields 0 when biased positive.
+   334.       elsif resign(exponent) > +127 then
+   335.          -- Deal with overflow.
+   336.          the_V_bit_is_set := True;
+   337.          exponent := 2#01_111_111#;
+   338.       end if;
+   339.    end normalize;
+   340.
+   341.    function fraction_word (mantissa : CPU.f48)
+   342.    return KDF9.word
+   343.     -- shift_word_left must be used instead of scale_up to avoid a spurious overflow.
+   344.    is (
+   345.        (shift_word_left(as_word(mantissa), 8) and KDF9.not_sign_bit)
+   346.           or
+   347.        (as_word(mantissa) and sign_bit)
+   348.       );
+   349.
+   350.    function masked_mantissa (F : CPU.f48)
+   351.    return CPU.f48
+   352.    is (as_f48(as_word(F) and mantissa_mask));
+   353.
+   354.    function scaler (F : CPU.f48)
+   355.    return KDF9.word
+   356.    is ((shift_word_right(as_word(F), 39) and 2#11_111_111#) - 128);
+   357.
+   358.    function normalized (full_fraction, scaler : KDF9.word)
+   359.    return CPU.f48 is
+   360.       E : KDF9.word := scaler;
+   361.       F : KDF9.word := full_fraction;
+   362.    begin
+   363.       normalize(fraction => F, exponent => E);
+   364.       return CPU.f48(shift_word_left((E + 128) and 2#11_111_111#, 39) or F);
+   365.    end normalized;
+   366.
+   367.    function normalized  (R : CPU.f48)
+   368.    return CPU.f48
+   369.    is (normalized(full_fraction => fraction_word(R), scaler => scaler(R)));
+   370.
+   371.    function "-" (I : CPU.signed)
+   372.    return KDF9.word
+   373.    is (as_word(-CPU.s_64(I)));
+   374.
+   375.    function "abs" (I : CPU.signed)
+   376.    return KDF9.word
+   377.    is (as_word(abs CPU.s_64(I)));
+   378.
+   379.    function "+" (L, R : CPU.signed)
+   380.    return KDF9.word
+   381.    is (as_word(CPU.s_64(L) + CPU.s_64(R)));
+   382.
+   383.    function "-" (L, R : CPU.signed)
+   384.    return KDF9.word
+   385.    is (as_word(CPU.s_64(L) - CPU.s_64(R)));
+   386.
+   387.    function "*" (L, R : CPU.signed)
+   388.    return KDF9.word
+   389.    is (contracted(KDF9.pair'(unsign(L) * unsign(R))));
+   390.
+   391.    procedure do_DIVI (
+   392.                       L         : in KDF9.word;
+   393.                       R         : in KDF9.word;
+   394.                       Quotient,
+   395.                       Remainder : out KDF9.word
+   396.                      ) is
+   397.    begin
+   398.       if R /= 0 then
+   399.          Remainder := as_word(CPU.s_64(resign(L)) mod CPU.s_64(resign(R)));
+   400.          Quotient  :=
+   401.             as_word((CPU.s_64(resign(L)) - CPU.s_64(resign(Remainder))) / CPU.s_64(resign(R)));
+   402.       else
+   403.          the_V_bit_is_set := True;
+   404.          Quotient  := L;  -- ??
+   405.          Remainder := R;  -- ??
+   406.       end if;
+   407.    end do_DIVI;
+   408.
+   409.    function "*" (L, R : KDF9.word)
+   410.    return CPU.fraction is
+   411.    begin
+   412.       if L = sign_bit and R = sign_bit then
+   413.          the_V_bit_is_set := True;
+   414.          return as_fraction(sign_bit);  -- The only case is L = R = -1.0 = L*R.
+   415.       else
+   416.          return as_fraction(L) * as_fraction(R);
+   417.       end if;
+   418.    end "*";
+   419.
+   420.    function "/" (L, R : KDF9.word)
+   421.    return CPU.fraction is
+   422.    begin
+   423.       if R = 0 or L = sign_bit then
+   424.          the_V_bit_is_set := True;
+   425.          return as_fraction(L); -- ??
+   426.       elsif R = sign_bit then
+   427.          return -as_fraction(L);
+   428.       elsif abs as_fraction(L) < abs as_fraction(R) then  -- abs is safe now.
+   429.          return as_fraction(L) / as_fraction(R);
+   430.       else
+   431.          the_V_bit_is_set := True;
+   432.          return as_fraction(L); -- ??
+   433.       end if;
+   434.    end "/";
+   435.
+   436.    function "+" (L, R : KDF9.pair)
+   437.    return KDF9.pair is
+   438.       carry, sum : CPU.s_64;
+   439.       result     : KDF9.pair;
+   440.    begin
+   441.       sum := CPU.s_64(L.lsw and KDF9.not_sign_bit) + CPU.s_64(R.lsw and KDF9.not_sign_bit);
+   442.       if unsign(sum) > KDF9.max_word then -- carry into msw
+   443.          carry := 1;
+   444.          result.lsw := KDF9.word(unsign(sum) and KDF9.not_sign_bit);
+   445.       else
+   446.          carry := 0;
+   447.          result.lsw := KDF9.word(sum);
+   448.       end if;
+   449.       sum := CPU.s_64(resign(L.msw)) + CPU.s_64(resign(R.msw)) + carry;
+   450.       result.msw := as_word(sum);
+   451.       return result;
+   452.    end "+";
+   453.
+   454.    function "-" (J : KDF9.pair)
+   455.    return KDF9.pair is
+   456.       borrow,
+   457.       negative : CPU.s_64;
+   458.       result   : KDF9.pair;
+   459.    begin
+   460.       negative := - CPU.s_64(J.lsw and KDF9.not_sign_bit);
+   461.       if unsign(negative) > KDF9.max_word then -- borrow from msw
+   462.          borrow := 1;
+   463.          result.lsw := KDF9.word(unsign(negative) and KDF9.not_sign_bit);
+   464.       else
+   465.          borrow := 0;
+   466.          result.lsw := KDF9.word(negative);
+   467.       end if;
+   468.       negative := - CPU.s_64(resign(J.msw)) - borrow;
+   469.       result.msw := as_word(negative);
+   470.       return result;
+   471.    end "-";
+   472.
+   473.    function "-" (L, R : KDF9.pair)
+   474.    return KDF9.pair is
+   475.       borrow,
+   476.       difference : CPU.s_64;
+   477.       result     : KDF9.pair;
+   478.    begin
+   479.       difference := CPU.s_64(L.lsw and KDF9.not_sign_bit) - CPU.s_64(R.lsw and KDF9.not_sign_bit);
+   480.       if unsign(difference) > KDF9.max_word then -- borrow from msw
+   481.          borrow := 1;
+   482.          result.lsw := KDF9.word(unsign(difference) and KDF9.not_sign_bit);
+   483.       else
+   484.          borrow := 0;
+   485.          result.lsw := KDF9.word(difference);
+   486.       end if;
+   487.       difference := CPU.s_64(resign(L.msw)) - CPU.s_64(resign(R.msw)) - borrow;
+   488.       result.msw := as_word(difference);
+   489.       return result;
+   490.    end "-";
+   491.
+   492.    function "*" (L, R : KDF9.word)
+   493.    return KDF9.pair is
+   494.       S, T, U, V, W : KDF9.word;
+   495.       H, M, B       : KDF9.pair;
+   496.    begin
+   497.       if L = sign_bit then
+   498.          if R = L then
+   499.             -- L*R = (+1.0), which is not a valid fraction, so deal with overflow.
+   500.             the_V_bit_is_set := True;
+   501.             return (L, 0);
+   502.          else
+   503.             -- L*R = -R.
+   504.             return -(R, 0);
+   505.          end if;
+   506.       end if;
+   507.       if R = sign_bit then
+   508.          -- L*R = -L.
+   509.          return -(L, 0);
+   510.       end if;
+   511.       -- Now it is safe to take absolute values, as they cannot overflow.
+   512.       S := scale_down(abs resign(L), 24);
+   513.       T := abs resign(L) and halfword_mask;
+   514.       U := scale_down(abs resign(R), 24);
+   515.       V := abs resign(R) and halfword_mask;
+   516.       H := ((S*U)*2, 0);
+   517.       M := scale_down((KDF9.word'(S*V), 0), 1) + scale_down((KDF9.word'(T*U), 0), 1);
+   518.       M := scale_down(M, 22);
+   519.       W := rotate_word_left(KDF9.word'(T*V), 1);
+   520.       B := (W and 1, shift_word_right(W, 1));
+   521.       if resign(L xor R) < 0 then
+   522.          return - (H + M + B);
+   523.       else
+   524.          return    H + M + B;
+   525.       end if;
+   526.    end "*";
+   527.
+   528.    f_64_small : constant := 2.0**(-63);
+   529.    type f_64 is delta f_64_small range -1.0 .. +1.0 - f_64_small with Size => 64;
+   530.
+   531.    function scale_down (f : CPU.f_64; N : Natural)
+   532.    return f_64
+   533.    is (if N > 62 then 0.0 else f / 2**N);
+   534.
+   535.    function to_f_64 (w : KDF9.word)
+   536.    return CPU.f_64
+   537.    is (CPU.f_64(as_fraction(w)));
+   538.
+   539.    function to_word (f : CPU.f_64)
+   540.    return KDF9.word
+   541.    is (as_word(CPU.fraction(f)));
+   542.
+   543.    procedure long_division (
+   544.                             L : in KDF9.pair;
+   545.                             R : in KDF9.word;
+   546.                             Q : out KDF9.word
+   547.                            ) is
+   548.       N  : KDF9.pair := L;
+   549.       D  : KDF9.word;
+   550.       Ls,
+   551.       Rs,
+   552.       Qs : CPU.f_64;
+   553.       normalizer_N : Natural;
+   554.       normalizer_R : Natural;
+   555.       normalizer_Q : Integer;
+   556.    begin
+   557.       -- Normalize the dividend.
+   558.       normalizer_N := nr_leading_zeros(N.msw);
+   559.       if normalizer_N < 47 then
+   560.          -- N.msw contains significant bits.
+   561.          N := scale_up(N, normalizer_N);
+   562.       else
+   563.          -- All of the significant bits are in N.lsw, which is non-zero.
+   564.          N := scale_up(N, 47);
+   565.          normalizer_N := nr_leading_zeros(N.msw);
+   566.          N := scale_up(N, normalizer_N);
+   567.          normalizer_N := normalizer_N + 47;
+   568.       end if;
+   569.
+   570.       -- Normalize the divisor.
+   571.       normalizer_R := nr_leading_zeros(R);
+   572.       D := scale_up(R, normalizer_R);
+   573.
+   574.       -- Scale Ls and Rs so that the Ada fractional division cannot overflow.
+   575.       Ls := scale_down(to_f_64(N.msw), 2);
+   576.       Rs := scale_down(to_f_64(D), 1);
+   577.
+   578.       Qs := Ls / Rs;  -- Ada fractional division rounds, correctly for KDF9 DIV and DIVD.
+   579.
+   580.       -- Rescale the quotient.
+   581.       normalizer_Q := 1 + normalizer_R - normalizer_N;
+   582.       if normalizer_Q <= 0 then
+   583.          -- Overflow is impossible.
+   584.          Qs := scale_down(Qs, -normalizer_Q);
+   585.          Q := to_word(Qs);
+   586.       else
+   587.          -- If Qs >= 0.5, then L/R >= 1.0 is not a representable result fraction.
+   588.          -- If Qs < -0.5, then L/R < -1.0 is not a representable result fraction.
+   589.          the_V_bit_is_set := Qs >= 0.5 or Qs < -0.5;
+   590.          Q := scale_up(to_word(Qs), normalizer_Q);  -- A guess at the result for overflow ?? !!
+   591.       end if;
+   592.    end long_division;
+   593.
+   594.    procedure do_DIVD (
+   595.                       L : in KDF9.pair;
+   596.                       R : in KDF9.word;
+   597.                       Q : out KDF9.word
+   598.                      ) is
+   599.       N : KDF9.pair;
+   600.    begin
+   601.       N.msw := L.msw;
+   602.       -- Ignore an invalid D0 in the lsw of the dividend.
+   603.       N.lsw := L.lsw and KDF9.not_sign_bit;
+   604.
+   605.       -- Deal quickly with a zero dividend, giving a zero result.
+   606.       if (N.msw or N.lsw) = 0 then
+   607.          Q := 0;
+   608.          return;
+   609.       end if;
+   610.
+   611.       -- Deal with division by 0.
+   612.       if R = 0 then
+   613.          the_V_bit_is_set := True;
+   614.          Q := N.msw;  -- A guess at the result for division by zero ?? !!
+   615.          return;
+   616.       end if;
+   617.
+   618.       long_division(N, R, Q);
+   619.    end do_DIVD;
+   620.
+   621.    procedure do_DIVR (
+   622.                       L         : in KDF9.pair;
+   623.                       R         : in KDF9.word;
+   624.                       Quotient,
+   625.                       Remainder : out KDF9.word
+   626.                      ) is
+   627.       N  : KDF9.pair := L;
+   628.       D  : KDF9.word := R;
+   629.       S  : Integer   := 1;
+   630.       T  : KDF9.pair;
+   631.    begin
+   632.       -- Ignore an invalid D0 in the lsw of the dividend.
+   633.       N.lsw := N.lsw and KDF9.not_sign_bit;
+   634.
+   635.       -- Deal quickly with a zero dividend, giving a zero result.
+   636.       if (N.msw or N.lsw) = 0 then
+   637.          Quotient  := 0;
+   638.          Remainder := 0;
+   639.          return;
+   640.       end if;
+   641.
+   642.       -- Deal with division by 0.
+   643.       if R = 0 then
+   644.          the_V_bit_is_set := True;
+   645.          -- A guess at the results for division by zero ?? !!
+   646.          Quotient  := N.msw;
+   647.          Remainder := 0;
+   648.          return;
+   649.       end if;
+   650.
+   651.       -- Convert to an unsigned division problem, and note whether it needs to be be converted back.
+   652.       if resign(N.msw) < 0 then
+   653.          N := - N;
+   654.          S := - S;
+   655.       end if;
+   656.       if resign(R) < 0 then
+   657.          D := - D;
+   658.          S := - S;
+   659.       end if;
+   660.
+   661.       -- Check for inevitable overflow, and deal with it separately.
+   662.       if N.msw > D then
+   663.          the_V_bit_is_set := True;
+   664.          -- A guess at the results for overflow ?? !!
+   665.          Quotient := (if S < 0 then -(N.msw / D) else N.msw / D);
+   666.          T := L - (msw => Quotient*R, lsw => 0);
+   667.          Remainder := T.msw;
+   668.          return;
+   669.       end if;
+   670.
+   671.       -- Overflow is now impossible, but the result may be rounded.
+   672.       long_division(N, D, Quotient);
+   673.
+   674.       -- Undo any rounding effected by do_DIVD.
+   675.       loop
+   676.          T := N - Quotient * D;
+   677.       exit when T.msw = 0;
+   678.          Quotient := Quotient + 1;
+   679.       end loop;
+   680.       Quotient  := Quotient + T.lsw / D;
+   681.
+   682.       -- Correct the sign of the quotient and compute the remainder.
+   683.       Quotient  := (if S < 0 then -Quotient else Quotient);
+   684.       Remainder := contracted(L - Quotient*R);
+   685.    end do_DIVR;
+   686.
+   687.    function host_float (X : CPU.f48)
+   688.    return Long_Float is
+   689.       -- Warn if Long_Float does not have at least the range of a KDF9 floating point number.
+   690.       pragma Compile_Time_Warning(Long_Float'Last < 2.0**127,
+   691.                                   "Long_Float does not have enough range for KDF9 f.p.");
+   692.       -- Warn if Long_Float does not have at least the precision of a KDF9 floating point number.
+   693.       pragma Compile_Time_Warning(Long_Float'Small > 1.0/2.0**39,
+   694.                                   "Long_Float does not have enough precision for KDF9 f.p.");
+   695.       W : constant KDF9.word  := fraction_word(masked_mantissa(X));
+   696.       S : constant Long_Float := 2.0**Integer(resign(scaler(X)));
+   697.    begin
+   698.       return Long_Float(as_fraction(W)) * S;  -- Cannot overflow if warnings are absent.
+   699.    end host_float;
+   700.
+   701.    -- Round a 48-bit floating-point number to 24-bit format.
+   702.    function narrowed (R : CPU.f48)
+   703.    return CPU.f48
+   704.    is (normalized(fraction_word(R) + 2**23, scaler(R)));
+   705.
+   706.    overriding
+   707.    function "-" (R : CPU.f48)
+   708.    return CPU.f48 is
+   709.       -- F is made half of a true fraction to prevent overflow when negating:
+   710.       --    the result exponent is offset by 1, accordingly.
+   711.       E : constant KDF9.word := scaler(R) + 1;
+   712.       F : KDF9.word := scale_down_and_round(fraction_word(R), 1);
+   713.    begin
+   714.       F := as_word(CPU.u_64(-F));  -- "-" cannot overflow here.
+   715.       return normalized(full_fraction => F, scaler => E);
+   716.    end "-";
+   717.
+   718.    overriding
+   719.    function "abs" (R : CPU.f48)
+   720.    return CPU.f48
+   721.    is (if resign(KDF9.word(R)) < 0 then - R else + R);
+   722.
+   723.    overriding
+   724.    function "+" (L, R : CPU.f48)
+   725.    return CPU.f48 is
+   726.       -- B and D are made half of a true fraction to prevent overflow when
+   727.       --    adding; the result exponent is offset by 1, accordingly.
+   728.       A : constant KDF9.word := scaler(R);
+   729.       B : KDF9.word := scale_down(fraction_word(R), 1);
+   730.       C : constant KDF9.word := scaler(L);
+   731.       D : KDF9.word := scale_down(fraction_word(L), 1);
+   732.       E : KDF9.word;
+   733.       F : KDF9.word;
+   734.       N : Natural;
+   735.    begin
+   736.       if resign(A) >= resign(C) then
+   737.          N := Natural'Min(Natural(resign(A-C)), 48);
+   738.          D := scale_down_and_round(D, N);
+   739.          E := A + 1;
+   740.       else
+   741.          N := Natural'Min(Natural(resign(C-A)), 48);
+   742.          B := scale_down_and_round(B, N);
+   743.          E := C + 1;
+   744.       end if;
+   745.       the_CPU_delta := the_CPU_delta + shift_time(N);
+   746.       F := as_word(CPU.u_64(D + B));  -- "+" cannot overflow here.
+   747.       return normalized(full_fraction => F, scaler => E);
+   748.    end "+";
+   749.
+   750.    overriding
+   751.    function "-" (L, R : CPU.f48)
+   752.    return CPU.f48 is
+   753.       -- See "+".
+   754.       A : constant KDF9.word := scaler(R);
+   755.       B : KDF9.word := scale_down(fraction_word(R), 1);
+   756.       C : constant KDF9.word := scaler(L);
+   757.       D : KDF9.word := scale_down(fraction_word(L), 1);
+   758.       E : KDF9.word;
+   759.       F : KDF9.word;
+   760.       N : Natural;
+   761.    begin
+   762.       if resign(A) >= resign(C) then
+   763.          N := Natural'Min(Natural(resign(A-C)), 48);
+   764.          D := scale_down_and_round(D, N);
+   765.          E := A + 1;
+   766.       else
+   767.          N := Natural'Min(Natural(resign(C-A)), 48);
+   768.          B := scale_down_and_round(B, N);
+   769.          E := C + 1;
+   770.       end if;
+   771.       the_CPU_delta := the_CPU_delta + shift_time(N);
+   772.       F := as_word(CPU.u_64(D - B));  -- "-" cannot overflow here.
+   773.       return normalized(full_fraction => F, scaler => E);
+   774.    end "-";
+   775.
+   776.    overriding
+   777.    function "*" (L, R : CPU.f48)
+   778.    return CPU.f48 is
+   779.       B, D, E, F : KDF9.word;
+   780.    begin
+   781.       if (KDF9.word(L) or KDF9.word(R)) = 0 then
+   782.          return 0;
+   783.       end if;
+   784.       B := fraction_word(R);
+   785.       D := fraction_word(L);
+   786.       E := scaler(L) + scaler(R);
+   787.       if (B = sign_bit) and (B = D) then
+   788.           -- D*B = (+1), which is not a valid fraction, so treat specially.
+   789.           B := B / 2;
+   790.           D := D / 2;
+   791.           E := E + 2;
+   792.        end if;
+   793.       F := as_word(as_fraction(D) * as_fraction(B));  -- "*" cannot overflow here.
+   794.       return normalized(full_fraction => F, scaler => E);
+   795.    end "*";
+   796.
+   797.    overriding
+   798.    function "/" (L, R : CPU.f48)
+   799.    return CPU.f48 is
+   800.       D, N   : CPU.fraction;
+   801.       Ls, Rs : KDF9.word;
+   802.       E, F   : KDF9.word;
+   803.    begin
+   804.       if R = 0 then
+   805.          the_V_bit_is_set := True;
+   806.          return L;  -- ?? This result is not well defined in the Manual.
+   807.       end if;
+   808.       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
+   809.       --    scaled so that the division cannot overflow.
+   810.       Ls := scale_down(fraction_word(L), 2);
+   811.       Rs := scale_down(fraction_word(R), 1);
+   812.       N := abs as_fraction(Ls);  -- Ls is scaled down by 1/8, so "abs" cannot overflow.
+   813.       D := abs as_fraction(Rs);  -- Rs is scaled down by 1/2, so "abs" cannot overflow.
+   814.       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
+   815.       E := scaler(L) - scaler(R) + 1;
+   816.       F := as_word(N / D);
+   817.       if resign(KDF9.word(L) xor KDF9.word(R)) < 0 then
+   818.          -- The result is negative.
+   819.          F := -F;
+   820.       end if;
+   821.       return normalized(full_fraction => F, scaler => E);
+   822.    end "/";
+   823.
+   824.    overriding
+   825.    function "<" (L, R : CPU.f48)
+   826.    return Boolean is
+   827.       s : constant KDF9.word := KDF9.word(L) xor KDF9.word(R);
+   828.    begin
+   829.       if resign(s) < 0 then
+   830.          -- The signs differ: L<R iff L is negative.
+   831.          return resign(KDF9.word(L)) < 0;
+   832.       elsif resign(KDF9.word(L)) < 0 then
+   833.          -- L and R are both negative, so invert lexicographical order.
+   834.          return not (KDF9.word(L) < KDF9.word(R));
+   835.       else
+   836.          -- L and R are both non-negative: so use lexicographical order.
+   837.          return KDF9.word(L) < KDF9.word(R);
+   838.       end if;
+   839.    end "<";
+   840.
+   841.    function fraction_pair (DF : CPU.f96)
+   842.    return KDF9.pair is
+   843.       P : KDF9.pair;
+   844.    begin
+   845.       P.msw := scale_down(fraction_word(DF.msw), 8);
+   846.       P.lsw := fraction_word(DF.lsw) and KDF9.not_sign_bit;
+   847.       return scale_up(P, 8);
+   848.    end fraction_pair;
+   849.
+   850.    function scaler (DF : CPU.f96)
+   851.    return KDF9.word
+   852.    is (scaler(DF.msw));
+   853.
+   854.    function narrowed (DF : CPU.f96)
+   855.    return CPU.f48 is
+   856.       fraction : KDF9.pair := fraction_pair(DF) + (0, 2**46);
+   857.    begin
+   858.       reconstruct(fraction, scaler(DF));
+   859.       return CPU.f48(fraction.msw);
+   860.    end narrowed;
+   861.
+   862.    procedure reconstruct (frac   : in out KDF9.pair;
+   863.                           scaler : in KDF9.word) is
+   864.       KDF9_exponent :  KDF9.word := scaler + 128;
+   865.       normalizer    : Natural;
+   866.    begin
+   867.       if (frac.msw or frac.lsw) = 0 then
+   868.          return; -- frac is already normalized.
+   869.       end if;
+   870.
+   871.       normalizer := nr_leading_zeros(frac.msw);
+   872.
+   873.       if normalizer = 47 then  -- frac.msw is zero, so frac.lsw is non-zero.
+   874.          normalizer := 47 + nr_leading_zeros(frac.lsw);
+   875.       end if;
+   876.
+   877.       KDF9_exponent := KDF9_exponent - KDF9.word(normalizer);
+   878.
+   879.       frac := scale_up(frac, normalizer);
+   880.       the_CPU_delta := the_CPU_delta + shift_time(normalizer);
+   881.
+   882.       -- 96-bit shift_arithmetic does not round and so cannot overflow here.
+   883.       frac := scale_down(frac, 8);
+   884.       frac.lsw := scale_down(frac.lsw, 8);
+   885.       -- Clear both scaler fields.
+   886.       frac.msw := frac.msw and mantissa_mask;
+   887.       frac.lsw := frac.lsw and mantissa_mask;
+   888.       if resign(KDF9_exponent) < 0 then
+   889.          -- Deal with underflow.
+   890.          frac := (0, 0);
+   891.          return;
+   892.       elsif KDF9_exponent > 255 then
+   893.          -- Deal with overflow.
+   894.          the_V_bit_is_set := True;
+   895.          KDF9_exponent := 255;
+   896.       end if;
+   897.
+   898.       frac.msw := frac.msw or shift_word_left(KDF9_exponent and 8#377#, 39);
+   899.       if KDF9_exponent < 39 then
+   900.          frac.lsw := 0;
+   901.       else
+   902.          frac.lsw := frac.lsw or shift_word_left((KDF9_exponent-39) and 8#377#, 39);
+   903.       end if;
+   904.    end reconstruct;
+   905.
+   906.    function "-" (R : CPU.f96)
+   907.    return CPU.f96
+   908.    is (CPU.f96'(0, 0) - R);
+   909.
+   910.    function "+" (L, R : CPU.f96)
+   911.    return CPU.f96 is
+   912.       -- Scale fractions to prevent overflow; must adjust exponent accordingly.
+   913.       L_exponent : constant KDF9.word := scaler(L);
+   914.       R_exponent : constant KDF9.word := scaler(R);
+   915.       L_fraction : KDF9.pair := scale_down(fraction_pair(L), 1);
+   916.       R_fraction : KDF9.pair := scale_down(fraction_pair(R), 1);
+   917.       exponent   : KDF9.word;
+   918.       the_result : KDF9.pair;
+   919.       aligner    : Natural;
+   920.    begin
+   921.       if resign(R_exponent) >= resign(L_exponent) then
+   922.          aligner := Natural(resign(R_exponent-L_exponent));
+   923.          aligner := Natural'Min(95, aligner);
+   924.          L_fraction := scale_down(L_fraction, aligner);
+   925.          exponent := R_exponent + 1;
+   926.       else
+   927.          aligner := Natural(resign(L_exponent-R_exponent));
+   928.          aligner := Natural'Min(95, aligner);
+   929.          R_fraction := scale_down(R_fraction, aligner);
+   930.          exponent := L_exponent + 1;
+   931.       end if;
+   932.       the_CPU_delta := the_CPU_delta + shift_time(aligner);
+   933.       the_result := L_fraction + R_fraction;  -- "+" cannot overflow here.
+   934.       reconstruct(the_result, scaler => exponent);
+   935.       return as_f96(the_result);
+   936.    end "+";
+   937.
+   938.    function "-" (L, R : CPU.f96)
+   939.    return CPU.f96 is
+   940.       -- See "+".
+   941.       L_exponent : constant KDF9.word := scaler(L);
+   942.       R_exponent : constant KDF9.word := scaler(R);
+   943.       L_fraction : KDF9.pair := scale_down(fraction_pair(L), 1);
+   944.       R_fraction : KDF9.pair := scale_down(fraction_pair(R), 1);
+   945.       exponent   : KDF9.word;
+   946.       the_result : KDF9.pair;
+   947.       aligner    : Natural;
+   948.    begin
+   949.       if resign(R_exponent) >= resign(L_exponent) then
+   950.          aligner := Natural(resign(R_exponent-L_exponent));
+   951.          aligner := Natural'Min(95, aligner);
+   952.          L_fraction := scale_down(L_fraction, aligner);
+   953.          exponent := R_exponent + 1;
+   954.       else
+   955.          aligner := Natural(resign(L_exponent-R_exponent));
+   956.          aligner := Natural'Min(95, aligner);
+   957.          R_fraction := scale_down(R_fraction, aligner);
+   958.          exponent := L_exponent + 1;
+   959.       end if;
+   960.       the_CPU_delta := the_CPU_delta + shift_time(aligner);
+   961.       the_result := L_fraction - R_fraction;  -- "-" cannot overflow here.
+   962.       reconstruct(the_result, scaler => exponent);
+   963.       return as_f96(the_result);
+   964.    end "-";
+   965.
+   966.    function "*" (L, R : CPU.f48)
+   967.    return CPU.f96 is
+   968.       V_was_set : constant Boolean := the_V_bit_is_set;
+   969.       LR        : KDF9.pair;
+   970.    begin
+   971.       the_V_bit_is_set := False;
+   972.       LR := fraction_word(L) * fraction_word(R);
+   973.       if the_V_bit_is_set then
+   974.          -- The product is not a valid fixed-point fraction, but is actually OK,
+   975.          --    so restore the orginal overflow state, and  ...
+   976.          the_V_bit_is_set := V_was_set;
+   977.          --  ... construct +1.0 in double-precision floating-point.
+   978.          return as_f96((shift_word_left(2#0_10_000_001_1#, 38), 0));
+   979.       end if;
+   980.       reconstruct(LR, scaler => scaler(L) + scaler(R));
+   981.       return as_f96(LR);
+   982.    end "*";
+   983.
+   984.    function "/" (L : CPU.f96; R : CPU.f48)
+   985.    return CPU.f48 is  -- aka DIVDF
+   986.       -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
+   987.       --    scaled so that the division cannot overflow.
+   988.       Ls : constant KDF9.pair := scale_down(fraction_pair(L), 2);
+   989.       Rs : constant KDF9.word := scale_down(fraction_word(R), 1);
+   990.       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
+   991.       E : constant KDF9.word  := scaler(L) - scaler(R) + 1;
+   992.       F : KDF9.word;
+   993.    begin
+   994.       if R = 0 then
+   995.          the_V_bit_is_set := True;
+   996.          return L.msw;  -- ?? This result is not well defined in the Manual.
+   997.       end if;
+   998.       do_DIVD(Ls, Rs, F);
+   999.       return normalized(full_fraction => F, scaler => E);
+  1000.    end "/";
+  1001.
+  1002.    function number_of_1_bits_in (W : KDF9.word)
+  1003.    return KDF9.word is
+  1004.       u : constant CPU.u_64 := CPU.u_64(W);
+  1005.       n :          CPU.u_64 := shift_right(u, 1) and 16#77_77_77_77_77_77_77_77#;
+  1006.       x :          CPU.u_64 := u - n;
+  1007.    begin
+  1008.       n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
+  1009.       x := x - n;
+  1010.       n := shift_right(n, 1) and 16#77_77_77_77_77_77_77_77#;
+  1011.       x := x - n;
+  1012.       x := (x + shift_right(x, 4)) and 16#0F_0F_0F_0F_0F_0F_0F_0F#;
+  1013.       x := x * 16#01_01_01_01_01_01_01_01#;
+  1014.       return KDF9.word(shift_right(x, CPU.u_64'Size-8));
+  1015.    end number_of_1_bits_in;
+  1016.
+  1017.    procedure push (F : in CPU.f48) is
+  1018.    begin
+  1019.       push(KDF9.word(F));
+  1020.    end push;
+  1021.
+  1022.    function pop
+  1023.    return CPU.f48
+  1024.    is (CPU.f48(KDF9.word'(pop)));
+  1025.
+  1026.    function read_top
+  1027.    return CPU.f48
+  1028.    is (CPU.f48(KDF9.word'(read_top)));
+  1029.
+  1030.    procedure write_top (F : in CPU.f48) is
+  1031.    begin
+  1032.       write_top(KDF9.word(F));
+  1033.    end write_top;
+  1034.
+  1035.    procedure push (DF : in CPU.f96) is
+  1036.       AB : constant KDF9.pair := as_pair(DF);
+  1037.    begin
+  1038.       push(AB);
+  1039.    end push;
+  1040.
+  1041.    function pop
+  1042.    return CPU.f96
+  1043.    is (as_f96(pop));
+  1044.
+  1045.    function read_top
+  1046.    return CPU.f96
+  1047.    is (as_f96(read_top));
+  1048.
+  1049.    procedure write_top (DF : in CPU.f96) is
+  1050.       AB : constant KDF9.pair := as_pair(DF);
+  1051.    begin
+  1052.       write_top(AB);
+  1053.    end write_top;
+  1054.
+  1055. end KDF9.CPU;
+
+Compiling: ../Source/kdf9-cpu.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
+     2. --   Ada types; and for types used in the internal functioning of the microcode.
+     3. --
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     6. --
+     7. -- The ee9 program is free software; you can redistribute it and/or
+     8. -- modify it under terms of the GNU General Public License as published
+     9. -- by the Free Software Foundation; either version 3, or (at your option)
+    10. -- any later version. This program is distributed in the hope that it
+    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    13. -- See the GNU General Public License for more details. You should have
+    14. -- received a copy of the GNU General Public License distributed with
+    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    16. --
+    17.
+    18. with Ada.Unchecked_Conversion;
+    19.
+    20. package KDF9.CPU is
+    21.
+    22. --
+    23. --
+    24.    --
+    25.    -- 48-bit integer and fractional ALU types and operations
+    26.    --
+    27. --
+    28. --
+    29.
+    30.    type signed is range -2**47 .. +2**47 - 1 with Size => KDF9.word'Size;
+    31.
+    32.    function unsign is new Ada.Unchecked_Conversion (CPU.signed, KDF9.word);
+    33.
+    34.    function resign is new Ada.Unchecked_Conversion (KDF9.word, CPU.signed);
+    35.
+    36.    function "-" (I : CPU.signed)
+    37.    return KDF9.word
+    38.       with Inline;
+    39.
+    40.    function "abs" (I : CPU.signed)
+    41.    return KDF9.word
+    42.       with Inline;
+    43.
+    44.    function "+" (L, R : CPU.signed)
+    45.    return KDF9.word
+    46.       with Inline;
+    47.
+    48.    function "-" (L, R : CPU.signed)
+    49.    return KDF9.word
+    50.       with Inline;
+    51.
+    52.    function "*" (L, R : CPU.signed)
+    53.    return KDF9.word;
+    54.
+    55.    -- Determine the Quotient and Remainder of L/R, where:
+    56.    --    sign(Remainder) = sign(R) and |Remainder| < |R|, i.e. Remainder = L mod R;
+    57.    --    Quotient = (L - Remainder) / R.
+    58.
+    59.    procedure do_DIVI (
+    60.                       L         : in KDF9.word;
+    61.                       R         : in KDF9.word;
+    62.                       Quotient,
+    63.                       Remainder : out KDF9.word
+    64.                      );
+    65.
+    66.    -- Inherited signed single-length integer division is removed from the type.
+    67.
+    68.    function "/" (L, R : CPU.signed)
+    69.    return KDF9.word is abstract;
+    70.
+    71.    function "mod" (L, R : CPU.signed)
+    72.    return KDF9.word is abstract;
+    73.
+    74.    -- Contract a double-word, setting the V bit if necessary.
+    75.
+    76.    function contracted (P : KDF9.pair)
+    77.    return KDF9.word
+    78.       with Inline;
+    79.
+    80. --
+    81. --
+    82.    -- Shifting operations with KDF9 semantics.
+    83. --
+    84. --
+    85.
+    86.    type signed_Q_part is range  -2**15 .. +2**15 - 1 with Size => KDF9.Q_part'Size;
+    87.
+    88.    function resign is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
+    89.
+    90.    -- L>0 for left-shift, L<0 for right-shift.
+    91.
+    92.    function shift_logical (W : KDF9.word; L : CPU.signed_Q_part)
+    93.    return KDF9.word
+    94.       with Inline;
+    95.
+    96.    function shift_circular (W : KDF9.word; L : CPU.signed_Q_part)
+    97.    return KDF9.word
+    98.       with Inline;
+    99.
+   100.    -- shift_arithmetic rounds the result correctly.
+   101.    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
+   102.    return KDF9.word
+   103.       with Inline;
+   104.
+   105.    -- number_of_1_bits_in counts the number of bits in W with value 1.
+   106.    function number_of_1_bits_in (W : KDF9.word)
+   107.    return KDF9.word
+   108.       with Inline;
+   109.
+   110. --
+   111. --
+   112.    -- A fraction is a word W interpreted as the value W / 2**47;
+   113. --
+   114. --
+   115.
+   116.    KDF9_small : constant := 2.0**(-47);
+   117.
+   118.    type fraction is delta KDF9_small range -1.0 .. +1.0 - KDF9_small with Size => KDF9.word'Size;
+   119.
+   120.    function as_fraction is new Ada.Unchecked_Conversion (KDF9.word, CPU.fraction);
+   121.
+   122.    function as_word     is new Ada.Unchecked_Conversion (CPU.fraction, KDF9.word);
+   123.
+   124.    -- These operations treat the KDF9.word operands as full-word fractions,
+   125.
+   126.    function "*" (L, R : KDF9.word)
+   127.    return CPU.fraction;
+   128.
+   129.    function "/" (L, R : KDF9.word)
+   130.    return CPU.fraction;
+   131.
+   132.
+   133. --
+   134. --
+   135.    --
+   136.    -- 48-bit integer and fractional ALU operations
+   137.    --
+   138. --
+   139. --
+   140.
+   141.    function "+" (L, R : KDF9.pair)
+   142.    return KDF9.pair
+   143.       with Inline;
+   144.
+   145.    function "-" (J : KDF9.pair)
+   146.    return KDF9.pair
+   147.       with Inline;
+   148.
+   149.    function "-" (L, R : KDF9.pair)
+   150.    return KDF9.pair
+   151.       with Inline;
+   152.
+   153.    -- 48 * 48 -> 96-bit, for XD, etc.
+   154.
+   155.    function "*" (L, R : KDF9.word)
+   156.    return KDF9.pair;
+   157.
+   158.    procedure do_DIVD (
+   159.                       L : in KDF9.pair;
+   160.                       R : in KDF9.word;
+   161.                       Q : out KDF9.word
+   162.                      );
+   163.
+   164.    procedure do_DIVR (
+   165.                       L         : in KDF9.pair;
+   166.                       R         : in KDF9.word;
+   167.                       Quotient,
+   168.                       Remainder : out KDF9.word
+   169.                      );
+   170.
+   171.    function shift_logical (P : KDF9.pair; L : CPU.signed_Q_part)
+   172.    return KDF9.pair
+   173.       with Inline;
+   174.
+   175.    function shift_arithmetic (P : KDF9.pair; L : CPU.signed_Q_part)
+   176.    return KDF9.pair
+   177.       with Inline;
+   178.
+   179.
+   180. --
+   181. --
+   182.    --
+   183.    -- 48-bit floating point ALU types and operations
+   184.    --
+   185. --
+   186. --
+   187.
+   188.    -- This is a substrate for KDF9 floating point, not an Ada f.p. type.
+   189.
+   190.    type f48 is mod 2**48 with Size => KDF9.word'Size;
+   191.
+   192.    -- Remove useless substrate modular operations not, and, or, xor and mod.
+   193.
+   194.    overriding
+   195.    function "not" (R : CPU.f48)
+   196.    return CPU.f48 is abstract;
+   197.
+   198.    overriding
+   199.    function "and" (L, R : CPU.f48)
+   200.    return CPU.f48 is abstract;
+   201.
+   202.    overriding
+   203.    function "or" (L, R : CPU.f48)
+   204.    return CPU.f48 is abstract;
+   205.
+   206.    overriding
+   207.    function "xor" (L, R : CPU.f48)
+   208.    return CPU.f48 is abstract;
+   209.
+   210.    overriding
+   211.    function "mod" (L, R : CPU.f48)
+   212.    return CPU.f48 is abstract;
+   213.
+   214.    function as_word is new Ada.Unchecked_Conversion (CPU.f48, KDF9.word);
+   215.
+   216.    function as_f48  is new Ada.Unchecked_Conversion (KDF9.word, CPU.f48);
+   217.
+   218.    procedure push (F : in CPU.f48);
+   219.
+   220.    function pop
+   221.    return CPU.f48
+   222.       with Inline;
+   223.
+   224.    procedure write_top (F : in CPU.f48)
+   225.       with Inline;
+   226.
+   227.    function read_top
+   228.    return CPU.f48
+   229.       with Inline;
+   230.
+   231.     -- Standardize a (possibly) non-normalized floating-point number.
+   232.
+   233.    function normalized  (R : CPU.f48)
+   234.    return CPU.f48;
+   235.
+   236.    -- Convert a 47-bit fraction to a rounded, standardized 39-bit mantissa,
+   237.    --    and adjust its exponent accordingly, setting overflow when necessary.
+   238.
+   239.    procedure normalize (fraction, exponent : in out KDF9.word)
+   240.       with Inline;
+   241.
+   242.    -- Convert a 39-bit mantissa to a 47-bit fraction, preserving the sign.
+   243.
+   244.    function fraction_word (mantissa : CPU.f48)
+   245.    return KDF9.word
+   246.       with Inline;
+   247.
+   248.    -- The floating-point number with the exponent field set to 0.
+   249.
+   250.    function masked_mantissa (F : CPU.f48)
+   251.    return CPU.f48
+   252.       with Inline;
+   253.
+   254.    -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
+   255.
+   256.    function scaler (F : CPU.f48)
+   257.    return KDF9.word
+   258.       with Inline;
+   259.
+   260.     -- Synthesize a normalized floating-point number from its components.
+   261.
+   262.    function normalized (full_fraction, scaler : KDF9.word)
+   263.    return CPU.f48
+   264.       with Inline;
+   265.
+   266.    -- Round a 48-bit floating-point number to 24-bit format.
+   267.
+   268.    function narrowed (R : CPU.f48)
+   269.    return CPU.f48;
+   270.
+   271.    overriding
+   272.    function "-" (R : CPU.f48)
+   273.    return CPU.f48;
+   274.
+   275.    overriding
+   276.    function "abs" (R : CPU.f48)
+   277.    return CPU.f48;
+   278.
+   279.    overriding
+   280.    function "+" (L, R : CPU.f48)
+   281.    return CPU.f48;
+   282.
+   283.    overriding
+   284.    function "-" (L, R : CPU.f48)
+   285.    return CPU.f48;
+   286.
+   287.    overriding
+   288.    function "*" (L, R : CPU.f48)
+   289.    return CPU.f48;
+   290.
+   291.    overriding
+   292.    function "/" (L, R : CPU.f48)
+   293.    return CPU.f48;
+   294.
+   295.    overriding
+   296.    function "<" (L, R : CPU.f48)
+   297.    return Boolean;
+   298.
+   299.    function host_float (X : CPU.f48)
+   300.    return Long_Float;
+   301.
+   302.    exponent_mask : constant KDF9.word := KDF9.word'(2#11_111_111#) * 2**39;
+   303.    mantissa_mask : constant KDF9.word := not exponent_mask;
+   304.    frac_msb_mask : constant KDF9.word := 2**46;  -- M.S.B. of a 47-bit fraction
+   305.    mant_msb_mask : constant KDF9.word := 2**38;  -- M.S.B. of a 39-bit mantissa
+   306.    overflow_mask : constant KDF9.word := 2**39;  -- bit set on rounding overflow
+   307.
+   308.
+   309. --
+   310. --
+   311.    --
+   312.    -- 96-bit floating point ALU types and operations
+   313.    --
+   314. --
+   315. --
+   316.
+   317.    type f96 is
+   318.       record
+   319.          msw, lsw : CPU.f48;
+   320.       end record;
+   321.
+   322.    function as_pair is new Ada.Unchecked_Conversion (CPU.f96, KDF9.pair);
+   323.
+   324.    function as_f96  is new Ada.Unchecked_Conversion (KDF9.pair, CPU.f96);
+   325.
+   326.    procedure push (DF : in CPU.f96)
+   327.       with Inline,
+   328.            Pre => the_NEST_depth < 15
+   329.                or else the_CPU_state = Director_state;
+   330.
+   331.    function pop
+   332.    return CPU.f96
+   333.       with Inline;
+   334.
+   335.    procedure write_top (DF : in CPU.f96)
+   336.       with Inline;
+   337.
+   338.    function read_top
+   339.    return CPU.f96
+   340.       with Inline;
+   341.
+   342.    -- The algebraic scale-factor, not the hardware exponent, -128 <= scaler < +128.
+   343.
+   344.    function scaler (DF : CPU.f96)
+   345.    return KDF9.word
+   346.       with Inline;
+   347.
+   348.    -- Round a 96-bit double-precision floating-point number to 48 bit format.
+   349.
+   350.    function narrowed (DF : CPU.f96)
+   351.    return CPU.f48
+   352.       with Inline;
+   353.
+   354.    -- Derive a 96-bit fraction from the double-precision floating-point number,
+   355.    --    with the mantissa bits in D9-D47 and D49-D87,
+   356.    --       and with D1-D8 copies of the sign, D48 zero, and D87-D95 zero.
+   357.
+   358.    function fraction_pair (DF : CPU.f96)
+   359.    return KDF9.pair
+   360.       with Inline;
+   361.
+   362.    -- Convert 96-bit fraction, and an algebraic scale-factor exponent,
+   363.    --    into a 96-bit floating point number, setting overflow when necessary.
+   364.
+   365.    procedure reconstruct (frac   : in out KDF9.pair;
+   366.                           scaler : in KDF9.word);
+   367.
+   368.    function "-" (R : CPU.f96)
+   369.    return CPU.f96;
+   370.
+   371.    function "+" (L, R : CPU.f96)
+   372.    return CPU.f96;
+   373.
+   374.    function "-" (L, R : CPU.f96)
+   375.    return CPU.f96;
+   376.
+   377.    function "*" (L, R : CPU.f48)
+   378.    return CPU.f96;
+   379.
+   380.    function "/" (L : CPU.f96;
+   381.                  R : CPU.f48)
+   382.    return CPU.f48;
+   383.
+   384. ------------------------------------------------------------------------------------------------
+   385.
+   386. --
+   387. --
+   388.    --
+   389.    -- These are the emulation host's register types and their operations.
+   390.    --
+   391. --
+   392. --
+   393.
+   394.    type u_64 is mod 2**64 with Size => 64;
+   395.
+   396.    pragma Provide_Shift_Operators (u_64);
+   397.
+   398.    function as_word (u : CPU.u_64)
+   399.    return KDF9.word
+   400.       with Inline;
+   401.
+   402.    type s_64 is range -2**63 .. +2**63-1 with Size => 64;
+   403.
+   404.    -- The signed as_word sets the V bit if necessary.
+   405.
+   406.    function as_word (s : CPU.s_64)
+   407.    return KDF9.word
+   408.       with Inline;
+   409.
+   410.    function unsign is new Ada.Unchecked_Conversion(CPU.s_64, CPU.u_64);
+   411.
+   412.    function resign is new Ada.Unchecked_Conversion(CPU.u_64, CPU.s_64);
+   413.
+   414. --
+   415. --
+   416.    --
+   417.    -- These are the 48-bit primitive, fixed-direction, shift operations.
+   418.    --
+   419. --
+   420. --
+   421.
+   422.    function shift_time (amount : Natural)
+   423.    return KDF9.us
+   424.       with Inline;
+   425.
+   426.    subtype word_shift_length is Natural range 0..48;
+   427.
+   428.    function shift_word_left (W : KDF9.word; amount : word_shift_length)
+   429.    return KDF9.word
+   430.       with Inline;
+   431.
+   432.    function shift_word_right (W : KDF9.word; amount : word_shift_length)
+   433.    return KDF9.word
+   434.       with Inline;
+   435.
+   436.    function rotate_word_left (W : KDF9.word; amount : word_shift_length)
+   437.    return KDF9.word
+   438.       with Inline;
+   439.
+   440.    function rotate_word_right (W : KDF9.word; amount : word_shift_length)
+   441.    return KDF9.word
+   442.       with Inline;
+   443.
+   444. end KDF9.CPU;
+
+ 1055 lines: No errors
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-phu_store.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- The K5 operation data formats.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Unchecked_Conversion;
+    18. --
+    19. with KDF9.CPU;
+    20.
+    21. package body KDF9.PHU_store is
+    22.
+    23.    function short_PHU (p : KDF9.priority)
+    24.    return KDF9.word is
+    25.
+    26.       use type KDF9.store.group_address;
+    27.
+    28.       type PHU_as_6_bits is mod 2**6
+    29.          with Size => 6;
+    30.
+    31.       function as_6_bits is new Ada.Unchecked_Conversion(Source => PHU_store.PHU_subset,
+    32.                                                          Target => short_PHU.PHU_as_6_bits);
+    33.
+    34.       the_reason    : PHU_store.blockage_kind;
+    35.       the_parameter : KDF9.buffer_number;
+    36.
+    37.    begin
+    38.       if not PHU(p).is_held_up then
+    39.          return 0;  -- All fields are non-significant.
+    40.       end if;
+    41.
+    42.       -- PHU(p).is_held_up, so other fields are valid.
+    43.       the_reason := PHU(p).blockage.reason;
+    44.       if the_reason = buffer_busy then
+    45.          the_parameter := PHU(p).blockage.buffer_nr;
+    46.       else
+    47.          -- This is next to useless, but is what the K5 order actually did.
+    48.          the_parameter := KDF9.buffer_number(PHU(p).blockage.group_nr mod 2**4);
+    49.       end if;
+    50.
+    51.       return KDF9.word(as_6_bits((the_parameter, the_reason, True)));
+    52.    end short_PHU;
+    53.
+    54.    function K5_operand
+    55.    return KDF9.word
+    56.    is (
+    57.        KDF9.CPU.shift_word_left(short_PHU(0), 48-06) or
+    58.        KDF9.CPU.shift_word_left(short_PHU(1), 48-12) or
+    59.        KDF9.CPU.shift_word_left(short_PHU(2), 48-18) or
+    60.        KDF9.CPU.shift_word_left(short_PHU(3), 48-24)
+    61.       );
+    62.
+    63. end KDF9.PHU_store;
+
+Compiling: ../Source/kdf9-phu_store.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- The K5 operation data formats.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with System;
+    18. --
+    19. with KDF9.store;
+    20.
+    21. package KDF9.PHU_store is
+    22.
+    23.    -- PHU, the Program Hold-Up register is internal to I/O Control.
+    24.    -- It has one element for each of the 4 program priority levels, 0..3.
+    25.    -- A subset of its content is exposed to Director by means of the K5 order.
+    26.
+    27.    type blockage_kind is (buffer_busy, locked_core) with Size => 1;
+    28.
+    29.    type PHU_reason (reason : PHU_store.blockage_kind := buffer_busy) is
+    30.       record
+    31.          case reason is
+    32.             when buffer_busy =>
+    33.                buffer_nr : KDF9.buffer_number;
+    34.                by_INTQq  : Boolean;
+    35.             when locked_core =>
+    36.                group_nr  : KDF9.store.group_address;
+    37.          end case;
+    38.       end record;
+    39.
+    40.    type PHU_register (is_held_up : Boolean := False) is
+    41.       record
+    42.          case is_held_up is
+    43.             when False =>
+    44.                null;
+    45.             when True =>
+    46.                blockage : PHU_reason;
+    47.          end case;
+    48.       end record;
+    49.
+    50.    idle_PHU : constant PHU_register := (is_held_up => False);
+    51.
+    52.    PHU : array (KDF9.priority) of PHU_store.PHU_register := (others => idle_PHU);
+    53.
+    54.    type PHU_subset is
+    55.       record
+    56.          parameter  : KDF9.buffer_number;
+    57.          reason     : PHU_store.blockage_kind;
+    58.          is_held_up : Boolean;
+    59.       end record
+    60.    with Size => 6, Bit_Order => System.Low_Order_First;
+    61.
+    62.    for  PHU_subset use
+    63.       record
+    64.          parameter  at 0 range 0 .. 3;
+    65.          reason     at 0 range 4 .. 4;
+    66.          is_held_up at 0 range 5 .. 5;
+    67.       end record;
+    68.
+    69.    -- A K5_operand is a KDF9 word, D00-D47, with the content:
+    70.    --    PHU_subset(0) in D00 .. D05
+    71.    --    PHU_subset(1) in D06 .. D11
+    72.    --    PHU_subset(2) in D12 .. D17
+    73.    --    PHU_subset(3) in D18 .. D23
+    74.    --    zeros         in D24 .. D47
+    75.
+    76.    function K5_operand
+    77.    return KDF9.word;
+    78.
+    79. end KDF9.PHU_store;
+
+ 63 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/tracing.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with exceptions;
+    18. with formatting;
+    19. with HCI;
+    20. with KDF9.decoding;
+    21. with KDF9.store;
+    22. with state_display;
+    23.
+    24. use exceptions;
+    25. use formatting;
+    26. use HCI;
+    27. use KDF9;
+    28. use KDF9.decoding;
+    29. use KDF9.store;
+    30. use state_display;
+    31.
+    32. package body tracing is
+    33.
+    34.    procedure clear_the_histogram is
+    35.    begin
+    36.       the_histogram := (others => 0);
+    37.    end clear_the_histogram;
+    38.
+    39.    procedure clear_the_profile is
+    40.    begin
+    41.       the_profile := (others => 0);
+    42.    end clear_the_profile;
+    43.
+    44.    procedure set_breakpoints (first, last : in KDF9.code_address) is
+    45.    begin
+    46.       for p in first .. last loop
+    47.          breakpoints(p) := True;
+    48.       end loop;
+    49.    end set_breakpoints;
+    50.
+    51.    procedure handle_breakpoint is
+    52.    begin
+    53.       short_witness;
+    54.       interact;
+    55.       quit_if_requested;
+    56.       change_diagnostic_mode_if_requested;
+    57.    end handle_breakpoint;
+    58.
+    59.    procedure clear_all_watchpoints is
+    60.    begin
+    61.       fetchpoints := (others => False);
+    62.       storepoints := (others => False);
+    63.    end clear_all_watchpoints;
+    64.
+    65.    procedure set_fetch_points (first, last : in KDF9.address) is
+    66.    begin
+    67.       for p in first .. last loop
+    68.          fetchpoints(p) := True;
+    69.       end loop;
+    70.    end set_fetch_points;
+    71.
+    72.    procedure set_store_points (first, last : in KDF9.address) is
+    73.    begin
+    74.       for p in first .. last loop
+    75.          storepoints(p) := True;
+    76.       end loop;
+    77.    end set_store_points;
+    78.
+    79.    procedure clear_retro_FIFO is
+    80.    begin
+    81.       retro_FIFO_count := 0; retro_FIFO_index := 0;
+    82.    end clear_retro_FIFO;
+    83.
+    84.    procedure take_note_of (the_IAR   : in KDF9.syllable_address;
+    85.                            the_value : in KDF9.word) is
+    86.    begin
+    87.       if retrospective_tracing_is_enabled             and then
+    88.             ICR in low_count .. high_count            and then
+    89.                NIA_word_number in low_bound .. high_bound then
+    90.          declare
+    91.             the_note : constant retro_FIFO_entry
+    92.                      := (
+    93.                          location   => the_IAR,
+    94.                          order      => INS.order,
+    95.                          parameter  => the_value,
+    96.                          ICR_value  => ICR,
+    97.                          CPU_time   => the_CPU_time,
+    98.                          nested     => the_NEST_depth,
+    99.                          called     => the_SJNS_depth,
+   100.                          V          => the_V_bit_is_set,
+   101.                          T          => the_T_bit_is_set,
+   102.                          D          => the_CPU_state = Director_state,
+   103.                          level      => CPL
+   104.                         );
+   105.          begin
+   106.             if retro_FIFO_count = 0 then
+   107.                retro_FIFO(0) := the_note;
+   108.                retro_FIFO_count := 1;
+   109.             else
+   110.                retro_FIFO_index := retro_FIFO_index + 1;
+   111.                retro_FIFO(retro_FIFO_index) := the_note;
+   112.                if retro_FIFO_count < FIFO_size then
+   113.                   retro_FIFO_count := retro_FIFO_count + 1;
+   114.                end if;
+   115.             end if;
+   116.          end;
+   117.       end if;
+   118.    end take_note_of;
+   119.
+   120.    procedure take_note_of (the_value : in KDF9.word) is
+   121.    begin
+   122.       take_note_of(CIA, the_value);
+   123.    end take_note_of;
+   124.
+   125.    procedure clear_IOC_FIFO is
+   126.    begin
+   127.       IOC_FIFO_count := 0; IOC_FIFO_index := 0;
+   128.    end clear_IOC_FIFO;
+   129.
+   130.    procedure register_IO_event (the_note : in IOC_FIFO_entry) is
+   131.    begin
+   132.       if peripheral_tracing_is_enabled                and then
+   133.             ICR in low_count .. high_count            and then
+   134.                NIA_word_number in low_bound .. high_bound then
+   135.          if IOC_FIFO_count = 0 then
+   136.             IOC_FIFO(0) := the_note;
+   137.             IOC_FIFO_count := 1;
+   138.          else
+   139.             IOC_FIFO_index := IOC_FIFO_index + 1;
+   140.             IOC_FIFO(IOC_FIFO_index) := the_note;
+   141.             if IOC_FIFO_count < FIFO_size then
+   142.                IOC_FIFO_count := IOC_FIFO_count + 1;
+   143.             end if;
+   144.          end if;
+   145.       end if;
+   146.    end register_IO_event;
+   147.
+   148.    procedure take_note_of_IO_start (
+   149.                                     device_name     : in IOC.device_name;
+   150.                                     completion_time : in KDF9.us;
+   151.                                     control_word    : in KDF9.Q_register;
+   152.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
+   153.                                    )
+   154.    is
+   155.       the_note : constant  IOC_FIFO_entry
+   156.                :=
+   157.                 (
+   158.                  kind            => start_transfer,
+   159.                  ICR_value       => ICR,
+   160.                  order_address   => CIA,
+   161.                  decoded_order   => INS,
+   162.                  initiation_time => the_clock_time,
+   163.                  device_name     => take_note_of_IO_start.device_name,
+   164.                  completion_time => take_note_of_IO_start.completion_time,
+   165.                  is_for_Director => (the_CPU_state = Director_state),
+   166.                  priority_level  => CPL,
+   167.                  context         => the_context,
+   168.                  control_word    => take_note_of_IO_start.control_word,
+   169.                  operation       => take_note_of_IO_start.operation
+   170.                 );
+   171.    begin
+   172.       register_IO_event(the_note);
+   173.    end take_note_of_IO_start;
+   174.
+   175.    procedure take_note_of_IO_finis (
+   176.                                     ICR_value       : in KDF9.order_counter;
+   177.                                     order_address   : in KDF9.syllable_address;
+   178.                                     decoded_order   : in KDF9.decoded_order;
+   179.                                     initiation_time : in KDF9.us;
+   180.                                     device_name     : in IOC.device_name;
+   181.                                     is_for_Director : Boolean;
+   182.                                     priority_level  : in KDF9.priority;
+   183.                                     completion_time : in KDF9.us;
+   184.                                     control_word    : in KDF9.Q_register;
+   185.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
+   186.                                    )
+   187.    is
+   188.       the_note : constant  IOC_FIFO_entry
+   189.                :=
+   190.                 (
+   191.                  kind            => finis_transfer,
+   192.                  ICR_value       => take_note_of_IO_finis.ICR_value,
+   193.                  order_address   => take_note_of_IO_finis.order_address,
+   194.                  decoded_order   => take_note_of_IO_finis.decoded_order,
+   195.                  initiation_time => take_note_of_IO_finis.initiation_time,
+   196.                  device_name     => take_note_of_IO_finis.device_name,
+   197.                  is_for_Director => take_note_of_IO_finis.is_for_Director,
+   198.                  priority_level  => take_note_of_IO_finis.priority_level,
+   199.                  context         => the_context,
+   200.                  completion_time => take_note_of_IO_finis.completion_time,
+   201.                  control_word    => take_note_of_IO_finis.control_word,
+   202.                  operation       => take_note_of_IO_finis.operation
+   203.                 );
+   204.
+   205.    begin
+   206.       register_IO_event(the_note);
+   207.    end take_note_of_IO_finis;
+   208.
+   209.    procedure take_note_of_store_lockout (device_name : in IOC.device_name) is
+   210.       the_note : constant  IOC_FIFO_entry
+   211.                :=
+   212.                 (
+   213.                  kind            => store_lockout,
+   214.                  ICR_value       => ICR,
+   215.                  order_address   => CIA,
+   216.                  decoded_order   => INS,
+   217.                  initiation_time => the_clock_time,
+   218.                  device_name     => take_note_of_store_lockout.device_name,
+   219.                  is_for_Director => False,
+   220.                  priority_level  => CPL,
+   221.                  context         => the_context,
+   222.                  data_address    => the_locked_out_address,
+   223.                  operation       => IOC.some_other_operation
+   224.                 );
+   225.    begin
+   226.       register_IO_event(the_note);
+   227.    end take_note_of_store_lockout;
+   228.
+   229.    procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
+   230.                                           operation   : in IOC.transfer_kind := IOC.some_other_operation) is
+   231.       the_note : constant  IOC_FIFO_entry
+   232.                :=
+   233.                 (
+   234.                  kind            => buffer_lockout,
+   235.                  ICR_value       => ICR,
+   236.                  order_address   => CIA,
+   237.                  decoded_order   => INS,
+   238.                  initiation_time => the_clock_time,
+   239.                  device_name     => take_note_of_buffer_lockout.device_name,
+   240.                  is_for_Director => False,
+   241.                  priority_level  => CPL,
+   242.                  context         => the_context,
+   243.                  operation       => take_note_of_buffer_lockout.operation
+   244.                 );
+   245.    begin
+   246.       register_IO_event(the_note);
+   247.    end take_note_of_buffer_lockout;
+   248.
+   249.    procedure take_note_of_test (
+   250.                                 device_name : in IOC.device_name;
+   251.                                 Q_register  : in KDF9.Q_register;
+   252.                                 status      : in Boolean
+   253.                                )
+   254.    is
+   255.       the_note : constant  IOC_FIFO_entry
+   256.                :=
+   257.                 (
+   258.                  kind            => buffer_status,
+   259.                  ICR_value       => ICR+1,  -- ICR is not incremented until the end of an order.
+   260.                  order_address   => CIA,
+   261.                  decoded_order   => INS,
+   262.                  initiation_time => the_clock_time,
+   263.                  device_name     => take_note_of_test.device_name,
+   264.                  is_for_Director => (the_CPU_state = Director_state),
+   265.                  priority_level  => CPL,
+   266.                  context         => the_context,
+   267.                  Q_register      => take_note_of_test.Q_register,
+   268.                  status          => take_note_of_test.status,
+   269.                  operation       => IOC.some_other_operation
+   270.                 );
+   271.    begin
+   272.       register_IO_event(the_note);
+   273.    end take_note_of_test;
+   274.
+   275.    procedure clear_interrupt_FIFO is
+   276.    begin
+   277.       interrupt_FIFO_count := 0; interrupt_FIFO_index := 0;
+   278.    end clear_interrupt_FIFO;
+   279.
+   280.    procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
+   281.    is
+   282.       length  : constant Natural  := Natural'Min(message'Length, max_interrupt_message_length);
+   283.       content : constant String   := message(message'First .. message'First+length-1);
+   284.       padding : constant String   := (1 .. max_interrupt_message_length-length => ' ');
+   285.    begin
+   286.       declare
+   287.          the_note : constant interrupt_FIFO_entry
+   288.                   :=
+   289.                    (
+   290.                     interrupt_code => take_note_of_interrupt.interrupt_code,
+   291.                     ICR_value      => ICR,
+   292.                     order_address  => CIA,
+   293.                     busy_time      => the_clock_time,
+   294.                     priority_level => CPL,
+   295.                     context        => the_context,
+   296.                     message        => content & padding
+   297.                    );
+   298.       begin
+   299.          if interrupt_tracing_is_enabled                 and then
+   300.                ICR in low_count .. high_count            and then
+   301.                   NIA_word_number in low_bound .. high_bound then
+   302.             if interrupt_FIFO_count = 0 then
+   303.                interrupt_FIFO(0) := the_note;
+   304.                interrupt_FIFO_count := 1;
+   305.             else
+   306.                interrupt_FIFO_index := interrupt_FIFO_index + 1;
+   307.                interrupt_FIFO(interrupt_FIFO_index) := the_note;
+   308.                if interrupt_FIFO_count < FIFO_size then
+   309.                   interrupt_FIFO_count := interrupt_FIFO_count + 1;
+   310.                end if;
+   311.             end if;
+   312.          end if;
+   313.       end;
+   314.    end take_note_of_interrupt;
+   315.
+   316.    procedure add_INS_to_the_histogram is
+   317.       syllable_0 : KDF9.syllable := INS.order.syllable_0;
+   318.    begin
+   319.       if INS.kind = normal_jump_order then
+   320.          syllable_0 := (syllable_0 and 2#1111_0000#) or INS.Qq;
+   321.       elsif INS.kind = data_access_order then
+   322.          syllable_0 := (syllable_0 and 2#11_000_111#);
+   323.       end if;
+   324.       the_histogram(syllable_0) := the_histogram(syllable_0) + 1;
+   325.    end add_INS_to_the_histogram;
+   326.
+   327.    procedure add_CIA_to_the_profile is
+   328.    begin
+   329.       the_profile(CIA.code_address) := the_profile(CIA.code_address) + 1;
+   330.    end add_CIA_to_the_profile;
+   331.
+   332.    procedure preview_a_one_syllable_order is null;
+   333.
+   334.    procedure preview_a_two_syllable_order is
+   335.    begin
+   336.       case INS.compressed_opcode is
+   337.          when TO_MkMq
+   338.             | TO_MkMqQ
+   339.             | TO_MkMqH
+   340.             | TO_MkMqQH
+   341.             | TO_MkMqN
+   342.             | TO_MkMqQN
+   343.             | TO_MkMqHN
+   344.             | TO_MkMqQHN =>
+   345.             the_trace_operand := read_top;
+   346.          when others =>
+   347.             the_trace_operand := as_word(the_Q_store(INS.Qq));
+   348.       end case;
+   349.    end preview_a_two_syllable_order;
+   350.
+   351.    procedure preview_a_jump_order is
+   352.    begin
+   353.       case INS.compressed_opcode is
+   354.          when JrEQ
+   355.             | JrNE
+   356.             | JrGTZ
+   357.             | JrLTZ
+   358.             | JrEQZ
+   359.             | JrLEZ
+   360.             | JrGEZ
+   361.             | JrNEZ
+   362.             | OS_OUT =>
+   363.             if the_NEST_depth > 0 then
+   364.                the_trace_operand := read_top;
+   365.             end if;
+   366.          when JrEN
+   367.             | JrNEN =>
+   368.             the_trace_operand := KDF9.word(the_NEST_depth);
+   369.          when JrEJ
+   370.             | JrNEJ =>
+   371.             the_trace_operand := KDF9.word(the_SJNS_depth);
+   372.          when EXIT_n
+   373.             | EXITD =>
+   374.             if the_SJNS_depth > 0 then
+   375.                the_trace_operand := as_word(SJNS_top);
+   376.             else
+   377.                the_trace_operand := -1;
+   378.             end if;
+   379.          when JrCqZ
+   380.             | JrCqNZ =>
+   381.             the_trace_operand := as_word(the_Q_store(INS.Qq));
+   382.          when JrV
+   383.             | JrNV =>
+   384.             the_trace_operand := (if the_V_bit_is_set then 1 else 0);
+   385.          when JrTR
+   386.             | JrNTR =>
+   387.             the_trace_operand := (if the_T_bit_is_set then 1 else 0);
+   388.          when others =>
+   389.             null;
+   390.       end case;
+   391.    end preview_a_jump_order;
+   392.
+   393.    procedure preview_a_data_access_order is
+   394.    begin
+   395.       case INS.compressed_opcode is
+   396.          when TO_EaMq
+   397.             | TO_EaMqQ =>
+   398.             the_trace_operand := read_top;
+   399.          when others =>
+   400.             null;
+   401.       end case;
+   402.    end preview_a_data_access_order;
+   403.
+   404.    procedure look_back_at_a_one_syllable_order is
+   405.       AB : KDF9.pair;
+   406.    begin
+   407.       case INS.compressed_opcode is
+   408.          when XDF
+   409.             | XPLUSF
+   410.             | MINUSDF
+   411.             | PLUSDF
+   412.             | FLOATD
+   413.             | NEGDF
+   414.             | MAXF
+   415.             | PERM
+   416.             | CAB
+   417.             | MAX
+   418.             | XD
+   419.             | NEGD
+   420.             | DUPD
+   421.             | DIVI
+   422.             | STR
+   423.             | REVD
+   424.             | MINUSD
+   425.             | PLUSD
+   426.             | DIVR =>
+   427.             AB := read_top;
+   428.             the_trace_operand := AB.msw;
+   429.          when others =>
+   430.             if the_NEST_depth > 0 then
+   431.                the_trace_operand := read_top;
+   432.             end if;
+   433.       end case;
+   434.    end look_back_at_a_one_syllable_order;
+   435.
+   436.    procedure look_back_at_an_IO_order is null;
+   437.
+   438.    procedure look_back_at_a_two_syllable_order is
+   439.       AB : KDF9.pair;
+   440.    begin
+   441.       case INS.compressed_opcode is
+   442.          when MkMq
+   443.             | MkMqQ
+   444.             | MkMqH
+   445.             | MkMqQH
+   446.             | MkMqQN
+   447.             | MkMqHN
+   448.             | MkMqQHN
+   449.             | QCIMq
+   450.             | SHA
+   451.             | SHL
+   452.             | SHC
+   453.             | TO_Kq
+   454.             | Kk
+   455.             | LINK =>
+   456.             the_trace_operand := read_top;
+   457.          when TO_MkMq
+   458.             | TO_MkMqQ
+   459.             | TO_MkMqH
+   460.             | TO_MkMqQH
+   461.             | TO_MkMqN
+   462.             | TO_MkMqQN
+   463.             | TO_MkMqHN
+   464.             | TO_MkMqQHN =>
+   465.             null;
+   466.          when M_PLUS_Iq
+   467.             | M_MINUS_Iq
+   468.             | NCq
+   469.             | DCq
+   470.             | POS1_TO_Iq
+   471.             | NEG1_TO_Iq
+   472.             | POS2_TO_Iq
+   473.             | NEG2_TO_Iq
+   474.             | TO_RCIMq
+   475.             | ADD_TO_QCIMq
+   476.             | JCqNZS =>
+   477.             the_trace_operand := as_word(the_Q_store(INS.Qq));
+   478.          when CqTOQk
+   479.             | IqTOQk
+   480.             | MqTOQk
+   481.             | QqTOQk
+   482.             | CIqTOQk
+   483.             | IMqTOQk
+   484.             | CMqTOQk =>
+   485.             the_trace_operand := as_word(the_Q_store(INS.Qk));
+   486.          when SHLD
+   487.             | SHAD
+   488.             | MACC =>
+   489.             AB := read_top;
+   490.             the_trace_operand := AB.msw;
+   491.          when TO_LINK =>
+   492.             the_trace_operand := as_word(SJNS_top);
+   493.          when others =>
+   494.             look_back_at_an_IO_order;
+   495.       end case;
+   496.    end look_back_at_a_two_syllable_order;
+   497.
+   498.    procedure look_back_at_a_jump_order is
+   499.       BA_image  : constant String := "BA #" & oct_of(BA);
+   500.       NOL_image : constant String := "NOL"  & NOL'Image;
+   501.    begin
+   502.       case INS.compressed_opcode is
+   503.          when Jr =>
+   504.             the_trace_operand := as_word(SJNS_link(NIA));
+   505.          when JSr =>
+   506.             the_trace_operand := as_word(SJNS_top);
+   507.          when EXITD =>
+   508.             take_note_of_interrupt(EXITD_flag, BA_image & " " & NOL_image & " @ " & oct_of(NIA));
+   509.          when others =>
+   510.             null;
+   511.       end case;
+   512.    end look_back_at_a_jump_order;
+   513.
+   514.    procedure look_back_at_a_data_access_order is
+   515.    begin
+   516.       case INS.compressed_opcode is
+   517.          when EaMq
+   518.             | EaMqQ
+   519.             | SET =>
+   520.             the_trace_operand := read_top;
+   521.          when others =>
+   522.             null;
+   523.       end case;
+   524.    end look_back_at_a_data_access_order;
+   525.
+   526.    procedure act_on_any_fetchpoint is
+   527.       use type watch_flags.set;
+   528.    begin
+   529.       if fetchpoints/the_trace_address then
+   530.          log_new_line;
+   531.          log("Fetch watchhpoint: N1 := [#" & oct_of(the_trace_address) & "]");
+   532.          short_witness;
+   533.          interact;
+   534.          quit_if_requested;
+   535.          change_diagnostic_mode_if_requested;
+   536.       end if;
+   537.    end act_on_any_fetchpoint;
+   538.
+   539.    procedure act_on_any_storepoint is
+   540.       use type watch_flags.set;
+   541.    begin
+   542.       if storepoints/the_trace_address then
+   543.          log_new_line;
+   544.          log(
+   545.              "Store watchpoint: #"
+   546.            & oct_of(the_trace_address)
+   547.            & " := [N1] = #"
+   548.            & oct_of(the_trace_operand)
+   549.             );
+   550.          short_witness;
+   551.          interact;
+   552.          quit_if_requested;
+   553.          change_diagnostic_mode_if_requested;
+   554.       end if;
+   555.    end act_on_any_storepoint;
+   556.
+   557.    procedure act_on_any_two_syllable_order_watchpoints is
+   558.    begin
+   559.       case INS.compressed_opcode is
+   560.          when MkMq
+   561.             | MkMqQ
+   562.             | MkMqH
+   563.             | MkMqQH
+   564.             | MkMqQN
+   565.             | MkMqHN
+   566.             | MkMqQHN =>
+   567.             act_on_any_fetchpoint;
+   568.          when TO_MkMq
+   569.             | TO_MkMqQ
+   570.             | TO_MkMqH
+   571.             | TO_MkMqQH
+   572.             | TO_MkMqN
+   573.             | TO_MkMqQN
+   574.             | TO_MkMqHN
+   575.             | TO_MkMqQHN =>
+   576.             act_on_any_storepoint;
+   577.          when others =>
+   578.             null;
+   579.       end case;
+   580.    end act_on_any_two_syllable_order_watchpoints;
+   581.
+   582.    procedure act_on_any_data_access_order_watchpoints is
+   583.    begin
+   584.       case INS.compressed_opcode is
+   585.          when EaMq
+   586.             | EaMqQ =>
+   587.             act_on_any_fetchpoint;
+   588.          when TO_EaMq
+   589.             | TO_EaMqQ =>
+   590.             act_on_any_storepoint;
+   591.          when others =>
+   592.             null;
+   593.       end case;
+   594.    end act_on_any_data_access_order_watchpoints;
+   595.
+   596. end tracing;
+
+Compiling: ../Source/tracing.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide diagnostic trace, breakpoint, and watchpoint support.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with generic_sets;
+    18. with IOC;
+    19. with KDF9;
+    20. with settings;
+    21.
+    22. use  settings;
+    23.
+    24. package tracing is
+    25.
+    26.    -- Support for significant-operand evaluation and tracing.
+    27.
+    28.    the_trace_operand : KDF9.word;
+    29.    the_trace_address : KDF9.address;
+    30.
+    31.    procedure preview_a_one_syllable_order;
+    32.
+    33.    procedure preview_a_two_syllable_order;
+    34.
+    35.    procedure preview_a_jump_order;
+    36.
+    37.    procedure preview_a_data_access_order;
+    38.
+    39.    procedure look_back_at_a_one_syllable_order;
+    40.
+    41.    procedure look_back_at_a_two_syllable_order;
+    42.
+    43.    procedure look_back_at_a_jump_order
+    44.       with Inline => False;
+    45.
+    46.    procedure look_back_at_a_data_access_order;
+    47.
+    48.    -- Support for breakpoints.
+    49.
+    50.    package order_flags is new generic_sets(member => KDF9.code_address);
+    51.
+    52.    breakpoints : order_flags.set := order_flags.empty_set;
+    53.
+    54.    procedure set_breakpoints (first, last : in KDF9.code_address);
+    55.
+    56.    procedure handle_breakpoint;
+    57.
+    58.    -- Support for watchpoints.
+    59.
+    60.    package watch_flags is new generic_sets(member => KDF9.address);
+    61.
+    62.    fetchpoints : watch_flags.set := watch_flags.empty_set;
+    63.    storepoints : watch_flags.set := watch_flags.empty_set;
+    64.
+    65.    procedure clear_all_watchpoints;
+    66.
+    67.    procedure set_fetch_points (first, last : in KDF9.address);
+    68.
+    69.    procedure set_store_points (first, last : in KDF9.address);
+    70.
+    71.    procedure act_on_any_two_syllable_order_watchpoints
+    72.       with Inline => False;
+    73.
+    74.    procedure act_on_any_data_access_order_watchpoints
+    75.       with Inline => False;
+    76.
+    77.
+    78.    --
+    79.    -- Retrospective tracing.
+    80.    --
+    81.
+    82.    FIFO_size : constant := 256;
+    83.
+    84.    type FIFO_index is mod FIFO_size;
+    85.
+    86.    -- Support for all-instruction retrospective tracing.
+    87.
+    88.    type retro_FIFO_entry is
+    89.       record
+    90.          location  : KDF9.syllable_address;
+    91.          order     : KDF9.syllable_group;
+    92.          parameter : KDF9.word;
+    93.          ICR_value : KDF9.order_counter;
+    94.          CPU_time  : KDF9.us;
+    95.          nested    : KDF9.NEST_depth;
+    96.          called    : KDF9.SJNS_depth;
+    97.          V, T, D   : Boolean;
+    98.          level     : KDF9.priority;
+    99.       end record;
+   100.
+   101.    retro_FIFO  : array (tracing.FIFO_index) of tracing.retro_FIFO_entry;
+   102.
+   103.    retro_FIFO_index : tracing.FIFO_index := 0;
+   104.
+   105.    retro_FIFO_count : Natural range 0 .. FIFO_size := 0;
+   106.
+   107.    procedure clear_retro_FIFO;
+   108.
+   109.    procedure take_note_of (the_value : in KDF9.word);
+   110.
+   111.    -- Support for retrospective peripheral I/O tracing.
+   112.
+   113.    type IOC_event_kind is (start_transfer,
+   114.                            finis_transfer,
+   115.                            buffer_lockout,
+   116.                            store_lockout,
+   117.                            buffer_status);
+   118.
+   119.
+   120.    type IOC_FIFO_entry (kind : IOC_event_kind := start_transfer) is
+   121.       record
+   122.          ICR_value       : KDF9.order_counter;
+   123.          order_address   : KDF9.syllable_address;
+   124.          decoded_order   : KDF9.decoded_order;
+   125.          initiation_time : KDF9.us;
+   126.          device_name     : IOC.device_name;
+   127.          is_for_Director : Boolean;
+   128.          priority_level  : KDF9.priority;
+   129.          context         : KDF9.context;
+   130.          operation       : IOC.transfer_kind := IOC.some_other_operation;
+   131.          case kind is
+   132.             when start_transfer | finis_transfer =>
+   133.                completion_time : KDF9.us;
+   134.                control_word    : KDF9.Q_register;
+   135.             when store_lockout =>
+   136.                data_address : KDF9.Q_part;
+   137.             when buffer_lockout =>
+   138.                null;
+   139.             when buffer_status =>
+   140.                Q_register : KDF9.Q_register;
+   141.                status     : Boolean;
+   142.          end case;
+   143.       end record;
+   144.
+   145.    IOC_FIFO  : array (tracing.FIFO_index) of tracing.IOC_FIFO_entry;
+   146.
+   147.    IOC_FIFO_index : tracing.FIFO_index := 0;
+   148.
+   149.    IOC_FIFO_count : Natural range 0 .. FIFO_size := 0;
+   150.
+   151.    procedure clear_IOC_FIFO;
+   152.
+   153.    procedure take_note_of_IO_start (
+   154.                                     device_name     : in IOC.device_name;
+   155.                                     completion_time : in KDF9.us;
+   156.                                     control_word    : in KDF9.Q_register;
+   157.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
+   158.                                    );
+   159.
+   160.    procedure take_note_of_IO_finis (
+   161.                                     ICR_value       : in KDF9.order_counter;
+   162.                                     order_address   : in KDF9.syllable_address;
+   163.                                     decoded_order   : in KDF9.decoded_order;
+   164.                                     initiation_time : in KDF9.us;
+   165.                                     device_name     : in IOC.device_name;
+   166.                                     is_for_Director : Boolean;
+   167.                                     priority_level  : in KDF9.priority;
+   168.                                     completion_time : in KDF9.us;
+   169.                                     control_word    : in KDF9.Q_register;
+   170.                                     operation       : in IOC.transfer_kind := IOC.some_other_operation
+   171.                                    );
+   172.
+   173.    procedure take_note_of_store_lockout  (device_name : in IOC.device_name);
+   174.
+   175.    procedure take_note_of_buffer_lockout (device_name : in IOC.device_name;
+   176.                                           operation   : in IOC.transfer_kind := IOC.some_other_operation);
+   177.
+   178.    procedure take_note_of_test (
+   179.                                 device_name : in IOC.device_name;
+   180.                                 Q_register  : in KDF9.Q_register;
+   181.                                 status      : in Boolean
+   182.                                 );
+   183.
+   184.
+   185.    -- Support for retrospective interrupt-request tracing.
+   186.
+   187.    max_interrupt_message_length : constant := 100;
+   188.    type interrupt_FIFO_entry is
+   189.       record
+   190.          interrupt_code : KDF9.interrupt_number;
+   191.          ICR_value      : KDF9.order_counter;
+   192.          order_address  : KDF9.syllable_address;
+   193.          busy_time      : KDF9.us;
+   194.          priority_level : KDF9.priority;
+   195.          context        : KDF9.context;
+   196.          message        : String (1..max_interrupt_message_length);
+   197.       end record;
+   198.
+   199.    interrupt_FIFO  : array (tracing.FIFO_index) of tracing.interrupt_FIFO_entry;
+   200.
+   201.    interrupt_FIFO_index : tracing.FIFO_index := 0;
+   202.
+   203.    interrupt_FIFO_count : Natural range 0 .. FIFO_size := 0;
+   204.
+   205.    procedure clear_interrupt_FIFO;
+   206.
+   207.    procedure take_note_of_interrupt (interrupt_code : in KDF9.interrupt_number; message : in String)
+   208.       with Inline => False;
+   209.
+   210.
+   211.    -- Support for the instruction-type and instruction-word frequency histograms.
+   212.
+   213.    the_histogram : array (KDF9.syllable) of KDF9.order_counter;
+   214.
+   215.    procedure clear_the_histogram;
+   216.
+   217.    procedure add_INS_to_the_histogram
+   218.       with Inline;
+   219.
+   220.    the_profile   : array (KDF9.code_address) of KDF9.order_counter;
+   221.
+   222.    procedure clear_the_profile;
+   223.
+   224.    procedure add_CIA_to_the_profile
+   225.       with Inline;
+   226.
+   227. end tracing;
+
+ 596 lines: No errors
+
+
+Compiling: /home/parallels/emulation/Source/formatting.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide basic data-formatting operations for KDF9 data types.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Characters.Handling;
+    18. with Ada.Strings;
+    19. with Ada.Strings.Fixed;
+    20. --
+    21. with KDF9_char_sets;
+    22. with KDF9.CPU;
+    23.
+    24. use  Ada.Characters.Handling;
+    25. use  Ada.Strings;
+    26. use  Ada.Strings.Fixed;
+    27. --
+    28. use  KDF9_char_sets;
+    29. use  KDF9.CPU;
+    30.
+    31. package body formatting is
+    32.
+    33.    digit_map : constant array (KDF9.halfword range 0 .. 15) of Character := "0123456789ABCDEF";
+    34.
+    35.    -- Return N as 3 octal digits.
+    36.    function oct_of (N : KDF9.syllable)
+    37.    return String
+    38.    is (oct_of(KDF9.halfword(N))(6 .. 8));
+    39.
+    40.    -- Return N as 6 octal digits.
+    41.    function oct_of (N : KDF9.field_of_16_bits)
+    42.    return String is
+    43.       value : KDF9.field_of_16_bits := N;
+    44.       oct   : String(1 .. 6);
+    45.    begin
+    46.       for i in reverse oct'Range loop
+    47.          oct(i) := digit_map(KDF9.halfword(value mod 8));
+    48.          value := value / 8;
+    49.       end loop;
+    50.       return oct;
+    51.    end oct_of;
+    52.
+    53.    -- Return N as 1 .. min_digits octal digits, with (partial) zero suppression.
+    54.    function oct_of (N : KDF9.Q_part; min_digits : octal_width := 6)
+    55.    return String is
+    56.       oct : constant String(octal_width) := oct_of(KDF9.field_of_16_bits(N));
+    57.    begin
+    58.      if N = 0 then return (1..min_digits => '0'); end if;
+    59.      for i in 1 .. 6-min_digits loop
+    60.         if oct(i) /= '0' then
+    61.            return oct(i .. 6);
+    62.         end if;
+    63.       end loop;
+    64.       return oct(7-min_digits .. 6);
+    65.    end oct_of;
+    66.
+    67.    -- Return N as 1 .. 5 decimal digits, with zero suppression and sign when neagtive.
+    68.    function signed_dec_of (N : KDF9.Q_part)
+    69.    return String is
+    70.       dec : constant String := resign(N)'Image;
+    71.    begin
+    72.       return trimmed(dec);
+    73.    end signed_dec_of;
+    74.
+    75.    -- Return N as decimal digits, with zero suppression.
+    76.    function dec_of (N : KDF9.Q_part)
+    77.    return String is
+    78.       dec : constant String := N'Image;
+    79.    begin
+    80.       return trimmed(dec);
+    81.    end dec_of;
+    82.
+    83.    -- Return N as up to 5 octal digits.
+    84.    function oct_of (N : KDF9.code_address)
+    85.    return String is
+    86.       value : KDF9.code_address := N;
+    87.       j     : Positive := 5;
+    88.       oct   : String(1 .. 5);
+    89.    begin
+    90.       for i in reverse oct'Range loop
+    91.          oct(i) := digit_map(KDF9.halfword(value mod 8));
+    92.          value := value / 8;
+    93.       end loop;
+    94.       for i in oct'Range loop
+    95.          if oct(i) /= '0' then j := i; exit; end if;
+    96.       end loop;
+    97.       return oct(j..5);
+    98.    end oct_of;
+    99.
+   100.    -- Return N as decimal digits, with zero suppression.
+   101.    function dec_of (N : KDF9.code_address)
+   102.    return String
+   103.    is (trimmed(N'Image));
+   104.
+   105.    -- Return N as 8 octal digits.
+   106.    function oct_of (N : KDF9.halfword)
+   107.    return String is
+   108.       value : KDF9.halfword := N;
+   109.       oct   : String(1 .. 8);
+   110.    begin
+   111.       for i in reverse oct'Range loop
+   112.          oct(i) := digit_map(value mod 8);
+   113.          value := value / 8;
+   114.       end loop;
+   115.       return oct;
+   116.    end oct_of;
+   117.
+   118.    -- Return N as #wwwww/s, where w and s are octal digits.
+   119.    function oct_of (N : KDF9.SJNS_link)
+   120.    return String
+   121.    is (
+   122.        "#"
+   123.       &  oct_of(N.code_address)
+   124.       & '/'
+   125.       & digit_map(KDF9.halfword(N.syllable_index))
+   126.       );
+   127.
+   128.    -- Return N as #wwwww/s, where w and s are octal digits.
+   129.    function oct_of (N : KDF9.syllable_address)
+   130.    return String
+   131.    is (oct_of(KDF9.SJNS_link(N)));
+   132.
+   133.    -- Return N as dddd/d, where d is a decimal digit.
+   134.    function dec_of (N : KDF9.syllable_address)
+   135.    return String
+   136.    is (
+   137.        trimmed(N.code_address'Image)
+   138.             & '/'
+   139.             & digit_map(KDF9.halfword(N.syllable_index))
+   140.       );
+   141.
+   142.    -- Return N as #wwwww/s, where w and s are octal digits;
+   143.    --    or as dddd/s, where d is a decimal digit, according to octal_option.
+   144.    function oct_or_dec_of (N : KDF9.syllable_address; octal_option : Boolean)
+   145.    return String
+   146.    is (if octal_option then oct_of(N) else dec_of(N));
+   147.
+   148.    -- Return N as 16 octal digits
+   149.    function oct_of (N : KDF9.word)
+   150.    return String is
+   151.       value : KDF9.word := N;
+   152.       oct   : String(1 .. 16);
+   153.    begin
+   154.       for i in reverse oct'Range loop
+   155.          oct(i) := digit_map(KDF9.halfword(value mod 8));
+   156.          value := value / 8;
+   157.       end loop;
+   158.       return oct;
+   159.    end oct_of;
+   160.
+   161.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
+   162.    function "-" (L, R : String)
+   163.    return String is
+   164.       trim_R : constant String := trim(R, right);
+   165.    begin
+   166.       if trim_R /= "" then
+   167.          return trim(L, right) & ", " & trim_R;
+   168.       else
+   169.          return trim(L, right);
+   170.       end if;
+   171.    end "-";
+   172.
+   173.    -- Return S with all leading an trailing blanks removed.
+   174.    function trimmed (S : String)
+   175.    return String
+   176.    is (Trim(S, Ada.Strings.Both));
+   177.
+   178.    -- Return trimmed(S), right-just_right in a field of width at least W.
+   179.    function just_right (S : String; W : Positive := 3)
+   180.    return String is
+   181.      image   : constant String   := Trim(S, Ada.Strings.Both);
+   182.      columns : constant Positive := Positive'Max(W, image'Length);
+   183.    begin
+   184.      return Ada.Strings.Fixed.Tail(image, columns, ' ');
+   185.    end just_right;
+   186.
+   187.    -- Return trimmed(S), left-justified in a field of width at least W.
+   188.    function just_left (S : String; W : Positive := 3)
+   189.    return String is
+   190.      image   : constant String   := Trim(S, Ada.Strings.Both);
+   191.      columns : constant Positive := Positive'Max(W, image'Length);
+   192.    begin
+   193.      return Ada.Strings.Fixed.Head(image, columns, ' ');
+   194.    end just_left;
+   195.
+   196.    function plurality (count : KDF9.word; for_1 : String := ""; for_more : String := "s")
+   197.    return String
+   198.    is (if count /= 1 then for_more else for_1);
+   199.
+   200.    -- Return C converted to a 1-character string.
+   201.    function "+" (C : Character)
+   202.    return unit_string
+   203.    is ((1 => C));
+   204.
+   205.    -- Return C with all Latin-1 lower-case letters converted to upper-case.
+   206.    function to_upper (C : Character)
+   207.    return Character
+   208.    renames Ada.Characters.Handling.to_upper;
+   209.
+   210.    -- Return S with all Latin-1 lower-case letters converted to upper-case.
+   211.    function to_upper (S : String)
+   212.    return String
+   213.    renames Ada.Characters.Handling.to_upper;
+   214.
+   215.    -- Return C with all Latin-1 upper-case letters converted to lower-case.
+   216.    function to_lower (C : Character)
+   217.    return Character
+   218.    renames Ada.Characters.Handling.to_lower;
+   219.
+   220.    -- Return S with all Latin-1 upper-case letters converted to lower-case.
+   221.    function to_lower (S : String)
+   222.    return String
+   223.    renames Ada.Characters.Handling.to_lower;
+   224.
+   225.    -- Return the 8-character Latin-1 string representing the 8 Case Normal characters in N.
+   226.    function to_string (N : KDF9.word)
+   227.    return word_as_byte_string is
+   228.       word   : KDF9.word := N;
+   229.       result : word_as_byte_string;
+   230.    begin
+   231.       for i in reverse 1 .. 8 loop
+   232.          result(i) := KDF9_char_sets.TP_CN(KDF9_char_sets.symbol(word and 8#77#));
+   233.          word := word / 64;
+   234.       end loop;
+   235.       return result;
+   236.    end to_string;
+   237.
+   238.    -- Return the result of applying to_string to each word of a double-word.
+   239.    function to_string (P : KDF9.pair)
+   240.    return pair_as_byte_string is
+   241.       result : pair_as_byte_string;
+   242.    begin
+   243.       result(1 ..  8) := to_string(P.msw);
+   244.       result(9 .. 16) := to_string(P.lsw);
+   245.       return result;
+   246.    end to_string;
+   247.
+   248.    -- Like to_string, but with glyphs for format effectors.
+   249.    function glyphs_for (N : KDF9.word)
+   250.    return word_as_byte_string is
+   251.       word   : KDF9.word := N;
+   252.       glyphs : word_as_byte_string;
+   253.    begin
+   254.       for i in reverse 1..8 loop
+   255.          glyphs(i) := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
+   256.          word := word / 64;
+   257.       end loop;
+   258.       return glyphs;
+   259.    end glyphs_for;
+   260.
+   261.    function glyphs_for (S : String)
+   262.    return String is
+   263.       T : String (S'First..S'Last);
+   264.    begin
+   265.       for i in T'Range loop
+   266.          T(i) := glyph_for(S(i));
+   267.       end loop;
+   268.       return T;
+   269.    end glyphs_for;
+   270.
+   271. end formatting;
+
+Compiling: ../Source/formatting.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Provide basic data-formatting operations for KDF9 data types.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with KDF9;
+    18.
+    19. use  KDF9;
+    20.
+    21. package formatting is
+    22.
+    23.    subtype unit_string         is String(1 .. 1);
+    24.    subtype word_as_byte_string is String(1 .. 8);
+    25.    subtype pair_as_byte_string is String(1 .. 16);
+    26.
+    27.    -- Return N as 3 octal digits.
+    28.    function oct_of (N : KDF9.syllable)
+    29.    return String;
+    30.
+    31.    -- Return N as 6 octal digits.
+    32.    function oct_of (N : KDF9.field_of_16_bits)
+    33.    return String;
+    34.
+    35.    subtype octal_width is Positive range 1 .. 6;
+    36.
+    37.    -- Return N as octal digits, with (partial) zero suppression.
+    38.    -- The first (6-min_digits) are elided if '0'; all remaining digits are returned.
+    39.    -- Up to 6 digits can be returned if the result is longer than min_digits.
+    40.    -- If N is 0, the String (1..min_digits => '0') is returned.
+    41.    function oct_of (N : KDF9.Q_part; min_digits : octal_width := 6)
+    42.    return String;
+    43.
+    44.    -- Return N as 1 .. 5 decimal digits, with zero suppression and sign when neagtive.
+    45.    function signed_dec_of (N : KDF9.Q_part)
+    46.    return String;
+    47.
+    48.    -- Return N as 1 .. 6 decimal digits, with zero suppression.
+    49.    function dec_of (N : KDF9.Q_part)
+    50.    return String;
+    51.
+    52.    -- Return N as up to 5 octal digits.
+    53.    function oct_of (N : KDF9.code_address)
+    54.    return String;
+    55.
+    56.    -- Return N as decimal digits, with zero suppression.
+    57.    function dec_of (N : KDF9.code_address)
+    58.    return String ;
+    59.
+    60.    -- Return N as 8 octal digits.
+    61.    function oct_of (N : KDF9.halfword)
+    62.    return String;
+    63.
+    64.    -- Return N as #wwwww/s, where w and s are octal digits.
+    65.    function oct_of (N : KDF9.SJNS_link)
+    66.    return String;
+    67.
+    68.    -- Return N as #wwwww/s, where w and s are octal digits.
+    69.    function oct_of (N : KDF9.syllable_address)
+    70.    return String;
+    71.
+    72.    -- Return N as dddd/d, where d is a decimal digit.
+    73.    function dec_of (N : KDF9.syllable_address)
+    74.    return String;
+    75.
+    76.    -- Return N as #wwwww/s, where w and s are octal digits;
+    77.    --    or as dddd/s, where d is a decimal digit, according to octal_option.
+    78.    function oct_or_dec_of (N : KDF9.syllable_address; octal_option : Boolean)
+    79.    return String;
+    80.
+    81.    -- Return N as 16 octal digits.
+    82.    function oct_of (N : KDF9.word)
+    83.    return String;
+    84.
+    85.    -- Return "L', R'", or "L'"if R' is empty; ' indicates removal of trailing blanks.
+    86.    function "-" (L, R : String)
+    87.    return String;
+    88.
+    89.    -- Return S with all leading and trailing blanks removed.
+    90.    function trimmed (S : String)
+    91.    return String;
+    92.
+    93.    -- Return trimmed(S), right-justified in a field of width at least W.
+    94.    function just_right (S : String; W : Positive := 3)
+    95.    return String;
+    96.
+    97.    -- Return trimmed(S), left-justified in a field of width at least W.
+    98.    function just_left (S : String; W : Positive := 3)
+    99.    return String;
+   100.
+   101.    -- Return the (pluralizing) suffix if count /= 1.
+   102.    function plurality (count : KDF9.word; for_1 : String := ""; for_more : String := "s")
+   103.    return String;
+   104.
+   105.    -- Return C converted to a 1-character string.
+   106.    function "+" (C : Character)
+   107.    return unit_string;
+   108.
+   109.    -- Return C with all Latin-1 lower-case letters converted to upper-case.
+   110.    function to_upper (C : Character)
+   111.    return Character;
+   112.
+   113.    -- Return S with all Latin-1 lower-case letters converted to upper-case.
+   114.    function to_upper (S : String)
+   115.    return String;
+   116.
+   117.    -- Return C with all Latin-1 upper-case letters converted to lower-case.
+   118.    function to_lower (C : Character)
+   119.    return Character;
+   120.
+   121.    -- Return S with all Latin-1 upper-case letters converted to lower-case.
+   122.    function to_lower (S : String)
+   123.    return String;
+   124.
+   125.    -- Return the 8-character Latin-1 string representing the 8 Case Normal characters in N.
+   126.    function to_string (N : KDF9.word)
+   127.    return word_as_byte_string;
+   128.
+   129.    -- Return the result of applying to_string to each word of a double-word.
+   130.    function to_string (P : KDF9.pair)
+   131.    return pair_as_byte_string;
+   132.
+   133.    -- Like to_string, but with glyphs for format effectors.
+   134.    function glyphs_for (N : KDF9.word)
+   135.    return word_as_byte_string;
+   136.
+   137.    function glyphs_for (S : String)
+   138.    return String;
+   139.
+   140. end formatting;
+
+ 271 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/host_io.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Buffered I/O streams to support KDF9 device I/O.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Characters.Latin_1;
+    18. --
+    19. with OS_specifics;
+    20.
+    21. use  Ada.Characters.Latin_1;
+    22. --
+    23. use  OS_specifics;
+    24.
+    25. package body host_IO is
+    26.
+    27.    function fd_of (the_stream : host_IO.stream)
+    28.    return Natural
+    29.    is (the_stream.fd);
+    30.
+    31.    procedure open (the_stream : in out host_IO.stream;
+    32.                    file_name  : in String;
+    33.                    mode       : in POSIX.access_mode;
+    34.                    fd         : in Integer) is
+    35.    begin
+    36.       if fd >= 0 then
+    37.          make_transparent(fd);
+    38.          the_stream.base_name := file_name(file_name'First .. file_name'First+2);
+    39.          the_stream.IO_mode := mode;
+    40.          the_stream.last_IO := read_mode;
+    41.          the_stream.fd := fd;
+    42.          the_stream.is_open := True;
+    43.       else
+    44.          the_stream.is_open := False;
+    45.       end if;
+    46.    end open;
+    47.
+    48.    procedure open (the_stream : in out host_IO.stream;
+    49.                    file_name  : in String;
+    50.                    mode       : in POSIX.access_mode) is
+    51.       fd : Integer;
+    52.    begin -- open
+    53.       fd := POSIX.open(file_name, mode);
+    54.       open(the_stream, file_name, mode, fd);
+    55.    exception
+    56.       when POSIX_IO_error =>
+    57.          trap_operator_error("«" & file_name & "» cannot be opened");
+    58.    end open;
+    59.
+    60.    procedure truncate (the_stream : in out host_IO.stream) is
+    61.    begin
+    62.       truncate(the_stream.fd);
+    63.    end truncate;
+    64.
+    65.    procedure close (the_stream : in out host_IO.stream) is
+    66.       response : Integer;
+    67.    begin
+    68.       if the_stream.is_open then
+    69.          flush(the_stream);
+    70.          response := close(the_stream.fd);
+    71.          pragma Unreferenced(response);
+    72.          the_stream.is_open := False;
+    73.       end if;
+    74.    end close;
+    75.
+    76.    procedure flush (the_stream  : in out host_IO.stream;
+    77.                     a_byte_time : in KDF9.us := 0) is
+    78.       response : Integer with Unreferenced;
+    79.    begin
+    80.       if the_stream.is_open      and then
+    81.             the_stream.next_byte > 0 then
+    82.          if the_stream.IO_mode > read_mode and the_stream.last_IO = write_mode then
+    83.             if a_byte_time = 0 then
+    84.                response := write(the_stream.fd, the_stream.buffer, the_stream.next_byte);
+    85.             else
+    86.                for p in 1 .. the_stream.next_byte loop
+    87.                   response := write(the_stream.fd, the_stream.buffer(p..p), 1);
+    88.                   KDF9.delay_by(a_byte_time);
+    89.                end loop;
+    90.             end if;
+    91.          end if;
+    92.          the_stream.next_byte := 0;
+    93.          the_stream.block_size := 0;
+    94.       end if;
+    95.    end flush;
+    96.
+    97.    function a_LF_was_just_read (the_stream : host_IO.stream)
+    98.    return Boolean
+    99.    is (
+   100.        the_stream.is_open                   and then
+   101.           the_stream.bytes_moved > 0        and then
+   102.              the_stream.last_IO = read_mode and then
+   103.                 the_stream.next_byte = 0    and then
+   104.                    the_stream.block_size = 0
+   105.       );
+   106.
+   107.    function a_LF_was_just_written (the_stream : host_IO.stream)
+   108.    return Boolean
+   109.    is (
+   110.        the_stream.is_open                    and then
+   111.           the_stream.bytes_moved > 0         and then
+   112.              the_stream.last_IO /= read_mode and then
+   113.                 the_stream.column = 0
+   114.       );
+   115.
+   116.    procedure reattach (the_stream : in out host_IO.stream;
+   117.                        file_name  : in String;
+   118.                        mode       : in POSIX.access_mode) is
+   119.    begin
+   120.       close(the_stream);
+   121.       open(the_stream, file_name, (if the_stream.IO_mode = rd_wr_mode then rd_wr_mode else mode));
+   122.       if the_stream.is_open then
+   123.          the_stream.last_char := ' ';
+   124.          the_stream.block_size := 0;
+   125.          the_stream.next_byte := 0;
+   126.          the_stream.position := 0;
+   127.       end if;
+   128.    end reattach;
+   129.
+   130.    function is_open (the_stream : host_IO.stream)
+   131.    return Boolean
+   132.    is (the_stream.is_open);
+   133.
+   134.    function bytes_moved (the_stream : host_IO.stream)
+   135.    return KDF9.word
+   136.    is (the_stream.bytes_moved);
+   137.
+   138.    function column (the_stream : host_IO.stream)
+   139.    return Natural
+   140.    is (the_stream.column);
+   141.
+   142.    procedure get_position (position   : out Natural;
+   143.                            the_stream : in out host_IO.stream) is
+   144.    begin
+   145.       flush(the_stream);
+   146.       position := the_stream.position;
+   147.    end get_position;
+   148.
+   149.    function buffer_is_empty (the_stream : host_IO.stream)
+   150.    return Boolean
+   151.    is (not the_stream.is_open or else the_stream.next_byte >= the_stream.block_size);
+   152.
+   153.    function buffer_is_full (the_stream : host_IO.stream)
+   154.    return Boolean
+   155.    is (the_stream.is_open and then the_stream.next_byte = the_stream.buffer'Last);
+   156.
+   157.    procedure set_position (position   : in Natural;
+   158.                            the_stream : in out host_IO.stream;
+   159.                            whence     : in POSIX.seek_origin := from_start) is
+   160.       response : POSIX.file_position with Warnings => Off;
+   161.    begin
+   162.       flush(the_stream);
+   163.       response := seek(the_stream.fd, POSIX.file_position(position), whence);
+   164.       the_stream.position := position;
+   165.    end set_position;
+   166.
+   167.    procedure clear (the_stream : in out host_IO.stream) is
+   168.    begin
+   169.       the_stream.next_byte := 0;
+   170.       the_stream.block_size := 0;
+   171.    end clear;
+   172.
+   173.    procedure reset (the_stream : in out host_IO.stream) is
+   174.    begin
+   175.       flush(the_stream);
+   176.       if the_stream.is_open then
+   177.          the_stream.last_IO := read_mode;
+   178.          the_stream.position := 0;
+   179.          the_stream.next_byte := 0;
+   180.          the_stream.block_size := 0;
+   181.       end if;
+   182.    end reset;
+   183.
+   184.    procedure back_off (the_stream : in out host_IO.stream) is
+   185.    begin
+   186.       if the_stream.is_open                   and then
+   187.             the_stream.next_byte > 0          and then
+   188.                the_stream.last_IO = read_mode     then
+   189.          the_stream.next_byte := the_stream.next_byte - 1;
+   190.          the_stream.position := the_stream.position - 1;
+   191.       else
+   192.          trap_operator_error(the_stream.base_name & "cannot back_off");
+   193.       end if;
+   194.    end back_off;
+   195.
+   196.    procedure get_byte (char       : out Character;
+   197.                        the_stream : in out host_IO.stream) is
+   198.       response : Integer;
+   199.    begin
+   200.       if buffer_is_empty(the_stream) then
+   201.          response := read(the_stream.fd, the_stream.buffer, the_stream.buffer'Size);
+   202.          the_stream.block_size := response;
+   203.          the_stream.next_byte := 0;
+   204.          if response <= 0 then
+   205.             raise end_of_stream;
+   206.          end if;
+   207.       end if;
+   208.       the_stream.next_byte := the_stream.next_byte + 1;
+   209.       the_stream.position := the_stream.position + 1;
+   210.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
+   211.       the_stream.last_IO := read_mode;
+   212.       char := the_stream.buffer(the_stream.next_byte);
+   213.       if char = LF then
+   214.          the_stream.column := 0;
+   215.       else
+   216.          the_stream.column := the_stream.column + 1;
+   217.       end if;
+   218.    end get_byte;
+   219.
+   220.    procedure get_bytes (the_string : out String;
+   221.                         the_stream : in out host_IO.stream;
+   222.                         uncounted  : in Boolean := True) is
+   223.       old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
+   224.    begin
+   225.       for b of the_string loop
+   226.          get_byte(b, the_stream);
+   227.       end loop;
+   228.       if uncounted then
+   229.          the_stream.bytes_moved := old_bytes_moved;
+   230.       end if;
+   231.    end get_bytes;
+   232.
+   233.    procedure get_char (char       : out Character;
+   234.                        the_stream : in out host_IO.stream) is
+   235.    begin
+   236.       get_byte(char, the_stream);
+   237.       if char = CR then
+   238.          char := LF;
+   239.          the_stream.last_char := CR;
+   240.       elsif char = LF and the_stream.last_char = CR then
+   241.          the_stream.last_char := LF;
+   242.          get_byte(char, the_stream);
+   243.       else
+   244.          the_stream.last_char := char;
+   245.       end if;
+   246.    end get_char;
+   247.
+   248.    procedure peek_at_char (char       : out Character;
+   249.                            the_stream : in out host_IO.stream) is
+   250.    begin
+   251.       get_char(char, the_stream);
+   252.       back_off(the_stream);
+   253.    end peek_at_char;
+   254.
+   255.    -- put_escape_code writes directly to the stream's device, avoiding the stream's buffers.
+   256.    procedure put_escape_code (the_string : in String;
+   257.                               the_stream : in out host_IO.stream) is
+   258.       response : Integer with Warnings => Off;
+   259.    begin
+   260.       if not the_stream.is_open then
+   261.          raise end_of_stream;
+   262.       end if;
+   263.       response := write(the_stream.fd,
+   264.                         the_string,
+   265.                         the_string'Length);
+   266.    end put_escape_code;
+   267.
+   268.    procedure put_byte (char       : in Character;
+   269.                        the_stream : in out host_IO.stream) is
+   270.       response : Integer with Warnings => Off;
+   271.    begin
+   272.       if the_stream.buffer_is_full then
+   273.          response := write(the_stream.fd,
+   274.                            the_stream.buffer,
+   275.                            the_stream.buffer'Size);
+   276.          the_stream.next_byte := 0;
+   277.       end if;
+   278.       the_stream.next_byte := the_stream.next_byte + 1;
+   279.       the_stream.position := the_stream.position + 1;
+   280.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
+   281.       the_stream.buffer(the_stream.next_byte) := char;
+   282.       the_stream.last_IO := write_mode;
+   283.       if char = LF then
+   284.          the_stream.column := 0;
+   285.       else
+   286.          the_stream.column := the_stream.column + 1;
+   287.       end if;
+   288.    end put_byte;
+   289.
+   290.    procedure do_not_put_byte (char       : in Character;
+   291.                               the_stream : in out host_IO.stream) is
+   292.    begin
+   293.       the_stream.bytes_moved := the_stream.bytes_moved + 1;
+   294.       the_stream.last_IO := write_mode;
+   295.       if char = LF then
+   296.          the_stream.column := 0;
+   297.       else
+   298.          the_stream.column := the_stream.column + 1;
+   299.       end if;
+   300.    end do_not_put_byte;
+   301.
+   302.    procedure put_bytes (the_string : in String;
+   303.                         the_stream : in out host_IO.stream;
+   304.                         uncounted  : in Boolean := True) is
+   305.       old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
+   306.    begin
+   307.       for c of the_string loop
+   308.          put_byte(c, the_stream);
+   309.       end loop;
+   310.       if uncounted then
+   311.          the_stream.bytes_moved := old_bytes_moved;
+   312.       end if;
+   313.    end put_bytes;
+   314.
+   315.    procedure put_EOL (the_stream : in out host_IO.stream;
+   316.                       uncounted  : in Boolean := True) is
+   317.    begin
+   318.       put_bytes(NL, the_stream, uncounted);
+   319.    end put_EOL;
+   320.
+   321.    procedure put_char (char       : in Character;
+   322.                        the_stream : in out host_IO.stream) is
+   323.    begin
+   324.       if char = LF then
+   325.          put_EOL(the_stream, uncounted => False);
+   326.       else
+   327.          put_byte(char, the_stream);
+   328.       end if;
+   329.    end put_char;
+   330.
+   331.    procedure put_chars (the_string : in String;
+   332.                         the_stream : in out host_IO.stream) is
+   333.    begin
+   334.       for c of the_string loop
+   335.          put_char(c, the_stream);
+   336.       end loop;
+   337.    end put_chars;
+   338.
+   339.    function contents (the_stream : host_IO.stream)
+   340.    return String is
+   341.    begin
+   342.       return the_stream.buffer(1..the_stream.next_byte);
+   343.    end contents;
+   344.
+   345.    procedure inject (the_string : in String;
+   346.                      the_stream : in out host_IO.stream) is
+   347.       the_length : constant Natural := the_string'Length;
+   348.    begin
+   349.       if the_length > 0 and the_length < the_stream.buffer'Length then
+   350.          the_stream.block_size := the_length + 1;
+   351.          the_stream.buffer(1 .. the_length) := the_string;
+   352.          the_stream.buffer(the_length + 1)  := LF;
+   353.       end if;
+   354.    end inject;
+   355.
+   356. end host_IO;
+
+Compiling: ../Source/host_io.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- Buffered I/O streams to support KDF9 device I/O.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with KDF9;
+    18. with POSIX;
+    19.
+    20. use  KDF9;
+    21. use  POSIX;
+    22.
+    23. package host_IO is
+    24.
+    25.    end_of_stream : exception;
+    26.
+    27.    type stream is tagged limited private;
+    28.
+    29.    function fd_of (the_stream : host_IO.stream)
+    30.    return Natural;
+    31.
+    32.    -- Open a stream with an established fd.
+    33.    procedure open (the_stream : in out host_IO.stream;
+    34.                    file_name  : in String;
+    35.                    mode       : in POSIX.access_mode;
+    36.                    fd         : in Integer);
+    37.
+    38.    -- Open a base file then use its fd to open a stream.
+    39.    procedure open (the_stream : in out host_IO.stream;
+    40.                    file_name  : in String;
+    41.                    mode       : in POSIX.access_mode)
+    42.       with Inline => False;
+    43.
+    44.    procedure truncate (the_stream : in out host_IO.stream);
+    45.
+    46.    procedure close (the_stream : in out host_IO.stream);
+    47.
+    48.    procedure flush (the_stream  : in out host_IO.stream;
+    49.                     a_byte_time : in KDF9.us := 0);
+    50.
+    51.    -- Reassign an open stream to another file.
+    52.    procedure reattach (the_stream : in out host_IO.stream;
+    53.                        file_name  : in String;
+    54.                        mode       : in POSIX.access_mode);
+    55.
+    56.    function is_open (the_stream : host_IO.stream)
+    57.    return Boolean;
+    58.
+    59.    function bytes_moved (the_stream : host_IO.stream)
+    60.    return KDF9.word;
+    61.
+    62.    function column (the_stream : host_IO.stream)
+    63.    return Natural;
+    64.
+    65.    procedure get_position (position   : out Natural;
+    66.                            the_stream : in out host_IO.stream);
+    67.
+    68.    procedure set_position (position   : in Natural;
+    69.                            the_stream : in out host_IO.stream;
+    70.                            whence     : in POSIX.seek_origin := from_start);
+    71.
+    72.    procedure clear (the_stream : in out host_IO.stream);
+    73.
+    74.    procedure reset (the_stream : in out host_IO.stream);
+    75.
+    76.    -- Arrange for the last-read byte to be read again.
+    77.    procedure back_off (the_stream : in out host_IO.stream)
+    78.       with Inline;
+    79.
+    80.    procedure get_byte (char       : out Character;
+    81.                        the_stream : in out host_IO.stream);
+    82.
+    83.    -- get_bytes iterates get_byte over the_string, for convenience.
+    84.    -- If uncounted then the output is not included in the_stream.bytes_moved.
+    85.    procedure get_bytes (the_string : out String;
+    86.                         the_stream : in out host_IO.stream;
+    87.                         uncounted  : in Boolean := True);
+    88.
+    89.    -- True iff the last get_byte obtained a LF.
+    90.    function a_LF_was_just_read (the_stream : host_IO.stream)
+    91.    return Boolean;
+    92.
+    93.    -- get_char differs from get_byte in the treatment of line terminators.
+    94.    -- CR, LF, and CRLF are all returned as a single LF character, so catering
+    95.    --    for old MacOS, MSDOS, and macOS/UNIX/Linux external text-file formats.
+    96.    procedure get_char (char       : out Character;
+    97.                        the_stream : in out host_IO.stream);
+    98.
+    99.    -- peek_at_char uses get_char to inspect the next char to be delivered,
+   100.    --    then invokes back_off so that it is left in the input stream.
+   101.    procedure peek_at_char (char       : out Character;
+   102.                            the_stream : in out host_IO.stream);
+   103.
+   104.    -- do_not_put_byte does the same as put_byte, except for actually writing it to the_stream.
+   105.    procedure do_not_put_byte (char       : in Character;
+   106.                               the_stream : in out host_IO.stream);
+   107.
+   108.    procedure put_byte (char       : in Character;
+   109.                        the_stream : in out host_IO.stream);
+   110.
+   111.    -- put_escape_code writes directly to the stream's device, avoiding the stream's buffers.
+   112.    procedure put_escape_code (the_string : in String;
+   113.                               the_stream : in out host_IO.stream);
+   114.
+   115.    -- put_bytes iterates put_byte over the_string, for convenience.
+   116.    -- If uncounted then the output is not included in the_stream.bytes_moved.
+   117.    procedure put_bytes (the_string : in String;
+   118.                         the_stream : in out host_IO.stream;
+   119.                         uncounted  : in Boolean := True);
+   120.
+   121.    -- put_EOL writes the host-appropriate line terminator (CRLF, or just LF)
+   122.    procedure put_EOL (the_stream : in out host_IO.stream;
+   123.                       uncounted  : in Boolean := True);
+   124.
+   125.    -- put_char differs from put_byte only in the treatment of line terminators.
+   126.    -- If char is LF, then put_EOL is used to output a host-appropriate line terminator.
+   127.    procedure put_char (char       : in Character;
+   128.                        the_stream : in out host_IO.stream);
+   129.
+   130.    -- put_chars iterates put_bytes over the_string, for convenience.
+   131.    procedure put_chars (the_string : in String;
+   132.                         the_stream : in out host_IO.stream);
+   133.
+   134.    -- True iff the last put_byte wrote out a LF.
+   135.    function a_LF_was_just_written (the_stream : host_IO.stream)
+   136.    return Boolean;
+   137.
+   138.    function buffer_is_empty (the_stream : host_IO.stream)
+   139.    return Boolean
+   140.       with Inline;
+   141.
+   142.    function buffer_is_full (the_stream : host_IO.stream)
+   143.    return Boolean
+   144.       with Inline;
+   145.
+   146.    -- Return the currently buffered output as a single string.
+   147.    function contents (the_stream : host_IO.stream)
+   148.    return String;
+   149.
+   150.    -- Make the_string appear to be input for the_stream (which must be empty).
+   151.    procedure inject (the_string : in String;
+   152.                      the_stream : in out host_IO.stream);
+   153.
+   154. private
+   155.
+   156.    -- N.B. in host_IO the term 'buffer' is used conventionally.
+   157.    -- It does NOT refer to a KDF9 DMA channel.
+   158.
+   159.    -- IO_buffer_size is enough for a full LP line, lacking any better criterion.
+   160.    IO_buffer_size : constant Positive := 161;
+   161.
+   162.    type stream is tagged limited
+   163.       record
+   164.          base_name   : String (1 .. 3) := "???";
+   165.          is_open     : Boolean := False;
+   166.          last_char   : Character := ' ';
+   167.          block_size,
+   168.          next_byte,
+   169.          saved_size,
+   170.          position,
+   171.          column      : Natural := 0;
+   172.          bytes_moved : KDF9.word := 0;
+   173.          fd          : Natural := Natural'Last;
+   174.          IO_mode     : POSIX.access_mode range read_mode .. rd_wr_mode;
+   175.          last_IO     : POSIX.access_mode range read_mode .. write_mode;
+   176.          buffer,
+   177.          look_behind : String(1 .. IO_buffer_size);
+   178.       end record;
+   179.
+   180. end host_IO;
+
+ 356 lines: No errors
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-store.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- KDF9 core store operations.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Unchecked_Conversion;
+    18. --
+    19. with formatting;
+    20. with KDF9.CPU;
+    21.
+    22. use formatting;
+    23. use  KDF9.CPU;
+    24.
+    25. package body KDF9.store is
+    26.
+    27.    -- diagnose_invalid_address avoids secondary stack usage in the address validation procedures.
+    28.    procedure diagnose_invalid_address (message : in String; address : in KDF9.word)
+    29.       with Inline => False;
+    30.
+    31.    procedure diagnose_invalid_address (message : in String; address : in KDF9.word) is
+    32.    begin
+    33.       trap_illegal_instruction(message & " =" & address'Image);
+    34.    end diagnose_invalid_address;
+    35.
+    36.    -- Check that EA, EA+BA are valid; LIV if invalid.
+    37.    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part)
+    38.       with Inline => True;
+    39.
+    40.    procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part) is
+    41.       PA : constant KDF9.word := (KDF9.word(EA) + KDF9.word(BA)) and Q_part_mask;
+    42.    begin
+    43.       if EA > NOL and then the_CPU_state = program_state then
+    44.          diagnose_invalid_address("NOL < virtual address", KDF9.word(EA));
+    45.       end if;
+    46.       if PA > max_address and then the_CPU_state = program_state then
+    47.          diagnose_invalid_address("32K-1 < physical address", PA);
+    48.       end if;
+    49.    end validate_virtual_and_real_addresses;
+    50.
+    51.    procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
+    52.                                     address_2 : KDF9.Q_part := 0;
+    53.                                     solo      : Boolean     := True) is
+    54.    begin
+    55.       LOV_if_user_mode(
+    56.                        if solo
+    57.                        then "at #" & oct_of(address_1) & " (E" & dec_of(address_1) & ")"
+    58.                        else "in #" & oct_of(address_1) & "..#" & oct_of(address_2)
+    59.                       );
+    60.    end if_user_mode_then_LOV;
+    61.
+    62.    function group (PA : KDF9.Q_part)
+    63.    return KDF9.Q_part
+    64.    is (PA / group_size);
+    65.
+    66.    procedure check_address_and_lockout (EA : in KDF9.Q_part) is
+    67.       PA : constant KDF9.Q_part := EA + BA;
+    68.    begin
+    69.       validate_virtual_and_real_addresses(EA);
+    70.       if locked_out(group(PA)) then
+    71.          the_locked_out_address := PA;
+    72.          if the_CPU_state /= Director_state then
+    73.             if_user_mode_then_LOV(PA);
+    74.          end if;
+    75.       end if;
+    76.    end check_address_and_lockout;
+    77.
+    78.    procedure validate_address_range (EA1, EA2 : in KDF9.Q_part) is
+    79.    begin
+    80.       if EA1 > EA2 then
+    81.          diagnose_invalid_address("initial address > final address", KDF9.word(EA2));
+    82.       end if;
+    83.       validate_virtual_and_real_addresses(EA1);
+    84.       validate_virtual_and_real_addresses(EA2);
+    85.    end validate_address_range;
+    86.
+    87.    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part) is
+    88.        PA1 : constant KDF9.Q_part := EA1 + BA;
+    89.        PA2 : constant KDF9.Q_part := EA2 + BA;
+    90.    begin
+    91.       validate_address_range (EA1, EA2);
+    92.       if there_are_locks_in_physical_addresses(KDF9.Q_register'(C => 0, I => PA1, M => PA2)) then
+    93.          if the_CPU_state /= Director_state then
+    94.             if_user_mode_then_LOV(PA1, PA2, solo => False);
+    95.          end if;
+    96.       end if;
+    97.    end check_addresses_and_lockouts;
+    98.
+    99.    -- Check that A1+A2 is valid; trap if it is invalid.
+   100.    function valid_word_address (A1, A2 : in KDF9.Q_part)
+   101.    return KDF9.address is
+   102.       V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(A2)) and Q_part_mask;
+   103.    begin
+   104.       if V > max_address then
+   105.          diagnose_invalid_address("32K-1 < virtual address", V);
+   106.       end if;
+   107.       return KDF9.address(V);
+   108.    end valid_word_address;
+   109.
+   110.    function signed is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
+   111.    function design is new Ada.Unchecked_Conversion (CPU.signed_Q_part, KDF9.Q_part);
+   112.
+   113.    -- Check that A1+A2/2 is valid; trap if it is invalid.  A2 must be treated as a signed number.
+   114.    function valid_halfword_address (A1, A2 : in KDF9.Q_part)
+   115.    return KDF9.address is
+   116.       V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(design(signed(A2)/2))) and Q_part_mask;
+   117.    begin
+   118.       if V > max_address then
+   119.          diagnose_invalid_address("32K-1 < virtual address", V);
+   120.       end if;
+   121.       return KDF9.address(V);
+   122.    end valid_halfword_address;
+   123.
+   124.    function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
+   125.    return KDF9_char_sets.symbol
+   126.    is (KDF9_char_sets.symbol(shift_word_right(core(EA+BA), 42 - 6*Natural(index)) and 8#77#));
+   127.
+   128.    procedure store_symbol (value : in KDF9_char_sets.symbol;
+   129.                            EA    : in KDF9.address;
+   130.                            index : in KDF9_char_sets.symbol_index) is
+   131.       place  : constant Natural   := 42 - 6*Natural(index);
+   132.       mask   : constant KDF9.word := not shift_word_left(8#77#, place);
+   133.       symbol : constant KDF9.word := shift_word_left(KDF9.word(value), place);
+   134.    begin
+   135.       core(EA+BA) := (core(EA+BA) and mask) or symbol;
+   136.    end store_symbol;
+   137.
+   138.    function fetch_octet (EA : KDF9.address; index : KDF9_char_sets.octet_index)
+   139.    return KDF9_char_sets.octet is
+   140.       place : constant Natural := 40 - 8*Natural(index);
+   141.    begin
+   142.       return KDF9_char_sets.octet(shift_word_right(core(EA+BA), place) and 8#377#);
+   143.    end fetch_octet;
+   144.
+   145.    procedure store_octet  (value : in KDF9_char_sets.octet;
+   146.                            EA    : in KDF9.address;
+   147.                            index : in KDF9_char_sets.octet_index) is
+   148.       place : constant Natural   := 40 - 8*Natural(index);
+   149.       octet : constant KDF9.word := shift_word_left(KDF9.word(value), place);
+   150.       mask  : constant KDF9.word := not shift_word_left(8#377#, place);
+   151.    begin
+   152.       core(EA+BA) := (core(EA+BA) and mask) or octet;
+   153.    end store_octet;
+   154.
+   155.    function fetch_syllable (EA : KDF9.syllable_address)
+   156.    return KDF9.syllable is
+   157.       address : constant KDF9.address := Q_part(EA.code_address) + BA;
+   158.       place   : constant Natural      := 40 - 8*Natural(EA.syllable_index);
+   159.    begin
+   160.       return KDF9.syllable(shift_word_right(core(address), place) and 8#377#);
+   161.    end fetch_syllable;
+   162.
+   163.    procedure store_syllable (value : in KDF9.syllable;
+   164.                              EA    : in KDF9.address;
+   165.                              index : in KDF9.syllable_index) is
+   166.       place    : constant Natural   := 40 - 8*Natural(index);
+   167.       syllable : constant KDF9.word := shift_word_left(KDF9.word(value), place);
+   168.       mask     : constant KDF9.word := not shift_word_left(8#377#, place);
+   169.    begin
+   170.       core(EA+BA) := (core(EA+BA) and mask) or syllable;
+   171.    end store_syllable;
+   172.
+   173.    function fetch_halfword (EA : KDF9.address; index : KDF9.halfword_number)
+   174.    return KDF9.word
+   175.    is (shift_word_left(shift_word_right(core(EA+BA), 24 - 24*Natural(index)), 24));
+   176.
+   177.    procedure store_halfword (value : in KDF9.word;
+   178.                              EA    : in KDF9.address;
+   179.                              index : in KDF9.halfword_number) is
+   180.       place   : constant Natural   := 24 - 24*Natural(index);
+   181.       half    : constant KDF9.word := shift_word_left(shift_word_right(value, 24), place);
+   182.       mask    : constant KDF9.word := not shift_word_left(halfword_mask, place);
+   183.    begin
+   184.       core(EA+BA) := (core(EA+BA) and mask) or half;
+   185.    end store_halfword;
+   186.
+   187.    function fetch_word (EA : KDF9.address)
+   188.    return KDF9.word
+   189.    is (core(EA+BA));
+   190.
+   191.    procedure store_word (value : in KDF9.word; EA : in KDF9.address) is
+   192.    begin
+   193.       core(EA+BA) := value;
+   194.    end store_word;
+   195.
+   196.    function there_are_locks_in_relative_addresses (Q : KDF9.Q_register)
+   197.    return Boolean is
+   198.    begin
+   199.       validate_address_range (Q.I, Q.M);
+   200.       return there_are_locks_in_physical_addresses((0, Q.I+BA, Q.M+BA));
+   201.    end there_are_locks_in_relative_addresses;
+   202.
+   203.    function there_are_locks_in_physical_addresses (Q : KDF9.Q_register)
+   204.    return Boolean is
+   205.    begin
+   206.       for g in group(Q.I) .. group(Q.M) loop
+   207.          if locked_out(g) then
+   208.             the_locked_out_address := g * group_size;
+   209.             return True;
+   210.          end if;
+   211.       end loop;
+   212.       return False;
+   213.    end there_are_locks_in_physical_addresses;
+   214.
+   215.    function is_unlocked (G : KDF9.store.group_address)
+   216.    return Boolean is
+   217.    begin
+   218.       return not locked_out(KDF9.Q_part(G));
+   219.    end is_unlocked;
+   220.
+   221.    procedure lock_out_relative_addresses (Q : in KDF9.Q_register) is
+   222.    begin
+   223.       validate_address_range (Q.I, Q.M);
+   224.       lock_out_absolute_addresses((0, Q.I+BA, Q.M+BA));
+   225.    end lock_out_relative_addresses;
+   226.
+   227.    procedure lock_out_absolute_addresses (Q : in KDF9.Q_register) is
+   228.    begin
+   229.       for g in group(Q.I) .. group(Q.M) loop
+   230.          locked_out(g) := True;
+   231.       end loop;
+   232.    end lock_out_absolute_addresses;
+   233.
+   234.    procedure unlock_absolute_addresses (Q : in KDF9.Q_register) is
+   235.    begin
+   236.       for g in group(Q.I) .. group(Q.M) loop
+   237.          locked_out(g) := False;
+   238.       end loop;
+   239.    end unlock_absolute_addresses;
+   240.
+   241. end KDF9.store;
+
+Compiling: ../Source/kdf9-store.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:51
+
+     1. -- KDF9 core store operations.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with KDF9_char_sets;
+    18.
+    19. use  KDF9_char_sets;
+    20.
+    21. package KDF9.store is
+    22.
+    23.    --
+    24.    -- Relative addresses may be either virtual or physical.
+    25.    -- Virtual addresses are generated by problem programs and must be relativized by adding BA.
+    26.    -- These addresses must also be validated to ensure they do not breach store limits.
+    27.    -- Physical "relative" addresses are generated by Director, when BA is guaranteed to be 0,
+    28.    --   so it has no effect, thus allowing the relative address routines to be used.
+    29.    --
+    30.    -- Absolute addresses are generated by I/O Control, which may be doing a transfer for either
+    31.    --   a Director or a problem program, and must therefore ensure that BA is not added.
+    32.    --
+    33.
+    34.    --
+    35.    -- Parameters named EA are Effective "relative" Addresses.
+    36.    --
+    37.
+    38.    function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
+    39.    return KDF9_char_sets.symbol;
+    40.
+    41.    function fetch_octet (EA : KDF9.address; index : KDF9_char_sets.octet_index)
+    42.    return KDF9_char_sets.octet
+    43.       with Inline;
+    44.
+    45.    function fetch_syllable (EA : KDF9.syllable_address)
+    46.    return KDF9.syllable
+    47.       with Inline;
+    48.
+    49.    function fetch_halfword (EA : KDF9.address; index : KDF9.halfword_number)
+    50.    return KDF9.word
+    51.       with Inline;
+    52.
+    53.    function fetch_word (EA : KDF9.address)
+    54.    return KDF9.word
+    55.       with Inline;
+    56.
+    57.    procedure store_symbol (value : in KDF9_char_sets.symbol;
+    58.                            EA    : in KDF9.address;
+    59.                            index : in KDF9_char_sets.symbol_index)
+    60.       with Inline;
+    61.
+    62.    procedure store_octet  (value : in KDF9_char_sets.octet;
+    63.                            EA    : in KDF9.address;
+    64.                            index : in KDF9_char_sets.octet_index)
+    65.       with Inline;
+    66.
+    67.    procedure store_syllable (value : in KDF9.syllable;
+    68.                              EA    : in KDF9.address;
+    69.                              index : in KDF9.syllable_index)
+    70.       with Inline;
+    71.
+    72.    procedure store_halfword (value : in KDF9.word;
+    73.                              EA    : in KDF9.address;
+    74.                              index : in KDF9.halfword_number)
+    75.       with Inline;
+    76.
+    77.    procedure store_word (value : in KDF9.word; EA : in KDF9.address)
+    78.       with Inline;
+    79.
+    80.    -- Check that A1+A2 is a valid word address; LIV if it is invalid.
+    81.    function valid_word_address (A1, A2 : in KDF9.Q_part)
+    82.    return KDF9.address
+    83.       with Inline;
+    84.
+    85.    -- Check that A1+A2/2 is valid; LIV if it is invalid.  A2 is treated as a signed number.
+    86.    function valid_halfword_address (A1, A2 : in KDF9.Q_part)
+    87.    return KDF9.address
+    88.       with Inline;
+    89.
+    90.    -- If a store access is locked out, its physical address is left here.
+    91.    the_locked_out_address : KDF9.Q_part;
+    92.
+    93.    procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
+    94.                                     address_2 : KDF9.Q_part := 0;
+    95.                                     solo      : Boolean     := True)
+    96.       with Inline => False;
+    97.
+    98.    -- Check EA and lockout for EA.
+    99.    procedure check_address_and_lockout (EA : in KDF9.Q_part)
+   100.       with Inline;
+   101.
+   102.    -- Check that EA1, EA2, EA1+BA, EA2+BA are valid, and EA1 <= EA2.
+   103.    --    LIV in any invalid case.
+   104.    procedure validate_address_range (EA1, EA2 : in KDF9.Q_part);
+   105.
+   106.    -- Check EA1, EA2, and lockouts for EA1+BA .. EA2+BA.
+   107.    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part);
+   108.
+   109.    function there_are_locks_in_relative_addresses (Q : KDF9.Q_register)
+   110.    return Boolean;
+   111.
+   112.    function there_are_locks_in_physical_addresses (Q : KDF9.Q_register)
+   113.    return Boolean;
+   114.
+   115.    procedure lock_out_relative_addresses (Q : in KDF9.Q_register);
+   116.
+   117.    procedure lock_out_absolute_addresses (Q : in KDF9.Q_register);
+   118.
+   119.    procedure unlock_absolute_addresses (Q : in KDF9.Q_register);
+   120.
+   121.    -- The maximum size KDF9 core store has 32Kibiwords.
+   122.    max_address   : constant := 2**15 - 1;
+   123.
+   124.    -- The group size of 32 words is 1 physical core allocation unit and physical lockout unit.
+   125.    group_size : constant := 32;
+   126.
+   127.    type group_address is mod 1024;
+   128.
+   129.     -- is_unlocked yields True if the designated group is NOT locked out.
+   130.    function is_unlocked (G : KDF9.store.group_address)
+   131.    return Boolean;
+   132.
+   133.    function group (PA : KDF9.Q_part)
+   134.    return KDF9.Q_part
+   135.       with Inline;
+   136.
+   137. private
+   138.
+   139.    type word_array is array (KDF9.Q_part range <>) of KDF9.word
+   140.       with Component_Size => 64, Convention => C;
+   141.
+   142.    -- The core store of KDF9.  Must be zeroized before loading any software.
+   143.    core : word_array (KDF9.Q_part range 0 .. max_address) := (others => 0);
+   144.
+   145.    -- The lockout store has one bit for every group_size words.
+   146.    last_lockout : constant := max_address / group_size;
+   147.    locked_out   : array (KDF9.Q_part range 0 .. last_lockout) of Boolean := (others => False);
+   148.
+   149. end KDF9.store;
+
+ 241 lines: No errors
+
+
+GNAT 8.3.0
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/imported_value_of.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Get the value of an environment variable.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23164,12 +23171,12 @@ Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/kdf9-tod_clock.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23248,12 +23255,12 @@ Compiled at: 2021-05-29 19:07:10
     79. end KDF9.TOD_clock;
 
 Compiling: ../Source/kdf9-tod_clock.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- functions that implement timing for Director emulation.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23289,13 +23296,125 @@ GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
+Compiling: /home/parallels/emulation/Source/kdf9-tsd-timing.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement the timing OUTs of the EE Time Sharing Directors.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package body KDF9.TSD.timing is
+    18.
+    19.    -- This is the actual wall clock time at which the program was loaded.
+    20.    -- If signature hashing is enabled, it stays at zero to get a repeatable hash.
+    21.    the_time_of_loading : KDF9.us := 0;
+    22.
+    23.    -- Set the base for virtual elapsed time reckoning.
+    24.    procedure set_the_time_of_loading (the_time : in KDF9.us) is
+    25.    begin
+    26.       the_time_of_loading := the_time;
+    27.    end set_the_time_of_loading;
+    28.
+    29.    -- Return a time in µs as 48-bit seconds to 23 integral places.
+    30.    function OUT_time (microseconds : KDF9.us)
+    31.    return KDF9.word is
+    32.       -- The time was recorded by the hardware in units of 32 us, not 1 us.
+    33.       truncated_time : constant KDF9.us := microseconds and not 31;
+    34.    begin
+    35.       if truncated_time < 2**23 * 1E6 then
+    36.          -- 2**18 / 15625 = 2**24 / 1E6, with no risk of overflow in 64 bits.
+    37.          return KDF9.word(truncated_time * 2**18 / 15625);
+    38.       else
+    39.          -- The virtual elapsed time overflows the 23-bit seconds field.
+    40.          -- This would never have happened to a real KDF9, as 2**23 seconds is over three months.
+    41.          -- No KDF9 could stay up that long!
+    42.          -- However 2**23 KDF9 seconds pass in about 5 hours of ee9 real time,
+    43.          --    so precautions have to be taken.
+    44.          raise program_exit with "the KDF9 has been running too long, time > 2**23 seconds";
+    45.       end if;
+    46.    end OUT_time;
+    47.
+    48.    procedure do_OUT_3 is
+    49.    begin
+    50.       push(OUT_time(the_CPU_time));
+    51.       the_trace_operand := read_top;
+    52.    end do_OUT_3;
+    53.
+    54.    procedure do_OUT_9 is
+    55.    begin
+    56.       -- A TOD clock is simulated using the real TOD at which the program was
+    57.       --    loaded, and the virtual time that has elapsed since.
+    58.       push(OUT_time(the_time_of_loading + the_clock_time));
+    59.       the_trace_operand := read_top;
+    60.    end do_OUT_9;
+    61.
+    62.    procedure do_OUT_17 is
+    63.    begin
+    64.       ensure_that_the_NEST_has_room_for_2_results;
+    65.       -- In program mode, the Elapsed Time is the same thing as the_clock_time.
+    66.       push(OUT_time(the_clock_time));
+    67.       push(OUT_time(the_CPU_time));
+    68.       the_trace_operand := read_top;
+    69.    end do_OUT_17;
+    70.
+    71. end KDF9.TSD.timing;
+
+Compiling: ../Source/kdf9-tsd-timing.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement the timing OUTs of the EE Time Sharing Directors.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package KDF9.TSD.timing is
+    18.
+    19.    procedure do_OUT_3;
+    20.
+    21.    procedure do_OUT_9;
+    22.
+    23.    procedure do_OUT_17;
+    24.
+    25.    -- Set the base for virtual elapsed time reckoning.
+    26.    procedure set_the_time_of_loading (the_time : in KDF9.us);
+    27.
+    28. end KDF9.TSD.timing;
+
+ 71 lines: No errors
+
+
 Compiling: /home/parallels/emulation/Source/kdf9-tsd.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23518,12 +23637,12 @@ Compiled at: 2021-05-29 19:07:10
    223. end KDF9.TSD;
 
 Compiling: ../Source/kdf9-tsd.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Implement the API (OUTs) of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23572,14 +23691,17 @@ Compiled at: 2021-05-29 19:07:10
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
 
-Compiling: /home/parallels/emulation/Source/kdf9-tsd-timing.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
 
-     1. -- Implement the timing OUTs of the EE Time Sharing Directors.
+Compiling: /home/parallels/emulation/Source/file_interfacing.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23593,69 +23715,38 @@ Compiled at: 2021-05-29 19:07:10
     14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
     15. --
     16.
-    17. package body KDF9.TSD.timing is
+    17. package body file_interfacing is
     18.
-    19.    -- This is the actual wall clock time at which the program was loaded.
-    20.    -- If signature hashing is enabled, it stays at zero to get a repeatable hash.
-    21.    the_time_of_loading : KDF9.us := 0;
-    22.
-    23.    -- Set the base for virtual elapsed time reckoning.
-    24.    procedure set_the_time_of_loading (the_time : in KDF9.us) is
-    25.    begin
-    26.       the_time_of_loading := the_time;
-    27.    end set_the_time_of_loading;
-    28.
-    29.    -- Return a time in µs as 48-bit seconds to 23 integral places.
-    30.    function OUT_time (microseconds : KDF9.us)
-    31.    return KDF9.word is
-    32.       -- The time was recorded by the hardware in units of 32 us, not 1 us.
-    33.       truncated_time : constant KDF9.us := microseconds and not 31;
-    34.    begin
-    35.       if truncated_time < 2**23 * 1E6 then
-    36.          -- 2**18 / 15625 = 2**24 / 1E6, with no risk of overflow in 64 bits.
-    37.          return KDF9.word(truncated_time * 2**18 / 15625);
-    38.       else
-    39.          -- The virtual elapsed time overflows the 23-bit seconds field.
-    40.          -- This would never have happened to a real KDF9, as 2**23 seconds is over three months.
-    41.          -- No KDF9 could stay up that long!
-    42.          -- However 2**23 KDF9 seconds pass in about 5 hours of ee9 real time,
-    43.          --    so precautions have to be taken.
-    44.          raise program_exit with "the KDF9 has been running too long, time > 2**23 seconds";
-    45.       end if;
-    46.    end OUT_time;
-    47.
-    48.    procedure do_OUT_3 is
-    49.    begin
-    50.       push(OUT_time(the_CPU_time));
-    51.       the_trace_operand := read_top;
-    52.    end do_OUT_3;
-    53.
-    54.    procedure do_OUT_9 is
-    55.    begin
-    56.       -- A TOD clock is simulated using the real TOD at which the program was
-    57.       --    loaded, and the virtual time that has elapsed since.
-    58.       push(OUT_time(the_time_of_loading + the_clock_time));
-    59.       the_trace_operand := read_top;
-    60.    end do_OUT_9;
-    61.
-    62.    procedure do_OUT_17 is
-    63.    begin
-    64.       ensure_that_the_NEST_has_room_for_2_results;
-    65.       -- In program mode, the Elapsed Time is the same thing as the_clock_time.
-    66.       push(OUT_time(the_clock_time));
-    67.       push(OUT_time(the_CPU_time));
-    68.       the_trace_operand := read_top;
-    69.    end do_OUT_17;
-    70.
-    71. end KDF9.TSD.timing;
+    19.    procedure initialize (some_file : in out File_Type;
+    20.                          mode      : in File_Mode;
+    21.                          file_name : in String) is
+    22.    begin
+    23.       Open(some_file, mode, file_name);
+    24.    exception
+    25.       when others =>
+    26.          if mode = Out_File then
+    27.             Create(some_file, Out_File, file_name);
+    28.          else
+    29.             raise;
+    30.          end if;
+    31.    end initialize;
+    32.
+    33.    procedure finalize (some_file : in out File_Type;
+    34.                        file_name : in String) is
+    35.       pragma Unreferenced(file_name);
+    36.    begin
+    37.       Close(some_file);
+    38.    end finalize;
+    39.
+    40. end file_interfacing;
 
-Compiling: ../Source/kdf9-tsd-timing.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Compiling: ../Source/file_interfacing.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
-     1. -- Implement the timing OUTs of the EE Time Sharing Directors.
+     1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23669,32 +23760,34 @@ Compiled at: 2021-05-29 19:07:10
     14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
     15. --
     16.
-    17. package KDF9.TSD.timing is
+    17. with Ada.Text_IO;
     18.
-    19.    procedure do_OUT_3;
+    19. use  Ada.Text_IO;
     20.
-    21.    procedure do_OUT_9;
+    21. package file_interfacing is
     22.
-    23.    procedure do_OUT_17;
-    24.
-    25.    -- Set the base for virtual elapsed time reckoning.
-    26.    procedure set_the_time_of_loading (the_time : in KDF9.us);
-    27.
-    28. end KDF9.TSD.timing;
+    23.    procedure initialize (some_file : in out File_Type;
+    24.                          mode      : in File_Mode;
+    25.                          file_name : in String);
+    26.
+    27.    procedure finalize (some_file : in out File_Type;
+    28.                        file_name : in String);
+    29.
+    30. end file_interfacing;
 
- 71 lines: No errors
+ 40 lines: No errors
 
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/finalize_ee9.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Shut down processing in preparation for a dignified exit.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -23733,2048 +23826,13 @@ GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
-Compiling: /home/parallels/emulation/Source/postscript.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Elementary Encapsulated PostScript (EPS) line drawing.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package body postscript is
-    18.
-    19.    use host_IO;
-    20.
-    21.    -- A path is a series of vectors v1, v2, ..., vn such that the last point
-    22.    --    of vi is the same as the first point of v(i+1),
-    23.    --       and v1, ..., vn are all drawn in the same colour.
-    24.    -- A new path is started by a jump to a non-contiguous point or by a change of pen colour.
-    25.
-    26.    there_is_an_open_path      : Boolean := False;
-    27.    the_last_point_in_the_path : postscript.point := (0, 0);
-    28.
-    29.    -- The bounding box limits are set from the value of maximum_offset at the end of the plot.
-    30.    maximum_offset             : postscript.point := (0, 0);
-    31.
-    32.    procedure ensure_separation (stream : in out host_IO.stream) is
-    33.    begin
-    34.       if column(stream) > 0 then
-    35.          put_byte(' ', stream);
-    36.       end if;
-    37.    end ensure_separation;
-    38.
-    39.    procedure put (stream : in out host_IO.stream; PS_text : String) is
-    40.    begin
-    41.       put_bytes(PS_text, stream);
-    42.    end put;
-    43.
-    44.    procedure put_unit (stream : in out host_IO.stream; PS_text : String) is
-    45.    begin
-    46.       ensure_separation(stream);
-    47.       put(stream, PS_text);
-    48.    end put_unit;
-    49.
-    50.    procedure put_line (stream : in out host_IO.stream; PS_text : String) is
-    51.    begin
-    52.       put(stream, PS_text);
-    53.       put_EOL(stream);
-    54.    end put_line;
-    55.
-    56.    procedure put_unit_line (stream : in out host_IO.stream; PS_text : String) is
-    57.    begin
-    58.       put_unit(stream, PS_text);
-    59.       put_EOL(stream);
-    60.    end put_unit_line;
-    61.
-    62.    procedure put_integer (stream : in out host_IO.stream; i : Integer) is
-    63.       integer_image  : constant String := i'Image;
-    64.    begin
-    65.       ensure_separation(stream);
-    66.       if integer_image(integer_image'First) /= ' ' then
-    67.          put(stream, integer_image);
-    68.       else  -- Suppress the nuisance blank character.
-    69.          put(stream, integer_image(integer_image'First+1..integer_image'Last));
-    70.       end if;
-    71.    end put_integer;
-    72.
-    73.    procedure terminate_any_open_path (stream : in out host_IO.stream) is
-    74.    begin
-    75.       if there_is_an_open_path then
-    76.          -- Draw the accumulated strokes.
-    77.          put_unit_line(stream, "s");
-    78.       end if;
-    79.       there_is_an_open_path := False;
-    80.    end terminate_any_open_path;
-    81.
-    82.    procedure draw_a_PS_vector (stream : in out host_IO.stream;
-    83.                                initial,
-    84.                                final  : in postscript.point) is
-    85.
-    86.       function largest_of (a, b, c : Natural)
-    87.       return Natural
-    88.       is (Natural'Max(a, Natural'Max(b, c)));
-    89.
-    90.    begin -- draw_a_PS_vector
-    91.       if initial /= the_last_point_in_the_path then
-    92.          -- This vector is not contiguous with the previous one.
-    93.          terminate_any_open_path(stream);
-    94.       end if;
-    95.       if initial = final then
-    96.          -- This vector is of length 0.
-    97.          return;
-    98.       end if;
-    99.       maximum_offset.x := largest_of(maximum_offset.x, initial.x, final.x);
-   100.       maximum_offset.y := largest_of(maximum_offset.y, initial.y, final.y);
-   101.       if there_is_an_open_path then
-   102.          -- Draw a line to the final point, extending the current path.
-   103.          put_integer(stream, final.x);
-   104.          put_integer(stream, final.y);
-   105.          put_unit_line(stream, "l");
-   106.       else
-   107.          -- Move to the initial point, opening a fresh path, and draw a line to the final point.
-   108.          put_integer(stream, final.x);
-   109.          put_integer(stream, final.y);
-   110.          put_integer(stream, initial.x);
-   111.          put_integer(stream, initial.y);
-   112.          put_unit_line(stream, "n");
-   113.          there_is_an_open_path := True;
-   114.       end if;
-   115.       the_last_point_in_the_path := final;
-   116.    end draw_a_PS_vector;
-   117.
-   118.    subtype RGB is String(1..11);
-   119.    gamut : constant array (pen_colour) of RGB
-   120.          := (
-   121.                Black          => ".00 .00 .00",
-   122.                Blue           => ".00 .00 1.0",
-   123.                Brown          => ".60 .20 .00",
-   124.                Cyan           => ".00 1.0 1.0",
-   125.                Dark_Blue      => ".10 .10 .80",
-   126.                Dark_Cyan      => ".20 .80 1.0",
-   127.                Dark_Green     => ".00 .60 .40",
-   128.                Dark_Grey      => ".50 .50 .50",
-   129.                Dark_Magenta   => ".75 .25 .75",
-   130.                Dark_Red       => ".75 .00 .00",
-   131.                Green          => ".00 1.0 .00",
-   132.                Grey           => ".80 .80 .80",
-   133.                Magenta        => "1.0 .00 1.0",
-   134.                Red            => "1.0 .00 .00",
-   135.                White          => "1.0 1.0 1.0",
-   136.                Yellow         => "1.0 1.0 .00"
-   137.             );
-   138.
-   139.    subtype tip_breadth is String(1..4);
-   140.    breadth : constant array (pen_tip_size) of tip_breadth
-   141.            := (
-   142.                Extra_Extra_Fine => "1.00",
-   143.                Extra_Fine       => "2.00",
-   144.                Fine             => "4.00",
-   145.                Medium           => "6.00",
-   146.                Medium_Broad     => "8.00",
-   147.                Broad            => "10.0",
-   148.                Extra_Broad      => "12.0"
-   149.               );
-   150.
-   151.    the_colour   : pen_colour   := the_default_colour;
-   152.    the_pen_size : pen_tip_size := the_default_tip_size;
-   153.
-   154.    procedure put_the_pen_settings (stream : in out host_IO.Stream) is
-   155.    begin -- put_the_pen_settings
-   156.       terminate_any_open_path(stream);
-   157.       put_unit(stream, gamut(the_colour));
-   158.       put_unit_line(stream, "setrgbcolor");
-   159.       put_unit(stream, breadth(the_pen_size));
-   160.       put_unit_line(stream, "setlinewidth");
-   161.    end put_the_pen_settings;
-   162.
-   163.    procedure set_the_pen_properties (this_colour   : in pen_colour   := the_default_colour;
-   164.                                      this_pen_size : in pen_tip_size := the_default_tip_size) is
-   165.    begin -- set_the_pen_properties
-   166.       the_colour := this_colour;
-   167.       the_pen_size := this_pen_size;
-   168.    end set_the_pen_properties;
-   169.
-   170.    -- We eventually seek back to the bounding box parametsrs using this, their file offset.
-   171.    the_position_of_the_placeholders : Natural;
-   172.
-   173.    procedure initialize_PS_output (stream : in out host_IO.Stream) is
-   174.
-   175.    begin -- initialize_PS_output
-   176.       put_line(stream, "%!PS-Adobe-3.0 EPSF-1.0");
-   177.       put_unit(stream, "%%BoundingBox: ");
-   178.
-   179.       -- Note the file offset of the bounding box placeholders.
-   180.       get_position(the_position_of_the_placeholders, stream);
-   181.
-   182.       -- Write the 12-column placeholders.
-   183.       put_line(stream, "xxxxxxxxxxxx|yyyyyyyyyyyy");
-   184.
-   185.       put_line(stream, "% This graph was plotted by ee9, the GNU Ada KDF9 emulator.");
-   186.       put_line(stream, "% For more information, see <http://www.findlayw.plus.com/KDF9>.");
-   187.       put_line(stream, "save");
-   188.
-   189.       put_line(stream, "1 setlinecap");
-   190.       put_line(stream, "1 setlinejoin");
-   191.
-   192.       put_the_pen_settings(stream);
-   193.
-   194.       put_line(stream, "0 792 translate");  -- Assumes a page of length 11"!
-   195.
-   196.       -- The plotter step was 0.005", which is the same as 0.36 PostScript points.
-   197.       -- The scaling factor is set here to make the wabbit example fit an A4 page.
-   198.       put_line(stream, "0.12 -0.12 scale");
-   199.
-   200.       put_line(stream, "/l { lineto } bind def");
-   201.       put_line(stream, "/n { newpath moveto lineto } bind def");
-   202.       put_line(stream, "/s { stroke } bind def");
-   203.
-   204.       put_line(stream, "save");
-   205.    end initialize_PS_output;
-   206.
-   207.    procedure finalize_PS_output (stream : in out host_IO.Stream) is
-   208.
-   209.       subtype bound_string is String(1..12);
-   210.
-   211.       function bound_image (n : in Natural)
-   212.       return bound_string is
-   213.          n_image : constant String := n'Image;
-   214.       begin
-   215.          return b : bound_string := (others => ' ') do
-   216.             b(b'Last-n_image'Length+1 .. b'Last) := n_image;
-   217.          end return;
-   218.       end bound_image;
-   219.
-   220.    begin -- finalize_PS_output
-   221.       terminate_any_open_path(stream);
-   222.       put_line(stream, "showpage");
-   223.       put_line(stream, "restore");
-   224.       put_line(stream, "restore");
-   225.       put_line(stream, "% End of plot");
-   226.
-   227.       -- Go back to the bounding box placeholders in the output file.
-   228.       set_position(the_position_of_the_placeholders, stream);
-   229.
-   230.       -- Overwrite them with the actual x and y co-ordinate bounds.
-   231.       put(stream, bound_image(maximum_offset.x));
-   232.       put(stream, " ");
-   233.       put(stream, bound_image(maximum_offset.y));
-   234.
-   235.       close(stream);
-   236.    end finalize_PS_output;
-   237.
-   238. end postscript;
-   239.
-
-Compiling: ../Source/postscript.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Elementary Encapsulated PostScript (EPS) line drawing.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with host_IO;
-    18.
-    19. package postscript is
-    20.
-    21.    type pen_colour is (
-    22.                        Black,
-    23.                        Blue,
-    24.                        Brown,
-    25.                        Cyan,
-    26.                        Dark_Blue,
-    27.                        Dark_Cyan,
-    28.                        Dark_Green,
-    29.                        Dark_Grey,
-    30.                        Dark_Magenta,
-    31.                        Dark_Red,
-    32.                        Green,
-    33.                        Grey,
-    34.                        Magenta,
-    35.                        Red,
-    36.                        White,
-    37.                        Yellow
-    38.                       );
-    39.
-    40.    the_default_colour : constant pen_colour := Black;
-    41.
-    42.    type pen_tip_size is (
-    43.                          Extra_Extra_Fine,
-    44.                          Extra_Fine,
-    45.                          Fine,
-    46.                          Medium,
-    47.                          Medium_Broad,
-    48.                          Broad,
-    49.                          Extra_Broad
-    50.                         );
-    51.
-    52.    the_default_tip_size : constant pen_tip_size := Extra_Extra_Fine;
-    53.
-    54.    -- Choose the pen's colour and tip size.
-    55.
-    56.    procedure set_the_pen_properties (this_colour   : in pen_colour   := the_default_colour;
-    57.                                      this_pen_size : in pen_tip_size := the_default_tip_size);
-    58.
-    59.    -- Drawing is done in terms of the plotter's co-ordinate system.
-    60.    -- (0, 0) is the top left point of the drawing,
-    61.    -- The x axis increases down the plot (long axis, direction of paper movement),
-    62.    --    and the y axis increases across the plot (short axis, direction of pen movement).
-    63.
-    64.    type point is
-    65.      record
-    66.         x, y : Natural;  -- All physically possible co-ordinates are non-negative.
-    67.      end record;
-    68.
-    69.    -- Draw a straight line from initial to final.
-    70.    procedure draw_a_PS_vector (stream : in out host_IO.stream;
-    71.                                initial,
-    72.                                final  : in postscript.point);
-    73.
-    74.    -- Open the PostScript file and write the prelude, with a placeholder for the bounds.
-    75.    procedure initialize_PS_output (stream : in out host_IO.Stream);
-    76.
-    77.    -- Close the PostScript file, having gone back to overwrite the bounding box placeholders.
-    78.    procedure finalize_PS_output (stream : in out host_IO.Stream);
-    79.
-    80. end postscript;
-
- 239 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/settings-io.adb
-Source file time stamp: 2021-05-18 17:50:23
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Settings-reader I/O support.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Characters.Latin_1;
-    18. --
-    19. with file_interfacing;
-    20. with KDF9;
-    21.
-    22. use  Ada.Characters.Latin_1;
-    23.
-    24. package body settings.IO is
-    25.
-    26.    procedure open_options_file (file : in out File_Type; name : in String) is
-    27.    begin
-    28.       file_interfacing.initialize(file, in_file, name);
-    29.       line_number := 1;
-    30.    exception
-    31.       when others =>
-    32.          raise Status_Error with name;
-    33.    end open_options_file;
-    34.
-    35.    procedure close_options_file (file : in out File_Type; name : in String) is
-    36.    begin
-    37.       file_interfacing.finalize(file, name);
-    38.    end close_options_file;
-    39.
-    40.    comment_flag_character : constant Character := '|';
-    41.
-    42.    procedure skip_to_next_non_blank (file : File_Type) is
-    43.       next_char : Character := ' ';
-    44.       end_line  : Boolean;
-    45.    begin
-    46.       loop
-    47.         look_ahead(file, next_char, end_line);
-    48.       exit when end_line or else (next_char not in ' ' | HT);
-    49.          get(file, next_char);
-    50.       end loop;
-    51.       if next_char = comment_flag_character then
-    52.          while not end_of_line(file) loop
-    53.             get(file, next_char);
-    54.          end loop;
-    55.       end if;
-    56.    end skip_to_next_non_blank;
-    57.
-    58.    procedure ensure_not_at_end_of_line (file : File_Type) is
-    59.    begin
-    60.       skip_to_next_non_blank (file);
-    61.       if end_of_line(file) then
-    62.          raise Data_Error;
-    63.       end if;
-    64.    end ensure_not_at_end_of_line;
-    65.
-    66.    procedure skip_to_next_nonempty_line (file : in File_Type) is
-    67.       flag     : Character;
-    68.       end_line : Boolean;
-    69.    begin
-    70.       loop
-    71.          look_ahead(file, flag, end_line);
-    72.          if end_line                      or else
-    73.                flag = comment_flag_character then
-    74.             Skip_Line(file);
-    75.             line_number := line_number + 1;
-    76.          else
-    77.             exit;
-    78.          end if;
-    79.       end loop;
-    80.       if flag = comment_flag_character then
-    81.          raise Data_Error;
-    82.       end if;
-    83.    end skip_to_next_nonempty_line;
-    84.
-    85.    digit_offset : constant := Character'Pos('0');
-    86.
-    87.    procedure get_octal (file : in File_Type; value : out KDF9.word) is
-    88.       next_char : Character;
-    89.       last_char : Character := '_';
-    90.       place     : Natural   := 0;
-    91.       end_line  : Boolean   := False;
-    92.    begin
-    93.       value := 0;
-    94.       ensure_not_at_end_of_line(file);
-    95.       get(file, next_char);
-    96.       if next_char = '#' then
-    97.          get(file, next_char);
-    98.       else
-    99.          raise Data_Error;
-   100.       end if;
-   101.       loop
-   102.          if next_char in '0' .. '7' then
-   103.             value := value*8 + KDF9.word(Character'Pos(next_char)-digit_offset);
-   104.             place := place + 1;
-   105.             if place > 16 then
-   106.                raise Data_Error;
-   107.             end if;
-   108.          elsif next_char = '_' then
-   109.             if place = 0 then
-   110.                raise Data_Error;
-   111.             end if;
-   112.          else
-   113.             if last_char = '_' or place = 0 then
-   114.                raise Data_Error;
-   115.             end if;
-   116.             exit;
-   117.          end if;
-   118.          last_char := next_char;
-   119.          look_ahead(file, next_char, end_line);
-   120.       exit when end_line;
-   121.          if next_char in '0' .. '7' or next_char = '_' then
-   122.             get(file, next_char);
-   123.          else
-   124.             if last_char = '_' or place = 0 then
-   125.                raise Data_Error;
-   126.             end if;
-   127.             exit;
-   128.          end if;
-   129.       end loop;
-   130.    end get_octal;
-   131.
-   132.    procedure get_decimal (file : in File_Type; value : out KDF9.word) is
-   133.       next_char : Character;
-   134.       last_char : Character := '_';
-   135.       place     : Natural   := 0;
-   136.       negative  : Boolean   := False;
-   137.       end_line  : Boolean   := False;
-   138.    begin
-   139.       value := 0;
-   140.       ensure_not_at_end_of_line(file);
-   141.       get(file, next_char);
-   142.       if next_char = '-' then
-   143.          negative := True;
-   144.          get(file, next_char);
-   145.       elsif next_char not in '0' .. '9' then
-   146.          raise Data_Error with "get_decimal " & next_char;
-   147.       end if;
-   148.       loop
-   149.          if next_char in '0' .. '9' then
-   150.             value := value*10 + KDF9.word(Character'Pos(next_char)-digit_offset);
-   151.             place := place + 1;
-   152.             if place > 15 then
-   153.                raise Data_Error;
-   154.             end if;
-   155.          elsif next_char = '_' then
-   156.             if place = 0 then
-   157.                raise Data_Error;
-   158.             end if;
-   159.          else
-   160.             if last_char = '_' or place = 0 then
-   161.                raise Data_Error;
-   162.             end if;
-   163.       exit;
-   164.          end if;
-   165.          last_char := next_char;
-   166.          look_ahead(file, next_char, end_line);
-   167.       exit when end_line;
-   168.          if next_char in '0' .. '9' or next_char = '_' then
-   169.             get(file, next_char);
-   170.          else
-   171.             if last_char = '_' or place = 0 then
-   172.                raise Data_Error;
-   173.             end if;
-   174.       exit;
-   175.          end if;
-   176.       end loop;
-   177.       if negative then
-   178.          value := - value;
-   179.       end if;
-   180.    end get_decimal;
-   181.
-   182.    procedure get_word (file : in File_Type; value : out KDF9.word) is
-   183.       next_char : Character;
-   184.       end_line  : Boolean;
-   185.    begin
-   186.       ensure_not_at_end_of_line(file);
-   187.       look_ahead(file, next_char, end_line);
-   188.       pragma Unreferenced(end_line);
-   189.       if next_char = '#' then
-   190.          get_octal(file, value);
-   191.       else
-   192.          get_decimal(file, value);
-   193.       end if;
-   194.    end get_word;
-   195.
-   196.    procedure get_char (file : in File_Type; value : out Character) is
-   197.       end_line : Boolean;
-   198.       char     : Character;
-   199.    begin
-   200.       ensure_not_at_end_of_line(file);
-   201.       look_ahead(file, char, end_line);
-   202.       if end_line then
-   203.          raise Data_Error;
-   204.       end if;
-   205.       if char /= ' ' then
-   206.          get(file, value);
-   207.       end if;
-   208.    end get_char;
-   209.
-   210. end settings.IO;
-   211.
-
-Compiling: ../Source/settings-io.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Settings-reader I/O support.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Text_IO;
-    18. --
-    19. with postscript;
-    20.
-    21. use  Ada.Text_IO;
-    22.
-    23. package settings.IO is
-    24.
-    25.    line_number : Natural := 0;
-    26.
-    27.    procedure open_options_file (file : in out File_Type; name : in String);
-    28.
-    29.    procedure close_options_file (file : in out File_Type; name : in String);
-    30.
-    31.    -- Check that the end of the line has not yet been reached, else raise Data_Error.
-    32.    procedure ensure_not_at_end_of_line (file : in File_Type);
-    33.
-    34.    -- Move the reading position to the next non-blank or EOL, skipping comment.
-    35.    procedure skip_to_next_non_blank (file : in File_Type);
-    36.
-    37.    -- Discard input until a non-empty line is reached,
-    38.    --    leaving the reading position at the start of that line,
-    39.    --    and incrementing line_number for each line terminator passed.
-    40.    procedure skip_to_next_nonempty_line (file : in File_Type);
-    41.
-    42.    -- Read octal digits string as KDF9.word,
-    43.    --    raising Data_Error on overflow or bad syntax.
-    44.    procedure get_octal (file : in File_Type; value : out KDF9.word);
-    45.
-    46.    -- Read decimal digits string as KDF9.word,
-    47.    --    raising Data_Error on overflow or bad syntax.
-    48.    procedure get_decimal (file  : in File_Type; value : out KDF9.word);
-    49.
-    50.    -- Read an address as a KDF9.word in either octal or decimal,
-    51.    --    using get_octal or get_decimal as indicated by the syntax.
-    52.    procedure get_word (file : in File_Type; value : out KDF9.word);
-    53.
-    54.    -- Read the character value immediately following an octal or decimal number,
-    55.    --    if it is not a space character; if it is a space, leave value unchanged.
-    56.    procedure get_char (file : in File_Type; value : out Character);
-    57.
-    58.    package colour_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_colour);
-    59.    package  width_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_tip_size);
-    60.
-    61. end settings.IO;
-
- 211 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/symbols.adb
-Source file time stamp: 2021-05-28 23:23:14
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Map object code addresses to Usercode symbolic addresses.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with formatting;
-    18.
-    19. use  formatting;
-    20.
-    21. package body symbols is
-    22.
-    23.    use KDF9;
-    24.
-    25.    the_WYZ_table : non_V_store_table;
-    26.
-    27.    function the_non_V_store_table
-    28.    return non_V_store_table
-    29.    is (the_WYZ_table);
-    30.
-    31.    procedure set_Z_min is
-    32.    begin
-    33.       if the_WYZ_table.Y_max = 0 or the_WYZ_table.Y_base = KDF9.address'Last then
-    34.          the_WYZ_table.Z_min := the_WYZ_table.Z_base - (the_WYZ_table.Y_base + the_WYZ_table.Z_base) / 8;
-    35.       else
-    36.          the_WYZ_table.Z_min := the_WYZ_table.Y_base + the_WYZ_table.Y_max;
-    37.       end if;
-    38.    end set_Z_min;
-    39.
-    40.    procedure define_W0 (address : in KDF9.address) is
-    41.    begin
-    42.       the_WYZ_table.W_base := address;
-    43.    end define_W0;
-    44.
-    45.    procedure define_Y0 (address : in KDF9.address) is
-    46.    begin
-    47.       the_WYZ_table.Y_base := address;
-    48.    end define_Y0;
-    49.
-    50.    procedure define_Z0 (address : in KDF9.address) is
-    51.    begin
-    52.       the_WYZ_table.Z_base := address;
-    53.       set_Z_min;
-    54.    end define_Z0;
-    55.
-    56.    procedure define_Yy0 (x : in Y_store_id; address : in KDF9.address) is
-    57.    begin
-    58.       the_WYZ_table.Yy_base(x) := address;
-    59.    end define_Yy0;
-    60.
-    61.    function Y_symbol (address : KDF9.address)
-    62.    return String is
-    63.    begin
-    64.       if address >= the_WYZ_table.Z_min then
-    65.          return "Z" & trimmed(KDF9.address'Image(the_WYZ_table.Z_base - address));
-    66.       end if;
-    67.       if address >= the_WYZ_table.Y_base then
-    68.          return "Y" & trimmed(KDF9.address'Image(address - the_WYZ_table.Y_base));
-    69.       end if;
-    70.       for y in reverse Y_store_id loop
-    71.          if address >= the_WYZ_table.Yy_base(y) then
-    72.             return "Y" & y & trimmed(KDF9.address'Image(address - the_WYZ_table.Yy_base(y))) ;
-    73.          end if;
-    74.       end loop;
-    75.       if address >= the_WYZ_table.W_base then
-    76.          return "W" & trimmed(KDF9.address'Image(address - the_WYZ_table.W_base));
-    77.       end if;
-    78.       return "E" & trimmed(KDF9.address'Image(address));
-    79.    end Y_symbol;
-    80.
-    81.    last_P_number : Integer range -1 .. 1000;
-    82.
-    83.    V_store_base  : V_definition_list (0 .. 1000);
-    84.
-    85.    function the_V_definition_list
-    86.    return V_definition_list
-    87.    is (V_store_base(0..last_P_number));
-    88.
-    89.    function the_V_definition_list_length
-    90.    return Natural
-    91.    is (last_P_number);
-    92.
-    93.    procedure declare_P0 (P0v : in KDF9.address) is
-    94.    begin
-    95.       V_store_base(0) := (P_number => 0, V_count => P0v, P_address => P0v+8,  V_address => 8);
-    96.    end declare_P0;
-    97.
-    98.    procedure define_Y_size (size : in KDF9.address) is
-    99.    begin
-   100.       the_WYZ_table.Y_max := size;
-   101.    end define_Y_size;
-   102.
-   103.    procedure declare_Pp (P_number : in Natural; V_count, P_address : in KDF9.address) is
-   104.       V_address : constant KDF9.address := P_address - V_count;
-   105.    begin
-   106.       last_P_number := last_P_number + 1;
-   107.       if last_P_number not in 0 .. 999 then
-   108.          raise Program_Error with "number of V store bases >" & Integer'Image(V_store_base'Last);
-   109.       end if;
-   110.       V_store_base(last_P_number)   := (P_number, V_count, P_address, V_address);
-   111.       V_store_base(last_P_number+1) := (8191, 8191, 8191, 8191);
-   112.    end declare_Pp;
-   113.
-   114.    function V_symbol (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
-   115.    return String is
-   116.    begin
-   117.       if address > 255 or not_for_SET then
-   118.          for p in 0 .. last_P_number loop
-   119.          exit when address < V_store_base(p).V_address;
-   120.             if V_store_base(p).V_count /= 0                                       and then
-   121.                   address in V_store_base(p).V_address .. V_store_base(p).P_address   then
-   122.                   -- N.B. NOT "V_store_base(p).P_address-1" to avoid wrap-around.
-   123.                return "V"
-   124.                     & trimmed(KDF9.address'Image(address - V_store_base(p).V_address))
-   125.                     & "P"
-   126.                     & trimmed(Natural'Image(V_store_base(p).P_number));
-   127.             end if;
-   128.          end loop;
-   129.       end if;
-   130.       return "E"
-   131.            & (if in_octal then "#" & oct_of(address, 1) else trimmed(KDF9.address'Image(address)));
-   132.    end V_symbol;
-   133.
-   134.    function P_symbol (address : KDF9.syllable_address; in_octal : Boolean)
-   135.    return String is
-   136.    begin
-   137.       for p in 0 .. last_P_number loop
-   138.          if KDF9.address(address.code_address) = V_store_base(p).P_address then
-   139.             return "P" & trimmed(Natural'Image(V_store_base(p).P_number));
-   140.          end if;
-   141.       end loop;
-   142.       return "E" & oct_or_dec_of(address, in_octal);
-   143.    end P_symbol;
-   144.
-   145.    function symbolic (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
-   146.    return String is
-   147.       Y_store : constant String := Y_symbol(address);
-   148.    begin
-   149.      return (if Y_store(1) = 'E' then V_symbol(address, in_octal, not_for_SET) else Y_store);
-   150.    end symbolic;
-   151.
-   152.    procedure clear_all_symbol_definitions is
-   153.    begin
-   154.       the_WYZ_table.Yy_base  := (others => KDF9.address'Last);
-   155.       last_P_number := 0;
-   156.       V_store_base  := (others => (0, 0, 0, 0));
-   157.       V_store_base(0) := (P_number => 0, V_count => 0, P_address => 8,  V_address => 8);
-   158.    end clear_all_symbol_definitions;
-   159.
-   160. begin
-   161.    clear_all_symbol_definitions;
-   162. end symbols;
-
-Compiling: ../Source/symbols.ads
-Source file time stamp: 2021-05-21 19:28:05
-Compiled at: 2021-05-29 19:07:10
-
-     1.  -- Map object code addresses to Usercode symbolic addresses.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with KDF9;
-    18.
-    19. package symbols is
-    20.
-    21.    procedure clear_all_symbol_definitions;
-    22.
-    23.    procedure declare_P0 (P0v : in KDF9.address);
-    24.    procedure declare_Pp (P_number : in Natural; V_count, P_address : in KDF9.address);
-    25.
-    26.    procedure define_Y_size (size : in KDF9.address);
-    27.
-    28.    procedure define_W0 (address : in KDF9.address);
-    29.    procedure define_Y0 (address : in KDF9.address);
-    30.    procedure define_Z0 (address : in KDF9.address);
-    31.
-    32.    subtype Y_store_id is Character range 'A' ..'Z';
-    33.
-    34.    procedure define_Yy0 (x : in Y_store_id; address : in KDF9.address);
-    35.
-    36.    function P_symbol (address : KDF9.syllable_address; in_octal : Boolean)
-    37.    return String;
-    38.
-    39.    function symbolic (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
-    40.    return String;
-    41.
-    42.    type V_definition is
-    43.    record
-    44.       P_number  : Natural;
-    45.       V_count   : KDF9.address;
-    46.       P_address : KDF9.address;
-    47.       V_address : KDF9.address;
-    48.    end record;
-    49.
-    50.    type V_definition_list is array (Natural range <>) of V_definition;
-    51.
-    52.    function the_V_definition_list
-    53.    return V_definition_list;
-    54.
-    55.    function the_V_definition_list_length
-    56.    return Natural;
-    57.
-    58.    type address_list is array (Y_store_id) of KDF9.address;
-    59.
-    60.    type non_V_store_table is
-    61.       record
-    62.          Yy_base : address_list;
-    63.          W_base  : KDF9.address := KDF9.address'Last;
-    64.          Y_base  : KDF9.address := KDF9.address'Last;
-    65.          Y_max   : KDF9.address := 0;
-    66.          Z_base  : KDF9.address := KDF9.address'Last;
-    67.          Z_min   : KDF9.address := KDF9.address'Last;
-    68.       end record;
-    69.
-    70.    function the_non_V_store_table
-    71.    return non_V_store_table;
-    72.
-    73. end symbols;
-
- 162 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/generic_sets.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Powersets of a discrete member type.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. -- generic
-    18. --    type member is (<>);
-    19. package body generic_sets is
-    20.
-    21.    function "/" (set : generic_sets.set; member : generic_sets.member)
-    22.    return Boolean
-    23.    is (set(member));
-    24.
-    25.    function "or" (set : generic_sets.set; member : generic_sets.member)
-    26.    return generic_sets.set is
-    27.    begin
-    28.       return result : generic_sets.set := set do
-    29.          result(member) := True;
-    30.       end return;
-    31.    end "or";
-    32.
-    33.    function "-" (set1, set2 : generic_sets.set)
-    34.    return generic_sets.set is
-    35.    begin -- Compute (set1 and not set2), avoiding need for a potentially large workspace.
-    36.       return result : generic_sets.set := set1 do
-    37.          for m in generic_sets.member loop
-    38.             if set2(m) then
-    39.                result(m) := False;
-    40.             end if;
-    41.          end loop;
-    42.       end return;
-    43.    end "-";
-    44.
-    45. end generic_sets;
-
-Compiling: ../Source/generic_sets.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Powersets of a discrete member type.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. generic
-    18.    type member is (<>);
-    19. package generic_sets is
-    20.
-    21.    pragma Preelaborate;
-    22.
-    23. --
-    24. -- This package implements only those set operations that are needed by ee9.
-    25. --
-    26.
-    27.    type set is array (generic_sets.member) of Boolean
-    28.       with Component_Size => 1;
-    29.
-    30.    empty_set : constant generic_sets.set := (others => False);
-    31.
-    32.    -- Test for membership of the set.
-    33.    function "/" (set : generic_sets.set; member : generic_sets.member)
-    34.    return Boolean with Inline;
-    35.
-    36.    -- Union of a set and a singleton.
-    37.    function "or"  (set : generic_sets.set; member : generic_sets.member)
-    38.    return generic_sets.set;
-    39.
-    40.    -- Computes (set1 and not set2).
-    41.    function "-" (set1, set2 : generic_sets.set)
-    42.    return generic_sets.set;
-    43.
-    44. end generic_sets;
-
- 45 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-decoding.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- The "compressed_opcode" values are effective opcodes, partially decoded from the first syllable,
-     2. --   and combined with opcode bits of the second syllable, where appropriate (e.g. in jumps).
-     3. --
-     4. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     6. --
-     7. -- The ee9 program is free software; you can redistribute it and/or
-     8. -- modify it under terms of the GNU General Public License as published
-     9. -- by the Free Software Foundation; either version 3, or (at your option)
-    10. -- any later version. This program is distributed in the hope that it
-    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    13. -- See the GNU General Public License for more details. You should have
-    14. -- received a copy of the GNU General Public License distributed with
-    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    16. --
-    17.
-    18. package KDF9.decoding is
-    19.
-    20.    -- The compressed_opcode values for 1-syllable orders are equal to their full codes.
-    21.
-    22.    ALL_0    : constant KDF9.compressed_opcode := 2#000_000#;
-    23.    VR       : constant KDF9.compressed_opcode := 2#000_001#;
-    24.    TO_TR    : constant KDF9.compressed_opcode := 2#000_010#;
-    25.    BITS     : constant KDF9.compressed_opcode := 2#000_011#;
-    26.    XF       : constant KDF9.compressed_opcode := 2#000_100#;
-    27.    XDF      : constant KDF9.compressed_opcode := 2#000_101#;
-    28.    INV006   : constant KDF9.compressed_opcode := 2#000_110#;
-    29.    XPLUSF   : constant KDF9.compressed_opcode := 2#000_111#;
-    30.    NEGD     : constant KDF9.compressed_opcode := 2#001_000#;
-    31.    OR_9     : constant KDF9.compressed_opcode := 2#001_001#;
-    32.    PERM     : constant KDF9.compressed_opcode := 2#001_010#;
-    33.    TOB      : constant KDF9.compressed_opcode := 2#001_011#;
-    34.    ROUNDH   : constant KDF9.compressed_opcode := 2#001_100#;
-    35.    NEV      : constant KDF9.compressed_opcode := 2#001_101#;
-    36.    ROUND    : constant KDF9.compressed_opcode := 2#001_110#;
-    37.    DUMMY    : constant KDF9.compressed_opcode := 2#001_111#;
-    38.    ROUNDF   : constant KDF9.compressed_opcode := 2#010_000#;
-    39.    ROUNDHF  : constant KDF9.compressed_opcode := 2#010_001#;
-    40.    MINUSDF  : constant KDF9.compressed_opcode := 2#010_010#;
-    41.    PLUSDF   : constant KDF9.compressed_opcode := 2#010_011#;
-    42.    FLOAT_9  : constant KDF9.compressed_opcode := 2#010_100#;
-    43.    FLOATD   : constant KDF9.compressed_opcode := 2#010_101#;
-    44.    ABS_9    : constant KDF9.compressed_opcode := 2#010_110#;
-    45.    NEG      : constant KDF9.compressed_opcode := 2#010_111#;
-    46.    ABSF     : constant KDF9.compressed_opcode := 2#011_000#;
-    47.    NEGF     : constant KDF9.compressed_opcode := 2#011_001#;
-    48.    MAX      : constant KDF9.compressed_opcode := 2#011_010#;
-    49.    NOT_9    : constant KDF9.compressed_opcode := 2#011_011#;
-    50.    XD       : constant KDF9.compressed_opcode := 2#011_100#;
-    51.    X_frac   : constant KDF9.compressed_opcode := 2#011_101#;
-    52.    MINUS    : constant KDF9.compressed_opcode := 2#011_110#;
-    53.    SIGN     : constant KDF9.compressed_opcode := 2#011_111#;
-    54.    INV040   : constant KDF9.compressed_opcode := 2#100_000#;
-    55.    ZERO     : constant KDF9.compressed_opcode := 2#100_001#;
-    56.    DUP      : constant KDF9.compressed_opcode := 2#100_010#;
-    57.    DUPD     : constant KDF9.compressed_opcode := 2#100_011#;
-    58.    DIVI     : constant KDF9.compressed_opcode := 2#100_100#;
-    59.    FIX      : constant KDF9.compressed_opcode := 2#100_101#;
-    60.    INV046   : constant KDF9.compressed_opcode := 2#100_110#;
-    61.    STR      : constant KDF9.compressed_opcode := 2#100_111#;
-    62.    CONT     : constant KDF9.compressed_opcode := 2#101_000#;
-    63.    REVD     : constant KDF9.compressed_opcode := 2#101_001#;
-    64.    ERASE    : constant KDF9.compressed_opcode := 2#101_010#;
-    65.    MINUSD   : constant KDF9.compressed_opcode := 2#101_011#;
-    66.    AND_9    : constant KDF9.compressed_opcode := 2#101_100#;
-    67.    INV055   : constant KDF9.compressed_opcode := 2#101_101#;
-    68.    PLUS     : constant KDF9.compressed_opcode := 2#101_110#;
-    69.    PLUSD    : constant KDF9.compressed_opcode := 2#101_111#;
-    70.    DIV      : constant KDF9.compressed_opcode := 2#110_000#;
-    71.    DIVD     : constant KDF9.compressed_opcode := 2#110_001#;
-    72.    DIVF     : constant KDF9.compressed_opcode := 2#110_010#;
-    73.    DIVDF    : constant KDF9.compressed_opcode := 2#110_011#;
-    74.    DIVR     : constant KDF9.compressed_opcode := 2#110_100#;
-    75.    REV      : constant KDF9.compressed_opcode := 2#110_101#;
-    76.    CAB      : constant KDF9.compressed_opcode := 2#110_110#;
-    77.    FRB      : constant KDF9.compressed_opcode := 2#110_111#;
-    78.    STAND    : constant KDF9.compressed_opcode := 2#111_000#;
-    79.    NEGDF    : constant KDF9.compressed_opcode := 2#111_001#;
-    80.    MAXF     : constant KDF9.compressed_opcode := 2#111_010#;
-    81.    INV073   : constant KDF9.compressed_opcode := 2#111_011#;
-    82.    PLUSF    : constant KDF9.compressed_opcode := 2#111_100#;
-    83.    MINUSF   : constant KDF9.compressed_opcode := 2#111_101#;
-    84.    INV076   : constant KDF9.compressed_opcode := 2#111_110#;
-    85.    SIGNF    : constant KDF9.compressed_opcode := 2#111_111#;
-    86.
-    87.
-    88.    -- compressed_opcode values for 2-syllable indirect fetch and store orders
-    89.
-    90.    MkMq       : constant KDF9.compressed_opcode := 2#000_000#;
-    91.    MkMqQ      : constant KDF9.compressed_opcode := 2#000_010#;
-    92.    MkMqH      : constant KDF9.compressed_opcode := 2#000_100#;
-    93.    MkMqQH     : constant KDF9.compressed_opcode := 2#000_110#;
-    94.    MkMqN      : constant KDF9.compressed_opcode := 2#001_000#;
-    95.    MkMqQN     : constant KDF9.compressed_opcode := 2#001_010#;
-    96.    MkMqHN     : constant KDF9.compressed_opcode := 2#001_100#;
-    97.    MkMqQHN    : constant KDF9.compressed_opcode := 2#001_110#;
-    98.
-    99.    TO_MkMq    : constant KDF9.compressed_opcode := 2#000_001#;
-   100.    TO_MkMqQ   : constant KDF9.compressed_opcode := 2#000_011#;
-   101.    TO_MkMqH   : constant KDF9.compressed_opcode := 2#000_101#;
-   102.    TO_MkMqQH  : constant KDF9.compressed_opcode := 2#000_111#;
-   103.    TO_MkMqN   : constant KDF9.compressed_opcode := 2#001_001#;
-   104.    TO_MkMqQN  : constant KDF9.compressed_opcode := 2#001_011#;
-   105.    TO_MkMqHN  : constant KDF9.compressed_opcode := 2#001_101#;
-   106.    TO_MkMqQHN : constant KDF9.compressed_opcode := 2#001_111#;
-   107.
-   108.
-   109.    -- compressed_opcode values for 2-syllable Q store orders
-   110.
-   111.    M_PLUS_Iq    : constant KDF9.compressed_opcode := 2#100_000#;
-   112.    M_MINUS_Iq   : constant KDF9.compressed_opcode := 2#100_001#;
-   113.    NCq          : constant KDF9.compressed_opcode := 2#100_010#;
-   114.    DCq          : constant KDF9.compressed_opcode := 2#100_011#;
-   115.    POS1_TO_Iq   : constant KDF9.compressed_opcode := 2#100_100#;
-   116.    NEG1_TO_Iq   : constant KDF9.compressed_opcode := 2#100_101#;
-   117.    POS2_TO_Iq   : constant KDF9.compressed_opcode := 2#100_110#;
-   118.    NEG2_TO_Iq   : constant KDF9.compressed_opcode := 2#100_111#;
-   119.
-   120.    MqTOQk       : constant KDF9.compressed_opcode := 2#101_001#;
-   121.    IqTOQk       : constant KDF9.compressed_opcode := 2#101_010#;
-   122.    IMqTOQk      : constant KDF9.compressed_opcode := 2#101_011#;
-   123.    CqTOQk       : constant KDF9.compressed_opcode := 2#101_100#;
-   124.    CMqTOQk      : constant KDF9.compressed_opcode := 2#101_101#;
-   125.    CIqTOQk      : constant KDF9.compressed_opcode := 2#101_110#;
-   126.    QqTOQk       : constant KDF9.compressed_opcode := 2#101_111#;
-   127.
-   128.    SHA          : constant KDF9.compressed_opcode := 2#110_001#;
-   129.    SHAD         : constant KDF9.compressed_opcode := 2#110_010#;
-   130.    MACC         : constant KDF9.compressed_opcode := 2#110_011#;
-   131.    SHL          : constant KDF9.compressed_opcode := 2#110_100#;
-   132.    SHLD         : constant KDF9.compressed_opcode := 2#110_110#;
-   133.    SHC          : constant KDF9.compressed_opcode := 2#110_111#;
-   134.    constant_bit : constant := 1;
-   135.
-   136.    TO_RCIMq     : constant KDF9.compressed_opcode := 2#111_000#;
-   137.    QCIMq        : constant KDF9.compressed_opcode := 2#111_001#;
-   138.    ADD_TO_QCIMq : constant KDF9.compressed_opcode := 2#111_010#;
-   139.
-   140.    -- masks for Q store Qk bits
-   141.
-   142.    reset_choice  : constant := 2#0001#;
-   143.    C_part_choice : constant := 2#1000#;
-   144.    I_part_choice : constant := 2#0100#;
-   145.    M_part_choice : constant := 2#0010#;
-   146.    all_Q_choice  : constant := C_part_choice + I_part_choice + M_part_choice;
-   147.
-   148.
-   149.    -- compressed_opcode values for 2-syllable SJNS orders
-   150.
-   151.    LINK    : constant KDF9.compressed_opcode := 2#111_011#;
-   152.    TO_LINK : constant KDF9.compressed_opcode := 2#111_100#;
-   153.
-   154.
-   155.    -- compressed_opcode values for 2-syllable Director-only orders
-   156.
-   157.    TO_Kq : constant KDF9.compressed_opcode := 2#111_101#;
-   158.    K0    : constant := 2#1000#;
-   159.    K1    : constant := 2#0100#;
-   160.    K2    : constant := 2#0010#;
-   161.    K3    : constant := 2#0001#;
-   162.    Kk    : constant KDF9.compressed_opcode := 2#111_110#;
-   163.    K4    : constant := 2#1000#;
-   164.    K5    : constant := 2#0100#;
-   165.    K7    : constant := 2#0001#;
-   166.
-   167.
-   168.    -- compressed_opcode value for 2-syllable short-loop jump order
-   169.
-   170.    JCqNZS : constant KDF9.compressed_opcode := 2#111_111#;
-   171.
-   172.
-   173.    -- compressed_opcode values for 2-syllable I/O orders
-   174.
-   175.    CT_PMB_PMC_BUSY_Qq     : constant KDF9.compressed_opcode := 2#010_000#;
-   176.    PAR_Qq                 : constant KDF9.compressed_opcode := 2#010_001#;
-   177.    PMF_PMG_Qq             : constant KDF9.compressed_opcode := 2#010_010#;
-   178.    PIA_PIC_CLO_TLO_Qq     : constant KDF9.compressed_opcode := 2#010_100#;
-   179.    PIB_PID_Qq             : constant KDF9.compressed_opcode := 2#010_101#;
-   180.    PIE_PIG_Qq             : constant KDF9.compressed_opcode := 2#010_110#;
-   181.    PIF_PIH_Qq             : constant KDF9.compressed_opcode := 2#010_111#;
-   182.
-   183.    POA_POC_POE_POF_PMH_Qq : constant KDF9.compressed_opcode := 2#011_000#;
-   184.    POB_POD_Qq             : constant KDF9.compressed_opcode := 2#011_001#;
-   185.    POG_POL_Qq             : constant KDF9.compressed_opcode := 2#011_010#;
-   186.    POH_POK_Qq             : constant KDF9.compressed_opcode := 2#011_011#;
-   187.    PMA_PMK_INT_Qq         : constant KDF9.compressed_opcode := 2#011_100#;
-   188.    PMD_PME_PML_Qq         : constant KDF9.compressed_opcode := 2#011_110#;
-   189.
-   190.    -- masks for I/O opcode extension bits (Qk field)
-   191.
-   192.    PAR_bits  : constant := 2#0000#;
-   193.
-   194.    -- PIA_PIC_CLO_TLO_Qq:
-   195.    PIA_bits  : constant := 2#0000#;
-   196.    PIC_bits  : constant := 2#1000#;
-   197.    CLO_bits  : constant := 2#0010#;
-   198.    TLO_bits  : constant := 2#0100#;
-   199.
-   200.    -- PIB_PID_Qq:
-   201.    PIB_bits  : constant := 2#0000#;
-   202.    PID_bits  : constant := 2#1000#;
-   203.
-   204.    -- PIE_PIG_Qq:
-   205.    PIE_bits  : constant := 2#0000#;
-   206.    PIG_bits  : constant := 2#1000#;
-   207.
-   208.    -- PIF_PIH_Qq:
-   209.    PIF_bits  : constant := 2#0000#;
-   210.    PIH_bits  : constant := 2#1000#;
-   211.
-   212.    -- PMA_PMK_INT_Qq:
-   213.    PMA_bits  : constant := 2#0000#;
-   214.    PMK_bits  : constant := 2#0100#;
-   215.    INT_bits  : constant := 2#0010#;
-   216.
-   217.    -- CT_PMB_PMC_BUSY_Qq:
-   218.    CTQ_bits   : constant := 2#0000#;
-   219.    PMB_bits   : constant := 2#1000#;
-   220.    PMC_bits   : constant := 2#0100#;
-   221.    BUSY_bits  : constant := 2#0010#;
-   222.    manual_bit : constant := 2#0001#;
-   223.
-   224.    -- PMD_PME_PML_Qq:
-   225.    PME_bits  : constant := 2#0000#;
-   226.    PMD_bits  : constant := 2#1000#;
-   227.    PML_bits  : constant := 2#0100#;
-   228.
-   229.    -- PMF_PMG_Qq:
-   230.    PMF_bits  : constant := 2#0000#;
-   231.    PMG_bits  : constant := 2#0100#;
-   232.
-   233.    -- POA_POC_POE_POF_PMH_Qq:
-   234.    POA_bits  : constant := 2#0000#;
-   235.    POC_bits  : constant := 2#1000#;
-   236.    POE_bits  : constant := 2#1100#;
-   237.    POF_bits  : constant := 2#0100#;
-   238.    PMH_bits  : constant := 2#0010#;
-   239.
-   240.    -- POB_POD_Qq:
-   241.    POB_bits  : constant := 2#0000#;
-   242.    POD_bits  : constant := 2#1000#;
-   243.
-   244.    -- POG_POL_Qq:
-   245.    POG_bits  : constant := 2#0000#;
-   246.    POL_bits  : constant := 2#1000#;
-   247.
-   248.    -- POH_POK_Qq:
-   249.    POH_bits  : constant := 2#0000#;
-   250.    POK_bits  : constant := 2#1000#;
-   251.
-   252.
-   253.    -- compressed_opcode values for normal jump orders
-   254.
-   255.    JrNE   : constant KDF9.compressed_opcode := 2#000_001#;
-   256.    JrGEZ  : constant KDF9.compressed_opcode := 2#000_010#;
-   257.    JrLEZ  : constant KDF9.compressed_opcode := 2#000_100#;
-   258.    JrNEZ  : constant KDF9.compressed_opcode := 2#000_110#;
-   259.    JrNV   : constant KDF9.compressed_opcode := 2#001_000#;
-   260.    OS_OUT : constant KDF9.compressed_opcode := 2#001_001#;
-   261.    JrNEN  : constant KDF9.compressed_opcode := 2#001_010#;
-   262.    Jr     : constant KDF9.compressed_opcode := 2#001_011#;
-   263.    JrNEJ  : constant KDF9.compressed_opcode := 2#001_100#;
-   264.    JSr    : constant KDF9.compressed_opcode := 2#001_101#;
-   265.    JrNTR  : constant KDF9.compressed_opcode := 2#001_110#;
-   266.    EXIT_n : constant KDF9.compressed_opcode := 2#001_111#;  -- 0h0 in bits 5-7
-   267.    JrEQ   : constant KDF9.compressed_opcode := 2#010_001#;
-   268.    JrLTZ  : constant KDF9.compressed_opcode := 2#010_010#;
-   269.    JrGTZ  : constant KDF9.compressed_opcode := 2#010_100#;
-   270.    JrEQZ  : constant KDF9.compressed_opcode := 2#010_110#;
-   271.    JrV    : constant KDF9.compressed_opcode := 2#011_000#;
-   272.    JrEN   : constant KDF9.compressed_opcode := 2#011_010#;
-   273.    JrEJ   : constant KDF9.compressed_opcode := 2#011_100#;
-   274.    JrTR   : constant KDF9.compressed_opcode := 2#011_110#;
-   275.    EXITD  : constant KDF9.compressed_opcode := 2#011_111#;  -- 010 in bits 5-7
-   276.    JrCqZ  : constant KDF9.compressed_opcode := 2#100_000#;
-   277.    JrCqNZ : constant KDF9.compressed_opcode := 2#110_000#;
-   278.
-   279.    EXIT_1_bit : constant := 2#010#;  -- 0h0 in bits 5-7 of EXIT syllable_0
-   280.
-   281.
-   282.    -- compressed_opcode values for directly-addressed data access orders
-   283.
-   284.    EaMq     : constant KDF9.compressed_opcode := 2#000_000#;
-   285.    TO_EaMq  : constant KDF9.compressed_opcode := 2#000_001#;
-   286.    EaMqQ    : constant KDF9.compressed_opcode := 2#000_010#;
-   287.    TO_EaMqQ : constant KDF9.compressed_opcode := 2#000_011#;
-   288.    SET      : constant KDF9.compressed_opcode := 2#000_100#;
-   289.
-   290.
-   291. end KDF9.decoding;
-
- 291 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/ioc-dispatcher.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with KDF9.PHU_store;
-    18. with tracing;
-    19.
-    20. use  tracing;
-    21.
-    22. package body IOC.dispatcher is
-    23.
-    24.    --
-    25.    --
-    26.    -- CLO, SLO and TLO do not operate on a buffer, and so can be fully implemented here.
-    27.    --
-    28.    --
-    29.
-    30.    procedure CLO (Q_operand   : in KDF9.Q_register;
-    31.                   set_offline : in Boolean) is
-    32.       pragma Unreferenced(set_offline);
-    33.       use  KDF9.PHU_store;
-    34.    begin
-    35.       -- This is a Director-only instruction.
-    36.       take_note_of_test("   ", Q_operand, False);
-    37.       unlock_absolute_addresses(Q_operand);
-    38.       -- CLO also clears PHU[CPL].
-    39.       PHU(CPL) := idle_PHU;
-    40.       add_in_the_IO_lockout_CPU_time(Q_operand);
-    41.    end CLO;
-    42.
-    43.    procedure SLO (Q_operand   : in KDF9.Q_register;
-    44.                   set_offline : in Boolean) is
-    45.       pragma Unreferenced(set_offline);
-    46.    begin
-    47.       -- This is a Director-only instruction.
-    48.       take_note_of_test("   ", Q_operand, False);
-    49.       lock_out_absolute_addresses(Q_operand);
-    50.       add_in_the_IO_lockout_CPU_time(Q_operand);
-    51.    end SLO;
-    52.
-    53.    procedure TLO (Q_operand   : in KDF9.Q_register;
-    54.                   result      : out Boolean) is
-    55.    begin
-    56.       -- This is NOT Director-only.
-    57.       result := there_are_locks_in_relative_addresses(Q_operand);
-    58.       take_note_of_test("   ", Q_operand, result);
-    59.       add_in_the_IO_lockout_CPU_time(Q_operand);
-    60.    end TLO;
-    61.
-    62.    --
-    63.    --
-    64.    -- All other I/O orders do access a buffer, and so dispatch to the relevant device driver.
-    65.    --
-    66.    --
-    67.
-    68.    procedure BUSY (Q_operand   : in KDF9.Q_register;
-    69.                    set_offline : in Boolean;
-    70.                    result      : out Boolean) is
-    71.    begin
-    72.       buffer(Q_operand.C and buffer_number_mask).BUSY(Q_operand, set_offline, result);
-    73.    end BUSY;
-    74.
-    75.    procedure PAR (Q_operand   : in KDF9.Q_register;
-    76.                   set_offline : in Boolean;
-    77.                   result      : out Boolean) is
-    78.    begin
-    79.       buffer(Q_operand.C and buffer_number_mask).PAR(Q_operand, set_offline, result);
-    80.    end PAR;
-    81.
-    82.    procedure MANUAL_CT (Q_operand   : in KDF9.Q_register;
-    83.                         set_offline : in Boolean) is
-    84.    begin
-    85.       buffer(Q_operand.C and buffer_number_mask).MANUAL_CT(Q_operand, set_offline);
-    86.    end MANUAL_CT;
-    87.
-    88.    procedure INT (Q_operand   : in KDF9.Q_register;
-    89.                   set_offline : in Boolean) is
-    90.    begin
-    91.       buffer(Q_operand.C and buffer_number_mask).INT(Q_operand, set_offline);
-    92.    end INT;
-    93.
-    94.    procedure PIA (Q_operand   : in KDF9.Q_register;
-    95.                   set_offline : in Boolean) is
-    96.    begin
-    97.       buffer(Q_operand.C and buffer_number_mask).PIA(Q_operand, set_offline);
-    98.       add_in_the_IO_lockout_CPU_time(Q_operand);
-    99.    end PIA;
-   100.
-   101.    procedure PIB (Q_operand   : in KDF9.Q_register;
-   102.                   set_offline : in Boolean) is
-   103.    begin
-   104.       buffer(Q_operand.C and buffer_number_mask).PIB(Q_operand, set_offline);
-   105.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   106.    end PIB;
-   107.
-   108.    procedure PIC (Q_operand   : in KDF9.Q_register;
-   109.                   set_offline : in Boolean) is
-   110.    begin
-   111.       buffer(Q_operand.C and buffer_number_mask).PIC(Q_operand, set_offline);
-   112.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   113.    end PIC;
-   114.
-   115.    procedure PID (Q_operand   : in KDF9.Q_register;
-   116.                   set_offline : in Boolean) is
-   117.    begin
-   118.       buffer(Q_operand.C and buffer_number_mask).PID(Q_operand, set_offline);
-   119.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   120.    end PID;
-   121.
-   122.    procedure PIE (Q_operand   : in KDF9.Q_register;
-   123.                   set_offline : in Boolean) is
-   124.    begin
-   125.       buffer(Q_operand.C and buffer_number_mask).PIE(Q_operand, set_offline);
-   126.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   127.    end PIE;
-   128.
-   129.    procedure PIF (Q_operand   : in KDF9.Q_register;
-   130.                   set_offline : in Boolean) is
-   131.    begin
-   132.       buffer(Q_operand.C and buffer_number_mask).PIF(Q_operand, set_offline);
-   133.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   134.    end PIF;
-   135.
-   136.    procedure PIG (Q_operand   : in KDF9.Q_register;
-   137.                   set_offline : in Boolean) is
-   138.    begin
-   139.       buffer(Q_operand.C and buffer_number_mask).PIG(Q_operand, set_offline);
-   140.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   141.    end PIG;
-   142.
-   143.    procedure PIH (Q_operand   : in KDF9.Q_register;
-   144.                   set_offline : in Boolean) is
-   145.    begin
-   146.       buffer(Q_operand.C and buffer_number_mask).PIH(Q_operand, set_offline);
-   147.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   148.    end PIH;
-   149.
-   150.    procedure PMA (Q_operand   : in KDF9.Q_register;
-   151.                   set_offline : in Boolean) is
-   152.    begin
-   153.       buffer(Q_operand.C and buffer_number_mask).PMA(Q_operand, set_offline);
-   154.    end PMA;
-   155.
-   156.    procedure PMB (Q_operand   : in KDF9.Q_register;
-   157.                   set_offline : in Boolean) is
-   158.    begin
-   159.       buffer(Q_operand.C and buffer_number_mask).PMB(Q_operand, set_offline);
-   160.    end PMB;
-   161.
-   162.    procedure PMC (Q_operand   : in KDF9.Q_register;
-   163.                   set_offline : in Boolean) is
-   164.    begin
-   165.       buffer(Q_operand.C and buffer_number_mask).PMC(Q_operand, set_offline);
-   166.    end PMC;
-   167.
-   168.    procedure PMD (Q_operand   : in KDF9.Q_register;
-   169.                   set_offline : in Boolean) is
-   170.    begin
-   171.       buffer(Q_operand.C and buffer_number_mask).PMD(Q_operand, set_offline);
-   172.    end PMD;
-   173.
-   174.    procedure PME (Q_operand   : in KDF9.Q_register;
-   175.                   set_offline : in Boolean) is
-   176.    begin
-   177.       buffer(Q_operand.C and buffer_number_mask).PME(Q_operand, set_offline);
-   178.    end PME;
-   179.
-   180.    procedure PMF (Q_operand   : in KDF9.Q_register;
-   181.                   set_offline : in Boolean) is
-   182.    begin
-   183.       buffer(Q_operand.C and buffer_number_mask).PMF(Q_operand, set_offline);
-   184.    end PMF;
-   185.
-   186.    procedure PMG (Q_operand   : in KDF9.Q_register;
-   187.                   set_offline : in Boolean) is
-   188.    begin
-   189.       buffer(Q_operand.C and buffer_number_mask).PMG(Q_operand, set_offline);
-   190.    end PMG;
-   191.
-   192.    procedure PMK (Q_operand   : in KDF9.Q_register;
-   193.                   set_offline : in Boolean) is
-   194.    begin
-   195.       buffer(Q_operand.C and buffer_number_mask).PMK(Q_operand, set_offline);
-   196.    end PMK;
-   197.
-   198.    procedure PML (Q_operand   : in KDF9.Q_register;
-   199.                   set_offline : in Boolean) is
-   200.    begin
-   201.       buffer(Q_operand.C and buffer_number_mask).PML(Q_operand, set_offline);
-   202.    end PML;
-   203.
-   204.    procedure POA (Q_operand   : in KDF9.Q_register;
-   205.                   set_offline : in Boolean) is
-   206.    begin
-   207.       buffer(Q_operand.C and buffer_number_mask).POA(Q_operand, set_offline);
-   208.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   209.    end POA;
-   210.
-   211.    procedure POB (Q_operand   : in KDF9.Q_register;
-   212.                   set_offline : in Boolean) is
-   213.    begin
-   214.       buffer(Q_operand.C and buffer_number_mask).POB(Q_operand, set_offline);
-   215.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   216.    end POB;
-   217.
-   218.    procedure POC (Q_operand   : in KDF9.Q_register;
-   219.                   set_offline : in Boolean) is
-   220.    begin
-   221.       buffer(Q_operand.C and buffer_number_mask).POC(Q_operand, set_offline);
-   222.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   223.    end POC;
-   224.
-   225.    procedure POD (Q_operand   : in KDF9.Q_register;
-   226.                   set_offline : in Boolean) is
-   227.    begin
-   228.       buffer(Q_operand.C and buffer_number_mask).POD(Q_operand, set_offline);
-   229.       add_in_the_IO_lockout_CPU_time(Q_operand);
-   230.    end POD;
-   231.
-   232.    procedure POE (Q_operand   : in KDF9.Q_register;
-   233.                   set_offline : in Boolean) is
-   234.    begin
-   235.       buffer(Q_operand.C and buffer_number_mask).POE(Q_operand, set_offline);
-   236.    end POE;
-   237.
-   238.    procedure POF (Q_operand   : in KDF9.Q_register;
-   239.                   set_offline : in Boolean) is
-   240.    begin
-   241.       buffer(Q_operand.C and buffer_number_mask).POF(Q_operand, set_offline);
-   242.    end POF;
-   243.
-   244.    procedure POG (Q_operand   : in KDF9.Q_register;
-   245.                   set_offline : in Boolean) is
-   246.    begin
-   247.       buffer(Q_operand.C and buffer_number_mask).POG(Q_operand, set_offline);
-   248.    end POG;
-   249.
-   250.    procedure POH (Q_operand   : in KDF9.Q_register;
-   251.                   set_offline : in Boolean) is
-   252.    begin
-   253.       buffer(Q_operand.C and buffer_number_mask).POH(Q_operand, set_offline);
-   254.    end POH;
-   255.
-   256.    procedure POK (Q_operand   : in KDF9.Q_register;
-   257.                   set_offline : in Boolean) is
-   258.    begin
-   259.       buffer(Q_operand.C and buffer_number_mask).POK(Q_operand, set_offline);
-   260.    end POK;
-   261.
-   262.    procedure POL (Q_operand   : in KDF9.Q_register;
-   263.                   set_offline : in Boolean) is
-   264.    begin
-   265.       buffer(Q_operand.C and buffer_number_mask).POL(Q_operand, set_offline);
-   266.    end POL;
-   267.
-   268. end IOC.dispatcher;
-
-Compiling: ../Source/ioc-dispatcher.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package IOC.dispatcher is
-    18.
-    19.    procedure MANUAL_CT (Q_operand   : in KDF9.Q_register;
-    20.                         set_offline : in Boolean);
-    21.
-    22.    procedure BUSY (Q_operand   : in KDF9.Q_register;
-    23.                    set_offline : in Boolean;
-    24.                    result      : out Boolean);
-    25.
-    26.    procedure PAR (Q_operand   : in KDF9.Q_register;
-    27.                   set_offline : in Boolean;
-    28.                   result      : out Boolean);
-    29.
-    30.    procedure TLO (Q_operand   : in KDF9.Q_register;
-    31.                   result      : out Boolean);
-    32.
-    33.    procedure CLO (Q_operand   : in KDF9.Q_register;
-    34.                   set_offline : in Boolean);
-    35.
-    36.    procedure SLO (Q_operand   : in KDF9.Q_register;
-    37.                   set_offline : in Boolean);
-    38.
-    39.    procedure INT (Q_operand   : in KDF9.Q_register;
-    40.                   set_offline : in Boolean);
-    41.
-    42.    procedure PIA (Q_operand   : in KDF9.Q_register;
-    43.                   set_offline : in Boolean);
-    44.
-    45.    procedure PIB (Q_operand   : in KDF9.Q_register;
-    46.                   set_offline : in Boolean);
-    47.
-    48.    procedure PIC (Q_operand   : in KDF9.Q_register;
-    49.                   set_offline : in Boolean);
-    50.
-    51.    procedure PID (Q_operand   : in KDF9.Q_register;
-    52.                   set_offline : in Boolean);
-    53.
-    54.    procedure PIE (Q_operand   : in KDF9.Q_register;
-    55.                   set_offline : in Boolean);
-    56.
-    57.    procedure PIF (Q_operand   : in KDF9.Q_register;
-    58.                   set_offline : in Boolean);
-    59.
-    60.    procedure PIG (Q_operand   : in KDF9.Q_register;
-    61.                   set_offline : in Boolean);
-    62.
-    63.    procedure PIH (Q_operand   : in KDF9.Q_register;
-    64.                   set_offline : in Boolean);
-    65.
-    66.    procedure PMA (Q_operand   : in KDF9.Q_register;
-    67.                   set_offline : in Boolean);
-    68.
-    69.    procedure PMB (Q_operand   : in KDF9.Q_register;
-    70.                   set_offline : in Boolean);
-    71.
-    72.    procedure PMC (Q_operand   : in KDF9.Q_register;
-    73.                   set_offline : in Boolean);
-    74.
-    75.    procedure PMD (Q_operand   : in KDF9.Q_register;
-    76.                   set_offline : in Boolean);
-    77.
-    78.    procedure PME (Q_operand   : in KDF9.Q_register;
-    79.                   set_offline : in Boolean);
-    80.
-    81.    procedure PMF (Q_operand   : in KDF9.Q_register;
-    82.                   set_offline : in Boolean);
-    83.
-    84.    procedure PMG (Q_operand   : in KDF9.Q_register;
-    85.                   set_offline : in Boolean);
-    86.
-    87.    procedure PMK (Q_operand   : in KDF9.Q_register;
-    88.                   set_offline : in Boolean);
-    89.
-    90.    procedure PML (Q_operand   : in KDF9.Q_register;
-    91.                   set_offline : in Boolean);
-    92.
-    93.    procedure POA (Q_operand   : in KDF9.Q_register;
-    94.                   set_offline : in Boolean);
-    95.
-    96.    procedure POB (Q_operand   : in KDF9.Q_register;
-    97.                   set_offline : in Boolean);
-    98.
-    99.    procedure POC (Q_operand   : in KDF9.Q_register;
-   100.                   set_offline : in Boolean);
-   101.
-   102.    procedure POD (Q_operand   : in KDF9.Q_register;
-   103.                   set_offline : in Boolean);
-   104.
-   105.    procedure POE (Q_operand   : in KDF9.Q_register;
-   106.                   set_offline : in Boolean);
-   107.
-   108.    procedure POF (Q_operand   : in KDF9.Q_register;
-   109.                   set_offline : in Boolean);
-   110.
-   111.    procedure POG (Q_operand   : in KDF9.Q_register;
-   112.                   set_offline : in Boolean);
-   113.
-   114.    procedure POH (Q_operand   : in KDF9.Q_register;
-   115.                   set_offline : in Boolean);
-   116.
-   117.    procedure POK (Q_operand   : in KDF9.Q_register;
-   118.                   set_offline : in Boolean);
-   119.
-   120.    procedure POL (Q_operand   : in KDF9.Q_register;
-   121.                   set_offline : in Boolean);
-   122.
-   123. end IOC.dispatcher;
-   124.
-
- 268 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-egdon.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Implement the API (OUTs) of the EGDON Director.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package body KDF9.EGDON is
-    18.
-    19.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word) is
-    20.    begin
-    21.       trap_unimplemented_feature("EGDON OUT" & OUT_number'Image);
-    22.    end do_an_EGDON_OUT;
-    23.
-    24. end KDF9.EGDON;
-
-Compiling: ../Source/kdf9-egdon.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:10
-
-     1. -- Implement the API (OUTs) of the EGDON Director.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package KDF9.EGDON is
-    18.
-    19.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word);
-    20.
-    21. end KDF9.EGDON;
-
- 24 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
-Compiling: /home/parallels/emulation/Source/kdf9-tsd-processes.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
-
-     1. -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with dumping;
-    18. with IOC;
-    19. with IOC.fast.DR.TSD_OUTs;
-    20. with IOC.fast.FD.TSD_OUTs;
-    21. with IOC.slow.shift.TR;
-    22. with KDF9.CPU;
-    23. with KDF9.store;
-    24. with KDF9.TSD.peripherals;
-    25.
-    26. with imported_value_of;
-    27.
-    28. use  dumping;
-    29. use  IOC;
-    30. use  IOC.fast.DR.TSD_OUTs;
-    31. use  IOC.fast.FD.TSD_OUTs;
-    32. use  IOC.slow.shift.TR;
-    33. use  KDF9.store;
-    34. use  KDF9.TSD.peripherals;
-    35.
-    36. package body KDF9.TSD.processes is
-    37.
-    38. --
-    39. -- OUTs 0, 1 and 2 terminate execution in various ways and call for appropriate finalization.
-    40. --
-    41.
-    42.    procedure free_any_allocated_tapes (OUT_number : in KDF9.word) is
-    43.    begin
-    44.       for b in KDF9.buffer_number loop
-    45.          if buffer(b) /= null                      and then
-    46.                buffer(b).kind in MT_kind | ST_kind and then
-    47.                   is_allocated(buffer(b))              then
-    48.             free_the_device_on_buffer(b, OUT_number);
-    49.          end if;
-    50.       end loop;
-    51.    end free_any_allocated_tapes;
-    52.
-    53.
-    54. --
-    55. -- OUT 0: terminate the run.
-    56. --
-    57.
-    58.    procedure do_OUT_0 is
-    59.    begin
-    60.       free_any_allocated_tapes(OUT_number => 0);
-    61.       notify_state_display_of_final_ICR;
-    62.       log_API_message("OUT 0: end of run");
-    63.       raise program_exit;
-    64.    end do_OUT_0;
-    65.
-    66.
-    67. --
-    68. -- OUT 1: terminate the run and overlay another program in a fresh start.
-    69. --
-    70.
-    71.    procedure finalize_interim_diagnostics (OUT_number : in KDF9.word) is
-    72.    begin
-    73.       if the_log_is_wanted and pre_overlay_state_is_enabled then
-    74.          show_final_state("before overlay by OUT" & OUT_number'Image);
-    75.       end if;
-    76.
-    77.       -- Deal with any dump requests.
-    78.       if the_log_is_wanted and nr_of_post_dumping_areas /= 0 then
-    79.          log_new_line;
-    80.          log_rule;
-    81.          log_title("Post-run Dump:");
-    82.          print_postrun_dump_areas;
-    83.       end if;
-    84.       remove_prerun_dump_areas;
-    85.       remove_postrun_dump_areas;
-    86.
-    87.       -- Restart tracing.
-    88.       clear_retro_FIFO;
-    89.       clear_IOC_FIFO;
-    90.       clear_the_histogram;
-    91.       clear_the_profile;
-    92.       the_profile_is_wanted := False;
-    93.       the_INS_plot_is_wanted := False;
-    94.       if the_external_trace_is_enabled then
-    95.          log_an_external_trace_header("ee9: Restarting the run for OUT" & OUT_number'Image);
-    96.       end if;
-    97.    end finalize_interim_diagnostics;
-    98.
-    99.    procedure prepare_successor (new_limits : in KDF9.word; new_program_name : in String := "" ) is
-   100.    begin
-   101.       -- Set up any new options.
-   102.       get_settings_from_file("2");
-   103.       display_execution_modes(new_program_name);
-   104.
-   105.       -- Complete the core image.
-   106.       poke_all_amendments;
-   107.       save_the_initial_jump;
-   108.       store_word(new_limits, 1);
-   109.
-   110.       -- Display initial dumps.
-   111.       the_program_has_been_analysed := False;
-   112.       show_all_prerun_dump_areas;
-   113.
-   114.       -- Establish the new CPU state.
-   115.       reset_V_and_T;
-   116.       set_NIA_to((0, 0));
-   117.    end prepare_successor;
-   118.
-   119.    procedure do_OUT_1 is
-   120.       P : KDF9.pair;
-   121.       W : KDF9.word;
-   122.    begin
-   123.       -- Get the program name.
-   124.       ensure_that_the_NEST_holds_2_operands;
-   125.       P := pop;
-   126.       P := KDF9.CPU.shift_logical(P, 24);
-   127.
-   128.       declare
-   129.          program_name : constant String := trimmed(to_string(P));
-   130.          overlay_name : constant String := imported_value_of("KDF9_BINARY", default => "Binary")
-   131.                                          & "/"
-   132.                                          & program_name;
-   133.       begin
-   134.          if program_name = "" then
-   135.             trap_failing_OUT(1, "the given program name is an empty string");
-   136.          end if;
-   137.
-   138.          if program_name = "KMW0201--UPU" then
-   139.             -- The Whetstone Controller is trying to overlay itself with the Translator.
-   140.             -- This is so inconvenient in practice that I simply prevent it.
-   141.             notify_state_display_of_final_ICR;
-   142.             log_API_message("OUT 1: ee9 will not return to the Whetstone Translator", skip => 2);
-   143.             raise program_exit;
-   144.          end if;
-   145.
-   146.          -- Tidy up the running program.
-   147.          free_all_devices;
-   148.          complete_all_extant_transfers;
-   149.          notify_state_display_of_final_ICR;
-   150.          finalize_interim_diagnostics(OUT_number => 1);
-   151.          log_API_message("OUT 1: ICR ="
-   152.                        & ICR'Image
-   153.                        & "; RAN/EL ="
-   154.                        & the_CPU_time'Image
-   155.                        & " /"
-   156.                        & KDF9.us'Image(the_clock_time)
-   157.                        & " KDF9 us"
-   158.                         );
-   159.
-   160.          -- The overlaid program inherits the predecessor's time and store limits.
-   161.          W := fetch_word(1);
-   162.          load_a_program(overlay_name);
-   163.          prepare_successor(new_limits => W, new_program_name => overlay_name);
-   164.
-   165.          raise mode_change_request;
-   166.       end;
-   167.    end do_OUT_1;
-   168.
-   169.
-   170. --
-   171. -- OUT 2: terminate the run and then restart it with a program already in core.
-   172. -- complete_TSD_OUT_2 is called by KDF9.microcode after it has finalized the OUT instruction.
-   173. --
-   174.
-   175.    time_limit : KDF9.word;
-   176.
-   177.    procedure do_OUT_2 is
-   178.    begin
-   179.       ensure_that_the_NEST_holds_an_operand;
-   180.       time_limit := pop;
-   181.       the_trace_operand := time_limit;
-   182.
-   183.       -- Tidy up the running program.
-   184.       free_any_allocated_tapes(OUT_number => 2);
-   185.       free_any_reserved_disc_space;
-   186.       free_any_reserved_drum_space;
-   187.       notify_state_display_of_final_ICR;
-   188.
-   189.       raise OUT_2_restart;
-   190.    end do_OUT_2;
-   191.
-   192.    procedure complete_TSD_OUT_2 is
-   193.    begin
-   194.       finalize_interim_diagnostics(OUT_number => 2);
-   195.       if time_limit >= 2**24 then
-   196.          trap_failing_OUT(2, "the new time limit =" & time_limit'Image & "s is too big");
-   197.       end if;
-   198.
-   199.       log_API_message("OUT 2: ICR ="
-   200.                     & ICR'Image
-   201.                     & "; RAN/EL ="
-   202.                     & the_CPU_time'Image
-   203.                     & " /"
-   204.                     & KDF9.us'Image(the_clock_time)
-   205.                     & " KDF9 us"
-   206.                     & "; new time limit = "
-   207.                     & time_limit'Image &"s"
-   208.                      );
-   209.
-   210.       --The successor has a new time limit and inherits the predecessor's store limit.
-   211.       prepare_successor(new_limits => time_limit * 2**24 + fetch_halfword(1, 1) / 2**24);
-   212.
-   213.       reset_the_program_state;
-   214.    end complete_TSD_OUT_2;
-   215.
-   216.
-   217. --
-   218. -- OUT 97: this not a genuine TSD OUT.
-   219. --
-   220.
-   221.    procedure do_OUT_97 is
-   222.       P      : constant KDF9.word := pop;
-   223.       name   : constant String    := trimmed(to_string(P));
-   224.       value  : constant String    := imported_value_of(name, "0");
-   225.       number : KDF9.word;
-   226.    begin
-   227.       number := KDF9.word'Value(value);
-   228.       the_trace_operand := number;
-   229.       push(number);
-   230.    exception
-   231.       when others =>
-   232.          trap_failing_OUT(97, name & " = «"& value & "», not a valid integer");
-   233.    end do_OUT_97;
-   234.
-   235. end KDF9.TSD.processes;
-
-Compiling: ../Source/kdf9-tsd-processes.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
-
-     1. -- Implement OUTs 0.. 2 and 5..7 of the EE Time Sharing Directors.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package KDF9.TSD.processes is
-    18.
-    19.    procedure do_OUT_0
-    20.       with No_Return, Inline => False;
-    21.
-    22.    procedure do_OUT_1
-    23.       with No_Return, Inline => False;
-    24.
-    25.    procedure do_OUT_2
-    26.       with No_Return, Inline => False;
-    27.
-    28.    procedure complete_TSD_OUT_2
-    29.       with Inline => False;
-    30.
-    31.    procedure do_OUT_97
-    32.       with Inline => False;
-    33.
-    34. end KDF9.TSD.processes;
-
- 235 lines: No errors
-
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
-
 Compiling: /home/parallels/emulation/Source/disassembly.adb
-Source file time stamp: 2021-05-28 23:28:26
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -25791,12 +23849,12 @@ Compiled at: 2021-05-29 19:07:11
     17. with formatting;
     18. with KDF9.CPU;
     19. with KDF9.decoding;
-    20. with symbols;
+    20. with disassembly.symbols;
     21.
     22. use  formatting;
     23. use  KDF9.CPU;
     24. use  KDF9.decoding;
-    25. use  symbols;
+    25. use  disassembly.symbols;
     26.
     27. package body disassembly is
     28.
@@ -26156,19 +24214,19 @@ Compiled at: 2021-05-29 19:07:11
    382.    begin  -- normal_jump_name
    383.       return (
    384.               case decoded.compressed_opcode is
-   385.                  when JrEQ   => jump("EQ"),
+   385.                  when JrEQ   => jump("="),
    386.                  when JrGTZ  => jump("GTZ"),
    387.                  when JrLTZ  => jump("LTZ"),
-   388.                  when JrEQZ  => jump("EQZ"),
+   388.                  when JrEQZ  => jump("=Z"),
    389.                  when JrV    => jump("V"),
    390.                  when JrEN   => jump("EN"),
    391.                  when Jr     => jump(""),
    392.                  when JrEJ   => jump("EJ"),
    393.                  when JrTR   => jump("TR"),
-   394.                  when JrNE   => jump("NE"),
+   394.                  when JrNE   => jump("±"),
    395.                  when JrLEZ  => jump("LEZ"),
    396.                  when JrGEZ  => jump("GEZ"),
-   397.                  when JrNEZ  => jump("NEZ"),
+   397.                  when JrNEZ  => jump("±Z"),
    398.                  when JrNV   => jump("NV"),
    399.                  when JrNEN  => jump("NEN"),
    400.                  when JrNEJ  => jump("NEJ"),
@@ -26399,10 +24457,10 @@ Compiled at: 2021-05-29 19:07:11
    625.        case encoding and 8#77# is
    626.           when JrCqZ  .. JrCqZ+2#1111#  => "JrCqZ",
    627.           when JrCqNZ .. JrCqNZ+2#1111# => "JrCqNZ",
-   628.           when JrEQ   => "JrEQ",
+   628.           when JrEQ   => "Jr=",
    629.           when JrGTZ  => "JrGTZ",
    630.           when JrLTZ  => "JrLTZ",
-   631.           when JrEQZ  => "JrEQZ",
+   631.           when JrEQZ  => "Jr=Z",
    632.           when JrV    => "JrV",
    633.           when JrEN   => "JrEN",
    634.           when Jr     => "Jr",
@@ -26410,10 +24468,10 @@ Compiled at: 2021-05-29 19:07:11
    636.           when JSr    => "JSr",
    637.           when JrTR   => "JrTR",
    638.           when EXIT_n => "EXIT",
-   639.           when JrNE   => "JrNE",
+   639.           when JrNE   => "Jr±",
    640.           when JrLEZ  => "JrLEZ",
    641.           when JrGEZ  => "JrGEZ",
-   642.           when JrNEZ  => "JrNEZ",
+   642.           when JrNEZ  => "Jr±Z",
    643.           when JrNV   => "JrNV",
    644.           when JrNEN  => "JrNEN",
    645.           when JrNEJ  => "JrNEJ",
@@ -26453,12 +24511,12 @@ Compiled at: 2021-05-29 19:07:11
    679. end disassembly;
 
 Compiling: ../Source/disassembly.ads
-Source file time stamp: 2021-05-20 18:11:45
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26501,17 +24559,2022 @@ Compiled at: 2021-05-29 19:07:11
 
  679 lines: No errors
 
+
+Compiling: /home/parallels/emulation/Source/disassembly-symbols.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Map object code addresses to Usercode symbolic addresses.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with formatting;
+    18.
+    19. use  formatting;
+    20.
+    21. package body disassembly.symbols is
+    22.
+    23.    procedure set_Z_min is
+    24.    begin
+    25.       if the_WYZ_table.Y_max = 0 or the_WYZ_table.Y_base = KDF9.address'Last then
+    26.          the_WYZ_table.Z_min := the_WYZ_table.Z_base - (the_WYZ_table.Y_base+the_WYZ_table.Z_base)/8;
+    27.       else
+    28.          the_WYZ_table.Z_min := the_WYZ_table.Y_base + the_WYZ_table.Y_max;
+    29.       end if;
+    30.    end set_Z_min;
+    31.
+    32.    procedure define_W0 (address : in KDF9.address) is
+    33.    begin
+    34.       the_WYZ_table.W_base := address;
+    35.    end define_W0;
+    36.
+    37.    procedure define_Y0 (address : in KDF9.address) is
+    38.    begin
+    39.       the_WYZ_table.Y_base := address;
+    40.    end define_Y0;
+    41.
+    42.    procedure define_Z0 (address : in KDF9.address) is
+    43.    begin
+    44.       the_WYZ_table.Z_base := address;
+    45.       set_Z_min;
+    46.    end define_Z0;
+    47.
+    48.    procedure define_Yy0 (x : in Y_store_id; address : in KDF9.address) is
+    49.    begin
+    50.       the_WYZ_table.Yy_base(x) := address;
+    51.    end define_Yy0;
+    52.
+    53.    function Y_symbol (address : KDF9.address)
+    54.    return String is
+    55.    begin
+    56.       if address >= the_WYZ_table.Z_min then
+    57.          return "Z" & trimmed(KDF9.address'Image(the_WYZ_table.Z_base - address));
+    58.       end if;
+    59.       if address >= the_WYZ_table.Y_base then
+    60.          return "Y" & trimmed(KDF9.address'Image(address - the_WYZ_table.Y_base));
+    61.       end if;
+    62.       for y in reverse Y_store_id loop
+    63.          if address >= the_WYZ_table.Yy_base(y) then
+    64.             return "Y" & y & trimmed(KDF9.address'Image(address - the_WYZ_table.Yy_base(y))) ;
+    65.          end if;
+    66.       end loop;
+    67.       if address >= the_WYZ_table.W_base then
+    68.          return "W" & trimmed(KDF9.address'Image(address - the_WYZ_table.W_base));
+    69.       end if;
+    70.       return "E" & trimmed(KDF9.address'Image(address));
+    71.    end Y_symbol;
+    72.
+    73.    procedure declare_P0 (P0v : in KDF9.address) is
+    74.    begin
+    75.       V_store_base(0) := (P_number => 0, V_count => P0v, P_address => P0v+8,  V_address => 8);
+    76.    end declare_P0;
+    77.
+    78.    procedure define_Y_size (size : in KDF9.address) is
+    79.    begin
+    80.       the_WYZ_table.Y_max := size;
+    81.    end define_Y_size;
+    82.
+    83.    procedure declare_Pp (P_number : in Natural; V_count, P_address : in KDF9.address) is
+    84.       V_address : constant KDF9.address := P_address - V_count;
+    85.    begin
+    86.       last_P_number := last_P_number + 1;
+    87.       if last_P_number not in 0 .. 999 then
+    88.          raise Program_Error with "number of V store bases >" & Integer'Image(V_store_base'Last);
+    89.       end if;
+    90.       V_store_base(last_P_number)   := (P_number, V_count, P_address, V_address);
+    91.       V_store_base(last_P_number+1) := (8191, 8191, 8191, 8191);
+    92.    end declare_Pp;
+    93.
+    94.    function V_symbol (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
+    95.    return String is
+    96.    begin
+    97.       if address > 255 or not_for_SET then
+    98.          for p in 0 .. last_P_number loop
+    99.          exit when address < V_store_base(p).V_address;
+   100.             if V_store_base(p).V_count /= 0                                       and then
+   101.                   address in V_store_base(p).V_address .. V_store_base(p).P_address   then
+   102.                   -- N.B. NOT "V_store_base(p).P_address-1" to avoid wrap-around.
+   103.                return "V"
+   104.                     & trimmed(KDF9.address'Image(address - V_store_base(p).V_address))
+   105.                     & "P"
+   106.                     & trimmed(Natural'Image(V_store_base(p).P_number));
+   107.             end if;
+   108.          end loop;
+   109.       end if;
+   110.       return "E"
+   111.            & (if in_octal then "#" & oct_of(address, 1) else trimmed(KDF9.address'Image(address)));
+   112.    end V_symbol;
+   113.
+   114.    function P_symbol (address : KDF9.syllable_address; in_octal : Boolean)
+   115.    return String is
+   116.    begin
+   117.       for p in 0 .. last_P_number loop
+   118.          if KDF9.address(address.code_address) = V_store_base(p).P_address then
+   119.             return "P" & trimmed(Natural'Image(V_store_base(p).P_number));
+   120.          end if;
+   121.       end loop;
+   122.       return "E" & oct_or_dec_of(address, in_octal);
+   123.    end P_symbol;
+   124.
+   125.    function symbolic (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
+   126.    return String is
+   127.       Y_store : constant String := Y_symbol(address);
+   128.    begin
+   129.      return (if Y_store(1) = 'E' then V_symbol(address, in_octal, not_for_SET) else Y_store);
+   130.    end symbolic;
+   131.
+   132.    procedure clear_all_symbol_definitions is
+   133.    begin
+   134.       the_WYZ_table.Yy_base := (others => KDF9.address'Last);
+   135.       V_store_base  := (others => (0, 0, 0, 0));
+   136.       last_P_number := 0;
+   137.       V_store_base(0) := (P_number => 0, V_count => 0, P_address => 8,  V_address => 8);
+   138.    end clear_all_symbol_definitions;
+   139.
+   140. end disassembly.symbols;
+
+Compiling: ../Source/disassembly-symbols.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1.  -- Map object code addresses to Usercode symbolic addresses.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package disassembly.symbols is
+    18.
+    19.    procedure clear_all_symbol_definitions;
+    20.
+    21.    procedure declare_P0 (P0v : in KDF9.address);
+    22.    procedure declare_Pp (P_number : in Natural; V_count, P_address : in KDF9.address);
+    23.
+    24.    procedure define_Y_size (size : in KDF9.address);
+    25.
+    26.    procedure define_W0 (address : in KDF9.address);
+    27.    procedure define_Y0 (address : in KDF9.address);
+    28.    procedure define_Z0 (address : in KDF9.address);
+    29.
+    30.    subtype Y_store_id is Character range 'A' ..'Z';
+    31.
+    32.    procedure define_Yy0 (x : in Y_store_id; address : in KDF9.address);
+    33.
+    34.    function P_symbol (address : KDF9.syllable_address; in_octal : Boolean)
+    35.    return String;
+    36.
+    37.    function symbolic (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
+    38.    return String;
+    39.
+    40.    last_P_number : Integer range -1 .. 1000 := -1;
+    41.
+    42.    type V_definition is
+    43.    record
+    44.       P_number  : Natural;
+    45.       V_count   : KDF9.address;
+    46.       P_address : KDF9.address;
+    47.       V_address : KDF9.address;
+    48.    end record;
+    49.
+    50.    type V_definition_list is array (Natural range <>) of V_definition;
+    51.
+    52.    V_store_base : V_definition_list (0 .. 1000);
+    53.
+    54.    type address_list is array (Y_store_id) of KDF9.address;
+    55.
+    56.    type non_V_store_table is
+    57.       record
+    58.          Yy_base : address_list := (others => KDF9.address'Last);
+    59.          W_base  : KDF9.address := KDF9.address'Last;
+    60.          Y_base  : KDF9.address := KDF9.address'Last;
+    61.          Y_max   : KDF9.address := 0;
+    62.          Z_base  : KDF9.address := KDF9.address'Last;
+    63.          Z_min   : KDF9.address := KDF9.address'Last;
+    64.       end record;
+    65.
+    66.    the_WYZ_table : non_V_store_table;
+    67.
+    68. end disassembly.symbols;
+
+ 140 lines: No errors
+
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
+Compiling: /home/parallels/emulation/Source/postscript.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Elementary Encapsulated PostScript (EPS) line drawing.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package body postscript is
+    18.
+    19.    use host_IO;
+    20.
+    21.    -- A path is a series of vectors v1, v2, ..., vn such that the last point
+    22.    --    of vi is the same as the first point of v(i+1),
+    23.    --       and v1, ..., vn are all drawn in the same colour.
+    24.    -- A new path is started by a jump to a non-contiguous point or by a change of pen colour.
+    25.
+    26.    there_is_an_open_path      : Boolean := False;
+    27.    the_last_point_in_the_path : postscript.point := (0, 0);
+    28.
+    29.    -- The bounding box limits are set from the value of maximum_offset at the end of the plot.
+    30.    maximum_offset             : postscript.point := (0, 0);
+    31.
+    32.    procedure ensure_separation (stream : in out host_IO.stream) is
+    33.    begin
+    34.       if column(stream) > 0 then
+    35.          put_byte(' ', stream);
+    36.       end if;
+    37.    end ensure_separation;
+    38.
+    39.    procedure put (stream : in out host_IO.stream; PS_text : String) is
+    40.    begin
+    41.       put_bytes(PS_text, stream);
+    42.    end put;
+    43.
+    44.    procedure put_unit (stream : in out host_IO.stream; PS_text : String) is
+    45.    begin
+    46.       ensure_separation(stream);
+    47.       put(stream, PS_text);
+    48.    end put_unit;
+    49.
+    50.    procedure put_line (stream : in out host_IO.stream; PS_text : String) is
+    51.    begin
+    52.       put(stream, PS_text);
+    53.       put_EOL(stream);
+    54.    end put_line;
+    55.
+    56.    procedure put_unit_line (stream : in out host_IO.stream; PS_text : String) is
+    57.    begin
+    58.       put_unit(stream, PS_text);
+    59.       put_EOL(stream);
+    60.    end put_unit_line;
+    61.
+    62.    procedure put_integer (stream : in out host_IO.stream; i : Integer) is
+    63.       integer_image  : constant String := i'Image;
+    64.    begin
+    65.       ensure_separation(stream);
+    66.       if integer_image(integer_image'First) /= ' ' then
+    67.          put(stream, integer_image);
+    68.       else  -- Suppress the nuisance blank character.
+    69.          put(stream, integer_image(integer_image'First+1..integer_image'Last));
+    70.       end if;
+    71.    end put_integer;
+    72.
+    73.    procedure terminate_any_open_path (stream : in out host_IO.stream) is
+    74.    begin
+    75.       if there_is_an_open_path then
+    76.          -- Draw the accumulated strokes.
+    77.          put_unit_line(stream, "s");
+    78.       end if;
+    79.       there_is_an_open_path := False;
+    80.    end terminate_any_open_path;
+    81.
+    82.    procedure draw_a_PS_vector (stream : in out host_IO.stream;
+    83.                                initial,
+    84.                                final  : in postscript.point) is
+    85.
+    86.       function largest_of (a, b, c : Natural)
+    87.       return Natural
+    88.       is (Natural'Max(a, Natural'Max(b, c)));
+    89.
+    90.    begin -- draw_a_PS_vector
+    91.       if initial /= the_last_point_in_the_path then
+    92.          -- This vector is not contiguous with the previous one.
+    93.          terminate_any_open_path(stream);
+    94.       end if;
+    95.       if initial = final then
+    96.          -- This vector is of length 0.
+    97.          return;
+    98.       end if;
+    99.       maximum_offset.x := largest_of(maximum_offset.x, initial.x, final.x);
+   100.       maximum_offset.y := largest_of(maximum_offset.y, initial.y, final.y);
+   101.       if there_is_an_open_path then
+   102.          -- Draw a line to the final point, extending the current path.
+   103.          put_integer(stream, final.x);
+   104.          put_integer(stream, final.y);
+   105.          put_unit_line(stream, "l");
+   106.       else
+   107.          -- Move to the initial point, opening a fresh path, and draw a line to the final point.
+   108.          put_integer(stream, final.x);
+   109.          put_integer(stream, final.y);
+   110.          put_integer(stream, initial.x);
+   111.          put_integer(stream, initial.y);
+   112.          put_unit_line(stream, "n");
+   113.          there_is_an_open_path := True;
+   114.       end if;
+   115.       the_last_point_in_the_path := final;
+   116.    end draw_a_PS_vector;
+   117.
+   118.    subtype RGB is String(1..11);
+   119.    gamut : constant array (pen_colour) of RGB
+   120.          := (
+   121.                Black          => ".00 .00 .00",
+   122.                Blue           => ".00 .00 1.0",
+   123.                Brown          => ".60 .20 .00",
+   124.                Cyan           => ".00 1.0 1.0",
+   125.                Dark_Blue      => ".10 .10 .80",
+   126.                Dark_Cyan      => ".20 .80 1.0",
+   127.                Dark_Green     => ".00 .60 .40",
+   128.                Dark_Grey      => ".50 .50 .50",
+   129.                Dark_Magenta   => ".75 .25 .75",
+   130.                Dark_Red       => ".75 .00 .00",
+   131.                Green          => ".00 1.0 .00",
+   132.                Grey           => ".80 .80 .80",
+   133.                Magenta        => "1.0 .00 1.0",
+   134.                Red            => "1.0 .00 .00",
+   135.                White          => "1.0 1.0 1.0",
+   136.                Yellow         => "1.0 1.0 .00"
+   137.             );
+   138.
+   139.    subtype tip_breadth is String(1..4);
+   140.    breadth : constant array (pen_tip_size) of tip_breadth
+   141.            := (
+   142.                Extra_Extra_Fine => "1.00",
+   143.                Extra_Fine       => "2.00",
+   144.                Fine             => "4.00",
+   145.                Medium           => "6.00",
+   146.                Medium_Broad     => "8.00",
+   147.                Broad            => "10.0",
+   148.                Extra_Broad      => "12.0"
+   149.               );
+   150.
+   151.    the_colour   : pen_colour   := the_default_colour;
+   152.    the_pen_size : pen_tip_size := the_default_tip_size;
+   153.
+   154.    procedure put_the_pen_settings (stream : in out host_IO.Stream) is
+   155.    begin -- put_the_pen_settings
+   156.       terminate_any_open_path(stream);
+   157.       put_unit(stream, gamut(the_colour));
+   158.       put_unit_line(stream, "setrgbcolor");
+   159.       put_unit(stream, breadth(the_pen_size));
+   160.       put_unit_line(stream, "setlinewidth");
+   161.    end put_the_pen_settings;
+   162.
+   163.    procedure set_the_pen_properties (this_colour   : in pen_colour   := the_default_colour;
+   164.                                      this_pen_size : in pen_tip_size := the_default_tip_size) is
+   165.    begin -- set_the_pen_properties
+   166.       the_colour := this_colour;
+   167.       the_pen_size := this_pen_size;
+   168.    end set_the_pen_properties;
+   169.
+   170.    -- We eventually seek back to the bounding box parametsrs using this, their file offset.
+   171.    the_position_of_the_placeholders : Natural;
+   172.
+   173.    procedure initialize_PS_output (stream : in out host_IO.Stream) is
+   174.
+   175.    begin -- initialize_PS_output
+   176.       put_line(stream, "%!PS-Adobe-3.0 EPSF-1.0");
+   177.       put_unit(stream, "%%BoundingBox: ");
+   178.
+   179.       -- Note the file offset of the bounding box placeholders.
+   180.       get_position(the_position_of_the_placeholders, stream);
+   181.
+   182.       -- Write the 12-column placeholders.
+   183.       put_line(stream, "xxxxxxxxxxxx|yyyyyyyyyyyy");
+   184.
+   185.       put_line(stream, "% This graph was plotted by ee9, the GNU Ada KDF9 emulator.");
+   186.       put_line(stream, "% For more information, see <http://www.findlayw.plus.com/KDF9>.");
+   187.       put_line(stream, "save");
+   188.
+   189.       put_line(stream, "1 setlinecap");
+   190.       put_line(stream, "1 setlinejoin");
+   191.
+   192.       put_the_pen_settings(stream);
+   193.
+   194.       put_line(stream, "0 792 translate");  -- Assumes a page of length 11"!
+   195.
+   196.       -- The plotter step was 0.005", which is the same as 0.36 PostScript points.
+   197.       -- The scaling factor is set here to make the wabbit example fit an A4 page.
+   198.       put_line(stream, "0.12 -0.12 scale");
+   199.
+   200.       put_line(stream, "/l { lineto } bind def");
+   201.       put_line(stream, "/n { newpath moveto lineto } bind def");
+   202.       put_line(stream, "/s { stroke } bind def");
+   203.
+   204.       put_line(stream, "save");
+   205.    end initialize_PS_output;
+   206.
+   207.    procedure finalize_PS_output (stream : in out host_IO.Stream) is
+   208.
+   209.       subtype bound_string is String(1..12);
+   210.
+   211.       function bound_image (n : in Natural)
+   212.       return bound_string is
+   213.          n_image : constant String := n'Image;
+   214.       begin
+   215.          return b : bound_string := (others => ' ') do
+   216.             b(b'Last-n_image'Length+1 .. b'Last) := n_image;
+   217.          end return;
+   218.       end bound_image;
+   219.
+   220.    begin -- finalize_PS_output
+   221.       terminate_any_open_path(stream);
+   222.       put_line(stream, "showpage");
+   223.       put_line(stream, "restore");
+   224.       put_line(stream, "restore");
+   225.       put_line(stream, "% End of plot");
+   226.
+   227.       -- Go back to the bounding box placeholders in the output file.
+   228.       set_position(the_position_of_the_placeholders, stream);
+   229.
+   230.       -- Overwrite them with the actual x and y co-ordinate bounds.
+   231.       put(stream, bound_image(maximum_offset.x));
+   232.       put(stream, " ");
+   233.       put(stream, bound_image(maximum_offset.y));
+   234.
+   235.       close(stream);
+   236.    end finalize_PS_output;
+   237.
+   238. end postscript;
+   239.
+
+Compiling: ../Source/postscript.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Elementary Encapsulated PostScript (EPS) line drawing.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with host_IO;
+    18.
+    19. package postscript is
+    20.
+    21.    type pen_colour is (
+    22.                        Black,
+    23.                        Blue,
+    24.                        Brown,
+    25.                        Cyan,
+    26.                        Dark_Blue,
+    27.                        Dark_Cyan,
+    28.                        Dark_Green,
+    29.                        Dark_Grey,
+    30.                        Dark_Magenta,
+    31.                        Dark_Red,
+    32.                        Green,
+    33.                        Grey,
+    34.                        Magenta,
+    35.                        Red,
+    36.                        White,
+    37.                        Yellow
+    38.                       );
+    39.
+    40.    the_default_colour : constant pen_colour := Black;
+    41.
+    42.    type pen_tip_size is (
+    43.                          Extra_Extra_Fine,
+    44.                          Extra_Fine,
+    45.                          Fine,
+    46.                          Medium,
+    47.                          Medium_Broad,
+    48.                          Broad,
+    49.                          Extra_Broad
+    50.                         );
+    51.
+    52.    the_default_tip_size : constant pen_tip_size := Extra_Extra_Fine;
+    53.
+    54.    -- Choose the pen's colour and tip size.
+    55.
+    56.    procedure set_the_pen_properties (this_colour   : in pen_colour   := the_default_colour;
+    57.                                      this_pen_size : in pen_tip_size := the_default_tip_size);
+    58.
+    59.    -- Drawing is done in terms of the plotter's co-ordinate system.
+    60.    -- (0, 0) is the top left point of the drawing,
+    61.    -- The x axis increases down the plot (long axis, direction of paper movement),
+    62.    --    and the y axis increases across the plot (short axis, direction of pen movement).
+    63.
+    64.    type point is
+    65.      record
+    66.         x, y : Natural;  -- All physically possible co-ordinates are non-negative.
+    67.      end record;
+    68.
+    69.    -- Draw a straight line from initial to final.
+    70.    procedure draw_a_PS_vector (stream : in out host_IO.stream;
+    71.                                initial,
+    72.                                final  : in postscript.point);
+    73.
+    74.    -- Open the PostScript file and write the prelude, with a placeholder for the bounds.
+    75.    procedure initialize_PS_output (stream : in out host_IO.Stream);
+    76.
+    77.    -- Close the PostScript file, having gone back to overwrite the bounding box placeholders.
+    78.    procedure finalize_PS_output (stream : in out host_IO.Stream);
+    79.
+    80. end postscript;
+
+ 239 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/settings-io.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Settings-reader I/O support.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Characters.Latin_1;
+    18. --
+    19. with file_interfacing;
+    20. with KDF9;
+    21.
+    22. use  Ada.Characters.Latin_1;
+    23.
+    24. package body settings.IO is
+    25.
+    26.    procedure open_options_file (file : in out File_Type; name : in String) is
+    27.    begin
+    28.       file_interfacing.initialize(file, in_file, name);
+    29.       line_number := 1;
+    30.    exception
+    31.       when others =>
+    32.          raise Status_Error with name;
+    33.    end open_options_file;
+    34.
+    35.    procedure close_options_file (file : in out File_Type; name : in String) is
+    36.    begin
+    37.       file_interfacing.finalize(file, name);
+    38.    end close_options_file;
+    39.
+    40.    comment_flag_character : constant Character := '|';
+    41.
+    42.    procedure skip_to_next_non_blank (file : File_Type) is
+    43.       next_char : Character := ' ';
+    44.       end_line  : Boolean;
+    45.    begin
+    46.       loop
+    47.         look_ahead(file, next_char, end_line);
+    48.       exit when end_line or else (next_char not in ' ' | HT);
+    49.          get(file, next_char);
+    50.       end loop;
+    51.       if next_char = comment_flag_character then
+    52.          while not end_of_line(file) loop
+    53.             get(file, next_char);
+    54.          end loop;
+    55.       end if;
+    56.    end skip_to_next_non_blank;
+    57.
+    58.    procedure ensure_not_at_end_of_line (file : File_Type) is
+    59.    begin
+    60.       skip_to_next_non_blank (file);
+    61.       if end_of_line(file) then
+    62.          raise Data_Error;
+    63.       end if;
+    64.    end ensure_not_at_end_of_line;
+    65.
+    66.    procedure skip_to_next_nonempty_line (file : in File_Type) is
+    67.       flag     : Character;
+    68.       end_line : Boolean;
+    69.    begin
+    70.       loop
+    71.          look_ahead(file, flag, end_line);
+    72.          if end_line                      or else
+    73.                flag = comment_flag_character then
+    74.             Skip_Line(file);
+    75.             line_number := line_number + 1;
+    76.          else
+    77.             exit;
+    78.          end if;
+    79.       end loop;
+    80.       if flag = comment_flag_character then
+    81.          raise Data_Error;
+    82.       end if;
+    83.    end skip_to_next_nonempty_line;
+    84.
+    85.    digit_offset : constant := Character'Pos('0');
+    86.
+    87.    procedure get_octal (file : in File_Type; value : out KDF9.word) is
+    88.       next_char : Character;
+    89.       last_char : Character := '_';
+    90.       place     : Natural   := 0;
+    91.       end_line  : Boolean   := False;
+    92.    begin
+    93.       value := 0;
+    94.       ensure_not_at_end_of_line(file);
+    95.       get(file, next_char);
+    96.       if next_char = '#' then
+    97.          get(file, next_char);
+    98.       else
+    99.          raise Data_Error;
+   100.       end if;
+   101.       loop
+   102.          if next_char in '0' .. '7' then
+   103.             value := value*8 + KDF9.word(Character'Pos(next_char)-digit_offset);
+   104.             place := place + 1;
+   105.             if place > 16 then
+   106.                raise Data_Error;
+   107.             end if;
+   108.          elsif next_char = '_' then
+   109.             if place = 0 then
+   110.                raise Data_Error;
+   111.             end if;
+   112.          else
+   113.             if last_char = '_' or place = 0 then
+   114.                raise Data_Error;
+   115.             end if;
+   116.             exit;
+   117.          end if;
+   118.          last_char := next_char;
+   119.          look_ahead(file, next_char, end_line);
+   120.       exit when end_line;
+   121.          if next_char in '0' .. '7' or next_char = '_' then
+   122.             get(file, next_char);
+   123.          else
+   124.             if last_char = '_' or place = 0 then
+   125.                raise Data_Error;
+   126.             end if;
+   127.             exit;
+   128.          end if;
+   129.       end loop;
+   130.    end get_octal;
+   131.
+   132.    procedure get_decimal (file : in File_Type; value : out KDF9.word) is
+   133.       next_char : Character;
+   134.       last_char : Character := '_';
+   135.       place     : Natural   := 0;
+   136.       negative  : Boolean   := False;
+   137.       end_line  : Boolean   := False;
+   138.    begin
+   139.       value := 0;
+   140.       ensure_not_at_end_of_line(file);
+   141.       get(file, next_char);
+   142.       if next_char = '-' then
+   143.          negative := True;
+   144.          get(file, next_char);
+   145.       elsif next_char not in '0' .. '9' then
+   146.          raise Data_Error with "get_decimal " & next_char;
+   147.       end if;
+   148.       loop
+   149.          if next_char in '0' .. '9' then
+   150.             value := value*10 + KDF9.word(Character'Pos(next_char)-digit_offset);
+   151.             place := place + 1;
+   152.             if place > 15 then
+   153.                raise Data_Error;
+   154.             end if;
+   155.          elsif next_char = '_' then
+   156.             if place = 0 then
+   157.                raise Data_Error;
+   158.             end if;
+   159.          else
+   160.             if last_char = '_' or place = 0 then
+   161.                raise Data_Error;
+   162.             end if;
+   163.       exit;
+   164.          end if;
+   165.          last_char := next_char;
+   166.          look_ahead(file, next_char, end_line);
+   167.       exit when end_line;
+   168.          if next_char in '0' .. '9' or next_char = '_' then
+   169.             get(file, next_char);
+   170.          else
+   171.             if last_char = '_' or place = 0 then
+   172.                raise Data_Error;
+   173.             end if;
+   174.       exit;
+   175.          end if;
+   176.       end loop;
+   177.       if negative then
+   178.          value := - value;
+   179.       end if;
+   180.    end get_decimal;
+   181.
+   182.    procedure get_word (file : in File_Type; value : out KDF9.word) is
+   183.       next_char : Character;
+   184.       end_line  : Boolean;
+   185.    begin
+   186.       ensure_not_at_end_of_line(file);
+   187.       look_ahead(file, next_char, end_line);
+   188.       pragma Unreferenced(end_line);
+   189.       if next_char = '#' then
+   190.          get_octal(file, value);
+   191.       else
+   192.          get_decimal(file, value);
+   193.       end if;
+   194.    end get_word;
+   195.
+   196.    procedure get_char (file : in File_Type; value : out Character) is
+   197.       end_line : Boolean;
+   198.       char     : Character;
+   199.    begin
+   200.       ensure_not_at_end_of_line(file);
+   201.       look_ahead(file, char, end_line);
+   202.       if end_line then
+   203.          raise Data_Error;
+   204.       end if;
+   205.       if char /= ' ' then
+   206.          get(file, value);
+   207.       end if;
+   208.    end get_char;
+   209.
+   210. end settings.IO;
+   211.
+
+Compiling: ../Source/settings-io.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Settings-reader I/O support.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with Ada.Text_IO;
+    18. --
+    19. with postscript;
+    20.
+    21. use  Ada.Text_IO;
+    22.
+    23. package settings.IO is
+    24.
+    25.    line_number : Natural := 0;
+    26.
+    27.    procedure open_options_file (file : in out File_Type; name : in String);
+    28.
+    29.    procedure close_options_file (file : in out File_Type; name : in String);
+    30.
+    31.    -- Check that the end of the line has not yet been reached, else raise Data_Error.
+    32.    procedure ensure_not_at_end_of_line (file : in File_Type);
+    33.
+    34.    -- Move the reading position to the next non-blank or EOL, skipping comment.
+    35.    procedure skip_to_next_non_blank (file : in File_Type);
+    36.
+    37.    -- Discard input until a non-empty line is reached,
+    38.    --    leaving the reading position at the start of that line,
+    39.    --    and incrementing line_number for each line terminator passed.
+    40.    procedure skip_to_next_nonempty_line (file : in File_Type);
+    41.
+    42.    -- Read octal digits string as KDF9.word,
+    43.    --    raising Data_Error on overflow or bad syntax.
+    44.    procedure get_octal (file : in File_Type; value : out KDF9.word);
+    45.
+    46.    -- Read decimal digits string as KDF9.word,
+    47.    --    raising Data_Error on overflow or bad syntax.
+    48.    procedure get_decimal (file  : in File_Type; value : out KDF9.word);
+    49.
+    50.    -- Read an address as a KDF9.word in either octal or decimal,
+    51.    --    using get_octal or get_decimal as indicated by the syntax.
+    52.    procedure get_word (file : in File_Type; value : out KDF9.word);
+    53.
+    54.    -- Read the character value immediately following an octal or decimal number,
+    55.    --    if it is not a space character; if it is a space, leave value unchanged.
+    56.    procedure get_char (file : in File_Type; value : out Character);
+    57.
+    58.    package colour_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_colour);
+    59.    package  width_IO is new Ada.Text_IO.Enumeration_IO(postscript.pen_tip_size);
+    60.
+    61. end settings.IO;
+
+ 211 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/generic_sets.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Powersets of a discrete member type.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. -- generic
+    18. --    type member is (<>);
+    19. package body generic_sets is
+    20.
+    21.    function "/" (set : generic_sets.set; member : generic_sets.member)
+    22.    return Boolean
+    23.    is (set(member));
+    24.
+    25.    function "or" (set : generic_sets.set; member : generic_sets.member)
+    26.    return generic_sets.set is
+    27.    begin
+    28.       return result : generic_sets.set := set do
+    29.          result(member) := True;
+    30.       end return;
+    31.    end "or";
+    32.
+    33.    function "-" (set1, set2 : generic_sets.set)
+    34.    return generic_sets.set is
+    35.    begin -- Compute (set1 and not set2), avoiding need for a potentially large workspace.
+    36.       return result : generic_sets.set := set1 do
+    37.          for m in generic_sets.member loop
+    38.             if set2(m) then
+    39.                result(m) := False;
+    40.             end if;
+    41.          end loop;
+    42.       end return;
+    43.    end "-";
+    44.
+    45. end generic_sets;
+
+Compiling: ../Source/generic_sets.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Powersets of a discrete member type.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. generic
+    18.    type member is (<>);
+    19. package generic_sets is
+    20.
+    21.    pragma Preelaborate;
+    22.
+    23. --
+    24. -- This package implements only those set operations that are needed by ee9.
+    25. --
+    26.
+    27.    type set is array (generic_sets.member) of Boolean
+    28.       with Component_Size => 1;
+    29.
+    30.    empty_set : constant generic_sets.set := (others => False);
+    31.
+    32.    -- Test for membership of the set.
+    33.    function "/" (set : generic_sets.set; member : generic_sets.member)
+    34.    return Boolean with Inline;
+    35.
+    36.    -- Union of a set and a singleton.
+    37.    function "or"  (set : generic_sets.set; member : generic_sets.member)
+    38.    return generic_sets.set;
+    39.
+    40.    -- Computes (set1 and not set2).
+    41.    function "-" (set1, set2 : generic_sets.set)
+    42.    return generic_sets.set;
+    43.
+    44. end generic_sets;
+
+ 45 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/ioc-dispatcher.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with KDF9.PHU_store;
+    18. with tracing;
+    19.
+    20. use  tracing;
+    21.
+    22. package body IOC.dispatcher is
+    23.
+    24.    --
+    25.    --
+    26.    -- CLO, SLO and TLO do not operate on a buffer, and so can be fully implemented here.
+    27.    --
+    28.    --
+    29.
+    30.    procedure CLO (Q_operand   : in KDF9.Q_register;
+    31.                   set_offline : in Boolean) is
+    32.       pragma Unreferenced(set_offline);
+    33.       use  KDF9.PHU_store;
+    34.    begin
+    35.       -- This is a Director-only instruction.
+    36.       take_note_of_test("   ", Q_operand, False);
+    37.       unlock_absolute_addresses(Q_operand);
+    38.       -- CLO also clears PHU[CPL].
+    39.       PHU(CPL) := idle_PHU;
+    40.       add_in_the_IO_lockout_CPU_time(Q_operand);
+    41.    end CLO;
+    42.
+    43.    procedure SLO (Q_operand   : in KDF9.Q_register;
+    44.                   set_offline : in Boolean) is
+    45.       pragma Unreferenced(set_offline);
+    46.    begin
+    47.       -- This is a Director-only instruction.
+    48.       take_note_of_test("   ", Q_operand, False);
+    49.       lock_out_absolute_addresses(Q_operand);
+    50.       add_in_the_IO_lockout_CPU_time(Q_operand);
+    51.    end SLO;
+    52.
+    53.    procedure TLO (Q_operand   : in KDF9.Q_register;
+    54.                   result      : out Boolean) is
+    55.    begin
+    56.       -- This is NOT Director-only.
+    57.       result := there_are_locks_in_relative_addresses(Q_operand);
+    58.       take_note_of_test("   ", Q_operand, result);
+    59.       add_in_the_IO_lockout_CPU_time(Q_operand);
+    60.    end TLO;
+    61.
+    62.    --
+    63.    --
+    64.    -- All other I/O orders do access a buffer, and so dispatch to the relevant device driver.
+    65.    --
+    66.    --
+    67.
+    68.    procedure BUSY (Q_operand   : in KDF9.Q_register;
+    69.                    set_offline : in Boolean;
+    70.                    result      : out Boolean) is
+    71.    begin
+    72.       buffer(Q_operand.C and buffer_number_mask).BUSY(Q_operand, set_offline, result);
+    73.    end BUSY;
+    74.
+    75.    procedure PAR (Q_operand   : in KDF9.Q_register;
+    76.                   set_offline : in Boolean;
+    77.                   result      : out Boolean) is
+    78.    begin
+    79.       buffer(Q_operand.C and buffer_number_mask).PAR(Q_operand, set_offline, result);
+    80.    end PAR;
+    81.
+    82.    procedure MANUAL_CT (Q_operand   : in KDF9.Q_register;
+    83.                         set_offline : in Boolean) is
+    84.    begin
+    85.       buffer(Q_operand.C and buffer_number_mask).MANUAL_CT(Q_operand, set_offline);
+    86.    end MANUAL_CT;
+    87.
+    88.    procedure INT (Q_operand   : in KDF9.Q_register;
+    89.                   set_offline : in Boolean) is
+    90.    begin
+    91.       buffer(Q_operand.C and buffer_number_mask).INT(Q_operand, set_offline);
+    92.    end INT;
+    93.
+    94.    procedure PIA (Q_operand   : in KDF9.Q_register;
+    95.                   set_offline : in Boolean) is
+    96.    begin
+    97.       buffer(Q_operand.C and buffer_number_mask).PIA(Q_operand, set_offline);
+    98.       add_in_the_IO_lockout_CPU_time(Q_operand);
+    99.    end PIA;
+   100.
+   101.    procedure PIB (Q_operand   : in KDF9.Q_register;
+   102.                   set_offline : in Boolean) is
+   103.    begin
+   104.       buffer(Q_operand.C and buffer_number_mask).PIB(Q_operand, set_offline);
+   105.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   106.    end PIB;
+   107.
+   108.    procedure PIC (Q_operand   : in KDF9.Q_register;
+   109.                   set_offline : in Boolean) is
+   110.    begin
+   111.       buffer(Q_operand.C and buffer_number_mask).PIC(Q_operand, set_offline);
+   112.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   113.    end PIC;
+   114.
+   115.    procedure PID (Q_operand   : in KDF9.Q_register;
+   116.                   set_offline : in Boolean) is
+   117.    begin
+   118.       buffer(Q_operand.C and buffer_number_mask).PID(Q_operand, set_offline);
+   119.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   120.    end PID;
+   121.
+   122.    procedure PIE (Q_operand   : in KDF9.Q_register;
+   123.                   set_offline : in Boolean) is
+   124.    begin
+   125.       buffer(Q_operand.C and buffer_number_mask).PIE(Q_operand, set_offline);
+   126.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   127.    end PIE;
+   128.
+   129.    procedure PIF (Q_operand   : in KDF9.Q_register;
+   130.                   set_offline : in Boolean) is
+   131.    begin
+   132.       buffer(Q_operand.C and buffer_number_mask).PIF(Q_operand, set_offline);
+   133.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   134.    end PIF;
+   135.
+   136.    procedure PIG (Q_operand   : in KDF9.Q_register;
+   137.                   set_offline : in Boolean) is
+   138.    begin
+   139.       buffer(Q_operand.C and buffer_number_mask).PIG(Q_operand, set_offline);
+   140.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   141.    end PIG;
+   142.
+   143.    procedure PIH (Q_operand   : in KDF9.Q_register;
+   144.                   set_offline : in Boolean) is
+   145.    begin
+   146.       buffer(Q_operand.C and buffer_number_mask).PIH(Q_operand, set_offline);
+   147.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   148.    end PIH;
+   149.
+   150.    procedure PMA (Q_operand   : in KDF9.Q_register;
+   151.                   set_offline : in Boolean) is
+   152.    begin
+   153.       buffer(Q_operand.C and buffer_number_mask).PMA(Q_operand, set_offline);
+   154.    end PMA;
+   155.
+   156.    procedure PMB (Q_operand   : in KDF9.Q_register;
+   157.                   set_offline : in Boolean) is
+   158.    begin
+   159.       buffer(Q_operand.C and buffer_number_mask).PMB(Q_operand, set_offline);
+   160.    end PMB;
+   161.
+   162.    procedure PMC (Q_operand   : in KDF9.Q_register;
+   163.                   set_offline : in Boolean) is
+   164.    begin
+   165.       buffer(Q_operand.C and buffer_number_mask).PMC(Q_operand, set_offline);
+   166.    end PMC;
+   167.
+   168.    procedure PMD (Q_operand   : in KDF9.Q_register;
+   169.                   set_offline : in Boolean) is
+   170.    begin
+   171.       buffer(Q_operand.C and buffer_number_mask).PMD(Q_operand, set_offline);
+   172.    end PMD;
+   173.
+   174.    procedure PME (Q_operand   : in KDF9.Q_register;
+   175.                   set_offline : in Boolean) is
+   176.    begin
+   177.       buffer(Q_operand.C and buffer_number_mask).PME(Q_operand, set_offline);
+   178.    end PME;
+   179.
+   180.    procedure PMF (Q_operand   : in KDF9.Q_register;
+   181.                   set_offline : in Boolean) is
+   182.    begin
+   183.       buffer(Q_operand.C and buffer_number_mask).PMF(Q_operand, set_offline);
+   184.    end PMF;
+   185.
+   186.    procedure PMG (Q_operand   : in KDF9.Q_register;
+   187.                   set_offline : in Boolean) is
+   188.    begin
+   189.       buffer(Q_operand.C and buffer_number_mask).PMG(Q_operand, set_offline);
+   190.    end PMG;
+   191.
+   192.    procedure PMK (Q_operand   : in KDF9.Q_register;
+   193.                   set_offline : in Boolean) is
+   194.    begin
+   195.       buffer(Q_operand.C and buffer_number_mask).PMK(Q_operand, set_offline);
+   196.    end PMK;
+   197.
+   198.    procedure PML (Q_operand   : in KDF9.Q_register;
+   199.                   set_offline : in Boolean) is
+   200.    begin
+   201.       buffer(Q_operand.C and buffer_number_mask).PML(Q_operand, set_offline);
+   202.    end PML;
+   203.
+   204.    procedure POA (Q_operand   : in KDF9.Q_register;
+   205.                   set_offline : in Boolean) is
+   206.    begin
+   207.       buffer(Q_operand.C and buffer_number_mask).POA(Q_operand, set_offline);
+   208.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   209.    end POA;
+   210.
+   211.    procedure POB (Q_operand   : in KDF9.Q_register;
+   212.                   set_offline : in Boolean) is
+   213.    begin
+   214.       buffer(Q_operand.C and buffer_number_mask).POB(Q_operand, set_offline);
+   215.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   216.    end POB;
+   217.
+   218.    procedure POC (Q_operand   : in KDF9.Q_register;
+   219.                   set_offline : in Boolean) is
+   220.    begin
+   221.       buffer(Q_operand.C and buffer_number_mask).POC(Q_operand, set_offline);
+   222.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   223.    end POC;
+   224.
+   225.    procedure POD (Q_operand   : in KDF9.Q_register;
+   226.                   set_offline : in Boolean) is
+   227.    begin
+   228.       buffer(Q_operand.C and buffer_number_mask).POD(Q_operand, set_offline);
+   229.       add_in_the_IO_lockout_CPU_time(Q_operand);
+   230.    end POD;
+   231.
+   232.    procedure POE (Q_operand   : in KDF9.Q_register;
+   233.                   set_offline : in Boolean) is
+   234.    begin
+   235.       buffer(Q_operand.C and buffer_number_mask).POE(Q_operand, set_offline);
+   236.    end POE;
+   237.
+   238.    procedure POF (Q_operand   : in KDF9.Q_register;
+   239.                   set_offline : in Boolean) is
+   240.    begin
+   241.       buffer(Q_operand.C and buffer_number_mask).POF(Q_operand, set_offline);
+   242.    end POF;
+   243.
+   244.    procedure POG (Q_operand   : in KDF9.Q_register;
+   245.                   set_offline : in Boolean) is
+   246.    begin
+   247.       buffer(Q_operand.C and buffer_number_mask).POG(Q_operand, set_offline);
+   248.    end POG;
+   249.
+   250.    procedure POH (Q_operand   : in KDF9.Q_register;
+   251.                   set_offline : in Boolean) is
+   252.    begin
+   253.       buffer(Q_operand.C and buffer_number_mask).POH(Q_operand, set_offline);
+   254.    end POH;
+   255.
+   256.    procedure POK (Q_operand   : in KDF9.Q_register;
+   257.                   set_offline : in Boolean) is
+   258.    begin
+   259.       buffer(Q_operand.C and buffer_number_mask).POK(Q_operand, set_offline);
+   260.    end POK;
+   261.
+   262.    procedure POL (Q_operand   : in KDF9.Q_register;
+   263.                   set_offline : in Boolean) is
+   264.    begin
+   265.       buffer(Q_operand.C and buffer_number_mask).POL(Q_operand, set_offline);
+   266.    end POL;
+   267.
+   268. end IOC.dispatcher;
+
+Compiling: ../Source/ioc-dispatcher.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- CPU I/O orders are dispatched here to device-specific handlers within the IOC type hierarchy.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package IOC.dispatcher is
+    18.
+    19.    procedure MANUAL_CT (Q_operand   : in KDF9.Q_register;
+    20.                         set_offline : in Boolean);
+    21.
+    22.    procedure BUSY (Q_operand   : in KDF9.Q_register;
+    23.                    set_offline : in Boolean;
+    24.                    result      : out Boolean);
+    25.
+    26.    procedure PAR (Q_operand   : in KDF9.Q_register;
+    27.                   set_offline : in Boolean;
+    28.                   result      : out Boolean);
+    29.
+    30.    procedure TLO (Q_operand   : in KDF9.Q_register;
+    31.                   result      : out Boolean);
+    32.
+    33.    procedure CLO (Q_operand   : in KDF9.Q_register;
+    34.                   set_offline : in Boolean);
+    35.
+    36.    procedure SLO (Q_operand   : in KDF9.Q_register;
+    37.                   set_offline : in Boolean);
+    38.
+    39.    procedure INT (Q_operand   : in KDF9.Q_register;
+    40.                   set_offline : in Boolean);
+    41.
+    42.    procedure PIA (Q_operand   : in KDF9.Q_register;
+    43.                   set_offline : in Boolean);
+    44.
+    45.    procedure PIB (Q_operand   : in KDF9.Q_register;
+    46.                   set_offline : in Boolean);
+    47.
+    48.    procedure PIC (Q_operand   : in KDF9.Q_register;
+    49.                   set_offline : in Boolean);
+    50.
+    51.    procedure PID (Q_operand   : in KDF9.Q_register;
+    52.                   set_offline : in Boolean);
+    53.
+    54.    procedure PIE (Q_operand   : in KDF9.Q_register;
+    55.                   set_offline : in Boolean);
+    56.
+    57.    procedure PIF (Q_operand   : in KDF9.Q_register;
+    58.                   set_offline : in Boolean);
+    59.
+    60.    procedure PIG (Q_operand   : in KDF9.Q_register;
+    61.                   set_offline : in Boolean);
+    62.
+    63.    procedure PIH (Q_operand   : in KDF9.Q_register;
+    64.                   set_offline : in Boolean);
+    65.
+    66.    procedure PMA (Q_operand   : in KDF9.Q_register;
+    67.                   set_offline : in Boolean);
+    68.
+    69.    procedure PMB (Q_operand   : in KDF9.Q_register;
+    70.                   set_offline : in Boolean);
+    71.
+    72.    procedure PMC (Q_operand   : in KDF9.Q_register;
+    73.                   set_offline : in Boolean);
+    74.
+    75.    procedure PMD (Q_operand   : in KDF9.Q_register;
+    76.                   set_offline : in Boolean);
+    77.
+    78.    procedure PME (Q_operand   : in KDF9.Q_register;
+    79.                   set_offline : in Boolean);
+    80.
+    81.    procedure PMF (Q_operand   : in KDF9.Q_register;
+    82.                   set_offline : in Boolean);
+    83.
+    84.    procedure PMG (Q_operand   : in KDF9.Q_register;
+    85.                   set_offline : in Boolean);
+    86.
+    87.    procedure PMK (Q_operand   : in KDF9.Q_register;
+    88.                   set_offline : in Boolean);
+    89.
+    90.    procedure PML (Q_operand   : in KDF9.Q_register;
+    91.                   set_offline : in Boolean);
+    92.
+    93.    procedure POA (Q_operand   : in KDF9.Q_register;
+    94.                   set_offline : in Boolean);
+    95.
+    96.    procedure POB (Q_operand   : in KDF9.Q_register;
+    97.                   set_offline : in Boolean);
+    98.
+    99.    procedure POC (Q_operand   : in KDF9.Q_register;
+   100.                   set_offline : in Boolean);
+   101.
+   102.    procedure POD (Q_operand   : in KDF9.Q_register;
+   103.                   set_offline : in Boolean);
+   104.
+   105.    procedure POE (Q_operand   : in KDF9.Q_register;
+   106.                   set_offline : in Boolean);
+   107.
+   108.    procedure POF (Q_operand   : in KDF9.Q_register;
+   109.                   set_offline : in Boolean);
+   110.
+   111.    procedure POG (Q_operand   : in KDF9.Q_register;
+   112.                   set_offline : in Boolean);
+   113.
+   114.    procedure POH (Q_operand   : in KDF9.Q_register;
+   115.                   set_offline : in Boolean);
+   116.
+   117.    procedure POK (Q_operand   : in KDF9.Q_register;
+   118.                   set_offline : in Boolean);
+   119.
+   120.    procedure POL (Q_operand   : in KDF9.Q_register;
+   121.                   set_offline : in Boolean);
+   122.
+   123. end IOC.dispatcher;
+   124.
+
+ 268 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-decoding.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- The "compressed_opcode" values are effective opcodes, partially decoded from the first syllable,
+     2. --   and combined with opcode bits of the second syllable, where appropriate (e.g. in jumps).
+     3. --
+     4. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     5. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     6. --
+     7. -- The ee9 program is free software; you can redistribute it and/or
+     8. -- modify it under terms of the GNU General Public License as published
+     9. -- by the Free Software Foundation; either version 3, or (at your option)
+    10. -- any later version. This program is distributed in the hope that it
+    11. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    12. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    13. -- See the GNU General Public License for more details. You should have
+    14. -- received a copy of the GNU General Public License distributed with
+    15. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    16. --
+    17.
+    18. package KDF9.decoding is
+    19.
+    20.    -- The compressed_opcode values for 1-syllable orders are equal to their full codes.
+    21.
+    22.    ALL_0    : constant KDF9.compressed_opcode := 2#000_000#;
+    23.    VR       : constant KDF9.compressed_opcode := 2#000_001#;
+    24.    TO_TR    : constant KDF9.compressed_opcode := 2#000_010#;
+    25.    BITS     : constant KDF9.compressed_opcode := 2#000_011#;
+    26.    XF       : constant KDF9.compressed_opcode := 2#000_100#;
+    27.    XDF      : constant KDF9.compressed_opcode := 2#000_101#;
+    28.    INV006   : constant KDF9.compressed_opcode := 2#000_110#;
+    29.    XPLUSF   : constant KDF9.compressed_opcode := 2#000_111#;
+    30.    NEGD     : constant KDF9.compressed_opcode := 2#001_000#;
+    31.    OR_9     : constant KDF9.compressed_opcode := 2#001_001#;
+    32.    PERM     : constant KDF9.compressed_opcode := 2#001_010#;
+    33.    TOB      : constant KDF9.compressed_opcode := 2#001_011#;
+    34.    ROUNDH   : constant KDF9.compressed_opcode := 2#001_100#;
+    35.    NEV      : constant KDF9.compressed_opcode := 2#001_101#;
+    36.    ROUND    : constant KDF9.compressed_opcode := 2#001_110#;
+    37.    DUMMY    : constant KDF9.compressed_opcode := 2#001_111#;
+    38.    ROUNDF   : constant KDF9.compressed_opcode := 2#010_000#;
+    39.    ROUNDHF  : constant KDF9.compressed_opcode := 2#010_001#;
+    40.    MINUSDF  : constant KDF9.compressed_opcode := 2#010_010#;
+    41.    PLUSDF   : constant KDF9.compressed_opcode := 2#010_011#;
+    42.    FLOAT_9  : constant KDF9.compressed_opcode := 2#010_100#;
+    43.    FLOATD   : constant KDF9.compressed_opcode := 2#010_101#;
+    44.    ABS_9    : constant KDF9.compressed_opcode := 2#010_110#;
+    45.    NEG      : constant KDF9.compressed_opcode := 2#010_111#;
+    46.    ABSF     : constant KDF9.compressed_opcode := 2#011_000#;
+    47.    NEGF     : constant KDF9.compressed_opcode := 2#011_001#;
+    48.    MAX      : constant KDF9.compressed_opcode := 2#011_010#;
+    49.    NOT_9    : constant KDF9.compressed_opcode := 2#011_011#;
+    50.    XD       : constant KDF9.compressed_opcode := 2#011_100#;
+    51.    X_frac   : constant KDF9.compressed_opcode := 2#011_101#;
+    52.    MINUS    : constant KDF9.compressed_opcode := 2#011_110#;
+    53.    SIGN     : constant KDF9.compressed_opcode := 2#011_111#;
+    54.    INV040   : constant KDF9.compressed_opcode := 2#100_000#;
+    55.    ZERO     : constant KDF9.compressed_opcode := 2#100_001#;
+    56.    DUP      : constant KDF9.compressed_opcode := 2#100_010#;
+    57.    DUPD     : constant KDF9.compressed_opcode := 2#100_011#;
+    58.    DIVI     : constant KDF9.compressed_opcode := 2#100_100#;
+    59.    FIX      : constant KDF9.compressed_opcode := 2#100_101#;
+    60.    INV046   : constant KDF9.compressed_opcode := 2#100_110#;
+    61.    STR      : constant KDF9.compressed_opcode := 2#100_111#;
+    62.    CONT     : constant KDF9.compressed_opcode := 2#101_000#;
+    63.    REVD     : constant KDF9.compressed_opcode := 2#101_001#;
+    64.    ERASE    : constant KDF9.compressed_opcode := 2#101_010#;
+    65.    MINUSD   : constant KDF9.compressed_opcode := 2#101_011#;
+    66.    AND_9    : constant KDF9.compressed_opcode := 2#101_100#;
+    67.    INV055   : constant KDF9.compressed_opcode := 2#101_101#;
+    68.    PLUS     : constant KDF9.compressed_opcode := 2#101_110#;
+    69.    PLUSD    : constant KDF9.compressed_opcode := 2#101_111#;
+    70.    DIV      : constant KDF9.compressed_opcode := 2#110_000#;
+    71.    DIVD     : constant KDF9.compressed_opcode := 2#110_001#;
+    72.    DIVF     : constant KDF9.compressed_opcode := 2#110_010#;
+    73.    DIVDF    : constant KDF9.compressed_opcode := 2#110_011#;
+    74.    DIVR     : constant KDF9.compressed_opcode := 2#110_100#;
+    75.    REV      : constant KDF9.compressed_opcode := 2#110_101#;
+    76.    CAB      : constant KDF9.compressed_opcode := 2#110_110#;
+    77.    FRB      : constant KDF9.compressed_opcode := 2#110_111#;
+    78.    STAND    : constant KDF9.compressed_opcode := 2#111_000#;
+    79.    NEGDF    : constant KDF9.compressed_opcode := 2#111_001#;
+    80.    MAXF     : constant KDF9.compressed_opcode := 2#111_010#;
+    81.    INV073   : constant KDF9.compressed_opcode := 2#111_011#;
+    82.    PLUSF    : constant KDF9.compressed_opcode := 2#111_100#;
+    83.    MINUSF   : constant KDF9.compressed_opcode := 2#111_101#;
+    84.    INV076   : constant KDF9.compressed_opcode := 2#111_110#;
+    85.    SIGNF    : constant KDF9.compressed_opcode := 2#111_111#;
+    86.
+    87.
+    88.    -- compressed_opcode values for 2-syllable indirect fetch and store orders
+    89.
+    90.    MkMq       : constant KDF9.compressed_opcode := 2#000_000#;
+    91.    MkMqQ      : constant KDF9.compressed_opcode := 2#000_010#;
+    92.    MkMqH      : constant KDF9.compressed_opcode := 2#000_100#;
+    93.    MkMqQH     : constant KDF9.compressed_opcode := 2#000_110#;
+    94.    MkMqN      : constant KDF9.compressed_opcode := 2#001_000#;
+    95.    MkMqQN     : constant KDF9.compressed_opcode := 2#001_010#;
+    96.    MkMqHN     : constant KDF9.compressed_opcode := 2#001_100#;
+    97.    MkMqQHN    : constant KDF9.compressed_opcode := 2#001_110#;
+    98.
+    99.    TO_MkMq    : constant KDF9.compressed_opcode := 2#000_001#;
+   100.    TO_MkMqQ   : constant KDF9.compressed_opcode := 2#000_011#;
+   101.    TO_MkMqH   : constant KDF9.compressed_opcode := 2#000_101#;
+   102.    TO_MkMqQH  : constant KDF9.compressed_opcode := 2#000_111#;
+   103.    TO_MkMqN   : constant KDF9.compressed_opcode := 2#001_001#;
+   104.    TO_MkMqQN  : constant KDF9.compressed_opcode := 2#001_011#;
+   105.    TO_MkMqHN  : constant KDF9.compressed_opcode := 2#001_101#;
+   106.    TO_MkMqQHN : constant KDF9.compressed_opcode := 2#001_111#;
+   107.
+   108.
+   109.    -- compressed_opcode values for 2-syllable Q store orders
+   110.
+   111.    M_PLUS_Iq    : constant KDF9.compressed_opcode := 2#100_000#;
+   112.    M_MINUS_Iq   : constant KDF9.compressed_opcode := 2#100_001#;
+   113.    NCq          : constant KDF9.compressed_opcode := 2#100_010#;
+   114.    DCq          : constant KDF9.compressed_opcode := 2#100_011#;
+   115.    POS1_TO_Iq   : constant KDF9.compressed_opcode := 2#100_100#;
+   116.    NEG1_TO_Iq   : constant KDF9.compressed_opcode := 2#100_101#;
+   117.    POS2_TO_Iq   : constant KDF9.compressed_opcode := 2#100_110#;
+   118.    NEG2_TO_Iq   : constant KDF9.compressed_opcode := 2#100_111#;
+   119.
+   120.    MqTOQk       : constant KDF9.compressed_opcode := 2#101_001#;
+   121.    IqTOQk       : constant KDF9.compressed_opcode := 2#101_010#;
+   122.    IMqTOQk      : constant KDF9.compressed_opcode := 2#101_011#;
+   123.    CqTOQk       : constant KDF9.compressed_opcode := 2#101_100#;
+   124.    CMqTOQk      : constant KDF9.compressed_opcode := 2#101_101#;
+   125.    CIqTOQk      : constant KDF9.compressed_opcode := 2#101_110#;
+   126.    QqTOQk       : constant KDF9.compressed_opcode := 2#101_111#;
+   127.
+   128.    SHA          : constant KDF9.compressed_opcode := 2#110_001#;
+   129.    SHAD         : constant KDF9.compressed_opcode := 2#110_010#;
+   130.    MACC         : constant KDF9.compressed_opcode := 2#110_011#;
+   131.    SHL          : constant KDF9.compressed_opcode := 2#110_100#;
+   132.    SHLD         : constant KDF9.compressed_opcode := 2#110_110#;
+   133.    SHC          : constant KDF9.compressed_opcode := 2#110_111#;
+   134.    constant_bit : constant := 1;
+   135.
+   136.    TO_RCIMq     : constant KDF9.compressed_opcode := 2#111_000#;
+   137.    QCIMq        : constant KDF9.compressed_opcode := 2#111_001#;
+   138.    ADD_TO_QCIMq : constant KDF9.compressed_opcode := 2#111_010#;
+   139.
+   140.    -- masks for Q store Qk bits
+   141.
+   142.    reset_choice  : constant := 2#0001#;
+   143.    C_part_choice : constant := 2#1000#;
+   144.    I_part_choice : constant := 2#0100#;
+   145.    M_part_choice : constant := 2#0010#;
+   146.    all_Q_choice  : constant := C_part_choice + I_part_choice + M_part_choice;
+   147.
+   148.
+   149.    -- compressed_opcode values for 2-syllable SJNS orders
+   150.
+   151.    LINK    : constant KDF9.compressed_opcode := 2#111_011#;
+   152.    TO_LINK : constant KDF9.compressed_opcode := 2#111_100#;
+   153.
+   154.
+   155.    -- compressed_opcode values for 2-syllable Director-only orders
+   156.
+   157.    TO_Kq : constant KDF9.compressed_opcode := 2#111_101#;
+   158.    K0    : constant := 2#1000#;
+   159.    K1    : constant := 2#0100#;
+   160.    K2    : constant := 2#0010#;
+   161.    K3    : constant := 2#0001#;
+   162.    Kk    : constant KDF9.compressed_opcode := 2#111_110#;
+   163.    K4    : constant := 2#1000#;
+   164.    K5    : constant := 2#0100#;
+   165.    K7    : constant := 2#0001#;
+   166.
+   167.
+   168.    -- compressed_opcode value for 2-syllable short-loop jump order
+   169.
+   170.    JCqNZS : constant KDF9.compressed_opcode := 2#111_111#;
+   171.
+   172.
+   173.    -- compressed_opcode values for 2-syllable I/O orders
+   174.
+   175.    CT_PMB_PMC_BUSY_Qq     : constant KDF9.compressed_opcode := 2#010_000#;
+   176.    PAR_Qq                 : constant KDF9.compressed_opcode := 2#010_001#;
+   177.    PMF_PMG_Qq             : constant KDF9.compressed_opcode := 2#010_010#;
+   178.    PIA_PIC_CLO_TLO_Qq     : constant KDF9.compressed_opcode := 2#010_100#;
+   179.    PIB_PID_Qq             : constant KDF9.compressed_opcode := 2#010_101#;
+   180.    PIE_PIG_Qq             : constant KDF9.compressed_opcode := 2#010_110#;
+   181.    PIF_PIH_Qq             : constant KDF9.compressed_opcode := 2#010_111#;
+   182.
+   183.    POA_POC_POE_POF_PMH_Qq : constant KDF9.compressed_opcode := 2#011_000#;
+   184.    POB_POD_Qq             : constant KDF9.compressed_opcode := 2#011_001#;
+   185.    POG_POL_Qq             : constant KDF9.compressed_opcode := 2#011_010#;
+   186.    POH_POK_Qq             : constant KDF9.compressed_opcode := 2#011_011#;
+   187.    PMA_PMK_INT_Qq         : constant KDF9.compressed_opcode := 2#011_100#;
+   188.    PMD_PME_PML_Qq         : constant KDF9.compressed_opcode := 2#011_110#;
+   189.
+   190.    -- masks for I/O opcode extension bits (Qk field)
+   191.
+   192.    PAR_bits  : constant := 2#0000#;
+   193.
+   194.    -- PIA_PIC_CLO_TLO_Qq:
+   195.    PIA_bits  : constant := 2#0000#;
+   196.    PIC_bits  : constant := 2#1000#;
+   197.    CLO_bits  : constant := 2#0010#;
+   198.    TLO_bits  : constant := 2#0100#;
+   199.
+   200.    -- PIB_PID_Qq:
+   201.    PIB_bits  : constant := 2#0000#;
+   202.    PID_bits  : constant := 2#1000#;
+   203.
+   204.    -- PIE_PIG_Qq:
+   205.    PIE_bits  : constant := 2#0000#;
+   206.    PIG_bits  : constant := 2#1000#;
+   207.
+   208.    -- PIF_PIH_Qq:
+   209.    PIF_bits  : constant := 2#0000#;
+   210.    PIH_bits  : constant := 2#1000#;
+   211.
+   212.    -- PMA_PMK_INT_Qq:
+   213.    PMA_bits  : constant := 2#0000#;
+   214.    PMK_bits  : constant := 2#0100#;
+   215.    INT_bits  : constant := 2#0010#;
+   216.
+   217.    -- CT_PMB_PMC_BUSY_Qq:
+   218.    CTQ_bits   : constant := 2#0000#;
+   219.    PMB_bits   : constant := 2#1000#;
+   220.    PMC_bits   : constant := 2#0100#;
+   221.    BUSY_bits  : constant := 2#0010#;
+   222.    manual_bit : constant := 2#0001#;
+   223.
+   224.    -- PMD_PME_PML_Qq:
+   225.    PME_bits  : constant := 2#0000#;
+   226.    PMD_bits  : constant := 2#1000#;
+   227.    PML_bits  : constant := 2#0100#;
+   228.
+   229.    -- PMF_PMG_Qq:
+   230.    PMF_bits  : constant := 2#0000#;
+   231.    PMG_bits  : constant := 2#0100#;
+   232.
+   233.    -- POA_POC_POE_POF_PMH_Qq:
+   234.    POA_bits  : constant := 2#0000#;
+   235.    POC_bits  : constant := 2#1000#;
+   236.    POE_bits  : constant := 2#1100#;
+   237.    POF_bits  : constant := 2#0100#;
+   238.    PMH_bits  : constant := 2#0010#;
+   239.
+   240.    -- POB_POD_Qq:
+   241.    POB_bits  : constant := 2#0000#;
+   242.    POD_bits  : constant := 2#1000#;
+   243.
+   244.    -- POG_POL_Qq:
+   245.    POG_bits  : constant := 2#0000#;
+   246.    POL_bits  : constant := 2#1000#;
+   247.
+   248.    -- POH_POK_Qq:
+   249.    POH_bits  : constant := 2#0000#;
+   250.    POK_bits  : constant := 2#1000#;
+   251.
+   252.
+   253.    -- compressed_opcode values for normal jump orders
+   254.
+   255.    JrNE   : constant KDF9.compressed_opcode := 2#000_001#;
+   256.    JrGEZ  : constant KDF9.compressed_opcode := 2#000_010#;
+   257.    JrLEZ  : constant KDF9.compressed_opcode := 2#000_100#;
+   258.    JrNEZ  : constant KDF9.compressed_opcode := 2#000_110#;
+   259.    JrNV   : constant KDF9.compressed_opcode := 2#001_000#;
+   260.    OS_OUT : constant KDF9.compressed_opcode := 2#001_001#;
+   261.    JrNEN  : constant KDF9.compressed_opcode := 2#001_010#;
+   262.    Jr     : constant KDF9.compressed_opcode := 2#001_011#;
+   263.    JrNEJ  : constant KDF9.compressed_opcode := 2#001_100#;
+   264.    JSr    : constant KDF9.compressed_opcode := 2#001_101#;
+   265.    JrNTR  : constant KDF9.compressed_opcode := 2#001_110#;
+   266.    EXIT_n : constant KDF9.compressed_opcode := 2#001_111#;  -- 0h0 in bits 5-7
+   267.    JrEQ   : constant KDF9.compressed_opcode := 2#010_001#;
+   268.    JrLTZ  : constant KDF9.compressed_opcode := 2#010_010#;
+   269.    JrGTZ  : constant KDF9.compressed_opcode := 2#010_100#;
+   270.    JrEQZ  : constant KDF9.compressed_opcode := 2#010_110#;
+   271.    JrV    : constant KDF9.compressed_opcode := 2#011_000#;
+   272.    JrEN   : constant KDF9.compressed_opcode := 2#011_010#;
+   273.    JrEJ   : constant KDF9.compressed_opcode := 2#011_100#;
+   274.    JrTR   : constant KDF9.compressed_opcode := 2#011_110#;
+   275.    EXITD  : constant KDF9.compressed_opcode := 2#011_111#;  -- 010 in bits 5-7
+   276.    JrCqZ  : constant KDF9.compressed_opcode := 2#100_000#;
+   277.    JrCqNZ : constant KDF9.compressed_opcode := 2#110_000#;
+   278.
+   279.    EXIT_1_bit : constant := 2#010#;  -- 0h0 in bits 5-7 of EXIT syllable_0
+   280.
+   281.
+   282.    -- compressed_opcode values for directly-addressed data access orders
+   283.
+   284.    EaMq     : constant KDF9.compressed_opcode := 2#000_000#;
+   285.    TO_EaMq  : constant KDF9.compressed_opcode := 2#000_001#;
+   286.    EaMqQ    : constant KDF9.compressed_opcode := 2#000_010#;
+   287.    TO_EaMqQ : constant KDF9.compressed_opcode := 2#000_011#;
+   288.    SET      : constant KDF9.compressed_opcode := 2#000_100#;
+   289.
+   290.
+   291. end KDF9.decoding;
+
+ 291 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-egdon.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement the API (OUTs) of the EGDON Director.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package body KDF9.EGDON is
+    18.
+    19.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word) is
+    20.    begin
+    21.       trap_unimplemented_feature("EGDON OUT" & OUT_number'Image);
+    22.    end do_an_EGDON_OUT;
+    23.
+    24. end KDF9.EGDON;
+
+Compiling: ../Source/kdf9-egdon.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement the API (OUTs) of the EGDON Director.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package KDF9.EGDON is
+    18.
+    19.    procedure do_an_EGDON_OUT (OUT_number : in KDF9.word);
+    20.
+    21. end KDF9.EGDON;
+
+ 24 lines: No errors
+
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
+
+Compiling: /home/parallels/emulation/Source/kdf9-tsd-processes.adb
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. with dumping;
+    18. with IOC;
+    19. with IOC.fast.DR.TSD_OUTs;
+    20. with IOC.fast.FD.TSD_OUTs;
+    21. with IOC.slow.shift.TR;
+    22. with KDF9.CPU;
+    23. with KDF9.store;
+    24. with KDF9.TSD.peripherals;
+    25.
+    26. with imported_value_of;
+    27.
+    28. use  dumping;
+    29. use  IOC;
+    30. use  IOC.fast.DR.TSD_OUTs;
+    31. use  IOC.fast.FD.TSD_OUTs;
+    32. use  IOC.slow.shift.TR;
+    33. use  KDF9.store;
+    34. use  KDF9.TSD.peripherals;
+    35.
+    36. package body KDF9.TSD.processes is
+    37.
+    38. --
+    39. -- OUTs 0, 1 and 2 terminate execution in various ways and call for appropriate finalization.
+    40. --
+    41.
+    42.    procedure free_any_allocated_tapes (OUT_number : in KDF9.word) is
+    43.    begin
+    44.       for b in KDF9.buffer_number loop
+    45.          if buffer(b) /= null                      and then
+    46.                buffer(b).kind in MT_kind | ST_kind and then
+    47.                   is_allocated(buffer(b))              then
+    48.             free_the_device_on_buffer(b, OUT_number);
+    49.          end if;
+    50.       end loop;
+    51.    end free_any_allocated_tapes;
+    52.
+    53.
+    54. --
+    55. -- OUT 0: terminate the run.
+    56. --
+    57.
+    58.    procedure do_OUT_0 is
+    59.    begin
+    60.       free_any_allocated_tapes(OUT_number => 0);
+    61.       notify_state_display_of_final_ICR;
+    62.       log_API_message("OUT 0: end of run");
+    63.       raise program_exit;
+    64.    end do_OUT_0;
+    65.
+    66.
+    67. --
+    68. -- OUT 1: terminate the run and overlay another program in a fresh start.
+    69. --
+    70.
+    71.    procedure finalize_interim_diagnostics (OUT_number : in KDF9.word) is
+    72.    begin
+    73.       if the_log_is_wanted and pre_overlay_state_is_enabled then
+    74.          show_final_state("before overlay by OUT" & OUT_number'Image);
+    75.       end if;
+    76.
+    77.       -- Deal with any dump requests.
+    78.       if the_log_is_wanted and nr_of_post_dumping_areas /= 0 then
+    79.          log_new_line;
+    80.          log_rule;
+    81.          log_title("Post-run Dump:");
+    82.          print_postrun_dump_areas;
+    83.       end if;
+    84.       remove_prerun_dump_areas;
+    85.       remove_postrun_dump_areas;
+    86.
+    87.       -- Restart tracing.
+    88.       clear_retro_FIFO;
+    89.       clear_IOC_FIFO;
+    90.       clear_the_histogram;
+    91.       clear_the_profile;
+    92.       the_profile_is_wanted := False;
+    93.       the_INS_plot_is_wanted := False;
+    94.       if the_external_trace_is_enabled then
+    95.          log_an_external_trace_header("ee9: Restarting the run for OUT" & OUT_number'Image);
+    96.       end if;
+    97.    end finalize_interim_diagnostics;
+    98.
+    99.    procedure prepare_successor (new_limits : in KDF9.word; new_program_name : in String := "" ) is
+   100.    begin
+   101.       -- Set up any new options.
+   102.       get_settings_from_file("2");
+   103.       display_execution_modes(new_program_name);
+   104.
+   105.       -- Complete the core image.
+   106.       poke_all_amendments;
+   107.       save_the_initial_jump;
+   108.       store_word(new_limits, 1);
+   109.
+   110.       -- Display initial dumps.
+   111.       the_program_has_been_analysed := False;
+   112.       show_all_prerun_dump_areas;
+   113.
+   114.       -- Establish the new CPU state.
+   115.       reset_V_and_T;
+   116.       set_NIA_to((0, 0));
+   117.    end prepare_successor;
+   118.
+   119.    procedure do_OUT_1 is
+   120.       P : KDF9.pair;
+   121.       W : KDF9.word;
+   122.    begin
+   123.       -- Get the program name.
+   124.       ensure_that_the_NEST_holds_2_operands;
+   125.       P := pop;
+   126.       P := KDF9.CPU.shift_logical(P, 24);
+   127.
+   128.       declare
+   129.          program_name : constant String := trimmed(to_string(P));
+   130.          overlay_name : constant String := imported_value_of("KDF9_BINARY", default => "Binary")
+   131.                                          & "/"
+   132.                                          & program_name;
+   133.       begin
+   134.          if program_name = "" then
+   135.             trap_failing_OUT(1, "the given program name is an empty string");
+   136.          end if;
+   137.
+   138.          if program_name = "KMW0201--UPU" then
+   139.             -- The Whetstone Controller is trying to overlay itself with the Translator.
+   140.             -- This is so inconvenient in practice that I simply prevent it.
+   141.             notify_state_display_of_final_ICR;
+   142.             log_API_message("OUT 1: ee9 will not return to the Whetstone Translator", skip => 2);
+   143.             raise program_exit;
+   144.          end if;
+   145.
+   146.          -- Tidy up the running program.
+   147.          free_all_devices;
+   148.          complete_all_extant_transfers;
+   149.          notify_state_display_of_final_ICR;
+   150.          finalize_interim_diagnostics(OUT_number => 1);
+   151.          log_API_message("OUT 1: ICR ="
+   152.                        & ICR'Image
+   153.                        & "; RAN/EL ="
+   154.                        & the_CPU_time'Image
+   155.                        & " /"
+   156.                        & KDF9.us'Image(the_clock_time)
+   157.                        & " KDF9 us"
+   158.                         );
+   159.
+   160.          -- The overlaid program inherits the predecessor's time and store limits.
+   161.          W := fetch_word(1);
+   162.          load_a_program(overlay_name);
+   163.          prepare_successor(new_limits => W, new_program_name => overlay_name);
+   164.
+   165.          raise mode_change_request;
+   166.       end;
+   167.    end do_OUT_1;
+   168.
+   169.
+   170. --
+   171. -- OUT 2: terminate the run and then restart it with a program already in core.
+   172. -- complete_TSD_OUT_2 is called by KDF9.microcode after it has finalized the OUT instruction.
+   173. --
+   174.
+   175.    time_limit : KDF9.word;
+   176.
+   177.    procedure do_OUT_2 is
+   178.    begin
+   179.       ensure_that_the_NEST_holds_an_operand;
+   180.       time_limit := pop;
+   181.       the_trace_operand := time_limit;
+   182.
+   183.       -- Tidy up the running program.
+   184.       free_any_allocated_tapes(OUT_number => 2);
+   185.       free_any_reserved_disc_space;
+   186.       free_any_reserved_drum_space;
+   187.       notify_state_display_of_final_ICR;
+   188.
+   189.       raise OUT_2_restart;
+   190.    end do_OUT_2;
+   191.
+   192.    procedure complete_TSD_OUT_2 is
+   193.    begin
+   194.       finalize_interim_diagnostics(OUT_number => 2);
+   195.       if time_limit >= 2**24 then
+   196.          trap_failing_OUT(2, "the new time limit =" & time_limit'Image & "s is too big");
+   197.       end if;
+   198.
+   199.       log_API_message("OUT 2: ICR ="
+   200.                     & ICR'Image
+   201.                     & "; RAN/EL ="
+   202.                     & the_CPU_time'Image
+   203.                     & " /"
+   204.                     & KDF9.us'Image(the_clock_time)
+   205.                     & " KDF9 us"
+   206.                     & "; new time limit = "
+   207.                     & time_limit'Image &"s"
+   208.                      );
+   209.
+   210.       --The successor has a new time limit and inherits the predecessor's store limit.
+   211.       prepare_successor(new_limits => time_limit * 2**24 + fetch_halfword(1, 1) / 2**24);
+   212.
+   213.       reset_the_program_state;
+   214.    end complete_TSD_OUT_2;
+   215.
+   216.
+   217. --
+   218. -- OUT 97: this not a genuine TSD OUT.
+   219. --
+   220.
+   221.    procedure do_OUT_97 is
+   222.       P      : constant KDF9.word := pop;
+   223.       name   : constant String    := trimmed(to_string(P));
+   224.       value  : constant String    := imported_value_of(name, "0");
+   225.       number : KDF9.word;
+   226.    begin
+   227.       number := KDF9.word'Value(value);
+   228.       the_trace_operand := number;
+   229.       push(number);
+   230.    exception
+   231.       when others =>
+   232.          trap_failing_OUT(97, name & " = «"& value & "», not a valid integer");
+   233.    end do_OUT_97;
+   234.
+   235. end KDF9.TSD.processes;
+
+Compiling: ../Source/kdf9-tsd-processes.ads
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
+
+     1. -- Implement OUTs 0.. 2 and 5..7 of the EE Time Sharing Directors.
+     2. --
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
+     5. --
+     6. -- The ee9 program is free software; you can redistribute it and/or
+     7. -- modify it under terms of the GNU General Public License as published
+     8. -- by the Free Software Foundation; either version 3, or (at your option)
+     9. -- any later version. This program is distributed in the hope that it
+    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
+    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    12. -- See the GNU General Public License for more details. You should have
+    13. -- received a copy of the GNU General Public License distributed with
+    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
+    15. --
+    16.
+    17. package KDF9.TSD.processes is
+    18.
+    19.    procedure do_OUT_0
+    20.       with No_Return, Inline => False;
+    21.
+    22.    procedure do_OUT_1
+    23.       with No_Return, Inline => False;
+    24.
+    25.    procedure do_OUT_2
+    26.       with No_Return, Inline => False;
+    27.
+    28.    procedure complete_TSD_OUT_2
+    29.       with Inline => False;
+    30.
+    31.    procedure do_OUT_97
+    32.       with Inline => False;
+    33.
+    34. end KDF9.TSD.processes;
+
+ 235 lines: No errors
+
+
 Compiling: /home/parallels/emulation/Source/ioc-diagnostics.adb
-Source file time stamp: 2021-05-20 16:11:52
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Provide diagnostic output of the state of all the buffers.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26592,100 +26655,17 @@ Compiled at: 2021-05-29 19:07:11
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
-
-Compiling: /home/parallels/emulation/Source/file_interfacing.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
-
-     1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. package body file_interfacing is
-    18.
-    19.    procedure initialize (some_file : in out File_Type;
-    20.                          mode      : in File_Mode;
-    21.                          file_name : in String) is
-    22.    begin
-    23.       Open(some_file, mode, file_name);
-    24.    exception
-    25.       when others =>
-    26.          if mode = Out_File then
-    27.             Create(some_file, Out_File, file_name);
-    28.          else
-    29.             raise;
-    30.          end if;
-    31.    end initialize;
-    32.
-    33.    procedure finalize (some_file : in out File_Type;
-    34.                        file_name : in String) is
-    35.       pragma Unreferenced(file_name);
-    36.    begin
-    37.       Close(some_file);
-    38.    end finalize;
-    39.
-    40. end file_interfacing;
-
-Compiling: ../Source/file_interfacing.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
-
-     1. -- Provide an Ada.Text_IO interface to the file system of the real OS.
-     2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
-     4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
-     5. --
-     6. -- The ee9 program is free software; you can redistribute it and/or
-     7. -- modify it under terms of the GNU General Public License as published
-     8. -- by the Free Software Foundation; either version 3, or (at your option)
-     9. -- any later version. This program is distributed in the hope that it
-    10. -- will be useful, but WITHOUT ANY WARRANTY; without even the implied
-    11. -- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    12. -- See the GNU General Public License for more details. You should have
-    13. -- received a copy of the GNU General Public License distributed with
-    14. -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
-    15. --
-    16.
-    17. with Ada.Text_IO;
-    18.
-    19. use  Ada.Text_IO;
-    20.
-    21. package file_interfacing is
-    22.
-    23.    procedure initialize (some_file : in out File_Type;
-    24.                          mode      : in File_Mode;
-    25.                          file_name : in String);
-    26.
-    27.    procedure finalize (some_file : in out File_Type;
-    28.                        file_name : in String);
-    29.
-    30. end file_interfacing;
-
- 40 lines: No errors
-
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
 
 Compiling: /home/parallels/emulation/Source/plotter.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26887,12 +26867,12 @@ Compiled at: 2021-05-29 19:07:11
    202. end plotter;
 
 Compiling: ../Source/plotter.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -26966,17 +26946,14 @@ Compiled at: 2021-05-29 19:07:11
 
  202 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-dr-tsd_outs.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27090,12 +27067,12 @@ Compiled at: 2021-05-29 19:07:11
    114. end IOC.fast.DR.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-dr-tsd_outs.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:52
 
      1. -- Implement the drum API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27128,14 +27105,17 @@ Compiled at: 2021-05-29 19:07:11
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-fd-tsd_outs.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27370,12 +27350,12 @@ Compiled at: 2021-05-29 19:07:11
    235. end IOC.fast.FD.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-fd-tsd_outs.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27411,17 +27391,14 @@ Compiled at: 2021-05-29 19:07:11
 
  235 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/ioc-fast-tape-tsd_outs.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Emulation of magnetic tape decks and buffers.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27510,12 +27487,12 @@ Compiled at: 2021-05-29 19:07:11
     89. end IOC.fast.tape.TSD_OUTs;
 
 Compiling: ../Source/ioc-fast-tape-tsd_outs.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:11
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement the magnetic tape API (OUTs) of the EE Time Sharing Director.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27545,14 +27522,17 @@ Compiled at: 2021-05-29 19:07:11
 GNAT 8.3.0
 Copyright 1992-2018, Free Software Foundation, Inc.
 
+GNAT 8.3.0
+Copyright 1992-2018, Free Software Foundation, Inc.
+
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-peripherals.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:12
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27767,12 +27747,12 @@ Compiled at: 2021-05-29 19:07:12
    215. end KDF9.TSD.peripherals;
 
 Compiling: ../Source/kdf9-tsd-peripherals.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:12
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement 5, 6 and 7 of the EE Time Sharing Directors.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -27804,17 +27784,14 @@ Compiled at: 2021-05-29 19:07:12
 
  215 lines: No errors
 
-GNAT 8.3.0
-Copyright 1992-2018, Free Software Foundation, Inc.
-
 
 Compiling: /home/parallels/emulation/Source/kdf9-tsd-spooling.adb
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:12
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or
@@ -28028,12 +28005,12 @@ Compiled at: 2021-05-29 19:07:12
    214. end KDF9.TSD.spooling;
 
 Compiling: ../Source/kdf9-tsd-spooling.ads
-Source file time stamp: 2021-05-16 00:38:53
-Compiled at: 2021-05-29 19:07:12
+Source file time stamp: 2021-06-28 18:14:50
+Compiled at: 2021-06-28 19:31:53
 
      1. -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
      2. --
-     3. -- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+     3. -- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
      4. -- Copyright (C) 2021, W. Findlay; all rights reserved.
      5. --
      6. -- The ee9 program is free software; you can redistribute it and/or

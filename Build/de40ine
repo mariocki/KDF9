@@ -1,5 +1,5 @@
 #! /bin/bash
-# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
 # Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
@@ -13,14 +13,9 @@
 # this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 
 ROOT=..
-A=${ROOT}/Adjuncts
 B=${ROOT}/Build
 S=${ROOT}/Source
 T=${ROOT}/Testing
-U=${T}/Assembly
-X=${T}/Binary
-K=${T}/Kidsgrove
-W=${T}/Whetstone
 
 echo de40ine will work with folders in `pwd`/..
 echo Is this what you want\?
@@ -39,13 +34,8 @@ esac
 /usr/bin/xattr -v -d com.apple.quarantine ..
 /usr/bin/xattr -v -d com.apple.quarantine .
 
-/usr/bin/xattr -r -d com.apple.quarantine ${A}
 /usr/bin/xattr -r -d com.apple.quarantine ${B}
 /usr/bin/xattr -r -d com.apple.quarantine ${S}
 /usr/bin/xattr -r -d com.apple.quarantine ${T}
-/usr/bin/xattr -r -d com.apple.quarantine ${U}
-/usr/bin/xattr -r -d com.apple.quarantine ${A}
-/usr/bin/xattr -r -d com.apple.quarantine ${K}
-/usr/bin/xattr -r -d com.apple.quarantine ${W}
 
 echo The ee9 system is now out of quarantine. Stay safe!

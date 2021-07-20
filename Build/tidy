@@ -1,4 +1,4 @@
-# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
 # Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
@@ -12,10 +12,10 @@
 # this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 
 ROOT=..
-A=${ROOT}/Adjuncts
 B=${ROOT}/Build
 S=${ROOT}/Source
 T=${ROOT}/Testing
+A=${T}/Adjuncts
 K=${T}/Kidsgrove
 U=${T}/Assembly
 W=${T}/Whetstone
@@ -23,7 +23,7 @@ X=${T}/Binary
 
 echo
 echo Tidying ${A}.
-chmod 644 ${A}/*
+chmod 755 ${A}/*
 
 echo
 echo Tidying ${B}.
@@ -40,7 +40,7 @@ chmod 644 ${K}/*
 
 echo
 echo Tidying ${U}.
-rm -f ${U}/*-listing.txt
+rm -f ${U}/*-listing.txt ${U}/*-PEEP.k3
 chmod 644 ${U}/*
 
 echo
@@ -153,30 +153,36 @@ chmod 755 ${T}/extract_symbols
 chmod 755 ${T}/fd_regr_tests
 chmod 755 ${T}/kal3
 chmod 755 ${T}/kalgol
+chmod 755 ${T}/kidopt
 chmod 755 ${T}/kids
 chmod 755 ${T}/kids_tests
 chmod 755 ${T}/liv_tests
-chmod 755 ${T}/mkchan
 chmod 755 ${T}/mt_regr_tests
 chmod 755 ${T}/mtp
 chmod 755 ${T}/neat
 chmod 755 ${T}/nine
 chmod 755 ${T}/nine_priv
+chmod 755 ${T}/nine_path
 chmod 755 ${T}/nouv_tests
+chmod 755 ${T}/nyne
+chmod 755 ${T}/peep
 chmod 755 ${T}/plt
 chmod 755 ${T}/ports
 chmod 755 ${T}/rlt
+chmod 755 ${T}/set_*_codes
 chmod 755 ${T}/si_tests
 chmod 755 ${T}/stone
 chmod 755 ${T}/strop
 chmod 755 ${T}/sttl
 chmod 755 ${T}/tsd
 chmod 755 ${T}/tsdnine
+chmod 755 ${T}/tseldon
 chmod 755 ${T}/ucc
 chmod 755 ${T}/whet
 chmod 755 ${T}/whet_tests
 chmod 755 ${T}/wich
 chmod 755 ${T}/wich_tests
+chmod 755 ${T}/workspace
 
 OS=${1:-macOS}
 

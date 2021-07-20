@@ -1,6 +1,6 @@
 -- Generate a P option setting for the Kidsgrove compiler from symbolic option names.
 --
--- kidopt is an auxiliary of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- kidopt is an auxiliary of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@ procedure kidopt is
 
    package CLI renames Ada.Command_Line;
 
-   type options is (SEGMENT, TRACE, TABLES, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO);
+   type options is (SEGMENT, TRACE, OPTIMISER, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO);
 
    type values  is mod 2**8;
 
@@ -35,7 +35,7 @@ procedure kidopt is
                  := (
                      SEGMENT     => 8#200#, -- D0
                      TRACE       => 8#100#, -- D1
-                     TABLES      => 8#040#, -- D2
+                     OPTIMISER   => 8#040#, -- D2  This is not an authentic Z38 setting!
                      ORIG_SW     => 8#020#, -- D3
                      TEXT        => 8#010#, -- D4
                      NO_OPT      => 8#004#, -- D5
@@ -49,7 +49,7 @@ procedure kidopt is
    procedure include_option (given : in String) is
    begin
       if given in "SEGMENT"
-                | "TRACE" | "TABLES" | "ORIG_SW" | "TEXT" | "NO_OPT" | "NO_TEST" | "NO_WARN"
+                | "TRACE" | "OPTIMISER" | "ORIG_SW" | "TEXT" | "NO_OPT" | "NO_TEST" | "NO_WARN"
                 | "LOAD_AND_GO"
       then
          for o in options loop
@@ -88,7 +88,7 @@ begin -- kidopt
             To_Upper(CLI.Argument(1)) in "-H" | "-HELP" | "--HELP"  then
       Put_Line(Standard_Error, "kidopt [ WITH ] { option }");
       Put     (Standard_Error, "where option is one of: ");
-      Put_Line(Standard_Error, "TRACE, TABLES, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO");
+      Put_Line(Standard_Error, "SEGMENT, TRACE, OPTIMISER, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO");
       return;
    elsif CLI.Argument_Count > 0             and then
             To_Upper(CLI.Argument(1)) = "WITH"  then
@@ -103,7 +103,7 @@ begin -- kidopt
       end if;
    end loop;
 
-   Put_Line("P 11065S0 " & oct_of(options_set));
+   Put_Line("P 0S5 " & oct_of(options_set));
    if load_and_go_is_requested then
       Put_Line("P 11065S1 #200");
    end if;

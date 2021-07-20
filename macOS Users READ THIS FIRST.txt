@@ -2,26 +2,45 @@ If you are using macOS and have Apple's Gatekeeper anti-malware protection enabl
 macOS may try to prevent you from running the programs included in this distribution,
 which it may put in "quarantine" after download because they are not cryptographically signed.
 
-You can handle this in one of three ways:
+You can handle this in one of four ways:
 
-1. Switch off Gatekeeper.  I strongly recommend that you DO NOT DO THIS!
+0. Give up.
+   8-)
 
-2. Each time Gatekeeper blocks a program, go to the Security&Privacy/General option
-   in System Preferences and confirm that it is OK to run it.  You will have to do this
-   for each of the several ancilllary programs needed to run all the KDF9 software:
-      not just ee9 but a2b, kal3, kidopt, mkchan, and mtp.
-   This is tedious, but it needs to be done just the once for each of these programs.
+1. Switch off Gatekeeper.
+   I strongly recommend that you DO NOT DO THIS!
 
-3. The easy way: in the distributed Build directory, use the supplied shell script de40ine,
-   which removes the quarantine flag, by changing to the Build directory and issuing:
+2. Persuade Gatekeeper to let the program run.
+   Each time Gatekeeper blocks a run, you are offered the choice of deleting the program
+   (suggested in case you have downloaded malicious software) or just cancellling the run.
 
-      /usr/bin/xattr -r -d com.apple.quarantine de40ine # this may not be needed
-      ./de40ine
+   CLICK ON CANCEL, then go to the Security&Privacy:General option in System Preferences,
+   where you will find a button already set up to authorize running it.  Click that button.
 
-   You may need to run these commands with elevated privileges, depending on the privileges
-   normally possessed by your user identity, thus:
+   You should now find that that program runs successfully on a second attempt.  This is tedious,
+   but deliberately so, as Apple wants people to think twice about running unauthorized software.
 
-      sudo /usr/bin/xattr -r -d com.apple.quarantine de40ine
+   You will have to do this for each of the several programs needed to run all the KDF9 software:
+   not just ee9 but a2b, kal3, kidopt, mkchan, and mtp.  This is annoying, but it needs to be done
+   just the once for each of these programs.
+
+3. The easy way.
+   Use the supplied shell script de40ine, which removes the quarantine flag from everything
+   contained in the emulation folder and its subfolders.
+
+   Issue these Terminal commands, using the bash (or compatible) shell:
+
+      cd emulation/Build
+
       sudo ./de40ine
 
- If you are wary about this - as you perhaps should be - read de40ine and the xattr manual page.
+   and give your login password.
+
+   That should remove Gatekeeper's quarantine from everything in one fell swoop.
+
+   If you are wary about this - as you perhaps should be - look at the commands inside de40ine
+   and then read the manual page for xattr thus:
+
+      man xattr
+
+If trouble persists, get in touch with me: kdf9@findlayw.plus.com

@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -920,7 +920,7 @@ package body KDF9.microcode is
          when NEG1_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
             if INS.Qq /= 0 then
-               the_Q_store(INS.Qq).I := - 1;
+               the_Q_store(INS.Qq).I := 8#177777#;  -- i.e. -1
             end if;
 
          when POS2_TO_Iq =>
@@ -932,7 +932,7 @@ package body KDF9.microcode is
          when NEG2_TO_Iq =>
             the_CPU_delta := the_CPU_delta + 3;
             if INS.Qq /= 0 then
-               the_Q_store(INS.Qq).I := - 2;
+               the_Q_store(INS.Qq).I := 8#177776#;  -- i.e. -2
             end if;
 
          when CqTOQk =>

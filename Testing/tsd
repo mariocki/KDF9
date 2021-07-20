@@ -1,4 +1,4 @@
-export TSD=${DIRECTOR:-Binary/KKT40E007UPU}
+export TSD=${DIRECTOR:-${ADJUNCTS}/KKT40E007UPU}
 cp FW0 FW0_copy
 
 cp FW0_for_Director FW0

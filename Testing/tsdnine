@@ -1,5 +1,6 @@
 export DATA=${KDF9_DATA:-Data}
 export BINARY=${KDF9_BINARY:-Binary}
+export ADJUNCTS=${ADJUNCTS:-Adjuncts}
 
 trap "rm -f /tmp/$1.pblk; exit 2" 1 2 3
 

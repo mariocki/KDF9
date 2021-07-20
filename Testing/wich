@@ -27,16 +27,15 @@ fi
 shift
 
 export KIDSGROVE_ASSEMBLY=n
-kalgol $name ${KIDSOPTS}
 
-peep $name  ${ST:-24000} ${TL:-99999}
-
+kalgol $name with OPTIMISER ${KIDSOPTS}
+peep $name  ${ST:-30000} ${TL:-99999}
 ucc $name-PEEP
-
-echo The executable is in ${BINARY}/$name-PEEP; echo
 
 if [ -s ${BINARY}/$name-PEEP ]
 then
+   echo "The executable is in " ${BINARY}/$name-PEEP
+   echo
    cp settings_2.txt settings_1.txt
    nine $name-PEEP $1 $2 $3 $4
 else

@@ -1,4 +1,4 @@
-# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
 # Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
@@ -41,9 +41,9 @@ esac
 
 ROOT=..
 BUILD=${ROOT}/Build
-ADJUNCTS=${ROOT}/Adjuncts
 SOURCE=${ROOT}/Source
 TESTING=${ROOT}/Testing
+ADJUNCTS=${TESTING}/Adjuncts
 BINARY=${TESTING}/Binary
 KIDSGROVE=${TESTING}/Kidsgrove
 OBJECT=-aO${BUILD}
@@ -54,14 +54,7 @@ EXCEPTIONS=-funwind-tables
 OTHERS=
 BUG_FIXES=
 GCC_OPTIONS="${EXCEPTIONS} ${OTHERS} ${BUG_FIXES}"
-case $3 in
-distro)
-   CONCURRENCY=-j1
-   ;;
-*)
-   CONCURRENCY=-j0
-   ;;
-esac
+CONCURRENCY=-j0
 
 # Set up the OS-specific parameters and files.
 
@@ -291,7 +284,7 @@ KAlgol|kalgol)
    $CC -o mkchan ${ADJUNCTS}/mkchan.c  $CCWARNINGS
 	if test -r ${MKCHAN}
 	then
-	   mv ${MKCHAN} ${TESTING}
+	   mv ${MKCHAN} ${ADJUNCTS}
 	   echo mkchan COMPILED O.K.
 	else
 	   echo mkchan COMPILATION FAILED 
@@ -311,9 +304,9 @@ KAlgol|kalgol)
 	fi
 	mk9 kal3 ${OS}
 	echo; echo Converting mksys2.bin to MKSYS2 for ee9.
-	${TESTING}/a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${BINARY}/MKSYS2
+	${TESTING}/a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${ADJUNCTS}/MKSYS2
    echo; echo Converting KAB00.bin to KAB00DH--USU for ee9.
-   ${TESTING}/a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${BINARY}/KAB00DH--USU
+   ${TESTING}/a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${ADJUNCTS}/KAB00DH--USU
    ;;
 
 

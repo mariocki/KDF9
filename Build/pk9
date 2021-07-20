@@ -1,4 +1,4 @@
-# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
 # Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
@@ -15,12 +15,17 @@ ROOT=..
 B=${ROOT}/Build
 S=${ROOT}/Source
 T=${ROOT}/Testing
+A=${ROOT}/Testing/Adjuncts}
 OS=${1:-macOS}
 
 case ${OS} in
-   UNIX|Unix|unix|LINUX|Linux|linux|macOS|Macintosh|Mac|OSX)
-      STRIP="strip ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${T}/mkchan"
-      SIZE="size   ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${T}/mkchan"
+   UNIX|Unix|unix|LINUX|Linux|linux)
+      STRIP="strip ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${A}/mkchan"
+      SIZE="size   ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${A}/mkchan"
+      ;;
+   macOS|Macintosh|Mac|OSX)
+      STRIP="strip ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${A}/mkchan"
+      SIZE="size   ${T}/ee9 ${T}/kal3 ${T}/kidopt ${T}/a2b ${T}/mtp ${A}/mkchan"
       ;;
    [Ww]indows|WINDOWS)
       STRIP=": "

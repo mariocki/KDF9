@@ -1422,8 +1422,9 @@ Digital signature of traced orders = #1167512627473731.
 ------------------- END OF Test Case 1DH -------------------
 
 
-+++++++++++++++++++ BEGIN  Test Case KAlgol +++++++++++++++++++
++++++++++++++++++++ BEGIN  Test Case KIDS +++++++++++++++++++
 TEST kids FLUID
+TEST kids GPSPRIMES
 TEST kids HANOI
 TEST kids INPUT
 TEST kids MANORBOYX
@@ -1434,6 +1435,20 @@ TEST kids QSORT
 TEST kids WEEHAAVIE
 TEST kids WHETSTONE
 TEST kids ZELLER
+
+These tests ran as expected.
+
+
++++++++++++++++++++ BEGIN  Test Case WICH +++++++++++++++++++
+TEST wich FLUID
+TEST wich GPSPRIMES
+TEST wich HANOI
+TEST wich INPUT
+TEST wich MANORBOYX
+TEST wich PALSQR
+TEST wich QSORT
+TEST wich WHETSTONE
+TEST wich ZELLER
 
 These tests ran as expected.
 

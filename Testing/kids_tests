@@ -13,6 +13,11 @@ kids FLUID FLUID_data t prh         >>kids_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>kids_tests_log.txt;
    rm ${SOURCE}/FLUID.k3     ${BINARY}/FLUID       ${SOURCE}/FLUID-listing.txt
 
+echo TEST kids GPSPRIMES
+kids GPSPRIMES - t prh              >>kids_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>kids_tests_log.txt;
+   rm ${SOURCE}/GPSPRIMES.k3 ${BINARY}/GPSPRIMES   ${SOURCE}/GPSPRIMES-listing.txt
+
 echo TEST kids HANOI
 kids HANOI HANOI_data t prh         >>kids_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>kids_tests_log.txt;

@@ -1,7 +1,7 @@
 -- Emulation of a card punch buffer.
 -- Card punches are "unit record" devices: they cannot transfer less than a whole card.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or

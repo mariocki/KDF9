@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,6 +18,8 @@ with Ada.Text_IO;
 --
 with HCI;
 with host_IO;
+
+with imported_value_of;
 
 use  Ada.Text_IO;
 --
@@ -51,36 +53,60 @@ package body IOC.slow.shift.FW is
    FF_surrogate     : constant Character := '©';
 
    -- These are the ANSI SGR terminal escape codes for styling FW output.
-   red_font_code   : constant String := ESC & "[0m" & ESC & "[31m";
-   black_font_code : constant String := ESC & "[0m" & ESC & "[30m";
-   underline_code  : constant String := ESC & "[4m";
-   plain_font_code : constant String := ESC & "[0m";
+
+   function escaped (name, default : String)
+   return String is
+      text   : constant String := imported_value_of(name, default);
+      result : String (1..text'Length);
+      i, j   : Positive;
+   begin
+      if text'Length < 6 then return ""; end if;
+      i := text'First;
+      j := 1;
+      while i <= text'Last-2 loop
+         if text(i..i+2) = "ESC" then
+            result(j) := ESC;
+            i := i + 3;
+         else
+            result(j) := text(i);
+            i := i + 1;
+         end if;
+         j := j + 1;
+      end loop;
+      result(j..j+1) := text(i..i+1);
+      return result(1..j+1);
+   end escaped;
+
+   red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
+   black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
+   underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
+   plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
 
    procedure set_text_colour_to_red (the_flexowriter_output : in out host_IO.stream) is
    begin
-      if the_terminal_is_ANSI_compatible and realistic_FW_output_is_wanted then
-         put_escape_code(red_font_code, the_flexowriter_output);
+      if realistic_FW_output_is_wanted and red_font /= "" then
+         put_escape_code(red_font, the_flexowriter_output);
       end if;
    end set_text_colour_to_red;
 
    procedure set_text_colour_to_black (the_flexowriter_output : in out host_IO.stream) is
    begin
-      if the_terminal_is_ANSI_compatible then
-         put_escape_code(black_font_code, the_flexowriter_output);
+      if black_font /= "" then
+         put_escape_code(black_font, the_flexowriter_output);
       end if;
    end set_text_colour_to_black;
 
    procedure set_text_style_to_underline (the_flexowriter_output : in out host_IO.stream) is
    begin
-      if the_terminal_is_ANSI_compatible then
-         put_escape_code(underline_code, the_flexowriter_output);
+      if underline /= "" then
+         put_escape_code(underline, the_flexowriter_output);
       end if;
    end set_text_style_to_underline;
 
    procedure set_text_style_to_plain (the_flexowriter_output : in out host_IO.stream) is
    begin
-      if the_terminal_is_ANSI_compatible then
-         put_escape_code(plain_font_code, the_flexowriter_output);
+      if plain_font /= "" then
+         put_escape_code(plain_font, the_flexowriter_output);
       end if;
    end set_text_style_to_plain;
 

@@ -1,4 +1,4 @@
-# This file is part of ee9 (V6), the GNU Ada emulator of the English Electric KDF9.
+# This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
 # Copyright (C) 2021, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
@@ -24,8 +24,8 @@ cd ../..
 
 case ${OS} in
 UNIX|Unix|unix|LINUX|Linux|linux)
-   tar -c -f ${name}.tar emulation; gzip -c ${name}.tar > ${name}.tar.gz;
-   echo; ls -la ${name}.tar*
+   tar -c -f ${name}.tar emulation; gzip -c ${name}.tar > ${name}.tar.gz; rm ${name}.tar
+   echo; ls -la ${name}.tar.gz
    ;;
 macOS|Macintosh|Mac|OSX|[Ww]indows|WINDOWS)
    zip -q -r ${name}.zip emulation
