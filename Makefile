@@ -145,3 +145,8 @@ uninstall:
 	$(MAKE) -e -C ${MKCHAN}	uninstall
 	$(MAKE) -e -C ${KALGOL}	uninstall
 	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
+
+.PHONY: patch
+patch:
+	$(MAKE) -e -C ${KAL3} patch
+	cat kdfruntime.patch | (patch -p1 -r - --no-backup-if-mismatch --forward || true)

@@ -1,6 +1,6 @@
 -- Provide basic data-formatting operations for KDF9 data types.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -81,9 +81,9 @@ package body formatting is
    end dec_of;
 
    -- Return N as up to 5 octal digits.
-   function oct_of (N : KDF9.order_word_number)
+   function oct_of (N : KDF9.code_address)
    return String is
-      value : KDF9.order_word_number := N;
+      value : KDF9.code_address := N;
       j     : Positive := 5;
       oct   : String(1 .. 5);
    begin
@@ -98,7 +98,7 @@ package body formatting is
    end oct_of;
 
    -- Return N as decimal digits, with zero suppression.
-   function dec_of (N : KDF9.order_word_number)
+   function dec_of (N : KDF9.code_address)
    return String
    is (trimmed(N'Image));
 
@@ -120,7 +120,7 @@ package body formatting is
    return String
    is (
        "#"
-      &  oct_of(N.order_word_number)
+      &  oct_of(N.code_address)
       & '/'
       & digit_map(KDF9.halfword(N.syllable_index))
       );
@@ -134,7 +134,7 @@ package body formatting is
    function dec_of (N : KDF9.syllable_address)
    return String
    is (
-       trimmed(N.order_word_number'Image)
+       trimmed(N.code_address'Image)
             & '/'
             & digit_map(KDF9.halfword(N.syllable_index))
       );
@@ -235,19 +235,6 @@ package body formatting is
       return result;
    end to_string;
 
-   -- Like to_string, but with glyphs for format effectors.
-   function to_glyphs (N : in KDF9.word)
-   return word_as_byte_string is
-      word   : KDF9.word := N;
-      glyphs : word_as_byte_string;
-   begin
-      for i in reverse 1..8 loop
-         glyphs(i) := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
-         word := word / 64;
-      end loop;
-      return glyphs;
-   end to_glyphs;
-
    -- Return the result of applying to_string to each word of a double-word.
    function to_string (P : KDF9.pair)
    return pair_as_byte_string is
@@ -258,7 +245,27 @@ package body formatting is
       return result;
    end to_string;
 
-   -- Take a string and ignore it.
-   procedure discard (S : String) is null;
+   -- Like to_string, but with glyphs for format effectors.
+   function glyphs_for (N : KDF9.word)
+   return word_as_byte_string is
+      word   : KDF9.word := N;
+      glyphs : word_as_byte_string;
+   begin
+      for i in reverse 1..8 loop
+         glyphs(i) := glyph_for(to_CP(KDF9_char_sets.symbol(word and 8#77#)));
+         word := word / 64;
+      end loop;
+      return glyphs;
+   end glyphs_for;
+
+   function glyphs_for (S : String)
+   return String is
+      T : String (S'First..S'Last);
+   begin
+      for i in T'Range loop
+         T(i) := glyph_for(S(i));
+      end loop;
+      return T;
+   end glyphs_for;
 
 end formatting;

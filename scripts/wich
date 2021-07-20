@@ -1,0 +1,113 @@
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# wich : peephole optimiser for Whetstone.
+#------------------------------------------------------------------------
+
+if [ -z $KDF9RUNTIME ]; then
+   KDF9RUNTIME="$HOME/.kdf9"
+fi
+
+if [ $# -eq 0 ]; then
+   set -- "-h"
+fi
+
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+DATA=${KDF9RUNTIME}/Data
+LOGS=${KDF9RUNTIME}/logs
+SETTINGS=${KDF9RUNTIME}/settings
+USERCODE=${KDF9RUNTIME}/Assembly
+
+trap "rm -f /tmp/peep.commands /tmp/peep_tmp_[0123456789]" 0 1 2 3
+
+while [[ "$#" -gt 0 ]]; do
+   case ${1# } in
+   -h | --help)
+      echo "WICH - peephole optimiser for Whetstone."
+      echo
+      echo "Usage: wich [OPTION]... SOURCEFILE"
+      echo
+      echo "  -d, --diag=[f|p|t]          define the diagnostic mode"
+      echo "  -s, --state=[b|p|t]         define the run state"
+      echo "  -m, --misc=[a|d|e|f|g|h|i|m|n|o|p|q|r|s|t|w|x|z|0|1|2|3|4|5|6|7|8|9]"
+      echo "                              define the miscellaneous options"
+      echo "  -TP=TPMODE                  define the TP mode"
+      echo "  -TR=TRMODE                  define the TR mode"
+      echo
+      echo "Note: SOURCEFILE must exist in ${SOURCE}"
+      echo
+      exit 0
+      ;;
+   -s=* | --state=*)
+      state=-s${1#*=}
+      ;;
+   -d=* | --diag=*)
+      mode=-d${1#*=}
+      ;;
+   -m=* | --misc=*)
+      miscellany=-m${1#*=}
+      ;;
+   -TR=*)
+      TRmode=-TR${1#*=}
+      ;;
+   -TP=*)
+      TPmode=-TP${1#*=}
+      ;;
+   *)
+      if [ -z ${prog} ]; then
+         prog="$1"
+      else
+         datafile="$1"
+      fi
+      ;;
+   esac
+   shift
+done
+
+if [ x$progx = xx ]; then
+   echo "No program name was given."
+   echo
+   exit 1
+elif [ ! -r ${SOURCE}/$prog.a60 ]; then
+   echo "The file ${SOURCE}/${prog}.a60 is absent or unreadable."
+   echo
+   exit 1
+fi
+
+trap "rm -f ${SOURCE}/$1.k3 ${SOURCE}/$1-listing.txt" 0 1 2 3
+
+if [ -s settings_for_kalgol.txt ]; then
+   cp settings_for_kalgol.txt settings_1.txt
+fi
+shift
+
+export KIDSGROVE_ASSEMBLY=n
+kalgol $prog ${KIDSOPTS}
+
+peep $prog ${ST:-24000} ${TL:-99999}
+
+ucc $prog-PEEP
+
+echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}-PEEP"
+
+if [ -s ${KDF9RUNTIME}/Binary/$prog-PEEP ]; then
+   cp settings_2.txt settings_1.txt
+   nine "${mode/-d/-d=}" -s=t "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" $prog-PEEP $datafile
+else
+   exit 3
+fi

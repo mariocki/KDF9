@@ -1,6 +1,6 @@
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -61,9 +61,11 @@ package body dumping is
    return dumping.area_count
    is (post_dumping_area_count);
 
-   procedure request_a_dumping_area (format_set  : in dumping.format_set;
+   procedure request_a_dumping_area (
+                                     format_set  : in dumping.format_set;
                                      first, last : in KDF9.address;
-                                     was_stored  : out Boolean) is
+                                     was_stored  : out Boolean
+                                    ) is
    begin
       was_stored := False;
       if pre_dumping_area_count+post_dumping_area_count = nr_of_dumping_areas then
@@ -117,13 +119,15 @@ package body dumping is
          show_core_as_word_forms(first, last);
       end if;
       if format_set/Usercode_flag then
-         show_core_as_Usercode((KDF9.order_word_number(first), 0),
-                               (KDF9.order_word_number(last), 0),
-                                octal_option => not format_set/decimal_flag);
+         show_core_as_Usercode(
+                               (KDF9.code_address(first), 0),
+                               (KDF9.code_address(last),  0),
+                                octal_option => not format_set/decimal_flag
+                              );
       end if;
       if format_set/orders_flag then
-         show_core_as_syllables((KDF9.order_word_number(first), 0),
-                                (KDF9.order_word_number( last), 0));
+         show_core_as_syllables((KDF9.code_address(first), 0),
+                                (KDF9.code_address(last),  0));
       end if;
    end print_formatted_area;
 

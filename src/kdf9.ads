@@ -1,6 +1,6 @@
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -124,13 +124,13 @@ package KDF9 is
    -- They cause a RESET trap if encountered during execution.
    --
 
-   type syllable_index    is mod 2**3;
-   type order_word_number is mod 2**13;
+   type code_address   is mod 2**13;
+   type syllable_index is mod 2**3;
 
    type syllable_address is
       record
-         order_word_number : KDF9.order_word_number;
-         syllable_index    : KDF9.syllable_index;
+         code_address   : KDF9.code_address;
+         syllable_index : KDF9.syllable_index;
       end record;
 
    --
@@ -142,8 +142,8 @@ package KDF9 is
    for SJNS_link'Bit_Order use System.Low_Order_First;
    for SJNS_link use
       record
-         order_word_number at 0 range  0 .. 12;
-         syllable_index    at 0 range 13 .. 15;
+         code_address   at 0 range  0 .. 12;
+         syllable_index at 0 range 13 .. 15;
       end record;
 
    function as_word (the_link : KDF9.SJNS_link)
@@ -594,10 +594,10 @@ package KDF9 is
       with Inline;
 
    function NIA_word_number
-   return KDF9.order_word_number
+   return KDF9.code_address
       with Inline;
 
-   CIA : KDF9.syllable_address;  -- the Current Instruction Address
+   CIA : KDF9.syllable_address := (0, 0);  -- the Current Instruction Address
 
    -- IWB0 and IWB1 in KDF9 contained the current 2 instruction words.
    -- A 'short' loop, initiated by the JCqNZS instruction, ran entirely
@@ -694,10 +694,12 @@ package KDF9 is
    return Boolean;
 
    -- True if the parameter is not a valid KDF9 instruction.
-
    function is_an_invalid_order (decoded : KDF9.decoded_order)
    return Boolean;
 
+   -- True if the parameter is a well-formed unconditional jump.
+   function is_an_unconditional_jump (decoded : KDF9.decoded_order)
+   return Boolean;
 
    --
    -- The Instruction Counter Register, ICR, (N.B. NOT a 'PROGRAM counter')

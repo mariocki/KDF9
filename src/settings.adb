@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,6 +26,7 @@ with IOC.equipment;
 with KDF9.store;
 with postscript;
 with settings.IO;
+with symbols;
 with tracing;
 
 use  Ada.Exceptions;
@@ -38,6 +39,7 @@ use  formatting;
 use  HCI;
 use  KDF9.store;
 use  settings.IO;
+use  symbols;
 use  tracing;
 
 package body settings is
@@ -232,7 +234,7 @@ package body settings is
    procedure quit_if_requested is
    begin
       if quit_was_requested then
-         raise quit_request;
+         raise quit_request with ""; -- "" suppresses the default message.
       end if;
    end quit_if_requested;
 
@@ -280,12 +282,12 @@ package body settings is
    procedure get_settings_from_file (version : in String) is
 
       the_settings_file_name : constant String := "settings_" & version & ".txt";
+      HT                     : constant Character := Character'Val(9);
       counts_are_set : Boolean := False;
       settings_file  : File_Type;
       flag           : Character;
 
       procedure set_the_miscellany_flags is
-         HT : constant Character := Character'Val(9);
          c  : Character := ' ';
       begin
          skip_to_next_non_blank(settings_file);
@@ -317,7 +319,7 @@ package body settings is
       end set_the_miscellany_flags;
 
       procedure set_breakpoints is
-         start, end_point : KDF9.order_word_number;
+         start, end_point : KDF9.code_address;
       begin
          begin
             get_word(settings_file, KDF9.word(start));
@@ -466,6 +468,7 @@ package body settings is
             end if;
          end loop;
          log_new_line;
+
          if (format and is_parameter_flag) /= no_dumping_flags then
             get_word(settings_file, data);
             if data > max_address                     or else
@@ -527,32 +530,6 @@ package body settings is
                        );
                bad_range := True;
             end if;
-
-            if format/Usercode_flag then
-              if not end_of_line(settings_file) then
-                  get_word(settings_file, data);
-                  if data > 8190 then
-                     log_line(
-                              "***** Error: Scan start address: #"
-                            & oct_of(data)
-                            & " ="
-                            & data'Image
-                            & " > 8190, ignored."
-                             );
-                  else
-                     root_address := KDF9.order_word_number(data);
-                     log_line(
-                              "      Scan start address: #"
-                            & oct_of(root_address)
-                            & " ("
-                            & dec_of(root_address)
-                            & ")",
-                              iff => the_log_is_wanted
-                             );
-                  end if;
-               end if;
-            end if;
-
          end if;
 
          if not bad_range then
@@ -928,6 +905,87 @@ package body settings is
             log_line("***** Error in the device configuration; defaults used.");
       end set_KDF9_configuration;
 
+      procedure set_symbols is
+         c : Character := ' ';
+         w : KDF9.word;
+         a : KDF9.address;
+         v : KDF9.address;
+         p : Natural;
+      begin
+         if End_Of_Line(settings_file) then
+            clear_all_symbol_definitions;
+            return;
+         end if;
+         get(settings_file, c);
+         if    c = '#' then
+            get(settings_file, c);
+            get_word(settings_file, KDF9.word(a));
+            if c = 'V' then
+               declare_P0(a);
+            elsif c = 'Y' then
+               define_Y_size(if a = KDF9.address'Last then 0 else a);
+            else
+               raise Data_Error;
+            end if;
+         elsif c = 'W' then
+            get_word(settings_file, KDF9.word(a));
+            define_W0(a);
+         elsif c = 'Y' then
+            get_word(settings_file, KDF9.word(a));
+            define_Y0(a);
+         elsif c = 'Z' then
+            get_word(settings_file, KDF9.word(a));
+            define_Z0(a);
+         elsif c = 'P' then
+            loop
+               skip_to_next_non_blank(settings_file);
+               if End_Of_Line(settings_file) then
+                  return;
+               end if;
+               get_word(settings_file, KDF9.word(p));
+               skip_to_next_non_blank(settings_file);
+               get(settings_file, c);
+            exit when c /= '#';
+               get_decimal(settings_file, w);
+               v := KDF9.address(w+1);
+               skip_to_next_non_blank(settings_file);
+               get(settings_file, c);
+            exit when c /= '@';
+               get_word(settings_file, KDF9.word(a));
+               declare_Pp(p, v, a);
+            end loop;
+         elsif c = ' ' then
+            loop
+               skip_to_next_non_blank(settings_file);
+               if End_Of_Line(settings_file) then
+                  return;
+               end if;
+               get(settings_file, c);
+               if c not in 'A' .. 'Z'  then
+                     raise Data_Error;
+               end if;
+               get_word(settings_file, KDF9.word(a));
+               define_Yy0(c, a);
+            end loop;
+         else
+            raise Data_Error;
+         end if;
+      exception
+         when Data_Error =>
+            if not End_Of_Line(settings_file) then
+               Skip_Line(settings_file);
+            end if;
+            log_new_line;
+            log_line(
+                     "***** Error in a Y flag specification: "
+                   & "invalid data after «"
+                   & c
+                   & "»."
+                    );
+      end set_symbols;
+
+      error_count : Natural := 0;
+
    begin -- get_settings_from_file
 
       do_not_execute := False;
@@ -970,7 +1028,6 @@ package body settings is
                save_poke_value;
             when 'Q' | 'q' =>
                do_not_execute := True;
-               raise End_Error;
             when 'R' | 'r' =>
                set_tracing_range;
             when 'S' | 's' =>
@@ -984,22 +1041,26 @@ package body settings is
             when 'X' | 'x' =>
                only_signature_tracing := True;
             when 'Y' | 'y' =>
-               this_is_a_bare_Director := True;
+               set_symbols;
             when '-' | '/' =>
                Skip_Line(settings_file);
             when others =>
-               log_new_line;
+               if error_count > 10 then
+                  log_new_line;
+                  log_line("There are too many invalid flags in " & the_settings_file_name & ".");
+                  raise operator_error;
+               end if;
+               error_count := error_count + 1;
                log_line(
                         "Invalid flag: """
                       & flag
-                      & """ at line/column "
+                      & """ at line "
                       & line_number'Image
-                      & "/"
-                      & Ada.Text_IO.Count'Image(Col(settings_file))
                       & " of the settings file!"
                        );
-               log_line(" ...  the valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
+               log_line("The valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
                Skip_Line(settings_file);
+               line_number := line_number + 1;
          end case;
       end loop;
 
@@ -1012,30 +1073,24 @@ package body settings is
       when End_Error =>
          close_options_file(settings_file, the_settings_file_name);
 
+      when operator_error  =>
+         trap_operator_error("Abandoning the run");
+
       when Data_Error =>
          close_options_file(settings_file, the_settings_file_name);
-         log_new_line;
-         log_line("***** Error: invalid data in the settings file.");
-         log_line(
-                  "Reading of settings abandoned at line "
-                & line_number'Image
-                & " of "
-                & the_settings_file_name
-                & "."
-                 );
-
-      when quit_request =>
-         close_options_file(settings_file, the_settings_file_name);
-         log_new_line;
-         log_line(
-                  "Quit requested at line "
-                & line_number'Image
-                & " of "
-                & the_settings_file_name
-                & "."
-                 );
-         log_rule;
-         raise;
+         if error_count < 10 then
+            log_new_line;
+            log_line("***** Error: invalid data in the settings file.");
+            log_line(
+                     "Reading of settings abandoned at line "
+                   & line_number'Image
+                   & " of "
+                   & the_settings_file_name
+                   & "."
+                    );
+         else
+            raise;
+         end if;
 
       when error : others =>
          close_options_file(settings_file, the_settings_file_name);

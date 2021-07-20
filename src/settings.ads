@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -123,13 +123,10 @@ package settings is
 
    -- low_bound and high_bound bound the static scope of tracing.
 
-   low_bound_default  : constant KDF9.order_word_number := 0;
-   high_bound_default : constant KDF9.order_word_number := KDF9.order_word_number'Last;
-   low_bound          :          KDF9.order_word_number := low_bound_default;
-   high_bound         :          KDF9.order_word_number := high_bound_default;
-
-   -- root_address sets a flow analysis starting point for Usercode format dumps.
-   root_address       :          KDF9.order_word_number := 8191;
+   low_bound_default  : constant KDF9.code_address := 0;
+   high_bound_default : constant KDF9.code_address := KDF9.code_address'Last;
+   low_bound          :          KDF9.code_address := low_bound_default;
+   high_bound         :          KDF9.code_address := high_bound_default;
 
    -- low_count and high_count bound the dynamic scope of tracing.
 
@@ -149,8 +146,6 @@ package settings is
 
    procedure set_this_miscellany_flag (option : in Character);
 
-   -- do_not_execute is set if a quit is requested in the settings file.
-   -- The K option is not actioned unless version = "1".
    procedure get_settings_from_file (version : in String);
 
    procedure display_execution_modes (for_this : in String := "");

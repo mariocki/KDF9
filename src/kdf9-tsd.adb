@@ -1,6 +1,6 @@
 -- Implement the API (OUTs) of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -86,7 +86,7 @@ package body KDF9.TSD is
    procedure do_OUT_96 is
       use KDF9.CPU;
       P    : constant KDF9.word := pop;
-      text : constant String    := to_glyphs(P);
+      text : constant String    := glyphs_for(P);
    begin
       the_trace_operand := P;
       log_line("N1 = "

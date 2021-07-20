@@ -1,6 +1,6 @@
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -80,9 +80,11 @@ package dumping is
    subtype area_count  is Natural  range 0 .. nr_of_dumping_areas;
    subtype area_number is Positive range 1 .. nr_of_dumping_areas;
 
-   procedure request_a_dumping_area (format_set  : in dumping.format_set;
+   procedure request_a_dumping_area (
+                                     format_set  : in dumping.format_set;
                                      first, last : in KDF9.address;
-                                     was_stored  : out Boolean);
+                                     was_stored  : out Boolean
+                                    );
 
    procedure print_prerun_dump_areas;
 
@@ -105,11 +107,13 @@ package dumping is
          sub_word_flag in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w';
 
    -- poke support is in dumping because it is needed at the same time during initialization.
-   procedure add_to_poke_list (address    : in KDF9.address;
+   procedure add_to_poke_list (
+                               address    : in KDF9.address;
                                sub_word   : in sub_word_flag;
                                position   : in KDF9.address;
                                value      : in KDF9.word;
-                               was_stored : out Boolean);
+                               was_stored : out Boolean
+                              );
 
    -- poke_all_amendments effects all stored pokes and then clears the poke list for reuse.
    procedure poke_all_amendments;

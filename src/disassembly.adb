@@ -1,6 +1,6 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,10 +17,12 @@
 with formatting;
 with KDF9.CPU;
 with KDF9.decoding;
+with symbols;
 
 use  formatting;
 use  KDF9.CPU;
 use  KDF9.decoding;
+use  symbols;
 
 package body disassembly is
 
@@ -42,7 +44,7 @@ package body disassembly is
                                    & flagged(":", decoded.order.syllable_2)
       );
 
-   function one_syllable_order_name (decoded : KDF9.decoded_order)
+   function one_syllable_name (decoded : KDF9.decoded_order)
    return String
    is (
        case decoded.compressed_opcode is
@@ -107,7 +109,7 @@ package body disassembly is
           when others  =>  machine_code(decoded)
        );
 
-   function two_syllable_order_name (decoded : KDF9.decoded_order)
+   function two_syllable_name (decoded : KDF9.decoded_order)
    return String is
 
       default : constant String := machine_code(decoded);
@@ -121,7 +123,7 @@ package body disassembly is
       return String
       is (if stem = invalid then default else stem & "Q" & q);
 
-      function IO_order_name
+      function IO_name
       return String
       is (
           case decoded.compressed_opcode is
@@ -198,11 +200,11 @@ package body disassembly is
                when others =>      IO_order(invalid)
          );
 
-      function indirect_store_order_name (suffix : String := "")
+      function indirect_store_name (suffix : String := "")
       return String
       is ("=M" & k & "M" & q & suffix);
 
-      function indirect_fetch_order_name (suffix : String := "")
+      function indirect_fetch_name (suffix : String := "")
       return String
       is ("M" & k & "M" & q & suffix);
 
@@ -210,7 +212,7 @@ package body disassembly is
       return String
       is (part & q & " TO Q" & k);
 
-      function Qq_order_name (action : String; suffix : String := "")
+      function Qq_name (action : String; suffix : String := "")
       return String
       is (action & q & suffix);
 
@@ -230,41 +232,41 @@ package body disassembly is
          end if;
       end shift_count;
 
-      function shift_order_name (action : String)
+      function shift_name (action : String)
       return String
       is (action & shift_count);
 
-   begin -- two_syllable_order_name
+   begin -- two_syllable_name
       return
          (
           case decoded.compressed_opcode is
-             when MkMq       => indirect_fetch_order_name,
-             when MkMqQ      => indirect_fetch_order_name(suffix => "Q"),
-             when MkMqH      => indirect_fetch_order_name(suffix => "H"),
-             when MkMqQH     => indirect_fetch_order_name(suffix => "QH"),
-             when MkMqN      => indirect_fetch_order_name(suffix => "N"),
-             when MkMqQN     => indirect_fetch_order_name(suffix => "QN"),
-             when MkMqHN     => indirect_fetch_order_name(suffix => "HN"),
-             when MkMqQHN    => indirect_fetch_order_name(suffix => "QHN"),
+             when MkMq       => indirect_fetch_name,
+             when MkMqQ      => indirect_fetch_name(suffix => "Q"),
+             when MkMqH      => indirect_fetch_name(suffix => "H"),
+             when MkMqQH     => indirect_fetch_name(suffix => "QH"),
+             when MkMqN      => indirect_fetch_name(suffix => "N"),
+             when MkMqQN     => indirect_fetch_name(suffix => "QN"),
+             when MkMqHN     => indirect_fetch_name(suffix => "HN"),
+             when MkMqQHN    => indirect_fetch_name(suffix => "QHN"),
 
-             when TO_MkMq    => indirect_store_order_name,
-             when TO_MkMqQ   => indirect_store_order_name(suffix => "Q"),
-             when TO_MkMqH   => indirect_store_order_name(suffix => "H"),
-             when TO_MkMqQH  => indirect_store_order_name(suffix => "QH"),
-             when TO_MkMqN   => indirect_store_order_name(suffix => "N"),
-             when TO_MkMqQN  => indirect_store_order_name(suffix => "QN"),
-             when TO_MkMqHN  => indirect_store_order_name(suffix => "HN"),
-             when TO_MkMqQHN => indirect_store_order_name(suffix => "QHN"),
+             when TO_MkMq    => indirect_store_name,
+             when TO_MkMqQ   => indirect_store_name(suffix => "Q"),
+             when TO_MkMqH   => indirect_store_name(suffix => "H"),
+             when TO_MkMqQH  => indirect_store_name(suffix => "QH"),
+             when TO_MkMqN   => indirect_store_name(suffix => "N"),
+             when TO_MkMqQN  => indirect_store_name(suffix => "QN"),
+             when TO_MkMqHN  => indirect_store_name(suffix => "HN"),
+             when TO_MkMqQHN => indirect_store_name(suffix => "QHN"),
 
-             when M_PLUS_Iq  => Qq_order_name("M+I"),
-             when M_MINUS_Iq => Qq_order_name("M-I"),
-             when NCq        => Qq_order_name("NC"),
-             when DCq        => Qq_order_name("DC"),
-             when POS1_TO_Iq => Qq_order_name("I",  suffix => "=+1"),
-             when NEG1_TO_Iq => Qq_order_name("I",  suffix => "=-1"),
-             when POS2_TO_Iq => Qq_order_name("I",  suffix => "=+2"),
-             when NEG2_TO_Iq => Qq_order_name("I",  suffix => "=+2"),
-             when JCqNZS     => Qq_order_name("JC", suffix => "NZS"),
+             when M_PLUS_Iq  => Qq_name("M+I"),
+             when M_MINUS_Iq => Qq_name("M-I"),
+             when NCq        => Qq_name("NC"),
+             when DCq        => Qq_name("DC"),
+             when POS1_TO_Iq => Qq_name("I",  suffix => "=+1"),
+             when NEG1_TO_Iq => Qq_name("I",  suffix => "=-1"),
+             when POS2_TO_Iq => Qq_name("I",  suffix => "=+2"),
+             when NEG2_TO_Iq => Qq_name("I",  suffix => "=+2"),
+             when JCqNZS     => Qq_name("JC", suffix => "NZS"),
 
              when MqTOQk     => Qq_to_Qk_name("M"),
              when IqTOQk     => Qq_to_Qk_name("I"),
@@ -275,38 +277,38 @@ package body disassembly is
              when QqTOQk     => Qq_to_Qk_name("Q"),
              when QCIMq =>
                 (
-                 if (decoded.Qk and all_Q_choice) = all_Q_choice then  Qq_order_name("Q")
-                 elsif (decoded.Qk and M_part_choice) /= 0       then  Qq_order_name("M")
-                 elsif (decoded.Qk and C_part_choice) /= 0       then  Qq_order_name("C")
-                 elsif (decoded.Qk and I_part_choice) /= 0       then  Qq_order_name("I")
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then  Qq_name("Q")
+                 elsif (decoded.Qk and M_part_choice) /= 0       then  Qq_name("M")
+                 elsif (decoded.Qk and C_part_choice) /= 0       then  Qq_name("C")
+                 elsif (decoded.Qk and I_part_choice) /= 0       then  Qq_name("I")
                  else  default
                 ),
              when TO_RCIMq =>
                 (
-                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_order_name("=Q")
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_name("=Q")
                  elsif (decoded.Qk and M_part_choice) /= 0 then
-                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RM" else "=M")
+                    Qq_name(if (decoded.Qk and reset_choice) /= 0 then "=RM" else "=M")
                  elsif (decoded.Qk and C_part_choice) /= 0 then
-                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RC" else "=C")
+                    Qq_name(if (decoded.Qk and reset_choice) /= 0 then "=RC" else "=C")
                  elsif (decoded.Qk and I_part_choice) /= 0 then
-                    Qq_order_name(if (decoded.Qk and reset_choice) /= 0 then "=RI" else "=I")
+                    Qq_name(if (decoded.Qk and reset_choice) /= 0 then "=RI" else "=I")
                  else default
                 ),
              when ADD_TO_QCIMq =>
                 (
-                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_order_name("=+Q")
-                 elsif (decoded.Qk and M_part_choice) /= 0       then Qq_order_name("=+M")
-                 elsif (decoded.Qk and C_part_choice) /= 0       then Qq_order_name("=+C")
-                 elsif (decoded.Qk and I_part_choice) /= 0       then Qq_order_name("=+I")
+                 if (decoded.Qk and all_Q_choice) = all_Q_choice then Qq_name("=+Q")
+                 elsif (decoded.Qk and M_part_choice) /= 0       then Qq_name("=+M")
+                 elsif (decoded.Qk and C_part_choice) /= 0       then Qq_name("=+C")
+                 elsif (decoded.Qk and I_part_choice) /= 0       then Qq_name("=+I")
                  else  default
                 ),
 
-             when SHA   => shift_order_name("SHA"),
-             when SHAD  => shift_order_name("SHAD"),
-             when MACC  => shift_order_name("×+"),
-             when SHL   => shift_order_name("SHL"),
-             when SHLD  => shift_order_name("SHLD"),
-             when SHC   => shift_order_name("SHC"),
+             when SHA   => shift_name("SHA"),
+             when SHAD  => shift_name("SHAD"),
+             when MACC  => shift_name("×+"),
+             when SHL   => shift_name("SHL"),
+             when SHLD  => shift_name("SHLD"),
+             when SHC   => shift_name("SHC"),
 
              when TO_Kq =>
                 (
@@ -329,33 +331,55 @@ package body disassembly is
              when LINK    => "LINK",
              when TO_LINK => "=LINK",
 
-             when others  => IO_order_name
+             when others  => IO_name
           );
-   end two_syllable_order_name;
+   end two_syllable_name;
 
-   function normal_jump_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean := True;
-                                    both_bases   : Boolean := True)
+   function closer (
+                    decoded  : KDF9.decoded_order;
+                    address  : KDF9.syllable_address := (0, 0);
+                    in_octal : Boolean := True
+                   )   return String
+   is (
+       if decoded.kind = normal_jump_order and decoded.compressed_opcode = JSr
+       then ";(LINK=" & oct_or_dec_of(address, in_octal) & "); "
+       else "; "
+      );
+
+   function normal_jump_name (
+                              decoded   : KDF9.decoded_order;
+                              in_octal  : Boolean := True
+                             )
    return String is
 
-      the_target  : syllable_address renames decoded.target;
-      the_address : constant String := oct_or_dec_of(the_target, octal_option);
-      remark      : constant String
-                  := ";("
-                   & (if   octal_option
-                      then dec_of(KDF9.Q_part(the_target.order_word_number))
-                      else "#" & oct_of(the_target.order_word_number))
+      the_target  : constant KDF9.syllable_address  := decoded.target;
+      the_symbol  : constant String := P_symbol(the_target, in_octal);
+      num_remark  : constant String
+                  := (
+                      if   in_octal
+                      then ";("  & dec_of(KDF9.Q_part(the_target.code_address))
+                      else ";(#" & oct_of(the_target.code_address)
+                     )
+                  & ")";
+      sym_remark  : constant String
+                  := (
+                      if   in_octal
+                      then ";(#" & oct_of(the_target.code_address)
+                      else ";("  & dec_of(KDF9.Q_part(the_target.code_address))
+                     )
                    & ")";
+      remark      : constant String
+                  := (if the_symbol(the_symbol'First) = 'E' then num_remark else sym_remark);
 
-      function jump (on_condition : String)
+      function jump (condition : String; name : String := "J")
       return String
-      is ("JE" & the_address & on_condition & (if both_bases then remark else ""));
+      is (name & P_symbol(the_target, in_octal) & condition & remark);
 
       function leave (and_how : String)
       return String
-      is ("EXIT" & and_how & remark);
+      is ("EXIT " & and_how);
 
-   begin  -- normal_jump_order_name
+   begin  -- normal_jump_name
       return (
               case decoded.compressed_opcode is
                  when JrEQ   => jump("EQ"),
@@ -375,13 +399,10 @@ package body disassembly is
                  when JrNEN  => jump("NEN"),
                  when JrNEJ  => jump("NEJ"),
                  when JrNTR  => jump("NTR"),
-
                  when JrCqZ  => jump("C" & trimmed(decoded.Qq'Image) & "Z"),
                  when JrCqNZ => jump("C" & trimmed(decoded.Qq'Image) & "NZ"),
-
-                 when JSr    => "JSE" & the_address,
+                 when JSr    => jump("", name => "JS"),
                  when OS_OUT => "OUT",
-
                  when EXITD  => leave("D"),
                  when EXIT_n =>
                     -- Try to give the most helpful interpretation of the operand.
@@ -389,75 +410,107 @@ package body disassembly is
                      if the_target.syllable_index = 0 then  -- c.f. decode_a_jump_order.
                         -- No halfword offset applies.
                         (
-                         if the_target.order_word_number < 4 then
+                         if the_target.code_address < 4 then
                            leave(
-                                 if the_target.order_word_number = 0
+                                 if the_target.code_address = 0
                                  then ""
-                                 else oct_of(KDF9.Q_part(2*the_target.order_word_number), 1)
+                                 else oct_of(KDF9.Q_part(2*the_target.code_address), 1)
                                 )
                          else
-                           leave("AE" & oct_or_dec_of((the_target.order_word_number, 0), octal_option))
+                           leave("AE" & oct_or_dec_of((the_target.code_address, 0), in_octal))
                         )
-                     elsif the_target.order_word_number < 4 then
-                        leave(oct_of(KDF9.Q_part(2*the_target.order_word_number + 1), 1))
+                     elsif the_target.code_address < 4 then
+                        leave(oct_of(KDF9.Q_part(2*the_target.code_address + 1), 1))
                      else
-                        leave("AE" & oct_or_dec_of((the_target.order_word_number, 3), octal_option))
+                        leave("AE" & oct_or_dec_of((the_target.code_address, 3), in_octal))
                     ),
 
                  when others =>  machine_code(decoded)
              );
-   end normal_jump_order_name;
+   end normal_jump_name;
 
-   function data_access_order_name (decoded      : KDF9.decoded_order;
-                                    octal_option : Boolean;
-                                    both_bases   : Boolean := True)
+   function data_access_name (
+                              decoded       : KDF9.decoded_order;
+                              in_octal      : Boolean
+                             )
    return String is
+      opcode       : constant KDF9.compressed_opcode := decoded.compressed_opcode;
+      operand      : KDF9.Q_part renames decoded.operand;
 
-      operand      : KDF9.Q_part   renames decoded.operand;
-      Qq           : KDF9.Q_number renames decoded.Qq;
-      the_address  : constant String
-                   := (if octal_option then "#" & oct_of(operand, 1) else dec_of(operand));
-      remark       : constant String
-                   := ";(" & (if octal_option then dec_of(operand) else "#" & oct_of(operand, 1)) & ")";
-      any_modifier : constant String
-                   := (if Qq /= 0 then "M" & trimmed(Qq'Image) else "");
+      as_octal   : constant String := oct_of(operand, 1);
+      as_decimal : constant String := signed_dec_of(operand);
+      number     : constant String := (if in_octal then "#" & as_octal else as_decimal);
+      the_bare_name : constant String := (
+                                          if operand > 2**15
+                                          then "E" & number
+                                          else symbolic(operand, in_octal, opcode /= SET)
+                                         );
+
+      Qq        : KDF9.Q_number    renames decoded.Qq;
+      M_suffix  : constant String  := (if Qq /= 0 then "M" & trimmed(Qq'Image) else "");
+      Q_suffix  : constant String  := (if opcode in EaMqQ | TO_EaMqQ then "Q" else "");
+      modifier  : constant String  := M_suffix & Q_suffix;
+      one_digit : constant Boolean := (in_octal and operand < 8) or (not in_octal and operand < 10);
+      remark    : constant String
+                := (
+                    if one_digit
+                    then ""
+                    elsif the_bare_name(1) = 'E'
+                    then ";(" & (if in_octal then as_decimal else "#" & as_octal) & ")"
+                    else ";(" & number & ")"
+                   );
+
+      the_name : constant String := the_bare_name & modifier & remark;
+
    begin
-      return (
-              case decoded.compressed_opcode is
-                 when EaMq     => "E"   & the_address & any_modifier & remark,
-                 when TO_EaMq  => "=E"  & the_address & any_modifier & remark,
-                 when EaMqQ    => "E"   & the_address & any_modifier & "Q" & remark,
-                 when TO_EaMqQ => "=E"  & the_address & any_modifier & "Q" & remark,
-                 when SET      => "SET" & (
-                                           if octal_option
-                                           then "B" & oct_of(operand, 2)
-                                              & (
-                                                 if operand > 7 and both_bases
-                                                 then ";(" & signed_dec_of(operand) & ")"
-                                                 else ""
-                                                )
-                                           else signed_dec_of(operand)
-                                              & (
-                                                 if operand > 9 and both_bases
-                                                 then ";(B" & oct_of(operand, 2) & ")"
-                                                 else ""
-                                                )
-                                          ),
+      return
+             (
+              case opcode is
+                 when EaMq
+                    | EaMqQ    => the_name,
+                 when TO_EaMq
+                    | TO_EaMqQ => "=" & the_name,
+                 when SET      => (if the_name(1) = 'E'
+                                   then
+                                      "SET"
+                                    & (if one_digit
+                                       then oct_of(operand, 1)
+                                       else
+                                           (
+                                            if in_octal
+                                            then "B" & as_octal
+                                               & (
+                                                  if operand > 7
+                                                  then ";(" & as_decimal & ")"
+                                                  else ""
+                                                 )
+                                            else as_decimal
+                                               & (
+                                                  if operand > 9
+                                                  then ";(B" & as_octal & ")"
+                                                  else ""
+                                                 )
+                                           )
+                                      )
+                                  else
+                                     "SETA" & the_bare_name & remark
+                                ),
                  when others   => "?"
              );
-   end data_access_order_name;
+   end data_access_name;
 
-   function the_full_name_of (order        : KDF9.decoded_order;
-                              octal_option : Boolean := True;
-                              both_bases   : Boolean := True)
+   function the_full_name_of (
+                              order      : KDF9.decoded_order;
+                              in_octal   : Boolean := True
+                             )
    return String is
       result : constant String
          := (
              case order.kind is
-                when one_syllable_order => one_syllable_order_name(order),
-                when two_syllable_order => two_syllable_order_name(order),
-                when normal_jump_order  => normal_jump_order_name(order, octal_option, both_bases),
-                when data_access_order  => data_access_order_name(order, octal_option, both_bases)
+                when one_syllable_order => one_syllable_name(order),
+                when two_syllable_order => two_syllable_name(order),
+                when normal_jump_order  => normal_jump_name(order, in_octal),
+                when data_access_order  => data_access_name(order, in_octal)
             );
    begin
       return (if result(1) /= '?' then result else "an INVALID order");
@@ -465,7 +518,7 @@ package body disassembly is
 
    function the_code_and_name_of_INS
    return String
-   is (machine_code(INS) & ", i.e. " & the_full_name_of(INS));
+   is (machine_code(INS) & ", i.e. " & the_full_name_of(INS, in_octal => True)); -- & short_closer(INS));
 
    function two_syllable_skeleton (encoding : KDF9.syllable)
    return String is
@@ -616,7 +669,7 @@ package body disassembly is
       return
          (
           case KDF9.INS_kind(syllable_0 / 2**6) is
-             when one_syllable_order   => one_syllable_order_name(its_INS),
+             when one_syllable_order   => one_syllable_name(its_INS),
              when two_syllable_order   => two_syllable_skeleton(syllable_0),
              when normal_jump_order    => normal_jump_skeleton(syllable_0),
              when data_access_order    => data_access_skeleton(its_INS.compressed_opcode)

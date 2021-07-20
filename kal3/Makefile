@@ -17,14 +17,14 @@
 CC=gcc
 YACC=bison
 CFLAGS=-I. -fPIE -fPIC
-YFLAGS=-vtdy
+YFLAGS=-vdt
 
 prefix?=/usr/local
 
-kal3: kal3.c y.tab.c
+kal3: kal3.c kal3.tab.c
 	$(CC) -o $@ $^ $(CFLAGS)
 
-y.tab.c: kal3.y
+kal3.tab.c: kal3.y
 	$(YACC) $(YFLAGS) $^
 
 .PHONY: clean
@@ -46,3 +46,7 @@ update:
 #	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
 #	-git apply fixpaths.diff
 #	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since
+
+.PHONY: patch
+patch:
+	cat fixpaths.diff | (patch -p0 -r - --no-backup-if-mismatch --forward || true)

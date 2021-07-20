@@ -1,9 +1,8 @@
--- message.adb
+-- Specific feature values and operation for the console terminal streams.
+-- This is the Linux, macOS and UNIX version.
 --
--- Statically and dynamically controlled debugging output.
---
--- This file is part of ee9 (V5.1a), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2020, W. Findlay; all rights reserved.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,13 +15,20 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with POSIX;
-with settings;
+package body OS_specifics is
 
--- Display the text iff debugging is enabled, and pragma Debug is actioned.
-procedure message (text : in String) is
-begin
-   if settings.debugging_is_enabled then
-      pragma Debug(POSIX.output_line(text));
-   end if;
-end message;
+   procedure make_transparent (fd : in Integer) is null;
+
+   function EOL
+   return String
+   is (1 => Character'Val(16#0A#));
+
+   function UI_in_name
+   return String
+   is ("/dev/tty");
+
+   function UI_out_name
+   return String
+   is ("/dev/tty");
+
+end OS_specifics;

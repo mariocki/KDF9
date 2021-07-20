@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -111,7 +111,15 @@ package POSIX is
    procedure input  (message  : out Character);
 
    type response_kind is
-      (quit_response, EOF_response, name_response, at_response, here_response, wrong_response);
+                        (
+                         quit_response,
+                         EOF_response,
+                         LF_response,
+                         name_response,
+                         at_response,
+                         here_response,
+                         wrong_response
+                        );
 
    -- If we are in non-interactive mode, log an error and set response to wrong_response.
    -- Display a message and read a reply, letter.
@@ -125,7 +133,8 @@ package POSIX is
 
    -- If we are in non-interactive mode, log an error and set response to wrong_response.
    -- Display a prompt message and read a reply.
-   -- If it is null or EOL:   set response to EOF_response.
+   -- If it is null:          set response to EOF_response.
+   -- If it is EOL:           set response to LF_response.
    -- If it is /:             set response to name_response.
    -- If it is @:             set response to at_response.
    -- If it is =:             set response to here_response.

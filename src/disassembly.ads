@@ -1,6 +1,6 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -23,9 +23,17 @@ package disassembly is
    function the_code_and_name_of_INS
    return String;
 
-   function the_full_name_of (order        : KDF9.decoded_order;
-                              octal_option : Boolean := True;
-                              both_bases   : Boolean := True)
+   function the_full_name_of (
+                              order      : KDF9.decoded_order;
+                              in_octal   : Boolean := True
+                             )
+   return String;
+
+   function closer (
+                    decoded  : KDF9.decoded_order;
+                    address  : KDF9.syllable_address := (0, 0);
+                    in_octal : Boolean := True
+                   )
    return String;
 
    function the_short_name_of (syllable_0 : KDF9.syllable)

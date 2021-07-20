@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (6.3b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -41,7 +41,7 @@ package body tracing is
       the_profile := (others => 0);
    end clear_the_profile;
 
-   procedure set_breakpoints (first, last : in KDF9.order_word_number) is
+   procedure set_breakpoints (first, last : in KDF9.code_address) is
    begin
       for p in first .. last loop
          breakpoints(p) := True;
@@ -326,7 +326,7 @@ package body tracing is
 
    procedure add_CIA_to_the_profile is
    begin
-      the_profile(CIA.order_word_number) := the_profile(CIA.order_word_number) + 1;
+      the_profile(CIA.code_address) := the_profile(CIA.code_address) + 1;
    end add_CIA_to_the_profile;
 
    procedure preview_a_one_syllable_order is null;
