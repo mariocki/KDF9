@@ -76,11 +76,11 @@ trap " >${KDF9RUNTIME}/MT0 >${KDF9RUNTIME}/MT1 >${KDF9RUNTIME}/MT2 >${KDF9RUNTIM
        >${KDF9RUNTIME}/TR0 >${KDF9RUNTIME}/TR1 " 0
 
 if [ x$progx = xx ]; then
-   echo No program name was given.
+   echo "No program name was given."
    echo
    exit 1
 elif [ ! -r ${SOURCE}/$prog.a60 ]; then
-   echo The file ${SOURCE}/$prog.a60 is absent or unreadable.
+   echo "The file ${SOURCE}/$prog.a60 is absent or unreadable."
    echo
    exit 1
 fi
@@ -162,10 +162,12 @@ y)
       exit 5
    fi
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in Assembly/$prog.k3 and the KDF9 executable is in Binary/$prog"
+   echo "The Usercode is in  ${USERCODE}/${prog}.k3"
+   echo ""
+   echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}"
    ;;
 *)
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in Assembly/$prog.k3."
+   echo "The Usercode is in  ${USERCODE}/${prog}.k3."
    ;;
 esac

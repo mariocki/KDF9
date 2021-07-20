@@ -1,17 +1,76 @@
-USERCODE=${KDF9_USERCODE:-Assembly}
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# peep : peephole optimizer for Kidsgrove
+#------------------------------------------------------------------------
 
-trap "rm -f peep.commands peep_tmp_[0123456789]"   \
-      0 1 2 3
-
-if [ ! -r ${USERCODE}/$1.k3 ]
-then echo Could not find $1.k3 in Assembly; exit 1
+if [ -z $KDF9RUNTIME ]; then
+   KDF9RUNTIME="$HOME/.kdf9"
 fi
 
-tr  "\\r\\t" "\\n " < ${USERCODE}/$1.k3  > peep_tmp_0
-tr -s "\\n" < peep_tmp_0 > peep_tmp_1
-a2b -L2A <peep_tmp_1 > peep_tmp_0
+if [ $# -eq 0 ]; then
+   set -- "-h"
+fi
 
-cat >peep.commands <<++++
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+DATA=${KDF9RUNTIME}/Data
+LOGS=${KDF9RUNTIME}/logs
+SETTINGS=${KDF9RUNTIME}/settings
+USERCODE=${KDF9RUNTIME}/Assembly
+
+trap "rm -f /tmp/peep.commands /tmp/peep_tmp_[0123456789]" \
+   0 1 2 3
+
+while [[ "$#" -gt 0 ]]; do
+   case ${1# } in
+   -h | --help)
+      echo "PEEP - peephole optimizer for Kidsgrove."
+      echo
+      echo "Usage: peep SOURCEFILE"
+      echo
+      echo "Note: SOURCEFILE must exist in ${USERCODE}"
+      echo
+      exit 0
+      ;;
+   *)
+      if [ -z ${prog} ]; then
+         prog="$1"
+      fi
+      ;;
+   esac
+   shift
+done
+
+if [ x$progx = xx ]; then
+   echo "No program name was given."
+   echo
+   exit 1
+elif [ ! -r ${USERCODE}/$prog.k3 ]; then
+   echo "The file ${USERCODE}/$prog.k3 is absent or unreadable."
+   echo
+   exit 1
+fi
+
+tr "\\r\\t" "\\n " <${USERCODE}/$prog.k3 >/tmp/peep_tmp_0
+tr -s "\\n" </tmp/peep_tmp_0 >/tmp/peep_tmp_1
+a2b -L2A </tmp/peep_tmp_1 >/tmp/peep_tmp_0
+
+cat >/tmp/peep.commands <<++++
 /^ +$/d
 /^ +/s//   /
 10,\$s/([0123456789]) +([0123456789])/\1\2/g
@@ -39,9 +98,9 @@ cat >peep.commands <<++++
 10,\$s/;SET +/;SET/g
 10,\$s/SET[^;]+;=Z0;//g
 ++++
-sed -E -f peep.commands peep_tmp_0 > peep_tmp_1
+sed -E -f /tmp/peep.commands /tmp/peep_tmp_0 >/tmp/peep_tmp_1
 
-cat >peep.commands <<++++
+cat >/tmp/peep.commands <<++++
 10,\$s/SET1;SET47;FLOAT;/SETB403;SHC-10;(1.0);/g
 10,\$s/SET2;SET47;FLOAT;/SETB405;SHC-10;(2.0);/g
 10,\$s/SETB1;SET47;FLOAT;/SETB403;SHC-10;(1.0);/g
@@ -52,9 +111,9 @@ cat >peep.commands <<++++
 10,\$s/;=Y0M2Q;([^;]+);M-I2;Y0M2;\+;/;\1;+;/
 10,\$s/;=Y0M2Q;([^;]+);M-I2;Y0M2;-;/;\1;-;/
 ++++
-sed -E -f peep.commands peep_tmp_1 > peep_tmp_0
+sed -E -f /tmp/peep.commands /tmp/peep_tmp_1 >/tmp/peep_tmp_0
 
-cat >peep.commands <<++++
+cat >/tmp/peep.commands <<++++
 10,\$s/ZERO;OR;//g
 10,\$s/ZERO;AND;/ZERO;/g
 10,\$s/REV;REV;//g
@@ -138,9 +197,9 @@ cat >peep.commands <<++++
    /g
 10,\$s/ZERO;NEV;//g
 ++++
-sed -E -f peep.commands peep_tmp_0 > peep_tmp_1
+sed -E -f /tmp/peep.commands /tmp/peep_tmp_0 >/tmp/peep_tmp_1
 
-cat >peep.commands <<++++
+cat >/tmp/peep.commands <<++++
 10,\$s/ZERO;SIGN;J([^=]+)=Z;/J\1=Z;/g
 10,\$s/ZERO;SIGN;J([^=]+)=Z;/J\1=Z;/g
 10,\$s/ZERO;SIGN;J([^G]+)GTZ;/J\1GTZ;/g
@@ -153,9 +212,9 @@ cat >peep.commands <<++++
 10,\$s/ZERO;SIGNF;J([^G]+)GEZ;/J\1GEZ;/g
 10,\$s/ZERO;SIGNF;J([^L]+)LEZ;/J\1LEZ;/g
 ++++
-sed -E -f peep.commands peep_tmp_1 > peep_tmp_0
+sed -E -f /tmp/peep.commands /tmp/peep_tmp_1 >/tmp/peep_tmp_0
 
-cat >peep.commands <<++++
+cat >/tmp/peep.commands <<++++
 
 10,\$s/;J([^;]+);(.*)/;\\
 J\\1;\\
@@ -209,9 +268,9 @@ P\\1\\2;/
 10,\$s/=Z0;( +)(.+)/=Z0;\\
    \2/g
 ++++
-sed -E -f peep.commands peep_tmp_0 > peep_tmp_1
+sed -E -f /tmp/peep.commands /tmp/peep_tmp_0 >/tmp/peep_tmp_1
 
-ex peep_tmp_1  <<++++
+ex /tmp/peep_tmp_1 <<++++
 /^|/
 .+1,\$d
 s/^|.*/|/
@@ -219,7 +278,8 @@ w! peep_tmp_1
 q!
 ++++
 
-> ${USERCODE}/$1-PEEP.k3
-tr -s "\\n" < peep_tmp_1 > ${USERCODE}/$1-PEEP.k3
+>${USERCODE}/$1-PEEP.k3
+tr -s "\\n" </tmp/peep_tmp_1 >${USERCODE}/${prog}-PEEP.k3
 sttl $1-PEEP $2 $3
-echo The Usercode is in ${USERCODE}/$1-PEEP.k3; echo
+echo "The Usercode is in ${USERCODE}/${prog}-PEEP.k3"
+echo

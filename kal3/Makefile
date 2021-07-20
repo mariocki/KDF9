@@ -46,3 +46,7 @@ update:
 #	wget -N http://settle.ddns.net/KDF9/kal3.c --no-if-modified-since
 #	-git apply fixpaths.diff
 #	wget -N http://settle.ddns.net/KDF9/kal3.y --no-if-modified-since
+
+.PHONY: patch
+patch:
+	cat fixpaths.diff | (patch -p0 -r - --no-backup-if-mismatch --forward || true)

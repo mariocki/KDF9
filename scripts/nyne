@@ -1,20 +1,69 @@
-USERCODE=${KDF9_USERCODE:-Assembly}
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# nyne :
+#------------------------------------------------------------------------
 
-prog=$1
+if [ -z $KDF9RUNTIME ]; then
+   KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-if [ ! -r ${USERCODE}/$1.k3 ]
-then
-   echo The Usercode file "$1" is absent or unreadable.
+if [ $# -eq 0 ]; then
+   set -- "-h"
+fi
+
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+DATA=${KDF9RUNTIME}/Data
+LOGS=${KDF9RUNTIME}/logs
+SETTINGS=${KDF9RUNTIME}/settings
+USERCODE=${KDF9RUNTIME}/Assembly
+
+while [[ "$#" -gt 0 ]]; do
+   case ${1# } in
+   -h | --help)
+      echo "NYNE - ."
+      echo
+      echo "Usage: nyne SOURCEFILE"
+      echo
+      echo "Note: SOURCEFILE must exist in ${USERCODE}"
+      echo
+      exit 0
+      ;;
+   *)
+      if [ -z ${prog} ]; then
+         prog="$1"
+      fi
+      ;;
+   esac
+   shift
+done
+
+if [ x$progx = xx ]; then
+   echo "No program name was given."
    echo
-   exit 2
+   exit 1
+elif [ ! -r ${USERCODE}/$prog.k3 ]; then
+   echo "The file ${USERCODE}/$prog.k3 is absent or unreadable."
+   echo
+   exit 1
 fi
 
-extract_symbols $prog
-if [ -r settings_3.txt ]
-then
-   cp settings_3.txt settings_1.txt
-fi
-cat settings_symbols.txt >> settings_1.txt
+extract_symbols ${USERCODE}/$prog.k3
+cat settings_symbols >>${KDF9RUNTIME}/settings_1
 
 . nine $*
-

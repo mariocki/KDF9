@@ -1,76 +1,104 @@
-SOURCE=${KDF9_USERCODE:-Assembly}
-BINARY=${KDF9_BINARY:-Binary}
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+if [ -z $KDF9RUNTIME ]; then
+   export KDF9RUNTIME="$HOME/.kdf9"
+fi
 
-trap "rm -f wich_test_diff.txt"  \
-      0 1 2 3
+export DATA=${KDF9RUNTIME}/Data
+export KIDSGROVE=${KDF9RUNTIME}/Kidsgrove
+export USERCODE=${KDF9RUNTIME}/Assembly
+export WHETSTONE=${KDF9RUNTIME}/Whetstone
+export BINARY=${KDF9RUNTIME}/Binary
+export LOGS=${KDF9RUNTIME}/logs
+export TESTS=${KDF9RUNTIME}/tests
 
-export KIDSMISC=wz
-export KIDSLIST=""
->wich_tests_log.txt
+export EE9REGTEST=1
+
+#trap "rm -f ${LOGS}/wich_test.diff /tmp/wich_test/log" 0 1 2 3
+
+#export KIDSMISC=wz
+#export KIDSLIST=""
+>${LOGS}/wich_tests.log
 
 echo TEST wich FLUID
-wich FLUID FLUID_data t prh         >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/FLUID-PEEP.k3       ${BINARY}/FLUID-PEEP       ${SOURCE}/FLUID-PEEP-listing.txt
+wich FLUID FLUID_data -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/FLUID-PEEP.k3 ${BINARY}/FLUID-PEEP ${USERCODE}/FLUID-PEEP-listing.txt
 
 echo TEST wich HANOI
-wich HANOI HANOI_data t prh         >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/HANOI-PEEP.k3       ${BINARY}/HANOI-PEEP       ${SOURCE}/HANOI-PEEP-listing.txt
+wich HANOI HANOI_data -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/HANOI-PEEP.k3 ${BINARY}/HANOI-PEEP ${USERCODE}/HANOI-PEEP-listing.txt
 
 echo TEST wich INPUT
-wich INPUT INPUT_data t prh         >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/INPUT-PEEP.k3       ${BINARY}/INPUT-PEEP       ${SOURCE}/INPUT-PEEP-listing.txt
+wich INPUT INPUT_data -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/INPUT-PEEP.k3 ${BINARY}/INPUT-PEEP ${USERCODE}/INPUT-PEEP-listing.txt
 
 echo TEST wich MANORBOYX
-wich MANORBOYX - t prh              >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/MANORBOYX-PEEP.k3   ${BINARY}/MANORBOYX-PEEP   ${SOURCE}/MANORBOYX-PEEP-listing.txt
+wich MANORBOYX -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/MANORBOYX-PEEP.k3 ${BINARY}/MANORBOYX-PEEP ${USERCODE}/MANORBOYX-PEEP-listing.txt
 
 echo TEST wich MATMULT
-wich MATMULT - t prh                >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/MATMULT-PEEP.k3     ${BINARY}/MATMULT-PEEP     ${SOURCE}/MATMULT-PEEP-listing.txt
+wich MATMULT -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/MATMULT-PEEP.k3 ${BINARY}/MATMULT-PEEP ${USERCODE}/MATMULT-PEEP-listing.txt
 
 echo TEST wich PALSQR
-wich PALSQR - t prh                 >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/PALSQR-PEEP.k3      ${BINARY}/PALSQR-PEEP      ${SOURCE}/PALSQR-PEEP-listing.txt
+wich PALSQR -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/PALSQR-PEEP.k3 ${BINARY}/PALSQR-PEEP ${USERCODE}/PALSQR-PEEP-listing.txt
 
 echo TEST wich PENTOMINO
-wich PENTOMINO PENTOMINO_data t prh >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/PENTOMINO-PEEP.k3   ${BINARY}/PENTOMINO-PEEP   ${SOURCE}/PENTOMINO-PEEP-listing.txt
+wich PENTOMINO PENTOMINO_data -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/PENTOMINO-PEEP.k3 ${BINARY}/PENTOMINO-PEEP ${USERCODE}/PENTOMINO-PEEP-listing.txt
 
 echo TEST wich QSORT
-wich QSORT - t prh                  >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/QSORT-PEEP.k3       ${BINARY}/QSORT-PEEP       ${SOURCE}/QSORT-PEEP-listing.txt
+wich QSORT -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/QSORT-PEEP.k3 ${BINARY}/QSORT-PEEP ${USERCODE}/QSORT-PEEP-listing.txt
 
 echo TEST wich WEEHAAVIE
-wich WEEHAAVIE - t prh              >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/WEEHAAVIE-PEEP.k3   ${BINARY}/WEEHAAVIE-PEEP   ${SOURCE}/WEEHAAVIE-PEEP-listing.txt
+wich WEEHAAVIE -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/WEEHAAVIE-PEEP.k3 ${BINARY}/WEEHAAVIE-PEEP ${USERCODE}/WEEHAAVIE-PEEP-listing.txt
 
 echo TEST wich WHETSTONE
-wich WHETSTONE - t prh              >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/WHETSTONE-PEEP.k3   ${BINARY}/WHETSTONE-PEEP   ${SOURCE}/WHETSTONE-PEEP-listing.txt
+wich WHETSTONE -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/WHETSTONE-PEEP.k3 ${BINARY}/WHETSTONE-PEEP ${USERCODE}/WHETSTONE-PEEP-listing.txt
 
 echo TEST wich ZELLER
-wich ZELLER ZELLER_data t prh       >>wich_tests_log.txt
-fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/ZELLER-PEEP.k3      ${BINARY}/ZELLER-PEEP      ${SOURCE}/ZELLER-PEEP-listing.txt
+wich ZELLER ZELLER_data -d=t -m=prh >>${LOGS}/wich_tests.log
+fgrep "Digital signature of traced orders = " ${LOGS}/KDF9.log >>${LOGS}/wich_tests.log
+rm ${USERCODE}/ZELLER-PEEP.k3 ${BINARY}/ZELLER-PEEP ${USERCODE}/ZELLER-PEEP-listing.txt
 
 echo
-diff wich_tests_log.txt wich_tests_good_log.txt >wich_test_diff.txt
-if [ -s wich_test_diff.txt ]
-then
-   echo These are the unexpected variances for this run:
-   echo ===
-   more wich_test_diff.txt
-   echo ===
+iconv -f $(file -b --mime-encoding ${LOGS}/wich_test.log) -t UTF8 <${LOGS}/wich_test.log >/tmp/wich_test/log
+cat /tmp/wich_test.log >${LOGS}/wich_test.log
+diff ${LOGS}/wich_tests.log wich_tests_good_log.txt >${LOGS}/wich_test.diff
+if [ -s ${LOGS}/wich_test.diff ]; then
+   echo "These are the unexpected variances for this run:"
+   echo "==="
+   more ${LOGS}/wich_test.diff
+   echo "==="
 else
-   echo These tests ran as expected.
+   echo "These tests ran as expected."
 fi
