@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -59,8 +59,8 @@ package settings is
    --    they are both requested, and offered by the_diagnostic_mode.
    -- These requests may be set by the miscellany and visibilty options.
 
-   miscellany_flags  : constant String := "abdefghikmnopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
-   miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|m|n|o|p|q|r|s|t|w|x|z|.|0..9}";
+   miscellany_flags  : constant String := "abdefghiknopqrstwxyz.0123456789ABDEFGHIKMNOPQRSTWXYZ";
+   miscellany_prompt : constant String := "{a|b|d|e|f|g|h|i|k|n|o|p|q|r|s|t|w|x|z|.|0..9}";
 
    -- *_is_wanted  iff the facility is provided by default.
    -- *_is_enabled iff the facility is wanted and not suppressed by other considerations,
@@ -75,8 +75,7 @@ package settings is
    retrospective_tracing_is_wanted,
    the_final_state_is_wanted,
    the_log_is_wanted,
-   the_signature_is_wanted,
-   the_terminal_is_ANSI_compatible : Boolean := True;
+   the_signature_is_wanted         : Boolean := True;
 
    authentic_timing_is_enabled,
    debugging_is_enabled,

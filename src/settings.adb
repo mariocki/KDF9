@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@ with IOC.equipment;
 with KDF9.store;
 with postscript;
 with settings.IO;
-with symbols;
+with disassembly.symbols;
 with tracing;
 
 use  Ada.Exceptions;
@@ -39,7 +39,7 @@ use  formatting;
 use  HCI;
 use  KDF9.store;
 use  settings.IO;
-use  symbols;
+use  disassembly.symbols;
 use  tracing;
 
 package body settings is
@@ -56,7 +56,6 @@ package body settings is
       the_final_state_is_wanted        := True;
       the_log_is_wanted                := True;
       the_signature_is_wanted          := True;
-      the_terminal_is_ANSI_compatible  := True;
       authentic_timing_is_enabled      := False;
       debugging_is_enabled             := False;
       histogramming_is_enabled         := False;
@@ -116,8 +115,6 @@ package body settings is
             interrupt_tracing_is_wanted := False;
          when 'k' | 'K' =>
             choice(DR0_default) := DR;
-         when 'm' | 'M' =>
-            the_terminal_is_ANSI_compatible := False;
          when 'n' | 'N' =>
             noninteractive_usage_is_enabled := True;
             time_limit := offline_time_limit;
@@ -199,11 +196,6 @@ package body settings is
              when pause_mode    => "pause mode",
              when external_mode => "external trace mode"
          );
-      if the_diagnostic_mode = fast_mode then
-         log_line(".");
-         log_rule;
-         return;
-      end if;
 
       if authentic_timing_is_enabled      or else
          debugging_is_enabled             or else

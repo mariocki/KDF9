@@ -1,6 +1,6 @@
 -- Map object code addresses to Usercode symbolic addresses.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,20 +18,12 @@ with formatting;
 
 use  formatting;
 
-package body symbols is
-
-   use KDF9;
-
-   the_WYZ_table : non_V_store_table;
-
-   function the_non_V_store_table
-   return non_V_store_table
-   is (the_WYZ_table);
+package body disassembly.symbols is
 
    procedure set_Z_min is
    begin
       if the_WYZ_table.Y_max = 0 or the_WYZ_table.Y_base = KDF9.address'Last then
-         the_WYZ_table.Z_min := the_WYZ_table.Z_base - (the_WYZ_table.Y_base + the_WYZ_table.Z_base) / 8;
+         the_WYZ_table.Z_min := the_WYZ_table.Z_base - (the_WYZ_table.Y_base+the_WYZ_table.Z_base)/8;
       else
          the_WYZ_table.Z_min := the_WYZ_table.Y_base + the_WYZ_table.Y_max;
       end if;
@@ -77,18 +69,6 @@ package body symbols is
       end if;
       return "E" & trimmed(KDF9.address'Image(address));
    end Y_symbol;
-
-   last_P_number : Integer range -1 .. 1000;
-
-   V_store_base  : V_definition_list (0 .. 1000);
-
-   function the_V_definition_list
-   return V_definition_list
-   is (V_store_base(0..last_P_number));
-
-   function the_V_definition_list_length
-   return Natural
-   is (last_P_number);
 
    procedure declare_P0 (P0v : in KDF9.address) is
    begin
@@ -151,12 +131,10 @@ package body symbols is
 
    procedure clear_all_symbol_definitions is
    begin
-      the_WYZ_table.Yy_base  := (others => KDF9.address'Last);
-      last_P_number := 0;
+      the_WYZ_table.Yy_base := (others => KDF9.address'Last);
       V_store_base  := (others => (0, 0, 0, 0));
+      last_P_number := 0;
       V_store_base(0) := (P_number => 0, V_count => 0, P_address => 8,  V_address => 8);
    end clear_all_symbol_definitions;
 
-begin
-   clear_all_symbol_definitions;
-end symbols;
+end disassembly.symbols;

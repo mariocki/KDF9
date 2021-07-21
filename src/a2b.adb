@@ -1,4 +1,4 @@
--- This file is an auxiliary of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or

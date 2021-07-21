@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -33,7 +33,7 @@ with KDF9.PHU_store;
 with KDF9.store;
 with logging.file;
 with settings;
-with symbols;
+with disassembly.symbols;
 with tracing;
 
 with IOC.diagnostics;
@@ -56,7 +56,7 @@ use  KDF9.PHU_store;
 use  KDF9.store;
 use  logging.file;
 use  settings;
-use  symbols;
+use  disassembly.symbols;
 use  tracing;
 
 package body state_display is
@@ -1273,6 +1273,7 @@ package body state_display is
    begin
       if the_final_state_is_wanted then
          if loading_was_successful then
+
             -- make sure there is at least one NL after any FW output.
             if the_log_is_wanted then
                log_new_line;
@@ -1297,16 +1298,16 @@ package body state_display is
             end if;
 
             show_retrospective_traces;
-
             if the_signature_is_enabled then
                log_title("Digital signature of traced orders = #"
                        & oct_of(the_digital_signature)
                        & ".");
             end if;
+
          else
+
             log_line("ee9: " & because & ".");
             show_all_prerun_dump_areas;
-            return;
          end if;
       end if;
    end show_final_state;
@@ -1837,10 +1838,10 @@ package body state_display is
 
    procedure do_symbol_table_based_markup is
       subtype own is KDF9.code_address;
-      V_list : constant V_definition_list := the_V_definition_list;
-      non_Vs : constant non_V_store_table := the_non_V_store_table;
+      V_list : V_definition_list renames V_store_base(0..last_P_number);
+      non_Vs : non_V_store_table renames the_WYZ_table;
    begin
-      for e in V_list'First .. v_list'Last-1 loop
+      for e in V_list'First .. V_list'Last-1 loop
          -- Mark the V stores of P[e].
          for a in own(V_list(e).V_address) .. own(V_list(e).P_address-1) loop
             mark_as_a_data_word(own(a));
@@ -1872,7 +1873,7 @@ package body state_display is
          log_new_line;
       end if;
 
-      if the_V_definition_list_length = 0 then
+      if last_P_number = 0 then
          -- There is no symbol table, so we have to do a flow analysis.
          -- Mark all orders reachable from the initial jump in E0 and the restart jumps in E4.
 

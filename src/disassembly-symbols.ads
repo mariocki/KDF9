@@ -1,6 +1,6 @@
  -- Map object code addresses to Usercode symbolic addresses.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,9 +14,7 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with KDF9;
-
-package symbols is
+package disassembly.symbols is
 
    procedure clear_all_symbol_definitions;
 
@@ -39,6 +37,8 @@ package symbols is
    function symbolic (address : KDF9.address; in_octal : Boolean; not_for_SET : Boolean := True)
    return String;
 
+   last_P_number : Integer range -1 .. 1000 := -1;
+
    type V_definition is
    record
       P_number  : Natural;
@@ -49,17 +49,13 @@ package symbols is
 
    type V_definition_list is array (Natural range <>) of V_definition;
 
-   function the_V_definition_list
-   return V_definition_list;
-
-   function the_V_definition_list_length
-   return Natural;
+   V_store_base : V_definition_list (0 .. 1000);
 
    type address_list is array (Y_store_id) of KDF9.address;
 
    type non_V_store_table is
       record
-         Yy_base : address_list;
+         Yy_base : address_list := (others => KDF9.address'Last);
          W_base  : KDF9.address := KDF9.address'Last;
          Y_base  : KDF9.address := KDF9.address'Last;
          Y_max   : KDF9.address := 0;
@@ -67,7 +63,6 @@ package symbols is
          Z_min   : KDF9.address := KDF9.address'Last;
       end record;
 
-   function the_non_V_store_table
-   return non_V_store_table;
+   the_WYZ_table : non_V_store_table;
 
-end symbols;
+end disassembly.symbols;
