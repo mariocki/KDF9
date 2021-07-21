@@ -32,6 +32,7 @@ DATA=${KDF9RUNTIME}/Data
 LOGS=${KDF9RUNTIME}/logs
 SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
    case ${1# } in
@@ -44,6 +45,7 @@ while [[ "$#" -gt 0 ]]; do
       echo "                              define the kalgol options."
       echo "  -nc, --no-color             do not colorize error output."
       echo "  -k3, --no-k3                do not generate binary file."
+      echo "  -O                          Optimise."
       echo
       echo "Note: SOURCEFILE must exist in ${SOURCE}"
       echo
@@ -58,6 +60,9 @@ while [[ "$#" -gt 0 ]]; do
    -k3 | --no-k3)
       KIDSGROVE_ASSEMBLY=n
       ;;
+   -O)
+      OPTIMISE=1
+      ;;
    *)
       if [ -z ${prog} ]; then
          prog="$1"
@@ -67,7 +72,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-trap "rm -f  /tmp/chan6.pt /tmp/ptp.bin /tmp/mt.out /tmp/punch.txt;
+trap "rm -f  ${TEMPORARY}/chan6.pt ${TEMPORARY}/ptp.bin ${TEMPORARY}/mt.out ${TEMPORARY}/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt" \
    0 1 2 3
 
@@ -95,13 +100,13 @@ cat ${DATA}/systape_kalgol.txt >${DATA}/systape.txt
 nine MKSYS2 systape -m=wz
 #echo "The compiler overlay tape has been generated."; echo
 
-mkchan ${SOURCE}/$prog.a60 /tmp/chan6.pt >/dev/null
+mkchan ${SOURCE}/$prog.a60 ${TEMPORARY}/chan6.pt >/dev/null
 #echo "The basic symbol source program tape has been made."; echo
 
 >${KDF9RUNTIME}/TP0
 rm -f ${KDF9RUNTIME}/Binary/$prog
 rm -f ${USERCODE}/$prog.k3
-cat /tmp/chan6.pt >${DATA}/ABS_text.txt
+cat ${TEMPORARY}/chan6.pt >${DATA}/ABS_text.txt
 
 cat ${SETTINGS}/settings_for_kalgol.txt >${KDF9RUNTIME}/settings_1.txt
 
@@ -137,8 +142,11 @@ if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/e
    fi
 fi
 
-#${KDF9RUNTIME}/a2b -p2t < TP0 > ${USERCODE}/$prog.k3
-mtp MT0T >${USERCODE}/$prog.k3
+if [ -n ${OPTIMISE} ]; then
+   #   a2b -p2t <TP0 >${USERCODE}/$prog.k3
+   #else
+   mtp MT0T >${USERCODE}/$prog.k3
+fi
 
 if [ ! -s ${USERCODE}/$prog.k3 ]; then
    echo -e "${RED}**********************************************"
@@ -168,6 +176,6 @@ y)
    ;;
 *)
    echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in  ${USERCODE}/${prog}.k3."
+   echo "The Usercode is in  ${USERCODE}/${prog}.k3"
    ;;
 esac

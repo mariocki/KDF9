@@ -1,0 +1,5 @@
+# set the ANSI SGR escape code for plain text on any background
+export RED_FONT="NULL"
+export BLACK_FONT="NULL"
+export UNDERLINE="NULL"
+export PLAIN_FONT="NULL"

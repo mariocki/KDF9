@@ -24,6 +24,7 @@ if [ -z $KDF9RUNTIME ]; then
 fi
 
 FW0FILES=${KDF9RUNTIME}/FW0Files
+TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in

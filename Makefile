@@ -42,7 +42,7 @@ GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
 all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
 
 .phony: ee9
-ee9 : builddefs ${LIB_DIR} ${OPT_DEPENDS}
+ee9 : builddefs patch ${LIB_DIR} ${OPT_DEPENDS}
 	gnatmake -c ee9 -i ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/ee9.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/ee9.ali -o ${SRC}/ee9
@@ -70,7 +70,7 @@ mtp:
 	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
 
 .PHONY: kal3
-kal3:
+kal3: patch
 	$(MAKE) -e -C ${KAL3}
 
 .PHONY: kal4
@@ -152,7 +152,7 @@ patch:
 	cat kdfruntime.patch | (patch -p1 -r - --no-backup-if-mismatch --forward || true)
 
 #
-for a in runtime/tests/*.log; do
-	iconv -f $(file -b --mime-encoding ${a}) -t UTF8 <${a} >/tmp/tmpfile;
-	cat /tmp/tmpfile >${a};
-done
+#for a in runtime/tests/*.log; do
+#	iconv -f $(file -b --mime-encoding ${a}) -t UTF8 <${a} >/tmp/tmpfile;
+#	cat /tmp/tmpfile >${a};
+#done

@@ -27,6 +27,7 @@ if [ $# -eq 0 ]; then
 fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
@@ -42,13 +43,13 @@ if [[ "$#" -gt 0 ]]; then
     esac
 fi
 
-trap "rm -f  /tmp/a.out /tmp/mt.out" 0 1 2 3
+trap "rm -f  ${TEMPORARY}/a.out ${TEMPORARY}/mt.out" 0 1 2 3
 
 name=$(basename "$1" ".k3")
 if [ -f "${USERCODE}/$name.k3" ]; then
     kal3 -a ${USERCODE}/"$name.k3" >${USERCODE}/"$name-listing.txt"
-    if [ -s /tmp/a.out ]; then
-        mv -f /tmp/a.out ${KDF9RUNTIME}/Binary/"$name"
+    if [ -s ${TEMPORARY}/a.out ]; then
+        mv -f ${TEMPORARY}/a.out ${KDF9RUNTIME}/Binary/"$name"
     else
         echo "$kal3 detected error\(s\) in $name.k3"
         echo

@@ -29,6 +29,7 @@ fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
 TARGET=${KDF9RUNTIME}/Whetstone
+TEMPORARY=/tmp
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
@@ -44,7 +45,7 @@ if [[ "$#" -gt 0 ]]; then
     esac
 fi
 
-trap "rm -f /tmp/ports.commands  /tmp/ports.tmp" \
+trap "rm -f ${TEMPORARY}/ports.commands  ${TEMPORARY}/ports.tmp" \
     0 1 2 3
 
 if [ ! -r ${SOURCE}/$1.a60 ]; then
@@ -52,7 +53,7 @@ if [ ! -r ${SOURCE}/$1.a60 ]; then
     exit 1
 fi
 
-cat >/tmp/ports.commands <<++++
+cat >${TEMPORARY}/ports.commands <<++++
 1i\\
 $1|
 1,\$s/ _ /*/g
@@ -162,4 +163,4 @@ $1|
 |
 ++++
 
-cat ${SOURCE}/$1.a60 | sed -E -f /tmp/ports.commands >${TARGET}/$1.a60
+cat ${SOURCE}/$1.a60 | sed -E -f ${TEMPORARY}/ports.commands >${TARGET}/$1.a60

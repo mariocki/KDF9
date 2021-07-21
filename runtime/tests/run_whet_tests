@@ -25,10 +25,11 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-#trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log /tmp/whetoutput" 0 1 2 3
+#trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log ${TEMPORARY}/whetoutput" 0 1 2 3
 
 function runtest() {
    whet $1 -d=t -m=prh >>${LOGS}/whet_test.log
@@ -50,8 +51,8 @@ runtest WHETSTONE
 runtest ZELLER
 
 echo
-iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 <${LOGS}/whet_test.log >/tmp/whetoutput
-cat /tmp/whetoutput >${LOGS}/whet_test.log
+iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 <${LOGS}/whet_test.log >${TEMPORARY}/whetoutput
+cat ${TEMPORARY}/whetoutput >${LOGS}/whet_test.log
 diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/whet_test.diff
 if [ -s ${LOGS}/whet_test.diff ]; then
    echo "These are the unexpected variances for this run:"

@@ -20,6 +20,8 @@ if [ -z $KDF9RUNTIME ]; then
      KDF9RUNTIME="$HOME/.kdf9"
 fi
 
+export TEMPORARY=/tmp
+
 encoding=
 
 case $1 in

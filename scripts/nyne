@@ -32,6 +32,7 @@ DATA=${KDF9RUNTIME}/Data
 LOGS=${KDF9RUNTIME}/logs
 SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
    case ${1# } in

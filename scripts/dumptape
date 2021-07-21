@@ -48,7 +48,8 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-TMPFILE=/tmp/mtp.dump
+TEMPORARY=/tmp
+TMPFILE=${TEMPORARY}/mtp.dump
 
 trap "rm -f ${TMPFILE}" 0 1 2 3
 

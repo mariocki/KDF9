@@ -25,10 +25,11 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/error_output /tmp/ee9_test_case.log" 0 1 2 3
+trap "rm -f ${LOGS}/error_output ${TEMPORARY}/ee9_test_case.log" 0 1 2 3
 
 function resetOutputFiles {
     >${KDF9RUNTIME}/CP0
@@ -156,14 +157,18 @@ echo
 
 echo
 echo
-echo "Running Kidsgrove compiler and runtime tests:"
+echo "Running Kidsgrove kids tests:"
 echo "============================================"
 echo
 ${TESTS}/ee9_test_run KAlgol "run_kids_tests ahipr a" >>${LOGS}/ee9_test_case.log
 echo
 
-#iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case.log) -t UTF8 <${LOGS}/ee9_test_case.log >/tmp/ee9_test_case.log
-#cat /tmp/ee9_test_case.log >${LOGS}/ee9_test_case.log
+echo
+echo
+echo Running Kidsgrove wich tests:
+echo ============================================
+echo
+${TESTS}/ee9_test_run WICH "run_wich_tests ahipr a" >>${LOGS}/ee9_test_case.log
 
 diff -diwB --strip-trailing-cr -I 'The Usercode*' -I 'Compilation successful.' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log >${LOGS}/ee9_test_case.diff
 
