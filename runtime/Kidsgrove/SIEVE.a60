@@ -4,7 +4,11 @@
 
 !integer p, m, n, r;
 
-n := 25 600;
+n := 10 000;
+writetext(30, {{c}number _ of _ primes _ below:});
+write(30, format({nddddd}), n);
+writetext(30, {:});
+
 r := entier(2×sqrt(n));
 
    !begin
@@ -32,10 +36,8 @@ r := entier(2×sqrt(n));
       !if candidate[p] !then m := m + 1;
    !end;
 
-writetext(30, {{c}number _ of _ primes _ below:});
-write(30, format({nddddd}), n);
-writetext(30, { _ is:});
 write(30, format({ndddddc}), m);
+close(30);
 
 !end
 |

@@ -1,8 +1,7 @@
--- ioc-fast-dr-outs.ads
+-- Specific feature values and operation for the console terminal streams.
+-- This is the Linux, macOS and UNIX version.
 --
--- Implement the drum API (OUTs) of the EE Time Sharing Director.
---
--- This file is part of ee9 (V5.2b), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,14 +15,20 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-package IOC.fast.DR.OUTs is
+package body OS_specifics is
 
-   procedure do_TSD_OUT_11;
+   procedure make_transparent (fd : in Integer) is null;
 
-   procedure do_TSD_OUT_12;
+   function EOL
+   return String
+   is (1 => Character'Val(16#0A#));
 
-   procedure do_TSD_OUT_13;
+   function UI_in_name
+   return String
+   is ("/dev/tty");
 
-   procedure do_TSD_OUT_14;
+   function UI_out_name
+   return String
+   is ("/dev/tty");
 
-end IOC.fast.DR.OUTs;
+end OS_specifics;

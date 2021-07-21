@@ -24,15 +24,16 @@ if [ -z $KDF9RUNTIME ]; then
 fi
 
 TARGET=${KDF9RUNTIME}/Kidsgrove
+TEMPORARY=/tmp
 
-trap "rm -f /tmp/strop0.commands" 0 1 2 3
+trap "rm -f ${TEMPORARY}/strop0.commands" 0 1 2 3
 
 if [ ! -r $1.a60 ]; then
     echo "Could not find $1.a60"
     exit 1
 fi
 
-cat >/tmp/strop0.commands <<++++
+cat >${TEMPORARY}/strop0.commands <<++++
 s/\!=/±/g
 s/%/÷/g
 s/\*/×/g
@@ -43,4 +44,4 @@ s/\<=/_\</g
 s/\^\\*\\*\\*\\*\$/\|/
 ++++
 
-cat $1.a60 | sed -f /tmp/strop0.commands >${TARGET}/$1.a60
+cat $1.a60 | sed -f ${TEMPORARY}/strop0.commands >${TARGET}/$1.a60

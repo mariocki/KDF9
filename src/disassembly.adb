@@ -1,6 +1,6 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,12 +17,12 @@
 with formatting;
 with KDF9.CPU;
 with KDF9.decoding;
-with symbols;
+with disassembly.symbols;
 
 use  formatting;
 use  KDF9.CPU;
 use  KDF9.decoding;
-use  symbols;
+use  disassembly.symbols;
 
 package body disassembly is
 
@@ -382,19 +382,19 @@ package body disassembly is
    begin  -- normal_jump_name
       return (
               case decoded.compressed_opcode is
-                 when JrEQ   => jump("EQ"),
+                 when JrEQ   => jump("="),
                  when JrGTZ  => jump("GTZ"),
                  when JrLTZ  => jump("LTZ"),
-                 when JrEQZ  => jump("EQZ"),
+                 when JrEQZ  => jump("=Z"),
                  when JrV    => jump("V"),
                  when JrEN   => jump("EN"),
                  when Jr     => jump(""),
                  when JrEJ   => jump("EJ"),
                  when JrTR   => jump("TR"),
-                 when JrNE   => jump("NE"),
+                 when JrNE   => jump("±"),
                  when JrLEZ  => jump("LEZ"),
                  when JrGEZ  => jump("GEZ"),
-                 when JrNEZ  => jump("NEZ"),
+                 when JrNEZ  => jump("±Z"),
                  when JrNV   => jump("NV"),
                  when JrNEN  => jump("NEN"),
                  when JrNEJ  => jump("NEJ"),
@@ -625,10 +625,10 @@ package body disassembly is
        case encoding and 8#77# is
           when JrCqZ  .. JrCqZ+2#1111#  => "JrCqZ",
           when JrCqNZ .. JrCqNZ+2#1111# => "JrCqNZ",
-          when JrEQ   => "JrEQ",
+          when JrEQ   => "Jr=",
           when JrGTZ  => "JrGTZ",
           when JrLTZ  => "JrLTZ",
-          when JrEQZ  => "JrEQZ",
+          when JrEQZ  => "Jr=Z",
           when JrV    => "JrV",
           when JrEN   => "JrEN",
           when Jr     => "Jr",
@@ -636,10 +636,10 @@ package body disassembly is
           when JSr    => "JSr",
           when JrTR   => "JrTR",
           when EXIT_n => "EXIT",
-          when JrNE   => "JrNE",
+          when JrNE   => "Jr±",
           when JrLEZ  => "JrLEZ",
           when JrGEZ  => "JrGEZ",
-          when JrNEZ  => "JrNEZ",
+          when JrNEZ  => "Jr±Z",
           when JrNV   => "JrNV",
           when JrNEN  => "JrNEN",
           when JrNEJ  => "JrNEJ",

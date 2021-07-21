@@ -28,6 +28,7 @@ DATA=${KDF9RUNTIME}/Data
 LOGS=${KDF9RUNTIME}/logs
 SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
    case ${1# } in
@@ -49,7 +50,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-trap "rm -f /tmp/extract_symbols.commands /tmp/extract_symbols_tmp_?" 0 1 2 3
+trap "rm -f ${TEMPORARY}/extract_symbols.commands ${TEMPORARY}/extract_symbols_tmp_?" 0 1 2 3
 
 if [ x$progx = xx ]; then
    echo "No program name was given."
@@ -62,8 +63,8 @@ elif [ ! -r ${USERCODE}/$prog-listing.txt ]; then
 fi
 
 tr "\\r" "\\n " <${USERCODE}/$1-listing.txt >/tmpextract_symbols_tmp_0
-a2b -l2a </tmp/extract_symbols_tmp_0 >/tmp/extract_symbols_tmp_1
-cat >/tmp/extract_symbols.commands <<++++
+a2b -l2a <${TEMPORARY}/extract_symbols_tmp_0 >${TEMPORARY}/extract_symbols_tmp_1
+cat >${TEMPORARY}/extract_symbols.commands <<++++
 1,\$s/^.+V#.=.([0-9]+).*$/Y#V \1/
 1,\$s/^.+Y#.=.([0-9]+).*$/Y#Y \1/
 1,\$s/^.+W0.=.E([0-9]+).*$/YW \1/
@@ -74,8 +75,8 @@ cat >/tmp/extract_symbols.commands <<++++
 1,\$s/^=== Start (P[0-9]+)V([^;]+); at address ([0-9]+)\/[0-7]+.*$/Y\1 #\2 @\3/
 1,\$s/^[^Y].+$//
 ++++
-sed -E -f /tmp/extract_symbols.commands </tmp/extract_symbols_tmp_1 >/tmp/extract_symbols_tmp_2
-tr -s "\\n" </tmp/extract_symbols_tmp_2 >settings_symbols
+sed -E -f ${TEMPORARY}/extract_symbols.commands <${TEMPORARY}/extract_symbols_tmp_1 >${TEMPORARY}/extract_symbols_tmp_2
+tr -s "\\n" <${TEMPORARY}/extract_symbols_tmp_2 >settings_symbols
 ex settings_symbols <<++++
 1d
 w

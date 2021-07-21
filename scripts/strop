@@ -29,6 +29,7 @@ fi
 
 SOURCE=${KDF9RUNTIME}/Whetstone
 TARGET=${KDF9RUNTIME}/Kidsgrove
+TEMPORARY=/tmp
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
@@ -44,14 +45,14 @@ if [[ "$#" -gt 0 ]]; then
     esac
 fi
 
-trap "rm -f /tmp/strop.commands /tmp/strop.tmp[01]" 0 1 2 3
+trap "rm -f ${TEMPORARY}/strop.commands ${TEMPORARY}/strop.tmp[01]" 0 1 2 3
 
 if [ ! -r ${SOURCE}/$1.a60 ]; then
     echo "Could not find $1.a60 in ${SOURCE}"
     exit 1
 fi
 
-cat >/tmp/strop.commands <<++++
+cat >${TEMPORARY}/strop.commands <<++++
 2a\\
 !library A0, A1, A4, A5, A15;\\
 \\
@@ -128,4 +129,4 @@ cat >/tmp/strop.commands <<++++
 1d
 ++++
 
-cat ${SOURCE}/$1.a60 | sed -E -f /tmp/strop.commands >${TARGET}/$1.a60
+cat ${SOURCE}/$1.a60 | sed -E -f ${TEMPORARY}/strop.commands >${TARGET}/$1.a60

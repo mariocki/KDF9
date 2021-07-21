@@ -32,8 +32,9 @@ DATA=${KDF9RUNTIME}/Data
 LOGS=${KDF9RUNTIME}/logs
 SETTINGS=${KDF9RUNTIME}/settings
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
-trap "rm -f /tmp/peep.commands /tmp/peep_tmp_[0123456789]" 0 1 2 3
+trap "rm -f ${TEMPORARY}/peep.commands ${TEMPORARY}/peep_tmp_[0123456789]" 0 1 2 3
 
 while [[ "$#" -gt 0 ]]; do
    case ${1# } in
@@ -96,8 +97,7 @@ if [ -s settings_for_kalgol.txt ]; then
 fi
 shift
 
-export KIDSGROVE_ASSEMBLY=n
-kalgol $prog ${KIDSOPTS}
+kalgol $prog -O --no-k3 ${KIDSOPTS}
 
 peep $prog ${ST:-24000} ${TL:-99999}
 

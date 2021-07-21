@@ -18,7 +18,7 @@
    !begin writetext(30, s); i1 := ICR; t1 := Time !end pre;
 
 !procedure post;
-   !begin i2 := ICR - i1; t2 := (Time - t1 - c - x);  write(30, layout, entier(t2 / 12.0 ×  1.0º6 + 0.5)) !end post;
+   !begin i2 := ICR - i1; t2 := (Time - t1 - c);  write(30, layout, entier(t2 / 12.0 ×  1.0º6 + 0.5)) !end post;
 
 !real  x, y, z, t;
 !real  a, b, c, d, layout;

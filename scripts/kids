@@ -30,6 +30,7 @@ fi
 
 SOURCE=${KDF9RUNTIME}/Kidsgrove
 DATA=${KDF9RUNTIME}/Data
+TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
     case ${1# } in

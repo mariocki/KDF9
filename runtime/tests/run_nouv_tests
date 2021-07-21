@@ -25,6 +25,7 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 

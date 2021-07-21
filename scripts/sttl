@@ -28,6 +28,7 @@ if [ $# -eq 0 ]; then
 fi
 
 USERCODE=${KDF9RUNTIME}/Assembly
+TEMPORARY=/tmp
 
 if [[ "$#" -gt 0 ]]; then
     case ${1# } in
@@ -43,14 +44,14 @@ if [[ "$#" -gt 0 ]]; then
     esac
 fi
 
-trap "rm -f /tmp/STTL.commands /tmp/STTL_tmp" 0 1 2 3
+trap "rm -f ${TEMPORARY}/STTL.commands ${TEMPORARY}/STTL_tmp" 0 1 2 3
 
-cat >/tmp/STTL.commands <<++++
+cat >${TEMPORARY}/STTL.commands <<++++
 /^ST *.+ *; *TL *.+ *;/s//ST${2:-7680}; TL${3:-3000};/
 ++++
 
-if sed -E -f /tmp/STTL.commands ${USERCODE}/$1.k3 >/tmp/STTL_tmp; then
-    mv -f /tmp/STTL_tmp ${USERCODE}/$1.k3
+if sed -E -f ${TEMPORARY}/STTL.commands ${USERCODE}/$1.k3 >${TEMPORARY}/STTL_tmp; then
+    mv -f ${TEMPORARY}/STTL_tmp ${USERCODE}/$1.k3
 else
     echo "**** FAILURE when correcting ST and TL in ${USERCODE}/$1.k3"
 fi

@@ -219,4 +219,5 @@ LABEL F
 ===
 Digital signature of traced orders = #1455452340447466.
 
-Digital signature of traced orders = #1226022135555573.
+TEST OUT 2 - should end normally:
+Digital signature of traced orders = #6411665153737175.

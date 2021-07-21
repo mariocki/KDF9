@@ -25,10 +25,11 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-trap "rm -f ${LOGS}/error_output /tmp/ee9_test_case.log" 0 1 2 3
+trap "rm -f ${LOGS}/error_output ${TEMPORARY}/ee9_test_case.log" 0 1 2 3
 
 function resetOutputFiles {
     >${KDF9RUNTIME}/CP0
@@ -113,54 +114,70 @@ echo
 
 resetOutputFiles
 
-${TESTS}/ee9_test_case HIG >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case HIG >${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case LOG >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case LOG >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case DMP >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case DMP >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case REM >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case REM >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case DVD >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case DVD >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case ACK >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case ACK >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case HLT >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case HLT >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case HKT >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case HKT >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case MOB >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case MOB >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case GPR >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case GPR >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case FLU >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case FLU >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case WBM >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case WBM >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case RLT >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case RLT >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case TO4 >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case TO4 >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case TOX >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case TOX >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case MTW >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case MTW >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case INP >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case INP >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case WAB n >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case WAB n >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case FLO >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case FLO >>${LOGS}/ee9_test_case2.log
 echo
-${TESTS}/ee9_test_case 1DH >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_case 1DH >>${LOGS}/ee9_test_case2.log
 echo
+
+iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case2.log) -t UTF8 <${LOGS}/ee9_test_case2.log >${TEMPORARY}/ee9_test_case2.log
+cat ${TEMPORARY}/ee9_test_case2.log >>${LOGS}/ee9_test_case.log
 
 echo
 echo
-echo "Running Kidsgrove compiler and runtime tests:"
+echo "Running Kidsgrove kids tests:"
 echo "============================================"
 echo
-${TESTS}/ee9_test_run KAlgol "run_kids_tests ahipr a" >>${LOGS}/ee9_test_case.log
+${TESTS}/ee9_test_run KIDS "run_kids_tests ahipr a" >${LOGS}/ee9_test_case3.log
 echo
+
+iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case3.log) -t UTF8 <${LOGS}/ee9_test_case3.log >${TEMPORARY}/ee9_test_case3.log
+cat ${TEMPORARY}/ee9_test_case3.log >>${LOGS}/ee9_test_case.log
+
+echo
+echo
+echo "Running Kidsgrove wich tests:"
+echo "============================================"
+echo
+${TESTS}/ee9_test_run WICH "run_wich_tests ahipr a" >${LOGS}/ee9_test_case4.log
+
+iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case4.log) -t UTF8 <${LOGS}/ee9_test_case4.log >${TEMPORARY}/ee9_test_case4.log
+cat ${TEMPORARY}/ee9_test_case4.log >>${LOGS}/ee9_test_case.log
 
 #iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case.log) -t UTF8 <${LOGS}/ee9_test_case.log >/tmp/ee9_test_case.log
 #cat /tmp/ee9_test_case.log >${LOGS}/ee9_test_case.log

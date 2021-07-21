@@ -1,6 +1,5 @@
-The Usercode is in Assembly/FLUID.k3
-
-The executable is in Binary/FLUID
+The Usercode   is in  Assembly/FLUID.k3
+The executable is in  Binary/FLUID
 
 
 LP0:
@@ -31,10 +30,48 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5677321647775661.
-The Usercode is in Assembly/HANOI.k3
+Digital signature of traced orders = #1517277161313442.
+The Usercode   is in  Assembly/GPSPRIMES.k3
+The executable is in  Binary/GPSPRIMES
 
-The executable is in Binary/HANOI
+
+LP0:
+===
+THE    1ST PRIME IS    2
+THE    2ND PRIME IS    3
+THE    3RD PRIME IS    5
+THE    4TH PRIME IS    7
+THE    5TH PRIME IS   11
+THE    6TH PRIME IS   13
+THE    7TH PRIME IS   17
+THE    8TH PRIME IS   19
+THE    9TH PRIME IS   23
+THE   10TH PRIME IS   29
+THE   11TH PRIME IS   31
+THE   12TH PRIME IS   37
+THE   13TH PRIME IS   41
+THE   14TH PRIME IS   43
+THE   15TH PRIME IS   47
+THE   16TH PRIME IS   53
+THE   17TH PRIME IS   59
+THE   18TH PRIME IS   61
+THE   19TH PRIME IS   67
+THE   20TH PRIME IS   71
+THE   21ST PRIME IS   73
+THE   22ND PRIME IS   79
+THE   23RD PRIME IS   83
+THE   24TH PRIME IS   89
+THE   25TH PRIME IS   97
+THE   26TH PRIME IS  101
+THE   27TH PRIME IS  103
+THE   28TH PRIME IS  107
+THE   29TH PRIME IS  109
+THE   30TH PRIME IS  113
+FINISHED ENDS 0
+===
+Digital signature of traced orders = #5377331245747631.
+The Usercode   is in  Assembly/HANOI.k3
+The executable is in  Binary/HANOI
 
 
 LP0:
@@ -50,10 +87,9 @@ MOVE A DISC FROM B TO C
 MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #4672116012330012.
-The Usercode is in Assembly/INPUT.k3
-
-The executable is in Binary/INPUT
+Digital signature of traced orders = #3512015036013255.
+The Usercode   is in  Assembly/INPUT.k3
+The executable is in  Binary/INPUT
 
 
 LP0:
@@ -90,10 +126,9 @@ HELLO WORLD.
 FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3371333056161767.
-The Usercode is in Assembly/MANORBOYX.k3
-
-The executable is in Binary/MANORBOYX
+Digital signature of traced orders = #6523407406653501.
+The Usercode   is in  Assembly/MANORBOYX.k3
+The executable is in  Binary/MANORBOYX
 
 
 LP0:
@@ -101,10 +136,9 @@ LP0:
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3637615157312232.
-The Usercode is in Assembly/MATMULT.k3
-
-The executable is in Binary/MATMULT
+Digital signature of traced orders = #2335460266570666.
+The Usercode   is in  Assembly/MATMULT.k3
+The executable is in  Binary/MATMULT
 
 
 LP0:
@@ -146,10 +180,9 @@ ROW 10 SHOULD BE 1.23456789º +1
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #2664147257751506.
-The Usercode is in Assembly/PALSQR.k3
-
-The executable is in Binary/PALSQR
+Digital signature of traced orders = #3047546142010360.
+The Usercode   is in  Assembly/PALSQR.k3
+The executable is in  Binary/PALSQR
 
 
 LP0:
@@ -189,10 +222,9 @@ LP0:
 CPU TIME IN SECONDS:       101
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3702062461441634.
-The Usercode is in Assembly/PENTOMINO.k3
-
-The executable is in Binary/PENTOMINO
+Digital signature of traced orders = #1474364764544301.
+The Usercode   is in  Assembly/PENTOMINO.k3
+The executable is in  Binary/PENTOMINO
 
 
 LP0:
@@ -451,10 +483,9 @@ SOLUTION COUNT = 10
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3161473443017524.
-The Usercode is in Assembly/QSORT.k3
-
-The executable is in Binary/QSORT
+Digital signature of traced orders = #0660405164530751.
+The Usercode   is in  Assembly/QSORT.k3
+The executable is in  Binary/QSORT
 
 
 LP0:
@@ -473,10 +504,9 @@ CPU TIME IN SECONDS:      39
 +6.1846 7146 870 º+10;
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6155311016362361.
-The Usercode is in Assembly/WEEHAAVIE.k3
-
-The executable is in Binary/WEEHAAVIE
+Digital signature of traced orders = #2567474304717650.
+The Usercode   is in  Assembly/WEEHAAVIE.k3
+The executable is in  Binary/WEEHAAVIE
 
 
 LP0:
@@ -495,10 +525,9 @@ COUNT =         6
 +8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #4230330426172712.
-The Usercode is in Assembly/WHETSTONE.k3
-
-The executable is in Binary/WHETSTONE
+Digital signature of traced orders = #2537615560005577.
+The Usercode   is in  Assembly/WHETSTONE.k3
+The executable is in  Binary/WHETSTONE
 
 
 LP0:
@@ -517,10 +546,9 @@ N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 THAT TOOK  23.9 SECONDS, FOR  41.8 KWIPS
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #1664627544053247.
-The Usercode is in Assembly/ZELLER.k3
-
-The executable is in Binary/ZELLER
+Digital signature of traced orders = #7462771563353213.
+The Usercode   is in  Assembly/ZELLER.k3
+The executable is in  Binary/ZELLER
 
 
 LP0:
@@ -560,8 +588,8 @@ IN 2017 EASTER SUNDAY IS ON 16/04 AND KDF9 IS  53 YEARS OLD
 IN 2018 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  54 YEARS OLD
 IN 2019 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  55 YEARS OLD
 IN 2020 EASTER SUNDAY IS ON 12/04 AND KDF9 IS  56 YEARS OLD
-THESE ARE THE NEXT 21 YEARS (MAKING OPTIMISTIC ASSUMPTIONS)
 IN 2021 EASTER SUNDAY IS ON 04/04 AND KDF9 IS  57 YEARS OLD
+THESE ARE THE NEXT 21 YEARS (MAKING OPTIMISTIC ASSUMPTIONS)
 IN 2022 EASTER SUNDAY IS ON 17/04 AND KDF9 IS  58 YEARS OLD
 IN 2023 EASTER SUNDAY IS ON 09/04 AND KDF9 IS  59 YEARS OLD
 IN 2024 EASTER SUNDAY IS ON 31/03 AND KDF9 IS  60 YEARS OLD
@@ -582,6 +610,7 @@ IN 2038 EASTER SUNDAY IS ON 25/04 AND KDF9 IS  74 YEARS OLD
 IN 2039 EASTER SUNDAY IS ON 10/04 AND KDF9 IS  75 YEARS OLD
 IN 2040 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  76 YEARS OLD
 IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
+IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #1743315657650140.
+Digital signature of traced orders = #5371337621476474.

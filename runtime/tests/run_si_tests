@@ -25,10 +25,11 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-#trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; ${KDF9RUNTIME}/settings_1.txt /tmp/sioutput" 0 1 2 3
+#trap "rm -f ${LOGS}/si_test.log ${LOGS}/si_test_diffs.txt; ${KDF9RUNTIME}/settings_1.txt ${TEMPORARY}/sioutput" 0 1 2 3
 
 opt="-d=t -m=aenz"
 si0data=${DATA}/SI0_data.txt
@@ -104,8 +105,8 @@ nine SI12TPC $opt
 cat ${KDF9RUNTIME}/TP0 >>${LOGS}/si_test.log
 
 echo
-iconv -f $(file -b --mime-encoding ${LOGS}/si_test.log) -t UTF8 <${LOGS}/si_test.log >/tmp/sioutput
-cat /tmp/sioutput >${LOGS}/si_test.log
+iconv -f $(file -b --mime-encoding ${LOGS}/si_test.log) -t UTF8 <${LOGS}/si_test.log >${TEMPORARY}/sioutput
+cat ${TEMPORARY}/sioutput >${LOGS}/si_test.log
 diff -diwB --strip-trailing-cr ${LOGS}/si_test.log ${TESTS}/si_regr_tests_good.log >${LOGS}/si_test.diff
 if [ -s ${LOGS}/si_test.diff ]; then
    echo "These are the unexpected variances for this run:"

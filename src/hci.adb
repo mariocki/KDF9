@@ -6,7 +6,7 @@
 --
 -- Also provide operations allowing synchronization with the user.
 --
--- This file is part of ee9 (7.0a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -70,26 +70,14 @@ package body HCI is
       cc_list.log_new_line(iff);
    end log_new_line;
 
-   half_ruler : constant String (1 .. 40) := (others => '_');
-   half_blank : constant String (1 .. 40) := (others => ' ');
-   full_ruler : constant String (1 .. 80) := half_ruler & half_ruler;
-
    procedure log_rule (start_a_new_line : in Boolean := False;
                        iff              : in Boolean := True) is
    begin
-      if start_a_new_line then
-         cc_list.log_new_line(iff);
-      end if;
-      log_line(full_ruler, iff);
+       if start_a_new_line then
+          cc_list.log_new_line(iff);
+       end if;
+       log_line(String'(1..80 => '_'), iff);
    end log_rule;
-
-   procedure log_rule_half (second_half : in Boolean := False) is
-   begin
-      if second_half then
-         log(half_blank);
-      end if;
-      log_line(half_ruler);
-   end log_rule_half;
 
    procedure log_message (message : in String) is
    begin

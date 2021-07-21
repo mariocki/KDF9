@@ -25,10 +25,11 @@ export USERCODE=${KDF9RUNTIME}/Assembly
 export WHETSTONE=${KDF9RUNTIME}/Whetstone
 export LOGS=${KDF9RUNTIME}/logs
 export TESTS=${KDF9RUNTIME}/tests
+export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-#trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/cr_test.log ${LOGS}/cr_test.diff /tmp/cr_test.log" 0 1 2 3
+#trap "rm -f ${DATA}/crtest_data.txt ${LOGS}/cr_test.log ${LOGS}/cr_test.diff ${TEMPORARY}/cr_test.log" 0 1 2 3
 
 opt="-d=t -m=ae"
 
@@ -162,8 +163,8 @@ z)
 esac
 
 echo
-iconv -f $(file -b --mime-encoding ${LOGS}/cr_test.log) -t UTF8 <${LOGS}/cr_test.log >/tmp/cr_test.log
-cat /tmp/cr_test.log >${LOGS}/cr_test.log
+iconv -f $(file -b --mime-encoding ${LOGS}/cr_test.log) -t UTF8 <${LOGS}/cr_test.log >${TEMPORARY}/cr_test.log
+cat ${TEMPORARY}/cr_test.log >${LOGS}/cr_test.log
 diff -diwB --strip-trailing-cr ${LOGS}/cr_test.log ${TESTS}/cr_regr_tests_good.log >${LOGS}/cr_test.diff
 if [ -s ${LOGS}/cr_test.diff ]; then
    echo "These are the unexpected variances for this run:"

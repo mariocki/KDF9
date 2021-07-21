@@ -16,6 +16,8 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 
+export TEMPORARY=/tmp
+
 >${LOGS}/KDF9.log
 
 testtorun=$(echo "$2" | cut -f1 -d' ')
