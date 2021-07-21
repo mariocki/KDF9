@@ -17,6 +17,7 @@
 with Ada.Characters.Latin_1;
 --
 with OS_specifics;
+with get_runtime_paths;
 
 use  Ada.Characters.Latin_1;
 --
@@ -50,7 +51,7 @@ package body host_IO is
                    mode       : in POSIX.access_mode) is
       fd : Integer;
    begin -- open
-      fd := POSIX.open(file_name, mode);
+      fd := POSIX.open(get_runtime_paths & file_name, mode);
       open(the_stream, file_name, mode, fd);
    exception
       when POSIX_IO_error =>

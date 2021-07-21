@@ -49,4 +49,4 @@ update:
 
 .PHONY: patch
 patch:
-	cat fixpaths.diff | (patch -p0 -r - --no-backup-if-mismatch --forward || true)
+	cat fixpaths.diff | (patch -r - --no-backup-if-mismatch --forward || true)
