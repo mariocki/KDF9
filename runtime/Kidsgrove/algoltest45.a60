@@ -1,4 +1,0 @@
-'begin'
-   'integer' i, j;
-   i := j;
-'end'

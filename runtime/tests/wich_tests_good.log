@@ -1,6 +1,5 @@
-The Usercode is in Assembly/FLUID-PEEP.k3
-
-The executable is in Binary/FLUID-PEEP
+The Usercode   is in  Assembly/FLUID-PEEP.k3
+The executable is in  Binary/FLUID-PEEP
 
 
 LP0:
@@ -15,26 +14,64 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
     ALPHA             LAMBDA                LAMBDA.SQRT(2ALPHA) G
 
     0.0000             INFINITY             1.00000             1.00000
-    0.1000            2.0201º +0            0.90340             0.73452
-    0.2000            1.2812º +0            0.81029             0.52525
-    0.3000            9.2712º -1            0.71814             0.36101
-    0.4000            6.9943º -1            0.62559             0.24038
+    0.1000            2.0201� +0            0.90340             0.73452
+    0.2000            1.2812� +0            0.81029             0.52525
+    0.3000            9.2712� -1            0.71814             0.36101
+    0.4000            6.9943� -1            0.62559             0.24038
 
-    0.5000            5.3160º -1            0.53160             0.26796
-    0.6000            3.9727º -1            0.43519             0.30384
-    0.7000            2.8340º -1            0.33532             0.34489
-    0.8000            1.8242º -1            0.23075             0.38947
-    0.9000            8.9284º -2            0.11979             0.43642
+    0.5000            5.3160� -1            0.53160             0.26796
+    0.6000            3.9727� -1            0.43519             0.30384
+    0.7000            2.8340� -1            0.33532             0.34489
+    0.8000            1.8242� -1            0.23075             0.38947
+    0.9000            8.9284� -2            0.11979             0.43642
 
     1.0000            0.0000                0.00000             0.48394
 
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #4637033742352517.
-The Usercode is in Assembly/HANOI-PEEP.k3
+Digital signature of traced orders = #2217165553667100.
+The Usercode   is in  Assembly/GPSPRIMES-PEEP.k3
+The executable is in  Binary/GPSPRIMES-PEEP
 
-The executable is in Binary/HANOI-PEEP
+
+LP0:
+===
+THE    1ST PRIME IS    2
+THE    2ND PRIME IS    3
+THE    3RD PRIME IS    5
+THE    4TH PRIME IS    7
+THE    5TH PRIME IS   11
+THE    6TH PRIME IS   13
+THE    7TH PRIME IS   17
+THE    8TH PRIME IS   19
+THE    9TH PRIME IS   23
+THE   10TH PRIME IS   29
+THE   11TH PRIME IS   31
+THE   12TH PRIME IS   37
+THE   13TH PRIME IS   41
+THE   14TH PRIME IS   43
+THE   15TH PRIME IS   47
+THE   16TH PRIME IS   53
+THE   17TH PRIME IS   59
+THE   18TH PRIME IS   61
+THE   19TH PRIME IS   67
+THE   20TH PRIME IS   71
+THE   21ST PRIME IS   73
+THE   22ND PRIME IS   79
+THE   23RD PRIME IS   83
+THE   24TH PRIME IS   89
+THE   25TH PRIME IS   97
+THE   26TH PRIME IS  101
+THE   27TH PRIME IS  103
+THE   28TH PRIME IS  107
+THE   29TH PRIME IS  109
+THE   30TH PRIME IS  113
+FINISHED ENDS 0
+===
+Digital signature of traced orders = #0125254636010142.
+The Usercode   is in  Assembly/HANOI-PEEP.k3
+The executable is in  Binary/HANOI-PEEP
 
 
 LP0:
@@ -50,50 +87,48 @@ MOVE A DISC FROM B TO C
 MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #4711220442406651.
-The Usercode is in Assembly/INPUT-PEEP.k3
-
-The executable is in Binary/INPUT-PEEP
+Digital signature of traced orders = #2013741546657023.
+The Usercode   is in  Assembly/INPUT-PEEP.k3
+The executable is in  Binary/INPUT-PEEP
 
 
 LP0:
 ===
 HELLO WORLD.
-   111111111  1.111111111º +4
-  -222222222 -2.222222222º +3
-   333333333  3.333333333º +2
-   444444444  4.444444444º +1
-  -555555555 -5.555555555º +0
-   666666666  6.666666666º -1
-   123456789  1.234567890º +8
-   111111111  1.111111111º +1
-  -222222222 -2.222222222º -1
-   333333333  3.333333333º +1
-   444444444  4.444444444º+11
-  -555555555 -5.555555555º-11
-   666666666  6.666666666º+11
-  -987654321 -9.876543210º +8
-   111111111  1.000000000º +1
-  -222222222 -2.000000000º -1
-   333333333  3.000000000º +1
-   444444444  4.000000000º+11
-  -555555555 -5.000000000º-11
-   666666666  6.000000000º+11
-   987654321 -9.876543210º +8
-   111111111  1.000000000º +1
-  -222222222 -1.000000000º -2
-   333333333  1.000000000º +3
-   444444444  1.000000000º +4
-  -555555555 -1.000000000º -5
-   666666666  1.000000000º +6
+   111111111  1.111111111� +4
+  -222222222 -2.222222222� +3
+   333333333  3.333333333� +2
+   444444444  4.444444444� +1
+  -555555555 -5.555555555� +0
+   666666666  6.666666666� -1
+   123456789  1.234567890� +8
+   111111111  1.111111111� +1
+  -222222222 -2.222222222� -1
+   333333333  3.333333333� +1
+   444444444  4.444444444�+11
+  -555555555 -5.555555555�-11
+   666666666  6.666666666�+11
+  -987654321 -9.876543210� +8
+   111111111  1.000000000� +1
+  -222222222 -2.000000000� -1
+   333333333  3.000000000� +1
+   444444444  4.000000000�+11
+  -555555555 -5.000000000�-11
+   666666666  6.000000000�+11
+   987654321 -9.876543210� +8
+   111111111  1.000000000� +1
+  -222222222 -1.000000000� -2
+   333333333  1.000000000� +3
+   444444444  1.000000000� +4
+  -555555555 -1.000000000� -5
+   666666666  1.000000000� +6
            0  0.000000000    
 FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #7006032712704355.
-The Usercode is in Assembly/MANORBOYX-PEEP.k3
-
-The executable is in Binary/MANORBOYX-PEEP
+Digital signature of traced orders = #7360613122602726.
+The Usercode   is in  Assembly/MANORBOYX-PEEP.k3
+The executable is in  Binary/MANORBOYX-PEEP
 
 
 LP0:
@@ -101,55 +136,9 @@ LP0:
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5453163351171123.
-The Usercode is in Assembly/MATMULT-PEEP.k3
-
-The executable is in Binary/MATMULT-PEEP
-
-
-LP0:
-===
-
-
-SET C TO AB(10,20,10)
-
-
-ROW  1 SHOULD BE 1.23456789º +0
- 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0 1.23456790º +0
-
-ROW  2 SHOULD BE 2.46913578º +0
- 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0 2.46913580º +0
-
-ROW  3 SHOULD BE 3.70370367º +0
- 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0 3.70370370º +0
-
-ROW  4 SHOULD BE 4.93827156º +0
- 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0 4.93827160º +0
-
-ROW  5 SHOULD BE 6.17283945º +0
- 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0 6.17283951º +0
-
-ROW  6 SHOULD BE 7.40740734º +0
- 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0 7.40740741º +0
-
-ROW  7 SHOULD BE 8.64197523º +0
- 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0 8.64197531º +0
-
-ROW  8 SHOULD BE 9.87654312º +0
- 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0 9.87654321º +0
-
-ROW  9 SHOULD BE 1.11111110º +1
- 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1 1.11111111º +1
-
-ROW 10 SHOULD BE 1.23456789º +1
- 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1 1.23456790º +1
-
-FINISHED ENDS 0
-===
-Digital signature of traced orders = #4744136630242341.
-The Usercode is in Assembly/PALSQR-PEEP.k3
-
-The executable is in Binary/PALSQR-PEEP
+Digital signature of traced orders = #4500264046332432.
+The Usercode   is in  Assembly/PALSQR-PEEP.k3
+The executable is in  Binary/PALSQR-PEEP
 
 
 LP0:
@@ -186,319 +175,33 @@ LP0:
    30693   942060249
 
 
-CPU TIME IN SECONDS:        75
+CPU TIME IN SECONDS:        87
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6076310675621235.
-The Usercode is in Assembly/PENTOMINO-PEEP.k3
-
-The executable is in Binary/PENTOMINO-PEEP
+Digital signature of traced orders = #3775165541326567.
+The Usercode   is in  Assembly/QSORT-PEEP.k3
+The executable is in  Binary/QSORT-PEEP
 
 
 LP0:
 ===
-
-THE FIRST  9 SOLUTIONS:
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - - - -     
-I       I   I       I   I           I   I
-     - -     - -         - - - - - -     
-I   I           I   I       I       I   I
-     - -     - -     - -     - -     - - 
-I       I   I   I       I       I       I
- - - - - - -     - - - - - - - -     - - 
-I           I   I               I   I   I
-         - -     - -     - - - - - -     
-I       I           I   I               I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I       I       I
- - - - - - - - - - -     - -     - -     
-I   I           I           I       I   I
-     - - - -     - -     - - - -         
-I           I   I   I   I       I   I   I
- - - - -             - -         - -     
-I       I   I   I   I           I   I   I
-     - - - - - -     - - - - - -     - - 
-I   I       I           I   I           I
-     - -     - - - - - -     - - - -     
-I       I           I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -     - - - - - -     
-I   I           I           I       I   I
-     - - - -     - -     - - - -     - - 
-I           I   I   I   I       I       I
- - - - -             - -         - -     
-I       I   I   I   I           I   I   I
-     - - - - - -     - - - - - -     - - 
-I   I       I           I   I           I
-     - -     - - - - - -     - - - -     
-I       I           I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -         - - - - - - 
-I   I           I       I   I           I
-     - - - -     - -     - - - -         
-I           I       I   I       I       I
- - - - -     - - - -     - -     - - - - 
-I       I   I   I   I   I   I       I   I
-     - - - -         - -     - -         
-I   I           I   I           I   I   I
-     - -     - -     - -     - - - -     
-I       I   I           I   I           I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -     - - - -     - - 
-I   I           I           I   I   I   I
-     - - - -     - -     - -     - -     
-I           I   I   I   I   I           I
- - - - -             - -     - - - - - - 
-I   I   I   I   I       I           I   I
-         - - - - - -     - -     - -     
-I   I   I           I       I   I   I   I
- - -     - -         - - - - - -         
-I           I       I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I   I       I
- - - - - - - - - - -     - -             
-I   I               I   I       I       I
-     - - - -     - -     - -     - -     
-I           I   I   I       I       I   I
- - - - -     - -     - - - - - - - - - - 
-I   I   I   I   I       I           I   I
-         - -     - -     - - - -         
-I   I   I           I       I   I   I   I
- - -     - -     - - - - - -             
-I           I   I               I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I   I       I
- - - - - - - - - - -             - -     
-I   I               I       I       I   I
-     - - - -     - -     - -     - -     
-I           I   I   I   I       I       I
- - - - -     - -     - - - - - - - - - - 
-I   I   I   I   I       I           I   I
-         - -     - -     - - - -         
-I   I   I           I       I   I   I   I
- - -     - -     - - - - - -             
-I           I   I               I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - -         
-I   I               I   I       I       I
-     - - - -     - -     - -     - - - - 
-I           I   I           I   I       I
- - - - -     - - - -     - - - -     - - 
-I   I   I   I   I   I   I   I   I   I   I
-         - -         - -                 
-I   I   I       I           I   I   I   I
- - -     - -     - - - - - -             
-I           I       I           I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - -         
-I   I               I   I       I       I
-     - - - -     - -     - -     - - - - 
-I           I   I           I   I       I
- - - - -     - - - -     - - - -     - - 
-I   I   I   I   I   I   I   I   I   I   I
-         - -         - -                 
-I   I       I   I           I   I   I   I
- - -     - -     - - - - - -             
-I       I           I           I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-SOLUTION COUNT = 10
-
-
+CPU TIME IN SECONDS:      34
+
++5.6343 6700 000 �+ 6;
++6.8637 1808 100 �+ 9;
++1.3740 9313 910 �+10;
++2.0619 3278 070 �+10;
++2.7473 4793 610 �+10;
++3.4350 6926 710 �+10;
++4.1211 5254 390 �+10;
++4.8091 1049 610 �+10;
++5.4968 3182 710 �+10;
++6.1846 7146 870 �+10;
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5672527715100643.
-The Usercode is in Assembly/QSORT-PEEP.k3
-
-The executable is in Binary/QSORT-PEEP
-
-
-LP0:
-===
-CPU TIME IN SECONDS:      25
-
-+5.6343 6700 000 º+ 6;
-+6.8637 1808 100 º+ 9;
-+1.3740 9313 910 º+10;
-+2.0619 3278 070 º+10;
-+2.7473 4793 610 º+10;
-+3.4350 6926 710 º+10;
-+4.1211 5254 390 º+10;
-+4.8091 1049 610 º+10;
-+5.4968 3182 710 º+10;
-+6.1846 7146 870 º+10;
-FINISHED ENDS 0
-===
-Digital signature of traced orders = #5065050702524005.
-The Usercode is in Assembly/WEEHAAVIE-PEEP.k3
-
-The executable is in Binary/WEEHAAVIE-PEEP
-
-
-LP0:
-===
-EPSILON = 1.00000000000º-10
-MMAX =  20
-COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
-COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
-COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
-COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
-COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
-FINISHED ENDS 0
-===
-Digital signature of traced orders = #2635563343355161.
-The Usercode is in Assembly/WHETSTONE-PEEP.k3
-
-The executable is in Binary/WHETSTONE-PEEP
+Digital signature of traced orders = #6777140521071526.
+The Usercode   is in  Assembly/WHETSTONE-PEEP.k3
+The executable is in  Binary/WHETSTONE-PEEP
 
 
 LP0:
@@ -514,13 +217,12 @@ N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
 N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
-THAT TOOK  21.4 SECONDS, FOR  46.7 KWIPS
+THAT TOOK  22.8 SECONDS, FOR  43.8 KWIPS
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0155730076736255.
-The Usercode is in Assembly/ZELLER-PEEP.k3
-
-The executable is in Binary/ZELLER-PEEP
+Digital signature of traced orders = #0760323706127304.
+The Usercode   is in  Assembly/ZELLER-PEEP.k3
+The executable is in  Binary/ZELLER-PEEP
 
 
 LP0:
@@ -560,8 +262,8 @@ IN 2017 EASTER SUNDAY IS ON 16/04 AND KDF9 IS  53 YEARS OLD
 IN 2018 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  54 YEARS OLD
 IN 2019 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  55 YEARS OLD
 IN 2020 EASTER SUNDAY IS ON 12/04 AND KDF9 IS  56 YEARS OLD
-THESE ARE THE NEXT 21 YEARS (MAKING OPTIMISTIC ASSUMPTIONS)
 IN 2021 EASTER SUNDAY IS ON 04/04 AND KDF9 IS  57 YEARS OLD
+THESE ARE THE NEXT 21 YEARS (MAKING OPTIMISTIC ASSUMPTIONS)
 IN 2022 EASTER SUNDAY IS ON 17/04 AND KDF9 IS  58 YEARS OLD
 IN 2023 EASTER SUNDAY IS ON 09/04 AND KDF9 IS  59 YEARS OLD
 IN 2024 EASTER SUNDAY IS ON 31/03 AND KDF9 IS  60 YEARS OLD
@@ -582,6 +284,7 @@ IN 2038 EASTER SUNDAY IS ON 25/04 AND KDF9 IS  74 YEARS OLD
 IN 2039 EASTER SUNDAY IS ON 10/04 AND KDF9 IS  75 YEARS OLD
 IN 2040 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  76 YEARS OLD
 IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
+IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0553231543050065.
+Digital signature of traced orders = #6352313040151604.

@@ -1,4 +1,6 @@
  !begin
  !library A0;
+ !goto L;
+ L:
  !end
 |

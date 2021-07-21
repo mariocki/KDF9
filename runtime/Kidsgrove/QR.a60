@@ -1,4 +1,5 @@
 !begin
+
 !library A0, A1, A4, A5, A15;
 
 !comment
@@ -14,10 +15,10 @@ open(30);
 n := read(20);
 
    !begin
-      !integer i,j;
-      !real !array a[1:n,1:n], b[1:n,1:n];
+      !integer i, j;
+      !real !array a[1:n, 1:n], b[1:n, 1:n];
 
-      !procedure symmetric QR1(n,g);
+      !procedure symmetricQR(n, g);
       !value n; !integer n;
       !array g;
 
@@ -25,162 +26,161 @@ n := read(20);
          !comment
             uses Householders's method and the QR algorithm to
             find all n eigenvalues of the real symmetric matrix whose lower
-            triangular part is given in the array g[1:n,1:n].
-            The computed eigenvalues are stored as the diagonal elements g[i,i].
+            triangular part is given in the array g[1:n, 1:n].
+            The computed eigenvalues are stored as the diagonal elements g[i, i].
             The original contents of the lower triangular part of g are lost
             during the computation whereas the strictly upper triagular part
             of g is left untouched.
-         ;
+        ;
 
-            !real !procedure sum(i,m,n,a);
-            !value m,n; !integer i,m,n;
+            !real !procedure sum(i, m, n, a);
+            !value m, n; !integer i, m, n;
             !real a;
                !begin
                   !real s;
-                  s:= 0;
-                  !for i:= m !step 1 !until n !do s:= s + a;
-                     sum:= s
+                  s := 0;
+                  !for i := m !step 1 !until n !do s := s+a;
+                     sum := s
                !end sum;
 
-            !real !procedure max (a,b);
-            !value a,b; !real a,b;
-               max:= !if a > b !then a !else b;
+            !real !procedure max (a, b);
+            !value a, b; !real a, b;
+               max := !if a > b !then a !else b;
 
-         !procedure Housholder tridiagonalization 1(n,g,a,bq,norm);
+         !procedure Householder(n, g, a, bq, norm);
          !value n; !integer n;
-         !array g,a,bq;
+         !array g, a, bq;
          !real norm;
          !comment nonlocal real procedure sum, max;
          !comment
             reduces the given real symmetric n by n matrix g to tridiagonal form using
-            n - 2 elementary orthogonal trans-formations (I-2ww') = (I-gamma uu').
+            n-2 elementary orthogonal trans-formations (I-2ww') = (I-gamma uu').
             Only the lower triangular part of g need be given.
             The diagonal elements and the squares of the subdiagonal elements
             of the reduced matrix are stored in a[1:n] and bq[1:n-1] respectively.
             norm is set equal to the infinity norm of the reduced matrix.
-            The columns of the strictly lower triagular part of g are replaced
+            The columns of the strictly lower triangular part of g are replaced
             by the nonzero portions of the vectors u.
-         ;
+        ;
 
          !begin
-            !integer i,j,k;
-            !real t,absb,alpha,beta,gamma,sigma;
+            !integer i, j, k;
+            !real t, absb, alpha, beta, gamma, sigma;
             !array p[2:n];
 
-            norm:= absb:= 0;
-            !for k:= 1 !step 1 !until n - 2 !do
+            norm := absb := 0;
+            !for k := 1 !step 1 !until n-2 !do
                !begin
-                  a[k]:= g[k,k];
-                  sigma:= bq[k]:= sum(i,k+1,n,g[i,k]^2);
-                  t:= absb + abs(a[k]); absb:= sqrt(sigma);
-                  norm:= max(norm,t+absb);
-                  !if sigma ± 0 !then
+                  a[k] := g[k, k];
+                  sigma := bq[k] := sum(i, k+1, n, g[i, k]^2);
+                  t := absb+abs(a[k]); absb := sqrt(sigma);
+                  norm := max(norm, t+absb);
+                  !if sigma !ne 0 !then
                      !begin
-                        alpha:= g[k+1,k];
-                        beta:= !if alpha < 0 !then absb !else - absb;
-                        gamma:= 1 / (sigma-alpha×beta); g[k+1,k]:= alpha - beta;
-                        !for i:= k + 1 !step 1 !until n !do
-                           p[i]:= gamma ×
-                           (sum(j,k+1,i,g[i,j]×g[j,k]) + sum(j,i+1,n,g[j,i]×g[j,k]));
-                        t:= 0.5 × gamma × sum(i,k+1,n,g[i,k]×p[i]);
-                        !for i:= k + 1 !step 1 !until n !do
-                           p[i]:= p[i] - t×g[i,k];
-                        !for i:= k + 1 !step 1 !until n !do
-                           !for j:= k + 1 !step 1 !until i !do
-                              g[i,j]:= g[i,j] - g[i,k]×p[j] - p[i]×g[j,k]
+                        alpha := g[k+1, k];
+                        beta := !if alpha < 0 !then absb !else-absb;
+                        gamma := 1 / (sigma-alpha×beta); g[k+1, k] := alpha-beta;
+                        !for i := k+1 !step 1 !until n !do
+                           p[i] := gamma ×
+                                (sum(j, k+1, i, g[i, j]×g[j, k])+sum(j, i+1, n, g[j, i]×g[j, k]));
+                        t := 0.5 × gamma × sum(i, k+1, n, g[i, k]×p[i]);
+                        !for i := k+1 !step 1 !until n !do
+                           p[i] := p[i]-t×g[i, k];
+                        !for i := k+1 !step 1 !until n !do
+                           !for j := k+1 !step 1 !until i !do
+                              g[i, j] := g[i, j]-g[i, k]×p[j]-p[i]×g[j, k]
                      !end
                !end k;
 
-            a[n-1]:= g[n-1,n-1]; bq[n-1]:= g[n,n-1]^2;
-            a[n]:= g[n,n]; t:= abs(g[n,n-1]);
-            norm:= max(norm,absb+abs(a[n-1])+t);
-            norm:= max(norm,t+abs(a[n]))
+            a[n-1] := g[n-1, n-1]; bq[n-1] := g[n, n-1]^2;
+            a[n] := g[n, n]; t := abs(g[n, n-1]);
+            norm := max(norm, absb+abs(a[n-1])+t);
+            norm := max(norm, t+abs(a[n]))
 
-         !end Housholder tridiagonalization 1;
+         !end Householder;
 
-         !integer i,k,m,m1;
-         !real norm,epsq,lambda,mu,sq1,sq2,u,pq,gamma,t;
-         !array a[1:n],bq[0:n-1];
+         !integer i, k, m, m1;
+         !real norm, epsq, lambda, mu, sq1, sq2, u, pq, gamma, t;
+         !array a[1:n], bq[0:n-1];
 
-         Housholder tridiagonalization 1(n,g,a,bq,norm);
+         Householder(n, g, a, bq, norm);
 
-         epsq:= 3.25º-24×norm^2;
+         epsq := 3.25º-24×norm^2;
          !comment
             The tolerance used in the QR iteration depends on the square of the
             relative machine precision. Here 3.25º-24 is used, which is
             appropriate for a machine with a 39-bit mantissa, like KDF9.
-         ;
+        ;
 
-         mu:= 0; m:= n;
+         mu := 0; m := n;
 
       inspect:
 
          !if m = 0 !then
             !goto return
          !else
-            i:= k:= m1:= m - 1;
+            i := k := m1 := m-1;
 
-         bq[0]:= 0;
-         !if bq[k] _< epsq !then
+         bq[0] := 0;
+         !if bq[k] !le epsq !then
             !begin
-               g[m,m]:= a[m]; mu:= 0; m:= k;
+               g[m, m] := a[m]; mu := 0; m := k;
                !goto inspect
-            !end ;
+            !end;
 
-         !for i:= i - 1 !while  bq[i] > epsq !do k:= i;
+         !for i := i-1 !while  bq[i] > epsq !do k := i;
 
          !if k = m1 !then
             !begin !comment treat 2 × 2 block separately;
-               mu:= a[m1]×a[m] - bq[m1]; sq1:= a[m1] + a[m];
-               sq2:= sqrt((a[m1]-a[m])^2+4×bq[m1]);
-               lambda:= 0.5×(!if sq1_>0 !then sq1+sq2 !else sq1-sq2);
-               g[m1,m1]:= lambda; g[m,m]:= mu / lambda;
-               mu:= 0; m:= m - 2;
+               mu := a[m1]×a[m]-bq[m1]; sq1 := a[m1]+a[m];
+               sq2 := sqrt((a[m1]-a[m])^2+4×bq[m1]);
+               lambda := 0.5×(!if sq1!ge0 !then sq1+sq2 !else sq1-sq2);
+               g[m1, m1] := lambda; g[m, m] := mu / lambda;
+               mu := 0; m := m-2;
                !goto inspect
-            !end ;
+            !end;
 
-         lambda:=
-            !if abs(a[m]-mu) < 0.5×abs(a[m]) !then a[m] + 0.5×sqrt(bq[m1]) !else 0.0;
-         mu:= a[m]; sq1:= sq2:= u:= 0;
+         lambda := !if abs(a[m]-mu) < 0.5×abs(a[m]) !then a[m]+0.5×sqrt(bq[m1]) !else 0.0;
+         mu := a[m]; sq1 := sq2 := u := 0;
 
-         !for i:= k !step 1 !until m1 !do
+         !for i := k !step 1 !until m1 !do
             !begin !comment shortcut single QR iteration;
-               gamma:= a[i] - lambda - u;
-               pq:= !if sq1 ± 1 !then gamma^2/(1-sq1) !else (1-sq2)×bq[i-1];
-               t:= pq + bq[i]; bq[i-1]:= sq1 × t; sq2:= sq1;
-               sq1:= bq[i] / t; u:= sq1 × (gamma+a[i+1]-lambda);
-               a[i]:= gamma + u + lambda
+               gamma := a[i]-lambda-u;
+               pq := !if sq1 !ne 1 !then gamma^2/(1-sq1) !else (1-sq2)×bq[i-1];
+               t := pq+bq[i]; bq[i-1] := sq1 × t; sq2 := sq1;
+               sq1 := bq[i] / t; u := sq1 × (gamma+a[i+1]-lambda);
+               a[i] := gamma+u+lambda
             !end i;
 
-         gamma:= a[m] - lambda - u;
-         bq[m1]:= sq1 × (!if sq1±1 !then gamma^2/(1-sq1) !else (1-sq2)×bq[m1]);
-         a[m]:= gamma + lambda;
+         gamma := a[m]-lambda-u;
+         bq[m1] := sq1 × (!if sq1 !ne 1 !then gamma^2/(1-sq1) !else (1-sq2)×bq[m1]);
+         a[m] := gamma+lambda;
          !goto inspect;
 
       return:
 
-         !end symmetric QR 1;
+         !end symmetricQR;
 
-      !for i:= 1 !step 1 !until n !do
-         !for j:= 1 !step 1 !until i !do
-            b[i,j] := read(20);
-      !for i:= 1 !step 1 !until n !do
-         !for j:= 1 !step 1 !until i !do
-            a[i,j] := b[i,j];
+      !for i := 1 !step 1 !until n !do
+         !for j := 1 !step 1 !until i !do
+            b[i, j] := read(20);
+      !for i := 1 !step 1 !until n !do
+         !for j := 1 !step 1 !until i !do
+            a[i, j] := b[i, j];
 
-     symmetric QR 1(n,a);
+      symmetricQR(n, a);
 
-      !for i:= 1 !step 1 !until n !do
+      !for i := 1 !step 1 !until n !do
          !begin
          write(30, format({nds}), i);
-         write(30, format({+d.dddddddddº+ddc}), a[i,i])
-         !end ;
-       write(30, format({+d.dddddddddº+dd}), a[1,1]+a[2,2]);
-       writetext(30, { _  should  _  equal  _  });
-       write(30, format({+d.dddddddddº+dd}), b[1,1]+b[n,n]);
-       writetext(30, { _  and  _  });
-       write(30, format({+d.dddddddddº+ddc}), a[n-1,n-1]+a[n,n]);
-   !end ;
+         write(30, format({+d.dddddddddº+ddc}), a[i, i])
+         !end;
+      write(30, format({+d.dddddddddº+dd}), a[1, 1]+a[2, 2]);
+      writetext(30, { {s}  should  {s}  equal  {s}  });
+      write(30, format({+d.dddddddddº+dd}), b[1, 1]+b[n, n]);
+      writetext(30, { {s}  and {s}  });
+      write(30, format({+d.dddddddddº+ddc}), a[n-1, n-1]+a[n, n]);
+   !end;
 
    close(20);
    close(30);

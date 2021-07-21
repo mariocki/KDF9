@@ -1,6 +1,6 @@
 TEST PIB/POB from SI0 to TP:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -10,7 +10,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -21,7 +21,7 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 TEST PIC/POC from SI0 to TP:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -31,7 +31,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -42,7 +42,7 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 TEST PIB/POB from TR to SI0:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -52,7 +52,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -63,7 +63,7 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 TEST PIC/POC from TR to SI0:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -73,7 +73,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -84,7 +84,7 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 TEST PIC/POC from TR to SI1:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -94,7 +94,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -105,7 +105,7 @@ pqrstuvwpqrstuvw
 xyz    .xyz          |
 TEST PIC/POC from SI1 to TP:
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW
@@ -115,7 +115,7 @@ hijklmnohijklmno
 pqrstuvwpqrstuvw
 xyz    .xyz          |
 0123456701234567
-89_ยบ;+-.89_ยบ;+-.
+89_บ;+-.89_บ;+-.
 @ABCDEFG@ABCDEFG
 HIJKLMNOHIJKLMNO
 PQRSTUVWPQRSTUVW

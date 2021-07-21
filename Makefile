@@ -150,3 +150,9 @@ uninstall:
 patch:
 	$(MAKE) -e -C ${KAL3} patch
 	cat kdfruntime.patch | (patch -p1 -r - --no-backup-if-mismatch --forward || true)
+
+#
+#for a in runtime/tests/*.log; do
+#	iconv -f $(file -b --mime-encoding ${a}) -t UTF8 <${a} >/tmp/tmpfile;
+#	cat /tmp/tmpfile >${a};
+#done
