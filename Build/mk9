@@ -174,7 +174,7 @@ TEST_LINK_OPTIONS="${BASE_LINK_OPTIONS}"
 case ${OS} in
 
 macOS|Macintosh|Mac|OSX|UNIX|Unix|unix|LINUX|Linux|linux)
-   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatf -mtune=native -O3 -flto"
+   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatfn -mtune=native -O3 -flto"
    OPT_LINK_OPTIONS="${BASE_LINK_OPTIONS} -flto"
    ;;
 

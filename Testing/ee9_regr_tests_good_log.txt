@@ -168,7 +168,7 @@ Digital signature of traced orders = #1407535531421151.
 TP0:
 ===
 
-RAN/EL/000M02S/000M05S  SIZE    155
+RAN/EL/000M02S/000M05S  SIZE    156
 
 The  1st prime is   2
 The  2nd prime is   3
@@ -205,9 +205,9 @@ The 30th prime is 113
 LP0:
 ===
 
-RAN/EL/021M43S/021M47S===
-The signature of this test should be #2462534671215633. It was as follows:
-Digital signature of traced orders = #2462534671215633.
+RAN/EL/021M46S/021M50S===
+The signature of this test should be #3430267221624657. It was as follows:
+Digital signature of traced orders = #3430267221624657.
 ------------------- END OF Test Case GPR -------------------
 
 

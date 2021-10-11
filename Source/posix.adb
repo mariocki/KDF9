@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,8 +17,10 @@
 with System;
 --
 with Ada.Characters.Latin_1;
+with Ada.Strings.Fixed;
 
 use  Ada.Characters.Latin_1;
+use  Ada.Strings.Fixed;
 
 package body POSIX is
 
@@ -147,31 +149,36 @@ package body POSIX is
 
    C_reply_string : C.char_array(1 .. 256);
 
-   function next_file_name (prompt : String)
+   function next_file_name (prompt : String;
+                            inline : Boolean)
    return String is
-      C_prompt        : constant C.char_array
-                      := C.To_C(NL & "ee9: " & prompt & ": ", Append_Nul => False);
-      C_reply_length : C.Int with Warnings => Off;
+      C_prompt       : constant C.char_array
+                     := C.To_C(NL & "ee9: " & prompt & ": ", Append_Nul => False);
+      C_reply_length : C.Int;
    begin
       ensure_UI_is_open;
-      C_reply_length := write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length);
-      C_reply_string := (256 => Interfaces.C.char(NUL), others => '?');
+      if not inline then
+         C_reply_length := write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length);
+      end if;
+      C_reply_string := (others => C.char(NUL));
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, C_reply_string'Length);
       if C_reply_length < 2 then
-         -- ^C typed, probably.
+         -- LF or ^C or ^D typed, probably.
          return "";
       else
-         return C.To_Ada(C_reply_string)(1..Natural(C_reply_length-1));
+         return Trim(C.To_Ada(C_reply_string)(1..Natural(C_reply_length-1)), Ada.Strings.Both);
       end if;
    end next_file_name;
 
    procedure data_prompt (offline   : in  Boolean;
                           prompt    : in String;
-                          response  : out response_kind) is
-      message  : constant String := "ee9: " & prompt & ": ";
-      C_prompt : constant C.char_array := C.To_C(NL & message, Append_Nul => True);
+                          response  : out response_kind;
+                          inline    : out Boolean) is
+      message        : constant String := "ee9: " & prompt & ": ";
+      C_prompt       : constant C.char_array := C.To_C(NL & message, Append_Nul => True);
       C_reply_length : C.Int with Warnings => Off;
    begin
+      inline := False;
       if offline then
          output_line("ee9: Running in the non-interactive mode: EOF signalled.");
          response := EOF_response;
@@ -179,36 +186,41 @@ package body POSIX is
       end if;
       ensure_UI_is_open;
       C_reply_length := write(C.int(UI_out_FD), C_prompt'Address, C_prompt'Length-1);
-      C_reply_string := (others => '?');
-      C_reply_string(256) := C.char(NUL);
+      C_reply_string := (others => C.char(NUL));
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 2);
-
-      response := wrong_response;
 
       if C_reply_length = 0 then
          response := EOF_response;
+         return;
       elsif C.To_Ada(C_reply_string(1)) = LF then
          response := LF_response;
+         return;
       elsif C_reply_length = 2                         and then
                C.To_Ada(C_reply_string(2)) = LF        and then
                   C.To_Ada(C_reply_string(1)) in 'q' | 'Q' then
          response := quit_response;
-      elsif C_reply_length = 2                  and then
-               C.To_Ada(C_reply_string(2)) = LF and then
-                  C.To_Ada(C_reply_string(1)) = '/' then
-         response := name_response;
-      elsif C_reply_length = 2                  and then
-               C.To_Ada(C_reply_string(2)) = LF and then
-                  C.To_Ada(C_reply_string(1)) = '@' then
+         return;
+      elsif C_reply_length = 2               and then
+               C.To_Ada(C_reply_string(1)) = '/' then
+         inline := C.To_Ada(C_reply_string(2)) /= LF;
+         response := path_response;
+         return;
+      elsif C_reply_length = 2               and then
+               C.To_Ada(C_reply_string(1)) = '@' then
+         inline := C.To_Ada(C_reply_string(2)) /= LF;
          response := at_response;
+         return;
       elsif C_reply_length = 2                                                    and then
                C.To_Ada(C_reply_string(Interfaces.C.size_t(C_reply_length))) = LF and then
                    C.To_Ada(C_reply_string(1)) = '='                                  then
          response := here_response;
+         return;
       elsif C_reply_length > 0 then
          while C.To_Ada(C_reply_string(Interfaces.C.size_t(C_reply_length))) /= LF loop
             C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 1);
          end loop;
+         response := wrong_response;
+         return;
       end if;
    end data_prompt;
 
@@ -229,8 +241,7 @@ package body POSIX is
       end if;
       ensure_UI_is_open;
       C_reply_length := write(C.int(UI_out_FD), UNIX_prompt'Address, UNIX_prompt'Length-1);
-      C_reply_string := (others => '?');
-      C_reply_string(256) := C.char(NUL);
+      C_reply_string := (others => C.char(NUL));
       C_reply_length := read(C.int(UI_in_FD), C_reply_string'Address, 2);
 
       response := wrong_response;
@@ -242,7 +253,7 @@ package body POSIX is
          letter := C.To_Ada(C_reply_string(1));
          if C.To_Ada(C_reply_string(2)) = LF                                  and then
                letter in 'd' | 'f' | 'p' | 'q' | 't'| 'D' | 'F' | 'P' | 'Q' | 'T' then
-         response := name_response;
+         response := debug_response;
          end if;
       elsif C_reply_length > 0 then
          while C.To_Ada(C_reply_string(Interfaces.C.size_t(C_reply_length))) /= LF loop

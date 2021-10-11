@@ -3,17 +3,9 @@ BINARY=${KDF9_BINARY:-Binary}
 DATA=${KDF9_DATA:-Data}
 SOURCE=${KIDSGROVE:-Kidsgrove}
 USERCODE=${KDF9_USERCODE:-Assembly}
-TEMP=${TEMPORARY:-/var/tmp}
+TEMPORARY=${ALGOL_TEMP:-Workfiles}
 
-trap "rm -f  ${ADJUNCTS}/chan6.pt ptp.bin mt.out ${ADJUNCTS}/punch.txt ${TEMP}/error_output;
-      rm -f  ${TEMP}/systape.txt ${TEMP}/kalgol_labels.txt ${TEMP}/ABS_text.txt"   \
-      0 1 2 3
-
-if [ x${KIDSMODE}x = xfx ]
-then
-   KIDSMODE=""
-fi
-
+# Ensure we have a valid source file.
 if [ x$1x = xx ]
 then
    echo No program name was given.; echo
@@ -26,9 +18,17 @@ else
    name=$1
 fi
 
+# Delete workfiles on termination.
+trap "rm -f ${TEMPORARY}/chan6.pt;
+      rm -f ${TEMPORARY}/error_output;
+      rm -f ${TEMPORARY}/systape.txt;
+      rm -f ${TEMPORARY}/kalgol_labels.txt"   \
+      0 1 2 3
+
 > settings_1.txt
 
-cat > ${TEMP}/kalgol_labels.txt <<++++
+# Label the Kidsgrove system MT.
+cat > ${TEMPORARY}/kalgol_labels.txt <<++++
 00000000        |
 00000001        |
 00000002        |
@@ -37,40 +37,42 @@ cat > ${TEMP}/kalgol_labels.txt <<++++
 00000005        |
 |
 ++++
-nine_path ${BINARY}/RLT ${TEMP}/kalgol_labels.txt - zw - - t
+nine_path ${BINARY}/RLT ${TEMPORARY}/kalgol_labels.txt - zw - - t
 
-cp ${ADJUNCTS}/systape.txt ${TEMP}/systape.txt
-nine_path ${ADJUNCTS}/MKSYS2 ${TEMP}/systape.txt - zw
+# Populate the Kidsgrove system MT.
+nine_path ${ADJUNCTS}/MKSYS2 ${ADJUNCTS}/systape.txt - zw
 
-${ADJUNCTS}/mkchan ${SOURCE}/$name.a60 ${ADJUNCTS}/chan6.pt > /dev/null
+# Convert the source code to Algol Basic Symbols.
+${ADJUNCTS}/mkchan ${SOURCE}/$name.a60 ${TEMPORARY}/chan6.pt > /dev/null
 
 > TP0
 rm -f ${BINARY}/$name
 rm -f ${USERCODE}/$name.k3
-rm -f ${TEMP}/error_output
+rm -f ${TEMPORARY}/error_output
 chmod 755 TR0
 
+
+# Process any compilation options.
 if [ -r settings_for_kalgol.txt ]
 then
    cp settings_for_kalgol.txt settings_1.txt
 fi
-
 shift
 if [ x"$1"x = "xwithx" -o x"$1"x = "xWITHx" ]
 then
    shift
 fi
-
 kidopt with $* ${KIDSOPTS} >> settings_1.txt
 
-if nine_path ${ADJUNCTS}/KAB00DH--USU ${ADJUNCTS}/chan6.pt ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2>${TEMP}/error_output
+# Run the compiler.
+if nine_path ${ADJUNCTS}/KAB00DH--USU ${TEMPORARY}/chan6.pt ${KIDSMODE:--} ${KIDSMISC:-w-} ll kk 2>${TEMPORARY}/error_output
 then
-   if [ -s ${TEMP}/error_output ]
+   if [ -s ${TEMPORARY}/error_output ]
    then
       echo The compilation was abandoned.
-      echo ${TEMP}/error_output:
+      echo ${TEMPORARY}/error_output:
       echo ===
-      more ${TEMP}/error_output
+      more ${TEMPORARY}/error_output
       echo ===
       exit 2
    fi
@@ -97,6 +99,7 @@ then
 
 fi
 
+# Get the generated Usercode.
 case $*${KIDSOPTS} in
 *OPTIMISER*)
    a2b -p2t < TP0 > ${USERCODE}/$name.k3
@@ -110,7 +113,15 @@ then
    echo The Usercode object program could not be retrieved.; echo
    exit 3
 fi
-neat $name ${ST:-30000} ${TL:-99999}
+
+# Do not neaten if peep is going to be used.
+case ${KIDSGROVE_NEATEN:-y} in
+y)
+   neat $name ${ST:-30000} ${TL:-99999}
+   ;;
+*)
+   ;;
+esac
 
 case ${KIDSGROVE_ASSEMBLY:-y} in
 y)

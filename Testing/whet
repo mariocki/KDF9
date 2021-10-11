@@ -1,72 +1,33 @@
-export KDF9_BINARY=${ADJUNCTS:-Adjuncts}
-SOURCE=${WHETSTONE:-Whetstone}
+SOURCE="${KIDSGROVE:-Kidsgrove}"
+TARGET="${WHETSTONE:-Whetstone}"
 
-if [ x"$1"x = xx ]
+if [ -r "${TARGET}/$1.a60" ]
 then
-   echo You have not named a Whetstone Algol program to be run.
    echo
-   exit 1
-fi
-
-program=`basename "$1" ".a60"`.a60
-program=${SOURCE}/"$program"
-if [ -r "$program" ]
-then
-   cp "$program" TR1
-else
-   echo The source file "$program" is absent or unreadable.
+   printf "\\a\\a\\a"
+   printf "${TARGET}/$1.a60 already exists. Do you want to overwrite it (y/n)? "
+   read reply
    echo
-   exit 2
+   case $reply in
+      y | Y | yes | Yes | YES)
+         if [ -w "${TARGET}/$1.a60" ]
+         then
+            echo Converting ${SOURCE}/$1.a60.
+            echo
+         else
+            printf "\\a\\a\\a"
+            echo "${TARGET}/$1.a60 cannot be overwritten."
+            echo
+            exit
+         fi
+         ;;
+      *)
+         echo
+         exit
+         ;;
+   esac
 fi
 
-cp FW0 FW0_copy
-cp FW0_for_Whetstone FW0
-trap "cp FW0_copy FW0"  0 1 2
+ports $1
 
-mode=-d$2
-miscellany=-m$3
-
-if   [ "$mode" = -d ]
-then
-        ee9 +${KDF9_BINARY}/KMW0201--UPU;
-elif [ "$mode" = -d- ]
-then
-        ee9 -sp -df "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
-elif [ "$mode" = -df ]
-then
-   time ee9 -sp -df "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
-else
-        ee9 -sp "$mode" "$miscellany" +${KDF9_BINARY}/KMW0201--UPU;
-fi
-
-case $miscellany in
-   *z*)
-      ;;
-   *)
-      if [ -s CP0 ]
-      then
-         echo
-         echo CP0:
-         echo ===
-         more CP0
-         echo ===
-      fi
-
-      if [ -s TP0 ]
-      then
-         echo
-         echo TP0:
-         echo ===
-         more TP0
-         echo ===
-      fi
-
-      if [ -s LP0 ]
-      then
-         echo
-         echo LP0:
-         echo ===
-         more LP0
-         echo ===
-      fi;;
-esac
+walgol $*

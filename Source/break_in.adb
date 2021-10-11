@@ -1,6 +1,6 @@
 -- This communicates a break-in to the microcode.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -30,23 +30,29 @@ use  state_display;
 
 package body break_in is
 
-   requested : Boolean := False
+   requested : Natural := 0
       with Atomic, Volatile;
 
    procedure note_user_interrupt is
    begin
-      requested := True;
+      requested := requested + 1;
+      if requested > 2 then
+         -- A previous interrupt has not been serviced and the user is getting antsy.
+         -- Perhaps ee9 itself has gone into an infinite loop, so abandon the run.
+         finalize_ee9("Run abandoned by the user");
+         POSIX.exit_program(0);
+      end if;
    end note_user_interrupt;
 
    function has_been_requested
    return Boolean is
    begin
-      return requested;
+      return requested /= 0;
    end has_been_requested;
 
    procedure handler is
    begin
-      requested := False;
+      requested := 0;
       interact("Break-in");
       quit_if_requested;
       if the_execution_mode = boot_mode then

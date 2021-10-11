@@ -1,5 +1,5 @@
 USERCODE=${KDF9_USERCODE:-Assembly}
-TEMPORARY=${TEMPORARY:-/var/tmp}
+TEMPORARY=${ALGOL_TEMP:-Workfiles}
 
 trap "rm -f ${TEMPORARY}/neat.commands ${TEMPORARY}/neat_tmp_0 ${TEMPORARY}/neat_tmp_1"   \
       0 1 2 3

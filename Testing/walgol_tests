@@ -1,0 +1,56 @@
+trap "rm -f walgol_tests_diff.txt"  \
+      0 1 2 3
+
+>walgol_tests_log.txt
+
+walgol FLUID     t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo FLUID DONE      >>walgol_tests_log.txt
+
+walgol GPSPRIMES t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo GPSPRIMES DONE  >>walgol_tests_log.txt
+
+walgol HANOI     t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo HANOI DONE      >>walgol_tests_log.txt
+
+walgol INPUT     t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo INPUT DONE      >>walgol_tests_log.txt
+
+walgol MANORBOY  t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo MANORBOY DONE   >>walgol_tests_log.txt
+
+walgol MATMULT   t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo MATMULT DONE    >>walgol_tests_log.txt
+
+walgol PENTOMINO t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo PENTOMINO DONE  >>walgol_tests_log.txt
+
+walgol WEEHAAVIE t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo WEEHAAVIE DONE  >>walgol_tests_log.txt
+
+walgol WHETSTONE t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo WHETSTONE DONE  >>walgol_tests_log.txt
+
+walgol ZELLER    t prh >>walgol_tests_log.txt
+fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
+echo ZELLER DONE     >>walgol_tests_log.txt
+
+echo
+diff walgol_tests_log.txt walgol_tests_good_log.txt >walgol_tests_diff.txt
+if [ -s walgol_tests_diff.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more walgol_tests_diff.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi

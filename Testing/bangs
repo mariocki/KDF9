@@ -1,18 +1,15 @@
 SOURCE=${WHETSTONE:-Whetstone}
 TARGET=${KIDSGROVE:-Kidsgrove}
+TEMPORARY=${ALGOL_TEMP:-Workfiles}
 
-trap "rm -f strop.commands strop.tmp[01]"   \
+trap "rm -f ${TEMPORARY}/bangs.commands ${TEMPORARY}/bangs.tmp1"   \
       0 1 2 3
 
 if [ ! -r  ${SOURCE}/$1.a60 ]
 then echo Could not find $1.a60 in ${SOURCE}; exit 1
 fi
 
-cat >strop.commands <<++++
-2a\\
-!library A0, A1, A4, A5, A15;\\
-\\
-
+cat >${TEMPORARY}/bangs.commands <<++++
 1,\$s/_A_L_G_O_L/!ALGOL /g
 1,\$s/_a_n_d/!and /g
 1,\$s/_a_r_r_a_y/!array /g
@@ -46,44 +43,14 @@ cat >strop.commands <<++++
 1,\$s/_u_n_t_i_l/!until /g
 1,\$s/_v_a_l_u_e/!value /g
 1,\$s/_w_h_i_l_e/!while /g
-1,\$s/!ALGOL  /!ALGOL /g
-1,\$s/!and  /!and /g
-1,\$s/!array  /!array /g
-1,\$s/!begin  /!begin /g
-1,\$s/!boolean  /!boolean /g
-1,\$s/!Boolean  /!Boolean /g
-1,\$s/!comment  /!comment /g
-1,\$s/!do  /!do /g
-1,\$s/!else  /!else /g
-1,\$s/!end  /!end /g
-1,\$s/!eqv  /!eqv /g
-1,\$s/!EXIT  /!EXIT /g
-1,\$s/!false  /!false /g
-1,\$s/!for  /!for /g
-1,\$s/!goto  /!goto /g
-1,\$s/!if  /!if /g
-1,\$s/!imp  /!imp /g
-1,\$s/!integer  /!integer /g
-1,\$s/!KDF9  /!KDF9 /g
-1,\$s/!label  /!label /g
-1,\$s/!not  /!not /g
-1,\$s/!or  /!or /g
-1,\$s/!own  /!own /g
-1,\$s/!procedure  /!procedure /g
-1,\$s/!real  /!real /g
-1,\$s/!step  /!step /g
-1,\$s/!string  /!string /g
-1,\$s/!switch  /!switch /g
-1,\$s/!then  /!then /g
-1,\$s/!true  /!true /g
-1,\$s/!until  /!until /g
-1,\$s/!value  /!value /g
-1,\$s/!while  /!while /g
+1,\$s/!([a-zA-Z]+)  /!\\1 /g
 1,\$s/_\[/{/g
 1,\$s/_\]/}/g
 1,\$s/\*/ _ /g
 1d
+2a\\
+!library A0, A1, A4, A5, A15;
 ++++
 
-tr  "\\r" "\\n" < ${SOURCE}/$1.a60  > strop.tmp1
-sed -E -f strop.commands strop.tmp1 >${TARGET}/$1.a60
+tr  "\\r" "\\n" < ${SOURCE}/$1.a60  > ${TEMPORARY}/bangs.tmp1
+sed -E -f ${TEMPORARY}/bangs.commands ${TEMPORARY}/bangs.tmp1 >${TARGET}/$1.a60

@@ -1,6 +1,6 @@
 -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -179,7 +179,7 @@ package body KDF9.TSD.spooling is
       end if;
 
       if Q.M <= Q.I then
-         trap_failing_OUT(8, "invalid end-address #" & oct_of(Q.M));
+         trap_failing_OUT(8, "start address #" & oct_of(Q.I) & ", end address #" & oct_of(Q.M));
       end if;
 
       if Q.C = 0 then

@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -115,16 +115,17 @@ package POSIX is
                          quit_response,
                          EOF_response,
                          LF_response,
-                         name_response,
+                         path_response,
                          at_response,
                          here_response,
-                         wrong_response
+                         wrong_response,
+                         debug_response
                         );
 
    -- If we are in non-interactive mode, log an error and set response to wrong_response.
    -- Display a message and read a reply, letter.
    -- If it is null (EOF signalled) or EOL, set response to EOF_response.
-   -- If it is in 'd' | 'f' | 'p' | 't' | 'D' | 'F' | 'P' | 'T', set response to name_response.
+   -- If it is in 'd' | 'f' | 'p' | 't' | 'D' | 'F' | 'P' | 'T', set response to debug_response.
    -- If it is anything else, set response to wrong_response.
    procedure debug_prompt (offline   : in  Boolean;
                            reason    : in String;
@@ -135,17 +136,21 @@ package POSIX is
    -- Display a prompt message and read a reply.
    -- If it is null:          set response to EOF_response.
    -- If it is EOL:           set response to LF_response.
-   -- If it is /:             set response to name_response.
+   -- If it is /:             set response to path_response.
    -- If it is @:             set response to at_response.
    -- If it is =:             set response to here_response.
    -- If it is q or Q:        set response to quit_response.
    -- If it is anything else: set response to wrong_response.
+   -- Set inline True if data follows @ or / on the same line.
    procedure data_prompt (offline   : in  Boolean;
                           prompt    : in String;
-                          response  : out response_kind);
+                          response  : out response_kind;
+                          inline    : out Boolean);
 
    -- Get the name of the file.
-   function next_file_name (prompt : String)
+   -- Suppress the prompt if the data is expected on the current line of input.
+   function next_file_name (prompt : String;
+                            inline : Boolean)
    return String;
 
 end POSIX;

@@ -1,6 +1,6 @@
 -- Buffered I/O streams to support KDF9 device I/O.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -198,12 +198,13 @@ package body host_IO is
       response : Integer;
    begin
       if buffer_is_empty(the_stream) then
-         response := read(the_stream.fd, the_stream.buffer, the_stream.buffer'Size);
-         the_stream.block_size := response;
+         the_stream.block_size := 0;
          the_stream.next_byte := 0;
+         response := read(the_stream.fd, the_stream.buffer, the_stream.buffer'Size);
          if response <= 0 then
             raise end_of_stream;
          end if;
+         the_stream.block_size := response;
       end if;
       the_stream.next_byte := the_stream.next_byte + 1;
       the_stream.position := the_stream.position + 1;

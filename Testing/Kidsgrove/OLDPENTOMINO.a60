@@ -1,0 +1,276 @@
+
+'library' A0, A1, A4, A5, A15;
+'begin' 'comment'     pentomino, 130968;
+
+
+
+
+
+'integer' form1p12e;
+
+'integer' form1p1e;
+
+'integer' form6p2;
+
+'integer' form2p9;
+
+
+
+  'integer' score, nummer, lengte, breedte, stenen aantal, standen aantal,
+
+    i, j, k, teller, lb;
+
+
+
+form1p12e := format({s+d.dddddddddddº+nd});
+
+form1p1e  := format({+d.dº+nd});
+
+form6p2   := format({snnnnnd.dd});
+
+form2p9   := format({+nd.ddddddddds});
+
+open(11);
+
+open(20);
+
+
+
+  lengte:= read(20); breedte:= read(20); stenen aantal:= read(20); standen aantal:= read(20);
+
+  lb:= lengte × (breedte - 1);
+
+
+
+  'begin' 'integer' 'array' bord [-39 : 100],
+
+      standen, wijzer [1 : stenen aantal],
+
+      informatie [1 : 8 × standen aantal];
+
+    'boolean' 'array' ongebruikt [1 : stenen aantal];
+
+
+
+    'procedure' output;
+
+    'begin' 'integer' i, j;
+
+      score:= score + 1;
+
+      writetext(11,{ _ });
+
+      'for' j:= 1 'step' 1 'until' 2 × lengte 'do' 
+
+      'begin' writetext(11,{-}); writetext(11,{ _ }) 'end' ;
+
+      'comment' write(11,form6p2,time); newline(11,1);
+
+      'for' i:= 0 'step' lengte 'until' lb 'do' 
+
+      'begin' writetext(11,{I});
+
+        'for' j:= 1 'step' 1 'until' lengte - 1 'do' 
+
+        'begin' writetext(11,{ _  _  _ });
+
+          'if' bord [i + j] ± bord [i + j + 1]
+
+          'then' writetext(11,{I}) 'else' writetext(11,{ _ })
+
+        'end' ;
+
+        writetext(11,{ _  _  _ }); writetext(11,{I}); newline(11,1); writetext(11,{ _ });
+
+        'if' i < lb
+
+        'then' 'begin' 'for' j:= 1 'step' 1 'until' lengte 'do' 
+
+                     'begin' 'if' bord [i + j] ± bord [i + j + lengte]
+
+                       'then' 'begin' writetext(11,{-}); writetext(11,{ _ });
+
+                                   writetext(11,{-}); writetext(11,{ _ })
+
+                                 'end' 
+
+                       'else' writetext(11,{ _  _  _  _ })
+
+                     'end' 
+
+                   'end' 
+
+        'else' 'for' j:= 1 'step' 1 'until' 2 × lengte 'do' 
+
+                   'begin' writetext(11,{-}); writetext(11,{ _ }) 'end' ;
+
+        newline(11,1)
+
+      'end' ;
+
+      newline(11,2);
+
+      'if' score = 7 'then' 'goto' ex
+
+    'end' output;
+
+
+
+    'procedure' up (veld, kolom); 'value' veld, kolom;
+
+      'integer' veld, kolom;
+
+    'begin' 'integer' i, j, k, r, w, steen, aantal;
+
+      nummer:= nummer + 1;
+
+      'for' steen:= 1 'step' 1 'until' stenen aantal 'do' 
+
+      'if' ongebruikt [steen] 'then' 
+
+      'begin' ongebruikt [steen]:= 'false' ;
+
+        bord [veld]:= steen;
+
+        aantal:= standen [steen] - 1;
+
+        'for' i:= 0 'step' 1 'until' aantal 'do' 
+
+        'begin' w:= wijzer [steen] + 4 × i;
+
+          'if' bord [informatie [w] + veld] = 0 'then' 
+
+          'begin' 'if' bord [informatie [w + 1] + veld] = 0 'then' 
+
+             'begin' 'if' bord [informatie [w + 2] + veld] = 0 'then' 
+
+               'begin' 'if' bord [informatie [w + 3] + veld] = 0 'then' 
+
+                 'begin' 'for' j:= 0, 1, 2, 3 'do' 
+
+                     bord [informatie [w + j] + veld]:= steen;
+
+                     'if' nummer = stenen aantal
+
+                     'then' output
+
+                     'else' 
+
+                     'begin' 
+
+                       'for' k:= kolom 'step' 1 'until' lengte 'do' 
+
+                       'for' r:= 0 'step' lengte 'until' lb 'do' 
+
+                       'if' bord [r + k] = 0 'then' 'goto' beet;
+
+                     beet: up (r + k, k)
+
+                     'end' ;
+
+                     'for' j:= 0, 1, 2, 3 'do' 
+
+                     bord [informatie [w + j] + veld]:= 0
+
+                  'end' 
+
+                'end' 
+
+              'end' 
+
+           'end' 
+
+         'end' ;
+
+         ongebruikt [steen]:= 'true' 
+
+       'end' ;
+
+       bord [veld]:= 0;
+
+    down: nummer:= nummer - 1
+
+    'end' up;
+
+
+
+    teller:= 1;
+
+    'for' i:= 1 'step' 1 'until' stenen aantal 'do' 
+
+    'begin' j:= read(20); 'comment' steennummer, wordt niet gebruikt;
+
+       wijzer [i]:= teller; standen [i]:= read(20);
+
+       'for' j:= 1 'step' 1 'until' standen [i] 'do' 
+
+       'begin' 'for' k:= 0 'step' 1 'until' 3 'do' 
+
+         informatie [teller + k]:= read(20);
+
+         teller:= teller + 4
+
+       'end' 
+
+    'end' ;
+
+    'for' i:= - 39 'step' 1 'until' 0,
+
+                  61 'step' 1 'until' 100 'do' bord [i]:= - 1;
+
+    'for' i:= 1 'step' 1 'until' 60 'do' bord [i]:= 0;
+
+    'for' i:= 1 'step' 1 'until' stenen aantal 'do' 
+
+    ongebruikt [i]:= 'true' ;
+
+    score:= nummer:= 0;
+
+    newline(11,1); writetext(11,{The _ first _ 7 _ solutions:}); newline(11,3);
+
+    up (1, 1);
+
+  ex:
+
+  'end' ;
+
+
+
+close(20);
+
+close(11);
+
+
+
+'end' 
+
+|
+
+10, 6, 12, 63,
+
+1, 1, -9, 1, 11, 2,
+
+2, 2, 1, 2, 3, 4, 10, 20, 30, 40,
+
+3, 4, 1, 10, 20, 21, 1, 11, 20, 21, -10, -9, -8, 2, 10, 11, 12, 2,
+
+4, 4, 1, 11, 21, 22, 1, -9, -19, -18, 10, 11, 12, 22, -10, -9, -8, -18,
+
+5, 4, 1, 11, 21, 2, 1, -9, -19, 2, 1, 2, -8, 12, 10, -10, 1, 2,
+
+6, 4, 1, 2, 12, 22, 1, 2, -8, -18, 1, 2, 10, 20, 1, 2, -10, -20,
+
+7, 4, 1, 11, 12, 22, 1, -9, -8, -18, 10, 11, 21, 22, -10, -9, -19, -18,
+
+8, 8, 1, 11, 12, 13, 1, -9, -8, -7, 1, 2, 12, 13, 1, 2, -8, -7, 10, 20, 21, 31, 10, 20, 19, 29, 10, 11, 21, 31, 10, 9, 19, 29,
+
+9, 8, 1, -9, 2, 12, 1, 11, 2, -8, 10, 11, 21, 12, -10, -9, -19, -8, 1, 11, 21, 12, 1, -9, -19, -8, 1, 11, -9, 12, 1, 11, -9, -8,
+
+10, 8, 1, 2, 3, 12, 1, 2, 3, -8, 10, 20, 30, 11, -10, -20, -30, -9, 1, 11, 21, -9, 1, -9, -19, 11, 11, 1, 2, 3, -9, 1, 2, 3,
+
+11, 8, 1, 2, 3, 13, 1, 2, 3, -7, 10, 20, 30, 1, -10, -20, -30, 1, 1, 11, 21, 31, 1, -9, -19, -29, 10, 1, 2, 3, -10, 1, 2, 3,
+
+12, 8, 1, 2, 11, 12, 1, 2, -9, -8, 1, 2, 10, 11, 1, 2, -10, -9, 1, 10, 11, 20, 1, 10, 11, 21, 1, -10, -9, -20, 1, -10, -9, -19,
+
+|
+

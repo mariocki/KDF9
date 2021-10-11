@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -108,6 +108,7 @@ package body IOC.slow is
       end reattach_the_text_file;
 
       response : response_kind;
+      inline   : Boolean;
 
    begin
       output_line(BEL & "");
@@ -116,10 +117,12 @@ package body IOC.slow is
          POSIX.data_prompt(
                            noninteractive_usage_is_enabled,
                            "Type @ or / to name a file, = to type the data, ENTER key for EOF, Q or q to quit",
-                           response
+                           response,
+                           inline
                           );
          case response is
-            when wrong_response =>
+            when wrong_response
+               | debug_response =>
                null;  -- repeat the prompt
             when LF_response
                | EOF_response =>
@@ -138,18 +141,26 @@ package body IOC.slow is
             when at_response =>
                declare
                   here : constant String := imported_value_of("KDF9_DATA", default => "Data") & "/";
-                  next : constant String := next_file_name(BEL & "Give the name of a file in " & here);
+                  next : constant String
+                     := next_file_name(BEL & "Give the name of a file in " & here, inline);
                begin
+                  if next = "" then
+                     raise operator_error;
+                  end if;
                   reattach_the_text_file(here & next);
                   return;
                exception
                   when operator_error =>
                      output_line(BEL & "ee9: The file «"& here & next & "» could not be found");
                end;
-            when name_response =>
+            when path_response =>
                declare
-                  next : constant String := next_file_name(BEL & "Give the pathname of the file");
+                  next : constant String
+                       := next_file_name(BEL & "Give the pathname of the file", inline);
                begin
+                  if next = "" then
+                     raise operator_error;
+                  end if;
                   reattach_the_text_file(next);
                   return;
                exception

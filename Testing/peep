@@ -1,5 +1,5 @@
 USERCODE=${KDF9_USERCODE:-Assembly}
-TEMPORARY=${TEMPORARY:-/var/tmp}
+TEMPORARY=${ALGOL_TEMP:-Workfiles}
 
 trap "rm -f ${TEMPORARY}/peep.commands ${TEMPORARY}/peep_tmp_[0123456789]"   \
       0 1 2 3
@@ -149,6 +149,14 @@ cat >${TEMPORARY}/peep.commands <<++++
 10,\$s/SIGN;ABS;NEG;NOT;J([^#]+)#Z;/NEV;J\1=Z;\\
 /g
 10,\$s/SIGNF;ABS;NEG;NOT;J([^#]+)#Z;/NEV;J\1=Z;\\
+/g
+10,\$s/SIGN;ABS;NEG;J([^=]+)=Z;/NEV;J\1=Z;\\
+/g
+10,\$s/SIGNF;ABS;NEG;J([^=]+)=Z;/NEV;J\1=Z;\\
+/g
+10,\$s/SIGN;ABS;NEG;J([^#]+)#Z;/NEV;J\1#Z;\\
+/g
+10,\$s/SIGNF;ABS;NEG;J([^#]+)#Z;/NEV;J\1#Z;\\
 /g
 10,\$s/ZERO;NEV;//g
 10,\$s/=Y([^;]+);/=Y\1;\\

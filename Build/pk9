@@ -15,7 +15,7 @@ ROOT=..
 B=${ROOT}/Build
 S=${ROOT}/Source
 T=${ROOT}/Testing
-A=${ROOT}/Testing/Adjuncts}
+A=${ROOT}/Testing/Adjuncts
 OS=${1:-macOS}
 
 case ${OS} in

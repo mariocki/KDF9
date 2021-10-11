@@ -1,9 +1,3 @@
 trap "rm -f LP0; >LP0" 1 2 3
-
-case $1$2 in
-1964|thecrows|the_crows)
-   ln -sf /dev/tty LP0
-   whet WHETSTONE  f t;;
-*)
-   whet WHETSTONE f;;
-esac
+ln -sf /dev/tty LP0
+walgol WHETSTONE  f t

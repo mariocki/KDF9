@@ -30,7 +30,7 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #2217165553667100.
+Digital signature of traced orders = #6321174530420452.
 The Usercode   is in  Assembly/GPSPRIMES-PEEP.k3
 The executable is in  Binary/GPSPRIMES-PEEP
 
@@ -69,7 +69,7 @@ THE   29TH PRIME IS  109
 THE   30TH PRIME IS  113
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0125254636010142.
+Digital signature of traced orders = #1644762512267567.
 The Usercode   is in  Assembly/HANOI-PEEP.k3
 The executable is in  Binary/HANOI-PEEP
 
@@ -87,7 +87,7 @@ MOVE A DISC FROM B TO C
 MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #2013741546657023.
+Digital signature of traced orders = #2475676726177337.
 The Usercode   is in  Assembly/INPUT-PEEP.k3
 The executable is in  Binary/INPUT-PEEP
 
@@ -126,7 +126,7 @@ HELLO WORLD.
 FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #7360613122602726.
+Digital signature of traced orders = #4420320376740744.
 The Usercode   is in  Assembly/MANORBOYX-PEEP.k3
 The executable is in  Binary/MANORBOYX-PEEP
 
@@ -136,7 +136,7 @@ LP0:
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #4500264046332432.
+Digital signature of traced orders = #0321113073120250.
 The Usercode   is in  Assembly/PALSQR-PEEP.k3
 The executable is in  Binary/PALSQR-PEEP
 
@@ -175,31 +175,21 @@ LP0:
    30693   942060249
 
 
-CPU TIME IN SECONDS:        87
+CPU TIME IN SECONDS:        76
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3775165541326567.
+Digital signature of traced orders = #7247672675053302.
 The Usercode   is in  Assembly/QSORT-PEEP.k3
 The executable is in  Binary/QSORT-PEEP
 
 
 LP0:
 ===
-CPU TIME IN SECONDS:      34
+CPU TIME IN SECONDS:      25
 
-+5.6343 6700 000 º+ 6;
-+6.8637 1808 100 º+ 9;
-+1.3740 9313 910 º+10;
-+2.0619 3278 070 º+10;
-+2.7473 4793 610 º+10;
-+3.4350 6926 710 º+10;
-+4.1211 5254 390 º+10;
-+4.8091 1049 610 º+10;
-+5.4968 3182 710 º+10;
-+6.1846 7146 870 º+10;
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6777140521071526.
+Digital signature of traced orders = #7047272746366327.
 The Usercode   is in  Assembly/WHETSTONE-PEEP.k3
 The executable is in  Binary/WHETSTONE-PEEP
 
@@ -217,10 +207,10 @@ N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
 N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
-THAT TOOK  22.8 SECONDS, FOR  43.8 KWIPS
+THAT TOOK  21.1 SECONDS, FOR  47.4 KWIPS
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0760323706127304.
+Digital signature of traced orders = #5411170561105476.
 The Usercode   is in  Assembly/ZELLER-PEEP.k3
 The executable is in  Binary/ZELLER-PEEP
 
@@ -287,4 +277,4 @@ IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
 IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6352313040151604.
+Digital signature of traced orders = #1737215523373475.

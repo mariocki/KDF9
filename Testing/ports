@@ -1,20 +1,20 @@
-SOURCE=${KIDSGROVE:-Kidsgrove}
-TARGET=${WHETSTONE:-Whetstone}
+SOURCE="${KIDSGROVE:-Kidsgrove}"
+TARGET="${WHETSTONE:-Whetstone}"
+TEMPORARY="${ALGOL_TEMP:-Workfiles}"
 
-trap "rm -f ports.commands  ports.tmp"   \
+trap "rm -f "${TEMPORARY}/ports.commands"  "${TEMPORARY}/ports1.tmp" "${TEMPORARY}/ports2.tmp" "   \
       0 1 2 3
 
-if [ ! -r  ${SOURCE}/$1.a60 ]
+if [ ! -r  "${SOURCE}/$1.a60" ]
 then echo Could not find $1.a60 in ${SOURCE}; exit 1
 fi
 
-cat >ports.commands <<++++
+cat >"${TEMPORARY}/ports.commands" <<++++
 1i\\
 $1|
-1,\$s/ _ /*/g
-1,\$s/_ /*/g
-1,\$s/_([^<>])/*\1/g
-1,\$s/!library +A.+;//
+1,\$s/_([^][><])/\@\1/g
+1,\$s/_$/\@/g
+1,\$s/!library +.+;//
 1,\$s/!ALGOL/_A_L_G_O_L/g
 1,\$s/!and/_a_n_d/g
 1,\$s/!array/_a_r_r_a_y/g
@@ -101,10 +101,11 @@ $1|
 1,\$s/'lt'/</g
 1,\$s/'ne'/±/g
 1,\$s/'up'/^/g
+1,\$s/\*/×/g
+1,\$s/@/*/g
 1,\$s/%/÷/g
 1,\$s/!div/÷/g
 1,\$s/'div'/÷/g
-1,\$s/\*/×/g
 1,\$s/~/º/g
 1,\$s/\\\\/º/g
 1,\$s/{/_[/g
@@ -113,10 +114,9 @@ $1|
 1,\$s/<=/_</g
 1,\$s/!up/^/g
 1,\$s/'up'/^/g
-1,\$s/^\*\*\*\*$/|/
+s/^××+$//
 \$a\\
 |
 ++++
-
-tr  -d "\\r"  < ${SOURCE}/$1.a60  > ports.tmp
-sed -E -f ports.commands ports.tmp  > ${TARGET}/$1.a60
+tr  -d "\\r"  < "${SOURCE}/$1.a60"  > "${TEMPORARY}/ports1.tmp"
+sed -E -f "${TEMPORARY}/ports.commands" "${TEMPORARY}/ports1.tmp" > "${TARGET}/$1.a60"

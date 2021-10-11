@@ -1,0 +1,20 @@
+SQRT|
+_b_e_g_i_n
+
+_r_e_a_l x, y;
+_f_o_r x := 81, 25, 16, 9, 8, x/2 _w_h_i_l_e x >0.001 _d_o
+   _b_e_g_i_n
+   writetext(30, _[SQRT * OF * _]);
+   write(30, format(_[+d.ddddddddddº+dd_]), x);
+   writetext(30, _[* IS * _]);
+   y := sqrt(x);
+   write(30, format(_[+d.dddddddddddº+dd_]), y);
+   writetext(30, _[ * re-squared * IS * _]);
+   write(30, format(_[+d.dddddddddddº+dd_]), y^2);
+   writetext(30, _[ * relative * error * IS * _]);
+   write(30, format(_[+d.dddddddddddº+ddc_]), y^2/x -1.0);
+   _e_n_d;
+
+_e_n_d
+|
+|

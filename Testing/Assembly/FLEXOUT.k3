@@ -1,11 +1,9 @@
 V90; W0;
 RESTART; J999; J999;
 PROGRAM;
-   V1 = B20;        (plotter pen-down command);
-   V2 = Q0/AV1/AV1; (to plot data);
+   V2 = Q0/AV1/AV1;   (to type data);
    V3 = Q0/AV33/AV33; (to read data - not in same lockout group as output area);
-   V4 = B02;        (TR device-type code);
-   V5 = B20;        (GP device-type code);
+   V4 = B02;          (TR device-type code);
 
    V4; SET 5; OUT;  (claim TR);
    V3; =Q3; =C3;    (set up Q3 for TR input);
@@ -17,11 +15,7 @@ PROGRAM;
 *1;
    PICQ3;           (read one word from TR);
    PARQ3; J999TR;   (exit loop to 999 at EOF);
-   V33; DUP; =V1;
-   SETB 34; NEV;    (test for semicolon);
-J2NEZ;
-   SETB 12; =V1;    (substitute exclamation);
-*2;
+   V33; =V1;
    POCQ2;           (write one word to FW);
 J1;
 

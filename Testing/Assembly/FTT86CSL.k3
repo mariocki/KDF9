@@ -14,7 +14,7 @@ PROGRAM;                   (Fell timing test 86c Short Loop);
 *3; YJ0; YK0M6Q; ×F; =YH0; J3C6NZS;
    SET 3; OUT; SET 23; FLOAT;
 
-   SET 17; OUT; SET 23; FLOAT; REV;  SET 23; FLOAT;; REV;
+   SET 17; OUT; SET 23; FLOAT; REV;  SET 23; FLOAT; REV;
 
 999;
    ZERO; OUT;

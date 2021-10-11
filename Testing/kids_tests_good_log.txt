@@ -126,7 +126,7 @@ HELLO WORLD.
 FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #6523407406653501.
+Digital signature of traced orders = #2630276323070456.
 The Usercode   is in  Assembly/MANORBOYX.k3
 The executable is in  Binary/MANORBOYX
 
@@ -180,7 +180,7 @@ ROW 10 SHOULD BE 1.23456789º +1
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3047546142010360.
+Digital signature of traced orders = #5330535243477173.
 The Usercode   is in  Assembly/PALSQR.k3
 The executable is in  Binary/PALSQR
 
@@ -483,28 +483,18 @@ SOLUTION COUNT = 10
 
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #0660405164530751.
+Digital signature of traced orders = #6707333265023545.
 The Usercode   is in  Assembly/QSORT.k3
 The executable is in  Binary/QSORT
 
 
 LP0:
 ===
-CPU TIME IN SECONDS:      39
+CPU TIME IN SECONDS:      42
 
-+5.6343 6700 000 º+ 6;
-+6.8637 1808 100 º+ 9;
-+1.3740 9313 910 º+10;
-+2.0619 3278 070 º+10;
-+2.7473 4793 610 º+10;
-+3.4350 6926 710 º+10;
-+4.1211 5254 390 º+10;
-+4.8091 1049 610 º+10;
-+5.4968 3182 710 º+10;
-+6.1846 7146 870 º+10;
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #2567474304717650.
+Digital signature of traced orders = #6632027051137170.
 The Usercode   is in  Assembly/WEEHAAVIE.k3
 The executable is in  Binary/WEEHAAVIE
 
@@ -525,7 +515,7 @@ COUNT =         6
 +8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #2537615560005577.
+Digital signature of traced orders = #3325111267122624.
 The Usercode   is in  Assembly/WHETSTONE.k3
 The executable is in  Binary/WHETSTONE
 
@@ -613,4 +603,4 @@ IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
 IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #5371337621476474.
+Digital signature of traced orders = #7733544767277610.

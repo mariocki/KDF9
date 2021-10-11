@@ -30,13 +30,13 @@ HLT) this_test="nine LEECH LEECH_data9"
 HKT) this_test="nine LEECH LEECH_data9_KDF9"
      encoding=kk
      signature=\#6151525720423034;;
-MOB) this_test="whet MANORBOY"
+MOB) this_test="walgol MANORBOY"
      signature=\#1407535531421151;;
-GPR) this_test="whet GPSPRIMES"
-     signature=\#2462534671215633;;
-FLU) this_test="whet FLUID"
+GPR) this_test="walgol GPSPRIMES"
+     signature=\#3430267221624657;;
+FLU) this_test="walgol FLUID"
      signature=\#3755315062014254;;
-WBM) this_test="whet WHETSTONE"
+WBM) this_test="walgol WHETSTONE"
      signature=\#7636155453113124;;
 RLT) this_test="nine_priv RLT RLT_data"
      signature=\#3506450617016266;;
@@ -44,15 +44,13 @@ TO4) this_test="nine OUT4A -"
      signature=\#3257037520362447;;
 TOX) this_test="nine OUTX -"
      signature=\#5346716617576440;;
-MTW) this_test="whet MTW"
+MTW) this_test="walgol MTW"
      signature=\#1610433227767503;;
-INP) this_test="whet INPUT"
+INP) this_test="walgol INPUT"
      signature=\#3301160711524477;;
 *)   echo test case "$1"\;  UNKNOWN!
      exit 2;;
 esac
-
-rm -f Assembly/WEEHAAVIE.k3 Assembly/WEEHAAVIE-listing.txt Binary/WEEHAAVIE
 
 if /bin/sh ee9_test_run "$1" "$this_test t $mode $encoding" "$signature"
 then

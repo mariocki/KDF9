@@ -3,9 +3,6 @@ DATA=${KDF9_DATA:-Data}
 BINARY=${KDF9_BINARY:-Binary}
 USERCODE=${KDF9_USERCODE:-Assembly}
 
-trap "rm -f ${USERCODE}/$1.k3 ${USERCODE}/$1-listing.txt"   \
-      0 1 2 3
-
 if [ x$1x = xx ]
 then
    echo; echo No program name was given.; echo
@@ -27,8 +24,14 @@ fi
 shift
 
 export KIDSGROVE_ASSEMBLY=n
+export KIDSGROVE_NEATEN=n
 
 kalgol $name with OPTIMISER ${KIDSOPTS}
+if [ ! -s ${USERCODE}/$name.k3 ]
+then
+   exit 3
+fi
+
 peep $name  ${ST:-30000} ${TL:-99999}
 ucc $name-PEEP
 

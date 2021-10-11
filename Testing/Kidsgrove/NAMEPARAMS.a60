@@ -1,14 +1,15 @@
-_b_e_g_i_n
+!begin
  'library' A1, A5, A15;
 
-_r_e_a_l a, y;
+!real a, y;
 
-_r_e_a_l _p_r_o_c_e_d_u_r_e check(y, integrand1, integrand2);
-_r_e_a_l integrand1, integrand2, y;
+!real !procedure check(y, val1, val2);
+!real val1, val2, y;
    'begin'
    y := 0.5;
-   output(30, y); output(30, integrand1); writetext(30, {: should _ be_ 0.8{cc}});
-   output(30, y); output(30, integrand2); writetext(30, {: should _ be_ 0.8{cc}});
+   output(30, y); output(30, val1); writetext(30, {: should _ be_ 0.8{cc}});
+   y := 1.0;
+   output(30, y); output(30, val2); writetext(30, {: should _ be_ 1.0{cc}});
    check := 123456789.10;
    'end' check;
 
@@ -16,5 +17,5 @@ a := check(y, (y+y)/(1+y×y), (y+y+0.0)/(1.0+y×y));
 
 output(30, a)
 
-_e_n_d
+!end
 |
