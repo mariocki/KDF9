@@ -68,4 +68,5 @@ writetext(30, {{c}microseconds_per_instruction _ _ =});
 write(30, format({ssnd.ddc}), t2/i2*1 000 000);
 
 !end
-****
+|
+

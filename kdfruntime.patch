@@ -40,3 +40,16 @@ index 14059bb..57781b5 100644
        open(the_stream, file_name, mode, fd);
     exception
        when POSIX_IO_error =>
+diff --git a/src/ioc-slow-shift-fw.adb b/src/ioc-slow-shift-fw.adb
+index a6ef6f5..88dab17 100644
+--- a/src/ioc-slow-shift-fw.adb
++++ b/src/ioc-slow-shift-fw.adb
+@@ -78,7 +78,7 @@ package body IOC.slow.shift.FW is
+    end escaped;
+ 
+    red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
+-   black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
++   black_font : constant String := escaped("BLACK_FONT", "ESC[0m");
+    underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
+    plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
+ 

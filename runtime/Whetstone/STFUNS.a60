@@ -1,0 +1,53 @@
+STFUNS|
+_b_e_g_i_n 
+
+_r_e_a_l y, half pi, two pi, pi, x;
+
+two pi := 6.283185307179588;
+pi := two pi / 2;
+half pi := two pi / 4.0;
+
+open(30);
+
+_f_o_r y := 0.0, (y + 1.0) _w_h_i_l_e  y < 21 _d_o
+   _b_e_g_i_n
+   x := y / 20.0;
+   writetext(30, _[_[c_]x * =*_]);
+   write(30, format(_[+d.dddddddddddss_]), x);
+   writetext(30, _[ * pi.x * =*_]);
+   write(30, format(_[+d.dddddddddddss_]), pi × x);
+   writetext(30, _[ * sin(pi.x)* =*_]);
+   write(30, format(_[+d.dddddddddddss_]), sin(pi × x));
+   writetext(30, _[ * cos(pi.x)* =*_]);
+   write(30, format(_[+d.dddddddddddss_]), cos(pi × x));
+   _i_f cos(x) ± 0 _t_h_e_n
+      _b_e_g_i_n
+      writetext(30, _[ * x-arctan(sinx/cosx)* =*_]);
+      write(30, format(_[+d.dddddddddddº+dd_]),  x - arctan(sin(x)/cos(x)))
+      _e_n_d;
+   _e_n_d;
+
+writetext(30, _[_[cc_]_]);
+
+_f_o_r x := 0.0, x + 0.125 _w_h_i_l_e  x < 2.125, 4, x + 1.0 _w_h_i_l_e  x < 10.0 _d_o
+   _b_e_g_i_n
+   writetext(30, _[_[c_]x * =*_]);
+   write(30, format(_[+d.ddddddddddd_]), x);
+   writetext(30, _[_[ss_] * exp(x)* =*_]);
+   write(30, format(_[+d.ddddddddddº+dd_]), exp(x));
+   _i_f x ± 0 _t_h_e_n
+      _b_e_g_i_n
+      writetext(30, _[_[ss_] * ln(x)* =*_]);
+      write(30, format(_[+d.ddddddddddd_]), ln(x));
+      writetext(30, _[_[ss_] * exp(ln(x))-x* =*_]);
+      write(30, format(_[+d.ddddddddddº+dd_]), exp(ln(x))-x);
+      writetext(30, _[_[ss_] * ln(exp(x))-x* =*_]);
+      write(30, format(_[+d.ddddddddddº+dd_]), ln(exp(x))-x);
+      _e_n_d;
+   _e_n_d;
+
+writetext(30, _[_[cc_]_]);
+
+_e_n_d
+|
+|

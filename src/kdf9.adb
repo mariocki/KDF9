@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -36,19 +36,20 @@ package body KDF9 is
 
    C_part_scale : constant := 2**32;
    I_part_scale : constant := 2**16;
+   Q_part_scale : constant := 2**16;
 
    function as_Q (the_word : KDF9.word)
    return KDF9.Q_register
    is (
-       (C => KDF9.Q_part(KDF9.word'(the_word / C_part_scale)),
-        I => KDF9.Q_part(KDF9.word'(the_word / I_part_scale) and Q_part_mask),
-        M => KDF9.Q_part(the_word and Q_part_mask)
+       (C => KDF9.Q_part(KDF9.word'(the_word / C_part_scale) mod Q_part_scale),
+        I => KDF9.Q_part(KDF9.word'(the_word / I_part_scale) mod Q_part_scale),
+        M => KDF9.Q_part(the_word mod Q_part_scale)
        )
       );
 
    function as_word (the_Q : KDF9.Q_register)
    return KDF9.word
-   is (KDF9.word(the_Q.C)*C_part_scale + KDF9.word(the_Q.I)*I_part_scale + KDF9.word(the_Q.M));
+   is (KDF9.word(the_Q.C)*C_part_scale or KDF9.word(the_Q.I)*I_part_scale or KDF9.word(the_Q.M));
 
    function sign_extended (Q : KDF9.Q_part)
    return KDF9.word
@@ -689,11 +690,11 @@ package body KDF9 is
 
    procedure set_NIA_to (new_NIA : in KDF9.syllable_address) is
       mask        : constant := 8#377#;
-      shift       : constant := 8#400#;
+      shift       : constant := 2**8;
       IWB0, IWB1  : KDF9.word;
    begin
       if new_NIA.code_address = 8191 or else
-            new_NIA.syllable_index > 5       then
+            new_NIA.syllable_index > 5  then
          trap_an_invalid_order_address(new_NIA);
       end if;
 

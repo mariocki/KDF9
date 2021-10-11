@@ -3,59 +3,62 @@
 !library A1, A4, A5, A15;
 
    !procedure get the date of Easter Sunday (Easter day, Easter month, given year);
-      !value   given year;
-      !integer given year, Easter month, Easter day;
-   !begin
-
-      !procedure divide (dividend, divisor, quotient, remainder);
-         !value dividend, divisor;
-         !integer dividend, divisor, quotient, remainder;
+         !value   given year;
+         !integer given year, Easter month, Easter day;
       !begin
-      !integer q;
-      q := dividend !div divisor;
-      remainder := dividend  -  divisor  *  q;
-      quotient := q;
-      !end divide;
 
-   !integer a, b, c, h;
+         !procedure divide (dividend, divisor, quotient, remainder);
+            !value dividend, divisor;
+            !integer dividend, divisor, quotient, remainder;
+         !begin
 
-   divide(given year, 19, Easter month, a);
-   divide(given year, 100, b, c);
-   divide(b, 4, Easter day, given year);
-   divide(19 * a + b - Easter day + 15 - ((8 * b + 13) !div 25),  30,  Easter month,  h);
-   divide(c, 4, b, Easter day);
-   divide(2 * (given year + b) - h - Easter day + 32, 7, Easter month, c);
-   h := h + c - 7 * ((a + 11 * h + 19 * c) !div 433);
-   Easter month := (h + 90) !div 25;
-   divide(33 * Easter month + h + 19, 32, b, Easter day)
-   !end get the date of Easter Sunday;
+         !integer q;
+
+         q := dividend !div divisor;
+         remainder := dividend  -  divisor  *  q;
+         quotient := q;
+         !end divide;
+
+      !integer a, b, c, h;
+
+      divide(given year, 19, Easter month, a);
+      divide(given year, 100, b, c);
+      divide(b, 4, Easter day, given year);
+      divide(19 * a + b - Easter day + 15 - ((8 * b + 13) !div 25),  30,  Easter month,  h);
+      divide(c, 4, b, Easter day);
+      divide(2 * (given year + b) - h - Easter day + 32, 7, Easter month, c);
+      h := h + c - 7 * ((a + 11 * h + 19 * c) !div 433);
+      Easter month := (h + 90) !div 25;
+      divide(33 * Easter month + h + 19, 32, b, Easter day)
+      !end get the date of Easter Sunday;
 
    !procedure show a range of dates (first year, final year);
-      !value   first year, final year;
-      !integer first year, final year;
-   !begin
-
-   !integer this year;
-
-   !for this year := first year !step 1 !until final year !do
+         !value   first year, final year;
+         !integer first year, final year;
       !begin
-      get the date of Easter Sunday(Easter day, Easter month, this year);
-      write text(30, {In_});
-      write(30, format({dddds}), this year);
-      write text(30, {Easter_Sunday_is_on_});
-      write(30, format({dd}), Easter day);
-      write text(30, {/});
-      write(30, format({dd}), Easter month);
-      write text(30, {_and_KDF9_is});
-      write(30, format({s-nd}), this year - 1964);
-      write text(30, {_years_old{c}});
-      !end
-   !end show a range of dates;
 
-!integer Easter day, Easter month, given year, data year;
+      !integer this year;
+
+      !for this year := first year !step 1 !until final year !do
+         !begin
+         get the date of Easter Sunday(Easter day, Easter month, this year);
+         write text(30, {In_});
+         write(30, format({dddds}), this year);
+         write text(30, {Easter_Sunday_is_on_});
+         write(30, format({dd}), Easter day);
+         write text(30, {/});
+         write(30, format({dd}), Easter month);
+         write text(30, {_and_KDF9_is});
+         write(30, format({s-nd}), this year - 1964);
+         write text(30, {_years_old{c}});
+         !end
+      !end show a range of dates;
+
+!integer Easter day, Easter month, data year;
 
 open(20);
 data year := read(20);
+close(20);
 
 write text(30, {These_are_the_21_years_of_KDF9:{c}});
 show a range of dates (1960, 1980);
@@ -72,5 +75,9 @@ write text(30, {These_are_the_next_21_years});
 write text(30, {{c}});
 show a range of dates (data year + 1, data year + 21);
 
+close(30);
 !end
 |
+2021;
+|
+

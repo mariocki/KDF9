@@ -1,0 +1,23 @@
+NAMEPARAMS|
+_b_e_g_i_n
+ 
+
+_r_e_a_l a, y;
+
+_r_e_a_l _p_r_o_c_e_d_u_r_e check(y, val1, val2);
+_r_e_a_l val1, val2, y;
+   _b_e_g_i_n
+   y := 0.5;
+   output(30, y); output(30, val1); writetext(30, _[: should * be* 0.8_[cc_]_]);
+   y := 1.0;
+   output(30, y); output(30, val2); writetext(30, _[: should * be* 1.0_[cc_]_]);
+   check := 123456789.10;
+   _e_n_d check;
+
+a := check(y, (y+y)/(1+y×y), (y+y+0.0)/(1.0+y×y));
+
+output(30, a)
+
+_e_n_d
+|
+|

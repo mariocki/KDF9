@@ -1,0 +1,56 @@
+SOURCE=${WHETSTONE:-Whetstone}
+TARGET=${KIDSGROVE:-Kidsgrove}
+TEMPORARY=${ALGOL_TEMP:-Workfiles}
+
+trap "rm -f ${TEMPORARY}/kwote.commands ${TEMPORARY}/kwote.tmp1"   \
+      0 1 2 3
+
+if [ ! -r  ${SOURCE}/$1.a60 ]
+then echo Could not find $1.a60 in ${SOURCE}; exit 1
+fi
+
+cat >${TEMPORARY}/kwote.commands <<++++
+1,\$s/_A_L_G_O_L/'ALGOL' /g
+1,\$s/_a_n_d/'and' /g
+1,\$s/_a_r_r_a_y/'array' /g
+1,\$s/_b_e_g_i_n/'begin' /g
+1,\$s/_b_o_o_l_e_a_n/'boolean' /g
+1,\$s/_B_o_o_l_e_a_n/'Boolean' /g
+1,\$s/_c_o_m_m_e_n_t/'comment' /g
+1,\$s/_d_o/'do' /g
+1,\$s/_e_l_s_e/'else' /g
+1,\$s/_e_n_d/'end' /g
+1,\$s/_e_q_v/'eqv' /g
+1,\$s/_E_X_I_T/'EXIT' /g
+1,\$s/_f_a_l_s_e/'false' /g
+1,\$s/_f_o_r/'for' /g
+1,\$s/_g_o *_t_o/'goto' /g
+1,\$s/_i_f/'if' /g
+1,\$s/_i_m_p/'imp' /g
+1,\$s/_i_n_t_e_g_e_r/'integer' /g
+1,\$s/_K_D_F_9/'KDF9' /g
+1,\$s/_l_a_b_e_l/'label' /g
+1,\$s/_n_o_t/'not' /g
+1,\$s/_o_r/'or' /g
+1,\$s/_o_w_n/'own' /g
+1,\$s/_p_r_o_c_e_d_u_r_e/'procedure' /g
+1,\$s/_r_e_a_l/'real' /g
+1,\$s/_s_t_e_p/'step' /g
+1,\$s/_s_t_r_i_n_g/'string' /g
+1,\$s/_s_w_i_t_c_h/'switch' /g
+1,\$s/_t_h_e_n/'then' /g
+1,\$s/_t_r_u_e/'true' /g
+1,\$s/_u_n_t_i_l/'until' /g
+1,\$s/_v_a_l_u_e/'value' /g
+1,\$s/_w_h_i_l_e/'while' /g
+1,\$s/'  /' /g
+1,\$s/_\[/{/g
+1,\$s/_\]/}/g
+1,\$s/\*/ _ /g
+1d
+2a\\
+'library' A0, A1, A4, A5, A15;
+++++
+
+tr  "\\r" "\\n" < ${SOURCE}/$1.a60  > ${TEMPORARY}/kwote.tmp1
+sed -E -f ${TEMPORARY}/kwote.commands ${TEMPORARY}/kwote.tmp1 >${TARGET}/$1.a60

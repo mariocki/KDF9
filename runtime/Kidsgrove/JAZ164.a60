@@ -72,7 +72,7 @@
     !then  !begin  h := !if  h > 0 !then  hmin !else  - hmin;
                absh := hmin
              !end ;
-  !if  h  >=  b - xl _e_q_v h  >=  0
+  !if  h  >=  b - xl !eqv h  >=  0
   !then  !begin  d[2] := h; last := !true ;
                h := b - xl; absh := abs(h)
              !end
@@ -126,7 +126,7 @@ nstep: !if  reject
                     k4[jj] * 16 + k5[jj] * 4);
     toly := absh * (abs(zl[jj]) * ee[2*jj-1] + ee[2*jj]);
     tolz := abs(k0[jj]) * ee[2*(jj+n)-1] + absh * ee[2*(jj+n)];
-    reject := discry > toly _o_r discrz > tolz _o_r reject;
+    reject := discry > toly !or discrz > tolz !or reject;
     fhy := discry/toly; fhz := discrz/tolz;
     !if  fhz > fhy !then  fhy := fhz;
     !if  fhy > fhm !then  fhm := fhy

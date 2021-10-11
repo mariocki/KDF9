@@ -29,15 +29,15 @@ export TEMPORARY=/tmp
 
 export EE9REGTEST=1
 
-#trap "rm -f ${LOGS}/whet_test.diff ${LOGS}/whet_test.log ${TEMPORARY}/whetoutput" 0 1 2 3
+#trap "rm -f ${LOGS}/walgol_test.diff ${LOGS}/walgol_test.log ${TEMPORARY}/walgoloutput" 0 1 2 3
 
 function runtest() {
-   whet $1 -d=t -m=prh >>${LOGS}/whet_test.log
-   fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/whet_test.log
-   echo $1 DONE >>${LOGS}/whet_test.log
+   walgol $1 -d=t -m=prh >>${LOGS}/walgol_test.log
+   fgrep "Digital signature" ${LOGS}/KDF9.log >>${LOGS}/walgol_test.log
+   echo $1 DONE >>${LOGS}/walgol_test.log
 }
 
->${LOGS}/whet_test.log
+>${LOGS}/walgol_test.log
 
 runtest FLUID
 runtest GPSPRIMES
@@ -51,13 +51,13 @@ runtest WHETSTONE
 runtest ZELLER
 
 echo
-iconv -f $(file -b --mime-encoding ${LOGS}/whet_test.log) -t UTF8 <${LOGS}/whet_test.log >${TEMPORARY}/whetoutput
-cat ${TEMPORARY}/whetoutput >${LOGS}/whet_test.log
-diff -diwB --strip-trailing-cr ${LOGS}/whet_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/whet_test.diff
-if [ -s ${LOGS}/whet_test.diff ]; then
+iconv -f $(file -b --mime-encoding ${LOGS}/walgol_test.log) -t UTF8 <${LOGS}/walgol_test.log >${TEMPORARY}/whetoutput
+cat ${TEMPORARY}/whetoutput >${LOGS}/walgol_test.log
+diff -diwB --strip-trailing-cr ${LOGS}/walgol_test.log ${TESTS}/whet_regr_tests_good.log >${LOGS}/walgol_test.diff
+if [ -s ${LOGS}/walgol_test.diff ]; then
    echo "These are the unexpected variances for this run:"
    echo "==="
-   more ${LOGS}/whet_test.diff
+   more ${LOGS}/walgol_test.diff
    echo "==="
 else
    echo "These tests ran as expected."

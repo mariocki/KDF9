@@ -54,10 +54,13 @@ z := 1729;
 
 t1 := clock;
 sort(1, 10000);
-writetext(30, {CPU _ time _ in _ seconds:}); write(30, layout, clock - t1);
 
-!for i := 1 !step 1000 !until 10000 !do
-   output(30, a[i]);
+
+!for i := 1 !step 1 !until 10000-1 !do
+   !if a[i] > a[i+1] !then
+      output(30, i);
+
+writetext(30, {CPU _ time _ in _ seconds:}); write(30, layout, clock - t1);
 
 close(30);
 !end

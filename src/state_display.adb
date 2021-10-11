@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -354,8 +354,192 @@ package body state_display is
       log_new_line;
    end show_execution_context;
 
+   function for_FH_disc (compressed_opcode : KDF9.compressed_opcode; Pxy_bits : KDF9.Q_number)
+   return Boolean
+   is (case compressed_opcode is
+          when PIA_PIC_CLO_TLO_Qq     => Pxy_bits = PIC_bits,
+          when PIB_PID_Qq             => Pxy_bits = PID_bits,
+          when PIE_PIG_Qq             => Pxy_bits = PIG_bits,
+          when PIF_PIH_Qq             => Pxy_bits = PIH_bits,
+          when POA_POC_POE_POF_PMH_Qq => Pxy_bits = POC_bits,
+          when POB_POD_Qq             => Pxy_bits = POD_bits,
+          when POG_POL_Qq             => Pxy_bits = POL_bits,
+          when POH_POK_Qq             => Pxy_bits = POK_bits,
+          when others                 => False
+      );
+
+   type register_usage is array (KDF9.compressed_opcode) of Boolean
+      with Size => 64, Component_Size => 1;
+
+   it_uses_JB : constant register_usage
+              := (
+                   LINK
+                 | TO_LINK
+                 | OS_OUT
+                 | JrNEJ
+                 | JSr
+                 | EXIT_n
+                 | JrEJ
+                 | EXITD     => True,
+                   others    => False
+                 );
+
+   it_uses_Qq : constant register_usage
+              := (
+                   MkMq
+                 | MkMqQ
+                 | MkMqH
+                 | MkMqQH
+                 | MkMqN
+                 | MkMqQN
+                 | MkMqHN
+                 | MkMqQHN
+                 | TO_MkMq
+                 | TO_MkMqQ
+                 | TO_MkMqH
+                 | TO_MkMqQH
+                 | TO_MkMqN
+                 | TO_MkMqQN
+                 | TO_MkMqHN
+                 | TO_MkMqQHN
+                 | MqTOQk
+                 | IqTOQk
+                 | IMqTOQk
+                 | CqTOQk
+                 | CMqTOQk
+                 | CIqTOQk
+                 | QqTOQk
+                 | M_PLUS_Iq
+                 | M_MINUS_Iq
+                 | NCq
+                 | DCq
+                 | POS1_TO_Iq
+                 | NEG1_TO_Iq
+                 | POS2_TO_Iq
+                 | NEG2_TO_Iq
+                 | SHA
+                 | SHAD
+                 | MACC
+                 | SHL
+                 | SHLD
+                 | SHC
+                 | TO_RCIMq
+                 | QCIMq
+                 | ADD_TO_QCIMq
+                 | JCqNZS
+                 | PAR_Qq
+                 | PIA_PIC_CLO_TLO_Qq
+                 | PIB_PID_Qq
+                 | PIE_PIG_Qq
+                 | PIF_PIH_Qq
+                 | PMA_PMK_INT_Qq
+                 | CT_PMB_PMC_BUSY_Qq
+                 | PMD_PME_PML_Qq
+                 | PMF_PMG_Qq
+                 | POA_POC_POE_POF_PMH_Qq
+                 | POB_POD_Qq
+                 | POG_POL_Qq
+                 | POH_POK_Qq
+                 | JrCqNZ    => True,
+                   others    => False
+                 );
+
+   is_modified : constant register_usage
+               := (
+                    EaMq
+                  | TO_EaMq
+                  | EaMqQ
+                  | TO_EaMqQ  => True,
+                    others    => False
+                  );
+   is_MqMk_class : constant register_usage
+               := (
+
+                   MkMq
+                 | MkMqQ
+                 | MkMqH
+                 | MkMqQH
+                 | MkMqN
+                 | MkMqQN
+                 | MkMqHN
+                 | MkMqQHN
+                 | TO_MkMq
+                 | TO_MkMqQ
+                 | TO_MkMqH
+                 | TO_MkMqQH
+                 | TO_MkMqN
+                 | TO_MkMqQN
+                 | TO_MkMqHN
+                 | TO_MkMqQHN  => True,
+                   others      => False
+                  );
+
+   it_uses_Qk : constant register_usage
+              := (
+                   MkMq
+                 | MkMqQ
+                 | MkMqH
+                 | MkMqQH
+                 | MkMqN
+                 | MkMqQN
+                 | MkMqHN
+                 | MkMqQHN
+                 | TO_MkMq
+                 | TO_MkMqQ
+                 | TO_MkMqH
+                 | TO_MkMqQH
+                 | TO_MkMqN
+                 | TO_MkMqQN
+                 | TO_MkMqHN
+                 | TO_MkMqQHN
+                 | MqTOQk
+                 | IqTOQk
+                 | IMqTOQk
+                 | CqTOQk
+                 | CMqTOQk
+                 | CIqTOQk
+                 | QqTOQk    => True,
+                   others    => False
+                 );
+
+   function INS_uses_Qq
+   return Boolean is
+      (
+       -- A compressed_opcode may be ambiguous: to know which opcode it represents,
+       --   further attributes of the order may need to be considered.
+       case INS.kind is
+          when two_syllable_order =>
+             it_uses_Qq(INS.compressed_opcode)
+               and
+             -- If a shift, exclude fixed-amount shifts.
+             ((INS.order.syllable_1 and 1) = 0 or else INS.compressed_opcode not in SHA..SHC),
+          when normal_jump_order =>
+             INS.compressed_opcode in JrCqZ | JrCqNZ,
+          when data_access_order =>
+             is_modified(INS.compressed_opcode),
+          when others =>
+             False
+      );
+
    procedure log_to_external_trace is
-   begin
+
+      procedure log_Q_operand is
+         I : constant KDF9.compressed_opcode := INS.compressed_opcode;
+         Q : KDF9.Q_register;
+      begin
+         case INS.kind is
+            when two_syllable_order =>
+               if it_uses_Qq(I) and then not is_MqMk_class(I) then
+                  Q := the_Q_store(INS.Qq);
+                  tab_log_to(the_external_trace_file, 104);
+                  log(the_external_trace_file, "Q" & Q.C'Image & "/" & Q.I'Image & "/" & Q.M'Image);
+               end if;
+            when others =>
+               null;
+         end case;
+      end log_Q_operand;
+
+   begin -- log_to_external_trace
       log(the_external_trace_file, oct_of(CIA));
       tab_log_to(the_external_trace_file, 10);
       log(the_external_trace_file, ICR'Image);
@@ -389,8 +573,9 @@ package body state_display is
          tab_log_to(the_external_trace_file, 68);
       end if;
       log(the_external_trace_file, " |" & the_full_name_of(INS));
-      tab_log_to(the_external_trace_file, 90);
+      tab_log_to(the_external_trace_file, 92);
       log(the_external_trace_file, KDF9.us'Image(the_clock_time));
+      log_Q_operand;
       log_new_line(the_external_trace_file);
    end log_to_external_trace;
 
@@ -429,7 +614,7 @@ package body state_display is
    procedure show_CIA_and_NIA is
    begin
       log_line("CIA:        " & just_right(oct_of(CIA), 10) & " (" & just_right(dec_of(CIA) & ")"));
-      log_line("NIA:        " & just_right(oct_of(NIA), 10) & " (" & just_right(dec_of(NIA) & ")"));
+      log_line(" :        " & just_right(oct_of(NIA), 10) & " (" & just_right(dec_of(NIA) & ")"));
    end show_CIA_and_NIA;
 
    procedure long_witness is
@@ -442,138 +627,6 @@ package body state_display is
    end long_witness;
 
    procedure short_witness is
-
-      type register_usage is array (KDF9.compressed_opcode) of Boolean
-         with Size => 64, Component_Size => 1;
-
-      it_uses_JB : constant register_usage
-                 := (
-                      LINK
-                    | TO_LINK
-                    | OS_OUT
-                    | JrNEJ
-                    | JSr
-                    | EXIT_n
-                    | JrEJ
-                    | EXITD     => True,
-                      others    => False
-                    );
-
-      it_uses_Qq : constant register_usage
-                 := (
-                      MkMq
-                    | MkMqQ
-                    | MkMqH
-                    | MkMqQH
-                    | MkMqN
-                    | MkMqQN
-                    | MkMqHN
-                    | MkMqQHN
-                    | TO_MkMq
-                    | TO_MkMqQ
-                    | TO_MkMqH
-                    | TO_MkMqQH
-                    | TO_MkMqN
-                    | TO_MkMqQN
-                    | TO_MkMqHN
-                    | TO_MkMqQHN
-                    | MqTOQk
-                    | IqTOQk
-                    | IMqTOQk
-                    | CqTOQk
-                    | CMqTOQk
-                    | CIqTOQk
-                    | QqTOQk
-                    | M_PLUS_Iq
-                    | M_MINUS_Iq
-                    | NCq
-                    | DCq
-                    | POS1_TO_Iq
-                    | NEG1_TO_Iq
-                    | POS2_TO_Iq
-                    | NEG2_TO_Iq
-                    | SHA
-                    | SHAD
-                    | MACC
-                    | SHL
-                    | SHLD
-                    | SHC
-                    | TO_RCIMq
-                    | QCIMq
-                    | ADD_TO_QCIMq
-                    | JCqNZS
-                    | PAR_Qq
-                    | PIA_PIC_CLO_TLO_Qq
-                    | PIB_PID_Qq
-                    | PIE_PIG_Qq
-                    | PIF_PIH_Qq
-                    | PMA_PMK_INT_Qq
-                    | CT_PMB_PMC_BUSY_Qq
-                    | PMD_PME_PML_Qq
-                    | PMF_PMG_Qq
-                    | POA_POC_POE_POF_PMH_Qq
-                    | POB_POD_Qq
-                    | POG_POL_Qq
-                    | POH_POK_Qq
-                    | JrCqNZ    => True,
-                      others    => False
-                    );
-
-      is_modified : constant register_usage
-                  := (
-                       EaMq
-                     | TO_EaMq
-                     | EaMqQ
-                     | TO_EaMqQ  => True,
-                       others    => False
-                     );
-
-      it_uses_Qk : constant register_usage
-                 := (
-                      MkMq
-                    | MkMqQ
-                    | MkMqH
-                    | MkMqQH
-                    | MkMqN
-                    | MkMqQN
-                    | MkMqHN
-                    | MkMqQHN
-                    | TO_MkMq
-                    | TO_MkMqQ
-                    | TO_MkMqH
-                    | TO_MkMqQH
-                    | TO_MkMqN
-                    | TO_MkMqQN
-                    | TO_MkMqHN
-                    | TO_MkMqQHN
-                    | MqTOQk
-                    | IqTOQk
-                    | IMqTOQk
-                    | CqTOQk
-                    | CMqTOQk
-                    | CIqTOQk
-                    | QqTOQk    => True,
-                      others    => False
-                    );
-
-      function INS_uses_Qq
-      return Boolean is
-         (
-          -- A compressed_opcode may be ambiguous: to know which opcode it represents,
-          --   further attributes of the order may need to be considered.
-          case INS.kind is
-             when two_syllable_order =>
-                it_uses_Qq(INS.compressed_opcode)
-                  and
-                -- If a shift, exclude fixed-amount shifts.
-                ((INS.order.syllable_1 and 1) = 0 or else INS.compressed_opcode not in SHA..SHC),
-             when normal_jump_order =>
-                INS.compressed_opcode in JrCqZ | JrCqNZ,
-             when data_access_order =>
-                is_modified(INS.compressed_opcode),
-             when others =>
-                False
-         );
 
       need_new_line : Boolean := False;
 
@@ -769,21 +822,6 @@ package body state_display is
       end loop;
       return RFIR;
    end as_RFIR;
-
-   function for_FH_disc (compressed_opcode : KDF9.compressed_opcode; Pxy_bits : KDF9.Q_number)
-   return Boolean
-   is (case compressed_opcode is
-          when PIA_PIC_CLO_TLO_Qq     => Pxy_bits = PIC_bits,
-          when PIB_PID_Qq             => Pxy_bits = PID_bits,
-          when PIE_PIG_Qq             => Pxy_bits = PIG_bits,
-          when PIF_PIH_Qq             => Pxy_bits = PIH_bits,
-          when POA_POC_POE_POF_PMH_Qq => Pxy_bits = POC_bits,
-          when POB_POD_Qq             => Pxy_bits = POD_bits,
-          when POG_POL_Qq             => Pxy_bits = POL_bits,
-          when POH_POK_Qq             => Pxy_bits = POK_bits,
-          when others                 => False
-      );
-
 
    first_col   : constant := 17;
    device_col  : constant := first_col + 23;

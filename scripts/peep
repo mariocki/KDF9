@@ -209,6 +209,14 @@ cat >${TEMPORARY}/peep.commands <<++++
 /g
 10,\$s/SIGNF;ABS;NEG;NOT;J([^#]+)#Z;/NEV;J\1=Z;\\
 /g
+10,\$s/SIGN;ABS;NEG;J([^=]+)=Z;/NEV;J\1=Z;\\
+/g
+10,\$s/SIGNF;ABS;NEG;J([^=]+)=Z;/NEV;J\1=Z;\\
+/g
+10,\$s/SIGN;ABS;NEG;J([^#]+)#Z;/NEV;J\1#Z;\\
+/g
+10,\$s/SIGNF;ABS;NEG;J([^#]+)#Z;/NEV;J\1#Z;\\
+/g
 10,\$s/ZERO;NEV;//g
 10,\$s/=Y([^;]+);/=Y\1;\\
 /g

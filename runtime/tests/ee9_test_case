@@ -71,19 +71,19 @@ HKT)
      signature=\#6151525720423034
      ;;
 MOB)
-     this_test="whet MANORBOY"
+     this_test="walgol MANORBOY"
      signature=\#1407535531421151
      ;;
 GPR)
-     this_test="whet GPSPRIMES"
-     signature=\#2462534671215633
+     this_test="walgol GPSPRIMES"
+     signature=\#3430267221624657
      ;;
 FLU)
-     this_test="whet FLUID"
+     this_test="walgol FLUID"
      signature=\#3755315062014254
      ;;
 WBM)
-     this_test="whet WHETSTONE"
+     this_test="walgol WHETSTONE"
      signature=\#7636155453113124
      ;;
 RLT)
@@ -99,11 +99,11 @@ TOX)
      signature=\#5346716617576440
      ;;
 MTW)
-     this_test="whet MTW"
+     this_test="walgol MTW"
      signature=\#1610433227767503
      ;;
 INP)
-     this_test="whet INPUT"
+     this_test="walgol INPUT"
      signature=\#3301160711524477
      ;;
 *)

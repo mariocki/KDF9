@@ -1,6 +1,6 @@
 !begin
 
-!library A1, A5, A12, A15;
+!library A6, A12;
 
 !integer  i, j, k, m, n, p;
 

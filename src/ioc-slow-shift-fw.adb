@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -78,7 +78,7 @@ package body IOC.slow.shift.FW is
    end escaped;
 
    red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
-   black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
+   black_font : constant String := escaped("BLACK_FONT", "ESC[0m");
    underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
    plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
 
@@ -576,11 +576,13 @@ package body IOC.slow.shift.FW is
                word := fetch_word(w) and 8#377#;
                size := size + 1;
                char := Character'Val(word);
-
-               if word = KDF9_char_sets.Semi_Colon_tape_bits then
+               if word = KDF9_char_sets.Semi_Colon_tape_bits and then
+                     not the_FW.is_transcribing                  then
                   -- Hypothesis: POC and POD act like POA and POB with respect to prompting;
                   --    and change from writing to reading after the output of any word that has
                   --       the KDF9 FW tape code for a semicolon in its least significant 8 bits.
+                  -- This takes effect iff the device is not "transcribing",
+                  --     i.e. not doing Latin-1 output transparently.
                   declare
                      the_prompt : constant String := contents(the_FW.output);
                   begin
@@ -590,30 +592,27 @@ package body IOC.slow.shift.FW is
                      set_text_style_to_plain(the_FW.output);
                      put_byte(';', the_FW.output);
                      flush(the_FW.output, the_pause);
-
                      inject_a_response(the_FW, neat(the_prompt), size);
-
                      the_FW.mode := the_flexowriter_is_reading;
                      set_text_style_to_plain(the_FW.output);
                   end;
                elsif flexowriter_output_is_wanted then
-
-                        if char = '_' then
-                           underlined := True;
-                           do_not_put_byte(char, the_FW.output);
-                           flush(the_FW.output, the_pause);
-                        else
-                           if underlined then
-                              set_text_style_to_underline(the_FW.output);
-                           end if;
-                           put_char(char, the_FW.output);
-                           if underlined then
-                              flush(the_FW.output, the_pause);
-                              set_text_style_to_plain(the_FW.output);
-                              set_text_colour_to_red(the_FW.output);
-                              underlined := False;
-                           end if;
-                        end if;
+                  if char = '_' then
+                     underlined := True;
+                     do_not_put_byte(char, the_FW.output);
+                     flush(the_FW.output, the_pause);
+                  else
+                     if underlined then
+                        set_text_style_to_underline(the_FW.output);
+                     end if;
+                     put_char(char, the_FW.output);
+                     if underlined then
+                        flush(the_FW.output, the_pause);
+                        set_text_style_to_plain(the_FW.output);
+                        set_text_colour_to_red(the_FW.output);
+                        underlined := False;
+                     end if;
+                  end if;
       exit word_loop when transfer_to_EM and then word = KDF9_char_sets.End_Message_tape_bits;
                end if;
 

@@ -179,9 +179,6 @@ ${TESTS}/ee9_test_run WICH "run_wich_tests ahipr a" >${LOGS}/ee9_test_case4.log
 iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case4.log) -t UTF8 <${LOGS}/ee9_test_case4.log >${TEMPORARY}/ee9_test_case4.log
 cat ${TEMPORARY}/ee9_test_case4.log >>${LOGS}/ee9_test_case.log
 
-#iconv -f $(file -b --mime-encoding ${LOGS}/ee9_test_case.log) -t UTF8 <${LOGS}/ee9_test_case.log >/tmp/ee9_test_case.log
-#cat /tmp/ee9_test_case.log >${LOGS}/ee9_test_case.log
-
 diff -diwB --strip-trailing-cr -I 'The Usercode*' -I 'Compilation successful.' ${LOGS}/ee9_test_case.log ${TESTS}/ee9_regr_tests_good.log >${LOGS}/ee9_test_case.diff
 
 if [ ! \( -s ${LOGS}/ee9_test_case.diff \) ]; then

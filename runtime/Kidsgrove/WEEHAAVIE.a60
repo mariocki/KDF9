@@ -1,4 +1,5 @@
-!begin  !library A0, A1, A5, A15;
+!begin
+!library A0, A6, A12;
 
    !comment  HAVIE INTEGRATOR. ALGORITHM 257, Robert N. Kubik, CACM 8 (1965) 381;
 

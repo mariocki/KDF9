@@ -36,7 +36,7 @@ export CC=gcc
 export CFLAGS=-funwind-tables -march=native -O3 -funroll-loops -fno-stack-check
 GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W -gnatw.B -gnatwC -gnatw.u -gnatw.Y -gnatw.K -gnatyO
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.Y
-GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn
+GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn -gnatfn -mtune=native -O3
 
 .PHONY: all
 all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp

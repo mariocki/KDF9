@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a 2-case (Normal/Shift) buffer.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -125,17 +125,18 @@ package body IOC.slow.shift is
                         Q_operand     : in KDF9.Q_register;
                         reading_to_EM : in Boolean) is
 
-      function deframed (byte : Character)
+      function reframed (byte : Character)
       return KDF9.word is
          data : KDF9.word;
-      begin -- deframed
-         -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+      begin -- reframed
+         -- Permute the paper tape frame bits to make a data byte, see the Manual, § 17.7, pp. 137-138.
+         -- This is the converse of put_words.reframed.
          data := KDF9.word(Character'Pos(byte));
          return  (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
               or (data and 2#0110_0000#)/2  -- D41-D42 -> D42-D43
               or (data and 2#0001_0000#)*4  -- D43     -> D41
               or (data and 2#1000_0000#);   -- D40     -> D40
-      end deframed;
+      end reframed;
 
       start_address : constant KDF9.address := Q_operand.I;
       end_address : constant KDF9.address := Q_operand.M;
@@ -155,7 +156,7 @@ package body IOC.slow.shift is
          else
             -- KDF9 mode.
             get_frame_from_stream(char, the_device);
-            word := deframed(char);
+            word := reframed(char);
             done := KDF9_char_sets.symbol(word and 8#77#) = End_Message;
          end if;
          store_word(word, w);
@@ -241,7 +242,8 @@ package body IOC.slow.shift is
       return Character is
          data : KDF9.word:= KDF9.word(Character'Pos(byte));
       begin -- reframed
-         -- Permute the paper tape frame bits, see the Manual, § 17.7, pp. 137-138.
+         -- Permute the data bits to make a paper tape frame, see the Manual, § 17.7, pp. 137-138.
+         -- This is the converse of get_words.reframed.
          data := (data and 2#0000_1111#)    -- D44-D47 -> D44-D47
               or (data and 2#0011_0000#)*2  -- D42-D43 -> D41-D42
               or (data and 2#0100_0000#)/4  -- D41     -> D43

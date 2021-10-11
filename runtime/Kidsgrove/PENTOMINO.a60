@@ -1,5 +1,5 @@
 !begin !comment pentomino, 130968;
-!library A0, A1, A4, A5, A12, A15;
+!library A6, A12;
 !integer  solution count, max solution count;
 !integer  piece number, piece count, place count;
 !integer  board length, board width, board area;
@@ -13,6 +13,7 @@ form3id := format({ndd});
 
 printer := 30;
 open(printer);
+
 reader := 20;
 open(reader);
 

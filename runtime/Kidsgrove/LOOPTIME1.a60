@@ -11,5 +11,4 @@
 !integer  i;
 !for  i := 1 !step  1 !until  1 000 000 !do
 !end
-****
 |

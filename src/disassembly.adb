@@ -1,6 +1,6 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -435,15 +435,15 @@ package body disassembly is
                              )
    return String is
       opcode       : constant KDF9.compressed_opcode := decoded.compressed_opcode;
-      operand      : KDF9.Q_part renames decoded.operand;
-
-      as_octal   : constant String := oct_of(operand, 1);
-      as_decimal : constant String := signed_dec_of(operand);
-      number     : constant String := (if in_octal then "#" & as_octal else as_decimal);
+      is_SET         : constant Boolean                := (opcode and 2#111#) = SET;
+      operand       : KDF9.Q_part renames decoded.operand;
+      as_octal      : constant String := oct_of(operand, 1);
+      as_decimal    : constant String := signed_dec_of(operand);
+      number        : constant String := (if in_octal then "#" & as_octal else as_decimal);
       the_bare_name : constant String := (
-                                          if operand > 2**15
+                                          if operand not in KDF9.address
                                           then "E" & number
-                                          else symbolic(operand, in_octal, opcode /= SET)
+                                          else symbolic(operand, in_octal, is_SET)
                                          );
 
       Qq        : KDF9.Q_number    renames decoded.Qq;

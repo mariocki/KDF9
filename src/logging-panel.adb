@@ -1,6 +1,6 @@
 -- Provide logging output to an interactive terminal/control panel.
 --
--- This file is part of ee9 (8.0k), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -107,7 +107,7 @@ package body logging.panel is
       loop
          logger.column_number := 1;
          POSIX.debug_prompt(noninteractive_usage_is_enabled, reason, response, choice);
-         if response = name_response then
+         if response = debug_response then
             case choice is
                when 'q' | 'Q' =>
                   quit_was_requested := True;
