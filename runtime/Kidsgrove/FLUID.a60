@@ -50,10 +50,10 @@
 
 	write text (10,
 	            {
-	              Propagation _ of _ an _ Impulse _ into _ a _ Viscous-locking _ Medium
+	              Propagation$of$an$Impulse$into$a$Viscous-locking$Medium
 	              {cccc}
 	              {ssss}
-	              Delta _ alpha _ = _
+	              Delta$alpha$=$
 	            }
 	           );
 

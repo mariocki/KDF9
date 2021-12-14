@@ -1,0 +1,291 @@
+!begin
+
+   !library A1, A4, A13;
+
+   !integer A, B, C, D, E, F, G, H, I, J, K, L, M,
+            N, O, P, Q, R, S, T, U, V, W, X, Y, Z;
+   !integer LS, SP, SLASH, ZERO, NINE;
+
+   !procedure outch (ch); !value ch; !integer ch;
+      !if ch != 64 !then charout(30, ch);
+
+   !procedure divide (dividend, divisor, quotient, remainder);
+         !value dividend, divisor;
+         !integer dividend, divisor, quotient, remainder;
+      !begin
+      quotient := dividend !div divisor;
+      remainder := dividend  -  divisor  *  quotient;
+      !end divide;
+
+   !procedure outint (a); !value a; !integer a;
+      !begin
+      !integer q, r, n;
+      !if a < 0 !then
+         !begin
+         outch(30);
+         a := !if a < 0 !then -a !else a
+         !end;
+      divide(a, 10, q, r);
+      !if q != 0 !then
+         outint(q);
+      outch(r+ZERO)
+      !end of outint;
+
+   !integer nextch;
+
+   !integer !procedure inpch;
+      !begin
+      charin(20, nextch);
+      inpch := nextch;
+      !end inpch;
+
+   !integer !procedure next non blank;
+      !begin
+      lbl: !if nextch != 0 !then next non blank := inpch !else !goto lbl;
+      !end next non blank;
+
+   !integer !procedure inint;
+      !begin
+      !integer i, ch;
+      i := 0;
+   NEXT:
+      ch := inpch;
+      !if ch !ge ZERO !and ch !le NINE !then
+         !begin
+         i := i * 10 + (ch - ZERO);
+         !goto NEXT;
+         !end;
+      inint := i;
+      !end inint;
+
+   !comment In the following, adapted from the UCA3 originals, calls on the EGDON
+            error handling routine, P91, are replaced with inline quits (OUT 0);
+   !comment V and Y stores are replaced by Algol variables with similar names;
+
+   !integer V12P90, V13P90, V14P90, V15P90, V16P90;
+   !integer V4P9, V5P9, V6P9;
+
+   !integer !array YT [0 : 100];
+   !integer !array YU [0 : 100];
+
+   !integer !procedure partI (place); !value place; !integer place;
+      !KDF9 0/0/0/0;
+      {place}; DUP; =M3; DUP; V12P90; -; J101LTZ;
+      102; V13P90; -; J103GEZ;
+      104; M0M3; =Q3; C3;
+      !EXIT;
+      103; SET 10103; ZERO; OUT;
+      101; SET 10101; ZERO; OUT;
+      !ALGOL;
+
+   !integer !procedure partJ (place); !value place; !integer place;
+      !KDF9 0/0/0/0;
+      {place}; DUP; =M3; DUP; V12P90; -; J201LTZ;
+      202; V13P90; -; J203GEZ;
+      204; M0M3; =Q3; I3;
+      !EXIT;
+      203; SET 10203; ZERO; OUT;
+      201; SET 10201; ZERO; OUT;
+      !ALGOL;
+
+   !integer !procedure partK (place); !value place; !integer place;
+      !KDF9 0/0/0/0;
+      {place}; DUP; =M3; DUP; V12P90; -; J301LTZ;
+      302; V13P90; -; J303GEZ;
+      304; M0M3; =Q3; M3;
+      !EXIT;
+      303; SET 10303; ZERO; OUT;
+      301; SET 10301; ZERO; OUT;
+      !ALGOL;
+
+   !procedure setI (place, value); !value place, value; !integer place, value;
+      !KDF9 0/0/0/0;
+      {value}; =C6; {place}; DUP; DUP;
+      =Q5; V12P90; -; J401LTZ;
+      402; V13P90; -; J403GEZ;
+      404; M0M5; =Q7; C6 TO Q7; -M0M5;
+      !EXIT;
+      403; SET 10403; ZERO; OUT;
+      401; SET 10401; ZERO; OUT;
+      !ALGOL;
+
+   !procedure setJ (place, value); !value place, value; !integer place, value;
+      !KDF9 0/0/0/0;
+      {value}; =I6; {place}; DUP; DUP;
+      =Q5; V12P90; -; J501LTZ;
+      502; V13P90; -; J503GEZ;
+      504; M0M5; =Q7; I6 TO Q7; -M0M5;
+      !EXIT;
+      503; SET 10503; ZERO; OUT;
+      501; SET 10501; ZERO; OUT;
+      !ALGOL;
+
+   !procedure setK (place, value); !value place, value; !integer place, value;
+      !KDF9 0/0/0/0;
+      {value}; =M6; {place}; DUP; DUP;
+      =Q5; V12P90; -; J601LTZ;
+      602; V13P90; -; J603GEZ;
+      604; M0M5; =Q7; M6 TO Q7; -M0M5;
+      !EXIT;
+      603; SET 10603; ZERO; OUT;
+      601; SET 10601; ZERO; OUT;
+      !ALGOL;
+
+   !integer !procedure IJK (iPart, jPart, kPart);
+      !value iPart, jPart, kPart;
+      !integer iPart, jPart, kPart;
+      !KDF9 0/0/0/0;
+      11;  V14P90; DUP; DUP; J200=Z;
+      110; V15P90; V16P90;   J300=;
+      =Q4; =M0M4; Q4; =V15P90;
+      111; DUP; =M4; M0M4; =M4; M4; =V14P90;
+      =Q3; {kPart}; =M7; {jPart}; =I7; {iPart}; =C7;
+      Q7; =M0M3; Q3;
+      !EXIT;
+      200; ( when available, JSP92, the garbage collector then J110);
+      300; SET 11130; ZERO; OUT;
+      !ALGOL;
+
+   !integer !procedure combine (state, action); !value state, action; !integer state, action;
+      !KDF9 0/0/0/0;
+      {state}; SHL+6; {action}; OR;
+      !EXIT;
+      !ALGOL;
+
+   !procedure split (rule, state, action); !value state; !integer rule, state, action;
+      !KDF9 0/0/0/0;
+      {rule}; DUP; SET B77; AND; ={action};
+      SHL-6; SET B1777; AND; ={state};
+      !EXIT;
+      !ALGOL;
+
+   !procedure clear the tape; !comment P9;
+      !KDF9 0/0/0/0;
+      V0=AYT0; V1=AYU0; V2=0; V4=0; V5=0; V6=0;
+      V1; V0; -; =V2; V2; =RC5; ZERO; =V4;
+      V2; SET 2; ÷I; ERASE; =V5; ZERO; =V6;
+      *11; ZERO; =YT0M5Q; *J11C5NZS;
+      !EXIT;
+      !ALGOL;
+
+   !procedure move the tape left;
+      !KDF9 0/0/0/0;
+      V6P9; SET7; J21=; NOT; NEG; =V6P9;
+      !EXIT;
+      21; ERASE; ZERO; =V6P9; V5P9; =RM5; V4P9; =YT0M5Q;
+      M5; V2P9; J22=; =V5P9; YT0M5; =V4P9;
+      !EXIT;
+      22; SET 22; ZERO; OUT;
+      !ALGOL;
+
+   !procedure move the tape right;
+      !KDF9 0/0/0/0;
+      V6P9; DUP; J31=Z; NEG; NOT; =V6P9;
+      !EXIT;
+      31; ERASE; SET 7; =V6P9; V5P9; =RM5; V4P9; =YT0M5Q;
+      M5; J32=Z; M-I5; M5; =V5P9; YT0M5; =V4P9;
+      !EXIT;
+      32; SET 32; ZERO; OUT;
+      !ALGOL;
+
+   !procedure write to tape (character); !value character; !integer character;
+      !KDF9 0/0/0/0;
+      SET 7; V6P9; -; SHL+1; DUP; SHL+1; +; =C8;
+      {character}; DUP; SHLC8;
+      SET B77; SHLC8; NOT; V4P9; AND;
+      OR; =V4P9;
+      !EXIT;
+      !ALGOL;
+
+   !integer !procedure read from tape;
+      !KDF9 0/0/0/0;
+      SET 7; V6P9; -; SHL+1; DUP; SHL+1; +; =C8;
+      SET B77; SHLC8; NOT; V4P9; AND;
+      NC8; SHLC8;
+      !EXIT;
+      !ALGOL;
+
+   !integer !procedure CPU time in seconds;
+   !KDF9 0/0/0/0;
+   SET 3; OUT; (This is the same as OUT 122 in EGDON);
+   SHA-24;
+   !EXIT;
+   !ALGOL;
+
+
+   !integer !array LAV[1:1], ILF[1:1];
+   !integer LSL, LAL, IDP, name tree;
+
+   !integer !procedure insert rule (state, symbol, action, node);
+         !value   state, symbol, action, node;
+         !integer state, symbol, action, node;
+         !comment insert a Turing machine rule (state, symbol, action) in the match tree at node;
+      !begin
+      !integer ch, trigger;
+      trigger := combine(state, symbol);
+      !if node = 0 !then
+         insert rule := IJK(trigger, action, 0)
+      !else
+         !if partK(node) = 0 !then
+            !begin
+            !if action > partJ(node)
+               !then insert rule := IJK(trigger, action, IJK(node, -1, 0))
+            !else
+               !if action = partJ(node) !then
+                  !begin
+                  insert rule := node;
+                  outch(SLASH);
+                  setI(node, trigger);
+                  outch(Q);
+                  outint(state);
+                  !for ch := SP, S, action, SP, R, E, P, L, A, C, E, D, LS !do outch(ch)
+                  !end
+               !else
+                  insert rule(IJK(trigger, action, IJK(0, 0, 0)))
+            !end
+         !else
+            !begin
+            insert rule := node;
+            !if action <= partJ(node) !then
+               setK(node, IJK(insert rule(state, symbol, action, partI(partK(node))), -1, partK(partK(node))))
+            !else
+               setK(node, IJK(partI(partK(node)), -1, insert rule(state, symbol, action, partK(partK(node)))))
+            !end
+      !end of insert rule;
+
+   !procedure print state;
+      !begin
+      !integer ch;
+      outch(Q);
+      outint(current state);
+      outch(S);
+      outch(current symbol);
+      !if found !then
+         !begin
+         outch(rule type);
+         outint(next state);
+         !end
+      !else
+         !for ch := N, O, T, SP, F, O, U, N, D, LS !do outch(ch);
+      !end print state;
+
+   !procedure print the tape expression;
+      !begin
+      !integer ch;
+      !for ch := T, A, P, E, LS !do outch(ch);
+      print state;
+      !end print the tape expression;
+
+   !procedure add to the tape; ;
+
+   !integer current state, current symbol, rule type, next state;
+   !boolean found, tape input mode;
+   !integer char;
+
+
+STOP:
+   !if tape input mode !then add to the tape;
+   !for char := LS, SLASH, S, T, O, P, S, LS !do outch(char);
+
+!end of AMTSIM
+|

@@ -49,47 +49,47 @@
    !real answer, pi;
    !integer ii;
 
-   writetext(30, {minitest_0_to_2_x^3 _ = _ });
+   writetext(30, {minitest$0$to$2$x^3$=$});
    answer := int(0, 2, minitest);
    output(30, answer);
-   writetext(30, {Now _ for _ the _ square _ root });
+   writetext(30, {Now$for$the$square$root });
    output(30, sqrt(answer));
    pi := answer*arctan(1.0);
-   writetext(30, {This _ is _ the _ value _ of _ pi _ calculated _ using _ arctan _ });
+   writetext(30, {This$is$the$value$of$pi$calculated$using$arctan$});
    output(30, pi);
    answer := sin(pi/6.0);
-   writetext(30, {sin _ pi/6 _ which _ should _ be _ a _ half _ });
+   writetext(30, {sin$pi/6$which$should$be$a$half$});
    output(30, answer);
    answer := cos(pi/6.0);
-   writetext(30, {cos _ pi/6 _ which _ should _ be _ a _ the _ same _ as _ the _ next _ result _ });
+   writetext(30, {cos$pi/6$which$should$be$a$the$same$as$the$next$result$});
    output(30, answer);
-   writetext(30, {should _ be _ same _ as _ the _ previous _ });
+   writetext(30, {should$be$same$as$the$previous$});
    answer := sqrt(3.0)/2.0;
    output(30, answer);
 
-   writetext(30, {Now _ square _ it _ to _ get _ 3/4 _ });
+   writetext(30, {Now$square$it$to$get$3/4$});
    output(30, answer^2);
 
    ii := 3;
-   writetext(30, {3^3 _ = _  });
+   writetext(30, {3^3$=$});
    output(30, ii^ii);
-   writetext(30, {Integer _ divide _ 3 _ squared _ by _ 2 _ });
+   writetext(30, {Integer$divide$3$squared$by$2$});
    output(30, ii^2 % 2);
 
-   writetext(30, {Calculate _ e _ using _ exp _ });
+   writetext(30, {Calculate$e$using$exp$});
    answer := exp(1.0);
    output(30, answer);
-   writetext(30, {... _ and _ take _ its _ log _ });
+   writetext(30, {...$and$take$its$log$});
    output(30, ln(answer));
 
-   writetext(30, {{c}fulltest_0_to_1_triangle_ = _});
+   writetext(30, {{c}fulltest$0$to$1$triangle$=$});
    answer := int(0, 1, intfy);
    output(30, answer);
 
-   writetext(30, {Testing _ exponentiation: _ 2 ^ 4 _ = _});
+   writetext(30, {Testing$exponentiation:$2 ^ 4$=$});
    answer := 4.0;
    output(30, 2^answer);
-   writetext(30, {Testing _ exponentiation: _ 2 ^ 4.0 _ = _});
+   writetext(30, {Testing$exponentiation:$2 ^ 4.0$=$});
    output(30, 2.0^answer);
 
 !end

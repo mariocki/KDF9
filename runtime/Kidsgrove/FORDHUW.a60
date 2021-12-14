@@ -1,5 +1,5 @@
-'begin' 
-'library' A0, A1, A4, A5, A15;
+'begin'
+'library' A0, A1, A4, A5, A12, A15;
 
    'integer' layout;
 
@@ -10,43 +10,43 @@
    epsilon := (1.0 / (2.0 ^ 39)) / 2.0;
    delta := 1.0º-37 / 10.0;
 
-   writetext(30, { _ delta _ = _ }); write(30, layout, delta);
+   writetext(30, {$delta$=$}); write(30, layout, delta);
    newline(30, 1);
-   writetext(30, { _ epsilon _ = _ 1/2^40 _ = _ }); write(30, layout, epsilon);
+   writetext(30, {$epsilon$=$1/2^40$=$}); write(30, layout, epsilon);
    newline(30, 1);
 
 
    x := 3.14159265359 / 4.0;
    w := x - epsilon;
-   write(30, layout, x - w); writetext(30, {x _ - _ w{c}});
+   write(30, layout, x - w); writetext(30, {x$-$w{c}});
    y := x + epsilon;
-   write(30, layout, y - x); writetext(30, {y _ - _ x{cc}});
+   write(30, layout, y - x); writetext(30, {y$-$x{cc}});
 
-   writetext(30, { _ x _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _  _ sin _ x _  _  _  _  _  _  _  _  _  _  _  _  _  _  _ cos _ x _  _  _  _  _  _  _  _  _  _  _  _  _  _  _ sin _ x _ / _ cos _ x _  _  _  _  _  _  _ arctan _ sin _ / _ cos _  _  _  _ (arctan-x)/epsilon});
+   writetext(30, {$x$$$$$$$$$$$$$$$$$$$sin$x$$$$$$$$$$$$$$$cos$x$$$$$$$$$$$$$$$sin$x$/$cos$x$$$$$$$arctan$sin$/$cos$$$$(arctan-x)/epsilon});
    newline(30, 1);
 
-      write(30, layout, w); writetext(30, { _  _ });
-      write(30, layout, sin(w)); writetext(30, { _  _ });
-      write(30, layout, cos(w)); writetext(30, { _  _ });
-      write(30, layout, sin(w)/cos(w)); writetext(30, { _  _ });
-      write(30, layout, arctan(sin(w)/cos(w))); writetext(30, { _  _ });
+      write(30, layout, w); writetext(30, {$$});
+      write(30, layout, sin(w)); writetext(30, {$$});
+      write(30, layout, cos(w)); writetext(30, {$$});
+      write(30, layout, sin(w)/cos(w)); writetext(30, {$$});
+      write(30, layout, arctan(sin(w)/cos(w))); writetext(30, {$$});
       write(30, layout, (arctan(sin(w)/cos(w)) - w) / epsilon);
       newline(30, 1);
 
-      write(30, layout, x); writetext(30, { _  _ });
-      write(30, layout, sin(x)); writetext(30, { _  _ });
-      write(30, layout, cos(x)); writetext(30, { _  _ });
-      write(30, layout, sin(x)/cos(x)); writetext(30, { _  _ });
-      write(30, layout, arctan(sin(x)/cos(x))); writetext(30, { _  _ });
+      write(30, layout, x); writetext(30, {$$});
+      write(30, layout, sin(x)); writetext(30, {$$});
+      write(30, layout, cos(x)); writetext(30, {$$});
+      write(30, layout, sin(x)/cos(x)); writetext(30, {$$});
+      write(30, layout, arctan(sin(x)/cos(x))); writetext(30, {$$});
       write(30, layout, (arctan(sin(x)/cos(x)) - x) / epsilon);
       newline(30, 1);
 
-      write(30, layout, y); writetext(30, { _  _ });
-      write(30, layout, sin(y)); writetext(30, { _  _ });
-      write(30, layout, cos(y)); writetext(30, { _  _ });
-      write(30, layout, sin(y)/cos(y)); writetext(30, { _  _ });
-      write(30, layout, arctan(sin(y)/cos(y))); writetext(30, { _  _ });
+      write(30, layout, y); writetext(30, {$$});
+      write(30, layout, sin(y)); writetext(30, {$$});
+      write(30, layout, cos(y)); writetext(30, {$$});
+      write(30, layout, sin(y)/cos(y)); writetext(30, {$$});
+      write(30, layout, arctan(sin(y)/cos(y))); writetext(30, {$$});
       write(30, layout, (arctan(sin(y)/cos(y)) - y) / epsilon);
       newline(30, 2);
-'end' 
+'end'
 |

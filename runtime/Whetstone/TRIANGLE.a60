@@ -1,6 +1,6 @@
 TRIANGLE|
 _b_e_g_i_n
-
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A6;
 
    _c_o_m_m_e_n_t program to integrate f(x,y) over triangle (0,0), (1,0), (1,1);
    _c_o_m_m_e_n_t extra parameter to intint makes it work;
@@ -50,47 +50,47 @@ _b_e_g_i_n
    _r_e_a_l answer, pi;
    _i_n_t_e_g_e_r ii;
 
-   writetext(30, _[minitest*0*to*2*x^3 * = * _]);
+   writetext(30, _[minitest*0*to*2*x^3*=*_]);
    answer := int(0, 2, minitest);
    output(30, answer);
-   writetext(30, _[Now * for * the * square * root _]);
+   writetext(30, _[Now*for*the*square*root _]);
    output(30, sqrt(answer));
    pi := answer×arctan(1.0);
-   writetext(30, _[This * is * the * value * of * pi * calculated * using * arctan * _]);
+   writetext(30, _[This*is*the*value*of*pi*calculated*using*arctan*_]);
    output(30, pi);
    answer := sin(pi/6.0);
-   writetext(30, _[sin * pi/6 * which * should * be * a * half * _]);
+   writetext(30, _[sin*pi/6*which*should*be*a*half*_]);
    output(30, answer);
    answer := cos(pi/6.0);
-   writetext(30, _[cos * pi/6 * which * should * be * a * the * same * as * the * next * result * _]);
+   writetext(30, _[cos*pi/6*which*should*be*a*the*same*as*the*next*result*_]);
    output(30, answer);
-   writetext(30, _[should * be * same * as * the * previous * _]);
+   writetext(30, _[should*be*same*as*the*previous*_]);
    answer := sqrt(3.0)/2.0;
    output(30, answer);
 
-   writetext(30, _[Now * square * it * to * get * 3/4 * _]);
+   writetext(30, _[Now*square*it*to*get*3/4*_]);
    output(30, answer^2);
 
    ii := 3;
-   writetext(30, _[3^3 * = *  _]);
+   writetext(30, _[3^3*=*_]);
    output(30, ii^ii);
-   writetext(30, _[Integer * divide * 3 * squared * by * 2 * _]);
+   writetext(30, _[Integer*divide*3*squared*by*2*_]);
    output(30, ii^2 ÷ 2);
 
-   writetext(30, _[Calculate * e * using * exp * _]);
+   writetext(30, _[Calculate*e*using*exp*_]);
    answer := exp(1.0);
    output(30, answer);
-   writetext(30, _[... * and * take * its * log * _]);
+   writetext(30, _[...*and*take*its*log*_]);
    output(30, ln(answer));
 
-   writetext(30, _[_[c_]fulltest*0*to*1*triangle* = *_]);
+   writetext(30, _[_[c_]fulltest*0*to*1*triangle*=*_]);
    answer := int(0, 1, intfy);
    output(30, answer);
 
-   writetext(30, _[Testing * exponentiation: * 2 ^ 4 * = *_]);
+   writetext(30, _[Testing*exponentiation:*2 ^ 4*=*_]);
    answer := 4.0;
    output(30, 2^answer);
-   writetext(30, _[Testing * exponentiation: * 2 ^ 4.0 * = *_]);
+   writetext(30, _[Testing*exponentiation:*2 ^ 4.0*=*_]);
    output(30, 2.0^answer);
 
 _e_n_d

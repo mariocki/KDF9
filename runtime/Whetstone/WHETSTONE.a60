@@ -1,14 +1,16 @@
-WHETSTONEBMK|
+WHETSTONE|
 _b_e_g_i_n
 
-_r_e_a_l x1, x2, x3, x4, x, y, z , t, t1, t2, a, b, c;
-_a_r_r_a_y e[1:4];
-_i_n_t_e_g_e_r i, j , k, l, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A1, A4, A5, A15;
 
-_p_r_o_c_e_d_u_r_e pa(ep);
-   _r_e_a_l _a_r_r_a_y ep;
+_r_e_a_l  x1, x2, x3, x4, x, y, z , t, t1, t2;
+_a_r_r_a_y  e[1:4];
+_i_n_t_e_g_e_r  i, j , k, l, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
+
+_p_r_o_c_e_d_u_r_e  pa(ep);
+   _r_e_a_l  _a_r_r_a_y  ep;
 _b_e_g_i_n
-   _i_n_t_e_g_e_r j ;
+   _i_n_t_e_g_e_r  j ;
    j := 0;
    lab:
    ep[1] := (ep[1] + ep[2] + ep[3] - ep[4])  × t;
@@ -16,176 +18,176 @@ _b_e_g_i_n
    ep[3] := (ep[1] - ep[2] + ep[3] + ep[4])  × t;
    ep[4] := (-ep[1] + ep[2] + ep[3] + ep[4]) / t2;
    j := j + 1;
-   _i_f j < 6 _t_h_e_n
-   _g_o_t_o lab;
-_e_n_d _p_r_o_c_e_d_u_r_e pa;
+   _i_f  j < 6 _t_h_e_n
+   _g_o_t_o  lab;
+_e_n_d  _p_r_o_c_e_d_u_r_e  pa;
 
-_p_r_o_c_e_d_u_r_e p0;
+_p_r_o_c_e_d_u_r_e  p0;
 _b_e_g_i_n
    e[j] := e[k];
    e[k] := e[l];
    e[l] := e[j];
-_e_n_d _p_r_o_c_e_d_u_r_e p0;
+_e_n_d  _p_r_o_c_e_d_u_r_e  p0;
 
-_p_r_o_c_e_d_u_r_e p3(x, y, z );
-   _v_a_l_u_e x, y;
-   _r_e_a_l x, y, z ;
+_p_r_o_c_e_d_u_r_e  p3(x, y, z );
+   _v_a_l_u_e  x, y;
+   _r_e_a_l  x, y, z ;
 _b_e_g_i_n
    x := t × (x + y);
    y := t × (x + y);
    z := (x + y)/t2;
-_e_n_d _p_r_o_c_e_d_u_r_e p3;
+_e_n_d  _p_r_o_c_e_d_u_r_e  p3;
 
-_p_r_o_c_e_d_u_r_e pout(n, j , k, x1, x2, x3, x4);
-   _v_a_l_u_e n, j , k, x1, x2, x3, x4;
-   _i_n_t_e_g_e_r n, j , k;
-   _r_e_a_l x1, x2, x3, x4;
+_p_r_o_c_e_d_u_r_e  pout(n, j , k, x1, x2, x3, x4);
+   _v_a_l_u_e  n, j , k, x1, x2, x3, x4;
+   _i_n_t_e_g_e_r  n, j , k;
+   _r_e_a_l  x1, x2, x3, x4;
 _b_e_g_i_n
    writetext(30, _[n=_]);   write(30, format(_[nnnd_]), n);
-   writetext(30, _[*j=_]);  write(30, format(_[nnnd_]), j);
-   writetext(30, _[*k=_]);  write(30, format(_[nnnd_]), k);
-   writetext(30, _[*x1=_]); write(30, format(_[+d.dddddddd_]), x1);
-   writetext(30, _[*x2=_]); write(30, format(_[+d.dddddddd_]), x2);
-   writetext(30, _[*x3=_]); write(30, format(_[+d.dddddddd_]), x3);
-   writetext(30, _[*x4=_]); write(30, format(_[+d.dddddddd_]), x4);
+   writetext(30, _[ * j=_]);  write(30, format(_[nnnd_]), j);
+   writetext(30, _[ * k=_]);  write(30, format(_[nnnd_]), k);
+   writetext(30, _[ * x1=_]); write(30, format(_[+d.dddddddd_]), x1);
+   writetext(30, _[ * x2=_]); write(30, format(_[+d.dddddddd_]), x2);
+   writetext(30, _[ * x3=_]); write(30, format(_[+d.dddddddd_]), x3);
+   writetext(30, _[ * x4=_]); write(30, format(_[+d.dddddddd_]), x4);
    writetext(30, _[_[c_]_]);
-_e_n_d _p_r_o_c_e_d_u_r_e pout;
+_e_n_d  _p_r_o_c_e_d_u_r_e  pout;
 
 open(30);
 
-_c_o_m_m_e_n_t initialise constants;
+_c_o_m_m_e_n_t  initialise constants;
 t  := 0.499975;
 t1 := 0.50025;
 t2 := 2.0;
 
-_c_o_m_m_e_n_t read i, controlling total weight:
+_c_o_m_m_e_n_t  read i, controlling total weight:
    if i=1 the total weight is one million Whetstone instructions:
    Walgol ran at 2.4KWIPS, so this should take 417 KDF9 CPU seconds;
 i := 1;
-i  := i × 10;
+i  := i  × 10;
 n1 := 0;
-n2 := 12 ×i;
-n3 := 14 ×i;
-n4 := 345 ×i;
+n2 := 12  × i;
+n3 := 14  × i;
+n4 := 345 × i;
 n5 := 0;
-n6 := 210 ×i;
-n7 := 32 ×i;
-n8 := 899 ×i;
-n9 := 616 ×i;
+n6 := 210 × i;
+n7 := 32  × i;
+n8 := 899 × i;
+n9 := 616 × i;
 n10 := 0;
-n11 := 93 ×i;
+n11 := 93 × i;
 
-_c_o_m_m_e_n_t module 1: simple identifiers;
+_c_o_m_m_e_n_t  module 1: simple identifiers;
 x1 := 1.0;
 x2 := x3 := x4 := -1.0;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n1 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n1 _d_o
 _b_e_g_i_n
-   x1 := (x1 + x2 + x3 - x4) ×t;
-   x2 := (x1 + x2 - x3 + x4) ×t;
-   x3 := (x1 - x2 + x3 + x4) ×t;
-   x4 := (-x1 + x2 + x3 + x4) ×t;
-_e_n_d module 1;
+   x1 := (x1 + x2 + x3 - x4)  × t;
+   x2 := (x1 + x2 - x3 + x4)  × t;
+   x3 := (x1 - x2 + x3 + x4)  × t;
+   x4 := (-x1 + x2 + x3 + x4) × t;
+_e_n_d  module 1;
 pout(n1, n1, n1, x1, x2, x3, x4);
 
-_c_o_m_m_e_n_t module 2: array elements;
+_c_o_m_m_e_n_t  module 2: array elements;
 e[1] := 1.0;
 e[2] := e[3] :=e[4] := -1.0;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n2 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n2 _d_o
 _b_e_g_i_n
    e[1] := (e[1] + e[2] + e[3] - e[4])  × t;
    e[2] := (e[1] + e[2] - e[3] + e[4])  × t;
    e[3] := (e[1] - e[2] + e[3] + e[4])  × t;
    e[4] := (-e[1] + e[2] + e[3] + e[4]) × t;
-_e_n_d module 2;
+_e_n_d  module 2;
 pout(n2, n3, n2, e[1], e[2], e[3], e[4]);
 
-_c_o_m_m_e_n_t module 3: _a_r_r_a_y as parameter;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n3 _d_o
+_c_o_m_m_e_n_t  module 3: _a_r_r_a_y  as parameter;
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n3 _d_o
    pa(e);
 pout(n3, n2, n2, e[1], e[2], e[3], e[4]);
 
-_c_o_m_m_e_n_t module 4: conditional jumps;
+_c_o_m_m_e_n_t  module 4: conditional jumps;
 j := 1;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n4 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n4 _d_o
 _b_e_g_i_n
-   _i_f j = 1 _t_h_e_n
+   _i_f  j = 1 _t_h_e_n
       j := 2
    _e_l_s_e
       j := 3;
-   _i_f j > 2 _t_h_e_n
+   _i_f  j > 2 _t_h_e_n
       j := 0
    _e_l_s_e
       j := 1;
-   _i_f j < 1 _t_h_e_n
+   _i_f  j < 1 _t_h_e_n
       j := 1
    _e_l_s_e
       j := 0;
-_e_n_d module 4;
+_e_n_d  module 4;
 pout(n4, j , j , x1, x2, x3, x4);
 
-_c_o_m_m_e_n_t module 5: omitted;
+_c_o_m_m_e_n_t  module 5: omitted;
 
-_c_o_m_m_e_n_t module 6: _i_n_t_e_g_e_r arithmetic;
+_c_o_m_m_e_n_t  module 6: _i_n_t_e_g_e_r  arithmetic;
 j := 1;
 k := 2;
 l := 3;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n6 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n6 _d_o
 _b_e_g_i_n
    j := j × (k - j ) × (l - k);
    k := l × k - (l - j ) × k;
    l := (l - k) × (k + j );
    e[l - 1] := j + k + l;
    e[k - 1] := j × k × l;
-_e_n_d module 6;
+_e_n_d  module 6;
 pout(n6, j , k, e[1], e[2], e[3], e[4]);
 
-_c_o_m_m_e_n_t module 7: trig. functions;
+_c_o_m_m_e_n_t  module 7: trig. functions;
 x := y := 0.5;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n7 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n7 _d_o
 _b_e_g_i_n
    x := t × arctan(t2 × sin(x) × cos(x) / (cos(x + y) + cos(x - y) - 1.0));
    y := t × arctan(t2 × sin(y) × cos(y) / (cos(x + y) + cos(x - y) - 1.0));
-_e_n_d module 7;
+_e_n_d  module 7;
 pout(n7, j , k, x, x, y, y);
 
-_c_o_m_m_e_n_t module 8:
-_p_r_o_c_e_d_u_r_e calls;
+_c_o_m_m_e_n_t  module 8:
+_p_r_o_c_e_d_u_r_e  calls;
 x := y := z := 1.0;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n8 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n8 _d_o
 _b_e_g_i_n
    p3(x, y, z );
-_e_n_d module 8;
+_e_n_d  module 8;
 pout(n8, j , k, x, y, z , z );
 
-_c_o_m_m_e_n_t module 9: _a_r_r_a_y references;
+_c_o_m_m_e_n_t  module 9: _a_r_r_a_y  references;
 j := 1;
 k := 2;
 l := 3;
 e[1] := 1.0;
 e[2] := 2.0;
 e[3] := 3.0;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n9 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n9 _d_o
    p0;
 pout(n9, j , k, e[1], e[2], e[3], e[4]);
 
-_c_o_m_m_e_n_t module 10: _i_n_t_e_g_e_r arithmetic;
+_c_o_m_m_e_n_t  module 10: _i_n_t_e_g_e_r  arithmetic;
 j := 2;
 k := 3;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n10 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n10 _d_o
 _b_e_g_i_n
    j := j + k;
    k := j + k;
    j := k - j ;
    k := k - j - j ;
-_e_n_d module 10;
+_e_n_d  module 10;
 pout(n10, j , k, x1, x2, x3, x4);
 
-_c_o_m_m_e_n_t module 11: standard functions;
+_c_o_m_m_e_n_t  module 11: standard functions;
 x := 0.75;
-_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n11 _d_o
+_f_o_r  i := 1 _s_t_e_p  1 _u_n_t_i_l  n11 _d_o
 _b_e_g_i_n
    x := sqrt(exp(ln(x)/t1));
-_e_n_d module 11;
+_e_n_d  module 11;
 pout(n11, j , k, x, x, x, x);
 
 close(30);

@@ -19,7 +19,7 @@ open(reader);
 
 max solution count := read(reader);
 newline(printer,1);
-writetext(printer,{The _ first _ }); write(printer, form2id, max solution count); writetext(printer,{ _ solutions:});
+writetext(printer,{The$first$}); write(printer, form2id, max solution count); writetext(printer,{$solutions:});
 newline(printer,3);
 
 board length := read(reader);
@@ -37,24 +37,24 @@ board area   := board length × (board width - 1);
   !procedure  print solution;
      !begin
      !integer  i, j;
-     writetext(printer,{{c}print _solution: {c}});
-     writetext(printer,{{c}board _ length_ = });
+     writetext(printer,{{c}print$solution:{c}});
+     writetext(printer,{{c}board$length$=});
      write(printer, form3id, board length);
      newline(printer,1);
-     writetext(printer,{{c}board _ width_ = });
+     writetext(printer,{{c}board$width$=});
      write(printer, form3id, board width);
      newline(printer,1);
-     writetext(printer,{{c}piece _ count_ = });
+     writetext(printer,{{c}piece$count$=});
      write(printer, form3id, piece count);
      newline(printer,1);
-     writetext(printer,{{c}place _ count_ = });
+     writetext(printer,{{c}place$count$=});
      write(printer, form3id, place count);
      newline(printer,1);
      solution count := solution count + 1;
 
      !if solution count > max solution count !then
         !begin
-        writetext(printer,{{c}solution _ count_ = });
+        writetext(printer,{{c}solution$count$=});
         write(printer, form3id, solution count);
         newline(printer,3);
         !goto  END OF RUN;
@@ -64,7 +64,7 @@ board area   := board length × (board width - 1);
      !for  j := 1 !step  1 !until 2 × board length !do
         !begin
         writetext(printer,{-});
-        writetext(printer,{ _ })
+        writetext(printer,{$})
         !end;
      newline(printer,1);
      !for i := 0 !step board length !until board area !do
@@ -72,34 +72,34 @@ board area   := board length × (board width - 1);
         writetext(printer,{I});
         !for j := 1 !step 1 !until board length - 1 !do
            !begin
-           writetext(printer,{ _  _  _ });
+           writetext(printer,{$$$});
            !if  board[i + j] ± board[i + j + 1] !then
               writetext(printer,{I})
            !else
-              writetext(printer,{ _ })
+              writetext(printer,{$})
            !end;
-        writetext(printer,{ _  _  _ });
+        writetext(printer,{$$$});
         writetext(printer,{I});
         newline(printer,1);
-        writetext(printer,{ _ });
+        writetext(printer,{$});
         !if i < board area !then
            !begin
               !for j := 1 !step 1 !until board length !do
                  !begin
                  !if board[i + j] ± board[i + j + board length] !then
                     !begin
-                    writetext(printer,{-}); writetext(printer,{ _ });
-                    writetext(printer,{-}); writetext(printer,{ _ })
+                    writetext(printer,{-}); writetext(printer,{$});
+                    writetext(printer,{-}); writetext(printer,{$})
                     !end
                  !else
-                    writetext(printer,{ _  _  _  _ })
+                    writetext(printer,{$$$$})
                  !end
             !end
         !else
            !for j := 1 !step 1 !until 2 × board length !do
               !begin
               writetext(printer,{-});
-              writetext(printer,{ _ })
+              writetext(printer,{$})
               !end;
         newline(printer,1)
         !end;

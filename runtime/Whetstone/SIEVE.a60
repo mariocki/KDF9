@@ -1,29 +1,44 @@
-ERATOSTHENES|
-_b_e_g_i_n _c_o_m_m_e_n_t Sieve of Erathostenes;
-_i_n_t_e_g_e_r p, m;
-_b_o_o_l_e_a_n _a_r_r_a_y prime [2 : 10000];
+SIEVE|
+_b_e_g_i_n
 
-_f_o_r p:= 2, 3 _s_t_e_p 2 _u_n_t_i_l 10000 _d_o
-   prime[p]:= _t_r_u_e ;
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A1, A5, A15;
 
-_f_o_r p:= 2, 3 _s_t_e_p 2 _u_n_t_i_l 200 _d_o
+_i_n_t_e_g_e_r p, m, n, r;
+
+n := 10 000;
+writetext(30, _[_[c_]number * of * primes * below:_]);
+write(30, format(_[nddddd_]), n);
+writetext(30, _[:_]);
+
+r := entier(2×sqrt(n));
+
    _b_e_g_i_n
-      _i_f prime[p]
-      _t_h_e_n
-         _f_o_r m:= p × p _s_t_e_p p _u_n_t_i_l 10000 _d_o
-            prime[m]:= _f_a_l_s_e
+
+   _b_o_o_l_e_a_n _a_r_r_a_y candidate [2 : n];
+
+   _c_o_m_m_e_n_t deal with 2 separately;
+   candidate[2] := _t_r_u_e ;
+   _f_o_r m := 4 _s_t_e_p 2 _u_n_t_i_l n _d_o
+      candidate[m] := _f_a_l_s_e;
+
+   _c_o_m_m_e_n_t now deal with the other factors;
+   _f_o_r p := 3 _s_t_e_p 2 _u_n_t_i_l n _d_o
+      candidate[p]:= _t_r_u_e ;
+
+   _f_o_r p := 3 _s_t_e_p 2 _u_n_t_i_l r _d_o
+      _b_e_g_i_n
+      _i_f candidate[p] _t_h_e_n
+         _f_o_r m := p × p _s_t_e_p p _u_n_t_i_l n _d_o
+            candidate[m] := _f_a_l_s_e
+      _e_n_d;
+
+   m := 1; _c_o_m_m_e_n_t because 2 is prime;
+   _f_o_r p := 3 _s_t_e_p 2 _u_n_t_i_l n _d_o
+      _i_f candidate[p] _t_h_e_n m := m + 1;
    _e_n_d;
 
-m:= 0;
+write(30, format(_[ndddddc_]), m);
+close(30);
 
-loop: _f_o_r p:= 2, 3 _s_t_e_p 2 _u_n_t_i_l 10000 _d_o
-   _b_e_g_i_n
-      _i_f prime[p]
-      _t_h_e_n
-         _b_e_g_i_n incr: m:= m + 1; _c_o_m_m_e_n_t write(30, format(_[nnnnnnndc_]), p); _e_n_d
-   _e_n_d;
-
-writetext(30, _[_[c_]number*of*primes*below*10000:*_]);
-write(30, format(_[nnnnnnndc_]), m)
 _e_n_d
 |

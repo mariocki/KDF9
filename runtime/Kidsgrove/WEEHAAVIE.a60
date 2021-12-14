@@ -30,14 +30,14 @@
 estimate:
    count := count + 1;
    t[1] := h × (endpts + sumt); sumu := 0.0;
-      !comment  t[1] = h×(0.5×f[0]+f[1]+f[2]+...+0.5×f[2 !up (i-1)]);
+      !comment  t[1] = h×(0.5×f[0]+f[1]+f[2]+...+0.5×f[2 ^ (i-1)]);
    y := a - h/2.0;
    !for  j := 1 !step  1 !until  n !do
       !begin
       y := y + h; sumu := sumu + integrand;
       !end ;
    u[1] := h × sumu; k := 1;
-      !comment  u[1] = h×(f[1/2]+f[3/2]+...f[(2 !up i-1)/2],
+      !comment  u[1] = h×(f[1/2]+f[3/2]+...f[(2 ^ i-1)/2],
       k corresponds to approximate solution with truncation
       error term of order 2k;
 test:
@@ -46,9 +46,9 @@ test:
       havieintegrator := 0.5 × (t[k] + u[k]);
       !goto  exit
       !end ;
-   !if  k  !=  i !then
+   !if  k  ±  i !then
       !begin
-      d := 2  !up  (2×k);
+      d := 2  ^  (2×k);
       t[k+1] := (d × t[k] - tprev[k]) / (d - 1.0);
       tprev[k] := t[k];
       u[k+1] := (d × u[k] - uprev[k]) / (d - 1.0);
@@ -72,63 +72,62 @@ exit:
 
 
 eps  := 1.0º-10;
-writetext(30, {epsilon _ = _ });
-write(30, format({d.ddddddddddd~-ddc}), eps);
+writetext(30, {epsilon$=$});
+write(30, format({d.dddddddddddº+ndc}), eps);
 
 m max  := 20;
-writetext(30, {m max _ = _ });
+writetext(30, {m max$=$});
 write(30, format({nddc}), m max);
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,1.0/(1.0+y×y),m max);
-writetext(30, {count _ = _ });
+writetext(30, {count$=$});
 write(30, format({nddddddddc}), count);
-write(30, format({+d.ddddddddddd~-dd}), answer);
-writetext(30, { _ approximates _ +7.85398163397º_-1});
-writetext(30, {, _ relative _ error _ });
-write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.785398163397448)/0.785398163397448);
+write(30, format({+d.dddddddddddº+nd}), answer);
+writetext(30, {$approximates$+7.8539816339745º$-1});
+writetext(30, {,$relative$error$});
+write(30, format({+d.dddddddddddº+ndc}), (answer - 0.78539816339745)/0.78539816339745);
 
 a := eps; b := 1;
-answer := havieintegrator(y,eps,b,eps,(y !up (-y)),m max);
-writetext(30, {count _ = _ });
+answer := havieintegrator(y,eps,b,eps,(y ^ (-y)),m max);
+writetext(30, {count$=$});
 write(30, format({nddddddddc}), count);
-write(30, format({+d.ddddddddddd~-dd}), answer);
-writetext(30, { _ approximates _ });
-write(30, format({+d.ddddddddddd~-dd}), 1.29128599706266);
-writetext(30, {, _ relative _ error _ });
-write(30, format({+d.ddddddddddd~-ddc}), (answer - 1.29128599706266)/1.29128599706266);
+write(30, format({+d.dddddddddddº+nd}), answer);
+writetext(30, {$approximates$+1.2912859970627º$+0});
+writetext(30, {,$relative$error$});
+write(30, format({+d.dddddddddddº+ndc}), (answer - 1.2912859970627)/1.2912859970627);
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,ln(1.0+y)/(1.0 + y^2),m max);
-writetext(30, {count _ = _ });
+writetext(30, {count$=$});
 write(30, format({nddddddddc}), count);
-write(30, format({+d.ddddddddddd~-dd}), answer);
-writetext(30, { _ approximates _ +2.72198261288º_-1});
-writetext(30, {, _ relative _ error _ });
-write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.27219826128795)/0.27219826128795);
+write(30, format({+d.dddddddddddº+nd}), answer);
+writetext(30, {$approximates$+2.7219826128795º$-1});
+writetext(30, {,$relative$error$});
+write(30, format({+d.dddddddddddº+ndc}), (answer - 0.27219826128795)/0.27219826128795);
 
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,(y+y)/(1.0+y×y),m max);
-writetext(30, {count _ = _ });
+writetext(30, {count$=$});
 write(30, format({nddddddddc}), count);
-write(30, format({+d.ddddddddddd~-dd}), answer);
-writetext(30, { _ approximates _ +6.93147180560º_-1});
-writetext(30, {, _ relative _ error _ });
-write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.6931471805599453)/0.6931471805599453);
+write(30, format({+d.dddddddddddº+nd}), answer);
+writetext(30, {$approximates$+6.9314718055995º$-1});
+writetext(30, {,$relative$error$});
+write(30, format({+d.dddddddddddº+ndc}), (answer - 0.69314718055995)/0.69314718055995);
 
 
 a:= 0.0; b:= 4.3;
 answer := havieintegrator(y, a, b, eps, exp(-y×y), m max);
-writetext(30, {count _ = _ });
+writetext(30, {count$=$});
 write(30, format({nddddddddc}), count);
-write(30, format({+d.ddddddddddd~-dd}), answer);
-writetext(30, { _ approximates _ +8.86226924395º_-1});
-writetext(30, {, _ relative _ error _ });
-write(30, format({+d.ddddddddddd~-ddc}), (answer - 0.8862269243951)/0.8862269243951);
+write(30, format({+d.dddddddddddº+nd}), answer);
+writetext(30, {$approximates$+8.8622692439507º$-1});
+writetext(30, {,$relative$error$});
+write(30, format({+d.dddddddddddº+ndc}), (answer - 0.88622692439507)/0.88622692439507);
 
 FINISH:
 
 !end
 |
-
+|

@@ -52,7 +52,7 @@ PROGRAM;                   (test TSD FD OUT seek and I/O logic);
    Q8; SHC+16; =V179;
    Q8; SET 41; OUT;
    V9; =Q9; C15 TO Q9;
-   Q9; SET 42; OUT;
+   Q9; SET 42; OUT; SET 47; OUT;
    V200; V100; J999±; ERASE;
    V279; V179; J999±; ERASE;
    EXIT 1;

@@ -1,6 +1,6 @@
 QR|
 _b_e_g_i_n
-
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A1, A4, A5, A15;
 
 _c_o_m_m_e_n_t
    eigenvalues of a real symmetric matrix by the QR method.
@@ -81,8 +81,7 @@ n := read(20);
                         beta:= _i_f alpha < 0 _t_h_e_n absb _e_l_s_e - absb;
                         gamma:= 1 / (sigma-alpha×beta); g[k+1,k]:= alpha - beta;
                         _f_o_r i:= k + 1 _s_t_e_p 1 _u_n_t_i_l n _d_o
-                           p[i]:= gamma ×
-                           (sum(j,k+1,i,g[i,j]×g[j,k]) + sum(j,i+1,n,g[j,i]×g[j,k]));
+                           p[i]:= gamma × (sum(j,k+1,i,g[i,j]×g[j,k]) + sum(j,i+1,n,g[j,i]×g[j,k]));
                         t:= 0.5 × gamma × sum(i,k+1,n,g[i,k]×p[i]);
                         _f_o_r i:= k + 1 _s_t_e_p 1 _u_n_t_i_l n _d_o
                            p[i]:= p[i] - t×g[i,k];
@@ -176,14 +175,29 @@ n := read(20);
             write(30, format(_[nds_]), i); write(30, format(_[+d.dddddddddº+ddc_]), a[i,i])
          _e_n_d ;
        write(30, format(_[+d.dddddddddº+dd_]), a[1,1]+a[2,2]);
-       writetext(30, _[* should * equal * _]);
+       writetext(30, _[*should*equal*_]);
        write(30, format(_[+d.dddddddddº+dd_]), b[1,1]+b[n,n]);
-       writetext(30, _[* and * _]);
+       writetext(30, _[*and*_]);
        write(30, format(_[+d.dddddddddº+ddc_]), a[n-1,n-1]+a[n,n]);
+       writetext(30, _[*sum*of*_]);
+       write(30, format(_[+d.dddddddddº+dd_]), a[n-1,n-1]);
+       writetext(30, _[*and*_]);
+       write(30, format(_[+d.dddddddddº+ddc_]), a[n,n]);
    _e_n_d ;
 
    close(20);
    close(30);
 
 _e_n_d
+|
+9;
+11;
+0; 21;
+0; 0; 31;
+0; 0; 0; 41;
+0; 0; 0; 0; 51;
+0; 0; 0; 0; 0; 61;
+0; 0; 0; 0; 0; 0; 71;
+0; 0; 0; 0; 0; 0; 0; 81;
+1; 0; 0; 0; 0; 0; 0; 0; 91;
 |

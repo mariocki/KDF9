@@ -30,13 +30,13 @@ n := 20;
 p := 10;
 
 writetext(30, {{cc}set _ C _ to _ AB(});
-write(30, format({nd}),  m); writetext(30, {,});
-write(30, format({nd}),  n); writetext(30, {,});
-write(30, format({nd}),  p); writetext(30, {){c}});
+write(30, format({nd}), m); writetext(30, {,});
+write(30, format({nd}), n); writetext(30, {,});
+write(30, format({nd}), p); writetext(30, {){c}});
 
 !for  i := 1 !step  1 !until  m !do
    !for  k := 1 !step  1 !until  n !do
-      A[i,k] := i / 10.0 !up (k-1);
+      A[i,k] := i / 10.0 ^ (k-1);
 
 !for  k := 1 !step  1 !until  n !do
    !for  j := 1 !step  1 !until  p !do

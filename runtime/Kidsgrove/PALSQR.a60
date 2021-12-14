@@ -22,7 +22,7 @@ REPEAT1:
    n := n + 1; s := n*n; k := 0;
    REPEAT2:
       k := k + 1; r := s !div 10;
-      d[k] := s - 10*r; s := r;
+      d[k] := s - r*10; s := r;
       !if s !ne 0 !then !goto REPEAT2;
 
    i := 1; j := k;
