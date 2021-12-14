@@ -143,39 +143,31 @@ if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/e
 fi
 
 if [ -n ${OPTIMISE} ]; then
-   #   a2b -p2t <TP0 >${USERCODE}/$prog.k3
-   #else
-   mtp MT0T >${USERCODE}/$prog.k3
+   glance -o <${USERCODE}/$prog.k3 > >${TEMPORARY}/${prog}_opt.k3
+else
+   glance -r <${USERCODE}/$prog.k3 > >${TEMPORARY}/${prog}_opt.k3
 fi
+st_tl ${ST:-30000} ${TL:-99999} <${TEMPORARY}/${prog}_opt.k3 >${USERCODE}/${prog}_opt.k3
 
-if [ ! -s ${USERCODE}/$prog.k3 ]; then
+if [ ! -s ${USERCODE}/${prog}_opt.k3 ]; then
    echo -e "${RED}**********************************************"
-   echo "The Usercode object program could not be retrieved for ${prog}."
+   echo "The Usercode object program could not be retrieved for ${prog}_opt"
    echo -e "**********************************************${NC}"
    echo
    exit 4
 fi
 
-case ${KIDSGROVE_ASSEMBLY:-y} in
-y)
-   neat $prog ${ST:-24000} ${TL:-99999}
-   ucc $prog >${LOGS}/error_output 2>&1
-   if [ ! -s ${KDF9RUNTIME}/Binary/$prog ]; then
-      echo -e "${RED}**********************************************"
-      echo "An object program could not be assembled for ${prog}."
-      echo -e "**********************************************${NC}"
-      echo
-      cat "${LOGS}/error_output"
-      echo -e "${RED}**********************************************${NC}"
-      exit 5
-   fi
-   echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in  ${USERCODE}/${prog}.k3"
-   echo ""
-   echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}"
-   ;;
-*)
-   echo -e "${GREEN}Compilation successful.${NC}"
-   echo "The Usercode is in  ${USERCODE}/${prog}.k3"
-   ;;
-esac
+ucc ${prog}_opt >${LOGS}/error_output 2>&1
+if [ ! -s ${KDF9RUNTIME}/Binary/${prog}_opt ]; then
+   echo -e "${RED}**********************************************"
+   echo "An object program could not be assembled for ${prog}_opt."
+   echo -e "**********************************************${NC}"
+   echo
+   cat "${LOGS}/error_output"
+   echo -e "${RED}**********************************************${NC}"
+   exit 5
+fi
+echo -e "${GREEN}Compilation successful.${NC}"
+echo "The Usercode is in  ${USERCODE}/${prog}_opt.k3"
+echo ""
+echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}_opt"

@@ -104,6 +104,21 @@ else
     fi
 fi
 
+if [ ! -r ${USERCODE}/$1-listing.txt ]
+then
+   echo
+   echo ${ID} ${USERCODE}/$1-listing.txt is absent or unreadable.
+   echo ${ID} Disassembly will not show operands as Usercode symbols.
+   echo
+else
+   extract_symbols < ${USERCODE}/$1-listing.txt > settings_symbols.txt
+   if [ -r settings_3.txt ]
+   then
+      cp settings_3.txt settings_1.txt
+   fi
+   cat settings_symbols.txt >> settings_1.txt
+fi
+
 if [ "$mode" = -df ]; then
     time ee9 "$state" "$mode" "$TRmode" "$TPmode" "$miscellany" +"$program"
 else

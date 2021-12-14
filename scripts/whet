@@ -1,0 +1,34 @@
+SOURCE="${KIDSGROVE:-Kidsgrove}"
+TARGET="${WHETSTONE:-Whetstone}"
+ID="`basename $0`: "
+
+if [ -r "${TARGET}/$1.a60" ]
+then
+   echo
+   printf "\\a\\a\\a"
+   printf "${ID} ${TARGET}/$1.a60 already exists. Do you want to overwrite it (y/n)? "
+   read reply
+   echo
+   case $reply in
+      y | Y | yes | Yes | YES)
+         if [ -w "${TARGET}/$1.a60" ]
+         then
+            echo ${ID} Converting ${SOURCE}/$1.a60.
+            echo
+         else
+            printf "\\a\\a\\a"
+            echo ${ID} "${TARGET}/$1.a60 cannot be overwritten."
+            echo
+            exit
+         fi
+         ;;
+      *)
+         echo
+         exit
+         ;;
+   esac
+fi
+
+ports -f $1 <${SOURCE}/$1.a60 >${TARGET}/$1.a60
+
+walgol $*

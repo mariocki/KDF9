@@ -97,6 +97,7 @@ if [ -s settings_for_kalgol.txt ]; then
 fi
 shift
 
+export KIDSGROVE_PEEPHOLE=y
 kalgol $prog -O --no-k3 ${KIDSOPTS}
 
 peep $prog ${ST:-24000} ${TL:-99999}
