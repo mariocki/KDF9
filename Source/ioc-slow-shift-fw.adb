@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -17,14 +17,12 @@
 with Ada.Text_IO;
 --
 with HCI;
-with host_IO;
 
 with imported_value_of;
 
 use  Ada.Text_IO;
 --
 use  HCI;
-use  host_IO;
 
 package body IOC.slow.shift.FW is
 
@@ -118,8 +116,8 @@ package body IOC.slow.shift.FW is
       with
          No_Return
       is
-         left_quote  : constant String := (if part_2 /= "" then  " «" else "");
-         right_quote : constant String := (if part_2 /= "" then  "» " else "");
+         left_quote  : constant String := (if part_2 /= "" then  " """ else "");
+         right_quote : constant String := (if part_2 /= "" then  """ " else "");
       begin
          raise operator_error
             with part_1 & left_quote & glyphs_for(part_2) & right_quote & part_3;
@@ -202,42 +200,58 @@ package body IOC.slow.shift.FW is
       the_FW.current_case := KDF9_char_sets.Case_Normal;
    end Initialize;
 
-   -- If authentic timing, the delay of length the_pause is inserted between characters output
+   -- If authentic timing, the delay of length 0.1s is inserted between characters output
    --    to the Flexowriter, with the aim of approximating the actual speed of its typing.
-   the_pause  : KDF9.us := 0;
+   the_pause  : Duration := 0.0;
 
-   procedure set_the_duration_of_the_pause (the_FW : in FW.device) is
+   procedure set_the_duration_of_the_pause is
    begin
       if authentic_timing_is_enabled then
-         the_pause := the_FW.quantum;
+         the_pause := 0.1;
       else
-         the_pause := 0;
+         the_pause := 0.0;
       end if;
    end set_the_duration_of_the_pause;
 
-   call_for_manual_input    : constant String (1..2) := (others => BEL);
+   call_for_manual_input : constant String (1..2) := (others => BEL);
+
+   saved_output : String(1 .. max_text_length);
+   last_saved   : Natural range 0 .. max_text_length := 0;
+
+   procedure write_and_save (ch : Character; the_FW : in out FW.device) is
+   begin
+      delay the_pause;
+      last_saved := last_saved + 1;
+      saved_output(last_saved) := ch;
+      put_byte(ch, the_FW.output);
+      flush(the_FW.output);
+   end write_and_save;
 
    procedure inject_a_response (the_FW     : in out FW.device;
                                 the_prompt : in String;
                                 the_size   : in out KDF9.word) is
    begin
-      set_the_duration_of_the_pause(the_FW);
+      set_the_duration_of_the_pause;
       for t in next_interaction .. last_interaction loop
          declare
             the : interaction renames interactions(t);
          begin
             if the.prompt_length = the.total_length then
                -- A null response, so terminate the program.
-               raise exceptions.quit_request with "at the prompt: «"& the_prompt & "»";
+               raise exceptions.quit_request with "at the prompt: "& quote(the_prompt);
             end if;
             next_interaction := next_interaction + 1;
             if the.text(1..the.prompt_length-1) = the_prompt and then
                   the.text(the.prompt_length-0) = ';'            then
                inject(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.stream);
                the_size := the_size + KDF9.word(the.total_length-the.prompt_length);
-               put_chars(the.text(the.prompt_length+1..the.total_length) & LF, the_FW.output);
-               -- Human operators type much more slowly than KDF9 buffers!
-               flush(the_FW.output, the_pause*10);
+               for c of the.text(the.prompt_length+1..the.total_length) loop
+                  -- Human operators type more slowly than KDF9 buffers!
+                  delay the_pause * 4;
+                  write_and_save(c, the_FW);
+               end loop;
+               put_EOL(the_FW.output);
+               flush(the_FW.output);
                the_FW.mode := the_flexowriter_is_reading;
                return;
             end if;
@@ -249,7 +263,7 @@ package body IOC.slow.shift.FW is
          raise input_is_impossible;
       end if;
       put_bytes(call_for_manual_input, the_FW.output);
-      flush(the_FW.output, the_pause);
+      flush(the_FW.output);
       the_FW.mode := the_flexowriter_is_reading;
    end inject_a_response;
 
@@ -385,7 +399,7 @@ package body IOC.slow.shift.FW is
 
    underlined : Boolean := False;
 
-   procedure put_symbols (the_FW         : in out FW.device;
+  procedure put_symbols (the_FW         : in out FW.device;
                           Q_operand      : in KDF9.Q_register;
                           transfer_to_EM : in Boolean) is
       start_address : constant KDF9.address := Q_operand.I;
@@ -394,16 +408,17 @@ package body IOC.slow.shift.FW is
       size   : KDF9.word := 0;
       symbol : KDF9_char_sets.symbol;
       char   : Character;
-   begin
+    begin
+      last_saved := 0;
+
       check_addresses_and_lockouts(start_address, end_address);
-      set_the_duration_of_the_pause(the_FW);
+      set_the_duration_of_the_pause;
       the_FW.mode := the_flexowriter_is_writing;
       set_text_style_to_plain(the_FW.output);
       set_text_colour_to_red(the_FW.output);
 
       -- Ensure that any prompt occupies the buffer alone.
       flush(the_FW.output);
-
    word_loop:
       for w in start_address .. end_address loop
          for c in KDF9_char_sets.symbol_index'Range loop
@@ -435,14 +450,13 @@ package body IOC.slow.shift.FW is
                      if char = ';' then
 
                         declare
-                           the_prompt : constant String := contents(the_FW.output);
+                           the_prompt : constant String := saved_output(1..last_saved);
                         begin
                            -- Must flush AFTER saving the prompt and BEFORE going black.
-                           flush(the_FW.output, the_pause);
+                           flush(the_FW.output);
                            set_text_colour_to_black(the_FW.output);
                            set_text_style_to_plain(the_FW.output);
-                           put_byte(';', the_FW.output);
-                           flush(the_FW.output, the_pause);
+                           write_and_save(';', the_FW);
 
                            inject_a_response(the_FW, neat(the_prompt), size);
 
@@ -454,15 +468,14 @@ package body IOC.slow.shift.FW is
 
                         if char = '_' then
                            underlined := True;
+                           delay the_pause;
                            do_not_put_byte(char, the_FW.output);
-                           flush(the_FW.output, the_pause);
                         else
                            if underlined then
                               set_text_style_to_underline(the_FW.output);
                            end if;
-                           put_char(char, the_FW.output);
+                           write_and_save(char, the_FW);
                            if underlined then
-                              flush(the_FW.output, the_pause);
                               set_text_style_to_plain(the_FW.output);
                               set_text_colour_to_red(the_FW.output);
                               underlined := False;
@@ -503,7 +516,7 @@ package body IOC.slow.shift.FW is
          end loop;
       end loop word_loop;
 
-      flush(the_FW.output, the_pause);
+      flush(the_FW.output);
       set_text_style_to_plain(the_FW.output);
       set_text_colour_to_black(the_FW.output);
       do_output_housekeeping(the_FW, written => size-fill, fetched => size);
@@ -563,8 +576,10 @@ package body IOC.slow.shift.FW is
       word : KDF9.word;
       char : Character;
    begin
+      last_saved := 0;
+
       check_addresses_and_lockouts(start_address, end_address);
-      set_the_duration_of_the_pause(the_FW);
+      set_the_duration_of_the_pause;
       the_FW.mode := the_flexowriter_is_writing;
       set_text_style_to_plain(the_FW.output);
       set_text_colour_to_red(the_FW.output);
@@ -584,14 +599,13 @@ package body IOC.slow.shift.FW is
                   -- This takes effect iff the device is not "transcribing",
                   --     i.e. not doing Latin-1 output transparently.
                   declare
-                     the_prompt : constant String := contents(the_FW.output);
+                     the_prompt : constant String := saved_output(1..last_saved);
                   begin
                      -- Must flush AFTER saving the prompt and BEFORE going black.
-                     flush(the_FW.output, the_pause);
+                     flush(the_FW.output);
                      set_text_colour_to_black(the_FW.output);
                      set_text_style_to_plain(the_FW.output);
-                     put_byte(';', the_FW.output);
-                     flush(the_FW.output, the_pause);
+                     write_and_save(';', the_FW);
                      inject_a_response(the_FW, neat(the_prompt), size);
                      the_FW.mode := the_flexowriter_is_reading;
                      set_text_style_to_plain(the_FW.output);
@@ -599,15 +613,14 @@ package body IOC.slow.shift.FW is
                elsif flexowriter_output_is_wanted then
                   if char = '_' then
                      underlined := True;
+                     delay the_pause;
                      do_not_put_byte(char, the_FW.output);
-                     flush(the_FW.output, the_pause);
                   else
                      if underlined then
                         set_text_style_to_underline(the_FW.output);
                      end if;
-                     put_char(char, the_FW.output);
+                     write_and_save(char, the_FW);
                      if underlined then
-                        flush(the_FW.output, the_pause);
                         set_text_style_to_plain(the_FW.output);
                         set_text_colour_to_red(the_FW.output);
                         underlined := False;
@@ -676,7 +689,8 @@ package body IOC.slow.shift.FW is
 
    overriding
    procedure Finalize (the_FW : in out FW.device) is
-      total : constant KDF9.word := the_FW.output.bytes_moved+the_FW.stream.bytes_moved + the_FW.shifts;
+      total : constant KDF9.word
+            := KDF9.word(the_FW.output.bytes_moved+the_FW.stream.bytes_moved) + the_FW.shifts;
    begin
       close(
            the_FW,

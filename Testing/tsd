@@ -1,4 +1,6 @@
 export TSD=${DIRECTOR:-${ADJUNCTS}/KKT40E007UPU}
+ID="`basename $0`: "
+
 cp FW0 FW0_copy
 
 cp FW0_for_Director FW0

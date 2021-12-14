@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,9 +18,10 @@ with Ada.Characters.Latin_1;
 with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 --
+with data_imaging;
 with disassembly;
+with disassembly.symbols;
 with exceptions;
-with formatting;
 with generic_sets;
 with HCI;
 with IOC;
@@ -33,7 +34,7 @@ with KDF9.PHU_store;
 with KDF9.store;
 with logging.file;
 with settings;
-with disassembly.symbols;
+with string_editing;
 with tracing;
 
 with IOC.diagnostics;
@@ -42,9 +43,10 @@ use  Ada.Characters.Latin_1;
 use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 --
+use  data_imaging;
 use  disassembly;
+use  disassembly.symbols;
 use  exceptions;
-use  formatting;
 use  HCI;
 use  IOC;
 use  IOC.fast.DR;
@@ -56,8 +58,8 @@ use  KDF9.PHU_store;
 use  KDF9.store;
 use  logging.file;
 use  settings;
-use  disassembly.symbols;
 use  tracing;
+use  string_editing;
 
 package body state_display is
 
@@ -124,7 +126,7 @@ package body state_display is
 
    procedure show_as_glyphs (the_word : in KDF9.word) is
    begin
-      log("«" & glyphs_for(the_word) & "»");
+      log(quote(glyphs_for(the_word)));
    end show_as_glyphs;
 
    procedure log_padded_string (text  : in String;
@@ -148,41 +150,40 @@ package body state_display is
       log_padded_string("#" & oct_of(number), width);
    end log_octal;
 
-  procedure show_in_various_formats (the_word : in KDF9.word;
-                                     column   : in Positive := 5) is
+  procedure show_in_various_formats (the_word : in KDF9.word) is
       image : String(1 .. 21);
    begin
+      log("  ");
       log_octal(the_word);
-      log(" = " & just_right(trimmed(CPU.signed'Image(resign(the_word))), 16) & " = ");
-      Put(image, host_float(CPU.f48(the_word)), Aft => 12, Exp => 2);
-      log(trimmed(image) & " = ");
-      log(as_fraction(the_word)'Image);
-      log_new_line;
-      tab_log_to(column);
-      log(" = ");
-      show_Q_register(as_Q(the_word));
-      log("   = ");
-      show_Q_in_decimal(as_Q(the_word));
-      log_new_line;
-      tab_log_to(column);
       log(" = ");
       show_in_syllables_form(the_word);
       log("= ");
       show_as_glyphs(the_word);
+      tab_log_to(66);
+      log("= ");
+      show_Q_register(as_Q(the_word));
+      log_new_line;
+      log(" = " & just_right(trimmed(CPU.signed'Image(resign(the_word))), 16) & " = ");
+      Put(image, host_float(CPU.f48(the_word)), Aft => 12, Exp => 2);
+      log(trimmed(image) & " = ");
+      log(as_fraction(the_word)'Image);
+      tab_log_to(66);
+      log("= ");
+      show_Q_in_decimal(as_Q(the_word));
    end show_in_various_formats;
 
    procedure show_progress is
 
       function readable (t : KDF9.us)
       return String is
-         t_plus_5E2 : constant KDF9.us := (t + 5E2)/ 1E3;
-         t_plus_5E5 : constant KDF9.us := (t + 5E5)/ 1E6;
+         t_in_ms  : constant KDF9.us := (t + 5E2)/ 1E3;
+         t_in_sec : constant KDF9.us := (t + 5E5)/ 1E6;
       begin
-         return (if t < 1E3 then
-                    ""
-              elsif t < 1E6 then
-                    " about" & t_plus_5E2'Image & " ms"
-              else  " about" & t_plus_5E5'Image & " sec" );
+         return (
+                 if    t < 1E3 then ""
+                 elsif t < 1E6 then " about" & t_in_ms'Image & " ms"
+                 else               " about" & t_in_sec'Image & " sec"
+                );
       end readable;
 
       CPU : constant String := " KDF9 us  (RAN)" & readable(the_CPU_time);
@@ -572,7 +573,7 @@ package body state_display is
          end if;
          tab_log_to(the_external_trace_file, 68);
       end if;
-      log(the_external_trace_file, " |" & the_full_name_of(INS));
+      log(the_external_trace_file, " |" & the_full_name_of(INS, True));
       tab_log_to(the_external_trace_file, 92);
       log(the_external_trace_file, KDF9.us'Image(the_clock_time));
       log_Q_operand;
@@ -1129,7 +1130,7 @@ package body state_display is
          begin -- show_IOC_FIFO
             log(oct_of(this.order_address) & ":");
             tab_log_to(first_col);
-            if the_full_name_of(this.decoded_order) = "OUT"  then
+            if the_full_name_of(this.decoded_order, True) = "OUT"  then
                 if this.device_name(1..2) in "MT" | "ST" and then
                       this.ICR_value >= the_final_ICR        then
                   log("OUT 0/2 rewind");
@@ -1156,7 +1157,7 @@ package body state_display is
                   log("OUT ?");
                end if;
             else
-               log(mnemonic(the_full_name_of(this.decoded_order), this.device_name));
+               log(mnemonic(the_full_name_of(this.decoded_order, True), this.device_name));
             end if;
             tab_log_to(device_col);
             log(this.device_name);
@@ -1379,9 +1380,12 @@ package body state_display is
    type convertor is
       not null access function (address : KDF9.address) return converted_word;
 
-   procedure show_core (first, last : in KDF9.address;
-                        head, side  : in String;
-                        converted   : in convertor) is
+   procedure show_core (start, finish : in KDF9.address;
+                        head, side    : in String;
+                        converted     : in convertor) is
+
+      first : constant KDF9.address := bounded_data_address(start);
+      last  : constant KDF9.address := bounded_data_address(finish);
 
       procedure show_group (first : in KDF9.address) is
          address : KDF9.address := first;
@@ -1393,10 +1397,20 @@ package body state_display is
          end loop;
       end show_group;
 
-      address : KDF9.address := first;
+      address : KDF9.address := bounded_data_address(first);
 
    begin
-      if (last-first+1) < 1 then
+      if last < start then
+         log_title(
+                   "Address range #"
+                 & oct_of(start)
+                 & " .. #"
+                 & oct_of(finish)
+                 & ", to be given as "
+                 & head
+                 & ", is outside the allocated core."
+                  );
+         log_rule;
          return;
       end if;
       BA := 0; -- Ensure that physical store is examined when running in boot mode.
@@ -1417,7 +1431,7 @@ package body state_display is
       exit when address >= KDF9.address'Last - increment;
          address := address + increment;
       end loop;
-      log_new_line;
+      log_rule;
    end show_core;
 
    function encoding_of (address : KDF9.address; code_table : output_code_table)
@@ -1514,7 +1528,8 @@ package body state_display is
 
    procedure show_core_in_card_code (first, last : in KDF9.address) is
    begin
-      show_core(first, last,head => "characters in CR/CP code",
+      show_core(first, last,
+                head => "characters in CR/CP code",
                 side => "CP",
                 converted => card_code'Access);
    end show_core_in_card_code;
@@ -1532,15 +1547,21 @@ package body state_display is
       show_core_in_case_visible(first, last);
    end show_core_in_tape_code;
 
-   procedure show_core_as_word_forms (first, last  : KDF9.address) is
+   procedure show_core_as_word_forms (start, finish : in KDF9.address; octal_option : in Boolean) is
+
+      first : constant KDF9.address := bounded_data_address(start);
+      last  : constant KDF9.address := bounded_data_address(finish);
 
       procedure show_word (address : KDF9.address) is
-         word : constant KDF9.word := fetch_word(address);
+         word  : constant KDF9.word := fetch_word(address);
+         label : constant String := data_label(address, octal_option);
       begin
-         log_octal(KDF9.field_of_16_bits(address));
-         log(":");
-         tab_log_to(jump_tab);
-         show_in_various_formats(word, column => jump_tab);
+         if label(1) = 'V' then
+            log_new_line;
+         end if;
+         log(label);
+         log_line(":");
+         show_in_various_formats(word);
          log_new_line;
       end show_word;
 
@@ -1558,6 +1579,7 @@ package body state_display is
          for address in first+1 .. last-1 loop
             this_word := fetch_word(address);
             if this_word = last_word and address = last_address+1 then
+               log_new_line;
                log_line("==========  ditto  ========");
             elsif this_word /= last_word then
                show_word(address);
@@ -1571,13 +1593,21 @@ package body state_display is
       end show_word_group;
 
    begin
-      if first > last then
+      if last < start then
+         log_title(
+                   "Address range #"
+                 & oct_of(start)
+                 & " .. #"
+                 & oct_of(finish)
+                 & "], to be given as 48-bit words, is outside the allocated core."
+                  );
+         log_rule;
          return;
       end if;
       BA := 0; -- Ensure that physical store is examined when running in boot mode.
       log_title("Core store interpreted as 48-bit words:");
       show_word_group(first, last);
-      log_new_line;
+      log_rule;
    end show_core_as_word_forms;
 
    -- Each word of code space is described by a set of flags.
@@ -1597,19 +1627,6 @@ package body state_display is
    function "/" (word : KDF9.code_address; flag : KDF9.syllable_index)
    return Boolean
    is (analysis_flags(word)/flag);
-
---         procedure show_flags (a : in KDF9.code_address) is
---         begin
---            log_line(a'Image & ":  "
---             & (if analysis_flags(a)(is_a_code_word) then "CODE " else "DATA ")
---             & (if analysis_flags(a)(0) then "T" else " ")
---             & (if analysis_flags(a)(1) then "T" else " ")
---             & (if analysis_flags(a)(2) then "T" else " ")
---             & (if analysis_flags(a)(3) then "T" else " ")
---             & (if analysis_flags(a)(4) then "T" else " ")
---             & (if analysis_flags(a)(5) then "T" else " ")
---              );
---         end show_flags;
 
    function is_a_jump_target (the_point : in KDF9.syllable_address)
    return Boolean
@@ -1849,13 +1866,13 @@ package body state_display is
       end if;
    end mark_the_words_reachable_from;
 
-   procedure mark_all_jump_targets (start_point : in KDF9.syllable_address) is
+   procedure mark_all_jump_targets (start_point, end_point : in KDF9.syllable_address) is
       address : KDF9.syllable_address := start_point;
    begin
       mark_as_a_jump_target(address);
       loop
-      exit when address.code_address > 8190;
-      exit when address.code_address/is_a_data_word;
+      exit when address.code_address > end_point.code_address;
+      exit when address.code_address / is_a_data_word;
          set_NIA_to(address);
          decode_the_next_order;
          case INS.kind is
@@ -1876,26 +1893,34 @@ package body state_display is
 
    procedure do_symbol_table_based_markup is
       subtype own is KDF9.code_address;
-      V_list : V_definition_list renames V_store_base(0..last_P_number);
-      non_Vs : non_V_store_table renames the_WYZ_table;
+      T      : non_V_store_table renames the_WYZ_table;
+      limit  : KDF9.Q_part;
    begin
-      for e in V_list'First .. V_list'Last-1 loop
-         -- Mark the V stores of P[e].
-         for a in own(V_list(e).V_address) .. own(V_list(e).P_address-1) loop
-            mark_as_a_data_word(own(a));
-         end loop;
+      -- Mark the whole of core as data by default.
+      for a in KDF9.code_address loop
+         mark_as_a_data_word(a);
+      end loop;
+      -- Mark the code word of each Usercode routine.
+      for e in 0 .. last_P_number loop
          -- Mark the order words of P[e].
-         for a in own(V_list(e).P_address) .. own(V_list(e+1).V_address-1) loop
+         if e = last_P_number then
+            limit := KDF9.Q_part(bounded_code_address(T.W_base).code_address);
+         else
+            limit := P_store_base(e+1).V_address;
+            if limit = 0 then
+               -- P(e+1) has no V stores, so use its code address instead.
+               limit := P_store_base(e+1).P_address;
+            end if;
+         end if;
+         for a in own(P_store_base(e).P_address) .. own(limit-1) loop
             mark_as_a_code_word(own(a));
          end loop;
-         mark_all_jump_targets((own(V_list(e).P_address), 0));
+         -- Ensure that internal labels of this routine are flagged.
+         mark_all_jump_targets((own(P_store_base(e).P_address), 0), (own(limit), 0));
       end loop;
-      -- Mark the global data words.
-      for a in own(non_Vs.W_base) .. own(KDF9.address'Min(8191, non_Vs.Z_base)) loop
-         mark_as_a_data_word(own(a));
-      end loop;
+      -- Restore data marking of W0 in case limit = W_base.
+      mark_as_a_data_word(own(bounded_code_address(T.W_base).code_address));
    end do_symbol_table_based_markup;
-
 
    procedure markup_a_problem_program is
    begin
@@ -2040,9 +2065,9 @@ package body state_display is
       end if;
    end mark_all_code_blocks_and_data_blocks;
 
-   procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
-                                    octal_option : in Boolean) is
+   procedure show_core_as_Usercode (first, last : in KDF9.syllable_address; octal_option : in Boolean) is
 
+      final       : constant KDF9.syllable_address := bounded_code_address(last);
       six_DUMMIES : constant KDF9.word := 8#0360741703607417#;
       prev_word   : KDF9.word := 8#0706050403020100#; -- invalid opcodes
       comparator  : KDF9.word := prev_word;
@@ -2100,8 +2125,6 @@ package body state_display is
             end if;
          end set_at_new_line;
 
-         last_nz_location : KDF9.syllable_address;
-
       begin -- show_a_block_of_orders
          this_word := fetch_word(KDF9.address(address.code_address));
 
@@ -2116,32 +2139,28 @@ package body state_display is
 
          loop
             if address.code_address/is_a_data_word then
-               last_nz_location := address;
-
+               this_word := fetch_word(KDF9.address(address.code_address));
                -- Display a line of data.
-               log(oct_or_dec_of(address, octal_option) & ": ");
-               set_line_at(jump_tab);
-               show_in_various_formats(fetch_word(KDF9.address(address.code_address)),
-                                       column => jump_tab);
-               log_new_line;
-
-               -- Skip over any following zero words (DUMMY0 or uninitialized V stores).
-               loop
-                  if address.code_address = last.code_address then
-                     -- The whole block has been processed.
-                     return;
+               declare
+                  label : constant String := data_label(KDF9.Q_part(address.code_address), octal_option);
+               begin
+                  if label(1..2) = "V0" then
+                     -- The routine has V stores, so leave a gap here.
+                     log_new_line;
                   end if;
-                  address := (address.code_address+1, 0);
-               exit when fetch_word(KDF9.address(address.code_address)) /= 0;
-               end loop;
-               if address.code_address > last_nz_location.code_address+1 then
-                  log("========  zeros  ========");
+                  log(label & ": ");
+               end;
+               if this_word = 0 then
+                  log_line("zero");
+               else
+                  log_new_line;
+                  show_in_various_formats(fetch_word(KDF9.address(address.code_address)));
                   log_new_line;
                end if;
+         exit when address.code_address >= last.code_address;
+               address := (address.code_address+1, 0);
             else
-               -- We have found an instruction word.
-               log_new_line;
-         exit;
+         exit; -- We have reached code.
             end if;
          end loop;
 
@@ -2149,6 +2168,7 @@ package body state_display is
          loop
          -- Setting NIA to 8191 LIVs, in accordance with the hardware, so avoid that.
          exit when address.code_address = 8191;
+         exit when address.code_address > last.code_address;
             this_word := fetch_word(KDF9.address(address.code_address));
 
             -- Suppress output of more than 1 of a block of equal values.
@@ -2176,8 +2196,19 @@ package body state_display is
                -- Jumps go at the start of a fresh line for best visibility.
                -- Label the jump with its address at the start of the line for easy reference.
                set_at_new_line;
-               log(oct_or_dec_of(address, octal_option) & ": ");
-               log_new_line;
+               if address.syllable_index = 0 then
+                  declare
+                     label : constant String := routine_name(address, octal_option);
+                  begin
+                     if label(1) = 'P' and then V_store_count(address) = 0 then
+                        -- The routine has no V stores listed, so leave a gap here.
+                        log_new_line;
+                     end if;
+                     log_line(label & ": ");
+                  end;
+               else
+                  log_line("E" & oct_and_dec_of(address, octal_option, ", E", "") & ": ");
+               end if;
             end if;
 
             -- Set the tab position appropriately for the order type.
@@ -2234,7 +2265,7 @@ package body state_display is
                return;
             end if;
 
-            if (address.code_address+1)/is_a_data_word then
+            if (address.code_address)/is_a_data_word then
                -- We have reached the end of the orders and are about to run into data.
                return;
             end if;
@@ -2247,10 +2278,7 @@ package body state_display is
                log_new_line;
             elsif this_word = comparator and this_word /= prev_word then
                -- Display the placeholder of a suppressed group of equal words.
-               log_new_line;
-               log_line("==========  #"
-                      & oct_of(KDF9.syllable(this_word and 255))
-                      & "  ==========");
+               log_line(" ...");
                address := (address.code_address+1, 0);
                if address.code_address > last.code_address or else
                      address.code_address/is_a_data_word           then
@@ -2275,7 +2303,7 @@ package body state_display is
          address := first;
          loop
             show_a_block_of_orders(address);
-            exit when address.code_address >= last.code_address;
+            exit when address.code_address >= final.code_address;
          end loop;
          log_new_line;
          log_rule;
@@ -2288,9 +2316,9 @@ package body state_display is
       set_NIA_to((0, syllable_index => 0));
    end show_core_as_Usercode;
 
-   procedure show_core_as_syllables (first, last  : KDF9.syllable_address) is
+   procedure show_core_as_syllables (first, last : KDF9.syllable_address) is
 
-      address     :   KDF9.syllable_address;
+      address : KDF9.syllable_address;
 
       procedure show_a_block is
 
@@ -2321,12 +2349,11 @@ package body state_display is
     begin  -- show_core_as_syllables
        BA := 0; -- Ensure that physical store is examined when running in boot mode.
       log_line("Core store interpreted as order syllables.");
-      address := first;
+      address := bounded_code_address(first);
       loop
-         show_a_block;
          exit when address.code_address > last.code_address;
+         show_a_block;
       end loop;
-      log_new_line;
       log_rule;
    end show_core_as_syllables;
 

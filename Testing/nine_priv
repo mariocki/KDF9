@@ -1,1 +1,5 @@
-nine "$1" "$2" "$3" "$4" "$5" "$6" t
+mode=${3:--}
+misc=${4:--}
+TPxy=${5:--}
+TRxy=${6:--}
+none $1 $2 $mode $misc $TPxy $TRxy t

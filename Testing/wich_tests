@@ -6,71 +6,73 @@ trap "rm -f wich_test_diff.txt"  \
 
 export KIDSMISC=wz
 export KIDSLIST=""
+export KIDSGROVE=
+
 >wich_tests_log.txt
 
 echo TEST wich FLUID
 wich FLUID FLUID_data t prh         >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/FLUID-PEEP.k3       ${BINARY}/FLUID-PEEP       ${SOURCE}/FLUID-PEEP-listing.txt
+   rm ${SOURCE}/FLUID-OPT.k3       ${BINARY}/FLUID-OPT       ${SOURCE}/FLUID-OPT-listing.txt
 
 echo TEST wich GPSPRIMES
 wich GPSPRIMES - t prh              >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/GPSPRIMES-PEEP.k3   ${BINARY}/GPSPRIMES-PEEP   ${SOURCE}/GPSPRIMES-PEEP-listing.txt
+   rm ${SOURCE}/GPSPRIMES-OPT.k3   ${BINARY}/GPSPRIMES-OPT   ${SOURCE}/GPSPRIMES-OPT-listing.txt
 
 echo TEST wich HANOI
 wich HANOI HANOI_data t prh         >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/HANOI-PEEP.k3       ${BINARY}/HANOI-PEEP       ${SOURCE}/HANOI-PEEP-listing.txt
+   rm ${SOURCE}/HANOI-OPT.k3       ${BINARY}/HANOI-OPT       ${SOURCE}/HANOI-OPT-listing.txt
 
 echo TEST wich INPUT
 wich INPUT INPUT_data t prh         >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/INPUT-PEEP.k3       ${BINARY}/INPUT-PEEP       ${SOURCE}/INPUT-PEEP-listing.txt
+   rm ${SOURCE}/INPUT-OPT.k3       ${BINARY}/INPUT-OPT       ${SOURCE}/INPUT-OPT-listing.txt
 
 echo TEST wich MANORBOYX
 wich MANORBOYX - t prh              >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/MANORBOYX-PEEP.k3   ${BINARY}/MANORBOYX-PEEP   ${SOURCE}/MANORBOYX-PEEP-listing.txt
+   rm ${SOURCE}/MANORBOYX-OPT.k3   ${BINARY}/MANORBOYX-OPT   ${SOURCE}/MANORBOYX-OPT-listing.txt
 
 # MATMULT is excluded because it fails if optimised.
 #echo TEST wich MATMULT
 #wich MATMULT - t prh                >>wich_tests_log.txt
 #fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-#   rm ${SOURCE}/MATMULT-PEEP.k3     ${BINARY}/MATMULT-PEEP     ${SOURCE}/MATMULT-PEEP-listing.txt
+#   rm ${SOURCE}/MATMULT-OPT.k3     ${BINARY}/MATMULT-OPT     ${SOURCE}/MATMULT-OPT-listing.txt
 
 echo TEST wich PALSQR
 wich PALSQR - t prh                 >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/PALSQR-PEEP.k3      ${BINARY}/PALSQR-PEEP      ${SOURCE}/PALSQR-PEEP-listing.txt
+   rm ${SOURCE}/PALSQR-OPT.k3      ${BINARY}/PALSQR-OPT      ${SOURCE}/PALSQR-OPT-listing.txt
 
 # PENTOMINO is excluded because it fails if optimised.
 #echo TEST wich PENTOMINO
 #wich PENTOMINO PENTOMINO_data t prh >>wich_tests_log.txt
 #fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-#   rm ${SOURCE}/PENTOMINO-PEEP.k3   ${BINARY}/PENTOMINO-PEEP   ${SOURCE}/PENTOMINO-PEEP-listing.txt
+#   rm ${SOURCE}/PENTOMINO-OPT.k3   ${BINARY}/PENTOMINO-OPT   ${SOURCE}/PENTOMINO-OPT-listing.txt
 
 
 echo TEST wich QSORT
 wich QSORT - t prh                  >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/QSORT-PEEP.k3       ${BINARY}/QSORT-PEEP       ${SOURCE}/QSORT-PEEP-listing.txt
+   rm ${SOURCE}/QSORT-OPT.k3       ${BINARY}/QSORT-OPT       ${SOURCE}/QSORT-OPT-listing.txt
 
 # WEEHAAVIE is excluded because it fails if optimised.
 #echo TEST wich WEEHAAVIE
 #wich WEEHAAVIE - t prh              >>wich_tests_log.txt
 #fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-#   rm ${SOURCE}/WEEHAAVIE-PEEP.k3   ${BINARY}/WEEHAAVIE-PEEP   ${SOURCE}/WEEHAAVIE-PEEP-listing.txt
+#   rm ${SOURCE}/WEEHAAVIE-OPT.k3   ${BINARY}/WEEHAAVIE-OPT   ${SOURCE}/WEEHAAVIE-OPT-listing.txt
 
 echo TEST wich WHETSTONE
 wich WHETSTONE - t prh              >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/WHETSTONE-PEEP.k3   ${BINARY}/WHETSTONE-PEEP   ${SOURCE}/WHETSTONE-PEEP-listing.txt
+   rm ${SOURCE}/WHETSTONE-OPT.k3   ${BINARY}/WHETSTONE-OPT   ${SOURCE}/WHETSTONE-OPT-listing.txt
 
 echo TEST wich ZELLER
 wich ZELLER ZELLER_data t prh       >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/ZELLER-PEEP.k3      ${BINARY}/ZELLER-PEEP      ${SOURCE}/ZELLER-PEEP-listing.txt
+   rm ${SOURCE}/ZELLER-OPT.k3      ${BINARY}/ZELLER-OPT      ${SOURCE}/ZELLER-OPT-listing.txt
 
 echo
 diff wich_tests_log.txt wich_tests_good_log.txt >wich_test_diff.txt

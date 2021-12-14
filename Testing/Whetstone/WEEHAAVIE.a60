@@ -1,6 +1,6 @@
 WEEHAAVIE|
 _b_e_g_i_n
-
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A6, A12;
 
    _c_o_m_m_e_n_t  HAVIE INTEGRATOR. ALGORITHM 257, Robert N. Kubik, CACM 8 (1965) 381;
 
@@ -73,64 +73,62 @@ _e_n_d  havieintegrator;
 
 
 eps  := 1.0º-10;
-writetext(30, _[epsilon * = * _]);
-write(30, format(_[d.dddddddddddº-ddc_]), eps);
+writetext(30, _[epsilon*=*_]);
+write(30, format(_[d.dddddddddddº+ndc_]), eps);
 
 m max  := 20;
-writetext(30, _[m max * = * _]);
+writetext(30, _[m max*=*_]);
 write(30, format(_[nddc_]), m max);
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,1.0/(1.0+y×y),m max);
-writetext(30, _[count * = * _]);
+writetext(30, _[count*=*_]);
 write(30, format(_[nddddddddc_]), count);
-write(30, format(_[+d.dddddddddddº-dd_]), answer);
-writetext(30, _[ * approximates * +7.85398163397º*-1_]);
-writetext(30, _[, * relative * error * _]);
-write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.785398163397448)/0.785398163397448);
+write(30, format(_[+d.dddddddddddº+nd_]), answer);
+writetext(30, _[*approximates*+7.8539816339745º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº+ndc_]), (answer - 0.78539816339745)/0.78539816339745);
 
 a := eps; b := 1;
 answer := havieintegrator(y,eps,b,eps,(y ^ (-y)),m max);
-writetext(30, _[count * = * _]);
+writetext(30, _[count*=*_]);
 write(30, format(_[nddddddddc_]), count);
-write(30, format(_[+d.dddddddddddº-dd_]), answer);
-writetext(30, _[ * approximates * _]);
-write(30, format(_[+d.dddddddddddº-dd_]), 1.29128599706266);
-writetext(30, _[, * relative * error * _]);
-write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 1.29128599706266)/1.29128599706266);
+write(30, format(_[+d.dddddddddddº+nd_]), answer);
+writetext(30, _[*approximates*+1.2912859970627º*+0_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº+ndc_]), (answer - 1.2912859970627)/1.2912859970627);
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,ln(1.0+y)/(1.0 + y^2),m max);
-writetext(30, _[count * = * _]);
+writetext(30, _[count*=*_]);
 write(30, format(_[nddddddddc_]), count);
-write(30, format(_[+d.dddddddddddº-dd_]), answer);
-writetext(30, _[ * approximates * +2.72198261288º*-1_]);
-writetext(30, _[, * relative * error * _]);
-write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.27219826128795)/0.27219826128795);
+write(30, format(_[+d.dddddddddddº+nd_]), answer);
+writetext(30, _[*approximates*+2.7219826128795º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº+ndc_]), (answer - 0.27219826128795)/0.27219826128795);
 
 
 a := 0; b := 1;
 answer := havieintegrator(y,0,b,eps,(y+y)/(1.0+y×y),m max);
-writetext(30, _[count * = * _]);
+writetext(30, _[count*=*_]);
 write(30, format(_[nddddddddc_]), count);
-write(30, format(_[+d.dddddddddddº-dd_]), answer);
-writetext(30, _[ * approximates * +6.93147180560º*-1_]);
-writetext(30, _[, * relative * error * _]);
-write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.6931471805599453)/0.6931471805599453);
+write(30, format(_[+d.dddddddddddº+nd_]), answer);
+writetext(30, _[*approximates*+6.9314718055995º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº+ndc_]), (answer - 0.69314718055995)/0.69314718055995);
 
 
 a:= 0.0; b:= 4.3;
 answer := havieintegrator(y, a, b, eps, exp(-y×y), m max);
-writetext(30, _[count * = * _]);
+writetext(30, _[count*=*_]);
 write(30, format(_[nddddddddc_]), count);
-write(30, format(_[+d.dddddddddddº-dd_]), answer);
-writetext(30, _[ * approximates * +8.86226924395º*-1_]);
-writetext(30, _[, * relative * error * _]);
-write(30, format(_[+d.dddddddddddº-ddc_]), (answer - 0.8862269243951)/0.8862269243951);
+write(30, format(_[+d.dddddddddddº+nd_]), answer);
+writetext(30, _[*approximates*+8.8622692439507º*-1_]);
+writetext(30, _[,*relative*error*_]);
+write(30, format(_[+d.dddddddddddº+ndc_]), (answer - 0.88622692439507)/0.88622692439507);
 
 FINISH:
 
 _e_n_d
 |
-
 |

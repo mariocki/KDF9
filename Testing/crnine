@@ -1,5 +1,6 @@
 BINARY=${KDF9_BINARY:-Binary}
 DATA=${KDF9_DATA:-Data}
+ID="`basename $0`: "
 
 prog=$1
 data=$2
@@ -9,7 +10,7 @@ cp FW0 FW0_copy
 
 if [ x"${prog}"x = xx ]
 then
-   echo You have not named a binary program to be run.
+   echo ${ID} You have not named a binary program to be run.
    echo
    exit 1
 fi
@@ -18,7 +19,7 @@ program=`basename "${prog}"`
 program=${BINARY}/"$program"
 if [ ! -r "$program" ]
 then
-   echo The object code file "$program" is absent or unreadable.
+   echo ${ID} The object code file "$program" is absent or unreadable.
    echo
    exit 2
 fi
@@ -37,7 +38,7 @@ else
       then
          cp "$datatxt" CR0
       else
-         echo The file "$datatxt" is absent or unreadable.
+         echo ${ID} The file "$datatxt" is absent or unreadable.
          exit 3
       fi
    fi

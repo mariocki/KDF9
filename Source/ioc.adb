@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -109,7 +109,7 @@ package body IOC is
    function usage (the_buffer : IOC.device)
    return KDF9.word is
    begin
-      return the_buffer.stream.bytes_moved;
+      return KDF9.word(the_buffer.stream.bytes_moved);
    end usage;
 
    procedure flush (the_buffer : in out IOC.device) is

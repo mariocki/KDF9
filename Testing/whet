@@ -1,22 +1,23 @@
 SOURCE="${KIDSGROVE:-Kidsgrove}"
 TARGET="${WHETSTONE:-Whetstone}"
+ID="`basename $0`: "
 
 if [ -r "${TARGET}/$1.a60" ]
 then
    echo
    printf "\\a\\a\\a"
-   printf "${TARGET}/$1.a60 already exists. Do you want to overwrite it (y/n)? "
+   printf "${ID} ${TARGET}/$1.a60 already exists. Do you want to overwrite it (y/n)? "
    read reply
    echo
    case $reply in
       y | Y | yes | Yes | YES)
          if [ -w "${TARGET}/$1.a60" ]
          then
-            echo Converting ${SOURCE}/$1.a60.
+            echo ${ID} Converting ${SOURCE}/$1.a60.
             echo
          else
             printf "\\a\\a\\a"
-            echo "${TARGET}/$1.a60 cannot be overwritten."
+            echo ${ID} "${TARGET}/$1.a60 cannot be overwritten."
             echo
             exit
          fi
@@ -28,6 +29,6 @@ then
    esac
 fi
 
-ports $1
+ports -f $1 <${SOURCE}/$1.a60 >${TARGET}/$1.a60
 
 walgol $*

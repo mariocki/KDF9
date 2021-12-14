@@ -20,6 +20,8 @@ cat > ${DATA}/mt_test_labels.txt <<++++
 0-00-777AMPEXTM4|
 |
 ++++
+
+ucc RLT
 nine_priv RLT mt_test_labels - zw
 cp MT2 MTx
 
@@ -28,7 +30,7 @@ cp MT2 MTx
 
 echo TEST A - MRWD, MFR, MBR, MLW, MBSK, MLB, MFSK, MGAP, writing max block, MWIPE - should terminate normally:
 cp MTx MT2; ucc OUT4A
-nine OUT4A - t $opt >> mt_regr_tests_log.txt
+none OUT4A - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -37,7 +39,7 @@ z)
 esac
 echo TEST B - GAP in unWIPEd area - should fail \"Impossible I/O operation\":
 cp MTx MT2; ucc OUT4B
-nine OUT4B - t $opt >> mt_regr_tests_log.txt
+none OUT4B - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -46,7 +48,7 @@ z)
 esac
 echo TEST C - valid WIPE at end of data - should end normally:
 cp MTx MT2; ucc OUT4C
-nine OUT4C - t $opt >> mt_regr_tests_log.txt
+none OUT4C - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -55,7 +57,7 @@ z)
 esac
 echo TEST D - reading past the end of data - should fail \"Impossible I/O operation\":
 cp MTx MT2; ucc OUT4D
-nine OUT4D - t $opt >> mt_regr_tests_log.txt
+none OUT4D - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -64,7 +66,7 @@ z)
 esac
 echo TEST E - attempt to write past PET - should fail \"Impossible I/O operation\":
 cp MTx MT2; ucc OUT4E
-nine OUT4E - t $opt >> mt_regr_tests_log.txt
+none OUT4E - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -73,7 +75,7 @@ z)
 esac
 echo TEST F - MW, MWE, MFRE and MBRE - should end normally:
 cp MTx MT2; ucc OUT4F
-nine OUT4F - t $opt >> mt_regr_tests_log.txt
+none OUT4F - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -82,7 +84,7 @@ z)
 esac
 echo TEST G - WIPE entire tape, leaving it unlabelled - should end normally:
 cp MTx MT2; ucc OUT4G
-nine OUT4G - t $opt >> mt_regr_tests_log.txt
+none OUT4G - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -91,7 +93,7 @@ z)
 esac
 echo TEST H - writing to ETW - should end normally:
 cp MTx MT2; ucc OUT4H
-nine OUT4H - t $opt >> mt_regr_tests_log.txt
+none OUT4H - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -100,7 +102,7 @@ z)
 esac
 echo TEST I - MBR at BTW - should LIV:
 cp MTx MT2; ucc OUT4I
-nine OUT4I - t $opt >> mt_regr_tests_log.txt
+none OUT4I - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -109,7 +111,7 @@ z)
 esac
 echo TEST J - MBSK at BTW - should LIV:
 cp MTx MT2; ucc OUT4J
-nine OUT4J - t $opt >> mt_regr_tests_log.txt
+none OUT4J - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -118,7 +120,7 @@ z)
 esac
 echo TEST K - MBR after label block, R/W 1-word blocks - should end normally:
 cp MTx MT2; ucc OUT4K
-nine OUT4K - t $opt >> mt_regr_tests_log.txt
+none OUT4K - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -127,7 +129,7 @@ z)
 esac
 echo TEST L - R/W 32K-word blocks - should end normally:
 cp MTx MT2; ucc OUT4L
-nine OUT4L - t $opt >> mt_regr_tests_log.txt
+none OUT4L - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -137,7 +139,7 @@ esac
 
 echo TEST T - like TEST A but for 7-track decks - should end normally:
 nine_priv RLT mt_test_labels - zw; ucc OUT4T
-nine OUT4T - t $opt >> mt_regr_tests_log.txt
+none OUT4T - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 case $opt in
 z)
@@ -148,7 +150,7 @@ esac
 echo TEST TRO - like TEST T but without WPR - should fail:
 chmod 444 ST0
 nine_priv RLT mt_test_labels - zw; ucc OUT4T
-nine OUT4T - t $opt >> mt_regr_tests_log.txt
+none OUT4T - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 chmod 644 ST0
 case $opt in
@@ -161,7 +163,7 @@ echo TEST OUT 2 - should end normally:
 echo >> mt_regr_tests_log.txt
 echo TEST OUT 2 - should end normally: >> mt_regr_tests_log.txt
 nine_priv RLT mt_test_labels - zw; ucc OUT2
-nine OUT2 - t $opt >> mt_regr_tests_log.txt
+none OUT2 - t $opt >> mt_regr_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>mt_regr_tests_log.txt
 
 

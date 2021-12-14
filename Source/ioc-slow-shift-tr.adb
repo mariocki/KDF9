@@ -1,6 +1,6 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,10 +14,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with KDF9.TOD_clock;
+with disassembly.symbols;
 with KDF9.TSD.timing;
 
-use  KDF9.TOD_clock;
+use  disassembly.symbols;
 
 package body IOC.slow.shift.TR is
 
@@ -270,7 +270,7 @@ package body IOC.slow.shift.TR is
       if the_reader.is_open then
          the_reader.current_case := KDF9_char_sets.Case_Normal;
       else
-         trap_operator_error("«" & next_file_name & "» cannot be found");
+         trap_operator_error(quote(next_file_name) & " cannot be found");
       end if;
    end reattach;
 
@@ -387,6 +387,9 @@ package body IOC.slow.shift.TR is
       if fetch_halfword(1, 1) > threshold or else fetch_halfword(1, 1) = 0 then
          store_halfword(substitute, 1, 1);
       end if;
+
+      -- Save the available data for later diagnostic purposes.
+      set_whole_program_data(fetch_word(1), (fetch_word(0)/2**24));
 
       -- Do not set the time if we are computing a signature, so as to get a repeatable hash.
       if not the_signature_is_enabled then

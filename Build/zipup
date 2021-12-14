@@ -29,6 +29,7 @@ UNIX|Unix|unix|LINUX|Linux|linux)
    ;;
 macOS|Macintosh|Mac|OSX|[Ww]indows|WINDOWS)
    zip -q -r ${name}.zip emulation
+   chmod 644 ${name}.zip
    echo; ls -la ${name}.zip
    ;;
 *)

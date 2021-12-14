@@ -9,7 +9,7 @@ Digital signature of traced orders = #2426735724677272.
 TEST TDISCFHNS POC, POK, PIC, PIG.
 Digital signature of traced orders = #5462015425746221.
 TEST TFDOUTS 41, 42, 43, 44, 45.
-Digital signature of traced orders = #5117365631055154.
+Digital signature of traced orders = #5531737131615377.
 TEST TFDOUTFAILS 41 with no discs reserved.
 Digital signature of traced orders = #7346020045376345.
 TEST TFDOUTFAILS 44, 45 too many 45s.

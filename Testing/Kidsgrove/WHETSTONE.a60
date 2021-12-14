@@ -198,9 +198,9 @@ pout(n11, j , k, x, x, x, x);
 
 ends := (Time - starts);
 
-writetext(30, {{c}That_took_});
+writetext(30, {{c}That$took$});
 write(30, format({ndd.ds}), ends);
-writetext(30, {seconds,_for_});
+writetext(30, {seconds,$for$});
 write(30, format({ndd.ds}), 1º6 / ends / 1000);
 writetext(30, {KWIPS{c}});
 

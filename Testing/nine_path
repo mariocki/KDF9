@@ -1,3 +1,4 @@
+ID="`basename $0`: "
 program=$1
 datatxt=$2
 
@@ -5,14 +6,14 @@ cp FW0 FW0_copy
 
 if [ x"${program}"x = xx ]
 then
-   echo You have not named a binary program to be run.
+   echo ${ID} You have not named a binary program to be run.
    echo
    exit 1
 fi
 
 if [ ! -r "$program" ]
 then
-   echo The object code file "$program" is absent or unreadable.
+   echo ${ID} The object code file "$program" is absent or unreadable.
    echo
    exit 2
 fi
@@ -21,7 +22,7 @@ if [ -r "$datatxt" ]
 then
    cp "$datatxt" TR1
 else
-   echo The file "$datatxt" is absent or unreadable.
+   echo ${ID} The file "$datatxt" is absent or unreadable.
    exit 3
 fi
 

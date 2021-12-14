@@ -13,9 +13,9 @@
 !procedure print move (from, to);
       !integer from, to;
    !begin
-    writetext(30, {Move _ a _ disc _ from _ });
+    writetext(30, {Move$a$disc$from$});
     disc(from);
-    writetext(30, { _ to _ });
+    writetext(30, {$to$});
     disc(to);
     writetext(30, {{c}});
    !end print move;
@@ -42,9 +42,9 @@ open(20);
 disc count := 1;
 disc count := read(20);
 
-writetext(30, {The _ Towers _ of _ Hanoi.{c}Move});
+writetext(30, {The$Towers$of$Hanoi.{c}Move});
 write(30, format({ndd}), disc count);
-writetext(30, {_ discs _ from _ tower _ A _ to _ tower _ C _ via _ tower _ B{c}});
+writetext(30, {$discs$from$tower$A$to$tower$C$via$tower$B{c}});
 solve(disc count, 1, 3, 2);
 
 close(20);
@@ -52,4 +52,6 @@ close(30)
 !end
 |
 3;
+|
+|
 |

@@ -156,11 +156,11 @@ ee9|warn)
    esac
    ;;
 
-kal3|KAlgol|kalgol|distro|all|a2b|mtp|call_tape|kidopt)
+kal3|KAlgol|kalgol|distro|all|a2b|mtp|call_tape|kidopt|ports|glance|extract_symbols|st_tl)
    ;;
 
 *)
-   echo Invalid housekeeping parameter \"$1\"!
+   echo Invalid build option parameter \"$1\"!
    exit 1
    ;;
 
@@ -174,7 +174,7 @@ TEST_LINK_OPTIONS="${BASE_LINK_OPTIONS}"
 case ${OS} in
 
 macOS|Macintosh|Mac|OSX|UNIX|Unix|unix|LINUX|Linux|linux)
-   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatfn -mtune=native -O3 -flto"
+   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatfn -mtune=native -Ofast -flto"
    OPT_LINK_OPTIONS="${BASE_LINK_OPTIONS} -flto"
    ;;
 
@@ -259,7 +259,6 @@ warn)
 	fi
    ;;
 
-
 kal3)
    echo
    echo Compiling kal3 for ${OS}.
@@ -274,7 +273,6 @@ kal3)
 	   exit 10
 	fi
 	;;
-
 
 KAlgol|kalgol)
    echo
@@ -291,88 +289,28 @@ KAlgol|kalgol)
 	   exit 10
 	fi
 	echo
-	echo Compiling kidopt for ${OS}.
-	COMMAND="gnatmake ${MAKE_OPTIONS} -aI${SOURCE} ${OBJECT} ${GCC_OPTIONS} ${OPT_GNAT_OPTIONS} kidopt ${OPT_LINK_OPTIONS}"
-	eval ${COMMAND} >>komlog.ada
-	if test -r kidopt
-	then
-	   mv ${KIDOPT} ${TESTING}
-	   echo kidopt COMPILED O.K.
-	else
-	   echo kidopt COMPILATION FAILED 
-	   exit 10
-	fi
-	mk9 kal3 ${OS}
+	${BUILD}/mk9 a2b     ${OS}
+	${BUILD}/mk9 glance  ${OS}
+	${BUILD}/mk9 kidopt  ${OS}
+	${BUILD}/mk9 ports   ${OS}
+	${BUILD}/mk9 st_tl   ${OS}
+	${BUILD}/mk9 kal3    ${OS}
 	echo; echo Converting mksys2.bin to MKSYS2 for ee9.
 	${TESTING}/a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${ADJUNCTS}/MKSYS2
    echo; echo Converting KAB00.bin to KAB00DH--USU for ee9.
    ${TESTING}/a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${ADJUNCTS}/KAB00DH--USU
    ;;
 
-
-a2b)
-   echo
-   echo Building a2b.
-	COMMAND="gnatmake ${MAKE_OPTIONS} -aI${SOURCE} ${OBJECT} ${GCC_OPTIONS} ${OPT_GNAT_OPTIONS} a2b ${OPT_LINK_OPTIONS}"
-   echo ====
-   (
-	  echo Using the build command:
-     echo ${COMMAND}
-	)  >>komlog.ada
-	cat komlog.ada
-   echo ====
-   cp adc-ee9.adc gnat.adc
-	eval ${COMMAND} >>komlog.ada
-	if test -r a2b
-	then
-	   $STRIP a2b
-	   mv a2b ${TESTING}/${A2B}
-	   fgrep -B2 ">>>" komlog.ada
-	else
-	   echo ee9 COMPILATION FAILED 
-	   fgrep -B2 ">>>" komlog.ada
-	   exit 10
-	fi
-	;;
-
-
-mtp)
-   echo
-   echo Building mtp.
-	COMMAND="gnatmake ${MAKE_OPTIONS} -aI${SOURCE} ${OBJECT} ${GCC_OPTIONS} ${OPT_GNAT_OPTIONS} mtp ${OPT_LINK_OPTIONS}"
-   echo ====
-   (
-	  echo Using the build command:
-     echo ${COMMAND}
-	)  >>komlog.ada
-	cat komlog.ada
-   echo ====
-   cp adc-ee9.adc gnat.adc
-	eval ${COMMAND} >>komlog.ada
-	if test -r mtp
-	then
-	   $STRIP mtp
-	   mv mtp ${TESTING}/${MTP}
-	   fgrep -B2 ">>>" komlog.ada
-	else
-	   echo ee9 COMPILATION FAILED 
-	   fgrep -B2 ">>>" komlog.ada
-	   exit 10
-	fi
-	;;
-
-
 all)
    echo
-   echo Building a2b, mtp, kal3, KAlgol and ee9.
-	${BUILD}/mk9 a2b  ${OS}
-	${BUILD}/mk9 mtp  ${OS}
-	${BUILD}/mk9 KAlgol ${OS}
+   echo Building mtp, KAlgol and ee9.
+	${BUILD}/mk9 mtp              ${OS}
+	${BUILD}/mk9 extract_symbols  ${OS}
+	${BUILD}/mk9 KAlgol           ${OS}
 	echo
 	grep "Welcome to ee9 V" ${SOURCE}/ee9.adb
-	${BUILD}/mk9 ee9  ${OS} distro
+	${BUILD}/mk9 ee9              ${OS}
 	;;
-
 
 distro)
    echo
@@ -381,6 +319,30 @@ distro)
 	${BUILD}/pk9 ${OS}
 	;;
 
+$1)
+   echo
+   echo Building $1.
+	COMMAND="gnatmake ${MAKE_OPTIONS} -aI${SOURCE} ${OBJECT} ${GCC_OPTIONS} ${OPT_GNAT_OPTIONS} $1 ${OPT_LINK_OPTIONS}"
+   echo ====
+   (
+	  echo Using the build command:
+     echo ${COMMAND}
+	)  >>komlog.ada
+	cat komlog.ada
+   echo ====
+   cp adc-ee9.adc gnat.adc
+	eval ${COMMAND} >>komlog.ada
+	if test -r $1
+	then
+	   $STRIP $1
+	   mv $1 ${TESTING}/$1
+	   fgrep -B2 ">>>" komlog.ada
+	else
+	   echo ee9 COMPILATION FAILED 
+	   fgrep -B2 ">>>" komlog.ada
+	   exit 10
+	fi
+	;;
 
 *)
    echo

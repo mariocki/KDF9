@@ -1,6 +1,6 @@
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,10 +16,10 @@
 
 with Ada.Unchecked_Conversion;
 --
-with formatting;
+with data_imaging;
 with KDF9.CPU;
 
-use formatting;
+use  data_imaging;
 use  KDF9.CPU;
 
 package body KDF9.store is

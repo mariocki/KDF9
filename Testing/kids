@@ -11,6 +11,7 @@ then
    cp settings_for_kalgol.txt settings_1.txt
 fi
 
+export KIDSGROVE_PEEPHOLE=n
 kalgol $1
 
 if [ -s ${BINARY}/$1 ]

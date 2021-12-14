@@ -1,6 +1,8 @@
 trap "rm -f walgol_tests_diff.txt"  \
       0 1 2 3
 
+export WHETSTONE=
+
 >walgol_tests_log.txt
 
 walgol FLUID     t prh >>walgol_tests_log.txt

@@ -1,5 +1,6 @@
 GPSPRIMES|
  _b_e_g_i_n
+ _c_o_m_m_e_n_t _l_i_b_r_a_r_y A1, A4, A5, A15;
 
  _c_o_m_m_e_n_t after Knuth and Merner, CACM June 1961;
 
@@ -26,32 +27,31 @@ open(10);
         _i_f j = 0  _t_h_e_n -1  _e_l_s_e j,
        p,
         _i_f j = 1  _t_h_e_n  1
-                    _e_l_s_e
+                   _e_l_s_e
                        _i_f GPS
                               (
                                a,
                                j,
                                z,
                                 _i_f a = 1  _t_h_e_n 1
-                                           _e_l_s_e ( _i_f rem(j, a) = 0  _a_n_d a < j _t_h_e_n 0 _e_l_s_e z)
+                                           _e_l_s_e ( _i_f rem(j, a) = 0  _a_n_d a < j  _t_h_e_n 0  _e_l_s_e z)
                               ) = z
-                       _t_h_e_n ( _i_f p < m  _t_h_e_n p + 1 _e_l_s_e j × GPS(a, 1, j, -1))
-                       _e_l_s_e p
+                       _t_h_e_n  ( _i_f p < m  _t_h_e_n p + 1  _e_l_s_e j × GPS(a, 1, j, -1))
+                       _e_l_s_e  p
       )
  _d_o
     _b_e_g_i_n
-    writetext(10, _[The _[s_]_]);
-    write(10, format(_[nd_]), m);
-    _i_f is special(m) in having units digit:(1)  _t_h_e_n writetext(10, _[st * _])  _e_l_s_e
-    _i_f is special(m) in having units digit:(2)  _t_h_e_n writetext(10, _[nd * _])  _e_l_s_e
-    _i_f is special(m) in having units digit:(3)  _t_h_e_n writetext(10, _[rd * _])  _e_l_s_e
-                                                           writetext(10, _[th * _]);
-    writetext(10, _[prime * is * _]);
-    write(10, format(_[nddc_]), p);
+   writetext(10, _[The _[s_]_]);
+   write(10, format(_[nddd_]), m);
+    _i_f is special(m) in having units digit:(1)  _t_h_e_n writetext(10, _[st *_])  _e_l_s_e
+    _i_f is special(m) in having units digit:(2)  _t_h_e_n writetext(10, _[nd *_])  _e_l_s_e
+    _i_f is special(m) in having units digit:(3)  _t_h_e_n writetext(10, _[rd *_])  _e_l_s_e
+                                                       writetext(10, _[th * _]);
+   writetext(10, _[prime * is * _]);
+   write(10, format(_[ndddc_]), p);
     _e_n_d;
 
 close(10)
 
 _e_n_d
-|
 |

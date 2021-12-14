@@ -2,10 +2,11 @@ SOURCE=${KIDSGROVE:-Kidsgrove}
 DATA=${KDF9_DATA:-Data}
 BINARY=${KDF9_BINARY:-Binary}
 USERCODE=${KDF9_USERCODE:-Assembly}
+ID="`basename $0`: "
 
 if [ x$1x = xx ]
 then
-   echo; echo No program name was given.; echo
+   echo; echo ${ID} No program name was given.; echo
    exit 1
 fi
 
@@ -13,7 +14,7 @@ name=$1
 
 if [ ! -r ${SOURCE}/$name.a60 ]
 then
-   echo; echo ${SOURCE}/$name.a60 was not found.; echo
+   echo; echo ${ID} ${SOURCE}/$name.a60 was not found.; echo
    exit 2
 fi
 
@@ -23,8 +24,7 @@ then
 fi
 shift
 
-export KIDSGROVE_ASSEMBLY=n
-export KIDSGROVE_NEATEN=n
+export KIDSGROVE_PEEPHOLE=y
 
 kalgol $name with OPTIMISER ${KIDSOPTS}
 if [ ! -s ${USERCODE}/$name.k3 ]
@@ -32,15 +32,10 @@ then
    exit 3
 fi
 
-peep $name  ${ST:-30000} ${TL:-99999}
-ucc $name-PEEP
-
-if [ -s ${BINARY}/$name-PEEP ]
+if [ -s ${BINARY}/$name-OPT ]
 then
-   echo "The executable is in " ${BINARY}/$name-PEEP
-   echo
    cp settings_2.txt settings_1.txt
-   nine $name-PEEP $1 $2 $3 $4
+   nine $name-OPT $1 $2 $3 $4
 else
    exit 3
 fi

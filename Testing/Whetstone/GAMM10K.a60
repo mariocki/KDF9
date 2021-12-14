@@ -1,0 +1,131 @@
+GAMM10K|
+_b_e_g_i_n
+
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A1, A5, A15;
+
+_c_o_m_m_e_n_t GAMM in FORTRAN - single precision version, mark 3;
+_c_o_m_m_e_n_t National Physical Laboratory Benchmark Gamm F;
+_c_o_m_m_e_n_t This program has a single parameter N;
+_c_o_m_m_e_n_t Set N := 10000 for about 60s on a machine like System 360/65;
+_c_o_m_m_e_n_t Output is by one write statement to stream 30;
+_c_o_m_m_e_n_t It takes KDF9 about 480s with unoptimised KAlgol,
+                   and about 154s when optimised;
+
+_i_n_t_e_g_e_r FIVE, I, J, N, REP, TEN, THIRTY;
+_r_e_a_l ACC, ACC1, DIVN, ROOT, X, Y;
+_r_e_a_l _a_r_r_a_y A[1:30], B[1:30], C[1:30];
+
+N := 10000;
+FIVE := 5;
+TEN := 10;
+THIRTY := 30;
+DIVN := 1.0 / N;
+X := 0.1;
+ACC := 0.0;
+
+_c_o_m_m_e_n_t INITIALISE A AND B;
+Y := 1.0;
+_f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 30 _d_o
+_b_e_g_i_n
+  A[I] := I;
+  B[I] := - Y;
+  Y := - Y;
+_e_n_d;
+
+_c_o_m_m_e_n_t ONE PASS OF THIS LOOP CORRESPONDS TO 300 GAMM UNITS;
+_f_o_r REP := 1 _s_t_e_p 1 _u_n_t_i_l N _d_o
+     _b_e_g_i_n
+_c_o_m_m_e_n_t FIRST ADDITION/SUBTRACTION LOOP;
+   I := 30;
+   _f_o_r J := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     C[I] := A[I] + B[I];
+     I := I - 1;
+     _e_n_d;
+_c_o_m_m_e_n_t FIRST POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + C[I]) × X;
+     _e_n_d;
+   ACC1 := Y × DIVN; _c_o_m_m_e_n_t not I, which is undefined in Algol;
+_c_o_m_m_e_n_t FIRST MAXIMUM ELEMENT LOOP;
+   Y := C[11];
+   _f_o_r I := 12 _s_t_e_p 1 _u_n_t_i_l 20 _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t FIRST SOUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 5 _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t SECOND ADDITION/SUBTRACTION LOOP;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     A[I] := C[I] - B[I];
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + A[I]) × X;
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l FIVE _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t FIRST MULTIPLICATION LOOP;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     C[I] := C[I] × B[I];
+     _e_n_d;
+_c_o_m_m_e_n_t SECOND MAXIMUM ELEMENT LOOP;
+   Y := C[20];
+   _f_o_r I := 21 _s_t_e_p 1 _u_n_t_i_l THIRTY _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t THIRD SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l 5 _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+   ACC1 := ACC1 + ROOT × DIVN;
+_c_o_m_m_e_n_t THIRD POLYNOMIAL LOOP;
+   Y := 0.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     Y := (Y + C[I]) × X;
+     _e_n_d;
+   ACC1 := ACC1 + Y × DIVN;
+_c_o_m_m_e_n_t THIRD MAXIMUM ELEMENT LOOP;
+   Y := C[1];
+   _f_o_r I := 2 _s_t_e_p 1 _u_n_t_i_l TEN _d_o
+     _b_e_g_i_n
+     _i_f (C[I] > Y) _t_h_e_n Y := C[I];
+     _e_n_d;
+_c_o_m_m_e_n_t FOURTH SQUARE ROOT LOOP;
+   ROOT := 1.0;
+   _f_o_r I := 1 _s_t_e_p 1 _u_n_t_i_l FIVE _d_o
+     _b_e_g_i_n
+     ROOT := 0.5 × (ROOT + Y/ROOT);
+     _e_n_d;
+
+     ACC1 := ACC1 + ROOT × DIVN;
+     ACC := ACC + ACC1;
+_e_n_d;
+open(30);
+output(30, N);
+output(30, ACC);
+output(30, ACC1);
+_c_o_m_m_e_n_t Should print N then  1.6733 4322 4109 0064 7168 4801E1;
+_c_o_m_m_e_n_t KDF9 actually prints 1.6733 4322 084E1;
+_e_n_d
+|

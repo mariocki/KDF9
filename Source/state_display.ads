@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -72,12 +72,11 @@ package state_display is
 
    the_program_has_been_analysed : Boolean := False;
 
-   procedure show_core_as_word_forms (first, last : in KDF9.address);
+   procedure show_core_as_word_forms (start, finish : in KDF9.address; octal_option : in Boolean);
 
    procedure show_core_as_syllables (first, last : in KDF9.syllable_address);
 
-   procedure show_core_as_Usercode (first, last  : in KDF9.syllable_address;
-                                    octal_option : in Boolean);
+   procedure show_core_as_Usercode (first, last : in KDF9.syllable_address; octal_option : in Boolean);
 
    procedure show_core_in_print_code (first, last : in KDF9.address);
 

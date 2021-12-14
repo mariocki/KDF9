@@ -5,7 +5,9 @@ trap "rm -f kids_test_diff.txt"  \
       0 1 2 3
 
 export KIDSMISC=wz
-export KIDSLIST=""
+export KIDSLIST=
+export KIDSGROVE=
+
 >kids_tests_log.txt
 
 echo TEST kids FLUID

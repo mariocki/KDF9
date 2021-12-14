@@ -1,6 +1,6 @@
 -- Provide support for diagnostic core-dumping area descriptions.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,11 +14,11 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with formatting;
 with state_display;
+with string_editing;
 
-use  formatting;
 use  state_display;
+use  string_editing;
 
 package body dumping is
 
@@ -38,7 +38,7 @@ package body dumping is
 
    function dumping_flag (c : Character)
    return dumping.flag
-   is (dumping.flag(to_upper(c)));
+   is (dumping.flag(upper(c)));
 
    type area is
       record
@@ -116,7 +116,10 @@ package body dumping is
          show_core_in_Latin_1(first, last);
       end if;
       if format_set/word_flag then
-         show_core_as_word_forms(first, last);
+         show_core_as_word_forms(
+                                 first, last,
+                                 octal_option => not format_set/decimal_flag
+                                );
       end if;
       if format_set/Usercode_flag then
          show_core_as_Usercode(
@@ -126,8 +129,10 @@ package body dumping is
                               );
       end if;
       if format_set/orders_flag then
-         show_core_as_syllables((KDF9.code_address(first), 0),
-                                (KDF9.code_address(last),  0));
+         show_core_as_syllables(
+                                (KDF9.code_address(first), 0),
+                                (KDF9.code_address(last),  0)
+                               );
       end if;
    end print_formatted_area;
 

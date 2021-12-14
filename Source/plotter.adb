@@ -1,6 +1,6 @@
 -- Emulation of the plotting commands of the Calcomp 564 graph plotter.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -137,7 +137,7 @@ package body plotter is
 
      procedure move_by (this_step : in plotter.step) is
      begin
-        -- Convert from natural orientation of X axis to PostScript direction.
+        -- Convert from Natural orientation of X axis to PostScript direction.
         if the_pen_is_down then
            draw_by((-this_step.dx, +this_step.dy));
         else

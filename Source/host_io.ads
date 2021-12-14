@@ -1,6 +1,6 @@
--- Buffered I/O streams to support KDF9 device I/O.
+-- Buffered I/O streams to support KDF9 device I/O.   Also used by ancillary programs.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,10 +14,8 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with KDF9;
 with POSIX;
 
-use  KDF9;
 use  POSIX;
 
 package host_IO is
@@ -41,12 +39,17 @@ package host_IO is
                    mode       : in POSIX.access_mode)
       with Inline => False;
 
+   -- Open an anonymous stream, such as the standard input, with the given fd.
+   -- The mode is derived from the fd: 0 => read_mode, others => write_mode.
+   procedure open (the_stream : in out host_IO.stream;
+                   fd         : in Integer)
+      with Inline => False;
+
    procedure truncate (the_stream : in out host_IO.stream);
 
    procedure close (the_stream : in out host_IO.stream);
 
-   procedure flush (the_stream  : in out host_IO.stream;
-                    a_byte_time : in KDF9.us := 0);
+   procedure flush (the_stream  : in out host_IO.stream);
 
    -- Reassign an open stream to another file.
    procedure reattach (the_stream : in out host_IO.stream;
@@ -56,8 +59,10 @@ package host_IO is
    function is_open (the_stream : host_IO.stream)
    return Boolean;
 
+   type bytes_moved_count is range 0 .. 2**48 - 1;
+
    function bytes_moved (the_stream : host_IO.stream)
-   return KDF9.word;
+   return host_IO.bytes_moved_count;
 
    function column (the_stream : host_IO.stream)
    return Natural;
@@ -169,12 +174,11 @@ private
          saved_size,
          position,
          column      : Natural := 0;
-         bytes_moved : KDF9.word := 0;
+         bytes_moved : host_IO.bytes_moved_count := 0;
          fd          : Natural := Natural'Last;
          IO_mode     : POSIX.access_mode range read_mode .. rd_wr_mode;
          last_IO     : POSIX.access_mode range read_mode .. write_mode;
-         buffer,
-         look_behind : String(1 .. IO_buffer_size);
+         buffer      : String(1 .. IO_buffer_size);
       end record;
 
 end host_IO;

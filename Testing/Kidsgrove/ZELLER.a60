@@ -42,15 +42,15 @@
       !for this year := first year !step 1 !until final year !do
          !begin
          get the date of Easter Sunday(Easter day, Easter month, this year);
-         write text(30, {In_});
+         write text(30, {In$});
          write(30, format({dddds}), this year);
-         write text(30, {Easter_Sunday_is_on_});
+         write text(30, {Easter$Sunday$is$on$});
          write(30, format({dd}), Easter day);
          write text(30, {/});
          write(30, format({dd}), Easter month);
-         write text(30, {_and_KDF9_is});
+         write text(30, {$and$KDF9$is});
          write(30, format({s-nd}), this year - 1964);
-         write text(30, {_years_old{c}});
+         write text(30, {$years$old{c}});
          !end
       !end show a range of dates;
 
@@ -60,18 +60,18 @@ open(20);
 data year := read(20);
 close(20);
 
-write text(30, {These_are_the_21_years_of_KDF9:{c}});
+write text(30, {These$are$the$21$years$of$KDF9:{c}});
 show a range of dates (1960, 1980);
 
 !if data year >= 2009 !then
    !begin
-   write text(30, {These_are_the_years_of_ee9:{c}});
+   write text(30, {These$are$the$years$of$ee9:{c}});
    show a range of dates (2009, data year);
    !end;
 
-write text(30, {These_are_the_next_21_years});
+write text(30, {These$are$the$next$21$years});
 !if data year >= 2020 !then
-   write text(30, {_(making_optimistic_assumptions)});
+   write text(30, {$(making$optimistic$assumptions)});
 write text(30, {{c}});
 show a range of dates (data year + 1, data year + 21);
 

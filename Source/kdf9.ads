@@ -1,6 +1,6 @@
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -339,18 +339,23 @@ package KDF9 is
    --
    --
 
+   -- The date a multiple of 28 years ago has the same day/date correspondence as today.
+   -- To avoid exposing KDF9's lack of Y2K compliance, ee9 uses such a date before 2000.
+   -- 8-)
+   -- todays_date_28n_years_ago returns a word of 8 KDF9 characters in the format DD/MM/YY.
+
    type us is mod 2**64;  -- The emulation clocks tick in microseconds (unlike KDF9's clock).
 
    -- The virtual processor time.
-
    the_CPU_time  : KDF9.us := 0;
 
    -- The amount by which the_CPU_time is increased by an instruction execution.
-
    the_CPU_delta : KDF9.us := 0;
 
-   -- The virtual elapsed time, capped to prevent a spurious double-clock (RESET) interrupt.
+   -- The virtual elapsed time at which the next IO interrupt is expected.
+   the_next_interrupt_time : KDF9.us := KDF9.us'Last;
 
+   -- The virtual elapsed time, capped to prevent a spurious double-clock (RESET) interrupt.
    function the_clock_time
    return KDF9.us
       with Inline;
@@ -358,20 +363,18 @@ package KDF9 is
    -- Advance to the largest of the_CPU_time, the_elapsed_time, the_last_delay_time, and past.
    -- Cap the increase to prevent a spurious double-clock (RESET) interrupt in Director.
    -- If necessary, pause execution until the real time equals the virtual elapsed time.
-
    procedure advance_the_clock (past : in KDF9.us);
 
-   -- The virtual clock time at which the next IO interrupt is expected.
-
-   the_next_interrupt_time : KDF9.us := KDF9.us'Last;
-
-   -- Pause execution for the_delay_time in virtual microseconds.
-
-   procedure delay_by (the_delay_time : in KDF9.us);
-
    -- If necessary, pause execution until the real time equals the virtual elapsed time.
-
    procedure synchronize_the_real_and_virtual_times;
+
+   -- Getthe date as a word of 8 characters, thus: dd/mm/yy, where 19yy = this year-28n.
+   function todays_date_28n_years_ago
+   return KDF9.word;
+
+   -- The real time in microseconds since midnight.
+   function the_time_of_day
+   return KDF9.us;
 
 ------------------------------------------------------------------------------------------------
 
@@ -727,7 +730,6 @@ private
    use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
 
    the_elapsed_time    : KDF9.us := 0;
-   the_last_delay_time : KDF9.us := 0;
 
    fetching_normally   : Boolean := True;
 

@@ -3,15 +3,23 @@ export DATA=Data
 export KIDSGROVE=Kidsgrove
 export USERCODE=Assembly
 export WHETSTONE=Whetstone
+export TEMPORARY=${ALGOL_TEMP:-Workfiles}
 
-cp settings_1.txt settings_1.copy
-cp settings_2.txt settings_2.copy
+cp settings_1.txt ${TEMPORARY}/SAVED-settings_1.txt
+cp settings_2.txt ${TEMPORARY}/SAVED-settings_2.txt
+cp settings_3.txt ${TEMPORARY}/SAVED-settings_3.txt
+cp settings_for_kalgol.txt ${TEMPORARY}/SAVED-settings_for_kalgol.txt
+cp settings_symbols.txt ${TEMPORARY}/SAVED-settings_symbols.txt
 
-trap "cp settings_1.copy settings_1.txt; \
-      cp settings_2.copy settings_2.txt; \
-      rm -f settings_?.copy;             \
-      exit 999"                         \
-      1 2 3
+trap "mv ${TEMPORARY}/SAVED-settings_1.txt settings_1.txt; \
+      mv ${TEMPORARY}/SAVED-settings_2.txt settings_2.txt; \
+      mv ${TEMPORARY}/SAVED-settings_3.txt settings_2.txt; \
+      mv ${TEMPORARY}/SAVED-settings_for_kalgol.txt settings_for_kalgol.txt; \
+      mv ${TEMPORARY}/SAVED-settings_symbols.txt settings_symbols.txt; \
+      rm -f ${TEMPORARY}/ee9_regr_tests_log.txt \
+      rm -f ${TEMPORARY}/differences.txt \
+      exit 999"                          \
+      0 1 2 3
 
 echo
 echo This runs a variety of tests, designed to verify that ee9 is working.
@@ -40,7 +48,9 @@ echo
 
 > settings_1.txt
 > settings_2.txt
+> settings_3.txt
 > settings_for_kalgol.txt
+> settings_symbols.txt
 > ee9_regr_tests_log.txt
 
 echo; echo
@@ -124,25 +134,22 @@ echo
 ee9_test_run WICH "wich_tests ahipr a" >> ee9_regr_tests_log.txt
 echo
 
-cp settings_1.copy settings_1.txt
-cp settings_2.copy settings_2.txt
-rm -f settings_[12].copy
-
 printf "\\a\\a\\a"
 echo Press RETURN when you are ready to see the results:
 read reply
 
-tr -d "\\r" > POSIX-ee9_regr_tests_log.txt < ee9_regr_tests_log.txt
+cp ee9_regr_tests_log.txt ${TEMPORARY}/ee9_regr_tests_log.txt
+a2b -reg > ee9_regr_tests_log.txt < ${TEMPORARY}/ee9_regr_tests_log.txt
 
-more POSIX-ee9_regr_tests_log.txt
+more ee9_regr_tests_log.txt
 
-diff POSIX-ee9_regr_tests_log.txt ee9_regr_tests_good_log.txt  > differences.txt
+diff ee9_regr_tests_log.txt ee9_regr_tests_good_log.txt  > ${TEMPORARY}/differences.txt
 
 printf "\\a\\a\\a"
 echo Press RETURN to complete the procedure:
 read reply
 
-if [ ! \( -s differences.txt \) ]
+if [ ! \( -s ${TEMPORARY}/differences.txt \) ]
 then
    echo
    echo "Done: ee9 is working as expected."
@@ -158,9 +165,7 @@ else
    echo Press RETURN to see the discrepancies:
    read reply
    echo
-   more differences.txt
+   more ${TEMPORARY}/differences.txt
 fi
-
-rm -f differences.txt POSIX-ee9_regr_tests_log.txt
 
 exit 0

@@ -1,5 +1,6 @@
 BINARY=${KDF9_BINARY:-Binary}
 USERCODE=${KDF9_USERCODE:-Assembly}
+ID="`basename $0`: "
 
 trap "rm -f a.out mt.out; exit 2" 1 2 3
 
@@ -11,13 +12,13 @@ then
    then
       cp a.out ${BINARY}/"$name"
    else
-      echo kal3 detected error\(s\) in $name.k3
+      echo ${ID} kal3 detected error\(s\) in $name.k3
       more "$name-listing.txt"
    fi
    rm -f a.out mt.out
    exit 0
 else
-   echo `basename "$0"`: there is no file named "$name.k3" in the ${USERCODE} folder!
+   echo ${ID} there is no file named "$name.k3" in the ${USERCODE} folder!
    echo
    exit 1
 fi

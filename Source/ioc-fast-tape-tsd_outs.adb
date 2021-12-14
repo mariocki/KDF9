@@ -1,6 +1,6 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -26,6 +26,19 @@ package body IOC.fast.tape.TSD_OUTs is
       return the_deck.is_open and then the_deck.tape_file.position > 0;
    end needs_rewinding;
 
+   procedure log_allocation (OUT_number : in KDF9.word; name, buffer, TSN : in String) is
+   begin
+      log_API_message("OUT"
+                 & OUT_number'Image
+                 & ": requested "
+                 & name
+                 & " and got "
+                 & buffer
+                 & " with TSN "
+                 & quote(TSN)
+                  );
+   end log_allocation;
+
    procedure do_OUT_4 is
       B : KDF9.Q_part;
       S : KDF9.word;
@@ -35,27 +48,12 @@ package body IOC.fast.tape.TSD_OUTs is
       W := pop;
       declare
          label : constant short_label := short_label(to_string(W));
+         name  : constant String := (if W = 0 then "a ZERO tape" else " " & quote(String(label)));
       begin
          find_tape(tape.data_storage(label), B, S);
          push(KDF9.word(B));
          the_trace_operand := KDF9.word(B);
-         if W = 0 then
-            log_API_message("OUT 4: requested a ZERO tape  and got "
-                          & device_name_of(buffer(B).all)
-                          & " with TSN «"
-                          & to_string(S)
-                          & "»"
-                           );
-         else
-            log_API_message("OUT 4: requested  «"
-                          & String(label)
-                          & "»  and got "
-                          & device_name_of(buffer(B).all)
-                          & " with TSN «"
-                          & to_string(S)
-                          & "»"
-                           );
-         end if;
+         log_allocation(4, name, buffer(B).device_name, to_string(S));
       end;
       set_state_of(buffer(B), allocated => True);
    end do_OUT_4;
@@ -74,14 +72,7 @@ package body IOC.fast.tape.TSD_OUTs is
          push(S);
          push(KDF9.word(B));
          the_trace_operand := KDF9.word(B);
-         log_API_message("OUT 10: requested «"
-                       & String(label)
-                       & "» and got "
-                       & device_name_of(buffer(B).all)
-                       & " with TSN «"
-                       & to_string(S)
-                       & "»"
-                        );
+         log_allocation(10, quote(String(label)), buffer(B).device_name, to_string(S));
       end;
       set_state_of(buffer(B), allocated => True);
    end do_OUT_10;

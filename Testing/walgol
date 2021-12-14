@@ -1,9 +1,10 @@
 export KDF9_BINARY=${ADJUNCTS:-Adjuncts}
 SOURCE=${WHETSTONE:-Whetstone}
+ID="`basename $0`: "
 
 if [ x"$1"x = xx ]
 then
-   echo You have not named a Whetstone Algol program to be run.
+   echo ${ID} You have not named a Whetstone Algol program to be run.
    echo
    exit 1
 fi
@@ -14,7 +15,7 @@ if [ -r "$program" ]
 then
    cp "$program" TR1
 else
-   echo The source file "$program" is absent or unreadable.
+   echo ${ID} The source file "$program" is absent or unreadable.
    echo
    exit 2
 fi

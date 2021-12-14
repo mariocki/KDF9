@@ -36,19 +36,19 @@ fgrep "Digital signature"  KDF9_log.txt   >>fd_regr_tests_log.txt
 echo "TEST TFDOUTS 41, 42, 43, 44, 45."
 echo "TEST TFDOUTS 41, 42, 43, 44, 45."   >>fd_regr_tests_log.txt
 >FD0; ucc  TFDOUTS
-nine       TFDOUTS - t ${opt}
+none       TFDOUTS - t ${opt}
 fgrep "Digital signature"  KDF9_log.txt   >>fd_regr_tests_log.txt
 
 echo "TEST TFDOUTFAILS 41 with no discs reserved."
 echo "TEST TFDOUTFAILS 41 with no discs reserved." >>fd_regr_tests_log.txt
 >FD0; ucc  TFDOUTFAILS
-VARIABLE=8 nine       TFDOUTFAILS - t ${opt}
+VARIABLE=8 none       TFDOUTFAILS - t ${opt}
 fgrep "Digital signature"  KDF9_log.txt            >>fd_regr_tests_log.txt
 
 echo "TEST TFDOUTFAILS 44, 45 too many 45s."
 echo "TEST TFDOUTFAILS 44, 45 too many 45s."       >>fd_regr_tests_log.txt
 >FD0; ucc  TFDOUTFAILS
-VARIABLE=4 nine       TFDOUTFAILS - t ${opt}
+VARIABLE=4 none       TFDOUTFAILS - t ${opt}
 fgrep "Digital signature"  KDF9_log.txt            >>fd_regr_tests_log.txt
 
 echo

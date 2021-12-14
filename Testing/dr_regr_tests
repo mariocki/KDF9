@@ -24,19 +24,19 @@ fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
 echo "TEST TDROUTS   11, 12, 13, 14."
 echo "TEST TDROUTS   11, 12, 13, 14."  >>dr_regr_tests_log.txt
 >DR0; ucc  TDROUTS;
-nine       TDROUTS - t ${opt}k
+none       TDROUTS - t ${opt}k
 fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
 
 echo "TEST TDROUTFAILS   13."
 echo "TEST TDROUTFAILS   13."  >>dr_regr_tests_log.txt
 >DR0; ucc  TDROUTFAILS;
-VARIABLE=3 nine       TDROUTFAILS - t ${opt}k
+VARIABLE=3 none       TDROUTFAILS - t ${opt}k
 fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
 
 echo "TEST TDROUTFAILS   11, 13."
 echo "TEST TDROUTFAILS   11, 13."  >>dr_regr_tests_log.txt
 >DR0; ucc  TDROUTFAILS;
-VARIABLE=6 nine       TDROUTFAILS - t ${opt}k
+VARIABLE=6 none       TDROUTFAILS - t ${opt}k
 fgrep "Digital signature" KDF9_log.txt >>dr_regr_tests_log.txt
 
 echo

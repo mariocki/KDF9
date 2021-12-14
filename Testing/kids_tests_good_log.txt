@@ -1,5 +1,5 @@
-The Usercode   is in  Assembly/FLUID.k3
-The executable is in  Binary/FLUID
+The Usercode   is in Assembly/FLUID.k3
+The executable is in Binary/FLUID
 
 
 LP0:
@@ -31,8 +31,8 @@ PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #1517277161313442.
-The Usercode   is in  Assembly/GPSPRIMES.k3
-The executable is in  Binary/GPSPRIMES
+The Usercode   is in Assembly/GPSPRIMES.k3
+The executable is in Binary/GPSPRIMES
 
 
 LP0:
@@ -70,8 +70,8 @@ THE   30TH PRIME IS  113
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #5377331245747631.
-The Usercode   is in  Assembly/HANOI.k3
-The executable is in  Binary/HANOI
+The Usercode   is in Assembly/HANOI.k3
+The executable is in Binary/HANOI
 
 
 LP0:
@@ -88,8 +88,8 @@ MOVE A DISC FROM A TO C
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #3512015036013255.
-The Usercode   is in  Assembly/INPUT.k3
-The executable is in  Binary/INPUT
+The Usercode   is in Assembly/INPUT.k3
+The executable is in Binary/INPUT
 
 
 LP0:
@@ -127,8 +127,8 @@ FAREWELL, CRUEL WORLD.
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #2630276323070456.
-The Usercode   is in  Assembly/MANORBOYX.k3
-The executable is in  Binary/MANORBOYX
+The Usercode   is in Assembly/MANORBOYX.k3
+The executable is in Binary/MANORBOYX
 
 
 LP0:
@@ -137,8 +137,8 @@ LP0:
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #2335460266570666.
-The Usercode   is in  Assembly/MATMULT.k3
-The executable is in  Binary/MATMULT
+The Usercode   is in Assembly/MATMULT.k3
+The executable is in Binary/MATMULT
 
 
 LP0:
@@ -181,8 +181,8 @@ ROW 10 SHOULD BE 1.23456789º +1
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #5330535243477173.
-The Usercode   is in  Assembly/PALSQR.k3
-The executable is in  Binary/PALSQR
+The Usercode   is in Assembly/PALSQR.k3
+The executable is in Binary/PALSQR
 
 
 LP0:
@@ -222,9 +222,9 @@ LP0:
 CPU TIME IN SECONDS:       101
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #1474364764544301.
-The Usercode   is in  Assembly/PENTOMINO.k3
-The executable is in  Binary/PENTOMINO
+Digital signature of traced orders = #5745072041016250.
+The Usercode   is in Assembly/PENTOMINO.k3
+The executable is in Binary/PENTOMINO
 
 
 LP0:
@@ -484,8 +484,8 @@ SOLUTION COUNT = 10
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #6707333265023545.
-The Usercode   is in  Assembly/QSORT.k3
-The executable is in  Binary/QSORT
+The Usercode   is in Assembly/QSORT.k3
+The executable is in Binary/QSORT
 
 
 LP0:
@@ -495,8 +495,8 @@ CPU TIME IN SECONDS:      42
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #6632027051137170.
-The Usercode   is in  Assembly/WEEHAAVIE.k3
-The executable is in  Binary/WEEHAAVIE
+The Usercode   is in Assembly/WEEHAAVIE.k3
+The executable is in Binary/WEEHAAVIE
 
 
 LP0:
@@ -504,20 +504,20 @@ LP0:
 EPSILON = 1.00000000000º-10
 MMAX =  20
 COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +2.31600924005º-12
++7.85398163400º -1 APPROXIMATES +7.8539816339745º -1, RELATIVE ERROR +2.31600924005º-12
 COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.04271642424º-10
++1.29128599746º +0 APPROXIMATES +1.2912859970627º +0, RELATIVE ERROR +3.04271642424º-10
 COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
++2.72198261288º -1 APPROXIMATES +2.7219826128795º -1, RELATIVE ERROR +3.34129504528º-12
 COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +0.00000000000    
++6.93147180560º -1 APPROXIMATES +6.9314718055995º -1, RELATIVE ERROR +0.00000000000    
 COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +6.15752925174º-12
++8.86226924400º -1 APPROXIMATES +8.8622692439507º -1, RELATIVE ERROR +6.15752925174º-12
 FINISHED ENDS 0
 ===
-Digital signature of traced orders = #3325111267122624.
-The Usercode   is in  Assembly/WHETSTONE.k3
-The executable is in  Binary/WHETSTONE
+Digital signature of traced orders = #2146072212220316.
+The Usercode   is in Assembly/WHETSTONE.k3
+The executable is in Binary/WHETSTONE
 
 
 LP0:
@@ -537,8 +537,8 @@ THAT TOOK  23.9 SECONDS, FOR  41.8 KWIPS
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #7462771563353213.
-The Usercode   is in  Assembly/ZELLER.k3
-The executable is in  Binary/ZELLER
+The Usercode   is in Assembly/ZELLER.k3
+The executable is in Binary/ZELLER
 
 
 LP0:

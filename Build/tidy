@@ -45,7 +45,7 @@ chmod 644 ${K}/*
 
 echo
 echo Tidying ${U}.
-rm -f ${U}/*-listing.txt ${U}/*-PEEP.k3
+rm -f ${U}/*-listing.txt ${U}/*-OPT.k3
 chmod 644 ${U}/*
 
 echo
@@ -62,7 +62,7 @@ for f in ${K}/*.a60
 do
   g=`basename $f .a60`
   rm -f ${U}/${g}.k3      ${U}/${g}-listing.txt      ${X}/${g}
-  rm -f ${U}/${g}-PEEP.k3 ${U}/${g}-PEEP-listing.txt ${X}/${g}-PEEP
+  rm -f ${U}/${g}-OPT.k3 ${U}/${g}-OPT-listing.txt ${X}/${g}-OPT
 done
 
 echo
@@ -156,6 +156,7 @@ chmod 755 ${T}/ee9_test_case
 chmod 755 ${T}/ee9_test_run
 chmod 755 ${T}/extract_symbols
 chmod 755 ${T}/fd_regr_tests
+chmod 755 ${T}/glance
 chmod 755 ${T}/kal3
 chmod 755 ${T}/kalgol
 chmod 755 ${T}/kidopt
@@ -165,20 +166,18 @@ chmod 755 ${T}/kwote
 chmod 755 ${T}/liv_tests
 chmod 755 ${T}/mt_regr_tests
 chmod 755 ${T}/mtp
-chmod 755 ${T}/neat
+chmod 755 ${T}/none
 chmod 755 ${T}/nine
 chmod 755 ${T}/nine_path
 chmod 755 ${T}/nine_priv
 chmod 755 ${T}/nouv_tests
-chmod 755 ${T}/nyne
-chmod 755 ${T}/peep
 chmod 755 ${T}/plt
 chmod 755 ${T}/ports
 chmod 755 ${T}/rlt
 chmod 755 ${T}/set_*_codes
 chmod 755 ${T}/si_tests
 chmod 755 ${T}/stone
-chmod 755 ${T}/sttl
+chmod 755 ${T}/st_tl
 chmod 755 ${T}/tsd
 chmod 755 ${T}/tsdnine
 chmod 755 ${T}/tseldon

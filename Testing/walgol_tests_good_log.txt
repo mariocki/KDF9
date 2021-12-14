@@ -2,7 +2,7 @@
 TP0:
 ===
 
-RAN/EL/000M03S/000M07S  SIZE    275
+RAN/EL/000M03S/000M08S  SIZE    297
 
 Propagation of an Impulse into a Viscous-locking Medium
 
@@ -11,85 +11,87 @@ Propagation of an Impulse into a Viscous-locking Medium
     Delta alpha = 0.1000
 
 
-    alpha               lambda       lambda×sqrt(2×alpha)         g
+    alpha             lambda                lambda.sqrt(2alpha) g
 
-    0.0000             INFINITY             1.00000            1.00000
-    0.1000            2.0201º +0            0.90340            0.73452
-    0.2000            1.2812º +0            0.81029            0.52525
-    0.3000            9.2712º -1            0.71814            0.36101
-    0.4000            6.9943º -1            0.62559            0.24038
+    0.0000             INFINITY             1.00000             1.00000
+    0.1000            2.0201º +0            0.90340             0.73452
+    0.2000            1.2812º +0            0.81029             0.52525
+    0.3000            9.2712º -1            0.71814             0.36101
+    0.4000            6.9943º -1            0.62559             0.24038
 
-    0.5000            5.3160º -1            0.53160            0.26796
-    0.6000            3.9727º -1            0.43519            0.30384
-    0.7000            2.8340º -1            0.33532            0.34489
-    0.8000            1.8242º -1            0.23075            0.38947
-    0.9000            8.9284º -2            0.11979            0.43642
+    0.5000            5.3160º -1            0.53160             0.26796
+    0.6000            3.9727º -1            0.43519             0.30384
+    0.7000            2.8340º -1            0.33532             0.34489
+    0.8000            1.8242º -1            0.23075             0.38947
+    0.9000            8.9284º -2            0.11979             0.43642
 
-    1.0000            0.0000                0.00000            0.48394
+    1.0000            0.0000                0.00000             0.48394
+
+
 ===
 
 LP0:
 ===
 
-RAN/EL/008M50S/008M56S===
-Digital signature of traced orders = #3755315075153754.
+RAN/EL/008M49S/008M56S===
+Digital signature of traced orders = #0613355475443420.
 FLUID DONE
 
 TP0:
 ===
 
-RAN/EL/000M02S/000M05S  SIZE    156
+RAN/EL/000M02S/000M05S  SIZE    157
 
-The  1st prime is   2
-The  2nd prime is   3
-The  3rd prime is   5
-The  4th prime is   7
-The  5th prime is  11
-The  6th prime is  13
-The  7th prime is  17
-The  8th prime is  19
-The  9th prime is  23
-The 10th prime is  29
-The 11th prime is  31
-The 12th prime is  37
-The 13th prime is  41
-The 14th prime is  43
-The 15th prime is  47
-The 16th prime is  53
-The 17th prime is  59
-The 18th prime is  61
-The 19th prime is  67
-The 20th prime is  71
-The 21st prime is  73
-The 22nd prime is  79
-The 23rd prime is  83
-The 24th prime is  89
-The 25th prime is  97
-The 26th prime is 101
-The 27th prime is 103
-The 28th prime is 107
-The 29th prime is 109
-The 30th prime is 113
+The    1st prime is    2
+The    2nd prime is    3
+The    3rd prime is    5
+The    4th prime is    7
+The    5th prime is   11
+The    6th prime is   13
+The    7th prime is   17
+The    8th prime is   19
+The    9th prime is   23
+The   10th prime is   29
+The   11th prime is   31
+The   12th prime is   37
+The   13th prime is   41
+The   14th prime is   43
+The   15th prime is   47
+The   16th prime is   53
+The   17th prime is   59
+The   18th prime is   61
+The   19th prime is   67
+The   20th prime is   71
+The   21st prime is   73
+The   22nd prime is   79
+The   23rd prime is   83
+The   24th prime is   89
+The   25th prime is   97
+The   26th prime is  101
+The   27th prime is  103
+The   28th prime is  107
+The   29th prime is  109
+The   30th prime is  113
 ===
 
 LP0:
 ===
 
-RAN/EL/021M46S/021M50S===
-Digital signature of traced orders = #3430267221624657.
+RAN/EL/021M47S/021M50S===
+Digital signature of traced orders = #4724161030033717.
 GPSPRIMES DONE
 
 TP0:
 ===
 
-RAN/EL/000M02S/000M04S  SIZE    154
+RAN/EL/000M02S/000M04S  SIZE    155
 ===
 
 LP0:
 ===
 
 THE TOWERS OF HANOI.
-MOVE 3 DISCS FROM TOWER A TO TOWER C VIA TOWER B
+MOVE  3 DISCS FROM TOWER A TO TOWER C VIA TOWER B
 MOVE A DISC FROM A TO C
 MOVE A DISC FROM A TO B
 MOVE A DISC FROM C TO B
@@ -99,7 +101,7 @@ MOVE A DISC FROM B TO C
 MOVE A DISC FROM A TO C
 
 RAN/EL/000M01S/000M06S===
-Digital signature of traced orders = #6733571075644332.
+Digital signature of traced orders = #5235274473716373.
 HANOI DONE
 
 TP0:
@@ -165,7 +167,7 @@ MANORBOY DONE
 TP0:
 ===
 
-RAN/EL/000M02S/000M05S  SIZE    217
+RAN/EL/000M02S/000M05S  SIZE    221
 ===
 
 LP0:
@@ -216,14 +218,14 @@ ROW 10 SHOULD BE 1.23456789º +1
  1.23456790º +1 1.23456790º +1
 
 
-RAN/EL/000M32S/000M35S===
-Digital signature of traced orders = #7606563365132661.
+RAN/EL/000M33S/000M36S===
+Digital signature of traced orders = #1004012446650566.
 MATMULT DONE
 
 TP0:
 ===
 
-RAN/EL/000M05S/000M13S  SIZE    494
+RAN/EL/000M05S/000M12S  SIZE    473
 ===
 
 LP0:
@@ -481,16 +483,16 @@ SOLUTION COUNT = 10
 
 
 
-RAN/EL/238M45S/238M54S===
-Digital signature of traced orders = #3576534237447450.
+RAN/EL/239M56S/240M05S===
+Digital signature of traced orders = #1446207640170431.
 PENTOMINO DONE
 
 TP0:
 ===
 
 IDENTIFIER mask NOT USED
-DECLARED ON LINE   3
-RAN/EL/000M05S/000M11S  SIZE    542
+DECLARED ON LINE   4
+RAN/EL/000M05S/000M11S  SIZE    534
 ===
 
 LP0:
@@ -499,38 +501,32 @@ LP0:
 EPSILON = 1.00000000000º-10
 MMAX =  20
 COUNT =         6
-+7.85398163400º -1 APPROXIMATES +7.85398163397º -1, RELATIVE ERROR +1.15800462004º-11
++7.85398163400º -1 APPROXIMATES +7.8539816339745º -1, RELATIVE ERROR +1.15800462004º-11
 COUNT =        20
-+1.29128599746º  0 APPROXIMATES +1.29128599706º  0, RELATIVE ERROR +3.07088972447º-10
++1.29128599746º +0 APPROXIMATES +1.2912859970627º +0, RELATIVE ERROR +3.07088972447º-10
 COUNT =         6
-+2.72198261288º -1 APPROXIMATES +2.72198261288º -1, RELATIVE ERROR +3.34129504528º-12
++2.72198261288º -1 APPROXIMATES +2.7219826128795º -1, RELATIVE ERROR +3.34129504528º-12
 COUNT =         6
-+6.93147180560º -1 APPROXIMATES +6.93147180560º -1, RELATIVE ERROR +1.31212349598º-11
++6.93147180560º -1 APPROXIMATES +6.9314718055995º -1, RELATIVE ERROR +1.31212349598º-11
 COUNT =         6
-+8.86226924400º -1 APPROXIMATES +8.86226924395º -1, RELATIVE ERROR +1.02625487529º-11
++8.86226924400º -1 APPROXIMATES +8.8622692439507º -1, RELATIVE ERROR +1.02625487529º-11
 
 RAN/EL/198M14S/198M14S===
-Digital signature of traced orders = #6473105614446710.
+Digital signature of traced orders = #7071041200601346.
 WEEHAAVIE DONE
 
 TP0:
 ===
 
-LINE  18 REL LINE   8 POSITION IDENTIFIER lab
+LINE  19 REL LINE   8 POSITION IDENTIFIER lab
 END COMMENT
-LINE  24 REL LINE   5 POSITION IDENTIFIER p0
+LINE  25 REL LINE   5 POSITION IDENTIFIER p0
 END COMMENT
-LINE  32 REL LINE   7 POSITION IDENTIFIER p3
+LINE  33 REL LINE   7 POSITION IDENTIFIER p3
 END COMMENT
-LINE  46 REL LINE  13 POSITION IDENTIFIER pout
+LINE  47 REL LINE  13 POSITION IDENTIFIER pout
 END COMMENT
-IDENTIFIER a NOT USED
-DECLARED ON LINE   2
-IDENTIFIER b NOT USED
-DECLARED ON LINE   2
-IDENTIFIER c NOT USED
-DECLARED ON LINE   2
-RAN/EL/000M05S/000M15S  SIZE    603
+RAN/EL/000M05S/000M14S  SIZE    604
 ===
 
 LP0:
@@ -547,8 +543,8 @@ N=6160 J=   1 K=   2 X1=+3.00000000 X2=+2.00000000 X3=+3.00000000 X4=-1.10309806
 N=   0 J=   2 K=   3 X1=+1.00000000 X2=-1.00000000 X3=-1.00000000 X4=-1.00000000
 N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
-RAN/EL/006M57S/006M59S===
-Digital signature of traced orders = #3113657561134733.
+RAN/EL/006M56S/006M59S===
+Digital signature of traced orders = #3327110735166160.
 WHETSTONE DONE
 
 TP0:
@@ -619,6 +615,6 @@ IN 2040 EASTER SUNDAY IS ON 01/04 AND KDF9 IS  76 YEARS OLD
 IN 2041 EASTER SUNDAY IS ON 21/04 AND KDF9 IS  77 YEARS OLD
 IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 
-RAN/EL/000M15S/000M20S===
-Digital signature of traced orders = #7426442661355532.
+RAN/EL/000M15S/000M19S===
+Digital signature of traced orders = #2556400473310225.
 ZELLER DONE

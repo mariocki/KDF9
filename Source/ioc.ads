@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -21,14 +21,15 @@ with KDF9;
 
 private with Ada.Exceptions;
 --
+private with data_imaging;
 private with exceptions;
-private with formatting;
 private with HCI;
 private with host_IO;
 private with KDF9_char_sets;
 private with KDF9.store;
 private with POSIX;
 private with settings;
+private with string_editing;
 
 use  Ada.Finalization;
 --
@@ -404,13 +405,14 @@ private
 
    use Ada.Exceptions; pragma Warnings(Off, Ada.Exceptions);
    --
+   use data_imaging;   pragma Warnings(Off, data_imaging);
    use exceptions;     pragma Warnings(Off, exceptions);
-   use formatting;     pragma Warnings(Off, formatting);
    use HCI;            pragma Warnings(Off, HCI);
    use host_IO;        pragma Warnings(Off, host_IO);
    use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
    use KDF9.store;     pragma Warnings(Off, KDF9.store);
    use settings;       pragma Warnings(Off, settings);
+   use string_editing; pragma Warnings(Off, string_editing);
 
    use POSIX;          -- Used here, so no need to suppress warnings.
 

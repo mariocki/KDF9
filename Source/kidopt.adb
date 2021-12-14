@@ -1,6 +1,6 @@
 -- Generate a P option setting for the Kidsgrove compiler from symbolic option names.
 --
--- kidopt is an auxiliary of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- kidopt is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -14,14 +14,17 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with Ada.Characters.Handling;
 with Ada.Command_Line;
-with Ada.Text_IO;
+--
+with simple_IO;
+with string_editing;
 
-use  Ada.Characters.Handling;
-use  Ada.Text_IO;
+use  simple_IO;
+use  string_editing;
 
 procedure kidopt is
+
+   pragma Unsuppress(All_Checks);
 
    package CLI renames Ada.Command_Line;
 
@@ -61,10 +64,14 @@ procedure kidopt is
             end if;
          end loop;
       else
-         Put_Line(Standard_Error, given & " is not a valid option for kidopt.");
+         report_line(given & " is not a valid option for kidopt.");
          CLI.Set_Exit_Status(CLI.Failure);
       end if;
    end include_option;
+
+   function "abs" (s : String)
+   return String
+   is (upper(s));
 
    function oct_of (v : values)
    return String is
@@ -84,28 +91,30 @@ begin -- kidopt
 
    if CLI.Argument_Count = 0 then
       return;
-   elsif CLI.Argument_Count = 1                                 and then
-            To_Upper(CLI.Argument(1)) in "-H" | "-HELP" | "--HELP"  then
-      Put_Line(Standard_Error, "kidopt [ WITH ] { option }");
-      Put     (Standard_Error, "where option is one of: ");
-      Put_Line(Standard_Error, "SEGMENT, TRACE, OPTIMISER, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO");
+   elsif CLI.Argument_Count = 1                           and then
+            abs CLI.Argument(1) in "-H" | "-HELP" | "--HELP"  then
+      report_line("kidopt [ WITH ] { option }");
+      report("where option is one of: ");
+      report_line("SEGMENT, TRACE, OPTIMISER, ORIG_SW, TEXT, NO_OPT, NO_TEST, NO_WARN, LOAD_AND_GO");
       return;
-   elsif CLI.Argument_Count > 0             and then
-            To_Upper(CLI.Argument(1)) = "WITH"  then
+   elsif CLI.Argument_Count > 0       and then
+            abs CLI.Argument(1) = "WITH"  then
       start := 2;
    end if;
 
    for i in start .. CLI.Argument_Count loop
-      if To_Upper(CLI.Argument(i)) = "NONE" then
+      if abs CLI.Argument(i) = "NONE" then
          options_set := 0;
       else
-         include_option(To_Upper(CLI.Argument(i)));
+         include_option(abs CLI.Argument(i));
       end if;
    end loop;
 
-   Put_Line("P 0S5 " & oct_of(options_set));
+   print_line("P 0S5 " & oct_of(options_set));
    if load_and_go_is_requested then
-      Put_Line("P 11065S1 #200");
+      print_line("P 11065S1 #200");
    end if;
+
+   flush_outputs;
 
 end kidopt;
