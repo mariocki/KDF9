@@ -1,5 +1,0 @@
-# set the ANSI SGR escape code for a black background with red and underlined text
-export RED_FONT="ESC[31m"
-export BLACK_FONT="ESC[37m"
-export UNDERLINE="ESC[4m"
-export PLAIN_FONT="ESC[0m"

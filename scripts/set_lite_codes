@@ -1,6 +1,0 @@
-# unset the ANSI SGR escape code to get the default white background with coloured and underlined text
-export -n RED_FONT
-export -n BLACK_FONT
-export -n UNDERLINE
-export -n PLAIN_FONT
-

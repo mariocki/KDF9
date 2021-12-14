@@ -100,8 +100,6 @@ shift
 export KIDSGROVE_PEEPHOLE=y
 kalgol $prog -O --no-k3 ${KIDSOPTS}
 
-peep $prog ${ST:-24000} ${TL:-99999}
-
 ucc $prog-PEEP
 
 echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}-PEEP"

@@ -39,7 +39,7 @@ GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnat
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn -gnatfn -mtune=native -O3
 
 .PHONY: all
-all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp
+all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp extract_symbols st_tl ports glance
 
 .phony: ee9
 ee9 : builddefs patch ${LIB_DIR} ${OPT_DEPENDS}
@@ -69,6 +69,30 @@ mtp:
 	gnatbind ${SRC}/mtp.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
 
+.PHONY: extract_symbols
+extract_symbols:
+	gnatmake -j4 -c -i ${SRC}/extract_symbols.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
+	gnatbind ${SRC}/extract_symbols.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/extract_symbols.ali -o ${SRC}/extract_symbols
+
+.PHONY: st_tl
+st_tl:
+	gnatmake -j4 -c -i ${SRC}/st_tl.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
+	gnatbind ${SRC}/st_tl.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/st_tl.ali -o ${SRC}/st_tl
+
+.PHONY: ports
+ports:
+	gnatmake -j4 -c -i ${SRC}/ports.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
+	gnatbind ${SRC}/ports.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/ports.ali -o ${SRC}/ports
+
+.PHONY: glance
+glance:
+	gnatmake -j4 -c -i ${SRC}/glance.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
+	gnatbind ${SRC}/glance.ali ${SRC:%=-aO%/} -shared
+	gnatlink ${SRC}/glance.ali -o ${SRC}/glance
+
 .PHONY: kal3
 kal3: patch
 	$(MAKE) -e -C ${KAL3}
@@ -94,7 +118,7 @@ clean:
 	$(RM) build.log
 	$(RM) ${SRC:%=%/*.ali}
 	$(RM) ${SRC:%=%/*.o}
-	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/gnat.adc
+	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/st_tl ${SRC}/extract_symbols ${SRC}/ports ${SRC}/glance ${SRC}/gnat.adc
 
 .PHONY: update
 update:
@@ -120,12 +144,9 @@ install: all
 	install -m 644 runtime/Kidsgrove/* $(DESTDIR)$(prefix)/share/kdf9/Kidsgrove
 	install -d $(DESTDIR)$(prefix)/share/kdf9/settings
 	install -m 644 runtime/settings/* $(DESTDIR)$(prefix)/share/kdf9/settings
-	install -d $(DESTDIR)$(prefix)/share/kdf9/tests
-	install -m 755 runtime/tests/* $(DESTDIR)$(prefix)/share/kdf9/tests
-	install -m 644 runtime/tests/*.log $(DESTDIR)$(prefix)/share/kdf9/tests
 	install -d $(DESTDIR)$(prefix)/share/kdf9/Whetstone
 	install -m 644 runtime/Whetstone/* $(DESTDIR)$(prefix)/share/kdf9/Whetstone
-	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp $(DESTDIR)$(prefix)/bin/
+	install -s -m 755 ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/st_tl ${SRC}/extract_symbols ${SRC}/ports ${SRC}/glance $(DESTDIR)$(prefix)/bin/
 	install -m 755 scripts/* $(DESTDIR)$(prefix)/bin/
 	sed "s|%prefix%|$(prefix)|g" < scripts/kdf9_setup > $(DESTDIR)$(prefix)/bin/kdf9_setup
 	$(MAKE) -e -C ${KAL3} install
@@ -139,6 +160,10 @@ uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/a2b
 	$(RM) $(DESTDIR)$(prefix)/bin/kidopt
 	$(RM) $(DESTDIR)$(prefix)/bin/mtp
+	$(RM) $(DESTDIR)$(prefix)/bin/extract_symbols
+	$(RM) $(DESTDIR)$(prefix)/bin/st_tl
+	$(RM) $(DESTDIR)$(prefix)/bin/ports
+	$(RM) $(DESTDIR)$(prefix)/bin/glance
 	for a in scripts/*; do $(RM) $(DESTDIR)$(prefix)/bin/`basename $$a`; done
 	$(MAKE) -e -C ${KAL3} uninstall
 	$(MAKE) -e -C ${KAL4} uninstall

@@ -1,9 +1,30 @@
+#!/bin/bash
+#------------------------------------------------------------------------
+#    This file is part of ee9.
+#
+#    ee9 is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    ee9 is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+# bangs : 
+#------------------------------------------------------------------------
 SOURCE=${WHETSTONE:-Whetstone}
 TARGET=${KIDSGROVE:-Kidsgrove}
-ID="`basename $0`: "
+ID="$(basename $0): "
 
-if [ ! -r  ${SOURCE}/$1.a60 ]
-then echo ${ID} Could not find $1.a60 in ${SOURCE}; exit 1
+if [ ! -r ${SOURCE}/$1.a60 ]; then
+  echo ${ID} Could not find $1.a60 in ${SOURCE}
+  exit 1
 fi
 
-ports -b < ${SOURCE}/$1.a60  >${TARGET}/$1.a60
+ports -b <${SOURCE}/$1.a60 >${TARGET}/$1.a60

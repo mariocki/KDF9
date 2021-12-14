@@ -104,19 +104,17 @@ else
     fi
 fi
 
-if [ ! -r ${USERCODE}/$1-listing.txt ]
-then
-   echo
-   echo ${ID} ${USERCODE}/$1-listing.txt is absent or unreadable.
-   echo ${ID} Disassembly will not show operands as Usercode symbols.
-   echo
+if [ ! -r ${USERCODE}/$1-listing.txt ]; then
+    echo
+    echo ${ID} ${USERCODE}/$1-listing.txt is absent or unreadable.
+    echo ${ID} Disassembly will not show operands as Usercode symbols.
+    echo
 else
-   extract_symbols < ${USERCODE}/$1-listing.txt > settings_symbols.txt
-   if [ -r settings_3.txt ]
-   then
-      cp settings_3.txt settings_1.txt
-   fi
-   cat settings_symbols.txt >> settings_1.txt
+    extract_symbols <${USERCODE}/$1-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
+    if [ -r ${KDF9RUNTIME}/settings_3.txt ]; then
+        cp ${KDF9RUNTIME}/settings_3.txt ${KDF9RUNTIME}/settings_1.txt
+    fi
+    cat ${KDF9RUNTIME}/settings_symbols.txt >>${KDF9RUNTIME}/settings_1.txt
 fi
 
 if [ "$mode" = -df ]; then

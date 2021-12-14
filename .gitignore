@@ -12,3 +12,7 @@ src/to_9_from_1934
 src/gnat.adc
 
 build.log
+src/extract_symbols
+src/glance
+src/ports
+src/st_tl
