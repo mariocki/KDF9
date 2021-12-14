@@ -1,6 +1,6 @@
--- Buffered I/O streams to support KDF9 device I/O.
+-- Buffered I/O streams to support KDF9 device I/O.   Also used by ancillary programs.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,11 +16,13 @@
 
 with Ada.Characters.Latin_1;
 --
+with exceptions;
 with OS_specifics;
 with get_runtime_paths;
 
 use  Ada.Characters.Latin_1;
 --
+use  exceptions;
 use  OS_specifics;
 
 package body host_IO is
@@ -46,6 +48,14 @@ package body host_IO is
       end if;
    end open;
 
+   -- This duplicates code in KDF9 so we can avoid with-ing KDF9.
+   procedure trap_operator_error (the_message : in String) is
+   begin
+      -- The program has failed for a reason, such as a misconfigured environment,
+      --    that is beyond its control and prevents further execution.
+      raise operator_error with "%" & the_message;
+   end trap_operator_error;
+
    procedure open (the_stream : in out host_IO.stream;
                    file_name  : in String;
                    mode       : in POSIX.access_mode) is
@@ -55,7 +65,18 @@ package body host_IO is
       open(the_stream, file_name, mode, fd);
    exception
       when POSIX_IO_error =>
-         trap_operator_error("«" & file_name & "» cannot be opened");
+         trap_operator_error("""" & file_name & """ cannot be opened");
+   end open;
+
+  -- Open an anonymous stream, such as the standard input, with the given fd.
+   procedure open (the_stream : in out host_IO.stream;
+                   fd         : in Integer) is
+      mode : constant POSIX.access_mode := (if fd = 0 then read_mode else write_mode);
+   begin -- open
+      open(the_stream, "???" & fd'Image, mode, fd);
+   exception
+      when POSIX_IO_error =>
+         trap_operator_error("fd" & fd'Image & " cannot be opened");
    end open;
 
    procedure truncate (the_stream : in out host_IO.stream) is
@@ -74,21 +95,13 @@ package body host_IO is
       end if;
    end close;
 
-   procedure flush (the_stream  : in out host_IO.stream;
-                    a_byte_time : in KDF9.us := 0) is
+   procedure flush (the_stream  : in out host_IO.stream) is
       response : Integer with Unreferenced;
    begin
       if the_stream.is_open      and then
             the_stream.next_byte > 0 then
          if the_stream.IO_mode > read_mode and the_stream.last_IO = write_mode then
-            if a_byte_time = 0 then
-               response := write(the_stream.fd, the_stream.buffer, the_stream.next_byte);
-            else
-               for p in 1 .. the_stream.next_byte loop
-                  response := write(the_stream.fd, the_stream.buffer(p..p), 1);
-                  KDF9.delay_by(a_byte_time);
-               end loop;
-            end if;
+            response := write(the_stream.fd, the_stream.buffer, the_stream.next_byte);
          end if;
          the_stream.next_byte := 0;
          the_stream.block_size := 0;
@@ -133,7 +146,7 @@ package body host_IO is
    is (the_stream.is_open);
 
    function bytes_moved (the_stream : host_IO.stream)
-   return KDF9.word
+   return host_IO.bytes_moved_count
    is (the_stream.bytes_moved);
 
    function column (the_stream : host_IO.stream)
@@ -222,7 +235,7 @@ package body host_IO is
    procedure get_bytes (the_string : out String;
                         the_stream : in out host_IO.stream;
                         uncounted  : in Boolean := True) is
-      old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
+      old_bytes_moved : constant host_IO.bytes_moved_count := the_stream.bytes_moved;
    begin
       for b of the_string loop
          get_byte(b, the_stream);
@@ -304,7 +317,7 @@ package body host_IO is
    procedure put_bytes (the_string : in String;
                         the_stream : in out host_IO.stream;
                         uncounted  : in Boolean := True) is
-      old_bytes_moved : constant KDF9.word := the_stream.bytes_moved;
+      old_bytes_moved : constant host_IO.bytes_moved_count := the_stream.bytes_moved;
    begin
       for c of the_string loop
          put_byte(c, the_stream);

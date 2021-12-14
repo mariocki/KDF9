@@ -1,6 +1,6 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,15 +14,17 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with formatting;
+with data_imaging;
+with disassembly.symbols;
 with KDF9.CPU;
 with KDF9.decoding;
-with disassembly.symbols;
+with string_editing;
 
-use  formatting;
+use  data_imaging;
+use  disassembly.symbols;
 use  KDF9.CPU;
 use  KDF9.decoding;
-use  disassembly.symbols;
+use  string_editing;
 
 package body disassembly is
 
@@ -353,7 +355,7 @@ package body disassembly is
    return String is
 
       the_target  : constant KDF9.syllable_address  := decoded.target;
-      the_symbol  : constant String := P_symbol(the_target, in_octal);
+      the_symbol  : constant String := code_operand(the_target, in_octal);
       num_remark  : constant String
                   := (
                       if   in_octal
@@ -373,11 +375,11 @@ package body disassembly is
 
       function jump (condition : String; name : String := "J")
       return String
-      is (name & P_symbol(the_target, in_octal) & condition & remark);
+      is (name & code_operand(the_target, in_octal) & condition & remark);
 
       function leave (and_how : String)
       return String
-      is ("EXIT " & and_how);
+      is ("EXIT" & and_how);
 
    begin  -- normal_jump_name
       return (
@@ -434,29 +436,23 @@ package body disassembly is
                               in_octal      : Boolean
                              )
    return String is
-      opcode       : constant KDF9.compressed_opcode := decoded.compressed_opcode;
-      is_SET         : constant Boolean                := (opcode and 2#111#) = SET;
+      opcode        : constant KDF9.compressed_opcode := decoded.compressed_opcode;
       operand       : KDF9.Q_part renames decoded.operand;
-      as_octal      : constant String := oct_of(operand, 1);
-      as_decimal    : constant String := signed_dec_of(operand);
-      number        : constant String := (if in_octal then "#" & as_octal else as_decimal);
+      number        : constant String := oct_or_dec_of(operand, in_octal);
       the_bare_name : constant String := (
                                           if operand not in KDF9.address
                                           then "E" & number
-                                          else symbolic(operand, in_octal, is_SET)
+                                          else data_operand(operand, in_octal)
                                          );
 
       Qq        : KDF9.Q_number    renames decoded.Qq;
       M_suffix  : constant String  := (if Qq /= 0 then "M" & trimmed(Qq'Image) else "");
       Q_suffix  : constant String  := (if opcode in EaMqQ | TO_EaMqQ then "Q" else "");
       modifier  : constant String  := M_suffix & Q_suffix;
-      one_digit : constant Boolean := (in_octal and operand < 8) or (not in_octal and operand < 10);
       remark    : constant String
                 := (
-                    if one_digit
+                    if operand < 8 or the_bare_name(1) = 'E'
                     then ""
-                    elsif the_bare_name(1) = 'E'
-                    then ";(" & (if in_octal then as_decimal else "#" & as_octal) & ")"
                     else ";(" & number & ")"
                    );
 
@@ -470,39 +466,12 @@ package body disassembly is
                     | EaMqQ    => the_name,
                  when TO_EaMq
                     | TO_EaMqQ => "=" & the_name,
-                 when SET      => (if the_name(1) = 'E'
-                                   then
-                                      "SET"
-                                    & (if one_digit
-                                       then oct_of(operand, 1)
-                                       else
-                                           (
-                                            if in_octal
-                                            then "B" & as_octal
-                                               & (
-                                                  if operand > 7
-                                                  then ";(" & as_decimal & ")"
-                                                  else ""
-                                                 )
-                                            else as_decimal
-                                               & (
-                                                  if operand > 9
-                                                  then ";(B" & as_octal & ")"
-                                                  else ""
-                                                 )
-                                           )
-                                      )
-                                  else
-                                     "SETA" & the_bare_name & remark
-                                ),
+                 when SET      => "SET" & SET_operand(operand, in_octal),
                  when others   => "?"
              );
    end data_access_name;
 
-   function the_full_name_of (
-                              order      : KDF9.decoded_order;
-                              in_octal   : Boolean := True
-                             )
+   function the_full_name_of (order : KDF9.decoded_order; in_octal : Boolean)
    return String is
       result : constant String
          := (

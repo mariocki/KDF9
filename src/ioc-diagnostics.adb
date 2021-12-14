@@ -1,6 +1,6 @@
 -- Provide diagnostic output of the state of all the buffers.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -70,7 +70,7 @@ begin
                        );
          end if;
          output_line("order ICR:"  & the_buffer.order_count'Image);
-         output_line("    order: " & disassembly.the_full_name_of(the_buffer.decoded_order));
+         output_line("    order: " & disassembly.the_full_name_of(the_buffer.decoded_order, True));
          output_line("@ address: " & oct_of(the_buffer.order_address));
       end if;
    end loop;

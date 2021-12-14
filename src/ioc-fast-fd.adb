@@ -1,6 +1,6 @@
 -- Emulation of a fixed disc drive.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -184,9 +184,11 @@ package body IOC.fast.FD is
       new_angle  : constant KDF9.us := angular_position(the_FD.locus.sector_number);
       old_angle  : constant KDF9.us := latency_start_time mod rotation_time;
       offset     : constant KDF9.us
-                 := (if   new_angle > old_angle
+                 := (
+                     if   new_angle > old_angle
                      then new_angle - old_angle
-                     else new_angle + rotation_time - old_angle);
+                     else new_angle + rotation_time - old_angle
+                    );
    begin
       -- According to GIM, the minimum latency is one sector;
       --    if less we have to go all the way around.

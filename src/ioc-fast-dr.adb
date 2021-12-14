@@ -1,6 +1,6 @@
 -- Emulation of a drum store.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -107,9 +107,11 @@ package body IOC.fast.DR is
       gap_time      : constant KDF9.us
                     := (if old_angle > critical_time then short_gap_time else long_gap_time);
       offset        : constant KDF9.us
-                    := (if   new_angle > old_angle
+                    := (
+                        if   new_angle > old_angle
                         then new_angle - old_angle
-                        else new_angle + track_time - old_angle);
+                        else new_angle + track_time - old_angle
+                       );
    begin
       -- Hypothesis: we can pick up the next complete sector without a full latency delay,
       --    if we are no closer to it than the start of its preceding inter-block gap.

@@ -1,6 +1,6 @@
 -- execution mode, diagnostic mode, and other emulation-control settings
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,28 +18,30 @@ with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 with Ada.Text_IO;
 --
+with data_imaging;
+with disassembly.symbols;
 with dumping;
 with exceptions;
-with formatting;
 with HCI;
 with IOC.equipment;
 with KDF9.store;
 with postscript;
 with settings.IO;
-with disassembly.symbols;
+with string_editing;
 with tracing;
 
 use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 use  Ada.Text_IO;
 --
+use  data_imaging;
+use  disassembly.symbols;
 use  dumping;
 use  exceptions;
-use  formatting;
 use  HCI;
 use  KDF9.store;
 use  settings.IO;
-use  disassembly.symbols;
+use  string_editing;
 use  tracing;
 
 package body settings is
@@ -84,9 +86,9 @@ package body settings is
    begin
       if is_invalid_miscellany_flag(option) then
          log_line(
-                  "***** Error in a miscellany specification: «"
+                  "***** Error in a miscellany specification: """
                 & option
-                & "»."
+                & """."
                  );
          return;
       end if;
@@ -178,7 +180,8 @@ package body settings is
       else
          log(
              case the_execution_mode is
-               when boot_mode        => (if this_is_a_bare_Director then
+               when boot_mode        => (
+                                         if this_is_a_bare_Director then
                                             "Running the bare " & run_type("Director")
                                          else
                                             "Booting the KDF9 " & run_type("Director")
@@ -306,7 +309,7 @@ package body settings is
             log_new_line;
             log_line(
                      "***** Error in a miscellany specification: "
-                   & (if c = ' ' then "no option was given." else "invalid data «"& c & "».")
+                   & (if c = ' ' then "no option was given." else "invalid data """& c & """.")
                     );
       end set_the_miscellany_flags;
 
@@ -441,6 +444,7 @@ package body settings is
          first_address,
          last_address : KDF9.address := 0;
          bad_range    : Boolean := False;
+         max_address,
          data         : KDF9.word;
          c            : Character;
          OK           : Boolean;
@@ -450,23 +454,23 @@ package body settings is
             get(settings_file, c);
             log(c, iff => the_log_is_wanted);
          exit when c = ' ';
-            if is_parameter_flag/dumping_flag(to_upper(c)) then
-               format := format or dumping_flag(to_upper(c));
+            if is_parameter_flag/dumping_flag(upper(c)) then
+               format := format or dumping_flag(upper(c));
             else
                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
                log_new_line;
-               log_line("***** Error: «"& c & "» is not a valid dump type.");
+               log_line("***** Error: """& c & """ is not a valid dump type.");
                return;
             end if;
          end loop;
          log_new_line;
 
+         max_address := (if (format and is_order_flag) /= no_dumping_flags then 8191 else 32767);
          if (format and is_parameter_flag) /= no_dumping_flags then
             get_word(settings_file, data);
-            if data > max_address                     or else
-                  (format/Usercode_flag and data > 8191) then
+            if data > max_address then
                log_line(
-                        "***** Error: Lower dump address  = #"
+                        "***** Error: Lower dump address = #"
                       & oct_of(data)
                       & " =" & data'Image
                       & " is too large for this option."
@@ -488,10 +492,9 @@ package body settings is
 
             if not end_of_line(settings_file) then
                get_word(settings_file, data);
-               if data > max_address                     or else
-                  (format/Usercode_flag and data > 8191) then
+               if data > max_address then
                   log_line(
-                           "***** Error: Upper dump address: #"
+                           "***** Error: Upper dump address = #"
                          & oct_of(data)
                          & " =" & data'Image
                          & " is too large for this option."
@@ -899,9 +902,8 @@ package body settings is
 
       procedure set_symbols is
          c : Character := ' ';
-         w : KDF9.word;
          a : KDF9.address;
-         v : KDF9.address;
+         v : Natural;
          p : Natural;
       begin
          if End_Of_Line(settings_file) then
@@ -913,52 +915,53 @@ package body settings is
             get(settings_file, c);
             get_word(settings_file, KDF9.word(a));
             if c = 'V' then
-               declare_P0(a);
+               set_main_program_V_size(Natural(a));
             elsif c = 'Y' then
-               define_Y_size(if a = KDF9.address'Last then 0 else a);
+               set_Y_size(if a = KDF9.address'Last then 0 else a);
             else
                raise Data_Error;
             end if;
+            return;
          elsif c = 'W' then
             get_word(settings_file, KDF9.word(a));
-            define_W0(a);
+            set_W0(a);
+            return;
          elsif c = 'Y' then
             get_word(settings_file, KDF9.word(a));
-            define_Y0(a);
+            set_Y0(a);
+            return;
          elsif c = 'Z' then
             get_word(settings_file, KDF9.word(a));
-            define_Z0(a);
+            set_Z0(a);
+            return;
          elsif c = 'P' then
-            loop
                skip_to_next_non_blank(settings_file);
-               if End_Of_Line(settings_file) then
-                  return;
-               end if;
                get_word(settings_file, KDF9.word(p));
                skip_to_next_non_blank(settings_file);
                get(settings_file, c);
-            exit when c /= '#';
-               get_decimal(settings_file, w);
-               v := KDF9.address(w+1);
-               skip_to_next_non_blank(settings_file);
-               get(settings_file, c);
-            exit when c /= '@';
-               get_word(settings_file, KDF9.word(a));
-               declare_Pp(p, v, a);
-            end loop;
+               if c = 'V' then
+                  get_decimal(settings_file, KDF9.word(v));
+                  skip_to_next_non_blank(settings_file);
+                  get(settings_file, c);
+                  if c /= '@' then raise Data_Error; end if;
+                  skip_to_next_non_blank(settings_file);
+                  get_word(settings_file, KDF9.word(a));
+                  site_Pp(p, a, v);
+               else
+                  if c /= '@' then raise Data_Error; end if;
+                  skip_to_next_non_blank(settings_file);
+                  get_word(settings_file, KDF9.word(a));
+                  site_Pp(p, a);
+               end if;
+            return;
          elsif c = ' ' then
-            loop
-               skip_to_next_non_blank(settings_file);
-               if End_Of_Line(settings_file) then
-                  return;
-               end if;
-               get(settings_file, c);
-               if c not in 'A' .. 'Z'  then
-                     raise Data_Error;
-               end if;
-               get_word(settings_file, KDF9.word(a));
-               define_Yy0(c, a);
-            end loop;
+            skip_to_next_non_blank(settings_file);
+            get(settings_file, c);
+            if c not in 'A' .. 'Z'  then
+               raise Data_Error;
+            end if;
+            get_word(settings_file, KDF9.word(a));
+            set_Yy0(c, a);
          else
             raise Data_Error;
          end if;
@@ -970,9 +973,9 @@ package body settings is
             log_new_line;
             log_line(
                      "***** Error in a Y flag specification: "
-                   & "invalid data after «"
+                   & "invalid data after """
                    & c
-                   & "»."
+                   & """."
                     );
       end set_symbols;
 

@@ -1,6 +1,6 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,15 +14,15 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with data_imaging;
 with exceptions;
-with formatting;
 with HCI;
 with KDF9.decoding;
 with KDF9.store;
 with state_display;
 
+use data_imaging;
 use exceptions;
-use formatting;
 use HCI;
 use KDF9;
 use KDF9.decoding;

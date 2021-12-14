@@ -1,6 +1,6 @@
 -- Implement OUTs 0, 1 and 2 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -22,6 +22,7 @@ with IOC.slow.shift.TR;
 with KDF9.CPU;
 with KDF9.store;
 with KDF9.TSD.peripherals;
+with string_editing;
 
 with imported_value_of;
 
@@ -32,6 +33,7 @@ use  IOC.fast.FD.TSD_OUTs;
 use  IOC.slow.shift.TR;
 use  KDF9.store;
 use  KDF9.TSD.peripherals;
+use  string_editing;
 
 package body KDF9.TSD.processes is
 
@@ -229,7 +231,7 @@ package body KDF9.TSD.processes is
       push(number);
    exception
       when others =>
-         trap_failing_OUT(97, name & " = «"& value & "», not a valid integer");
+         trap_failing_OUT(97, name & " = """& value & """, not a valid integer");
    end do_OUT_97;
 
 end KDF9.TSD.processes;

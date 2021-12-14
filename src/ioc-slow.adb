@@ -1,6 +1,6 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -151,7 +151,7 @@ package body IOC.slow is
                   return;
                exception
                   when operator_error =>
-                     output_line(BEL & "ee9: The file «"& here & next & "» could not be found");
+                     output_line(BEL & "ee9: The file """& here & next & """ could not be found");
                end;
             when path_response =>
                declare
@@ -165,7 +165,7 @@ package body IOC.slow is
                   return;
                exception
                   when operator_error =>
-                     output_line(BEL & "ee9: The file «"& next & "» could not be found");
+                     output_line(BEL & "ee9: The file """& next & """ could not be found");
                end;
          end case;
       end loop;

@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -809,11 +809,17 @@ package body KDF9.CPU is
       --    scaled so that the division cannot overflow.
       Ls := scale_down(fraction_word(L), 2);
       Rs := scale_down(fraction_word(R), 1);
-      N := abs as_fraction(Ls);  -- Ls is scaled down by 1/8, so "abs" cannot overflow.
-      D := abs as_fraction(Rs);  -- Rs is scaled down by 1/2, so "abs" cannot overflow.
       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
       E := scaler(L) - scaler(R) + 1;
-      F := as_word(N / D);
+      N := abs as_fraction(Ls);  -- Ls was scaled down by 1/4, so "abs" cannot overflow.
+      D := abs as_fraction(Rs);  -- Rs was scaled down by 1/2, so "abs" cannot overflow.
+      if N = D then
+         -- Avoid the one remaining overflow case by further rescaling.
+         F := as_word(N / 2 / D);
+         E := E + 1;
+      else
+         F := as_word(N / D);
+      end if;
       if resign(KDF9.word(L) xor KDF9.word(R)) < 0 then
          -- The result is negative.
          F := -F;

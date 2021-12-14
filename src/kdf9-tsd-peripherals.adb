@@ -1,6 +1,6 @@
 -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -148,7 +148,7 @@ package body KDF9.TSD.peripherals is
             buffer(B).kind /= GP_kind                     then
          log_API_message("OUT 5: requested a #"
                        & oct_of(KDF9.Q_part(W), 2)
-                       & " device and got "
+                       & "  type and got "
                        & device_name_of(buffer(B).all)
                        & (
                           if IOC.slow.shift.device(buffer(B).all).uses_Latin_1 then
@@ -160,7 +160,7 @@ package body KDF9.TSD.peripherals is
       else
          log_API_message("OUT 5: requested a #"
                        & oct_of(KDF9.Q_part(W), 2)
-                       & " device and got "
+                       & "  type and got "
                        & device_name_of(buffer(B).all)
                         );
       end if;

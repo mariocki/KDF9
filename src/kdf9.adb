@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -14,6 +14,9 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
+with Ada.Calendar;
+with Ada.Calendar.Time_Zones;
+with Ada.Calendar.Formatting;
 with Ada.Unchecked_Conversion;
 --
 with exceptions;
@@ -24,6 +27,10 @@ with KDF9.store;
 with settings;
 with tracing;
 
+use  Ada.Calendar;
+use  Ada.Calendar.Time_Zones;
+use  Ada.Calendar.Formatting;
+--
 use  exceptions;
 use  KDF9.CPU;
 use  KDF9.decoding;
@@ -262,36 +269,86 @@ package body KDF9 is
       the_Q_store := register_bank(the_context).Q_store;
    end set_K3_register;
 
-   a_microsecond : constant := 1.0 / 2.0**20;
+   function todays_date_28n_years_ago
+   return KDF9.word is
 
-   type seconds is delta a_microsecond range 0.0 .. 1000.0*365.2425*24.0*3600.0;  -- 1000 years!
+      zero  : constant KDF9.word := 8#20#;  -- in KDF9 internal code
+      slash : constant KDF9.word := 8#17#;  -- in KDF9 internal code
+      today : constant Ada.Calendar.Time := Ada.Calendar.Clock;
+
+      year, month, day, hour, minute, second : KDF9.word;
+      sub_second : Second_Duration;
+
+      -- For values of i in 0..99, return two 6-bit decimal digits in KDF9 internal code.
+      function as_2_digits (i : KDF9.word)
+      return KDF9.word
+      is ((i/10 + zero)*64 or (i mod 10 + zero));
+
+   begin  -- todays_date_28n_years_ago
+      Split(today,
+            Year_Number(year),
+            Month_Number(month),
+            Day_Number(day),
+            Hour_Number(hour),
+            Minute_Number(minute),
+            Second_Number(second),
+            sub_second,
+            Time_Zone => UTC_Time_Offset(today)
+           );
+      loop  -- Repeat n > 0 times, assuming no time travel into the past!
+         year := year - 28;
+      exit when year < 2000;
+      end loop;
+      return (as_2_digits(day)*64   or slash) * 64**5  -- DD/.....
+          or (as_2_digits(month)*64 or slash) * 64**2  --    MM/..
+          or (as_2_digits((year) mod 100));            --       YY
+   end todays_date_28n_years_ago;
+
+   function the_time_of_day
+   return KDF9.us is
+      today : constant Ada.Calendar.Time := Ada.Calendar.Clock;
+      year, month, day, hour, minute, second : KDF9.word;
+      sub_second : Second_Duration;
+   begin
+      Split(today,
+            Year_Number(year),
+            Month_Number(month),
+            Day_Number(day),
+            Hour_Number(hour),
+            Minute_Number(minute),
+            Second_Number(second),
+            Second_Duration(sub_second),
+            Time_Zone => UTC_Time_Offset(today)
+           );
+      return KDF9.us(hour*3600 + minute*60 + second) * 1_000_000
+           + KDF9.us(sub_second * 1_000_000);
+   end the_time_of_day;
+
+   the_time_at_loading : constant KDF9.us := the_time_of_day;
+
+   in_microseconds     : constant := 1.0 / 2.0**20;
+
+   type seconds is delta in_microseconds range 0.0 .. 1000.0*365.2425*24.0*3600.0;  -- 1000 years!
 
    procedure update_the_elapsed_time;
 
    -- Let the real elapsed time catch up with the_real_time virtual seconds.
-
+   -- This works well if the resolution of Ada.Calendar.Clock is significantly less than 100ms.
    procedure delay_until (the_real_time : in KDF9.us) is
-      a_jiffy : constant seconds := seconds(2**10) * a_microsecond;  -- ca. TR character-read time of 1ms
-      the_lag : seconds;
+      the_virtual_time : constant KDF9.us := the_time_of_day - the_time_at_loading;
+      the_time_lag     : seconds;
    begin
-       if the_real_time < the_last_delay_time then
-          the_last_delay_time := the_real_time;
-       end if;
-      the_lag := seconds(the_real_time - the_last_delay_time) * a_microsecond;
-      if the_lag >= a_jiffy then  -- More than a a_jiffy of virtual elapsed time has passed.
-         delay Duration(the_lag);
-         the_last_delay_time := the_real_time;
+      if the_virtual_time = 0 then
+         return;
       end if;
-     -- the_elapsed_time := the_real_time;
+      if the_real_time > the_virtual_time then
+         -- Make the physical elapsed time catch up with the virtual elapsed time.
+         the_time_lag := seconds(the_real_time - the_virtual_time) * in_microseconds;
+         delay Duration(the_time_lag);
+      end if;
+      the_elapsed_time := the_real_time;
       update_the_elapsed_time;
    end delay_until;
-
-   procedure delay_by (the_delay_time : in KDF9.us) is
-   begin
-      if authentic_timing_is_enabled then
-         delay_until(the_clock_time + the_delay_time);
-      end if;
-   end delay_by;
 
    -- Advance to the larger of the_CPU_time, the_elapsed_time, and the_last_delay_time.
    -- Cap the increase to prevent a spurious double-clock (RESET) interrupt in Director.
@@ -299,7 +356,6 @@ package body KDF9 is
    procedure update_the_elapsed_time is
       max_elapsed_time : constant KDF9.us := the_last_K4_time + 2**20 - 1;
    begin
-      the_elapsed_time := KDF9.us'Max(the_elapsed_time, the_last_delay_time);
       the_elapsed_time := KDF9.us'Max(the_elapsed_time, the_CPU_time);
       if the_execution_mode = boot_mode and the_CPU_state = Director_state then
          the_elapsed_time := KDF9.us'Min(the_elapsed_time, max_elapsed_time);
@@ -317,17 +373,18 @@ package body KDF9 is
 
    procedure advance_the_clock (past : in KDF9.us) is
    begin
-      the_elapsed_time := KDF9.us'Max(the_elapsed_time, past);
-      update_the_elapsed_time;
       if authentic_timing_is_enabled then
-         delay_until(the_elapsed_time);
+         delay_until(past);
+      else
+         the_elapsed_time := KDF9.us'Max(the_elapsed_time, past);
+         update_the_elapsed_time;
       end if;
    end advance_the_clock;
 
    procedure synchronize_the_real_and_virtual_times is
    begin
+      update_the_elapsed_time;
       if authentic_timing_is_enabled then
-         update_the_elapsed_time;
          delay_until(the_elapsed_time);
       end if;
    end synchronize_the_real_and_virtual_times;
@@ -402,7 +459,6 @@ package body KDF9 is
       ICR := 0;
       the_CPU_time := 0;
       the_elapsed_time := 0;
-      the_last_delay_time := 0;
       the_last_K4_time := 0;
       the_CPU_state := the_new_state;
       the_CPDAR := (0 => True, others => False);  -- FW0 is always allocated.

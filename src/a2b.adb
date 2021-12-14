@@ -1,4 +1,4 @@
--- This file is an auxiliary of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
@@ -13,24 +13,27 @@
 --
 
 with Ada.Command_Line;
-with Ada.Characters.Handling;
 with Ada.Characters.Latin_1;
 --
 with KDF9_char_sets;
 with OS_specifics;
 with POSIX;
+with string_editing;
+
 with from_5_hole;
 
-use  Ada.Characters.Handling;
 use  Ada.Characters.Latin_1;
 --
 use  KDF9_char_sets;
 use  OS_specifics;
 use  POSIX;
+use  string_editing;
 
 with KDF9_char_sets.framed;
 
 procedure a2b is
+
+   pragma Unsuppress(All_Checks);
 
    package CLI renames Ada.Command_Line;
 
@@ -42,7 +45,7 @@ procedure a2b is
          output_line(about & ".");
       end if;
       if with_reminder then
-         output_line("usage: a2b { -r2p | -L2p | -p2c | -p2L | -p2o | -p2r | -p2t}");
+         output_line("usage: a2b { -reg | -r2p | -L2p | -p2c | -p2L | -p2o | -p2r | -p2t}");
       end if;
       CLI.Set_Exit_Status(CLI.Failure);
       raise command_error;
@@ -55,7 +58,7 @@ procedure a2b is
 
    procedure check_flag_setting is
 
-      argument_1 : constant String := To_Lower(CLI.Argument(1));
+      argument_1 : constant String := lower(CLI.Argument(1));
 
    begin -- check_flag_setting
       -- Reject an empty parameter.
@@ -65,34 +68,37 @@ procedure a2b is
 
       -- Fail any non-flag parameter.
       if argument_1(1) /= '-'  then
-         complain("The parameter «"& argument_1 & "» is invalid");
+         complain("The parameter """& argument_1 & """ is invalid");
       end if;
 
       -- Fail a too-short flag parameter.
       if argument_1'Length < 4 then
-         complain("The parameter «"& argument_1 & "» is too short");
+         complain("The parameter """& argument_1 & """ is too short");
       end if;
 
       -- Fail a too-long flag parameter.
       if argument_1'Length > 4 then
-         complain("The parameter «"& argument_1 & "» is too long");
+         complain("The parameter """& argument_1 & """ is too long");
       end if;
 
       -- Check for a conversion parameter.
-      if argument_1 in "-r2p" | "-l2a" | "-l2p" | "-p2c" | "-p2l" | "-p2o" | "-p2r" | "-p2t" | "-f2l" then
+      if argument_1 in "-reg" | "-r2p" | "-r2p"
+                     | "-l2a" | "-l2p"
+                     | "-p2c" | "-p2l" | "-p2o" | "-p2r" | "-p2t"
+                     | "-f2l" then
          if argument_1 = "-p2c"                             and then
                CLI.Argument_Count = 2                       and then
                   CLI.Argument(2)'Length = 1                and then
                      CLI.Argument(2)(1) in load_medium_flag_set then
             load_medium := CLI.Argument(2)(1);
          elsif CLI.Argument_Count = 2 then
-            complain("The parameter «"& CLI.Argument(2) & "» is invalid");
+            complain("The parameter """& CLI.Argument(2) & """ is invalid");
          end if;
          return;
       end if;
 
       -- The flag is invalid.
-      complain("The parameter «"& argument_1 & "» is unrecognized");
+      complain("The parameter """& argument_1 & """ is unrecognized");
    end check_flag_setting;
 
    type word is mod 2**48;
@@ -544,10 +550,10 @@ procedure a2b is
 
             result := "  ";
             bytes_out := POSIX.write(1, result, 2);
-            result := " «";
+            result := " """;
             bytes_out := POSIX.write(1, result, 2);
             put_symbols_format(value);
-            result := "» ";
+            result := """ ";
             bytes_out := POSIX.write(1, result, 2);
 
             result(1..NL'Length) := NL;
@@ -586,21 +592,45 @@ procedure a2b is
       bytes_in  : Integer;
       bytes_out : Integer;
    begin
-     loop
-      bytes_in := POSIX.read(0, input, 4096);
-   exit when bytes_in < 1;
-      for b of input loop
-         if b in Latin_1_wierdos then
-            b := ASCII_equivalent(b);
-         end if;
-      end loop;
-      bytes_out := POSIX.write(1, input, bytes_in);
-   exit when bytes_out < bytes_in;
+      loop
+         bytes_in := POSIX.read(0, input, 4096);
+      exit when bytes_in < 1;
+         for b of input loop
+            if b in Latin_1_wierdos then
+               b := ASCII_equivalent(b);
+            end if;
+         end loop;
+         bytes_out := POSIX.write(1, input, bytes_in);
+      exit when bytes_out < bytes_in;
       end loop;
    end convert_Latin_1_to_ASCII;
 
+   procedure regularize is
+      input     : String(1..4096);
+      output    : String(1..1);
+      bytes_in  : Integer;
+      bytes_out : Integer;
+   begin
+      loop
+         bytes_in := POSIX.read(0, input, 4096);
+      exit when bytes_in < 1;
+         for b of input loop
+            if b in Latin_1_wierdos then
+               b := ASCII_equivalent(b);
+            end if;
+         end loop;
+         for i in 1 .. bytes_in loop
+            if input(i) /= CR then
+               output(1) := input(i);
+               bytes_out := POSIX.write(1, output, 1);
+         exit when bytes_out < 1;
+            end if;
+         end loop;
+      end loop;
+   end regularize;
+
    procedure do_the_requested_conversion is
-      argument : constant String := To_Lower(CLI.Argument(1)(1..4));
+      argument : constant String := lower(CLI.Argument(1)(1..4));
    begin -- do_the_requested_conversion
       if    argument = "-r2p" then
          convert_raw_bytes_to_paper_tape_code;
@@ -620,6 +650,8 @@ procedure a2b is
          convert_Ferranti_code_to_Latin_1;
       elsif argument = "-l2a" then
          convert_Latin_1_to_ASCII;
+      elsif argument = "-reg" then
+         regularize;
       else
          complain("Something went wrong");
       end if;

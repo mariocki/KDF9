@@ -1,6 +1,6 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (8.1a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2021, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ package body IOC.fast.tape is
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
-         trap_operator_error("«" & name & "» cannot be opened, even for reading");
+         trap_operator_error(quote(name) & " cannot be opened, even for reading");
    end open_RO;
 
    procedure open_RW (the_tape : in out tape.file; name : in String) is
@@ -40,7 +40,7 @@ package body IOC.fast.tape is
          the_tape.has_a_WP_ring := False;
          open_RO(the_tape, name);
       when Ada.IO_Exceptions.Name_Error =>
-         trap_operator_error("«" & name & "» cannot be opened");
+         trap_operator_error(quote(name) & " cannot be opened");
    end open_RW;
 
    procedure close (the_tape : in out tape.file) is
@@ -1229,7 +1229,7 @@ package body IOC.fast.tape is
             end;
          end if;
       end loop;
-      trap_operator_error("«" & String(the_label) & "» has not been mounted");
+      trap_operator_error(quote(String(the_label)) & " has not been mounted");
    end find_tape;
 
 end IOC.fast.tape;
