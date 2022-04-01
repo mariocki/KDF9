@@ -1,7 +1,7 @@
 -- Perform peephole optimizations of KDF9 Kidsgrove Algol object programs in Usercode.
 --
--- This file is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is an auxiliary of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -259,7 +259,7 @@ procedure glance is
 
    data : Unbounded_String;
 
-   max_line_length : constant := 4096;
+   max_line_length : constant := 1024; -- The longest line observed had 282 characters.
 
    subtype line_length_range is Natural range 0 .. max_line_length;
 
@@ -707,7 +707,7 @@ i_th: for i in special_optimizations'Range loop
    procedure clarify (optimizing : in Boolean) is
    begin
       loop
-         read_line(line, last);
+         read_line(line, last, True);
          if last /= 0 then
             if line(1) = '|' then
                print_line("|");
@@ -724,11 +724,7 @@ i_th: for i in special_optimizations'Range loop
                   do_cross_jump_substitutions;
                   do_special_substitutions;
                end if;
-               declare
-                  updated_line : constant String := To_String(data);
-               begin
-                  pretty_print(updated_line);
-               end;
+               pretty_print(To_String(data));
             end if;
          end if;
       end loop;
@@ -752,7 +748,7 @@ begin
       complain("invalid parameter: " & CLI.Argument(1));
    end if;
    loop
-      read_line(line, last);
+      read_line(line, last, True);
       print_line(line(1..last));
       last := index_forward(line(1..last), "PROGRAM;", 1);
    exit when last /= 0;
@@ -763,7 +759,12 @@ exception
    when end_error =>
       print_line("|");
       flush_outputs;
+   when EOL_error =>
+      report_line("glance: input line too long!");
+      flush_outputs;
+      CLI.Set_Exit_Status(CLI.Failure);
    when others =>
+      report_line("glance: other exception raised!");
       flush_outputs;
       CLI.Set_Exit_Status(CLI.Failure);
 end glance;

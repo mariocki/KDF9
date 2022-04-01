@@ -1,8 +1,8 @@
 -- Emulation of the common functionality of a KDF9 IOC "buffer" (DMA channel),
 --    with fail-stop stubs for operations having device-specific behaviour.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -92,7 +92,7 @@ package body IOC is
             truncate(the_buffer.stream);
          end if;
       else
-         trap_operator_error(the_buffer.device_name & " cannot be found");
+         trap_operator_error(the_buffer.device_name + "cannot be found");
       end if;
       IOC.device(the_buffer).Initialize;
    end open;
@@ -156,7 +156,7 @@ package body IOC is
    begin
       if not the_CPDAR(the_buffer.number) and then
             the_CPU_state /= Director_state   then
-         trap_illegal_instruction("unallocated I/O device " & the_buffer.device_name);
+         trap_illegal_instruction("unallocated I/O device" + the_buffer.device_name);
       end if;
    end validate_device;
 
@@ -178,7 +178,7 @@ package body IOC is
    procedure validate_parity (the_buffer : in IOC.device'Class) is
    begin
       if the_buffer.is_abnormal then
-         trap_illegal_instruction(the_buffer.device_name & " is abnormal (parity error or EOF)");
+         trap_illegal_instruction(the_buffer.device_name + "is abnormal (parity error or EOF)");
       end if;
    end validate_parity;
 
@@ -216,7 +216,7 @@ package body IOC is
                   );
       take_note_of_buffer_lockout(the_buffer.device_name, the_buffer.operation);
       if the_execution_mode = boot_mode then
-         LOV_if_user_mode(the_buffer.device_name & " is busy");
+         LOV_if_user_mode(the_buffer.device_name + "is busy");
       else
          advance_the_clock(the_buffer.completion_time);
          act_on_pending_interrupts;
@@ -283,8 +283,8 @@ package body IOC is
                           "in "
                        &  "#"   & oct_of(the_buffer.control_word.I)
                        &  "/#"  & oct_of(the_buffer.control_word.M)
-                       &  " for "
-                       &  the_buffer.device_name
+                       +  "for"
+                       +  the_buffer.device_name
                          );
       end if;
 
@@ -677,7 +677,7 @@ package body IOC is
    end mnemonic;
 
    procedure trap_failing_IO_operation (the_culprit : in String; the_message : in String) is
-      the_diagnostic : constant String := "%" & the_message & " on " & the_culprit;
+      the_diagnostic : constant String := "%" & the_message + "on" + the_culprit;
    begin
       if the_execution_mode in program_mode | privileged_mode then
          raise IO_error with the_diagnostic;
@@ -703,7 +703,7 @@ package body IOC is
       pragma Unreferenced(Q_operand);
       pragma Unreferenced(set_offline);
    begin
-      trap_illegal_instruction(order & " cannot be used on " & buffer.device_name);
+      trap_illegal_instruction(order + "cannot be used on" + buffer.device_name);
    end trap_illegal_IO_operation;
 
    --

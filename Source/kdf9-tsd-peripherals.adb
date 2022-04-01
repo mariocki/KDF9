@@ -1,7 +1,7 @@
 -- Implement OUTs 5, 6 and 7 of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -187,11 +187,11 @@ package body KDF9.TSD.peripherals is
       the_trace_operand := pop;
       if the_trace_operand > 15 then
          notify_state_display_of_final_ICR;
-         trap_failing_OUT(OUT_number, "#" & oct_of(the_trace_operand) & " is not a valid buffer number");
+         trap_failing_OUT(OUT_number, "#" & oct_of(the_trace_operand) + "is not a valid buffer number");
       end if;
       B := KDF9.buffer_number(the_trace_operand);
       if is_unallocated(buffer(B)) then
-         trap_failing_OUT(OUT_number, "device #" & oct_of(B, 2) & " is not allocated to this program");
+         trap_failing_OUT(OUT_number, "device #" & oct_of(B, 2) + "is not allocated to this program");
       end if;
       free_the_device_on_buffer(B, OUT_number);
    end deallocate_a_device;

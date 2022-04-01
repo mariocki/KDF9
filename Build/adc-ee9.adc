@@ -1,7 +1,7 @@
 --
 -- Ada 2012 global configuration pragmas for an optimized build with nearly all checks permitted.
 --
--- For ee9 (V8), (C) 2021, W. Findlay.
+-- For ee9 (V8), (C) 2022, W. Findlay.
 -- Released under the terms of the GNU General Public License.
 --
 

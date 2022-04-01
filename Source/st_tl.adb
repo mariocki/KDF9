@@ -1,7 +1,7 @@
 -- Set new ST and TL parameters in a kal3 source file produced by kalgol.
 --
--- This file is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is an auxiliary of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -38,8 +38,11 @@ procedure st_tl is
       raise end_error;
    end complain;
 
-   max_line_length : constant := 4096;
+
+   max_line_length : constant := 1024; -- The longest line observed had 282 characters.
+
    subtype line_length_range is Natural range 0 .. max_line_length;
+
    subtype source_code_line  is String(line_length_range range 1..max_line_length);
 
    line : source_code_line;

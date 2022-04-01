@@ -1,5 +1,5 @@
 # This file is part of ee9 (V8), the GNU Ada emulator of the English Electric KDF9.
-# Copyright (C) 2021, W. Findlay; all rights reserved.
+# Copyright (C) 2022, W. Findlay; all rights reserved.
 #
 # The ee9 system is free software; you can redistribute it and/or
 # modify it under terms of the GNU General Public License as published
@@ -156,7 +156,7 @@ ee9|warn)
    esac
    ;;
 
-kal3|KAlgol|kalgol|distro|all|a2b|mtp|call_tape|kidopt|ports|glance|extract_symbols|st_tl)
+kal3|KAlgol|kalgol|distro|all|a2b|mtp|call_tape|kidopt|ports|glance|extract_symbols|st_tl|check_code)
    ;;
 
 *)
@@ -319,6 +319,10 @@ distro)
 	${BUILD}/pk9 ${OS}
 	;;
 
+check_code)
+	gnatmake ${MAKE_OPTIONS} -aI${SOURCE} ${OBJECT} ${GCC_OPTIONS} ${OPT_GNAT_OPTIONS} -S $1
+   ;;
+
 $1)
    echo
    echo Building $1.
@@ -343,6 +347,8 @@ $1)
 	   exit 10
 	fi
 	;;
+
+
 
 *)
    echo

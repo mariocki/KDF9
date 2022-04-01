@@ -5,45 +5,41 @@ export WHETSTONE=
 
 >walgol_tests_log.txt
 
+echo TEST walgol FLUID
 walgol FLUID     t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo FLUID DONE      >>walgol_tests_log.txt
 
+echo TEST walgol GPSPRIMES
 walgol GPSPRIMES t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo GPSPRIMES DONE  >>walgol_tests_log.txt
 
+echo TEST walgol HANOI
 walgol HANOI     t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo HANOI DONE      >>walgol_tests_log.txt
 
+echo TEST walgol INPUT
 walgol INPUT     t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo INPUT DONE      >>walgol_tests_log.txt
 
+echo TEST walgol MANORBOY
 walgol MANORBOY  t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo MANORBOY DONE   >>walgol_tests_log.txt
 
+echo TEST walgol MATMULT
 walgol MATMULT   t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo MATMULT DONE    >>walgol_tests_log.txt
 
-walgol PENTOMINO t prh >>walgol_tests_log.txt
-fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo PENTOMINO DONE  >>walgol_tests_log.txt
-
+echo TEST walgol WEEHAAVIE
 walgol WEEHAAVIE t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo WEEHAAVIE DONE  >>walgol_tests_log.txt
 
+echo TEST walgol WHETSTONE
 walgol WHETSTONE t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo WHETSTONE DONE  >>walgol_tests_log.txt
 
+echo TEST walgol
 walgol ZELLER    t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
-echo ZELLER DONE     >>walgol_tests_log.txt
 
 echo
 diff walgol_tests_log.txt walgol_tests_good_log.txt >walgol_tests_diff.txt

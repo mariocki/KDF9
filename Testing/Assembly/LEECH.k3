@@ -3,7 +3,7 @@ ABCSJL26.016
 Coset enumeration|
 ST   ; TL99999;
 V    1; W    0;
-YA24000; YB    10; YC  1280;
+YA30000; YB    10; YC  1280;
 RESTART; J41; J19;
 
 PROGRAM;

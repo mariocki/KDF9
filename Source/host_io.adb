@@ -1,7 +1,7 @@
 -- Buffered I/O streams to support KDF9 device I/O.   Also used by ancillary programs.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -202,7 +202,7 @@ package body host_IO is
          the_stream.next_byte := the_stream.next_byte - 1;
          the_stream.position := the_stream.position - 1;
       else
-         trap_operator_error(the_stream.base_name & "cannot back_off");
+         trap_operator_error(the_stream.base_name & " cannot back_off");
       end if;
    end back_off;
 

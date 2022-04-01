@@ -1,7 +1,7 @@
 -- Implement a subset of the Time Sharing Director's OUT 8 / OUT 16 spooling API.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -53,7 +53,7 @@ package body KDF9.TSD.spooling is
                trap_failing_OUT(8, "invalid stream #" & data_word);
          end case;
          if the_device = 0 then
-            trap_operator_error("OUT 8 needs a " & the_type & " for stream #" & data_word(15..16));
+            trap_operator_error("OUT 8 needs a" + the_type + "for stream #" & data_word(15..16));
          end if;
          return the_device;
       end destination_device_for;

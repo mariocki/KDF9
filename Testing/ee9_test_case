@@ -30,14 +30,8 @@ HLT) this_test="none LEECH LEECH_data9"
 HKT) this_test="none LEECH LEECH_data9_KDF9"
      encoding=kk
      signature=\#6151525720423034;;
-MOB) this_test="walgol MANORBOY"
-     signature=\#1407535531421151;;
-GPR) this_test="walgol GPSPRIMES"
-     signature=\#4724161030033717;;
 FLU) this_test="walgol FLUID"
      signature=\#0613355475443420;;
-WBM) this_test="walgol WHETSTONE"
-     signature=\#3327110735166160;;
 RLT) this_test="nine_priv RLT RLT_data"
      signature=\#3506450617016266;;
 TO4) this_test="none OUT4A -"
@@ -46,8 +40,6 @@ TOX) this_test="none OUTX -"
      signature=\#5346716617576440;;
 MTW) this_test="walgol MTW"
      signature=\#2374020431503051;;
-INP) this_test="walgol INPUT"
-     signature=\#3301160711524477;;
 *)   echo test case "$1"\;  UNKNOWN!
      exit 2;;
 esac

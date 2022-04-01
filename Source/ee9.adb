@@ -1,7 +1,7 @@
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -26,6 +26,7 @@ with IOC.equipment;
 with IOC.slow.shift.TP;
 with IOC.slow.shift.TR;
 with settings;
+with string_editing;
 
 with execute;
 with say_goodbye;
@@ -37,6 +38,7 @@ use  exceptions;
 use  HCI;
 use  IOC.equipment;
 use  settings;
+use  string_editing;
 
 procedure ee9 is
 
@@ -63,7 +65,7 @@ procedure ee9 is
    procedure complain (about : in String; because : in String := "") is
    begin
       show_proper_usage(
-                        "Parameter """ & about & """ is not valid"
+                        "Parameter" + abs about & "is not valid"
                       & (if because = "" then "." else " because " & because & ".")
                        );
    end complain;
@@ -251,7 +253,7 @@ begin -- ee9
    impose_all_flag_settings;
    revise_the_IOC_configuration;
    log_line(
-            "This is ee9 8.1x, compiled by "
+            "This is ee9 8.2a, compiled by "
           & Standard'Compiler_Version
           & " on "
           & GNAT.Source_Info.Compilation_ISO_Date

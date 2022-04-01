@@ -1,7 +1,7 @@
 -- Provide basic string-data reformatting operations.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -16,12 +16,12 @@
 
 package string_editing is
 
-   -- Return C enclosed in the specified quotes.
-   function quote (C : Character; left_quote, right_quote : String := """")
+    -- Return C enclosed in quotes.
+   function "abs" (C : Character)
    return String;
 
-   -- Return trimmed(S) enclosed in the specified quotes.
-   function quote (S : String; left_quote, right_quote : String := """")
+    -- Return trimmed(S) enclosed in quotes.
+   function "abs" (S : String)
    return String;
 
    -- Return S with all leading and trailing blanks removed.
@@ -70,6 +70,13 @@ package string_editing is
    return Natural;
 
    -- An alternative to "&" which inserts a space between the operands.
+   function "+" (S : String; C : Character)
+   return String;
+
+   function "+" (C : Character; S : String)
+   return String;
+
+   -- An alternative to "&" which inserts a space between the trimmed operands.
    function "+" (S1, S2 : String)
    return String;
 

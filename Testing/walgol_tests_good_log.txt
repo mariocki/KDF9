@@ -35,7 +35,6 @@ LP0:
 
 RAN/EL/008M49S/008M56S===
 Digital signature of traced orders = #0613355475443420.
-FLUID DONE
 
 TP0:
 ===
@@ -79,7 +78,6 @@ LP0:
 
 RAN/EL/021M47S/021M50S===
 Digital signature of traced orders = #4724161030033717.
-GPSPRIMES DONE
 
 TP0:
 ===
@@ -102,7 +100,6 @@ MOVE A DISC FROM A TO C
 
 RAN/EL/000M01S/000M06S===
 Digital signature of traced orders = #5235274473716373.
-HANOI DONE
 
 TP0:
 ===
@@ -148,7 +145,6 @@ LP0:
 
 RAN/EL/000M03S/000M13S===
 Digital signature of traced orders = #3301160711524477.
-INPUT DONE
 
 TP0:
 ===
@@ -162,7 +158,6 @@ LP0:
    +1   +0   -2   +0   +1   +0   +1   -1  -10  -30  -67 -138
 RAN/EL/000M46S/000M48S===
 Digital signature of traced orders = #1407535531421151.
-MANORBOY DONE
 
 TP0:
 ===
@@ -220,272 +215,6 @@ ROW 10 SHOULD BE 1.23456789º +1
 
 RAN/EL/000M33S/000M36S===
 Digital signature of traced orders = #1004012446650566.
-MATMULT DONE
-
-TP0:
-===
-
-RAN/EL/000M05S/000M12S  SIZE    473
-===
-
-LP0:
-===
-
-THE FIRST  9 SOLUTIONS:
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - - - -     
-I       I   I       I   I           I   I
-     - -     - -         - - - - - -     
-I   I           I   I       I       I   I
-     - -     - -     - -     - -     - - 
-I       I   I   I       I       I       I
- - - - - - -     - - - - - - - -     - - 
-I           I   I               I   I   I
-         - -     - -     - - - - - -     
-I       I           I   I               I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I       I       I
- - - - - - - - - - -     - -     - -     
-I   I           I           I       I   I
-     - - - -     - -     - - - -         
-I           I   I   I   I       I   I   I
- - - - -             - -         - -     
-I       I   I   I   I           I   I   I
-     - - - - - -     - - - - - -     - - 
-I   I       I           I   I           I
-     - -     - - - - - -     - - - -     
-I       I           I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -     - - - - - -     
-I   I           I           I       I   I
-     - - - -     - -     - - - -     - - 
-I           I   I   I   I       I       I
- - - - -             - -         - -     
-I       I   I   I   I           I   I   I
-     - - - - - -     - - - - - -     - - 
-I   I       I           I   I           I
-     - -     - - - - - -     - - - -     
-I       I           I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -         - - - - - - 
-I   I           I       I   I           I
-     - - - -     - -     - - - -         
-I           I       I   I       I       I
- - - - -     - - - -     - -     - - - - 
-I       I   I   I   I   I   I       I   I
-     - - - -         - -     - -         
-I   I           I   I           I   I   I
-     - -     - -     - -     - - - -     
-I       I   I           I   I           I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I   I               I
- - - - - - - - - - -     - - - -     - - 
-I   I           I           I   I   I   I
-     - - - -     - -     - -     - -     
-I           I   I   I   I   I           I
- - - - -             - -     - - - - - - 
-I   I   I   I   I       I           I   I
-         - - - - - -     - -     - -     
-I   I   I           I       I   I   I   I
- - -     - -         - - - - - -         
-I           I       I               I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I   I       I
- - - - - - - - - - -     - -             
-I   I               I   I       I       I
-     - - - -     - -     - -     - -     
-I           I   I   I       I       I   I
- - - - -     - -     - - - - - - - - - - 
-I   I   I   I   I       I           I   I
-         - -     - -     - - - -         
-I   I   I           I       I   I   I   I
- - -     - -     - - - - - -             
-I           I   I               I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I   I       I
- - - - - - - - - - -             - -     
-I   I               I       I       I   I
-     - - - -     - -     - -     - -     
-I           I   I   I   I       I       I
- - - - -     - -     - - - - - - - - - - 
-I   I   I   I   I       I           I   I
-         - -     - -     - - - -         
-I   I   I           I       I   I   I   I
- - -     - -     - - - - - -             
-I           I   I               I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - -         
-I   I               I   I       I       I
-     - - - -     - -     - -     - - - - 
-I           I   I           I   I       I
- - - - -     - - - -     - - - -     - - 
-I   I   I   I   I   I   I   I   I   I   I
-         - -         - -                 
-I   I   I       I           I   I   I   I
- - -     - -     - - - - - -             
-I           I       I           I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-- - - - - - - - - - - - - - - - - - - - 
-I                   I       I           I
- - - - - - - - - - - - -     - -         
-I   I               I   I       I       I
-     - - - -     - -     - -     - - - - 
-I           I   I           I   I       I
- - - - -     - - - -     - - - -     - - 
-I   I   I   I   I   I   I   I   I   I   I
-         - -         - -                 
-I   I       I   I           I   I   I   I
- - -     - -     - - - - - -             
-I       I           I           I   I   I
- - - - - - - - - - - - - - - - - - - - - 
-
-
-
-PRINT SOLUTION:
-
-BOARD LENGTH = 10
-
-BOARD WIDTH =  6
-
-PIECE COUNT = 12
-
-PLACE COUNT = 63
-
-SOLUTION COUNT = 10
-
-
-
-RAN/EL/239M56S/240M05S===
-Digital signature of traced orders = #1446207640170431.
-PENTOMINO DONE
 
 TP0:
 ===
@@ -513,7 +242,6 @@ COUNT =         6
 
 RAN/EL/198M14S/198M14S===
 Digital signature of traced orders = #7071041200601346.
-WEEHAAVIE DONE
 
 TP0:
 ===
@@ -545,7 +273,6 @@ N= 930 J=   2 K=   3 X1=+0.83466552 X2=+0.83466552 X3=+0.83466552 X4=+0.83466552
 
 RAN/EL/006M56S/006M59S===
 Digital signature of traced orders = #3327110735166160.
-WHETSTONE DONE
 
 TP0:
 ===
@@ -617,4 +344,3 @@ IN 2042 EASTER SUNDAY IS ON 06/04 AND KDF9 IS  78 YEARS OLD
 
 RAN/EL/000M15S/000M19S===
 Digital signature of traced orders = #2556400473310225.
-ZELLER DONE

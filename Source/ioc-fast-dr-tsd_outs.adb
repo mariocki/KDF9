@@ -1,7 +1,7 @@
 -- Implement the drum API (OUTs) of the EE Time Sharing Director.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -96,7 +96,7 @@ package body IOC.fast.DR.TSD_OUTs is
       last_reserved_DR_sector := W - 1;
       OUT13_was_done := True;
       set_state_of(buffer(DR0_number), allocated => True);
-      log_API_message("OUT 13: allocated" & W'Image & " drum sectors");
+      log_API_message("OUT 13: allocated" & W'Image + "drum sectors");
    end do_OUT_13;
 
    procedure do_OUT_14 is

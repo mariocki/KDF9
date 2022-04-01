@@ -1,7 +1,7 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -35,7 +35,7 @@ package body IOC.fast.tape.TSD_OUTs is
                  & " and got "
                  & buffer
                  & " with TSN "
-                 & quote(TSN)
+                 & abs TSN
                   );
    end log_allocation;
 
@@ -48,7 +48,7 @@ package body IOC.fast.tape.TSD_OUTs is
       W := pop;
       declare
          label : constant short_label := short_label(to_string(W));
-         name  : constant String := (if W = 0 then "a ZERO tape" else " " & quote(String(label)));
+         name  : constant String := (if W = 0 then "a ZERO tape" else " " & abs String(label));
       begin
          find_tape(tape.data_storage(label), B, S);
          push(KDF9.word(B));
@@ -72,7 +72,7 @@ package body IOC.fast.tape.TSD_OUTs is
          push(S);
          push(KDF9.word(B));
          the_trace_operand := KDF9.word(B);
-         log_allocation(10, quote(String(label)), buffer(B).device_name, to_string(S));
+         log_allocation(10, abs String(label), buffer(B).device_name, to_string(S));
       end;
       set_state_of(buffer(B), allocated => True);
    end do_OUT_10;

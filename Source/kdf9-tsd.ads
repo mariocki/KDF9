@@ -1,7 +1,7 @@
 -- Implement the API (OUTs) of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -15,7 +15,7 @@
 --
 
 
-private with data_imaging;
+private with KDF9.imaging;
 private with exceptions;
 private with HCI;
 private with IOC.equipment;
@@ -36,7 +36,7 @@ package KDF9.TSD is
 
 private
 
-   use data_imaging;   pragma Warnings(Off, data_imaging);
+   use KDF9.imaging;   pragma Warnings(Off, KDF9.imaging);
    use exceptions;     pragma Warnings(Off, exceptions);
    use HCI;            pragma Warnings(Off, HCI);
    use IOC.equipment;  pragma Warnings(Off, IOC.equipment);

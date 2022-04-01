@@ -1,7 +1,7 @@
 -- Provide diagnostic trace, breakpoint, and watchpoint support.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -14,20 +14,22 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with data_imaging;
+with KDF9.imaging;
 with exceptions;
 with HCI;
 with KDF9.decoding;
 with KDF9.store;
 with state_display;
+with string_editing;
 
-use data_imaging;
+use KDF9.imaging;
 use exceptions;
 use HCI;
 use KDF9;
 use KDF9.decoding;
 use KDF9.store;
 use state_display;
+use string_editing;
 
 package body tracing is
 
@@ -505,7 +507,7 @@ package body tracing is
          when JSr =>
             the_trace_operand := as_word(SJNS_top);
          when EXITD =>
-            take_note_of_interrupt(EXITD_flag, BA_image & " " & NOL_image & " @ " & oct_of(NIA));
+            take_note_of_interrupt(EXITD_flag, BA_image + NOL_image + "@" + oct_of(NIA));
          when others =>
             null;
       end case;
@@ -544,7 +546,7 @@ package body tracing is
          log(
              "Store watchpoint: #"
            & oct_of(the_trace_address)
-           & " := [N1] = #"
+           + ":= [N1] = #"
            & oct_of(the_trace_operand)
             );
          short_witness;
