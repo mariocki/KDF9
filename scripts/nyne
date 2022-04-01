@@ -69,6 +69,6 @@ if [ -r ${KDF9RUNTIME}/settings_3.txt ]
 then
    cp ${KDF9RUNTIME}/settings_3.txt ${KDF9RUNTIME}/settings_1.txt
 fi
-cat ${KDF9RUNTIME}/settings_symbols >>${KDF9RUNTIME}/settings_1
+cat ${KDF9RUNTIME}/settings_symbols >>${KDF9RUNTIME}/settings_1.txt
 
 . nine $*
