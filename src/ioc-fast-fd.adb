@@ -1,7 +1,7 @@
 -- Emulation of a fixed disc drive.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -42,7 +42,7 @@ package body IOC.fast.FD is
       open(the_FD, rd_wr_mode);
    exception
       when others =>
-         trap_operator_error(the_FD.device_name & " cannot be opened for reading and writing");
+         trap_operator_error(the_FD.device_name + "cannot be opened for reading and writing");
    end Initialize;
 
    -- Hypothesis:
@@ -794,47 +794,48 @@ package body IOC.fast.FD is
             log_line
                    (
                     the_FD.device_name
-                  & " on buffer #"
+                  + "on buffer #"
                   & buffer
-                  & " spent:"
+                  + "spent:"
                    );
             log_line
                    (
                     "    "
                   & just_right(KDF9.us'Image(the_FD.data_time / 1_000), 6)
-                  & " ms in"
+                  + "ms in"
                   & the_FD.latency_count'Image
-                  & " data transfer" & plurality(the_FD.latency_count)
-                  & " totalling"
+                  + "data transfer" & plurality(the_FD.latency_count)
+                  + "totalling"
                   & KDF9.word'Image(the_FD.word_count)
-                  & " word" & plurality(the_FD.word_count)
+                  + ("word" & plurality(the_FD.word_count))
                   & ","
                    );
             log_line
                    (
                     "    "
                   & just_right(KDF9.us'Image(the_FD.switch_time / 1_000), 6)
-                  & " ms in"
+                  + "ms in"
                   & the_FD.switch_count'Image
-                  & " platter switch" & plurality(the_FD.switch_count, "", "es")
+                  + ("platter switch" & plurality(the_FD.switch_count, "", "es"))
                   & ","
                    );
             log_line
                    (
                     "    "
                   & just_right(KDF9.us'Image(the_FD.latency_time / 1_000), 6)
-                  & " ms in"
+                  + "ms in"
                   & the_FD.latency_count'Image
-                  & " rotational latenc" & plurality(the_FD.latency_count, "y", "ies")
+                  + ("rotational latenc" & plurality(the_FD.latency_count, "y", "ies"))
                   & ", and"
                    );
             log_line
                    (
                     "    "
                   & just_right(KDF9.us'Image(the_FD.seek_time / 1_000), 6)
-                  & " ms in"
+                  + "ms in"
                   & the_FD.seek_count'Image
-                  & " seek" & plurality(the_FD.seek_count) & "."
+                  + ("seek" & plurality(the_FD.seek_count))
+                  & "."
                    );
          end if;
          IOC.device(the_FD).Finalize;

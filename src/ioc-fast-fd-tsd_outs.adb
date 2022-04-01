@@ -1,7 +1,7 @@
 -- Implement the fixed disc API (OUTs) of the EE Time Sharing Director.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -63,7 +63,7 @@ package body IOC.fast.FD.TSD_OUTs is
                    + seek_area;
    begin
       if Q.C >= disc_set(current_disc_set).sectors then
-         trap_failing_OUT(OUT_number, Q.C'Image & " exceeds the sector capacity of the selected set");
+         trap_failing_OUT(OUT_number, Q.C'Image + "exceeds the sector capacity of the selected set");
       end if;
       return (parameter * 16 + FD0_number,  Q.I, Q.M);
    end FD_seek_parameter;
@@ -182,9 +182,9 @@ package body IOC.fast.FD.TSD_OUTs is
       log_API_message(
                       "OUT 44: reserved"
                     & F'Image
-                    & " FD0 disc"
+                    + "FD0 disc"
                     & plurality(KDF9.word(F))
-                    & " in set"
+                    + "in set"
                     & current_disc_set'Image
                      );
       set_state_of(buffer(FD0_number), allocated => True);
@@ -208,9 +208,9 @@ package body IOC.fast.FD.TSD_OUTs is
       log_API_message(
                       "OUT 45: released"
                     & disc_set(F).size'Image
-                    & " FD0 disc"
+                    + "FD0 disc"
                     & plurality(KDF9.word(disc_set(F).size))
-                    & " from set"
+                    + "from set"
                     & F'Image
                      );
       discs_claimed_so_far := discs_claimed_so_far - disc_set(F).size;

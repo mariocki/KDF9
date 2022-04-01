@@ -1,7 +1,7 @@
 -- Emulation of magnetic tape decks and buffers.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -28,7 +28,7 @@ package body IOC.fast.tape is
       the_tape.has_a_WP_ring := False;
    exception
       when others =>
-         trap_operator_error(quote(name) & " cannot be opened, even for reading");
+         trap_operator_error(abs name + "cannot be opened, even for reading");
    end open_RO;
 
    procedure open_RW (the_tape : in out tape.file; name : in String) is
@@ -40,7 +40,7 @@ package body IOC.fast.tape is
          the_tape.has_a_WP_ring := False;
          open_RO(the_tape, name);
       when Ada.IO_Exceptions.Name_Error =>
-         trap_operator_error(quote(name) & " cannot be opened");
+         trap_operator_error(abs name + "cannot be opened");
    end open_RW;
 
    procedure close (the_tape : in out tape.file) is
@@ -192,7 +192,7 @@ package body IOC.fast.tape is
                                            do_this  : String) is
    begin
       if is_at_PET (the_deck) then
-         trap_failing_IO_operation(the_deck, "an attempt was made to " & do_this & " past PET");
+         trap_failing_IO_operation(the_deck, "an attempt was made to" + do_this + "past PET");
       end if;
    end deal_with_trying_to_pass_PET;
 
@@ -594,7 +594,7 @@ package body IOC.fast.tape is
       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.is_at_BTW then
-         trap_illegal_instruction("MBRQq at BTW on " & the_deck.device_name);
+         trap_illegal_instruction("MBRQq at BTW on" + the_deck.device_name);
       end if;
       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read_backwards(the_deck, Q_operand, to_terminator => False);
@@ -612,7 +612,7 @@ package body IOC.fast.tape is
       time : constant KDF9.us :=  22 + MT_IO_time(the_deck, Q_operand);
    begin
       if the_deck.is_at_BTW then
-         trap_illegal_instruction("MBREQq at BTW on " & the_deck.device_name);
+         trap_illegal_instruction("MBREQq at BTW on" + the_deck.device_name);
       end if;
       start_data_transfer(the_deck, Q_operand, set_offline, time, input_operation);
       read_backwards(the_deck, Q_operand, to_terminator => True);
@@ -795,7 +795,7 @@ package body IOC.fast.tape is
                   set_offline : in Boolean) is
    begin
       if the_deck.is_at_BTW then
-         trap_illegal_instruction("MBSKQq at BTW on " & the_deck.device_name);
+         trap_illegal_instruction("MBSKQq at BTW on" + the_deck.device_name);
       end if;
       start_data_transfer(the_deck, Q_operand, set_offline, 19);
       if Q_operand.M = 0 then
@@ -826,7 +826,7 @@ package body IOC.fast.tape is
                   set_offline : in Boolean) is
    begin
       if the_deck.kind = MT_kind then
-         trap_illegal_instruction("PMKQq on 1081 deck " & the_deck.device_name);
+         trap_illegal_instruction("PMKQq on 1081 deck" + the_deck.device_name);
       else
          the_deck.PMA(Q_operand, set_offline);
       end if;
@@ -839,7 +839,7 @@ package body IOC.fast.tape is
                   set_offline : in Boolean) is
    begin
       if the_deck.kind = MT_kind then
-         trap_illegal_instruction("PMLQq on 1081 deck " & the_deck.device_name);
+         trap_illegal_instruction("PMLQq on 1081 deck" + the_deck.device_name);
       else
          the_deck.PMB(Q_operand, set_offline);
       end if;
@@ -879,7 +879,7 @@ package body IOC.fast.tape is
       the_size : length_in_frames;
    begin
       if not the_deck.tape_file.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name + "does not have a Write Permit Ring");
       end if;
 
       deal_with_trying_to_pass_PET(the_deck, "write");
@@ -1081,7 +1081,7 @@ package body IOC.fast.tape is
                                          the_deck,
                                          "a GAP of length"
                                        & the_length'Image
-                                       & " words would overwrite data at slice"
+                                       + "words would overwrite data at slice"
                                        & the_deck.tape_file.position'Image
                                         );
             end if;
@@ -1106,7 +1106,7 @@ package body IOC.fast.tape is
       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape_file.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name + "does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
@@ -1121,7 +1121,7 @@ package body IOC.fast.tape is
       time : constant KDF9.us := 19+IO_elapsed_time(the_deck, KDF9.word(Q_operand.M));
    begin
       if not the_deck.tape_file.has_a_WP_ring then
-         trap_operator_error(the_deck.device_name & " does not have a Write Permit Ring");
+         trap_operator_error(the_deck.device_name + "does not have a Write Permit Ring");
       end if;
       require_positive_count(Q_operand.M);
       start_data_transfer(the_deck, Q_operand, set_offline, time);
@@ -1138,11 +1138,11 @@ package body IOC.fast.tape is
                the_deck_was_used                                  then
             log_line(
                      the_deck.device_name
-                   & " on buffer #"
+                   + "on buffer #"
                    & buffer
-                   & " transferred"
+                   + "transferred"
                    & the_deck.bytes_moved'Image
-                   & " character" & plurality(the_deck.bytes_moved)
+                   + ("character" & plurality(the_deck.bytes_moved))
                    & (
                       if    the_deck.is_at_PET then ", and is now at PET."
                       elsif the_deck.is_at_ETW then ", and is now at ETW."
@@ -1229,7 +1229,7 @@ package body IOC.fast.tape is
             end;
          end if;
       end loop;
-      trap_operator_error(quote(String(the_label)) & " has not been mounted");
+      trap_operator_error(abs String(the_label) + "has not been mounted");
    end find_tape;
 
 end IOC.fast.tape;

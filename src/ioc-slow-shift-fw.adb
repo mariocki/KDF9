@@ -1,7 +1,7 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -238,7 +238,7 @@ package body IOC.slow.shift.FW is
          begin
             if the.prompt_length = the.total_length then
                -- A null response, so terminate the program.
-               raise exceptions.quit_request with "at the prompt: "& quote(the_prompt);
+               raise exceptions.quit_request with "at the prompt: "& abs the_prompt;
             end if;
             next_interaction := next_interaction + 1;
             if the.text(1..the.prompt_length-1) = the_prompt and then

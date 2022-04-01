@@ -1,7 +1,7 @@
 -- Emulation of the common functionality of a KDF9 "slow", byte-by-byte, devices.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -50,13 +50,11 @@ package body IOC.slow is
          end if;
          log_line(
                   the_buffer.device_name
-                & " on buffer #"
+                + "on buffer #"
                 & oct_of(KDF9.Q_part(the_buffer.number), 2)
-                & " "
-                & the_action
+                + the_action
                 & the_amount'Image
-                & " "
-                & the_quantum
+                + the_quantum
                 & "."
                  );
       end if;
@@ -112,14 +110,15 @@ package body IOC.slow is
 
    begin
       output_line(BEL & "");
-      output_line("ee9: End of given data for " & the_buffer.device_name & ".");
+      output_line("ee9: End of given data for" + the_buffer.device_name & ".");
       loop
-         POSIX.data_prompt(
-                           noninteractive_usage_is_enabled,
-                           "Type @ or / to name a file, = to type the data, ENTER key for EOF, Q or q to quit",
-                           response,
-                           inline
-                          );
+         POSIX.data_prompt
+            (
+             noninteractive_usage_is_enabled,
+             "Type @ or / to name a file, = to type the data, ENTER key for EOF, Q or q to quit",
+             response,
+             inline
+            );
          case response is
             when wrong_response
                | debug_response =>
@@ -142,16 +141,17 @@ package body IOC.slow is
                declare
                   here : constant String := imported_value_of("KDF9_DATA", default => "Data") & "/";
                   next : constant String
-                     := next_file_name(BEL & "Give the name of a file in " & here, inline);
+                     := next_file_name(BEL & "Give the name of a file in" + here, inline);
+                  this : constant String := here & next;
                begin
                   if next = "" then
                      raise operator_error;
                   end if;
-                  reattach_the_text_file(here & next);
+                  reattach_the_text_file(this);
                   return;
                exception
                   when operator_error =>
-                     output_line(BEL & "ee9: The file """& here & next & """ could not be found");
+                     output_line(BEL & "ee9: The file" + abs this + "could not be found.");
                end;
             when path_response =>
                declare
@@ -165,7 +165,7 @@ package body IOC.slow is
                   return;
                exception
                   when operator_error =>
-                     output_line(BEL & "ee9: The file """& next & """ could not be found");
+                     output_line(BEL & "ee9: The file" + abs next + "could not be found.");
                end;
          end case;
       end loop;

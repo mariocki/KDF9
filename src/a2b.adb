@@ -1,5 +1,5 @@
--- This file is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is an auxiliary of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -68,17 +68,17 @@ procedure a2b is
 
       -- Fail any non-flag parameter.
       if argument_1(1) /= '-'  then
-         complain("The parameter """& argument_1 & """ is invalid");
+         complain("The parameter" + abs argument_1 + "is invalid");
       end if;
 
       -- Fail a too-short flag parameter.
       if argument_1'Length < 4 then
-         complain("The parameter """& argument_1 & """ is too short");
+         complain("The parameter" + abs argument_1 + "is too short");
       end if;
 
       -- Fail a too-long flag parameter.
       if argument_1'Length > 4 then
-         complain("The parameter """& argument_1 & """ is too long");
+         complain("The parameter" + abs argument_1 + "is too long");
       end if;
 
       -- Check for a conversion parameter.
@@ -92,13 +92,13 @@ procedure a2b is
                      CLI.Argument(2)(1) in load_medium_flag_set then
             load_medium := CLI.Argument(2)(1);
          elsif CLI.Argument_Count = 2 then
-            complain("The parameter """& CLI.Argument(2) & """ is invalid");
+            complain("The parameter" + abs CLI.Argument(2) + "is invalid");
          end if;
          return;
       end if;
 
       -- The flag is invalid.
-      complain("The parameter """& argument_1 & """ is unrecognized");
+      complain("The parameter" + abs argument_1 + "is unrecognized");
    end check_flag_setting;
 
    type word is mod 2**48;
@@ -178,8 +178,8 @@ procedure a2b is
       end loop main_loop;
 
       if last /= 0 then
-         output_line(NL & "Warning: the last word had only" & last'Image & " data bytes!");
-         output_line("It was """ & oct_of(w) & """.");
+         output_line(NL & "Warning: the last word had only" & last'Image + "data bytes!");
+         output_line("It was" + abs oct_of(w) & ".");
       end if;
    end convert_raw_bytes_to_paper_tape_code;
 
@@ -210,8 +210,12 @@ procedure a2b is
       if parity /= 0 then
          parity_count := parity_count + 1;
          output_line;
-         output_line("Parity error: value was #" & oct_of(word(b))(15..16)
-                   & ", found at byte #" & oct_of(p)(11..16) & "!");
+         output_line("Parity error: value was #"
+                   & oct_of(word(b))(15..16)
+                   & ", found at byte #"
+                   & oct_of(p)(11..16)
+                   & "!"
+                    );
       end if;
       return symbol(top_2_bits/2 or low_4_bits);
    end sixbit;
@@ -675,6 +679,6 @@ exception
    when command_error =>
       null;
    when parity_error =>
-      output_line(parity_count'Image & " parity error(s) found.");
+      output_line(parity_count'Image + "parity error(s) found.");
 
 end a2b;

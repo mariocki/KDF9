@@ -1,7 +1,7 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,7 +18,7 @@ with Ada.Characters.Latin_1;
 with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 --
-with data_imaging;
+with KDF9.imaging;
 with disassembly;
 with disassembly.symbols;
 with exceptions;
@@ -43,7 +43,7 @@ use  Ada.Characters.Latin_1;
 use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 --
-use  data_imaging;
+use  KDF9.imaging;
 use  disassembly;
 use  disassembly.symbols;
 use  exceptions;
@@ -126,7 +126,7 @@ package body state_display is
 
    procedure show_as_glyphs (the_word : in KDF9.word) is
    begin
-      log(quote(glyphs_for(the_word)));
+      log(abs glyphs_for(the_word));
    end show_as_glyphs;
 
    procedure log_padded_string (text  : in String;
@@ -181,7 +181,7 @@ package body state_display is
       begin
          return (
                  if    t < 1E3 then ""
-                 elsif t < 1E6 then " about" & t_in_ms'Image & " ms"
+                 elsif t < 1E6 then " about" & t_in_ms'Image  & " ms"
                  else               " about" & t_in_sec'Image & " sec"
                 );
       end readable;

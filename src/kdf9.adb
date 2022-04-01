@@ -1,7 +1,7 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -113,7 +113,7 @@ package body KDF9 is
 
    function operand_words_needed (need : KDF9.NEST_depth)
    return String
-   is ("NEST lacks" & need'Image & " operand" & (if need > 1 then "s" else ""));
+   is ("NEST lacks" & need'Image + "operand" & (if need > 1 then "s" else ""));
 
    procedure ensure_that_the_NEST_holds (at_least : in KDF9.NEST_depth) is
    begin
@@ -140,7 +140,7 @@ package body KDF9 is
 
    function result_space_needed (need : KDF9.NEST_depth)
    return String
-   is (if need = 1 then "full NEST" else "NEST too full for" & need'Image & " operands");
+   is (if need = 1 then "full NEST" else "NEST too full for" & need'Image + "operands");
 
    procedure ensure_that_the_NEST_has_room_for (at_least : in KDF9.NEST_depth) is
    begin
@@ -576,7 +576,7 @@ package body KDF9 is
 
    procedure effect_clock_interrupt (interval : in KDF9.us) is
    begin
-      effect_interrupt(caused_by_CLOCK, interval'Image & " KDF9 us");
+      effect_interrupt(caused_by_CLOCK, interval'Image + "KDF9 us");
    end effect_clock_interrupt;
 
    procedure check_for_a_clock_interrupt is
@@ -663,7 +663,7 @@ package body KDF9 is
       OUT_name : constant String := OUT_number'Image;
    begin
       -- The program has issued an invalid OUT.
-      raise OUT_error with "%" & OUT_name(2..OUT_name'Last) & ": " & the_message;
+      raise OUT_error with "%" & OUT_name(2..OUT_name'Last) & ":" + the_message;
    end trap_failing_OUT;
 
    procedure trap_invalid_paper_tape (the_message : in String) is

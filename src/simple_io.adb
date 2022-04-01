@@ -1,7 +1,7 @@
 -- Simple line-oriented I/O avoiding the need to include Ada.Text_IO.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -70,7 +70,8 @@ package body simple_IO is
          raise end_error;
    end skip_line;
 
-   procedure read_line (s : out String; last : out Natural) is
+   procedure read_line (s : out String; last : out Natural; fail_EOL : in Boolean := False) is
+      ch : Character;
    begin
       last := 0;
       for i in s'Range loop
@@ -78,6 +79,14 @@ package body simple_IO is
       exit when s(i) = LF;
          last := i;
       end loop;
+      if fail_EOL and last = s'Last then
+         raise EOL_error;
+      elsif last = s'Last then
+         loop
+            get_char(ch, standard_input);
+         exit when ch = LF;
+         end loop;
+      end if;
    exception
       when end_of_stream =>
          raise end_error;

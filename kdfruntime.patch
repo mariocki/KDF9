@@ -7,6 +7,7 @@ index ec2da14..4d34d4f 100644
  with IOC.slow.shift.TR;
  with settings;
 +with get_runtime_paths;
+ with string_editing;
  
  with execute;
  with say_goodbye;

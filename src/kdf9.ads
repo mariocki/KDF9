@@ -1,7 +1,7 @@
 -- The architecturally-defined data and register formats of the KDF9 computer.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -17,6 +17,7 @@
 with System;
 --
 private with KDF9_char_sets;
+private with string_editing;
 
 package KDF9 is
 
@@ -728,6 +729,7 @@ package KDF9 is
 private
 
    use KDF9_char_sets; pragma Warnings(Off, KDF9_char_sets);
+   use string_editing; pragma Warnings(Off, string_editing);
 
    the_elapsed_time    : KDF9.us := 0;
 

@@ -1,7 +1,7 @@
 -- Generate a formatted printout of a magnetic tape file.
 --
--- This program is an auxiliary of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This program is an auxiliary of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The mtp program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -50,7 +50,7 @@ procedure mtp is
    begin
       if bytes_out < target then
          raise POSIX_error
-            with "POSIX.write error" & bytes_out'Image & " in " & where & "!";
+            with "POSIX.write error" & bytes_out'Image + "in" + where & "!";
       end if;
    end deal_with_an_output_error;
 
@@ -125,29 +125,29 @@ procedure mtp is
       begin
          -- Fail a too-short parameter.
          if argument'Length < 3 then
-            complain(quote(argument) & " is too short");
+            complain(abs argument + "is too short");
          end if;
 
          -- Fail a too-long parameter.
          if argument'Length > 6 then
-            complain(quote(argument) & " is too long");
+            complain(abs argument + "is too long");
          end if;
 
          -- Fail a non-MT parameter.
          if argument(1..2) not in "MT" | "ST" or else
                argument(3) not in '0' .. '7'     then
-            complain(quote(argument) & " is not a valid MT unit");
+            complain(abs argument + "is not a valid MT unit");
          end if;
 
          -- Fail an impossible analysis suffix.
          if argument'Length >= 4 then
             if argument(4) not in option_flags then
-               complain(quote(argument(4)) & " is not a valid option");
+               complain(abs argument(4) + "is not a valid option");
             end if;
             if argument(4) = 'T' then
                the_mode := plain_text_printing;
                if argument'Length > 4 then
-                  complain(quote(argument) & " is not a valid parameter (too long)");
+                  complain(abs argument + "is not a valid parameter (too long)");
                end if;
                return;
             end if;
@@ -159,19 +159,19 @@ procedure mtp is
 
          -- Handle despooling parameter(s).
          if argument'Length < 6 then
-            complain(quote(argument) & " is not a valid OUT8 despooling parameter (too short)");
+            complain(abs argument + "is not a valid OUT8 despooling parameter (too short)");
          end if;
 
          the_mode := OUT8_despooling;
          if argument(4) not in slot_names then
-               complain(quote(argument(5)) & " is not a valid TSD slot");
+               complain(abs argument(5) + "is not a valid TSD slot");
          end if;
          slot_id := argument(4);
          if argument(5) not in '1' | '3' | '5' | '7' then
-            complain(quote(argument(5..6)) & " is not a valid OUT8 stream number");
+            complain(abs argument(5..6) + "is not a valid OUT8 stream number");
          end if;
          if argument(6) not in '0' .. '7' then
-            complain(quote(argument(5..6)) & " is not a valid OUT8 stream number");
+            complain(abs argument(5..6) + "is not a valid OUT8 stream number");
          end if;
          stream_id := argument(5..6);
          an_LP_stream     := stream_id(1) in '3' | '7';
@@ -196,7 +196,7 @@ procedure mtp is
       exception
          when POSIX_IO_error =>
             report_line;
-            report_line(CLI.Argument(1)(1..3) & " cannot be opened for reading!");
+            report_line(CLI.Argument(1)(1..3) + "cannot be opened for reading!");
             raise command_error;
       end;
    end open_the_tape_file;
@@ -241,7 +241,7 @@ procedure mtp is
          raise POSIX_error
             with "POSIX.read error code"
                & bytes_read'Image
-               & " in read_a_slice!";
+               + "in read_a_slice!";
       end if;
 
       at_end_of_data := bytes_read = 0;
@@ -353,9 +353,9 @@ procedure mtp is
       else
          report_line;
          report_line(
-                     "This is not an OUT 8 tape! BLOCK FOUND is """
-                   & the_block(1..block_size)
-                   & """!"
+                     "This is not an OUT 8 tape! BLOCK FOUND is"
+                   + abs the_block(1..block_size)
+                   & "!"
                     );
          raise format_error;
       end if;
@@ -491,10 +491,10 @@ procedure mtp is
             if no_header_has_been_printed then
                -- I will say this only once.
                print(
-                     "Despooling OUT 8 stream "
-                   & stream_id
-                   & " for slot "
-                   & slot_id
+                     "Despooling OUT 8 stream"
+                   + stream_id
+                   + "for slot"
+                   + slot_id
                    & ", written on "
                     );
                declare
@@ -505,8 +505,8 @@ procedure mtp is
                begin
                   print_line(
                              date
-                           & " by "
-                           & prog
+                           + "by"
+                           + prog
                             );
                end;
                print_line;
@@ -597,7 +597,7 @@ procedure mtp is
                        slice_count'Image
                      & HT
                      & (if slice_flags in last_block_flags then "* " else "  ")
-                     & quote(the_data(1..slice_size))
+                     & abs the_data(1..slice_size)
                       );
             if slice_flags in final_slice_flags then print_line; end if;
 
@@ -606,7 +606,7 @@ procedure mtp is
                print(
                      slice_count'Image
                    & HT
-                   & "  GAP  of"
+                   & "  GAP  of "
                     );
                current_erasure_size := slice_size;
                current_erasure_kind := 'G';
@@ -619,7 +619,7 @@ procedure mtp is
                print(
                      slice_count'Image
                    & HT
-                   & "  WIPE  of"
+                   & "  WIPE  of "
                     );
                current_erasure_size := slice_size;
                current_erasure_kind := 'W';
@@ -647,7 +647,7 @@ procedure mtp is
    procedure finalize_any_erasure is
    begin
       if current_erasure_size /= 0 then
-         print_line(current_erasure_size'Image & " erased characters");
+         print_line(current_erasure_size'Image + "erased characters");
          print_line;
          current_erasure_size := 0;
          current_erasure_kind := '?';
@@ -674,10 +674,10 @@ begin -- mtp
                return;
             else
                print_line(
-                          "TAPE LABEL TSN "
-                        & quote(the_data(1..8))
-                        & ", IDENTIFIER "
-                        & quote(the_data(9..slice_size))
+                          "TAPE LABEL TSN"
+                        + abs the_data(1..8)
+                        & ", IDENTIFIER"
+                        + abs the_data(9..slice_size)
                          );
                print_line;
             end if;

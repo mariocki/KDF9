@@ -1,7 +1,7 @@
 -- Emulation of a drum store.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -68,7 +68,7 @@ package body IOC.fast.DR is
       open(IOC.device(the_DR), rd_wr_mode);
    exception
       when others =>
-         trap_operator_error(the_DR.device_name & " cannot be opened for reading and writing");
+         trap_operator_error(the_DR.device_name + "cannot be opened for reading and writing");
    end Initialize;
 
    procedure keep_house (the_DR        : in out DR.device;
@@ -193,8 +193,8 @@ package body IOC.fast.DR is
       end loop sector_loop;
       keep_house(the_DR, size, busy_time);
       start_data_transfer(the_DR, Q_operand, False, latency + busy_time, input_operation);
-      update_statistics(the_DR, latency);
       lock_out_relative_addresses(Q_operand);
+      update_statistics(the_DR, latency);
    end read_drum;
 
    overriding
@@ -484,29 +484,29 @@ package body IOC.fast.DR is
             log_line
                 (
                  the_DR.device_name
-               & " on buffer #"
+               + "on buffer #"
                & oct_of(KDF9.Q_part(the_DR.number), 2)
-               & " spent:"
+               + "spent:"
                 );
             log_line
                 (
                  "    "
                & just_right(KDF9.us'Image(transfer_time / 1_000), 6)
-               & " ms in"
+               + "ms in"
                & the_DR.latency_count'Image
-               & " data transfer" & plurality(the_DR.latency_count)
-               & " totalling"
+               + "data transfer" & plurality(the_DR.latency_count)
+               + "totalling"
                & KDF9.word'Image(the_DR.word_count)
-               & " word" & plurality(the_DR.word_count)
+               + "word" & plurality(the_DR.word_count)
                & ", and"
                 );
             log_line
                 (
                  "    "
                & just_right(KDF9.us'Image(the_DR.latency_time / 1_000), 6)
-               & " ms in"
+               + "ms in"
                & the_DR.latency_count'Image
-               & " rotational latenc" & plurality(the_DR.latency_count, "y.", "ies.")
+               + "rotational latenc" & plurality(the_DR.latency_count, "y.", "ies.")
                 );
          end if;
 

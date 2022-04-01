@@ -1,7 +1,7 @@
--- execution mode, diagnostic mode, and other emulation-control settings
+-- Read and register execution mode, diagnostic mode, and other emulation-control settings.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -18,7 +18,7 @@ with Ada.Exceptions;
 with Ada.Long_Float_Text_IO;
 with Ada.Text_IO;
 --
-with data_imaging;
+with KDF9.imaging;
 with disassembly.symbols;
 with dumping;
 with exceptions;
@@ -34,7 +34,7 @@ use  Ada.Exceptions;
 use  Ada.Long_Float_Text_IO;
 use  Ada.Text_IO;
 --
-use  data_imaging;
+use  KDF9.imaging;
 use  disassembly.symbols;
 use  dumping;
 use  exceptions;
@@ -45,6 +45,8 @@ use  string_editing;
 use  tracing;
 
 package body settings is
+
+   error_count : Natural := 0;
 
    procedure reset_default_visibility_options is
    begin
@@ -86,9 +88,9 @@ package body settings is
    begin
       if is_invalid_miscellany_flag(option) then
          log_line(
-                  "***** Error in a miscellany specification: """
-                & option
-                & """."
+                  "**** Error in a miscellany specification:"
+                + abs option
+                & "."
                  );
          return;
       end if;
@@ -170,7 +172,7 @@ package body settings is
 
       function run_type (type_of_run : String)
       return String
-      is (if for_this = "" then type_of_run else type_of_run & " " & for_this);
+      is (if for_this = "" then type_of_run else type_of_run + for_this);
 
    begin -- display_execution_modes
       if not the_log_is_wanted then return; end if;
@@ -303,13 +305,14 @@ package body settings is
          end loop;
       exception
          when Data_Error =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then
                Skip_Line(settings_file);
             end if;
             log_new_line;
             log_line(
-                     "***** Error in a miscellany specification: "
-                   & (if c = ' ' then "no option was given." else "invalid data """& c & """.")
+                     "**** Error in a miscellany specification:"
+                   + (if c = ' ' then "no option was given." else "invalid data" + abs c & ".")
                     );
       end set_the_miscellany_flags;
 
@@ -320,16 +323,17 @@ package body settings is
             get_word(settings_file, KDF9.word(start));
          exception
             when others =>
+               error_count := error_count + 1;
                log_new_line;
-               log_line("***** Error in lower address; no breakpoint set.");
+               log_line("**** Error in lower address; no breakpoint set.");
                return;
          end;
 
          log_new_line;
          log_line(
-                  "Lower breakpoint: "
+                  "Lower breakpoint: #"
                 & oct_of(KDF9.syllable_address'(start, 0))
-                & " ("
+                + "("
                 & dec_of(KDF9.syllable_address'(start, 0))
                 & ")",
                   iff => the_log_is_wanted
@@ -340,21 +344,23 @@ package body settings is
             get_word(settings_file, KDF9.word(end_point));
          exception
             when Data_Error =>
+               error_count := error_count + 1;
                log_line("      No upper address: one breakpoint set.", iff => the_log_is_wanted);
                set_breakpoints(start, start);
                return;
          end;
          log_line(
-                  "Upper breakpoint: "
+                  "Upper breakpoint: #"
                 & oct_of(KDF9.syllable_address'(end_point, 5))
-                & " (" & dec_of(KDF9.syllable_address'(end_point, 5))
+                + "(" & dec_of(KDF9.syllable_address'(end_point, 5))
                 & ")",
                   iff => the_log_is_wanted
                  );
          set_breakpoints(start, end_point);
       exception
          when others =>
-            log_line("***** Error setting breakpoints; ignored.");
+            error_count := error_count + 1;
+            log_line("**** Error setting breakpoints; none set.");
       end set_breakpoints;
 
       procedure set_store_points is
@@ -364,15 +370,16 @@ package body settings is
             get_word(settings_file, KDF9.word(start));
          exception
             when others =>
+               error_count := error_count + 1;
                log_new_line;
-               log_line("***** Error in lower address; no storepoint set.");
+               log_line("**** Error in lower address; no storepoint set.");
                return;
          end;
          log_new_line;
          log_line(
                   "Lower storepoint: #"
                 & oct_of(start)
-                & " ("
+                + "("
                 & dec_of(start)
                 & ")",
                   iff => the_log_is_wanted
@@ -381,6 +388,7 @@ package body settings is
             get_word(settings_file, KDF9.word(end_point));
          exception
             when Data_Error =>
+               error_count := error_count + 1;
                log_line("      No upper address: one storepoint set.", iff => the_log_is_wanted);
                set_store_points(start, start);
                return;
@@ -388,7 +396,7 @@ package body settings is
          log_line(
                   "Upper storepoint: #"
                 & oct_of(end_point)
-                & " ("
+                + "("
                 & dec_of(end_point)
                 & ")",
                   iff => the_log_is_wanted
@@ -396,7 +404,8 @@ package body settings is
          set_store_points(start, end_point);
       exception
          when others =>
-            log_line("***** Error setting storepoints; ignored.");
+            error_count := error_count + 1;
+            log_line("**** Error setting storepoints; none set.");
       end set_store_points;
 
       procedure set_watchpoints is
@@ -406,15 +415,16 @@ package body settings is
             get_word(settings_file, KDF9.word(start));
          exception
             when others =>
+               error_count := error_count + 1;
                log_new_line;
-               log_line("***** Error in lower address; no watchpoint set.");
+               log_line("**** Error in lower address; no watchpoint set.");
                return;
          end;
          log_new_line;
          log_line(
                   "Lower watchpoint: #"
                 & oct_of(start)
-                & " ("
+                + "("
                 & dec_of(start)
                 & ")",
                   iff => the_log_is_wanted
@@ -423,18 +433,25 @@ package body settings is
             get_word(settings_file, KDF9.word(end_point));
          exception
             when Data_Error =>
+               error_count := error_count + 1;
                log_line("      No upper address: one watchpoint set.", iff => the_log_is_wanted);
                set_store_points(start, start);
                set_fetch_points(start, start);
                return;
          end;
-         log_line("Upper watchpoint: #" & oct_of(end_point) & " (" & dec_of(end_point) & ")",
+         log_line(
+                  "Upper watchpoint: #"
+                & oct_of(end_point)
+                + "("
+                & dec_of(end_point)
+                & ")",
                   iff => the_log_is_wanted);
          set_fetch_points(start, end_point);
          set_store_points(start, end_point);
       exception
          when others =>
-            log_line("***** Error setting watchpoints; ignored.");
+            error_count := error_count + 1;
+            log_line("**** Error setting watchpoints; none set.");
       end set_watchpoints;
 
       procedure set_specified_dumping_ranges (epoch : in dumping.flag) is
@@ -449,7 +466,7 @@ package body settings is
          c            : Character;
          OK           : Boolean;
       begin
-         log("Dump: format " & epoch_flag, iff => the_log_is_wanted);
+         log("Dump: format" + epoch_flag, iff => the_log_is_wanted);
          while not End_Of_Line(settings_file) loop
             get(settings_file, c);
             log(c, iff => the_log_is_wanted);
@@ -459,7 +476,7 @@ package body settings is
             else
                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
                log_new_line;
-               log_line("***** Error: """& c & """ is not a valid dump type.");
+               log_line("**** Error:" + abs c + "is not a valid dump type.");
                return;
             end if;
          end loop;
@@ -470,10 +487,11 @@ package body settings is
             get_word(settings_file, data);
             if data > max_address then
                log_line(
-                        "***** Error: Lower dump address = #"
+                        "**** Error: Lower dump address = #"
                       & oct_of(data)
-                      & " =" & data'Image
-                      & " is too large for this option."
+                      + "="
+                      & data'Image
+                      + "is too large for this option."
                        );
                bad_range := True;
             else
@@ -482,7 +500,8 @@ package body settings is
                log_line(
                         "      Lower dump address: #"
                       & oct_of(first_address)
-                      & " (" & dec_of(first_address)
+                      + "("
+                      & dec_of(first_address)
                       & ")",
                         iff => the_log_is_wanted
                        );
@@ -494,10 +513,11 @@ package body settings is
                get_word(settings_file, data);
                if data > max_address then
                   log_line(
-                           "***** Error: Upper dump address = #"
+                           "**** Error: Upper dump address = #"
                          & oct_of(data)
-                         & " =" & data'Image
-                         & " is too large for this option."
+                         + "="
+                         & data'Image
+                         + "is too large for this option."
                           );
                   bad_range := True;
                else
@@ -505,7 +525,7 @@ package body settings is
                   log_line(
                            "      Upper dump address: #"
                          & oct_of(last_address)
-                         & " ("
+                         + "("
                          & dec_of(last_address)
                          & ")",
                            iff => the_log_is_wanted
@@ -515,12 +535,14 @@ package body settings is
 
             if first_address > last_address then
                log_line(
-                        "***** Error: Upper dump address: #"
+                        "**** Error: Upper dump address: #"
                       & oct_of(last_address)
-                      & " =" & last_address'Image
-                      & " is less than lower dump address: #"
+                      + "="
+                      & last_address'Image
+                      + "is less than lower dump address: #"
                       & oct_of(first_address)
-                      & " =" & first_address'Image
+                      + "="
+                      & first_address'Image
                       & "."
                        );
                bad_range := True;
@@ -530,16 +552,17 @@ package body settings is
          if not bad_range then
             request_a_dumping_area(format, first_address, last_address, OK);
             if not OK then
-               log_line("***** Error: Too many dump specifications (ignored).");
+               log_line("**** Error: Too many dump specifications (ignored).");
             end if;
          end if;
 
          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             log_new_line;
-            log_line("***** Error in a dump area specification (ignored)." );
+            log_line("**** Error in a dump area specification (ignored)." );
       end set_specified_dumping_ranges;
 
       procedure set_initial_dumping_ranges is
@@ -558,16 +581,16 @@ package body settings is
          while not End_Of_Line(settings_file) loop
             get(settings_file, c);
          exit when c = ' ';
-            if c not in 'P' | 'p' | 'T' | 't' then
-               raise Data_Error;
-            end if;
-            if c in 'P' | 'p' then
-               the_profile_is_wanted  := True;
-               clear_the_profile;
-            elsif c in  'T' | 't' then
-               the_INS_plot_is_wanted := True;
-               clear_the_histogram;
-            end if;
+            case c is
+               when 'P' | 'p' =>
+                  the_profile_is_wanted  := True;
+                  clear_the_profile;
+               when 'T' | 't' =>
+                  the_INS_plot_is_wanted := True;
+                  clear_the_histogram;
+               when others =>
+                  raise Data_Error;
+            end case;
          end loop;
          ensure_not_at_end_of_line(settings_file);
          get(settings_file, histogram_cutoff);
@@ -580,10 +603,11 @@ package body settings is
          end if;
       exception
          when others =>
+            error_count := error_count + 1;
             histogram_cutoff := cutoff_default;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             log_new_line;
-            log_line("***** Error in the histogram option; default used.");
+            log_line("**** Error in the histogram option; default used.");
       end set_histogram_options;
 
       procedure set_time_limit is
@@ -592,6 +616,7 @@ package body settings is
             get_decimal(settings_file, KDF9.word(time_limit));
          exception
             when others =>
+               error_count := error_count + 1;
                if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
                time_limit := offline_time_limit;
          end;
@@ -621,17 +646,18 @@ package body settings is
          show_counts;
          if low_count > high_count then
             log_new_line;
-            log_line("***** Error: Low count > high count.");
+            log_line("**** Error: Low count > high count.");
             raise Data_Error;
          end if;
          counts_are_set := True;
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             low_count  := low_count_default;
             high_count := high_count_default;
             log_new_line;
-            log_line("***** Error in a tracing count; defaults used.");
+            log_line("**** Error in a tracing count; defaults used.");
             show_counts;
       end set_tracing_counts;
 
@@ -644,14 +670,14 @@ package body settings is
             log_line(
                      "Lower trace address: #"
                    & oct_of(KDF9.syllable_address'(low_bound, 0))
-                   & " ("
+                   + "("
                    & dec_of(KDF9.syllable_address'(low_bound, 0))
                    & ")"
                     );
             log_line(
                      "Upper trace address: #"
                    & oct_of(KDF9.syllable_address'(high_bound, 5))
-                   & " ("
+                   + "("
                    & dec_of(KDF9.syllable_address'(high_bound, 5))
                    & ")"
                     );
@@ -662,17 +688,18 @@ package body settings is
          get_word(settings_file, KDF9.word(high_bound));
          if low_bound > high_bound then
             log_new_line;
-            log_line("***** Error: Low bound > high bound.");
+            log_line("**** Error: Low bound > high bound.");
             raise Data_Error;
          end if;
          show_range;
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             low_bound  := low_bound_default;
             high_bound := high_bound_default;
             log_new_line;
-            log_line("***** Error in a tracing address; defaults used.");
+            log_line("**** Error in a tracing address; defaults used.");
             show_range;
       end set_tracing_range;
 
@@ -685,10 +712,11 @@ package body settings is
          set_diagnostic_mode(the_diagnostic_mode);
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             set_diagnostic_mode(the_diagnostics_default);
             log_new_line;
-            log_line("***** Error in the diagnostic mode; default used.");
+            log_line("**** Error in the diagnostic mode; default used.");
       end set_diagnostic_mode;
 
       procedure set_execution_mode is
@@ -698,10 +726,11 @@ package body settings is
          get(settings_file, the_execution_mode);
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             the_execution_mode := the_execution_default;
             log_new_line;
-            log_line("***** Error in the testing mode; default used.");
+            log_line("**** Error in the testing mode; default used.");
       end set_execution_mode;
 
       procedure set_authenticity is
@@ -714,10 +743,11 @@ package body settings is
          end if;
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             the_authenticity_mode := the_authenticity_default;
             log_new_line;
-            log_line("***** Error in the authenticity mode; default used.");
+            log_line("**** Error in the authenticity mode; default used.");
       end set_authenticity;
 
       procedure set_graph_plotting_pen is
@@ -732,10 +762,10 @@ package body settings is
             if not the_log_is_wanted then return; end if;
             log_new_line;
             if the_colour /= the_default_colour then
-               log_line("The graph plotter pen colour is " & the_colour'Image & ".");
+               log_line("The graph plotter pen colour is" + the_colour'Image & ".");
             end if;
             if the_pen_size /= the_default_tip_size then
-               log_line("The graph plotter pen tip is " & the_pen_size'Image & ".");
+               log_line("The graph plotter pen tip is" + the_pen_size'Image & ".");
             end if;
          end show_pen_options;
 
@@ -753,20 +783,23 @@ package body settings is
             Get(settings_file, the_colour);
          exception
             when others =>
+               error_count := error_count + 1;
                log_new_line;
-               log_line("***** Error in the plotter pen the_colour; default used.");
+               log_line("**** Error in the plotter pen the_colour; default used.");
          end;
          ensure_not_at_end_of_line(settings_file);
          begin
             Get(settings_file, the_pen_size);
          exception
             when others =>
+               error_count := error_count + 1;
                log_new_line;
-               log_line("***** Error in the plotter pen tip; default used.");
+               log_line("**** Error in the plotter pen tip; default used.");
          end;
          configure_the_plotter;
       exception
          when Data_Error =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             configure_the_plotter;
       end set_graph_plotting_pen;
@@ -789,17 +822,19 @@ package body settings is
             get_word(settings_file, KDF9.word(address));
          exception
             when others =>
-               log_line("***** Error in poke word address.");
+               error_count := error_count + 1;
+               log_line("**** Error in poke word address.");
                Skip_Line(settings_file);
                return;
          end;
 
          get_char(settings_file, sub_word);
          if sub_word not in 'S' | 's' | 'C' | 'c' | 'L' | 'l' | 'U' | 'u' | 'W' | 'w' then
+            error_count := error_count + 1;
             log_line(
-                     "***** Error in (sub)word indicator; "
-                   & sub_word
-                   & " should be W, L, U, S, or C."
+                     "**** Error in (sub)word indicator;"
+                   + sub_word
+                   + "should be W, L, U, S, or C."
                     );
             Skip_Line(settings_file);
             return;
@@ -810,20 +845,22 @@ package body settings is
                get_word(settings_file, KDF9.word(position));
                if (sub_word in 'S' | 's' and position > 5) or else
                   (sub_word in 'C' | 'c' and position > 7)    then
+                  error_count := error_count + 1;
                   log_line(
-                           "***** Error in position given for a "
-                         & (if sub_word in 'S' | 's' then "syllable:" else "character:")
+                           "**** Error in position given for a"
+                         + (if sub_word in 'S' | 's' then "syllable:" else "character:")
                          & position'Image
-                         & " is too large, poke request ignored."
+                         + "is too large, poke request ignored."
                           );
                   Skip_Line(settings_file);
                   return;
                end if;
             exception
                when others =>
+                  error_count := error_count + 1;
                   log_line(
-                           "***** Error in position given for a "
-                         & (if sub_word in 'S' | 's' then "syllable" else "character")
+                           "**** Error in position given for a"
+                         + (if sub_word in 'S' | 's' then "syllable" else "character")
                          & ", poke request ignored."
                           );
                   Skip_Line(settings_file);
@@ -837,7 +874,8 @@ package body settings is
             get_word(settings_file, value);
          exception
             when others =>
-               log_line("***** Error in poked value.");
+               error_count := error_count + 1;
+               log_line("**** Error in poked value.");
                Skip_Line(settings_file);
                return;
          end;
@@ -845,11 +883,12 @@ package body settings is
          if (sub_word in 'L' | 'l' | 'U' | 'u' and value > 2**24-1) or else
                (sub_word in 'S' | 's'          and value > 255)     or else
                   (sub_word in 'C' | 'c'       and value > 63)      then
+            error_count := error_count + 1;
             log_line(
-                     "***** Error in poked value #"
+                     "**** Error in poked value #"
                    & oct_of(value)
-                   & ": out of range for a "
-                   & (case sub_word is
+                   & ": out of range for a"
+                   + (case sub_word is
                          when 'L' | 'l' | 'U' | 'u' => "halfword",
                          when 'S' | 's'             => "syllable",
                          when 'C' | 'c'             => "character",
@@ -863,7 +902,7 @@ package body settings is
          add_to_poke_list(address, sub_word, position, value, OK);
 
          if not OK then
-            log_line("***** Error setting up a poke: poke list full; request ignored.");
+            log_line("**** Error setting up a poke: poke list full; request ignored.");
          end if;
 
       exception
@@ -894,10 +933,11 @@ package body settings is
          if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
       exception
          when others =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then Skip_Line(settings_file); end if;
             IOC.equipment.choice := IOC.equipment.default;
             log_new_line;
-            log_line("***** Error in the device configuration; defaults used.");
+            log_line("**** Error in the device configuration; defaults used.");
       end set_KDF9_configuration;
 
       procedure set_symbols is
@@ -911,30 +951,27 @@ package body settings is
             return;
          end if;
          get(settings_file, c);
-         if    c = '#' then
-            get(settings_file, c);
-            get_word(settings_file, KDF9.word(a));
-            if c = 'V' then
-               set_main_program_V_size(Natural(a));
-            elsif c = 'Y' then
-               set_Y_size(if a = KDF9.address'Last then 0 else a);
-            else
-               raise Data_Error;
-            end if;
-            return;
-         elsif c = 'W' then
-            get_word(settings_file, KDF9.word(a));
-            set_W0(a);
-            return;
-         elsif c = 'Y' then
-            get_word(settings_file, KDF9.word(a));
-            set_Y0(a);
-            return;
-         elsif c = 'Z' then
-            get_word(settings_file, KDF9.word(a));
-            set_Z0(a);
-            return;
-         elsif c = 'P' then
+         case c is
+            when '#' =>
+               get(settings_file, c);
+               get_word(settings_file, KDF9.word(a));
+               if c = 'V' then
+                  set_main_program_V_size(Natural(a));
+               elsif c = 'Y' then
+                  set_Y_size(if a = KDF9.address'Last then 0 else a);
+               else
+                  raise Data_Error;
+               end if;
+            when 'W' =>
+               get_word(settings_file, KDF9.word(a));
+               set_W0(a);
+            when 'Y' =>
+               get_word(settings_file, KDF9.word(a));
+               set_Y0(a);
+            when 'Z' =>
+               get_word(settings_file, KDF9.word(a));
+               set_Z0(a);
+            when 'P' =>
                skip_to_next_non_blank(settings_file);
                get_word(settings_file, KDF9.word(p));
                skip_to_next_non_blank(settings_file);
@@ -953,33 +990,31 @@ package body settings is
                   get_word(settings_file, KDF9.word(a));
                   site_Pp(p, a);
                end if;
-            return;
-         elsif c = ' ' then
-            skip_to_next_non_blank(settings_file);
-            get(settings_file, c);
-            if c not in 'A' .. 'Z'  then
+            when ' ' =>
+               skip_to_next_non_blank(settings_file);
+               get(settings_file, c);
+               if c not in 'A' .. 'Z'  then
+                  raise Data_Error;
+               end if;
+               get_word(settings_file, KDF9.word(a));
+               set_Yy0(c, a);
+            when others =>
                raise Data_Error;
-            end if;
-            get_word(settings_file, KDF9.word(a));
-            set_Yy0(c, a);
-         else
-            raise Data_Error;
-         end if;
+         end case;
       exception
          when Data_Error =>
+            error_count := error_count + 1;
             if not End_Of_Line(settings_file) then
                Skip_Line(settings_file);
             end if;
             log_new_line;
             log_line(
-                     "***** Error in a Y flag specification: "
-                   & "invalid data after """
-                   & c
-                   & """."
+                     "**** Error in a Y flag specification: "
+                   & "invalid data after"
+                   + abs c
+                   & "."
                     );
       end set_symbols;
-
-      error_count : Natural := 0;
 
    begin -- get_settings_from_file
 
@@ -1040,29 +1075,30 @@ package body settings is
             when '-' | '/' =>
                Skip_Line(settings_file);
             when others =>
-               if error_count > 10 then
-                  log_new_line;
-                  log_line("There are too many invalid flags in " & the_settings_file_name & ".");
-                  raise operator_error;
-               end if;
                error_count := error_count + 1;
                log_line(
-                        "Invalid flag: """
-                      & flag
-                      & """ at line "
+                        "**** Invalid flag:"
+                      + abs flag
+                      + "at line"
                       & line_number'Image
-                      & " of the settings file!"
+                      + "of the settings file!"
                        );
-               log_line("The valid flags are A,B,C,D,F,G,I,K,L,N,O,P,Q,R,S,T,V,W,X, -, and /");
+               log_line("     The valid flags are A,B,C,D,F,G,H,I,K,L,N,O,P,Q,R,S,T,V,W,X,Y -, and /");
                Skip_Line(settings_file);
                line_number := line_number + 1;
          end case;
+
+         if error_count > 10 then
+            log_new_line;
+            log_line("**** There are too many invalid flags in" + the_settings_file_name & ".");
+            raise operator_error;
+         end if;
       end loop;
 
    exception
 
       when Status_Error =>
-         log_line("***** Error: " & the_settings_file_name & " was not found; defaults used.");
+         log_line("**** Error:" + the_settings_file_name + "was not found; defaults used.");
          log_new_line;
 
       when End_Error =>
@@ -1075,12 +1111,12 @@ package body settings is
          close_options_file(settings_file, the_settings_file_name);
          if error_count < 10 then
             log_new_line;
-            log_line("***** Error: invalid data in the settings file.");
+            log_line("**** Error: invalid data in the settings file.");
             log_line(
-                     "Reading of settings abandoned at line "
+                     "Reading of settings abandoned at line"
                    & line_number'Image
-                   & " of "
-                   & the_settings_file_name
+                   + "of"
+                   + the_settings_file_name
                    & "."
                     );
          else
@@ -1091,15 +1127,15 @@ package body settings is
          close_options_file(settings_file, the_settings_file_name);
          log_new_line;
          log_line(
-                  "Failure in ee9; unexpected exception: "
-                & Exception_Information(error)
-                & " in get_settings_from_file!"
+                  "Failure in ee9; unexpected exception:"
+                + Exception_Information(error)
+                + "in get_settings_from_file!"
                  );
          log_line(
-                  "Reading of settings abandoned at line "
+                  "Reading of settings abandoned at line"
                 & line_number'Image
-                & " of "
-                & the_settings_file_name
+                + "of"
+                + the_settings_file_name
                 & "!"
                  );
          log_rule;

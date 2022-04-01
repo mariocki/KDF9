@@ -1,7 +1,7 @@
 -- Produce dis-assembled instructions in an approximation to KDF9 Usercode.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -14,13 +14,13 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with data_imaging;
+with KDF9.imaging;
 with disassembly.symbols;
 with KDF9.CPU;
 with KDF9.decoding;
 with string_editing;
 
-use  data_imaging;
+use  KDF9.imaging;
 use  disassembly.symbols;
 use  KDF9.CPU;
 use  KDF9.decoding;
@@ -487,7 +487,7 @@ package body disassembly is
 
    function the_code_and_name_of_INS
    return String
-   is (machine_code(INS) & ", i.e. " & the_full_name_of(INS, in_octal => True)); -- & short_closer(INS));
+   is (machine_code(INS) & ", i.e. " & the_full_name_of(INS, in_octal => True));
 
    function two_syllable_skeleton (encoding : KDF9.syllable)
    return String is

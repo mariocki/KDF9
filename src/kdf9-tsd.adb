@@ -1,7 +1,7 @@
 -- Implement the API (OUTs) of the EE Time Sharing Directors.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -14,7 +14,7 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with data_imaging;
+with KDF9.imaging;
 with IOC.fast.DR.TSD_OUTs;
 with IOC.fast.FD.TSD_OUTs;
 with IOC.fast.tape.TSD_OUTs;
@@ -28,7 +28,7 @@ with settings;
 with string_editing;
 with tracing;
 
-use  data_imaging;
+use  KDF9.imaging;
 use  IOC.fast.DR.TSD_OUTs;
 use  IOC.fast.FD.TSD_OUTs;
 use  IOC.fast.tape.TSD_OUTs;
@@ -93,13 +93,11 @@ package body KDF9.TSD is
       the_trace_operand := P;
       log_line("N1 = "
              & resign(P)'Image
-             & " "
-             & as_fraction(P)'Image
-             & " "
-             & host_float(as_f48(P))'Image
-             & " #"
+             + as_fraction(P)'Image
+             + host_float(as_f48(P))'Image
+             + "#"
              & oct_of(P)
-             & quote(text)
+             + abs text
               );
       push(P);
    end do_OUT_96;

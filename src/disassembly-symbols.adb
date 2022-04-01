@@ -1,7 +1,7 @@
 -- Map object code addresses to Usercode data_label addresses.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -14,10 +14,10 @@
 -- this program; see file COPYING. If not, see <http://www.gnu.org/licenses/>.
 --
 
-with data_imaging;
+with KDF9.imaging;
 with string_editing;
 
-use  data_imaging;
+use  KDF9.imaging;
 use  string_editing;
 
 package body disassembly.symbols is
@@ -75,7 +75,7 @@ package body disassembly.symbols is
    begin
       T.Z_base := address;
       if T.Y_size = 0 or T.Y_base = KDF9.Q_part'Last then
-         T.Z_min := T.Z_base - (T.Y_base+T.Z_base)/8;
+         T.Z_min := T.Z_base - 64;  -- This is an arbitrary allowance.
       else
          T.Z_min := T.Y_base + T.Y_size;
       end if;
@@ -138,18 +138,33 @@ package body disassembly.symbols is
 
    function Y_symbol (address : KDF9.Q_part)
    return String is
+      last_Y : KDF9.Q_part := KDF9.Q_part'Last;
    begin
-      if address >= T.Z_min then
+      if T.Y_base = KDF9.Q_part'Last then
+         for y in reverse Y_store_id loop
+            if T.Yy_base(y) < KDF9.Q_part'Last then
+               last_Y := T.Yy_base(y);
+         exit;
+            end if;
+         end loop;
+      else
+         last_Y := T.Y_base;
+      end if;
+
+      if last_Y = KDF9.Q_part'Last then
          return "Z" & trimmed(KDF9.Q_part'Image(T.Z_base - address));
       end if;
+
       if address >= T.Y_base then
          return "Y" & trimmed(KDF9.Q_part'Image(address - T.Y_base));
       end if;
+
       for y in reverse Y_store_id loop
          if address >= T.Yy_base(y) then
             return "Y" & y & trimmed(KDF9.Q_part'Image(address - T.Yy_base(y))) ;
          end if;
       end loop;
+
       if address >= T.W_base then
          return "W" & trimmed(KDF9.Q_part'Image(address - T.W_base));
       end if;

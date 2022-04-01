@@ -1,7 +1,7 @@
 -- Emulation of a paper tape reader buffer.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -221,9 +221,9 @@ package body IOC.slow.shift.TR is
             "read",
             the_TR.byte_count,
             "character" & plurality(the_TR.byte_count)
-          & " in "
-          & (if the_TR.is_transcribing then "Latin-1" else "KDF9")
-          & " code"
+          + "in"
+          + (if the_TR.is_transcribing then "Latin-1" else "KDF9")
+          + "code"
            );
    end Finalize;
 
@@ -270,7 +270,7 @@ package body IOC.slow.shift.TR is
       if the_reader.is_open then
          the_reader.current_case := KDF9_char_sets.Case_Normal;
       else
-         trap_operator_error(quote(next_file_name) & " cannot be found");
+         trap_operator_error(abs next_file_name + "cannot be found");
       end if;
    end reattach;
 

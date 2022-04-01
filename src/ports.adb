@@ -1,7 +1,7 @@
 -- Convert KDF9 Algol programs between source code formats.
 --
--- This file is part of ee9 (8.1x), the GNU Ada emulator of the English Electric KDF9.
--- Copyright (C) 2021, W. Findlay; all rights reserved.
+-- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
 -- modify it under terms of the GNU General Public License as published
@@ -15,13 +15,10 @@
 --
 
 with Ada.Command_Line;
-with Ada.Strings.Unbounded;
 --
 with simple_IO;
 with string_editing;
 
-use  Ada.Strings.Unbounded;
---
 use  simple_IO;
 use  string_editing;
 
@@ -321,60 +318,65 @@ procedure ports is
 
    braces    : constant vocabulary := ( +"{",   +"}");
 
-   procedure convert (data : in out Unbounded_String; before, after : in vocabulary) is
-      first : constant Natural := Index_Non_Blank(data);
-      start : constant Natural := (if first = 0 then 1 else first);
-      pos   : Natural;
+
+   subtype line_range  is Natural range 0 .. 1024;
+   subtype source_line is String(line_range range 1..line_range'Last);
+
+   line : source_line;
+   last : line_range := 0;
+
+   procedure convert (before, after : in vocabulary) is
+      start : Natural;
    begin
-      if Length(data) = 0 then
+      if last = 0 then
          return;
       end if;
       for i in before'Range loop
-         pos := start;
          loop
-            pos := Index(data, before(i).all, pos);
-         exit when pos = 0;
+            start := index_forward(line(1..last), before(i).all, 1);
+         exit when start = 0;
             declare
-               j    : constant Natural          := pos - 1;
-               pre  : constant Unbounded_String := Unbounded_Slice(data, 1, j);
-               k    : constant Natural          := pos + before(i).all'Length;
-               post : constant Unbounded_String := Unbounded_Slice(data, k, Length(data));
+               orig_length : constant line_range := before(i).all'Length;
+               subs_length : constant line_range := after(i).all'Length;
+               new_last    : constant Integer := last - orig_length + subs_length;
             begin
-               data := pre & after(i).all & post;
+               if new_last not in 1..line_range'Last then
+                  raise EOL_error;
+               end if;
+               line(start+subs_length .. new_last) := line(start+orig_length .. last);
+               line(start .. start+subs_length-1) := after(i).all;
+               last := new_last;
             end;
-            pos := pos + before(i).all'Length;
          end loop;
       end loop;
    end convert;
 
-   subtype source_code_line is String(1..256);
+   procedure put_fixed_up is
+   begin
+      -- The following converts $ to a walgol quoted string space, i.e. *.
+      for c of line(1..last) loop
+         if c  = '$' then
+            c := '*';
+         end if;
+      end loop;
+      print_line(line(1..last));
+   end put_fixed_up;
+
+   procedure get_line is
+   begin
+      read_line(line, last);
+      if last = line'Last then
+         raise EOL_error;
+      end if;
+   end get_line;
 
    procedure de_strop (program_name : in String) is
-
-      procedure put_fixed_up (unfixed_line : in String) is
-         fixed_up_line : String := unfixed_line;
-      begin
-         -- The following converts $ to a walgol quoted string space, i.e. *.
-         for c of fixed_up_line loop
-            if c  = '$' then
-               c := '*';
-            end if;
-         end loop;
-         print_line(fixed_up_line);
-      end put_fixed_up;
-
-      data : Unbounded_String;
-      line : source_code_line;
-      last : Natural range 0 .. source_code_line'Last;
-
       do_bangs, do_kwote, do_brace : Boolean;
-
    begin
       -- Add a program name line for WAlgol.
       print_line(program_name & "|");
       loop
-         read_line(line, last);
-
+         get_line;
          if last = 0 then
             New_Line;
          else
@@ -409,20 +411,19 @@ procedure ports is
             do_brace := do_brace or else index_forward(line(1..last), "}", 1) > 0;
             if not (do_bangs or do_kwote or do_brace) then
                -- There are no stropped basic symbols in this line.
-               put_fixed_up(line(1..last));
+               put_fixed_up;
             else
                -- Convert stropped symbols of either format.
-               data := To_Unbounded_String(line(1..last));
                if do_bangs then
-                  convert(data, de_bangs, re_flex);
+                  convert(de_bangs, re_flex);
                end if;
                if do_kwote then
-                  convert(data, de_kwote, re_flex);
+                  convert(de_kwote, re_flex);
                end if;
                if do_brace then
-                  convert(data, braces, FW_quotes);
+                  convert(braces, FW_quotes);
                end if;
-               put_fixed_up(To_String(data));
+               put_fixed_up;
             end if;
          end if;
 
@@ -430,20 +431,16 @@ procedure ports is
    end de_strop;
 
    procedure re_strop (re_strop : vocabulary) is
-      line : source_code_line := (others => ' ');
-      last : Natural range 0 .. source_code_line'Last;
-      data : Unbounded_String;
    begin
       -- Suppress the WAlgol program name line for KAlgol.
-      read_line(line, last);
+      get_line;
       loop
-         read_line(line, last);
-
+         get_line;
          if last = 0 then
-            New_Line;
+            print_line;
          else
             -- Convert * used as a quoted string space to $ for kalgol.
-            for c of line loop
+            for c of line(1..last) loop
                if    c  = '*' then
                      c := '$';
                end if;
@@ -453,9 +450,8 @@ procedure ports is
                print_line(line(1..last));
             else
                -- Convert to the re-strop format, leaving kalgol-valid Flexowriter symbols verbatim.
-               data := To_Unbounded_String(line(1..last));
-               convert(data, de_flex, re_strop);
-               print_line(To_String(data));
+               convert(de_flex, re_strop);
+               put_fixed_up;
             end if;
          end if;
       end loop;
@@ -467,7 +463,7 @@ procedure ports is
          report_line(about & "!");
       end if;
       report_line("usage: ports [ -b | -k | -f program_name ] ");
-      raise Program_Error;
+      raise end_error;
    end complain;
 
 begin
@@ -491,9 +487,14 @@ begin
    end if;
    flush_outputs;
 exception
-   when End_Error =>
+   when end_error =>
       flush_outputs;
+   when EOL_error =>
+      report_line("ports: input line or output line too long!");
+      flush_outputs;
+      CLI.Set_Exit_Status(CLI.Failure);
    when others =>
+      report_line("ports: unexpected failure!");
       flush_outputs;
       CLI.Set_Exit_Status(CLI.Failure);
 end ports;
