@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -542,7 +542,7 @@ package body KDF9.CPU is
 
    procedure long_division (
                             L : in KDF9.pair;
-                            R : in KDF9.word;
+                            R : in KDF9.word; -- All callers must ensure that R /= 0.
                             Q : out KDF9.word
                            ) is
       N  : KDF9.pair := L;
@@ -567,7 +567,7 @@ package body KDF9.CPU is
          normalizer_N := normalizer_N + 47;
       end if;
 
-      -- Normalize the divisor.
+      -- Normalize the divisor.  All callers must ensure that R /= 0.
       normalizer_R := nr_leading_zeros(R);
       D := scale_up(R, normalizer_R);
 
@@ -809,6 +809,10 @@ package body KDF9.CPU is
       --    scaled so that the division cannot overflow.
       Ls := scale_down(fraction_word(L), 2);
       Rs := scale_down(fraction_word(R), 1);
+      if Rs = 0 then
+         the_V_bit_is_set := True;
+         return L;  -- ?? This result is not well defined in the Manual.
+      end if;
       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
       E := scaler(L) - scaler(R) + 1;
       N := abs as_fraction(Ls);  -- Ls was scaled down by 1/4, so "abs" cannot overflow.

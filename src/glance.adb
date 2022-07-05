@@ -1,6 +1,6 @@
 -- Perform peephole optimizations of KDF9 Kidsgrove Algol object programs in Usercode.
 --
--- This file is an auxiliary of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -131,60 +131,90 @@ procedure glance is
 
    one_field_optimizations : constant array (Positive range <>) of one_field_optimization
       := (
-          (-"ZERO; SIGNF; STR; REV; ERASE; NOT; J", -"=Z;",      +"J",		   +"<Z;"),
-          (-"ZERO; SIGNF; STR; REV; ERASE; J",		 -"=Z;",      +"J",		   +"GEZ;"),
-          (-"ZERO; SIGNF; SHA-1; NEG; NOT; J",   	 -"=Z;",      +"J",        +">Z;"),
-          (-"ZERO; SIGNF; SHA-1; NEG; J",        	 -"=Z;",      +"J",        +"LEZ;"),
-          (-"ZERO; SIGNF; SHA-1; NEG; J",           -"LEZ;",     +"J",        +"GEZ;"),
-          (-"ZERO; SIGNF; J",                    	 -"#Z;",      +"J",        +"#Z;"),
-          (-"ZERO; SIGNF; J",                    	 -"=Z;",      +"J",        +"=Z;"),
-          (-"ZERO; SIGNF; J",                       -"<Z;",      +"J",        +"<Z;"),
-          (-"ZERO; SIGNF; J",                       -">Z;",      +"J",        +">Z;"),
-          (-"ZERO; SIGNF; J",                       -"GEZ;",     +"J",        +"GEZ;"),
-          (-"ZERO; SIGNF; J",                       -"LEZ;",     +"J",        +"LEZ;"),
-          (-"ZERO; SIGNF; ABS; NEG; NOT; J",     	 -"#Z;",		  +"J",        +"=Z;"),
-          (-"ZERO; SIGNF; ABS; NEG; NOT; J",     	 -"=Z;",      +"J",        +"#Z;"),
-          (-"ZERO; SIGNF; ABS; NEG; J",          	 -"#Z;",		  +"J",        +"#Z;"),
-          (-"ZERO; SIGNF; ABS; NEG; J",          	 -"=Z;",		  +"J",        +"=Z;"),
-          (-"ZERO; SIGN; STR; REV; ERASE; NOT; J",  -"=Z;",      +"J",		   +"<Z;"),
-          (-"ZERO; SIGN; STR; REV; ERASE; J",		 -"=Z;",      +"J",		   +"GEZ;"),
-          (-"ZERO; SIGN; SHA-1; NEG; NOT; J",    	 -"=Z;",      +"J",        +">Z;"),
-          (-"ZERO; SIGN; SHA-1; NEG; J",         	 -"=Z;",      +"J",        +"LEZ;"),
-          (-"ZERO; SIGN; SHA-1; NEG; J",            -"LEZ;",     +"J",        +"GEZ;"),
-          (-"ZERO; SIGN; J",                     	 -"#Z;",      +"J",        +"#Z;"),
-          (-"ZERO; SIGN; J",                     	 -"=Z;",      +"J",        +"=Z;"),
-          (-"ZERO; SIGN; J",                        -"<Z;",      +"J",        +"<Z;"),
-          (-"ZERO; SIGN; J",                        -">Z;",      +"!!!J",     +">Z;"),
-          (-"ZERO; SIGN; J",                        -"GEZ;",     +"J",        +"GEZ;"),
-          (-"ZERO; SIGN; J",                        -"LEZ;",     +"J",        +"LEZ;"),
-          (-"ZERO; SIGN; ABS; NEG; NOT; J",         -"#Z;",		  +"J",        +"=Z;"),
-          (-"ZERO; SIGN; ABS; NEG; NOT; J",         -"=Z;",		  +"J",        +"#Z;"),
-          (-"ZERO; SIGN; ABS; NEG; J",              -"#Z;",      +"J",        +"#Z;"),
-          (-"ZERO; SIGN; ABS; NEG; J",              -"=Z;",      +"J",        +"=Z;"),
-          (-"SIGNF; STR; REV; ERASE; NOT; J",       -"=Z;",      +"SIGNF; J", +"<Z;"),
-          (-"SIGNF; STR; REV; ERASE; J",            -"=Z;",      +"SIGNF; J", +"GEZ;"),
-          (-"SIGNF; SHA-1; NEG; NOT; J",            -"=Z;",      +"SIGNF; J", +">Z;"),
-          (-"SIGNF; SHA-1; NEG; J",                 -"=Z;",      +"SIGNF; J", +"LEZ;"),
-          (-"SIGNF; SHA-1; NEG; J",                 -"LEZ;",     +"SIGNF; J", +"GEZ;"),
-          (-"SIGNF; ABS; NEG; NOT; J",           	 -"#Z;",      +"NEV; J",   +"=Z;"),
-          (-"SIGNF; ABS; NEG; NOT; J",           	 -"=Z;",      +"NEV; J",   +"#Z;"),
-          (-"SIGNF; ABS; NEG; J",                	 -"#Z;",      +"NEV; J",   +"#Z;"),
-          (-"SIGNF; ABS; NEG; J",                	 -"=Z;",      +"NEV; J",   +"=Z;"),
-          (-"SIGN; STR; REV; ERASE; NOT; J",			 -"=Z;",		  +"SIGN; J",	+"<Z;"),
-          (-"SIGN; STR; REV; ERASE; J",		       -"=Z;",		  +"SIGN; J",	+"GEZ;"),
-          (-"SIGN; SHA-1; NEG; NOT; J",          	 -"=Z;",      +"SIGN; J",  +">Z;"),
-          (-"SIGN; SHA-1; NEG; J",               	 -"=Z;",      +"SIGN; J",  +"LEZ;"),
-          (-"SIGN; SHA-1; NEG; J",                  -"LEZ;",     +"SIGN; J",  +"GEZ;"),
-          (-"SIGN; ABS; NEG; NOT; J",            	 -"#Z;",      +"NEV; J",   +"=Z;"),
-          (-"SIGN; ABS; NEG; NOT; J",            	 -"=Z;",      +"NEV; J",   +"#Z;"),
-          (-"SIGN; ABS; NEG; J",                 	 -"#Z;",      +"NEV; J",   +"#Z;"),
-          (-"SIGN; ABS; NEG; J",                 	 -"=Z;",      +"NEV; J",   +"=Z;"),
-          (-"REV; -; J",                            -"#Z",       +"NEV; J",   +"#Z"),
-          (-"REV; -; J",                            -"=Z",       +"NEV; J",   +"=Z"),
-          (-"REV; -; J",                            -"<Z",       +"-; J",     +"GTZ"),
-          (-"REV; -; J",                            -">Z",       +"-; J",     +"LTZ"),
-          (-"REV; -; J",                            -"GEZ",      +"-; J",     +"LEZ"),
-          (-"REV; -; J",                            -"LEZ",      +"-; J",     +"GEZ")
+          (-"ZERO; NOT; NEG; SIGN; ABS; NEG; J",      -"#Z;",      +"NEG; NOT; J",  +"#Z;"),
+          (-"ZERO; NOT; NEG; SIGN; ABS; NEG; J",      -"=Z;",      +"NEG; NOT; J",  +"=Z;"),
+          (-"ZERO; NOT; NEG; SIGN; ABS; NEG; NOT; J", -"#Z;",      +"NEG; NOT; J",  +"=Z;"),
+          (-"ZERO; NOT; NEG; SIGN; ABS; NEG; NOT; J", -"=Z;",      +"NEG; NOT; J",  +"#Z;"),
+          (-"ZERO; NOT; NEG; SIGN; NEG; STR; REV; ERASE; NOT; J",
+                                                      -"=Z;",      +"NEG; NOT; J",  +"GTZ;"),
+          (-"ZERO; NOT; NEG; SIGN; NEG; STR; REV; ERASE; J",
+                                                      -"=Z;",      +"NEG; NOT; J",  +"LEZ;"),
+          (-"ZERO; NOT; NEG; SIGN; STR; REV; ERASE; NOT; J",
+                                                      -"=Z;",      +"J",            +"LEZ;"),
+          (-"ZERO; NOT; NEG; SIGN; STR; REV; ERASE; J",
+                                                      -"=Z;",      +"J",            +">Z;"),
+          (-"ZERO; NOT; SIGN; NEG; STR; REV; ERASE; NOT; J",
+                                                      -"=Z;",      +"NOT; NEG; J",  +">Z;"),
+          (-"ZERO; NOT; SIGN; NEG; STR; REV; ERASE; J",
+                                                      -"=Z;",      +"NOT; NEG; J",  +"LEZ;"),
+          (-"ZERO; NOT; SIGN; STR; REV; ERASE; NOT; J",
+                                                      -"=Z;",      +"NOT; NEG; J",  +"<Z;"),
+          (-"ZERO; NOT; SIGN; STR; REV; ERASE; J",
+                                                      -"=Z;",      +"NOT; NEG; J",  +"GEZ;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"#Z;",      +"NOT: NEG; J",  +"#Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"=Z;",      +"NOT: NEG; J",  +"=Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"#Z;",      +"NOT: NEG; J",  +"=Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"=Z;",      +"NOT: NEG; J",  +"#Z;"),
+          (-"ZERO; SIGN; ABS; NEG; J",                -"#Z;",      +"J",            +"#Z;"),
+          (-"ZERO; SIGN; ABS; NEG; J",                -"=Z;",      +"J",            +"=Z;"),
+          (-"ZERO; SIGN; ABS; NEG; NOT; J",           -"#Z;",		 +"J",            +"=Z;"),
+          (-"ZERO; SIGN; ABS; NEG; NOT; J",           -"=Z;",		 +"J",            +"#Z;"),
+          (-"ZERO; SIGN; J",                     	   -"#Z;",      +"J",            +"#Z;"),
+          (-"ZERO; SIGN; J",                     	   -"=Z;",      +"J",            +"=Z;"),
+          (-"ZERO; SIGN; J",                          -"<Z;",      +"J",            +"<Z;"),
+          (-"ZERO; SIGN; J",                          -">Z;",      +"!!!J",         +">Z;"),
+          (-"ZERO; SIGN; J",                          -"GEZ;",     +"J",            +"GEZ;"),
+          (-"ZERO; SIGN; J",                          -"LEZ;",     +"J",            +"LEZ;"),
+          (-"ZERO; SIGN; NEG; STR; REV; ERASE; NOT; J",
+                                                      -"=Z;",	    +"J",	         +"GTZ;"),
+          (-"ZERO; SIGN; NEG; STR; REV; ERASE; J",    -"=Z;",	   +"J",	            +"LEZ;"),
+          (-"ZERO; SIGN; SHA-1; NEG; J",         	   -"=Z;",      +"J",            +"LEZ;"),
+          (-"ZERO; SIGN; SHA-1; NEG; J",              -"LEZ;",     +"J",            +"GEZ;"),
+          (-"ZERO; SIGN; SHA-1; NEG; NOT; J",    	   -"=Z;",      +"J",            +">Z;"),
+          (-"ZERO; SIGN; STR; REV; ERASE; J",		   -"=Z;",      +"J",		      +"GEZ;"),
+          (-"ZERO; SIGN; STR; REV; ERASE; NOT; J",    -"=Z;",      +"J",		      +"<Z;"),
+          (-"ZERO; SIGNF; ABS; NEG; J",          	   -"#Z;",		 +"J",            +"#Z;"),
+          (-"ZERO; SIGNF; ABS; NEG; J",          	   -"=Z;",		 +"J",            +"=Z;"),
+          (-"ZERO; SIGNF; ABS; NEG; NOT; J",     	   -"#Z;",		 +"J",            +"=Z;"),
+          (-"ZERO; SIGNF; ABS; NEG; NOT; J",     	   -"=Z;",      +"J",            +"#Z;"),
+          (-"ZERO; SIGNF; J",                    	   -"#Z;",      +"J",            +"#Z;"),
+          (-"ZERO; SIGNF; J",                    	   -"=Z;",      +"J",            +"=Z;"),
+          (-"ZERO; SIGNF; J",                         -"<Z;",      +"J",            +"<Z;"),
+          (-"ZERO; SIGNF; J",                         -">Z;",      +"J",            +">Z;"),
+          (-"ZERO; SIGNF; J",                         -"GEZ;",     +"J",            +"GEZ;"),
+          (-"ZERO; SIGNF; J",                         -"LEZ;",     +"J",            +"LEZ;"),
+          (-"ZERO; SIGNF; NEG; STR; REV; ERASE; J",   -"=Z;",		  +"J",	         +"LEZ;"),
+          (-"ZERO; SIGNF; SHA-1; NEG; J",        	   -"=Z;",      +"J",            +"LEZ;"),
+          (-"ZERO; SIGNF; SHA-1; NEG; J",             -"LEZ;",     +"J",            +"GEZ;"),
+          (-"ZERO; SIGNF; SHA-1; NEG; NOT; J",   	   -"=Z;",      +"J",            +">Z;"),
+          (-"ZERO; SIGNF; STR; REV; ERASE; J",		   -"=Z;",      +"J",		      +"GEZ;"),
+          (-"ZERO; SIGNF; STR; REV; ERASE; NOT; J",   -"=Z;",      +"J",		      +"<Z;"),
+          (-"SIGN; ABS; NEG; J",                 	   -"#Z;",      +"NEV; J",       +"#Z;"),
+          (-"SIGN; ABS; NEG; J",                 	   -"=Z;",      +"NEV; J",       +"=Z;"),
+          (-"SIGN; ABS; NEG; NOT; J",            	   -"#Z;",      +"NEV; J",       +"=Z;"),
+          (-"SIGN; ABS; NEG; NOT; J",            	   -"=Z;",      +"NEV; J",       +"#Z;"),
+          (-"SIGN; NEG; STR; REV; ERASE; J",			   -"=Z;",		 +"SIGN; J",      +"LEZ;"),
+          (-"SIGN; SHA-1; NEG; J",               	   -"=Z;",      +"SIGN; J",      +"LEZ;"),
+          (-"SIGN; SHA-1; NEG; J",                    -"LEZ;",     +"SIGN; J",      +"GEZ;"),
+          (-"SIGN; SHA-1; NEG; NOT; J",          	   -"=Z;",      +"SIGN; J",      +">Z;"),
+          (-"SIGN; STR; REV; ERASE; J",		         -"=Z;",	    +"SIGN; J",      +"GEZ;"),
+          (-"SIGN; STR; REV; ERASE; NOT; J",			   -"=Z;",		 +"SIGN; J",      +"<Z;"),
+          (-"SIGNF; ABS; NEG; J",                	   -"#Z;",      +"NEV; J",       +"#Z;"),
+          (-"SIGNF; ABS; NEG; J",                	   -"=Z;",      +"NEV; J",       +"=Z;"),
+          (-"SIGNF; ABS; NEG; NOT; J",           	   -"#Z;",      +"NEV; J",       +"=Z;"),
+          (-"SIGNF; ABS; NEG; NOT; J",           	   -"=Z;",      +"NEV; J",       +"#Z;"),
+          (-"SIGNF; NEG; STR; REV; ERASE; J",		   -"=Z;",	    +"SIGNF; J",     +"LEZ;"),
+          (-"SIGNF; SHA-1; NEG; J",                   -"=Z;",      +"SIGNF; J",     +"LEZ;"),
+          (-"SIGNF; SHA-1; NEG; J",                   -"LEZ;",     +"SIGNF; J",     +"GEZ;"),
+          (-"SIGNF; SHA-1; NEG; NOT; J",              -"=Z;",      +"SIGNF; J",     +">Z;"),
+          (-"SIGNF; STR; REV; ERASE; J",              -"=Z;",      +"SIGNF; J",     +"GEZ;"),
+          (-"SIGNF; STR; REV; ERASE; NOT; J",         -"=Z;",      +"SIGNF; J",     +"<Z;"),
+          (-"REV; -; J",                              -"LEZ;",      +"-; J",         +"GEZ;"),
+          (-"REV; -; J",                              -"#Z;",       +"NEV; J",       +"#Z;"),
+          (-"REV; -; J",                              -"<Z;",       +"-; J",         +"GTZ;"),
+          (-"REV; -; J",                              -"=Z;",       +"NEV; J",       +"=Z;"),
+          (-"REV; -; J",                              -">Z;",       +"-; J",         +"LTZ;"),
+          (-"REV; -; J",                              -"GEZ;",      +"-; J",         +"LEZ;")
          );
 
    type first_field_optimization is
@@ -319,7 +349,8 @@ i_th: for i in special_optimizations'Range loop
             after  : String renames this.old_right.all;
             l_pos,
             m_pos,
-            r_pos  : line_length_range;
+            r_pos,
+            t_pos: line_length_range;
          begin
             l_pos := 1;
     case_i: loop
@@ -329,14 +360,17 @@ i_th: for i in special_optimizations'Range loop
             exit case_i when m_pos = 0;
                if is_semicolon_free(Unbounded_Slice(data, l_pos+before'Length, m_pos-1)) then
                   r_pos := Index(data, after,  m_pos+middle'Length);
-               exit case_i when r_pos = 0;
+                  t_pos := Index(data, ";",  r_pos);
+               exit case_i when r_pos = 0
+                             or t_pos = 0
+                             or Unbounded_Slice(data, t_pos-1, t_pos) = "V;";
                   if is_semicolon_free(Unbounded_Slice(data, m_pos+middle'Length, r_pos-1)) then
                      if (this.new_left = null and this.new_right = null)          and then
                         +Unbounded_Slice(data, l_pos+1, l_pos+1) /= 'S'           and then
                            +Unbounded_Slice(data, m_pos-2, m_pos-2) in '0'..'9'   and then
                               +Unbounded_Slice(data, m_pos+3, m_pos+3) /= 'S'     and then
                                  +Unbounded_Slice(data, r_pos-1, r_pos-1) in '0'..'9' then
-                        -- Suppress and impossible jump.
+                        -- Suppress an impossible jump.
                         data := Unbounded_Slice(data, 1, m_pos)
                               & Unbounded_Slice(data, r_pos+1, Length(data));
             exit case_i;
@@ -364,9 +398,9 @@ i_th: for i in special_optimizations'Range loop
       for i in first_field_optimizations'Range loop
          declare
             this   : first_field_optimization renames first_field_optimizations(i);
-            before : String                 renames this.old_left.all;
-            middle : String                 renames this.old_middle.all;
-            after  : String                 renames this.old_right.all;
+            before : String renames this.old_left.all;
+            middle : String renames this.old_middle.all;
+            after  : String renames this.old_right.all;
             l_pos,
             m_pos,
             r_pos  : line_length_range;
@@ -397,8 +431,8 @@ i_th: for i in special_optimizations'Range loop
       for i in one_field_optimizations'Range loop
          declare
             this   : one_field_optimization renames one_field_optimizations(i);
-            before : String                 renames this.old_left.all;
-            after  : String                 renames this.old_right.all;
+            before : String renames this.old_left.all;
+            after  : String renames this.old_right.all;
             l_pos,
             r_pos  : line_length_range;
          begin
@@ -423,8 +457,8 @@ i_th: for i in special_optimizations'Range loop
       for i in constant_substitutions'Range loop
          declare
             this   : constant_substitution renames constant_substitutions(i);
-            before : String                renames this.poor.all;
-            after  : String                renames this.good.all;
+            before : String renames this.poor.all;
+            after  : String renames this.good.all;
             pos    : line_length_range;
          begin
     case_i: loop
@@ -704,7 +738,7 @@ i_th: for i in special_optimizations'Range loop
 
    end pretty_print;
 
-   procedure clarify (optimizing : in Boolean) is
+   procedure clarify_algol (optimizing : in Boolean) is
    begin
       loop
          read_line(line, last, True);
@@ -712,6 +746,9 @@ i_th: for i in special_optimizations'Range loop
             if line(1) = '|' then
                print_line("|");
                return;
+            elsif line(1) = '(' then
+               new_line;
+               print_line(line(1..last));
             else
                do_simple_substitutions(line(1..last));
                data := To_Unbounded_String(line(1..last));
@@ -728,14 +765,35 @@ i_th: for i in special_optimizations'Range loop
             end if;
          end if;
       end loop;
-   end clarify;
+   end clarify_algol;
+
+   procedure clarify_pascal is
+   begin
+      loop
+         read_line(line, last, True);
+         if last /= 0 then
+            if line(1) = '|' then
+               print_line("|");
+               return;
+            elsif line(1) in '(' | 'P' then
+               new_line;
+               print_line(line(1..last));
+            else
+               data := To_Unbounded_String(line(1..last));
+               do_constant_substitutions;
+               do_single_field_substitutions;
+               print_line(To_String(data));
+            end if;
+         end if;
+      end loop;
+   end clarify_pascal;
 
    procedure complain (about : in String := "") is
    begin
       if about /= "" then
          report_line(about & ".");
       end if;
-      report_line("usage: glance -o | -r ");
+      report_line("usage: glance -o | -p | -r ");
       CLI.Set_Exit_Status(CLI.Failure);
       raise program_error;
    end complain;
@@ -744,7 +802,7 @@ begin
    if CLI.Argument_Count /= 1 then
       complain;
    end if;
-   if lower(CLI.Argument(1)) not in "-o" | "-r" then
+   if lower(CLI.Argument(1)) not in "-o" | "-p" | "-r" then
       complain("invalid parameter: " & CLI.Argument(1));
    end if;
    loop
@@ -753,7 +811,11 @@ begin
       last := index_forward(line(1..last), "PROGRAM;", 1);
    exit when last /= 0;
    end loop;
-   clarify(optimizing => lower(CLI.Argument(1)) = "-o");
+   if lower(CLI.Argument(1)) = "-p" then
+      clarify_pascal;
+   else
+      clarify_algol(optimizing => lower(CLI.Argument(1)) = "-o");
+   end if;
    flush_outputs;
 exception
    when end_error =>

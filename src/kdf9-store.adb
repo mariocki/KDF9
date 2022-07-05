@@ -1,6 +1,6 @@
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -34,19 +34,15 @@ package body KDF9.store is
    end diagnose_invalid_address;
 
    -- Check that EA, EA+BA are valid; LIV if invalid.
-   procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part)
+   procedure validate_virtual_address (EA : in KDF9.Q_part)
       with Inline => True;
 
-   procedure validate_virtual_and_real_addresses (EA : in KDF9.Q_part) is
-      PA : constant KDF9.word := (KDF9.word(EA) + KDF9.word(BA)) and Q_part_mask;
+   procedure validate_virtual_address (EA : in KDF9.Q_part) is
    begin
       if EA > NOL and then the_CPU_state = program_state then
          diagnose_invalid_address("NOL < virtual address", KDF9.word(EA));
       end if;
-      if PA > max_address and then the_CPU_state = program_state then
-         diagnose_invalid_address("32K-1 < physical address", PA);
-      end if;
-   end validate_virtual_and_real_addresses;
+   end validate_virtual_address;
 
    procedure if_user_mode_then_LOV (address_1 : KDF9.Q_part;
                                     address_2 : KDF9.Q_part := 0;
@@ -66,7 +62,7 @@ package body KDF9.store is
    procedure check_address_and_lockout (EA : in KDF9.Q_part) is
       PA : constant KDF9.Q_part := EA + BA;
    begin
-      validate_virtual_and_real_addresses(EA);
+      validate_virtual_address(EA);
       if locked_out(group(PA)) then
          the_locked_out_address := PA;
          if the_CPU_state /= Director_state then
@@ -80,8 +76,8 @@ package body KDF9.store is
       if EA1 > EA2 then
          diagnose_invalid_address("initial address > final address", KDF9.word(EA2));
       end if;
-      validate_virtual_and_real_addresses(EA1);
-      validate_virtual_and_real_addresses(EA2);
+      validate_virtual_address(EA1);
+      validate_virtual_address(EA2);
    end validate_address_range;
 
    procedure check_addresses_and_lockouts (EA1, EA2 : in KDF9.Q_part) is
@@ -96,30 +92,21 @@ package body KDF9.store is
       end if;
    end check_addresses_and_lockouts;
 
-   -- Check that A1+A2 is valid; trap if it is invalid.
-   function valid_word_address (A1, A2 : in KDF9.Q_part)
+   function virtual_word_address (A1, A2 : in KDF9.Q_part)
    return KDF9.address is
-      V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(A2)) and Q_part_mask;
    begin
-      if V > max_address then
-         diagnose_invalid_address("32K-1 < virtual address", V);
-      end if;
-      return KDF9.address(V);
-   end valid_word_address;
+      return KDF9.address((KDF9.word(A1) + KDF9.word(A2)) and address_mask);
+   end virtual_word_address;
 
    function signed is new Ada.Unchecked_Conversion (KDF9.Q_part, CPU.signed_Q_part);
    function design is new Ada.Unchecked_Conversion (CPU.signed_Q_part, KDF9.Q_part);
 
-   -- Check that A1+A2/2 is valid; trap if it is invalid.  A2 must be treated as a signed number.
-   function valid_halfword_address (A1, A2 : in KDF9.Q_part)
+   -- A2 must be treated as a signed number.
+   function virtual_halfword_address (A1, A2 : in KDF9.Q_part)
    return KDF9.address is
-      V : constant KDF9.word := (KDF9.word(A1) + KDF9.word(design(signed(A2)/2))) and Q_part_mask;
    begin
-      if V > max_address then
-         diagnose_invalid_address("32K-1 < virtual address", V);
-      end if;
-      return KDF9.address(V);
-   end valid_halfword_address;
+      return KDF9.address((KDF9.word(A1) + KDF9.word(design(signed(A2)/2))) and address_mask);
+   end virtual_halfword_address;
 
    function fetch_symbol (EA : KDF9.address; index : KDF9_char_sets.symbol_index)
    return KDF9_char_sets.symbol

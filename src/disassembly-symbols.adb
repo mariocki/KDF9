@@ -1,6 +1,6 @@
 -- Map object code addresses to Usercode data_label addresses.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -238,11 +238,16 @@ package body disassembly.symbols is
 
    function data_operand (address : KDF9.Q_part; in_octal : Boolean)
    return String is
-      E_store : constant String := "E" & oct_and_dec_of(address, in_octal, ";(", ")");
-      Y_store : constant String := Y_symbol(address);
-      name    : constant String := (if Y_store = "" then V_symbol(address) else Y_store);
+      negative : constant Boolean := address > 2**15 - 10;
+      E_number : constant String  := (if negative
+                                      then Integer'Image(Integer(address) - 2**15)
+                                      else oct_and_dec_of(address, in_octal, ";(", ")")
+                                     );
+      E_store  : constant String := "E" & E_number;
+      Y_store  : constant String := Y_symbol(address);
+      name     : constant String := (if Y_store = "" then V_symbol(address) else Y_store);
    begin
-      return (if name = "" then E_store else name);
+      return (if name = "" or negative then E_store else name);
    end data_operand;
 
    function data_label (address : KDF9.Q_part; in_octal : Boolean)

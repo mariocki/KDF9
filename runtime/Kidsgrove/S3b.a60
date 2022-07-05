@@ -10,6 +10,7 @@
 'real'   t1, t2;
 !integer i1, i2;
 
+
 !procedure pre (s); !string s;
    !begin writetext(30, s); t1 := Time !end pre;
 
@@ -29,6 +30,8 @@
 !procedure  p2(x, y); !value  x, y; !real  x, y; ;
 
 !procedure  p3(x, y, z); !value  x, y, z; !real  x, y, z; ;
+
+!procedure q1(n); !value n; !integer n; !begin !integer j; j := n; m := j !end;
 
 c := 0;
 layout := format({nddddd.dc});
@@ -51,6 +54,10 @@ post;
 
 pre({{c}p3{ss}});
    p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);
+post;
+
+pre({{c}q1{ss}});
+   q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j);
 post;
 
 !end

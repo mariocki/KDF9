@@ -1,7 +1,7 @@
 -- Data supporting the definition of a KDF9 I/O equipment configuration.
 --
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or

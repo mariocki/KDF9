@@ -1,0 +1,194 @@
+T1P2D1W|
+_b_e_g_i_n
+
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A0, A1, A4, A5, A15;
+
+_i_n_t_e_g_e_r wt;
+_r_e_a_l x, y, z, norm, t3, estimate;
+_r_e_a_l x1, x2, x3, x4;
+_r_e_a_l _a_r_r_a_y  e1 [ 1 : 4 ];
+_i_n_t_e_g_e_r i, jj, kk, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, ij, ik, i1;
+_b_o_o_l_e_a_n fail;
+_r_e_a_l begins, ends;
+
+_p_r_o_c_e_d_u_r_e pa(ep); _a_r_r_a_y  ep;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r j;
+   j := 0;
+   lab :
+   ep[1] := (ep[1] + ep[2] + ep[3] - ep[4]) × 0.499975;
+   ep[2] := (ep[1] + ep[2] - ep[3] + ep[4]) × 0.499975;
+   ep[3] := (ep[1] - ep[2] + ep[3] + ep[4]) × 0.499975;
+   ep[4] := ( - ep[1] + ep[2] + ep[3] + ep[4]) / 2.0;
+   j := j + 1;
+   _i_f j < 6 _t_h_e_n
+      _g_o_t_o lab
+   _e_n_d;
+
+_p_r_o_c_e_d_u_r_e p0;
+   _b_e_g_i_n
+   e1[ij] := e1[ik];
+   e1[ik] := e1[i1];
+   e1[i1] := e1[ij];
+   _e_n_d;
+
+_p_r_o_c_e_d_u_r_e  p3(x, y, z ); _v_a_l_u_e  x, y; _r_e_a_l  x, y, z ;
+   _b_e_g_i_n
+   x := 0.499975 × (z + x);
+   y := 0.499975 × (x + y);
+   z := (x + y) / 2.0
+   _e_n_d;
+
+_p_r_o_c_e_d_u_r_e Check (ModuleNo, Condition);
+      _v_a_l_u_e ModuleNo, Condition; _i_n_t_e_g_e_r ModuleNo; _B_o_o_l_e_a_n Condition;
+   _b_e_g_i_n
+   _i_f _n_o_t Condition _t_h_e_n
+      _b_e_g_i_n
+      writetext(30, _[Module*_]);
+      write(30, format(_[nddd_]), ModuleNo);
+      writetext(30, _[*has*not*produced*the*expected*results_[c_]_]);
+      writetext(30, _[Check*listing*and*compare*with*Pascal*version_[c_]_]);
+      fail := _t_r_u_e;
+      _e_n_d;
+   _e_n_d;
+
+open(30);
+wt := 10;
+fail := _f_a_l_s_e;
+Check(0, (wt _> 1) _a_n_d (wt _< 10000) );
+
+n1 := 2 × wt;
+n2 := 10 × wt;
+n3 := 14 × wt;
+n4 := 345 × wt;
+n5 := 0;
+n6 := 95 × wt;
+n7 := 32 × wt;
+n8 := 800 × wt;
+n9 := 616 × wt;
+n10 := 0;
+n11 := 93 × wt;
+
+_c_o_m_m_e_n_t  module 1: simple identifiers;
+x1 := 1.0; x2 := - 1.0;  x3 := - 1.0;  x4 := - 1.0;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n1 _d_o
+    _b_e_g_i_n
+    x1 := (x1 + x2 + x3 - x4) × 0.499975;
+    x2 := (x1 + x2 - x3 + x4) × 0.499975;
+    x3 := (x1 - x2 + x3 + x4) × 0.499975;
+    x4 := ( - x1 + x2 + x3 + x4) × 0.499975;
+    _e_n_d;
+norm := sqrt(x1^2+x2^2+x3^2+x4^2);
+Check(1, abs(norm - exp(0.35735-n1×6.1º-5))/norm _< 0.1);
+
+_c_o_m_m_e_n_t  module 2: array elements;
+e1[1] := 1.0; e1[2] := - 1.0;  e1[3] := - 1.0;  e1[4] := - 1.0;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n2 _d_o
+    _b_e_g_i_n
+    e1[1] := (e1[1] + e1[2] + e1[3] - e1[4]) × 0.499975;
+    e1[2] := (e1[1] + e1[2] - e1[3] + e1[4]) × 0.499975;
+    e1[3] := (e1[1] - e1[2] + e1[3] + e1[4]) × 0.499975;
+    e1[4] := ( - e1[1] + e1[2] + e1[3] + e1[4]) × 0.499975;
+    _e_n_d;
+norm := sqrt(e1[1]^2 + e1[2]^2 + e1[3]^2 + e1[4]^2);
+Check(2, abs(norm - exp(0.35735-n2×6.1º-5))/norm _< 0.1);
+
+_c_o_m_m_e_n_t  module 3: array as parameter;
+t3 := 1.0/0.499975;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n3 _d_o
+    pa(e1);
+norm := sqrt(e1[1]^2 + e1[2]^2 + e1[3]^2 + e1[4]^2);
+Check(2, abs(norm - exp(0.35735-(n3×6+n2)×6.1º-5))/norm _< 0.1);
+
+_c_o_m_m_e_n_t  module 4: conditional jumps;
+jj := 1;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n4 _d_o
+    _b_e_g_i_n
+    _i_f jj = 1 _t_h_e_n
+       jj := 2
+    _e_l_s_e
+       jj := 3;
+    _i_f jj > 2 _t_h_e_n
+       jj := 0
+    _e_l_s_e
+       jj := 1;
+    _i_f jj < 1 _t_h_e_n
+       jj := 1
+    _e_l_s_e
+       jj := 0;
+    _e_n_d;
+Check( 4, jj = 1  );
+
+_c_o_m_m_e_n_t  module 5: omitted;
+
+_c_o_m_m_e_n_t  module 6: integer arithmetic;
+ij := 1;
+ik := 2;
+i1 := 3;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n6 _d_o
+    _b_e_g_i_n
+    ij := ij × (ik - ij) × (i1 - ik);
+    ik := i1 × ik - (i1 - ij) × ik;
+    i1 := (i1 - ik) × (ik + ij);
+    e1[i1 - 1] := ij + ik + i1;
+    e1[ik - 1] := ij × ik × i1;
+    _e_n_d;
+Check( 6, (ij=1) _a_n_d (ik=2) _a_n_d (i1=3) );
+
+_c_o_m_m_e_n_t  module 7: trig. functions;
+x := 0.5;  y := 0.5;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n7 _d_o
+    _b_e_g_i_n
+    x := 0.499975 × arctan(2.0 × sin(x) × cos(x) / (cos(x + y) + cos(x - y) - 1.0));
+    y := 0.499975 × arctan(2.0 × sin(y) × cos(y) / (cos(x + y) + cos(x - y) - 1.0))
+    _e_n_d;
+Check(7, (0.499975 - wt×0.0015 _< x) _a_n_d (x _< 0.499975 - wt×0.0004) _a_n_d (0.499975 - wt×0.0015 _< y) _a_n_d (y _< 0.499975 - wt×0.0004) );
+
+_c_o_m_m_e_n_t  module 8: procedure calls;
+x := 1.0;  y := 1.0;  z := 1.0;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n8 _d_o
+    p3(y × i, y + z, z);
+Check(8, abs(z - (0.99983352×n8 - 0.999555651)) _< n8×1.0º-6);
+
+_c_o_m_m_e_n_t  module 9: array references;
+ij := 1;
+ik := 2;
+i1 := 3;
+e1[1] := 1.0;
+e1[2] := 2.0;
+e1[3] := 3.0;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n9 _d_o
+    p0;
+Check(9, (e1[1] = 3.0) _a_n_d (e1[2] = 2.0) _a_n_d (e1[3] = 3.0) );
+
+_c_o_m_m_e_n_t  module 10: integer arithmetic;
+jj := 2;
+kk := 3;
+_f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n10 _d_o
+    _b_e_g_i_n
+    jj := jj + kk;
+    kk := jj + kk;
+    jj := kk - jj;
+    kk := kk - jj - jj;
+    _e_n_d;
+ Check(10, (jj=2) _a_n_d (kk=3) );
+
+ _c_o_m_m_e_n_t  module 11: standard functions;
+ x := 0.75;
+ _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l n11 _d_o
+     x := sqrt(exp(ln(x) / 0.50025));
+ estimate := 1.0 - exp(-0.0447×wt + ln(0.26));
+ Check(11, (abs(estimate-x)/estimate _< 0.0006 + 0.065/(5+wt) ));
+
+
+ _i_f fail _t_h_e_n
+    writetext(30, _[FAIL...1.2-1_[c_]_])
+ _e_l_s_e
+    _b_e_g_i_n
+    writetext(30, _[QUALITY...1.2-1_[c_]_]);
+    write(30, format(_[nddddddddddd_]), 100×wt);
+    writetext(30, _[*Kilo*New*Whetstones_[c_]_]);
+    _e_n_d;
+
+_e_n_d
+|

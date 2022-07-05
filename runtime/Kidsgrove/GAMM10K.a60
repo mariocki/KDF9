@@ -122,9 +122,8 @@ Y := 1.0;
 !end;
 open(30);
 output(30, N);
-output(30, ACC);
-output(30, ACC1);
+output(30, ACC1*N);
 !comment Should print N then  1.6733 4322 4109 0064 7168 4801E1;
-!comment KDF9 actually prints 1.6733 4322 084E1;
+!comment KDF9 actually prints 1.6733 4322 411E1;
 !end
 |

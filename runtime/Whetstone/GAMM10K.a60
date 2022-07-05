@@ -123,9 +123,8 @@ _c_o_m_m_e_n_t FOURTH SQUARE ROOT LOOP;
 _e_n_d;
 open(30);
 output(30, N);
-output(30, ACC);
 output(30, ACC1);
 _c_o_m_m_e_n_t Should print N then  1.6733 4322 4109 0064 7168 4801E1;
-_c_o_m_m_e_n_t KDF9 actually prints 1.6733 4322 084E1;
+_c_o_m_m_e_n_t KDF9 actually prints 1.6733 4322 411E1;
 _e_n_d
 |

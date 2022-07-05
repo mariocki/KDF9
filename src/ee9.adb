@@ -1,6 +1,6 @@
 -- This is the "main program" for the entire emulator.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -45,7 +45,7 @@ procedure ee9 is
 
    package CLI renames Ada.Command_Line;
 
-   the_log_file_name : constant String := get_runtime_paths & "logs/KDF9.log";
+   the_log_file_name : constant String := "KDF9_log.txt";
 
    a_command_line_error_is_detected : exception;
 
@@ -254,7 +254,7 @@ begin -- ee9
    impose_all_flag_settings;
    revise_the_IOC_configuration;
    log_line(
-            "This is ee9 8.2a, compiled by "
+            "This is ee9 8.2z, compiled by "
           & Standard'Compiler_Version
           & " on "
           & GNAT.Source_Info.Compilation_ISO_Date

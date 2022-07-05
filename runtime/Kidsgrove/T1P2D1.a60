@@ -1,0 +1,207 @@
+!begin
+
+!library A0, A1, A4, A5, A15;
+
+!integer wt;
+!real x, y, z, norm, t3, estimate;
+!real x1, x2, x3, x4;
+!real !array  e1 [ 1 : 4 ];
+!integer i, jj, kk, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, ij, ik, i1;
+!boolean fail;
+!real begins, ends;
+
+!real !procedure ICR;
+   !KDF9 2/0/0/0;
+   SET 99; OUT; SET 23; FLOAT; !EXIT;
+   !ALGOL;
+
+!real !procedure Time;
+   !KDF9 2/0/0/0;
+   SET 17; OUT; SET 23; FLOAT; !EXIT;
+   !ALGOL;
+
+!procedure pa(ep); !array  ep;
+   !begin
+   !integer j;
+   j := 0;
+   lab :
+   ep[1] := (ep[1] + ep[2] + ep[3] - ep[4]) * 0.499975;
+   ep[2] := (ep[1] + ep[2] - ep[3] + ep[4]) * 0.499975;
+   ep[3] := (ep[1] - ep[2] + ep[3] + ep[4]) * 0.499975;
+   ep[4] := ( - ep[1] + ep[2] + ep[3] + ep[4]) / 2.0;
+   j := j + 1;
+   !if j < 6 !then
+      !goto lab
+   !end;
+
+!procedure p0;
+   !begin
+   e1[ij] := e1[ik];
+   e1[ik] := e1[i1];
+   e1[i1] := e1[ij];
+   !end;
+
+!procedure  p3(x, y, z ); !value  x, y; !real  x, y, z ;
+   !begin
+   x := 0.499975 * (z + x);
+   y := 0.499975 * (x + y);
+   z := (x + y) / 2.0
+   !end;
+
+!procedure Check (ModuleNo, Condition);
+      !value ModuleNo, Condition; !integer ModuleNo; !Boolean Condition;
+   !begin
+   !if !not Condition !then
+      !begin
+      writetext(30, {Module$});
+      write(30, format({nddd}), ModuleNo);
+      writetext(30, {$has$not$produced$the$expected$results{c}});
+      writetext(30, {Check$listing$and$compare$with$Pascal$version{c}});
+      fail := !true;
+      !end;
+   !end;
+
+open(30);
+begins := Time;
+wt := 10;
+fail := !false;
+Check(0, (wt >= 1) !and (wt <= 10000) );
+
+n1 := 2 * wt;
+n2 := 10 * wt;
+n3 := 14 * wt;
+n4 := 345 * wt;
+n5 := 0;
+n6 := 95 * wt;
+n7 := 32 * wt;
+n8 := 800 * wt;
+n9 := 616 * wt;
+n10 := 0;
+n11 := 93 * wt;
+
+!comment  module 1: simple identifiers;
+x1 := 1.0; x2 := - 1.0;  x3 := - 1.0;  x4 := - 1.0;
+!for i := 1 !step 1 !until n1 !do
+    !begin
+    x1 := (x1 + x2 + x3 - x4) * 0.499975;
+    x2 := (x1 + x2 - x3 + x4) * 0.499975;
+    x3 := (x1 - x2 + x3 + x4) * 0.499975;
+    x4 := ( - x1 + x2 + x3 + x4) * 0.499975;
+    !end;
+norm := sqrt(x1^2+x2^2+x3^2+x4^2);
+Check(1, abs(norm - exp(0.35735-n1*6.1º-5))/norm <= 0.1);
+
+!comment  module 2: array elements;
+e1[1] := 1.0; e1[2] := - 1.0;  e1[3] := - 1.0;  e1[4] := - 1.0;
+!for i := 1 !step 1 !until n2 !do
+    !begin
+    e1[1] := (e1[1] + e1[2] + e1[3] - e1[4]) * 0.499975;
+    e1[2] := (e1[1] + e1[2] - e1[3] + e1[4]) * 0.499975;
+    e1[3] := (e1[1] - e1[2] + e1[3] + e1[4]) * 0.499975;
+    e1[4] := ( - e1[1] + e1[2] + e1[3] + e1[4]) * 0.499975;
+    !end;
+norm := sqrt(e1[1]^2 + e1[2]^2 + e1[3]^2 + e1[4]^2);
+Check(2, abs(norm - exp(0.35735-n2*6.1º-5))/norm <= 0.1);
+
+!comment  module 3: array as parameter;
+t3 := 1.0/0.499975;
+!for i := 1 !step 1 !until n3 !do
+    pa(e1);
+norm := sqrt(e1[1]^2 + e1[2]^2 + e1[3]^2 + e1[4]^2);
+Check(2, abs(norm - exp(0.35735-(n3*6+n2)*6.1º-5))/norm <= 0.1);
+
+!comment  module 4: conditional jumps;
+jj := 1;
+!for i := 1 !step 1 !until n4 !do
+    !begin
+    !if jj = 1 !then
+       jj := 2
+    !else
+       jj := 3;
+    !if jj > 2 !then
+       jj := 0
+    !else
+       jj := 1;
+    !if jj < 1 !then
+       jj := 1
+    !else
+       jj := 0;
+    !end;
+Check( 4, jj = 1  );
+
+!comment  module 5: omitted;
+
+!comment  module 6: integer arithmetic;
+ij := 1;
+ik := 2;
+i1 := 3;
+!for i := 1 !step 1 !until n6 !do
+    !begin
+    ij := ij * (ik - ij) * (i1 - ik);
+    ik := i1 * ik - (i1 - ij) * ik;
+    i1 := (i1 - ik) * (ik + ij);
+    e1[i1 - 1] := ij + ik + i1;
+    e1[ik - 1] := ij * ik * i1;
+    !end;
+Check( 6, (ij=1) !and (ik=2) !and (i1=3) );
+
+!comment  module 7: trig. functions;
+x := 0.5;  y := 0.5;
+!for i := 1 !step 1 !until n7 !do
+    !begin
+    x := 0.499975 * arctan(2.0 * sin(x) * cos(x) / (cos(x + y) + cos(x - y) - 1.0));
+    y := 0.499975 * arctan(2.0 * sin(y) * cos(y) / (cos(x + y) + cos(x - y) - 1.0))
+    !end;
+Check(7, (0.499975 - wt*0.0015 <= x) !and (x <= 0.499975 - wt*0.0004) !and (0.499975 - wt*0.0015 <= y) !and (y <= 0.499975 - wt*0.0004) );
+
+!comment  module 8: procedure calls;
+x := 1.0;  y := 1.0;  z := 1.0;
+!for i := 1 !step 1 !until n8 !do
+    p3(y * i, y + z, z);
+Check(8, abs(z - (0.99983352*n8 - 0.999555651)) <= n8*1.0º-6);
+
+!comment  module 9: array references;
+ij := 1;
+ik := 2;
+i1 := 3;
+e1[1] := 1.0;
+e1[2] := 2.0;
+e1[3] := 3.0;
+!for i := 1 !step 1 !until n9 !do
+    p0;
+Check(9, (e1[1] = 3.0) !and (e1[2] = 2.0) !and (e1[3] = 3.0) );
+
+!comment  module 10: integer arithmetic;
+jj := 2;
+kk := 3;
+!for i := 1 !step 1 !until n10 !do
+    !begin
+    jj := jj + kk;
+    kk := jj + kk;
+    jj := kk - jj;
+    kk := kk - jj - jj;
+    !end;
+ Check(10, (jj=2) !and (kk=3) );
+
+ !comment  module 11: standard functions;
+ x := 0.75;
+ !for i := 1 !step 1 !until n11 !do
+     x := sqrt(exp(ln(x) / 0.50025));
+ estimate := 1.0 - exp(-0.0447*wt + ln(0.26));
+ Check(11, (abs(estimate-x)/estimate <= 0.0006 + 0.065/(5+wt) ));
+
+ ends := Time;
+
+ !if fail !then
+    writetext(30, {FAIL...1.2-1{c}})
+ !else
+    !begin
+    writetext(30, {QUALITY...1.2-1{c}});
+    write(30, format({nddddddddddd}), 100*wt);
+    writetext(30, {$Kilo$New$Whetstones{c}});
+    !end;
+
+ writetext(30, {KWI/sec:});
+ write(30, format({nddd.dc}), 1.0º3 / (Time - begins));
+!end
+|

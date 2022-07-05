@@ -1,0 +1,84 @@
+EASTER|
+_b_e_g_i_n
+
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A1, A4, A5, A15;
+
+   _p_r_o_c_e_d_u_r_e get the date of Easter Sunday (Easter day, Easter month, given year);
+         _v_a_l_u_e   given year;
+         _i_n_t_e_g_e_r given year, Easter month, Easter day;
+      _b_e_g_i_n
+
+         _p_r_o_c_e_d_u_r_e divide (dividend, divisor, quotient, remainder);
+            _v_a_l_u_e dividend, divisor;
+            _i_n_t_e_g_e_r dividend, divisor, quotient, remainder;
+         _b_e_g_i_n
+
+         _i_n_t_e_g_e_r q;
+
+         q := dividend ÷ divisor;
+         remainder := dividend  -  divisor  ×  q;
+         quotient := q;
+         _e_n_d divide;
+
+      _i_n_t_e_g_e_r a, b, c, h;
+
+      divide(given year, 19, Easter month, a);
+      divide(given year, 100, b, c);
+      divide(b, 4, Easter day, given year);
+      divide(19 × a + b - Easter day + 15 - ((8 × b + 13) ÷ 25),  30,  Easter month,  h);
+      divide(c, 4, b, Easter day);
+      divide(2 × (given year + b) - h - Easter day + 32, 7, Easter month, c);
+      h := h + c - 7 × ((a + 11 × h + 19 × c) ÷ 433);
+      Easter month := (h + 90) ÷ 25;
+      divide(33 × Easter month + h + 19, 32, b, Easter day)
+      _e_n_d get the date of Easter Sunday;
+
+   _p_r_o_c_e_d_u_r_e show a range of dates (first year, final year);
+         _v_a_l_u_e   first year, final year;
+         _i_n_t_e_g_e_r first year, final year;
+      _b_e_g_i_n
+
+      _i_n_t_e_g_e_r this year;
+
+      _f_o_r this year := first year _s_t_e_p 1 _u_n_t_i_l final year _d_o
+         _b_e_g_i_n
+         get the date of Easter Sunday(Easter day, Easter month, this year);
+         write text(30, _[In*_]);
+         write(30, format(_[dddds_]), this year);
+         write text(30, _[Easter*Sunday*is*on*_]);
+         write(30, format(_[dd_]), Easter day);
+         write text(30, _[/_]);
+         write(30, format(_[dd_]), Easter month);
+         write text(30, _[*and*KDF9*is_]);
+         write(30, format(_[s-nd_]), this year - 1964);
+         write text(30, _[*years*old_[c_]_]);
+         _e_n_d
+      _e_n_d show a range of dates;
+
+_i_n_t_e_g_e_r Easter day, Easter month, data year;
+
+open(20);
+data year := read(20);
+close(20);
+
+write text(30, _[These*are*the*21*years*of*KDF9:_[c_]_]);
+show a range of dates (1960, 1980);
+
+_i_f data year _> 2009 _t_h_e_n
+   _b_e_g_i_n
+   write text(30, _[These*are*the*years*of*ee9:_[c_]_]);
+   show a range of dates (2009, data year);
+   _e_n_d;
+
+write text(30, _[These*are*the*next*21*years_]);
+_i_f data year _> 2020 _t_h_e_n
+   write text(30, _[*(making*optimistic*assumptions)_]);
+write text(30, _[_[c_]_]);
+show a range of dates (data year + 1, data year + 21);
+
+close(30);
+_e_n_d
+|
+2021;
+|
+
