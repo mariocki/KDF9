@@ -65,10 +65,10 @@ kids WHETSTONE - t prh              >>kids_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>kids_tests_log.txt;
    rm ${SOURCE}/WHETSTONE.k3 ${BINARY}/WHETSTONE   ${SOURCE}/WHETSTONE-listing.txt
 
-echo TEST kids ZELLER
-kids ZELLER ZELLER_data t prh       >>kids_tests_log.txt
+echo TEST kids EASTER
+kids EASTER EASTER_data t prh       >>kids_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>kids_tests_log.txt;
-   rm ${SOURCE}/ZELLER.k3    ${BINARY}/ZELLER      ${SOURCE}/ZELLER-listing.txt
+   rm ${SOURCE}/EASTER.k3    ${BINARY}/EASTER      ${SOURCE}/EASTER-listing.txt
 
 echo
 diff kids_tests_log.txt kids_tests_good_log.txt >kids_test_diff.txt

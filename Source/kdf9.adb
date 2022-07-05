@@ -1,6 +1,6 @@
 -- The machine-state manipulations used by the CPU microcode.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -454,7 +454,7 @@ package body KDF9 is
       CIA := (0, 0);
       CPL := 0;
       BA  := 0;
-      NOL := max_address;
+      NOL := KDF9.address'Last;
       the_RFIR := (others => False);
       ICR := 0;
       the_CPU_time := 0;

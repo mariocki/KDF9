@@ -23,15 +23,12 @@ FILES="ee9 kal3 kidopt a2b extract_symbols glance mtp ports st_tl ${A}/mkchan"
 cd ${T}
 case ${OS} in
    UNIX|Unix|unix|LINUX|Linux|linux)
-      STRIP="strip "
       SIZE="size "
       ;;
    macOS|Macintosh|Mac|OSX)
-      STRIP="strip "
       SIZE="size "
       ;;
    [Ww]indows|WINDOWS)
-      STRIP=": "
       SIZE=": "
       ;;
    *)
@@ -40,7 +37,6 @@ case ${OS} in
       ;;
 esac
 
-eval ${STRIP} ${FILES}
 eval ${SIZE}  ${FILES}
 ls   -l       ${FILES}
 

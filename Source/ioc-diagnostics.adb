@@ -1,6 +1,6 @@
 -- Provide diagnostic output of the state of all the buffers.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -57,8 +57,8 @@ begin
                    & "/"
                    & Q.M'Image
                     );
-         if Q.I <= max_address               and then
-             Q.M <= max_address              and then
+         if Q.I <= KDF9.address'Last               and then
+             Q.M <= KDF9.address'Last              and then
                 Q.I <= the_buffer.control_word.M then
             output_line(
                         "locked in:"

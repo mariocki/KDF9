@@ -1,11 +1,8 @@
-The V8.1a distribution should run on ARM Macs under Rosetta 2,
-except that the whet command will fail because of an ARM
-related incompatibility with the Unix tr and sed commands.
-You can still run Whetstone Algol using the walgol command.
+The current V8 (or later) distribution runs well under Rosetta 2 on Apple Silicon Macs.
 
 If you are using macOS and have Apple's Gatekeeper anti-malware protection enabled,
 macOS may try to prevent you from running the programs included in this distribution,
-which it may put in "quarantine" after download because they are not cryptographically signed.
+in "quarantine" after download because they are not signed with an Apple certificate.
 
 You can handle this in one of four ways:
 
@@ -26,8 +23,8 @@ You can handle this in one of four ways:
    but deliberately so, as Apple wants people to think twice about running unauthorized software.
 
    You will have to do this for each of the several programs needed to run all the KDF9 software:
-   not just ee9 but a2b, kal3, kidopt, mkchan, and mtp.  This is annoying, but it needs to be done
-   just the once for each of these programs.
+   not just ee9 but a2b, extract_symbols, glance, kal3, kidopt, mkchan, mtp, ports and st_tl.
+   This is (very) annoying, but it needs to be done just the once for each of these programs.
 
 3. The easy way.
    Use the supplied shell script de40ine, which removes the quarantine flag from everything
@@ -39,13 +36,50 @@ You can handle this in one of four ways:
 
       sudo ./de40ine
 
-   and give your login password.
+   and give your login password.  d40ine will ask whether you wish to continue.
 
+   If you reply with a q, it will quit and output an explanatory message.
+
+   If you instead press the RETURN key, it will go ahead.
    That should remove Gatekeeper's quarantine from everything in one fell swoop.
+   Job done.
 
-   If you are wary about this - as you perhaps should be - look at the commands inside de40ine
-   and then read the manual page for xattr thus:
+   If your KDF9 software was already out of quarantine, xattr will report errors
+   with messages along the lines of "No such xattr: com.apple.quarantine".
+   These are benign.  Again, job done.
 
-      man xattr
+   If trouble persists, get in touch with me: <kdf9@findlayw.plus.com>.
 
-If trouble persists, get in touch with me: kdf9@findlayw.plus.com
+   If you are wary about this -- as you perhaps should be -- look at the commands
+   inside de40ine and then read the message de40ine outputs in response to q.
+
+   For the avoidance of doubt, the following are the (only) commands that de40ine should contain:
+========================================================
+ROOT=..
+B=${ROOT}/Build
+S=${ROOT}/Source
+T=${ROOT}/Testing
+
+echo de40ine will work with folders in `pwd`/..
+echo Is this what you want\?
+echo "If not, Press q to quit: "
+
+read reply
+case ${reply} in
+q|Q) echo This is what xattr does:
+     /usr/bin/xattr -h
+     exit 0
+     ;;
+*)
+     ;;
+esac
+
+/usr/bin/xattr -v -d com.apple.quarantine ..
+/usr/bin/xattr -v -d com.apple.quarantine .
+
+/usr/bin/xattr -r -d com.apple.quarantine ${B}
+/usr/bin/xattr -r -d com.apple.quarantine ${S}
+/usr/bin/xattr -r -d com.apple.quarantine ${T}
+
+echo The ee9 system is now out of quarantine. Stay safe!
+========================================================

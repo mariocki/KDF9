@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -126,7 +126,7 @@ package body state_display is
 
    procedure show_as_glyphs (the_word : in KDF9.word) is
    begin
-      log(abs glyphs_for(the_word));
+      log('"' & glyphs_for(the_word) & '"');
    end show_as_glyphs;
 
    procedure log_padded_string (text  : in String;
@@ -829,7 +829,7 @@ package body state_display is
    operand_col : constant := device_col;
    event_col   : constant := operand_col + 4;
    is_D_col    : constant := event_col + 29;
-   depth_col   : constant := operand_col + 29;
+   depth_col   : constant := 77;
    time_col    : constant := depth_col + 11;
    ICR_col     : constant := time_col + 13;
 
@@ -861,8 +861,7 @@ package body state_display is
             tab_log_to(first_col);
             decoded.order := this.order;
             decode(decoded);
-            log(the_full_name_of(decoded,
-                                 in_octal => decoded.kind = normal_jump_order));
+            log(the_full_name_of(decoded, in_octal => decoded.kind = normal_jump_order));
             tab_log_to(operand_col);
             case decoded.kind is
                when one_syllable_order =>
@@ -895,9 +894,9 @@ package body state_display is
                            Put(image, host_float(CPU.f48(this.parameter)), Aft => 12, Exp => 2);
                            log(trimmed(image));
                         when others =>
-                           if this.nested > 0 then
-                              log_octal(this.parameter);
-                           end if;
+                           log_octal(this.parameter);
+                           log(" = ");
+                           log(CPU.signed'Image(resign(this.parameter)));
                      end case;
                   end if;
                when two_syllable_order =>
@@ -945,6 +944,7 @@ package body state_display is
                         | CMqTOQk
                         | TO_RCIMq
                         | ADD_TO_QCIMq
+                        | QCIMq
                         | JCqNZS =>
                         show_Q_register(Q);
                      when Kk =>
@@ -982,9 +982,13 @@ package body state_display is
                         | TO_MkMqHN
                         | TO_MkMqQHN =>
                         log_octal(this.parameter);
+                        log(" = ");
+                        log(CPU.signed'Image(resign(this.parameter)));
                      when others =>
                         if this.nested > 0 then
                            log_octal(this.parameter);
+                           log(" = ");
+                           log(CPU.signed'Image(resign(this.parameter)));
                         end if;
                   end case;
                when normal_jump_order =>
@@ -1032,6 +1036,8 @@ package body state_display is
                when others =>
                   if this.nested > 0 then
                      log_octal(this.parameter);
+                     log(" = ");
+                     log(CPU.signed'Image(resign(this.parameter)));
                   end if;
             end case;
             tab_log_to(depth_col);

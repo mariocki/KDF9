@@ -69,10 +69,10 @@ wich WHETSTONE - t prh              >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
    rm ${SOURCE}/WHETSTONE-OPT.k3   ${BINARY}/WHETSTONE-OPT   ${SOURCE}/WHETSTONE-OPT-listing.txt
 
-echo TEST wich ZELLER
-wich ZELLER ZELLER_data t prh       >>wich_tests_log.txt
+echo TEST wich EASTER
+wich EASTER EASTER_data t prh       >>wich_tests_log.txt
 fgrep "Digital signature of traced orders = " KDF9_log.txt >>wich_tests_log.txt;
-   rm ${SOURCE}/ZELLER-OPT.k3      ${BINARY}/ZELLER-OPT      ${SOURCE}/ZELLER-OPT-listing.txt
+   rm ${SOURCE}/EASTER-OPT.k3      ${BINARY}/EASTER-OPT      ${SOURCE}/EASTER-OPT-listing.txt
 
 echo
 diff wich_tests_log.txt wich_tests_good_log.txt >wich_test_diff.txt

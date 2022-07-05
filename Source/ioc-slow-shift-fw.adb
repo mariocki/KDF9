@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -221,10 +221,14 @@ package body IOC.slow.shift.FW is
    procedure write_and_save (ch : Character; the_FW : in out FW.device) is
    begin
       delay the_pause;
-      last_saved := last_saved + 1;
-      saved_output(last_saved) := ch;
-      put_byte(ch, the_FW.output);
-      flush(the_FW.output);
+      if last_saved < max_text_length then
+         last_saved := last_saved + 1;
+         saved_output(last_saved) := ch;
+         put_byte(ch, the_FW.output);
+         flush(the_FW.output);
+      else
+         raise IO_error with "excessive output to FW";
+      end if;
    end write_and_save;
 
    procedure inject_a_response (the_FW     : in out FW.device;

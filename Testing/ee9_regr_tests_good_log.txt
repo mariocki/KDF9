@@ -113,7 +113,7 @@ ADADADADAD
 ABCDEABCDEABCDEABCDEABCDEABCDEABCDE
 |
   1045|===
-The signature of this test should be #6151525720423034. It was as follows:
+The signature of this test should be #1053600074412203. It was as follows:
 Digital signature of traced orders = #1053600074412203.
 ------------------- END OF Test Case HLT -------------------
 
@@ -140,7 +140,7 @@ ADADADADAD
 ABCDEABCDEABCDEABCDEABCDEABCDEABCDE
 |
   1045|===
-The signature of this test should be #6151525720423034. It was as follows:
+The signature of this test should be #1053600074412203. It was as follows:
 Digital signature of traced orders = #1053600074412203.
 ------------------- END OF Test Case HKT -------------------
 
@@ -1292,7 +1292,7 @@ TEST kids PENTOMINO
 TEST kids QSORT
 TEST kids WEEHAAVIE
 TEST kids WHETSTONE
-TEST kids ZELLER
+TEST kids EASTER
 
 These tests ran as expected.
 
@@ -1306,7 +1306,7 @@ TEST wich MANORBOYX
 TEST wich PALSQR
 TEST wich QSORT
 TEST wich WHETSTONE
-TEST wich ZELLER
+TEST wich EASTER
 
 These tests ran as expected.
 

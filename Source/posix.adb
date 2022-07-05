@@ -1,6 +1,6 @@
 -- Provide a binding to a small subset of POSIX I/O operations.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ package body POSIX is
       fd : constant C.int := open(C.To_C(name, Append_Nul => True), C.int(mode));
    begin
       if fd < 0 then
-         raise POSIX_IO_error;
+         raise POSIX_IO_error with name;
       end if;
       return Integer(fd);
    end open;

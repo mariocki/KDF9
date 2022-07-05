@@ -537,8 +537,8 @@ THAT TOOK  23.9 SECONDS, FOR  41.8 KWIPS
 FINISHED ENDS 0
 ===
 Digital signature of traced orders = #7462771563353213.
-The Usercode   is in Assembly/ZELLER.k3
-The executable is in Binary/ZELLER
+The Usercode   is in Assembly/EASTER.k3
+The executable is in Binary/EASTER
 
 
 LP0:

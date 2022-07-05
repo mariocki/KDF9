@@ -44,6 +44,7 @@ BUILD=${ROOT}/Build
 SOURCE=${ROOT}/Source
 TESTING=${ROOT}/Testing
 ADJUNCTS=${TESTING}/Adjuncts
+TEMPORARY=${ALGOL_TEMP:-${TESTING}/Workfiles}
 BINARY=${TESTING}/Binary
 KIDSGROVE=${TESTING}/Kidsgrove
 OBJECT=-aO${BUILD}
@@ -91,6 +92,7 @@ UNIX|Unix|unix|LINUX|Linux|linux)
    BASE_LINK_OPTIONS="-bargs -static -largs -Wl,--gc-sections -Wl,--as-needed"
    CC=gcc
    STRIP=strip
+   CODESIGN=": "
    ;;
 
 macOS|Macintosh|Mac|OSX)
@@ -100,6 +102,7 @@ macOS|Macintosh|Mac|OSX)
    CC=cc
    CCWARNINGS="-Wno-pointer-sign -Wno-bitwise-op-parentheses"
    STRIP=strip
+   CODESIGN="codesign -s - "
    ;;
 
 [Ww]indows|WINDOWS)
@@ -114,6 +117,7 @@ macOS|Macintosh|Mac|OSX)
    A2B=${A2B}.exe
    MTP=${MTP}.exe
    STRIP=": "
+   CODESIGN=": "
    ;;
 
 *)
@@ -174,7 +178,7 @@ TEST_LINK_OPTIONS="${BASE_LINK_OPTIONS}"
 case ${OS} in
 
 macOS|Macintosh|Mac|OSX|UNIX|Unix|unix|LINUX|Linux|linux)
-   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatfn -mtune=native -Ofast -flto"
+   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatfn -mtune=native -O3 -flto"
    OPT_LINK_OPTIONS="${BASE_LINK_OPTIONS} -flto"
    ;;
 
@@ -215,6 +219,7 @@ ee9)
 	if test -r ee9
 	then
 	   $STRIP ee9
+	   $CODESIGN ee9
 	   mv ee9 ${TESTING}/${EE9}
 	   fgrep -B2 ">>>" komlog.ada
 	else
@@ -299,6 +304,23 @@ KAlgol|kalgol)
 	${TESTING}/a2b -r2p < ${ADJUNCTS}/mksys2.bin > ${ADJUNCTS}/MKSYS2
    echo; echo Converting KAB00.bin to KAB00DH--USU for ee9.
    ${TESTING}/a2b -r2p < ${ADJUNCTS}/KAB00.bin  > ${ADJUNCTS}/KAB00DH--USU
+   echo; echo Converting the compiler from text to a KDF9 magnetic tape.
+   cd ${TESTING};
+   cat > ${TEMPORARY}/kalgol_labels.txt <<++++
+00000000        |
+00000001        |
+00000002        |
+00000003        |
+00000004        |
+00000005        |
+|
+++++
+   nine_path ${BINARY}/RLT ${TEMPORARY}/kalgol_labels.txt - zw - - t
+   nine_path ${ADJUNCTS}/MKSYS2 ${ADJUNCTS}/systape.txt - z;
+   cp ${TESTING}/MT4 ${ADJUNCTS}
+   echo
+   echo KAlgol generated
+   echo
    ;;
 
 all)
@@ -339,6 +361,7 @@ $1)
 	if test -r $1
 	then
 	   $STRIP $1
+	   $CODESIGN $1
 	   mv $1 ${TESTING}/$1
 	   fgrep -B2 ">>>" komlog.ada
 	else

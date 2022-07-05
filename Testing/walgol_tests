@@ -38,7 +38,7 @@ walgol WHETSTONE t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
 
 echo TEST walgol
-walgol ZELLER    t prh >>walgol_tests_log.txt
+walgol EASTER    t prh >>walgol_tests_log.txt
 fgrep "Digital signature" KDF9_log.txt >>walgol_tests_log.txt
 
 echo

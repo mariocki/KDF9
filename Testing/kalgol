@@ -44,7 +44,8 @@ cat > ${TEMPORARY}/kalgol_labels.txt <<++++
 nine_path ${BINARY}/RLT ${TEMPORARY}/kalgol_labels.txt - zw - - t
 
 # Populate the Kidsgrove system MT.
-nine_path ${ADJUNCTS}/MKSYS2 ${ADJUNCTS}/systape.txt - zw
+#nine_path ${ADJUNCTS}/MKSYS2 ${ADJUNCTS}/systape.txt - zw
+cp ${ADJUNCTS}/MT4 .
 
 # Convert the source code to Algol Basic Symbols.
 ${ADJUNCTS}/mkchan ${SOURCE}/$name.a60 ${TEMPORARY}/chan6.pt > /dev/null

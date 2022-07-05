@@ -11,9 +11,13 @@
    !ALGOL;
 
 !integer start, x, count, max, layout;
+!real y;
+
+open(50);
+x := entier(y);
+open(20);
 
 layout := format({nnnnnnnnnnndc});
-open(20);
 start := read(20);
 close(20);
 

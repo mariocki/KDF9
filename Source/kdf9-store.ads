@@ -1,6 +1,6 @@
 -- KDF9 core store operations.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -77,13 +77,13 @@ package KDF9.store is
    procedure store_word (value : in KDF9.word; EA : in KDF9.address)
       with Inline;
 
-   -- Check that A1+A2 is a valid word address; LIV if it is invalid.
-   function valid_word_address (A1, A2 : in KDF9.Q_part)
+   -- Compute A1+A2 as a valid word address, mod 32K.
+   function virtual_word_address (A1, A2 : in KDF9.Q_part)
    return KDF9.address
       with Inline;
 
-   -- Check that A1+A2/2 is valid; LIV if it is invalid.  A2 is treated as a signed number.
-   function valid_halfword_address (A1, A2 : in KDF9.Q_part)
+   -- Check that A1+A2/2 as a valid word address, mod 32K.  A2 is treated as a signed number.
+   function virtual_halfword_address (A1, A2 : in KDF9.Q_part)
    return KDF9.address
       with Inline;
 
@@ -118,9 +118,6 @@ package KDF9.store is
 
    procedure unlock_absolute_addresses (Q : in KDF9.Q_register);
 
-   -- The maximum size KDF9 core store has 32Kibiwords.
-   max_address   : constant := 2**15 - 1;
-
    -- The group size of 32 words is 1 physical core allocation unit and physical lockout unit.
    group_size : constant := 32;
 
@@ -140,10 +137,10 @@ private
       with Component_Size => 64, Convention => C;
 
    -- The core store of KDF9.  Must be zeroized before loading any software.
-   core : word_array (KDF9.Q_part range 0 .. max_address) := (others => 0);
+   core : word_array (KDF9.Q_part range 0 .. KDF9.address'Last) := (others => 0);
 
    -- The lockout store has one bit for every group_size words.
-   last_lockout : constant := max_address / group_size;
+   last_lockout : constant := KDF9.address'Last / group_size;
    locked_out   : array (KDF9.Q_part range 0 .. last_lockout) of Boolean := (others => False);
 
 end KDF9.store;

@@ -1,6 +1,6 @@
 -- KDF9 ISP emulation - CPU microcode routines.
 --
--- This file is part of ee9 (8.2a), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -758,7 +758,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 4;
 
          when MkMq =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -766,7 +766,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQ =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -775,7 +775,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqH =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_NEST_has_room_for_a_result;
@@ -783,7 +783,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQH =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_NEST_has_room_for_a_result;
@@ -792,7 +792,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqN =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -800,7 +800,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQN =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -809,7 +809,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when MkMqHN =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_NEST_has_room_for_a_result;
@@ -817,7 +817,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when MkMqQHN =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             the_trace_operand := fetch_halfword(the_trace_address, the_Q_store(INS.Qq).M mod 2);
             ensure_that_the_NEST_has_room_for_a_result;
@@ -826,7 +826,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMq =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -834,7 +834,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQ =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -843,7 +843,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqH =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -851,7 +851,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQH =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -860,7 +860,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqN =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -868,7 +868,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQN =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -877,7 +877,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 8;
 
          when TO_MkMqHN =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -885,7 +885,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_MkMqQHN =>
-            the_trace_address := valid_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
+            the_trace_address := virtual_halfword_address(the_Q_store(INS.Qk).M+1, the_Q_store(INS.Qq).M);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -1383,7 +1383,7 @@ package body KDF9.microcode is
       case INS.compressed_opcode is
 
          when EaMq =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -1391,7 +1391,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 6;
 
          when TO_EaMq =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;
@@ -1399,7 +1399,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 6;
 
          when EaMqQ =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_has_room_for_a_result;
             the_trace_operand := fetch_word(the_trace_address);
@@ -1408,7 +1408,7 @@ package body KDF9.microcode is
             the_CPU_delta := the_CPU_delta + 7;
 
          when TO_EaMqQ =>
-            the_trace_address := valid_word_address(the_Q_store(INS.Qq).M, INS.operand);
+            the_trace_address := virtual_word_address(the_Q_store(INS.Qq).M, INS.operand);
             check_address_and_lockout(the_trace_address);
             ensure_that_the_NEST_holds_an_operand;
             the_trace_operand := pop;

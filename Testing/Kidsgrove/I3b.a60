@@ -30,6 +30,8 @@
 
 !procedure  p3(x, y, z); !value  x, y, z; !real  x, y, z; ;
 
+!procedure q1(n); !value n; !integer n; !begin !integer j; j := n; m := j !end;
+
 y := 1.0; z := 2.0; l := 1; m := 2;
 a := 1; b := 2; i3 := 0;
 layout := format({nddddc});
@@ -54,6 +56,10 @@ post;
 
 pre({{c}p3{ss}});
    p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);
+post;
+
+pre({{c}q1{ss}});
+   q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j); q1(j);
 post;
 
 !end
