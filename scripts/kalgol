@@ -143,9 +143,9 @@ if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/e
 fi
 
 if [ -n ${OPTIMISE} ]; then
-   glance -o <${USERCODE}/$prog.k3 > >${TEMPORARY}/${prog}_opt.k3
+   glance -o <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}_opt.k3
 else
-   glance -r <${USERCODE}/$prog.k3 > >${TEMPORARY}/${prog}_opt.k3
+   glance -r <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}_opt.k3
 fi
 st_tl ${ST:-30000} ${TL:-99999} <${TEMPORARY}/${prog}_opt.k3 >${USERCODE}/${prog}_opt.k3
 
