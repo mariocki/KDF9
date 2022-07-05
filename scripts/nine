@@ -106,8 +106,8 @@ fi
 
 if [ ! -r ${USERCODE}/$1-listing.txt ]; then
     echo
-    echo ${ID} ${USERCODE}/$1-listing.txt is absent or unreadable.
-    echo ${ID} Disassembly will not show operands as Usercode symbols.
+    echo ${USERCODE}/$1-listing.txt is absent or unreadable.
+    echo Disassembly will not show operands as Usercode symbols.
     echo
 else
     extract_symbols <${USERCODE}/$1-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
