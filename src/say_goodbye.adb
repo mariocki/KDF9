@@ -1,6 +1,6 @@
 -- Finalize emulation with a helpful message derived from exception information.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -58,7 +58,7 @@ begin  -- say_goodbye
       log_new_line;
    end if;
    if reason = "" then
-      finalize_ee9("Normal end of run");
+      finalize_ee9;
    elsif reason'Length > 2 and then
          reason(reason'Last-2..reason'Last) = "OUT" then
       finalize_ee9(reason + explanation);

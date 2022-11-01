@@ -1,6 +1,6 @@
 -- Provide the comprehensive machine-state display panel KDF9 never had.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -1077,7 +1077,7 @@ package body state_display is
       if IOC_FIFO_count = 0 then return; end if;
       log_title("Retrospective trace of peripheral I/O events.");
       tab_log_to(is_D_col);
-      log_line("CPL T   EL. TIME     ICR");
+      log_line("CPL T           EL. TIME       ICR");
       for i in 1 .. IOC_FIFO_count loop
          if i = 1 then
             log("Ended ");
@@ -1247,7 +1247,7 @@ package body state_display is
       if interrupt_FIFO_count = 0 then return; end if;
       log_title("Retrospective trace of interrupt requests.");
       tab_log_to(is_D_col);
-      log_line("CPL     EL. TIME     ICR");
+      log_line("CPL             EL. TIME     ICR");
       for i in 1 .. interrupt_FIFO_count loop
          log(if i = 1 then "Ended " else "After ");
          declare
@@ -1552,6 +1552,22 @@ package body state_display is
    begin
       show_core_in_case_visible(first, last);
    end show_core_in_tape_code;
+
+   procedure save_core_image is
+   begin
+      BA := 0; -- Ensure that physical store is examined when running in boot mode.
+      log("#");
+      log(oct_of(get_whole_program_size, min_digits => 5));
+      log_new_line;
+      for address in 0 .. get_whole_program_size loop
+         log("#");
+         log(oct_of(KDF9.Q_part(address), min_digits => 5));
+         log(" ");
+         log_octal(fetch_word(address), width => 16);
+         log_new_line;
+      end loop;
+      log_rule;
+   end save_core_image;
 
    procedure show_core_as_word_forms (start, finish : in KDF9.address; octal_option : in Boolean) is
 

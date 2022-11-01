@@ -1,6 +1,6 @@
 -- Generate a P option setting for the Kidsgrove compiler from symbolic option names.
 --
--- kidopt is an auxiliary of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- kidopt is an auxiliary of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- This program is free software; you can redistribute it and/or

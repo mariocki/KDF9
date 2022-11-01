@@ -1,6 +1,6 @@
 -- Emulation of the FlexoWriter buffer: monitor typewriter functionality.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -76,7 +76,7 @@ package body IOC.slow.shift.FW is
    end escaped;
 
    red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
-   black_font : constant String := escaped("BLACK_FONT", "ESC[0m");
+   black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
    underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
    plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
 

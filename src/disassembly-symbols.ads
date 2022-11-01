@@ -1,6 +1,6 @@
  -- Map object code addresses to Usercode data_label addresses.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -19,6 +19,7 @@ package disassembly.symbols is
    procedure clear_all_symbol_definitions;
 
    procedure set_whole_program_data (size, E0_jump : in KDF9.word);
+   function  get_whole_program_size return KDF9.Q_part;
 
    subtype Y_store_id is Character range 'A' ..'Z';
 

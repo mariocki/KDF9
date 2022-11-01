@@ -1,6 +1,6 @@
 -- Shut down processing in preparation for a dignified exit.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -18,16 +18,33 @@ with Ada.Exceptions;
 --
 with HCI;
 with IOC;
+with logging.file;
+with logging.panel;
+with settings;
 with state_display;
 
 use  HCI;
 use  IOC;
+use  logging.file;
+use  logging.panel;
+use  settings;
 use  state_display;
 
-procedure finalize_ee9 (because : in String) is
+procedure finalize_ee9 (because : in String := "") is
+   core_file_name : constant String := "pascal_core";
+   reason         : constant String := (if because = "" then "Normal end of run" else because);
 begin
-   show_final_state(because);
+   show_final_state(reason);
    finalize_all_KDF9_buffers;
+   if core_file_is_enabled and because /= "" then
+      -- Make a final state dump for POST.
+      close(panel_logger);
+      close(file_logger);
+      open(file_logger, core_file_name);
+      show_final_state(reason);
+      save_core_image;
+      close(file_logger);
+   end if;
 exception
    when error : others =>
       log_line("Failure: " & Ada.Exceptions.Exception_Information(error));
