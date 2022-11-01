@@ -1,29 +1,21 @@
 --
--- Ada 2012 global configuration pragmas for a build with copious checking and warnings.
+-- Ada 2012 global configuration for a build with copious checking and warnings.
 --
--- For ee9 (V6), (C) 2021, W. Findlay.
+-- For ee9 (V9), (C) 2022, W. Findlay.
 -- Released under the terms of the GNU General Public License.
 --
 
-pragma Unsuppress(All_Checks);
-
-pragma Optimize_Alignment(Time);
+pragma Restrictions(No_Abort_Statements);
+pragma Restrictions(No_Implementation_Attributes);
+pragma Restrictions(No_Implementation_Restrictions);
+pragma Restrictions(No_Obsolescent_Features);
+--pragma Restrictions(No_Streams);
+--pragma Restrictions(No_Tasking);
 
 pragma Assertion_Policy(Check);
-
 pragma Check_Policy(Debug, On);
-
-pragma Validity_Checks(On);
-
 pragma Initialize_Scalars;
-
+pragma Optimize_Alignment(Time);
+pragma Unsuppress(All_Checks);
+pragma Validity_Checks(On);
 pragma Warnings(On);
-
-pragma Restrictions(Max_Asynchronous_Select_Nesting => 0);
-pragma Restrictions(Max_Tasks => 0);
-pragma Restrictions(No_Abort_Statements);
-
-pragma Restrictions(No_Implementation_Attributes);
-pragma Restrictions(No_Obsolescent_Features);
-
-pragma Warnings (Off, "*array aggregate*");
