@@ -9,6 +9,8 @@ git commit -a -m "Copy Docs and Source"
 
 mv /tmp/KDF9/Testing/Adjuncts/kal3.[cy] kal3/
 
+git commit -a -m "Copy Kal3"
+
 make patch
 
 git commit -a -m "Apply runtime patches"
