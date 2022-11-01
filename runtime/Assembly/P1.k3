@@ -1,0 +1,183 @@
+P
+P1|
+ST 30304; TL 999999;
+V119; Y22111;
+RESTART; JP119; J9P117;
+PROGRAM;
+J1; (GO TO THE START OF THE MAIN PROGRAM);
+
+(BODY OF     p5                              );
+*6; LINK; =E2M4; DUP; =Q2; =E0M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4;
+
+(line 16 "i5 := i2 + 1000;");
+M2TOQ15; JS3P116; E5M3; SET 1000; +; =E5M1; 
+
+(line 17 "usercode 'M2; '; i1; i2; i4; -i5; end;");
+M2;  Y5; M2TOQ15; JS3P116; E5M3; E10M2; E5M1; NEG; 
+
+(line 18 "halt{12345};");
+SET 12345; J1P117;
+
+(line 19 "p2;");
+JS3; 
+
+(line 20 "p3;");
+M2TOQ15; JS2P116; M3;
+JS4; 
+
+(line 21 "p4;");
+E0M2; JS5; 
+
+(line 22 "p5;");
+M2; JS6; 
+
+(line 23 "end {p4};");
+
+(POSTLUDE OF p5                               LOCALS=1 NONLOCALS );
+Q1TOQ4; E2M1; =LINK; E0M1; =Q2; E1M1; =Q1; EXIT 1;
+
+(BODY OF     p4                              );
+*5; LINK; =E2M4; DUP; =Q2; =E0M4; Q1; =E1M4; Q4TOQ1; SET 11; =+M4;
+
+(line 26 "i4 := i2 + 100;");
+E0M2; =M3; E5M3; SET 100; +; =E10M1; 
+
+(line 27 "usercode i1; i2; -i4; end;");
+Y5; E0M2; =M3; E5M3; E10M1; NEG; 
+
+(line 28 "p5;");
+M1; JS6; 
+
+(line 29 "p4;");
+M2; JS5; 
+
+(line 30 "end {p4};");
+
+(POSTLUDE OF p4                               LOCALS=6 NONLOCALS );
+Q1TOQ4; E2M1; =LINK; E0M1; =Q2; E1M1; =Q1; EXIT 1;
+
+(BODY OF     p3                              );
+*4; LINK; =E2M4; DUP; =Q2; =E0M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4;
+
+(line 33 "p4;");
+M1; JS5; 
+
+(line 34 "p3;");
+M2; JS4; 
+
+(line 35 "end {p3};");
+
+(POSTLUDE OF p3                               NONLOCALS );
+Q1TOQ4; E2M1; =LINK; E0M1; =Q2; E1M1; =Q1; EXIT 1;
+
+(BODY OF     p2                              );
+*3; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4;
+
+(line 38 "i2 := i1 + 10;");
+Y5; SET 10; +; =E5M1; 
+
+(line 39 "usercode i1; -i2; end;");
+Y5; E5M1; NEG; 
+
+(line 40 "p3;");
+M1; JS4; 
+
+(line 41 "p2;");
+JS3; 
+
+(line 42 "end {p2};");
+
+(POSTLUDE OF p2                               LOCALS=1 NONLOCALS );
+Q1TOQ4; E2M1; =LINK; E0M1; =Q2; E1M1; =Q1; EXIT 1;
+
+(BODY OF     P1                                               MAIN PROGRAM);
+2;
+
+(line 45 "i1 := 1;");
+ZERO; NOT; NEG; =Y5; 
+
+(line 46 "p2;");
+JS3; 
+
+(line 47 "end .");
+
+(POSTLUDE OF P1                                               MAIN PROGRAM);
+JP119;
+
+(PRELUDE OF  P1                                               MAIN PROGRAM);
+1; ZERO; =Y0; ZERO; =Y1; ZERO; =Y2; ZERO; =Y3; ZERO; =Y4;
+SET AY0; =RM1; SET AY7; =RM4; SET AZ1; =Z0; 
+J2;
+
+P119V31; (END THE RUN);
+
+(THE V STORES ARE USED BY THE INTERIM OUTPUT ROUTINES);
+
+(V[i], FOR i FROM 0 THROUGH 9 CONTAINS THE DEVICE NUMBER FOR STREAM i);
+V0=0; (STREAM 0 ALWAYS GOES TO THE FLEXOWRITER);
+
+(V[i], FOR i FROM 20 THROUGH 31 IS SCRATCH WORKSPACE);
+V10=Q0/AV20/AV20; V11=Q0/AV20/AV21;
+V19=B1212121212121212; V18=B2020202020202020; V17=B7777777777777702;
+JSP118; Y4; ZERO; OUT;
+
+P118; (FLUSH BUFFERS, ETC);
+EXIT 1;
+
+P117V6; (FAILURES, SUBRANGES AND OVERFLOWS);
+V0=PDISASTER; V1=PSUBRANGE; V2=POVERFLOW; V3=PBAD*CASE; V4=P*POINTER; V5=P*STORAGE;
+V6=B4000000000000000;
+1;  =Y4; JSP118; SET AY0; =RM15; MRWDQ0;(SPECIFIC ERRORS AND FAILURE HALT);
+2;  V1; SET 401; J1;                    (ORDINAL SUBRANGE ERROR);
+3;  V2; SET 402; J1;                    (INTEGER OVERFLOW);
+4;  V2; SET 403; J1;                    (REAL OVERFLOW);
+
+(CHECKS ON ENTRY TO PROCEDURE/FUNCTION);
+5;  V6; =E3M1; M4; Z0; SIGN; J51>Z; EXIT 1;
+50; V5; SET 404; J1;                    (HEAP OVERFLOW);
+51; V5; SET 405; J1;                    (STACK OVERFLOW);
+6;  J3V; V6; J61=; EXIT 1;              (CHECK FOR OVERFLOW AND UNSET FN RESULT);
+61; SET 406; J1;                        (FAIL IF FN VALUE IS UNSET);
+7;  DUP; J3=Z; EXIT 1;                  (FAIL IF DIVIDE BY 0);
+
+(FAIL UNLESS N1 IN [Z0]+1 .. AZ1: INVALID POINTER);
+8;  DUP; Z0; SIGN; J81LEZ; DUP; SET AZ0; SIGN; J81GEZ; EXIT 1;
+
+(FAIL 407: NIL POINTER, FAIL 408: INVALID POINTER);
+81; DUP; V4; REV; ZERO; SIGN; ABS; SET 407; +; J1;
+9;  V0; SET 999; J1;                    (ABJECT FAILURES AND TINT I1);
+10; V3; SET 409; J1;                    (NO LIMB PROVIDED FOR THIS CASE);
+
+(FAIL UNLESS N2 IN [0..N1]);
+20; J3V; REV; DUP; J2<Z;  DUP; PERM; SIGN; J2<Z; EXIT 1;
+
+(FAIL UNLESS N2 IN [1..N1]);
+21; J3V; REV; DUP; J2LEZ; DUP; PERM; SIGN; J2<Z; EXIT 1;
+
+(FAIL UNLESS N3 IN [N2..N1]);
+22; J3V; CAB; DUP; PERM; SIGN; J2<Z; DUP; PERM; SIGN; J2>Z; EXIT 1;
+
+(FAIL IF N2 < N1);
+23; REV; DUP; CAB; SIGN; J2<Z; EXIT 1;
+
+(FAIL IF N2 > N1);
+24; REV; DUP; CAB; SIGN; J2>Z; EXIT 1;
+
+P116; (GET THE ADDRESS OF THE Nth-ENCLOSING SCOPE IN NP by calling label N);
+*15; E0M15; =M15;
+*14; E0M15; =M15;
+*13; E0M15; =M15;
+*12; E0M15; =M15;
+*11; E0M15; =M15;
+*10; E0M15; =M15;
+*9;  E0M15; =M15;
+*8;  E0M15; =M15;
+*7;  E0M15; =M15;
+*6;  E0M15; =M15;
+*5;  E0M15; =M15;
+*4;  E0M15; =M15;
+*3;  E0M15; =M15;
+*2;  E0M15; =M15;
+*1;  E0M15; =M3; EXIT 1;
+FINISH;
+|
