@@ -38,78 +38,64 @@ GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W 
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn -gnatfn -mtune=native -O3
 
-.PHONY: all
+.PHONY: all ee9 builddefs a2b kidopt mtp extract_symbols st_tl ports glance kal3 kal4 mkchan kalgol clean update install uninstall patch
 all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp extract_symbols st_tl ports glance
 
-.phony: ee9
 ee9 : builddefs patch ${LIB_DIR} ${OPT_DEPENDS}
 	gnatmake -c ee9 -i ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/ee9.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/ee9.ali -o ${SRC}/ee9
 
-.PHONY: builddefs
 builddefs:
 	cp -f builddefs/adc-${BUILD_TYPE}.adc ${SRC}/gnat.adc
 
-.PHONY: a2b
 a2b: 
 	gnatmake -j4 -c -i ${SRC}/a2b.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/a2b.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/a2b.ali -o ${SRC}/a2b
 
-.PHONY: kidopt
 kidopt:
 	gnatmake -j4 -c -i ${SRC}/kidopt.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/kidopt.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/kidopt.ali -o ${SRC}/kidopt
 
-.PHONY: mtp
 mtp:
 	gnatmake -j4 -c -i ${SRC}/mtp.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/mtp.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/mtp.ali -o ${SRC}/mtp
 
-.PHONY: extract_symbols
 extract_symbols:
 	gnatmake -j4 -c -i ${SRC}/extract_symbols.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/extract_symbols.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/extract_symbols.ali -o ${SRC}/extract_symbols
 
-.PHONY: st_tl
 st_tl:
 	gnatmake -j4 -c -i ${SRC}/st_tl.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/st_tl.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/st_tl.ali -o ${SRC}/st_tl
 
-.PHONY: ports
 ports:
 	gnatmake -j4 -c -i ${SRC}/ports.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/ports.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/ports.ali -o ${SRC}/ports
 
-.PHONY: glance
 glance:
 	gnatmake -j4 -c -i ${SRC}/glance.adb ${SRC:%=-I%} ${CFLAGS} ${GNAT_OPTIONS} >> build.log
 	gnatbind ${SRC}/glance.ali ${SRC:%=-aO%/} -shared
 	gnatlink ${SRC}/glance.ali -o ${SRC}/glance
 
-.PHONY: kal3
 kal3: patch
 	$(MAKE) -e -C ${KAL3}
 
-.PHONY: kal4
 kal4:
 	$(MAKE) -e -C ${KAL4}
 
-.PHONY: mkchan
 mkchan:
 	$(MAKE) -e -C ${MKCHAN}
 
-.PHONY: kalgol
 kalgol:
 	$(MAKE) -e -C ${KALGOL}
 
-.PHONY: clean
 clean:
 	$(MAKE) -e -C ${KAL3} clean
 	$(MAKE) -e -C ${KAL4} clean
@@ -120,14 +106,12 @@ clean:
 	$(RM) ${SRC:%=%/*.o}
 	$(RM) ${SRC}/ee9 ${SRC}/a2b ${SRC}/kidopt ${SRC}/mtp ${SRC}/st_tl ${SRC}/extract_symbols ${SRC}/ports ${SRC}/glance ${SRC}/gnat.adc
 
-.PHONY: update
 update:
 	$(MAKE) -e -C ${KAL3} update
 	$(MAKE) -e -C ${KAL4} update
 	$(MAKE) -e -C ${KALGOL}	update
 	$(MAKE) -e -C ${MKCHAN}	update
 
-.PHONY: install
 install: all
 	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
 	install -d $(DESTDIR)$(prefix)/bin/
@@ -154,7 +138,6 @@ install: all
 	$(MAKE) -e -C ${MKCHAN}	install
 	$(MAKE) -e -C ${KALGOL}	install
 
-.PHONY: uninstall
 uninstall:
 	$(RM) $(DESTDIR)$(prefix)/bin/ee9
 	$(RM) $(DESTDIR)$(prefix)/bin/a2b
@@ -171,7 +154,6 @@ uninstall:
 	$(MAKE) -e -C ${KALGOL}	uninstall
 	$(RM) -r $(DESTDIR)$(prefix)/share/kdf9/
 
-.PHONY: patch
 patch:
 	$(MAKE) -e -C ${KAL3} patch
 	cat kdfruntime.patch | (patch -p1 -r - --no-backup-if-mismatch --forward || true)
