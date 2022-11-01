@@ -26,6 +26,7 @@ with IOC.equipment;
 with IOC.slow.shift.TP;
 with IOC.slow.shift.TR;
 with settings;
+with get_runtime_paths;
 with string_editing;
 
 with execute;

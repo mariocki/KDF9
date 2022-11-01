@@ -76,7 +76,7 @@ package body IOC.slow.shift.FW is
    end escaped;
 
    red_font   : constant String := escaped("RED_FONT",   "ESC[0mESC[31m");
-   black_font : constant String := escaped("BLACK_FONT", "ESC[0mESC[30m");
+   black_font : constant String := escaped("BLACK_FONT", "ESC[0m");
    underline  : constant String := escaped("UNDERLINE",  "ESC[4m");
    plain_font : constant String := escaped("PLAIN_FONT", "ESC[0m");
 
