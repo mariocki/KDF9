@@ -90,18 +90,26 @@ elif [ ! -r ${SOURCE}/$prog.a60 ]; then
    exit 1
 fi
 
+
+if [ -z $NOCOLOR ]; then
+   RED='\033[1;31m'
+   YELLOW='\033[1;33m'
+   NC='\033[0m' #No Color
+   GREEN='\033[1;32m'
+fi
+
 >${KDF9RUNTIME}/settings_1.txt
 
-rlt tape_labels_for_KAlgol -m=w
-echo "The compiler work tapes have been labelled."
+rlt tape_labels_for_KAlgol -m=wz
+echo -e "${YELLOW}The compiler work tapes have been labelled.${NC}"
 
 cat ${DATA}/systape_kalgol.txt >${DATA}/systape.txt
 
-nine MKSYS2 systape -m=w
-echo "The compiler overlay tape has been generated."; echo
+nine MKSYS2 systape -m=wz
+echo -e "${YELLOW}The compiler overlay tape has been generated.${NC}";
 
 mkchan ${SOURCE}/$prog.a60 ${DATA}/ABS_text.txt 
-echo "The basic symbol source program tape has been made."; echo
+echo -e "${YELLOW}The basic symbol source program tape has been made.${NC}"; 
 
 >${KDF9RUNTIME}/TP0
 rm -f ${KDF9RUNTIME}/Binary/$prog
@@ -111,14 +119,7 @@ cat ${SETTINGS}/settings_for_kalgol.txt >${KDF9RUNTIME}/settings_1.txt
 
 kidopt with ${KIDSOPTS:-NONE} >>${KDF9RUNTIME}/settings_1.txt
 
-if [ -z $NOCOLOR ]; then
-   RED='\033[1;31m'
-   NC='\033[0m' #No Color
-   GREEN='\033[1;32m'
-fi
-
-# I have noticed sometimes the kalgol compiler gets 'stuck' so put a 60 second timout to prevent that.
-if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/error_output; then
+if nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/error_output; then
    if [ -s ${LOGS}/error_output ]; then
       echo -e "${RED}**********************************************"
       echo "The compilation was abandoned for ${prog}."
@@ -139,6 +140,12 @@ if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/er
       echo -e "${RED}**********************************************${NC}"
       exit 3
    fi
+fi
+
+if [ ! -r ${USERCODE}/$prog.k3 ]; then
+   echo -e "${RED}The file ${USERCODE}/$prog.k3 is absent - compilation failed.${NC}"
+   echo
+   exit 1
 fi
 
 if [ -n ${OPTIMISE} ]; then
@@ -167,6 +174,6 @@ if [ ! -s ${KDF9RUNTIME}/Binary/${prog}_opt ]; then
    exit 5
 fi
 echo -e "${GREEN}Compilation successful.${NC}"
-echo "The Usercode is in  ${USERCODE}/${prog}_opt.k3"
+echo "${YELLOW}The Usercode is in  ${USERCODE}/${prog}_opt.k3${NC}"
 echo ""
-echo "The executable is in ${KDF9RUNTIME}/Binary/${prog}_opt"
+echo "${YELLOW}The executable is in ${KDF9RUNTIME}/Binary/${prog}_opt${NC}"

@@ -86,9 +86,18 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+if [ -z $NOCOLOR ]; then
+   RED='\033[1;31m'
+   YELLOW='\033[1;33m'
+   NC='\033[0m' #No Color
+   GREEN='\033[1;32m'
+fi
+
+echo -e "${YELLOW}Starting compilation...${NC}"
 export KIDSGROVE_PEEPHOLE=n
 kalgol ${KIDSOPTS/-k/-k=} "${nc}" ${source}
 
+echo -e "${YELLOW}Compilation successful. Executing${NC}"
 if [ -s ${KDF9RUNTIME}/Binary/${source} ]; then
     >${KDF9RUNTIME}/settings_2.txt 
     >${KDF9RUNTIME}/settings_1.txt
