@@ -1,20 +1,12 @@
 !begin
 !library A0, A1, A4, A5, A12, A15;
 
-!comment next := !if odd(x) !then 3×x + 1 !else x ÷ 2;
-!integer !procedure next (n);  !value n;  !integer n;
-   !KDF9 0/0/0/0;
-   {n}; DUP; SET1; AND; J1NEZ;
-   SHL-1; !EXIT;
-   1;
-   DUP; DUP; +; +; SET1; +; !EXIT;
-   !ALGOL;
+!integer !procedure next (n); !value n; !integer n;
+   next := !if x ÷ 2 * 2 ± x !then 3×x + 1 !else x ÷ 2;
 
 !integer start, x, count, max, layout;
-!real y;
 
-open(50);
-x := entier(y);
+open(30);
 open(20);
 
 layout := format({nnnnnnnnnnndc});
@@ -22,7 +14,7 @@ start := read(20);
 close(20);
 
 x := start;
-count := 0;
+count := 1;
 max := x;
 
 !for x := next(x) !while x ± 1 !do

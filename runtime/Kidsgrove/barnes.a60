@@ -1,0 +1,576 @@
+!begin
+
+!library A6, A13, A14;
+
+!integer  storesize;
+
+
+!procedure  fail (n);
+!value n;
+!integer n;
+   'KDF9' 2/0/0/0;
+   {n};
+   MRWDQ0;
+   'ALGOL';
+
+open(20); open(10);
+copytext(20, 10, {;}); storesize := read(20);
+
+!begin
+!integer !array item, link [0:storesize];
+!integer nextcell, freecells, conscount, expression, faildev;
+!boolean failpm;
+
+!procedure writelist(dv, f, x, n);
+!value dv, f, x, n;
+!integer dv, f, x, n;
+   !begin
+   !integer room, line;
+
+   !procedure newline;
+      !begin
+      room := line;
+      write text(dv, {{c}});
+      !end newline;
+
+   !integer !procedure length(x);
+   !value x;
+   !integer x;
+      length := !if atom(x) !and x /= 0 !then
+                   n+1
+                !else !if x = 0 !then
+                   2
+                !else
+                   length(hd(x))+length(tl(x));
+
+   !procedure out1(x);
+   !value x;
+   !integer x;
+      !if atom(x) !and x /= 0 !then
+         write(dv, f, value(x))
+      !else
+      !if x = 0 !then
+         write text(dv, {N})
+      !else
+         !begin write text(dv, {(});
+      L:
+         out1(hd(x));
+         x := tl(x);
+         !if x /= 0 !then
+            !begin
+            write text(dv, {, });
+            !goto L;
+            !end;
+         write text(dv, {)});
+         !end;
+
+   !procedure out2(x, ebs);
+   !value x, ebs;
+   !integer x, ebs;
+      !begin
+      !integer lh, h;
+      !boolean first;
+      write text(dv, {(}); room := room-1; first := !true;
+   L:
+      h := hd(x);
+      lh := length(h);
+      x := tl(x);
+      !if x /= 0 !then
+         !begin
+         !if lh>room !and !not first !then
+            newline;
+         !if lh<= room !then
+            !begin
+            room := room-lh;
+            out1(h);
+            !end
+         !else
+            out2(h, 1);
+         write text(dv, {, });
+         first := !false;
+         !goto L;
+         !end;
+      lh := lh+ebs;
+      !if lh>room !and !not first !then
+         newline;
+      !if lh<= room !then
+         !begin
+         room := room-lh;
+         out1(h);
+         !end
+      !else
+         out2(h, ebs+1);
+      write text(dv, {)});
+      !end out2;
+
+   line := 70;
+   newline;
+   !if atom(x) !and x /= 0 !then
+      write(dv, f, value(x))
+   !else
+   !if x = 0 !then
+      write text(dv, {N})
+	!else
+	   out2(x, 1);
+	write text(dv, {;})
+   !end writelist;
+
+!procedure initiate;
+   !begin
+   !integer i;
+   item[0] := link[0] := 1;
+   !for i := 1 !step 1 !until storesize !do
+      !begin
+      link[i] := i+1;
+      item[i] := -1;
+      !end;
+   link[storesize] := 0;
+   nextcell := 1;
+   freecells := storesize;
+   conscount := expression := 0
+   !end initiate;
+
+!procedure achtung(a);
+!string a;
+   !begin
+   !integer f1, f2, f3, i;
+   f1 := format({ndddd});
+   f2 := format({ss-ndddddddddd});
+   f3 := format({ss-nddddddddddc});
+   write text(faildev, {{c}List*fail****});
+   write text(faildev, a);
+   !if failpm !then
+      !begin
+      write text(faildev, {{c}List*post*mortem'c});
+      !for i := 1 !step 1 !until storesize !do
+         !if link[i] = -1 !or link[i] !or item[i] /= -1 !then
+            !begin
+            write(faildev, f1, i);
+            write(faildev, f2, item[i]);
+            write(faildev, f3, link[i]);
+            !end
+      !end;
+   fail(-1);
+   !end achtung;
+
+!procedure tidy;
+   !begin
+   !integer i;
+   bases;
+   preserve(expression);
+   !for i := 1 !step 1 !until storesize !do
+      !if link[i]>= -1 !and item[i] /= -1 !then
+         !begin
+         link[i] := nextcell;
+         item[i] := -1;
+         nextcell := i;
+         freecells := freecells+1;
+         !end
+      !else
+      !if link[i]<-1 !then
+         link[i] := -link[i]-3;
+   !if freecells <= 1 !then
+      achtung({No*more*cells*available});
+   warning;
+   !end tidy;
+
+!procedure ante;
+   conscount := conscount+1;
+
+!procedure post;
+   !begin
+   !integer j;
+   conscount := conscount-1;
+   !if conscount = 0 !then
+      !begin
+   L:
+      !if expression /= 0 !then
+         !begin
+         freecells := freecells+1;
+         j := expression;
+         expression := tl(expression);
+         link[j] := nextcell;
+         item[j] := -1;
+         nextcell:= j;
+         !goto L;
+         !end;
+      !end;
+   !end post;
+
+!procedure preserve(x);
+!value x;
+!integer x;
+   !begin
+   !if x /= 0 !and link[x]>-2 !then
+      !begin
+      !if link[x]>-1 !and item[x] = -1 !then
+         achtung({Operand*of*preserve*on*free*storage*list});
+         link[x] := -link[x]-3;
+         !if link[x] /= -2 !then
+            !begin
+            preserve(item[x]);
+            preserve(-link[x]-3);
+            !end;
+      !end;
+   !end preserve;
+
+!procedure settl(x, y);
+!integer x, y;
+   !begin
+   !integer x1, y1;
+   ante;
+   x1 := x;
+   !if atom(x1) !or item[x1] = -1 !then
+      achtung({First*operand*of*settl*not*allowed});
+   y1 := y;
+   !if y1 /= 0 !and (atom(y1) !or [y1] = -1) !then
+      achtung({Second*operand*of*settl*not*allowed});
+   link[x1] := y1;
+   post;
+   !end settl;
+
+!procedure sethd(x, y);
+!integer x, y;
+   !begin
+   !integer x1, y1;
+   ante;
+   x1 := x;
+   !if atom(x1) !or item[x1] = -1 !then
+      achtung({First*operand*of*sethd*not*allowed});
+   y1 := y;
+   !if !not atom(y1) !and item[y1] = -1 !then
+      achtung({Second*operand*of*sethd*not*allowed});
+   item[x1] := y1;
+   post;
+   !end sethd;
+
+!procedure setvalue(x, y);
+!value x, y;
+!integer x, y;
+   !begin
+   !if !not atom(x) !or x = 0 !then
+      achtung({Operand*of*setvalue*not*allowed});
+   item[x] := y;
+   !end setvalue;
+
+!procedure join(x, y);
+!integer x, y;
+   !begin
+   !integer x1, y1;
+   ante;
+   x1 := x;
+L:
+   !if tl(x1) /= 0 !then
+      !begin
+      x1 := tl(x1);
+      !goto L;
+      !end;
+   y1 := y;
+   !if y1 /= 0 !and (atom(y1) !or item[y1] = -1) !then
+      achtung({Second*operand*of*join*not*allowed});
+   link[x1] := y1;
+   post;
+   !end join;
+
+!integer !procedure copy(x);
+!value x;
+!integer x;
+   copy := !if atom(x) !then x !else cons(copy(hd(x)), copy(tl(x)));
+
+!integer !procedure rev(x);
+!integer x;
+   !begin
+   !integer p, x1;
+   ante;
+   x1 := x;
+   p := 0;
+L:
+   !if x1 /= 0 !then
+      !begin
+      p := cons(hd(x1), p);
+      x1 := tl(x1);
+      !goto L;
+      !end;
+   rev := p;
+   post;
+   !end rev;
+
+!integer !procedure newcell;
+   !begin
+   !integer i, j;
+   !if freecells<1 !then
+      tidy;
+   i := nextcell;
+   j := link[i];
+   nextcell := link[j];
+   link[j] := expression;
+   item[j] := i;
+   expression := j;
+   link[i] := item[i] := 0;
+   freecells := freecells-2;
+   newcell := i
+   !end newcell;
+
+!integer !procedure hd(x);
+!value x;
+!integer x;
+   !begin
+   !if atom(x) !or item[x] = -1 !then
+      achtung({Operand*of*hd*not*list});
+   hd := item[x];
+   !end hd;
+
+!integer !procedure tl(x);
+!value x;
+!integer x;
+   !begin
+   !if atom(x) !or item[x] = -1 !then
+      achtung({Operand*of*tl*not*list});
+   tl := link[x];
+   !end tl;
+
+!integer !procedure cons(x, y);
+!integer x, y;
+   !begin
+   !integer i, x1, y1;
+   ante;
+   i := newcell;
+   x1 := x;
+   y1 := y;
+   !if !not atom(x1) !and item[x1] = -1 !then
+      achtung({First*operand*of*cons*not*allowed});
+   !if y1 /= 0 !and (atom(y1) !or item[y1] = -1) !then
+      achtung({Second*operand*of*cons*not*allowed});
+   link[i] := y1;
+   item[i] := x1;
+   post;
+   cons := i;
+   !end cons;
+
+!integer !procedure value(x);
+!value x;
+!integer x;
+   !begin
+   !if !not atom(x) !then
+      achtung({Operand*of*value*not*atom});
+   value := item[x];
+   !end value;
+
+!integer !procedure setup(x);
+!integer x;
+   !begin
+   !integer i;
+   ante;
+   i := newcell;
+   item[i] := x;
+   link[i] := -1;
+   post;
+   setup := i;
+   !end setup;
+
+!integer !procedure append(x, y);
+!integer x, y;
+   !begin
+   !integer x1;
+   ante;
+   x1 := x;
+   append := !if x1 = 0 !then
+                y
+             !else
+                cons(hd(x), append(tl(x1), y));
+   post
+   !end append;
+
+!integer !procedure read list(dv);
+!value dv;
+!integer dv;
+   !begin
+   !integer symbol, j, sign;
+   !boolean number;
+
+   !integer !procedure insymbol;
+      !begin
+      !integer i;
+   L:
+      i := inbasicsymbol(dv);
+      !if i = 160 !or i = 174 !or i = 158 !then
+         !goto L;
+      insymbol := i
+      !end insymbol;
+
+   !integer !procedure in;
+      !begin
+      !integer i, k;
+      !boolean first;
+      first := !true;
+      number := !false;
+   again:
+      symbol := insymbol;
+      !if number !then
+         !begin
+         !if symbol<9 !then
+            !begin
+            j := 10*j+sign*symbol;
+            !goto again;
+            !end;
+         number := !false;
+         i := cons(setup(j), 0);
+         !end
+      !else
+         !begin
+         !if symbol<= 9 !then
+            !begin
+            j := symbol;
+            number := !true;
+            sign := 1;
+            !goto again;
+            !end
+         !else
+         !if symbol = 209 !then
+            !begin
+            j := 0;
+            number := !true;
+            sign := -1;
+            !goto again;
+            !end
+         !else
+         !if symbol = 25 !then
+            i := cons(0, 0)
+         !else
+         !if symbol = 132 !then
+            i := cons(in, 0)
+         !else
+            achtung({Data*incorrect});
+         symbol := insymbol;
+         !end;
+         !if first !then
+            in := i
+         !else
+            link[k] := i;
+         first := !false;
+         k := i;
+         !if symbol = 166 !then
+            !goto again;
+         !if symbol /= 148 !then
+            achtung({Data*incorrect});
+         !end;
+   next:
+      !if inbasicsysmbol(dv) /= 132 !then
+         !goto next;
+      readlist := in;
+      !if insymbol /= 152 !then
+         achtung({Data*incorrect});
+      post;
+      !end in;
+
+!boolean !procedure equal(x, y);
+!integer x, y;
+   !begin
+   !integer x1, y1;
+   ante;
+   x1 := x;
+   y1 := y;
+L:
+   !if x1 = y1 !then
+      equal := !true
+   !else
+   !if x1 = 0 !or y1 = 0 !then
+      equal := !false
+   !else
+   !if atom(x1) !then
+      equal := atom(y1) !and item[x1] = item[y1]
+   !else
+   !if atom(y1) !then
+      equal := !false
+   !else
+      !begin
+      !if equal(hd(x1), hd(y1)) !then
+         !begin
+         x1 := tl(x1);
+         y1 := (y1);
+         !goto L;
+         !end;
+      equal := !false;
+      !end;
+   post;
+   !end equal;
+
+!boolean !procedure atom(x);
+!value x;
+!integer x;
+   atom := link[x] = -1;
+
+!procedure warning;
+   !begin
+   write text(10, {{c}only});
+   write(10, f, freecells);
+   write text(10, {**cells*available{c}});
+   !end warning;
+
+!procedure bases;
+   preserve(tree);
+
+!procedure joinon(i, tree);
+!value i, tree;
+!integer i, tree;
+   !if i < value(hd(tl(tree))) !then
+      !begin
+      !if hd(tree) = 0 !then
+         sethd(tree, cons(0, cons(setup(i), 0)))
+      !else
+         joinon(i, hd(tree));
+      !end
+   !else
+      !begin
+      !if tl(tl(tree)) = 0 !then
+         settl(tl(tree), cons(0, cons(setup(i), 0)))
+      !else
+         joinon(i, tl(tl(tree)));
+      !end;
+
+!procedure print(tree);
+!value tree;
+!integer tree;
+   !if tree /= 0 !then
+      !begin
+      print(hd(tree));
+      write(10, f, value(hd(tl(tree))));
+      print(tl(tl(tree)));
+      !end;
+
+!integer n, f, tree;
+
+   faildev := 10;
+   failpm := !true;
+   f := format({ndd});
+   initiate;
+   n := read(20);
+again:
+   tree := cons(0, cons(setup(read(20)), 0));
+   !for n := n-1 !while n > 0 !do
+      joinon(read(20), tree);
+   write text(10, {{cc}});
+   write list(10, f, tree, 3);
+   write text(10, {{cc}});
+   print(tree);
+   !if n /= 0 !then
+      !goto again;
+   close(10);
+   close(20);
+   !end inner block;
+!end
+|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
