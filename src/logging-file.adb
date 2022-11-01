@@ -1,6 +1,6 @@
 -- Provide logging output to a named text file.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -86,14 +86,15 @@ package body logging.file is
    end open;
 
    overriding
-   procedure close (logger : in out file.output; logfile_name : in String) is
+   procedure close (logger : in out file.output) is
 
       procedure free_log_file is
          new Ada.Unchecked_Deallocation(Ada.Text_IO.File_Type, File_Type_access);
 
    begin
       if logger.log_file_is_shut then return; end if;
-      file_interfacing.finalize(logger.the_log.all, logfile_name);
+      flush(logger);
+      -- file_interfacing.finalize(logger.the_log.all, logfile_name);
       free_log_file(logger.the_log);
       logger.log_file_is_shut := True;
    end close;

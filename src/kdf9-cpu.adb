@@ -1,7 +1,7 @@
 -- Support for KDF9 CPU/ALU operations that are not automatically inherited from
 --   Ada types; and for types used in the internal functioning of the microcode.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -109,9 +109,12 @@ package body KDF9.CPU is
          result.lsw := shift_word_left(P.lsw, L);
          crossover  := shift_word_right(P.lsw, 48-L);
          result.msw := shift_word_left(P.msw, L) or crossover;
-      else
+      elsif L < 96 then
          result.lsw := 0;
          result.msw := shift_word_left(P.lsw, L-48);
+      else
+         result.lsw := 0;
+         result.msw := 0;
       end if;
       return result;
    end shift_pair_left;
@@ -126,9 +129,12 @@ package body KDF9.CPU is
          result.msw := shift_word_right(P.msw, L);
          crossover  := shift_word_left(P.msw, 48-L);
          result.lsw := shift_word_right(P.lsw, L) or crossover;
-      else
+      elsif L < 96 then
          result.msw := 0;
          result.lsw := shift_word_right(P.msw, L-48);
+      else
+         result.msw := 0;
+         result.lsw := 0;
       end if;
       return result;
    end shift_pair_right;
@@ -170,11 +176,8 @@ package body KDF9.CPU is
       if amount = 0 then
          return W;
       elsif amount > 46 then
-         if resign(W) < 0 then
-            return KDF9.all_one_bits;
-         else
-            return 0;
-         end if;
+         -- Rounding a negative number shifted 47 or more places converts -1 to 0.
+         return 0;
       else
          -- It is undefined whether the intrinsic shift_right_arithmetic,
          --    operating on CPU.u_64, yields a rounded result.
@@ -210,11 +213,13 @@ package body KDF9.CPU is
    end scale_up;
 
    function shift_arithmetic (I : KDF9.word; L : CPU.signed_Q_part)
-   return KDF9.word
-   is (
+   return KDF9.word is
+   begin
+   return (
        if L < 0 then scale_down_and_round(I, Natural(-L))
        else          scale_up(I, Natural(L))
       );
+   end shift_arithmetic;
 
    function scale_up (P : KDF9.pair; L : Natural)
    return KDF9.pair is
@@ -798,23 +803,22 @@ package body KDF9.CPU is
    function "/" (L, R : CPU.f48)
    return CPU.f48 is
       D, N   : CPU.fraction;
+      Ln, Rn : CPU.f48;
       Ls, Rs : KDF9.word;
       E, F   : KDF9.word;
    begin
-      if R = 0 then
+      Ln := normalized(L);
+      Rn := normalized(R);
+      if Rn = 0 then
          the_V_bit_is_set := True;
-         return L;  -- ?? This result is not well defined in the Manual.
+         return Ln;  -- ?? This result is not well defined in the Manual.
       end if;
-      -- If L>=R, L/R>= 1, which is not a valid fraction; so Ls and Rs are
-      --    scaled so that the division cannot overflow.
-      Ls := scale_down(fraction_word(L), 2);
-      Rs := scale_down(fraction_word(R), 1);
-      if Rs = 0 then
-         the_V_bit_is_set := True;
-         return L;  -- ?? This result is not well defined in the Manual.
-      end if;
+      -- If Ln >= Rn then Ln/Rn >= 1, which is not a valid fraction;
+      --    so Ls and Rs are scaled to ensure that the division cannot overflow.
+      Ls := scale_down(fraction_word(Ln), 2);
+      Rs := scale_down(fraction_word(Rn), 1);
       -- E is increased by 1 to compensate the quotient's scaling by 1/2.
-      E := scaler(L) - scaler(R) + 1;
+      E := scaler(Ln) - scaler(Rn) + 1;
       N := abs as_fraction(Ls);  -- Ls was scaled down by 1/4, so "abs" cannot overflow.
       D := abs as_fraction(Rs);  -- Rs was scaled down by 1/2, so "abs" cannot overflow.
       if N = D then

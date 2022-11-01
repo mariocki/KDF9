@@ -1,0 +1,67 @@
+!begin
+
+!library A0, A1, A4, A5, A15;
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2, c;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s); t1 := Time !end pre;
+
+!procedure post;
+   !begin t2 := (Time - t1 - c);  write(30, layout, entier(t2/12.0 ×  1.0º6 + 0.5)) !end post;
+
+!real  x, y, z;
+!integer  layout;
+
+x := y := z := 1.0;
+
+layout := format({ndddd.ddc});
+
+c := 0.0;
+pre({{c}null _ statement _ timing _ overhead _ in _ microseconds/12{ss}});
+post;
+c := t2;
+
+pre({{c}x:=sin{ss}});
+   x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y); x:=sin(y);
+post;
+
+pre({{c}x:=cos{ss}});
+   x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y); x:=cos(y);
+post;
+
+pre({{c}x:=abs{ss}});
+   x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y); x:=abs(y);
+post;
+
+pre({{c}x:=exp{ss}});
+   x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y); x:=exp(y);
+post;
+
+pre({{c}x:=ln{ss}});
+   x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y); x:=ln(y);
+post;
+
+pre({{c}x:=sqrt{ss}});
+   x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y); x:=sqrt(y);
+post;
+
+pre({{c}x:=arctan{ss}});
+   x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y); x:=arctan(y);
+post;
+
+pre({{c}x:=sign{ss}});
+   x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y); x:=sign(y);
+post;
+
+pre({{c}x:=entier{ss}});
+   x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y); x:=entier(y);
+post;
+
+!end
+|

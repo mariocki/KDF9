@@ -1,0 +1,11 @@
+{ PASKAL_timing }
+
+function ICR : integer;
+   begin
+   usercode 'SET 99; OUT;'; =ICR end;
+   end {ICR};
+
+function Time : integer;
+   begin
+   usercode 'SET 17; OUT; REV; ERASE; SET 23; FLOAT;'; 1.0e6; 'XF; FIX; SET47; -; =C15; SHAC15;';  =Time; end;
+   end {Time};

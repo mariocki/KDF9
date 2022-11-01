@@ -1,0 +1,49 @@
+SOURCE=${PASCAL:-Pascal}
+DATA=${KDF9_DATA:-Data}
+BINARY=${KDF9_BINARY:-Binary}
+USERCODE=${KDF9_USERCODE:-Assembly}
+ID="`basename $0`: "
+
+if [ x$1x = xx ]
+then
+   echo; echo ${ID} No program name was given.; echo
+   exit 1
+fi
+
+name=$1
+shift
+
+if [ ! -r ${SOURCE}/$name.p ]
+then
+   echo; echo ${ID} ${SOURCE}/$name.p was not found.; echo
+   printf "\\a\\a\\a"
+   exit 2
+fi
+
+rm -f ${BINARY}/${name}
+
+if  [ x${LISTING}x = xNOLISTx ]
+then
+   paskal <${SOURCE}/$name.p >/dev/null
+else
+   paskal <${SOURCE}/$name.p
+fi
+if [ ! -s TP0 ]
+then
+   echo $0: $name produced no object code file!
+   printf "\\a\\a\\a"
+   exit 3
+fi
+cp TP0 original.txt
+glance -p <TP0 >${USERCODE}/${name}.k3
+> TP0
+> pascal_core
+ucc ${name}
+if [ ! -s ${BINARY}/${name} ]
+then
+   echo $0: $name produced no object code file!
+   printf "\\a\\a\\a"
+   exit 3
+fi
+
+nine ${name} ${1:--} ${2:--} c${3} ${4}

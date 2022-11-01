@@ -1,0 +1,89 @@
+{ PASKAL_int_IO }
+
+function int_field_leader (stream, abs_val, field : integer) : integer;
+   label
+      1;
+   const
+      modulus = 100000000;
+   var
+      digits, divisor, dividend : 0 .. maxint;
+   begin
+   digits := 8;
+   divisor := modulus;
+   dividend := abs_val;
+   repeat
+      divisor := divisor div 10;
+      digits := digits - 1;
+      if digits = 0 then
+         goto 1
+      until dividend div divisor <> 0;
+   1:
+   if field > digits then
+      space(stream, field-digits-1);
+   int_field_leader := digits;
+   end {int_field_leader};
+
+procedure put_small_int_field (stream, number, field : integer);
+   const
+      modulus = 100000000;
+   var
+      digits, abs_val : 0 .. maxint;
+   begin
+   abs_val := abs(number);
+   digits := int_field_leader(stream, abs_val, field);
+   if number < 0 then
+      put_char(stream, '-')
+   else
+   if field >= 0 then
+      put_char(stream, ' ');
+   usercode
+      abs_val;
+      'V19P119; REV; FRB; V18P119; OR;';
+      (7-digits) * 6;
+      '=C15; SHLC15; NC15; ZERO; NOT; SHLDC15; ERASE; =V20P119; V10P119; =Q15;';
+      stream;
+      '=M14; V0P119M14; =C15; POAQ15;';
+      end;
+   end {put_small_int_field};
+
+procedure put_small_int (stream, number : integer);
+   begin
+   put_small_int_field(stream, number, +8);
+   end {put_small_int};
+
+procedure put_small_int_left_justified (stream, number : integer);
+   begin
+   put_small_int_field(stream, number, -8);
+   end {put_small_int_left_justified};
+
+procedure put_int_field (stream, number, field : integer);
+   const
+      modulus = 100000000;
+   var
+      abs_val : 0 .. maxint;
+   begin
+   abs_val := abs(number);
+   if abs_val div modulus <> 0 then
+      begin
+      put_small_int_field(stream, number div modulus, field-8);
+      usercode
+         abs_val mod modulus;
+         'V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15;';
+         stream;
+         '=M14; V0P119M14; =C15; POAQ15;';
+         end;
+      end
+   else
+      put_small_int_field(stream, number, field);
+   end {put_int_with_options};
+
+procedure put_int (stream, number : integer);
+   begin
+   put_int_field(stream, number, +15);
+   end {put_int};
+
+procedure put_int_left_justified (stream, number : integer);
+   begin
+   put_int_field(stream, number, -15);
+   end {put_int_left_justified};
+

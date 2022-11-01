@@ -5,6 +5,7 @@ V119; Y22111;
 RESTART; JP119; J9P117;
 PROGRAM;
 J1; (GO TO THE MAIN PROGRAM PRELUDE);
+(CHECKS OFF);
 
 (PROCEDURE open            );
 *4;
@@ -161,8 +162,7 @@ SET 7; =E6M1;
 E6M1; NEG; NOT; =E6M1; 
 
 (line 72 "until (digits = 0) or (abs_val div power(10, digits) <> 0);");
-E6M1; ZERO; SIGN; ABS; NEG; NOT; SET 10; E6M1; JS2P111; J3P117; 
-E5M1; REV; DIVI; ERASE; ZERO; SIGN; ABS; NEG; OR; J36=Z;
+E6M1; ZERO; SIGN; ABS; NEG; NOT; SET 10; E6M1; JS1P111; E5M1; REV; DIVI; ERASE; ZERO; SIGN; ABS; NEG; OR; J36=Z;
 
 (line 73 "space(stream, 6-digits);");
 E-2M1; =E0M4Q; SET 6; E6M1; -; =E0M4Q; JS16; 
@@ -228,8 +228,7 @@ SET 9; =E6M1;
 E6M1; NEG; NOT; =E6M1; 
 
 (line 96 "until (digits = 0) or (abs_val div power(10, digits) <> 0);");
-E6M1; ZERO; SIGN; ABS; NEG; NOT; SET 10; E6M1; JS2P111; J3P117; 
-E5M1; REV; DIVI; ERASE; ZERO; SIGN; ABS; NEG; OR; J51=Z;
+E6M1; ZERO; SIGN; ABS; NEG; NOT; SET 10; E6M1; JS1P111; E5M1; REV; DIVI; ERASE; ZERO; SIGN; ABS; NEG; OR; J51=Z;
 
 (line 97 "space(stream, 8-digits);");
 E-2M1; =E0M4Q; SET 8; E6M1; -; =E0M4Q; JS16; 
@@ -276,10 +275,10 @@ LINK; =E1M4; Q1; =E3M4; Q4TOQ1; SET 8; =+M4; J28;
 *60;
 
 (line 118 "put_int(stream, trunc(number));");
-E-2M1; =E0M4Q; E-1M1; SET 47; FLOAT; JSP103; =E0M4Q; JS27; 
+E-2M1; =E0M4Q; E-1M1; JSP103; =E0M4Q; JS27; 
 
 (line 119 "number := abs(number);");
-E-1M1; ABS; SET 47; FLOAT; =E-1M1; 
+E-1M1; ABSF; =E-1M1; 
 
 (line 120 "put_char(stream,  '.');");
 E-2M1; =E0M4Q; SET 31; =E0M4Q; JS8; 
@@ -287,7 +286,9 @@ E-2M1; =E0M4Q; SET 31; =E0M4Q; JS8;
 (line 122 "usercode");
 
 (line 123 "trunc((number - trunc(number)) * 100000000);");
-E-1M1; SET 47; FLOAT; JSP103; E-1M1; REV; -; V0; XD; CONT; SET 47; FLOAT; JSP103; 
+E-1M1; JSP103; SET 47; FLOAT; E-1M1; REV; -F; 
+V2=B2335753604000000; 
+V2; XF; JSP103; 
 (line 124 "'V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15;';");
 V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15; 
 (line 125 "stream;");
@@ -325,8 +326,8 @@ Q1; =E3M4; Q4TOQ1; J66;
 
 (line 137 "usercode 'SET 17; OUT; REV; ERASE; SET 23; FLOAT;'; 1.0e6; 'XF; FIX; SET47; -; =C15; SHAC15;';  =time; end;");
 SET 17; OUT; REV; ERASE; SET 23; FLOAT; 
-V2=B2247502200000000; 
-V2; XF; FIX; SET47; -; =C15; SHAC15; =E0M1; 
+V3=B2247502200000000; 
+V3; XF; FIX; SET47; -; =C15; SHAC15; =E0M1; 
 
 
 (line 138 "end;");
@@ -348,16 +349,16 @@ ZERO; =E5M1;
 *75;
 
 (line 147 "e[1] := (e[1] + e[2] + e[3] - e[4])  * t;");
-Y40; Y41; +; Y42; +; Y43; -; Y34; XD; CONT; SET 47; FLOAT; =Y40; 
+Y40; Y41; +F; Y42; +F; Y43; -F; Y34; XF; =Y40; 
 
 (line 148 "e[2] := (e[1] + e[2] - e[3] + e[4])  * t;");
-Y40; Y41; +; Y42; -; Y43; +; Y34; XD; CONT; SET 47; FLOAT; =Y41; 
+Y40; Y41; +F; Y42; -F; Y43; +F; Y34; XF; =Y41; 
 
 (line 149 "e[3] := (e[1] - e[2] + e[3] + e[4])  * t;");
-Y40; Y41; -; Y42; +; Y43; +; Y34; XD; CONT; SET 47; FLOAT; =Y42; 
+Y40; Y41; -F; Y42; +F; Y43; +F; Y34; XF; =Y42; 
 
 (line 150 "e[4] := (-e[1] + e[2] + e[3] + e[4]) / t2;");
-Y40; NEG; Y41; +; Y42; +; Y43; +; SET 47; FLOAT; Y36; DIVF; =Y43; 
+Y40; NEGF; Y41; +F; Y42; +F; Y43; +F; Y36; DIVF; =Y43; 
 
 (line 158 "j := j + 1;");
 E5M1; NOT; NEG; =E5M1; 
@@ -405,13 +406,13 @@ J82;
 *85;
 
 (line 182 "x := t * (x + y);");
-E-3M1; E-2M1; +; Y34; XD; CONT; SET 47; FLOAT; =E-3M1; 
+E-3M1; E-2M1; +F; Y34; XF; =E-3M1; 
 
 (line 183 "y := t * (x + y);");
-E-3M1; E-2M1; +; Y34; XD; CONT; SET 47; FLOAT; =E-2M1; 
+E-3M1; E-2M1; +F; Y34; XF; =E-2M1; 
 
 (line 184 "z := (x + y) / t2;");
-E-3M1; E-2M1; +; SET 47; FLOAT; Y36; DIVF; E-1M1; =M15; =E0M15; 
+E-3M1; E-2M1; +F; Y36; DIVF; E-1M1; =M15; =E0M15; 
 
 (line 185 "end;");
 Q1TOQ4; SET -3; =+M4; E3M1; =Q1; EXIT 1;
@@ -457,18 +458,18 @@ JS68;
 
 (line 206 "t  := 0.499975;");
 
-V3=B1777777627110721; 
-V3; =Y34; 
+V4=B1777777627110721; 
+V4; =Y34; 
 
 (line 207 "t1 := 0.50025;");
 
-V4=B2004001014223351; 
-V4; =Y35; 
+V5=B2004001014223351; 
+V5; =Y35; 
 
 (line 208 "t2 := 2.0;");
 
-V5=B2024000000000000; 
-V5; =Y36; 
+V6=B2024000000000000; 
+V6; =Y36; 
 
 (line 213 "i  := 1;");
 ZERO; NOT; NEG; =Y8; 
@@ -511,19 +512,19 @@ SET 93; Y8; XD; CONT; =Y22;
 
 (line 229 "x1 := +1.0;");
 
-V6=B2014000000000000; 
-V6; =Y27; 
+V7=B2014000000000000; 
+V7; =Y27; 
 
 (line 230 "x2 := -1.0;");
 
-V7=B6014000000000000; 
-V7; =Y28; 
+V8=B6014000000000000; 
+V8; =Y28; 
 
 (line 231 "x3 := -1.0;");
-V7; =Y29; 
+V8; =Y29; 
 
 (line 232 "x4 := -1.0;");
-V7; =Y30; 
+V8; =Y30; 
 
 (line 233 "for  i := 1 to n1 do");
 Y12; =Y45; 
@@ -534,16 +535,16 @@ ZERO; NOT; NEG; =Y8;
 (line 234 "begin");
 
 (line 235 "x1 := (x1 + x2 + x3 - x4)  * t;");
-Y27; Y28; +; Y29; +; Y30; -; Y34; XD; CONT; SET 47; FLOAT; =Y27; 
+Y27; Y28; +F; Y29; +F; Y30; -F; Y34; XF; =Y27; 
 
 (line 236 "x2 := (x1 + x2 - x3 + x4)  * t;");
-Y27; Y28; +; Y29; -; Y30; +; Y34; XD; CONT; SET 47; FLOAT; =Y28; 
+Y27; Y28; +F; Y29; -F; Y30; +F; Y34; XF; =Y28; 
 
 (line 237 "x3 := (x1 - x2 + x3 + x4)  * t;");
-Y27; Y28; -; Y29; +; Y30; +; Y34; XD; CONT; SET 47; FLOAT; =Y29; 
+Y27; Y28; -F; Y29; +F; Y30; +F; Y34; XF; =Y29; 
 
 (line 238 "x4 := (-x1 + x2 + x3 + x4) * t;");
-Y27; NEG; Y28; +; Y29; +; Y30; +; Y34; XD; CONT; SET 47; FLOAT; =Y30; 
+Y27; NEGF; Y28; +F; Y29; +F; Y30; +F; Y34; XF; =Y30; 
 
 (line 239 "end;");
 
@@ -574,16 +575,16 @@ ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16;
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
 (line 249 "e[1] := +1.0;");
-V6; =Y40; 
+V7; =Y40; 
 
 (line 250 "e[2] := -1.0;");
-V7; =Y41; 
+V8; =Y41; 
 
 (line 251 "e[3] := -1.0;");
-V7; =Y42; 
+V8; =Y42; 
 
 (line 252 "e[4] := -1.0;");
-V7; =Y43; 
+V8; =Y43; 
 
 (line 253 "for  i := 1 to n2 do");
 Y13; =Y45; 
@@ -594,16 +595,16 @@ ZERO; NOT; NEG; =Y8;
 (line 254 "begin");
 
 (line 255 "e[1] := (e[1] + e[2] + e[3] - e[4])  * t;");
-Y40; Y41; +; Y42; +; Y43; -; Y34; XD; CONT; SET 47; FLOAT; =Y40; 
+Y40; Y41; +F; Y42; +F; Y43; -F; Y34; XF; =Y40; 
 
 (line 256 "e[2] := (e[1] + e[2] - e[3] + e[4])  * t;");
-Y40; Y41; +; Y42; -; Y43; +; Y34; XD; CONT; SET 47; FLOAT; =Y41; 
+Y40; Y41; +F; Y42; -F; Y43; +F; Y34; XF; =Y41; 
 
 (line 257 "e[3] := (e[1] - e[2] + e[3] + e[4])  * t;");
-Y40; Y41; -; Y42; +; Y43; +; Y34; XD; CONT; SET 47; FLOAT; =Y42; 
+Y40; Y41; -F; Y42; +F; Y43; +F; Y34; XF; =Y42; 
 
 (line 258 "e[4] := (-e[1] + e[2] + e[3] + e[4]) * t;");
-Y40; NEG; Y41; +; Y42; +; Y43; +; Y34; XD; CONT; SET 47; FLOAT; =Y43; 
+Y40; NEGF; Y41; +F; Y42; +F; Y43; +F; Y34; XF; =Y43; 
 
 (line 259 "end;");
 
@@ -694,7 +695,7 @@ SET 3; =Y9;
 173;
 
 (line 290 "if  j > 2 then");
-Y9; SET 2; SIGN; NEG; STR; REV; ERASE; J178=Z;
+Y9; SET 2; SIGN; SHA-1; NEG; J178=Z;
 
 (line 291 "j := 0");
 ZERO; =Y9; 
@@ -749,299 +750,300 @@ ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16;
 (line 306 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 309 "new_line(1, 1);");
-ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
-
-(line 313 "j := 1;");
+(line 312 "j := 1;");
 ZERO; NOT; NEG; =Y9; 
 
-(line 314 "k := 2;");
+(line 313 "k := 2;");
 SET 2; =Y10; 
 
-(line 315 "l := 3;");
+(line 314 "l := 3;");
 SET 3; =Y11; 
 
-(line 316 "for  i := 1 to 2100 do");
+(line 315 "for  i := 1 to 2100 do");
 ZERO; NOT; NEG; =Y8; 
-*200;
+*199;
 
-(line 317 "begin");
+(line 316 "begin");
 
-(line 318 "j := j * (k - j ) * (l - k);");
+(line 317 "j := j * (k - j ) * (l - k);");
 Y10; Y9; -; Y9; XD; CONT; Y11; Y10; -; XD; CONT; =Y9; 
 
-(line 319 "k := l * k - (l - j ) * k;");
+(line 318 "k := l * k - (l - j ) * k;");
 Y11; Y10; XD; CONT; Y11; Y9; -; Y10; XD; CONT; -; =Y10; 
 
-(line 320 "l := (l - k) * (k + j );");
+(line 319 "l := (l - k) * (k + j );");
 Y11; Y10; -; Y10; Y9; +; XD; CONT; =Y11; 
 
-(line 322 "usercode");
+(line 321 "usercode");
 
-(line 323 "j + k + l; @e[1]-1; 'NEG; NOT; =M8;'; l-1; '=M9; SET47; FLOAT; =M8M9;';");
+(line 322 "j + k + l; @e[1]-1; 'NEG; NOT; =M8;'; l-1; '=M9; SET47; FLOAT; =M8M9;';");
 Y9; Y10; +; Y11; +; SET AY40; NEG; NOT; NEG; NOT; =M8; Y11; NEG; NOT; =M9; SET47; FLOAT; =M8M9; 
-(line 324 "j * k * l; @e[1]; 'NEG; NOT; =M8;'; k-1; '=M9; SET47; FLOAT; =M8M9;';");
+(line 323 "j * k * l; @e[1]; 'NEG; NOT; =M8;'; k-1; '=M9; SET47; FLOAT; =M8M9;';");
 Y9; Y10; XD; CONT; Y11; XD; CONT; SET AY40; NEG; NOT; =M8; Y10; NEG; NOT; =M9; SET47; FLOAT; =M8M9; 
 
-(line 331 "end;");
+(line 330 "end;");
 
 Y8; NOT; NEG; DUP; =Y8; 
-SET 2100; SIGN; J200LEZ;
-199;
+SET 2100; SIGN; J199LEZ;
+198;
 
-(line 333 "check(n6, j);");
+(line 332 "check(n6, j);");
 Y17; =E0M4Q; Y9; =E0M4Q; JS89; 
 
-(line 334 "put_real(1, e[1]); space(1, 2);");
+(line 333 "put_real(1, e[1]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y40; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 335 "put_real(1, e[2]); space(1, 2);");
+(line 334 "put_real(1, e[2]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y41; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 336 "put_real(1, e[3]); space(1, 2);");
+(line 335 "put_real(1, e[3]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y42; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 337 "put_real(1, e[4]); space(1, 2);");
+(line 336 "put_real(1, e[4]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y43; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 338 "new_line(1, 1);");
+(line 337 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 342 "x := 0.5;");
+(line 341 "x := 0.5;");
 
-V8=B2004000000000000; 
-V8; =Y31; 
+V9=B2004000000000000; 
+V9; =Y31; 
 
-(line 343 "y := 0.5;");
-V8; =Y32; 
+(line 342 "y := 0.5;");
+V9; =Y32; 
 
-(line 344 "for  i := 1 to n7 do");
+(line 343 "for  i := 1 to n7 do");
 Y18; =Y45; 
-ZERO; NOT; NEG; Y45; SIGN; J218>Z;
+ZERO; NOT; NEG; Y45; SIGN; J217>Z;
 ZERO; NOT; NEG; =Y8; 
-*219;
+*218;
 
-(line 345 "begin");
+(line 344 "begin");
 
-(line 346 "x := t * arctan(t2 * sin(x) * cos(x) / (cos(x + y) + cos(x - y) - 1.0));");
-Y31; SET 47; FLOAT; JSP105; Y36; XD; CONT; Y31; SET 47; FLOAT; JSP106; XD; CONT; Y31; Y32; +; SET 47; FLOAT; JSP106; Y31; Y32; -; SET 47; FLOAT; JSP106; +; NEG; NOT; SET 47; FLOAT; SET 47; FLOAT; DIVF; SET 47; FLOAT; JSP107; Y34; XD; CONT; SET 47; FLOAT; =Y31; 
+(line 345 "x := t * arctan(t2 * sin(x) * cos(x) / (cos(x + y) + cos(x - y) - 1.0));");
+Y31; JSP105; Y36; XF; Y31; JSP106; XF; Y31; Y32; +F; JSP106; Y31; Y32; -F; JSP106; +F; V7; -F; DIVF; JSP107; Y34; XF; =Y31; 
 
-(line 347 "y := t * arctan(t2 * sin(y) * cos(y) / (cos(x + y) + cos(x - y) - 1.0));");
-Y32; SET 47; FLOAT; JSP105; Y36; XD; CONT; Y32; SET 47; FLOAT; JSP106; XD; CONT; Y31; Y32; +; SET 47; FLOAT; JSP106; Y31; Y32; -; SET 47; FLOAT; JSP106; +; NEG; NOT; SET 47; FLOAT; SET 47; FLOAT; DIVF; SET 47; FLOAT; JSP107; Y34; XD; CONT; SET 47; FLOAT; =Y32; 
+(line 346 "y := t * arctan(t2 * sin(y) * cos(y) / (cos(x + y) + cos(x - y) - 1.0));");
+Y32; JSP105; Y36; XF; Y32; JSP106; XF; Y31; Y32; +F; JSP106; Y31; Y32; -F; JSP106; +F; V7; -F; DIVF; JSP107; Y34; XF; =Y32; 
 
-(line 348 "end;");
+(line 347 "end;");
 
 Y8; NOT; NEG; DUP; =Y8; 
-Y45; SIGN; J219LEZ;
-218;
+Y45; SIGN; J218LEZ;
+217;
 
-(line 350 "check(n7, j);");
+(line 349 "check(n7, j);");
 Y18; =E0M4Q; Y9; =E0M4Q; JS89; 
+
+(line 350 "put_real(1, x); space(1, 2);");
+ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
+ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
 (line 351 "put_real(1, x); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 352 "put_real(1, x); space(1, 2);");
-ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
+(line 352 "put_real(1, y); space(1, 2);");
+ZERO; NOT; NEG; =E0M4Q; Y32; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
 (line 353 "put_real(1, y); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y32; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 354 "put_real(1, y); space(1, 2);");
-ZERO; NOT; NEG; =E0M4Q; Y32; =E0M4Q; JS59; 
-ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
-
-(line 355 "new_line(1, 1);");
+(line 354 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 360 "x := 1.0;");
-V6; =Y31; 
+(line 359 "x := 1.0;");
+V7; =Y31; 
 
-(line 361 "y := 1.0;");
-V6; =Y32; 
+(line 360 "y := 1.0;");
+V7; =Y32; 
 
-(line 362 "z := 1.0;");
-V6; =Y33; 
+(line 361 "z := 1.0;");
+V7; =Y33; 
 
-(line 363 "for  i := 1 to n8 do");
+(line 362 "for  i := 1 to n8 do");
 Y19; =Y45; 
-ZERO; NOT; NEG; Y45; SIGN; J236>Z;
+ZERO; NOT; NEG; Y45; SIGN; J235>Z;
 ZERO; NOT; NEG; =Y8; 
-*237;
+*236;
 
-(line 364 "begin");
+(line 363 "begin");
 
-(line 365 "p3(x, y, z );");
+(line 364 "p3(x, y, z );");
 Y31; =E0M4Q; Y32; =E0M4Q; SET AY33; =E0M4Q; JS84; 
 
-(line 366 "end;");
+(line 365 "end;");
 
 Y8; NOT; NEG; DUP; =Y8; 
-Y45; SIGN; J237LEZ;
-236;
+Y45; SIGN; J236LEZ;
+235;
 
-(line 368 "check(n8, j);");
+(line 367 "check(n8, j);");
 Y19; =E0M4Q; Y9; =E0M4Q; JS89; 
 
-(line 369 "put_real(1, x); space(1, 2);");
+(line 368 "put_real(1, x); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 370 "put_real(1, y); space(1, 2);");
+(line 369 "put_real(1, y); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y32; =E0M4Q; JS59; 
+ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
+
+(line 370 "put_real(1, z); space(1, 2);");
+ZERO; NOT; NEG; =E0M4Q; Y33; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
 (line 371 "put_real(1, z); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y33; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 372 "put_real(1, z); space(1, 2);");
-ZERO; NOT; NEG; =E0M4Q; Y33; =E0M4Q; JS59; 
-ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
-
-(line 373 "new_line(1, 1);");
+(line 372 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 378 "j := 1;");
+(line 377 "j := 1;");
 ZERO; NOT; NEG; =Y9; 
 
-(line 379 "k := 2;");
+(line 378 "k := 2;");
 SET 2; =Y10; 
 
-(line 380 "l := 3;");
+(line 379 "l := 3;");
 SET 3; =Y11; 
 
-(line 381 "e[1] := 1.0;");
-V6; =Y40; 
+(line 380 "e[1] := 1.0;");
+V7; =Y40; 
 
-(line 382 "e[2] := 2.0;");
-V5; =Y41; 
+(line 381 "e[2] := 2.0;");
+V6; =Y41; 
 
-(line 383 "e[3] := 3.0;");
+(line 382 "e[3] := 3.0;");
 
-V9=B2026000000000000; 
-V9; =Y42; 
+V10=B2026000000000000; 
+V10; =Y42; 
 
-(line 384 "for  i := 1 to n9 do");
+(line 383 "for  i := 1 to n9 do");
 Y20; =Y45; 
-ZERO; NOT; NEG; Y45; SIGN; J256>Z;
+ZERO; NOT; NEG; Y45; SIGN; J255>Z;
 ZERO; NOT; NEG; =Y8; 
-*257;
+*256;
 
-(line 385 "p0;");
+(line 384 "p0;");
 JS81; 
 
 Y8; NOT; NEG; DUP; =Y8; 
-Y45; SIGN; J257LEZ;
-256;
+Y45; SIGN; J256LEZ;
+255;
 
-(line 387 "check(n9, j);");
+(line 386 "check(n9, j);");
 Y20; =E0M4Q; Y9; =E0M4Q; JS89; 
 
-(line 388 "put_real(1, e[1]); space(1, 2);");
+(line 387 "put_real(1, e[1]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y40; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 389 "put_real(1, e[2]); space(1, 2);");
+(line 388 "put_real(1, e[2]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y41; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 390 "put_real(1, e[3]); space(1, 2);");
+(line 389 "put_real(1, e[3]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y42; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 391 "put_real(1, e[4]); space(1, 2);");
+(line 390 "put_real(1, e[4]); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y43; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 392 "new_line(1, 1);");
+(line 391 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 396 "j := 2;");
+(line 395 "j := 2;");
 SET 2; =Y9; 
 
-(line 397 "k := 3;");
+(line 396 "k := 3;");
 SET 3; =Y10; 
 
-(line 398 "for  i := 1 to n10 do");
+(line 397 "for  i := 1 to n10 do");
 Y21; =Y45; 
-ZERO; NOT; NEG; Y45; SIGN; J271>Z;
+ZERO; NOT; NEG; Y45; SIGN; J270>Z;
 ZERO; NOT; NEG; =Y8; 
-*272;
+*271;
 
-(line 399 "begin");
+(line 398 "begin");
 
-(line 400 "j := j + k;");
+(line 399 "j := j + k;");
 Y9; Y10; +; =Y9; 
 
-(line 401 "k := j + k;");
+(line 400 "k := j + k;");
 Y9; Y10; +; =Y10; 
 
-(line 402 "j := k - j ;");
+(line 401 "j := k - j ;");
 Y10; Y9; -; =Y9; 
 
-(line 403 "k := k - j - j ;");
+(line 402 "k := k - j - j ;");
 Y10; Y9; -; Y9; -; =Y10; 
 
-(line 404 "end;");
+(line 403 "end;");
 
 Y8; NOT; NEG; DUP; =Y8; 
-Y45; SIGN; J272LEZ;
-271;
+Y45; SIGN; J271LEZ;
+270;
 
-(line 406 "check(n10, j);");
+(line 405 "check(n10, j);");
 Y21; =E0M4Q; Y9; =E0M4Q; JS89; 
 
-(line 407 "put_real(1, x1); space(1, 2);");
+(line 406 "put_real(1, x1); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y27; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 408 "put_real(1, x2); space(1, 2);");
+(line 407 "put_real(1, x2); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y28; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 409 "put_real(1, x3); space(1, 2);");
+(line 408 "put_real(1, x3); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y29; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 410 "put_real(1, x4); space(1, 2);");
+(line 409 "put_real(1, x4); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y30; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 411 "new_line(1, 1);");
+(line 410 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 415 "x := 0.75;");
+(line 414 "x := 0.75;");
 
-V10=B2006000000000000; 
-V10; =Y31; 
+V11=B2006000000000000; 
+V11; =Y31; 
 
-(line 416 "for  i := 1 to n11 do");
+(line 415 "for  i := 1 to n11 do");
 Y22; =Y45; 
-ZERO; NOT; NEG; Y45; SIGN; J289>Z;
+ZERO; NOT; NEG; Y45; SIGN; J288>Z;
 ZERO; NOT; NEG; =Y8; 
-*290;
+*289;
 
-(line 417 "begin");
+(line 416 "begin");
 
-(line 418 "x := sqrt(exp(ln(x)/t1));");
-Y31; SET 47; FLOAT; JSP109; Y35; DIVF; SET 47; FLOAT; JSP110; SET 47; FLOAT; JSP108; =Y31; 
+(line 417 "x := sqrt(exp(ln(x)/t1));");
+Y31; JSP109; Y35; DIVF; JSP110; JSP108; =Y31; 
 
-(line 419 "end;");
+(line 418 "end;");
 
 Y8; NOT; NEG; DUP; =Y8; 
-Y45; SIGN; J290LEZ;
-289;
+Y45; SIGN; J289LEZ;
+288;
 
-(line 421 "check(n11, j);");
+(line 420 "check(n11, j);");
 Y22; =E0M4Q; Y9; =E0M4Q; JS89; 
+
+(line 421 "put_real(1, x); space(1, 2);");
+ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
+ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
 (line 422 "put_real(1, x); space(1, 2);");
 ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
@@ -1055,31 +1057,27 @@ ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16;
 ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
 ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
 
-(line 425 "put_real(1, x); space(1, 2);");
-ZERO; NOT; NEG; =E0M4Q; Y31; =E0M4Q; JS59; 
-ZERO; NOT; NEG; =E0M4Q; SET 2; =E0M4Q; JS16; 
-
-(line 426 "new_line(1, 1);");
+(line 425 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 428 "takes := time - begins;");
+(line 427 "takes := time - begins;");
 JS68; 
 Y24; -; =Y26; 
 
-(line 429 "put_alfa8(1, 'KWI/sec:');");
-ZERO; NOT; NEG; =E0M4Q; V11=B5367511763454310; V11; =E0M4Q; JS21; 
+(line 428 "put_alfa8(1, 'KWI/sec:');");
+ZERO; NOT; NEG; =E0M4Q; V12=B5367511763454310; V12; =E0M4Q; JS21; 
 
-(line 430 "put_real(1, round(1.0e10 / takes) / 10.0);");
+(line 429 "put_real(1, round(1.0e10 / takes) / 10.0);");
 ZERO; NOT; NEG; =E0M4Q; Y26; SET 47; FLOAT; 
-V12=B2424520137100000; 
-V12; REV; DIVF; SET 47; FLOAT; JSP104; SET 47; FLOAT; 
-V13=B2045000000000000; 
-V13; DIVF; =E0M4Q; JS59; 
+V13=B2424520137100000; 
+V13; REV; DIVF; JSP104; SET 47; FLOAT; 
+V14=B2045000000000000; 
+V14; DIVF; =E0M4Q; JS59; 
 
-(line 431 "new_line(1, 1);");
+(line 430 "new_line(1, 1);");
 ZERO; NOT; NEG; =E0M4Q; ZERO; NOT; NEG; =E0M4Q; JS11; 
 
-(line 432 "end.");
+(line 431 "end.");
 JP119;
 
 1;
@@ -1139,7 +1137,6 @@ P104; (ROUND);
    DUP; ABSF; FIX; SET 47; -; =C15; SHAC15; REV; J1GTZ;
    NEG;
 1; J4P117V; EXIT 1;
-
 
 P105V13; (SIN);
    V0=Q7/-1/AV7;

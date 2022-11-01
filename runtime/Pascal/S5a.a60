@@ -1,0 +1,72 @@
+!begin
+!library A0, A1, A4, A5, A15;
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2;
+!integer i1, i2;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s); t1 := Time !end pre;
+
+!procedure post;
+   !begin t2 := Time - t1;  write(30, layout, t2 ×  1.0º6 / 4.0 - c) !end post;
+
+!real  x, y, z, t;
+!real  a, b, c, d, layout;
+
+!integer  !array  E1[1:1], E2[1:1, 1:1], E3[1:1, 1:1, 1:1];
+!integer  i, j, k, l, m, n;
+
+y := 1.0; z := 2.0; l := 1; m := 2;
+a := 1; b := 2;
+layout := format({ndddd.dddc});
+
+writetext(30, {null _ statement _ timing _ overhead _ in _ microseconds{ss}});
+t1 := Time; t2 := Time - t1; c := t ×  1.0º6; write(30, layout, c);
+
+
+pre({{c}!for  _ loop _ zero _ iterations _ overhead{ss}});
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+   !for  i := 1 !step  1 !until  0 !do ;
+post;
+
+n := 100;
+pre({{c}!for  _ i _ := _ 1 _ !step  _ 1 _ !until  _ n _ !do  _ STEP{ss}});
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+   !for  i := 1 !step  1 !until  n !do ;
+post;
+
+pre({{c}!for  _ i _ := _ 1 _ !step  _ 1 _ !until  _ 1 _ !do  _ TOTAL{ss}});
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+   !for  i := 1 !step  1 !until  1 !do ;
+
+post;
+i := n;
+
+pre({{c}!while  _ loop _ zero _ iterations _ overhead{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+i := -1;
+pre({{c}!for  _ i _ := _ i _ + _ 1 _ !while  _ i _ < _ n _ !do  _ STEP{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+!end
+|

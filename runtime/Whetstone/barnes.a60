@@ -1,0 +1,570 @@
+BARNES|
+_b_e_g_i_n
+
+_c_o_m_m_e_n_t _l_i_b_r_a_r_y A6, A13, A14;
+
+_i_n_t_e_g_e_r  storesize;
+
+open(20); open(10);
+copytext(20, 10, _[;_]); storesize := read(20);
+
+_b_e_g_i_n
+_i_n_t_e_g_e_r _a_r_r_a_y item, link [0:storesize];
+_i_n_t_e_g_e_r nextcell, freecells, conscount, expression, faildev;
+_b_o_o_l_e_a_n failpm;
+
+_p_r_o_c_e_d_u_r_e writelist(dv, f, x, n);
+_v_a_l_u_e dv, f, x, n;
+_i_n_t_e_g_e_r dv, f, x, n;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r room, line;
+
+   _p_r_o_c_e_d_u_r_e newline;
+      _b_e_g_i_n
+      room := line;
+      write text(dv, _[_[c_]_]);
+      _e_n_d newline;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e length(x);
+   _v_a_l_u_e x;
+   _i_n_t_e_g_e_r x;
+      length := _i_f atom(x) _a_n_d x ± 0 _t_h_e_n
+                   n+1
+                _e_l_s_e _i_f x = 0 _t_h_e_n
+                   2
+                _e_l_s_e
+                   length(hd(x))+length(tl(x));
+
+   _p_r_o_c_e_d_u_r_e out1(x);
+   _v_a_l_u_e x;
+   _i_n_t_e_g_e_r x;
+      _i_f atom(x) _a_n_d x ± 0 _t_h_e_n
+         write(dv, f, value(x))
+      _e_l_s_e
+      _i_f x = 0 _t_h_e_n
+         write text(dv, _[N_])
+      _e_l_s_e
+         _b_e_g_i_n write text(dv, _[(_]);
+      L:
+         out1(hd(x));
+         x := tl(x);
+         _i_f x ± 0 _t_h_e_n
+            _b_e_g_i_n
+            write text(dv, _[, _]);
+            _g_o_t_o L;
+            _e_n_d;
+         write text(dv, _[)_]);
+         _e_n_d;
+
+   _p_r_o_c_e_d_u_r_e out2(x, ebs);
+   _v_a_l_u_e x, ebs;
+   _i_n_t_e_g_e_r x, ebs;
+      _b_e_g_i_n
+      _i_n_t_e_g_e_r lh, h;
+      _b_o_o_l_e_a_n first;
+      write text(dv, _[(_]); room := room-1; first := _t_r_u_e;
+   L:
+      h := hd(x);
+      lh := length(h);
+      x := tl(x);
+      _i_f x ± 0 _t_h_e_n
+         _b_e_g_i_n
+         _i_f lh>room _a_n_d _n_o_t first _t_h_e_n
+            newline;
+         _i_f lh_< room _t_h_e_n
+            _b_e_g_i_n
+            room := room-lh;
+            out1(h);
+            _e_n_d
+         _e_l_s_e
+            out2(h, 1);
+         write text(dv, _[, _]);
+         first := _f_a_l_s_e;
+         _g_o_t_o L;
+         _e_n_d;
+      lh := lh+ebs;
+      _i_f lh>room _a_n_d _n_o_t first _t_h_e_n
+         newline;
+      _i_f lh_< room _t_h_e_n
+         _b_e_g_i_n
+         room := room-lh;
+         out1(h);
+         _e_n_d
+      _e_l_s_e
+         out2(h, ebs+1);
+      write text(dv, _[)_]);
+      _e_n_d out2;
+
+   line := 70;
+   newline;
+   _i_f atom(x) _a_n_d x ± 0 _t_h_e_n
+      write(dv, f, value(x))
+   _e_l_s_e
+   _i_f x = 0 _t_h_e_n
+      write text(dv, _[N_])
+	_e_l_s_e
+	   out2(x, 1);
+	write text(dv, _[;_])
+   _e_n_d writelist;
+
+_p_r_o_c_e_d_u_r_e initiate;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r i;
+   item[0] := link[0] := 1;
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l storesize _d_o
+      _b_e_g_i_n
+      link[i] := i+1;
+      item[i] := -1;
+      _e_n_d;
+   link[storesize] := 0;
+   nextcell := 1;
+   freecells := storesize;
+   conscount := expression := 0
+   _e_n_d initiate;
+
+_p_r_o_c_e_d_u_r_e achtung(a);
+_s_t_r_i_n_g a;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r f1, f2, f3, i;
+   f1 := format(_[ndddd_]);
+   f2 := format(_[ss-ndddddddddd_]);
+   f3 := format(_[ss-nddddddddddc_]);
+   write text(faildev, _[_[c_]List*fail****_]);
+   write text(faildev, a);
+   _i_f failpm _t_h_e_n
+      _b_e_g_i_n
+      write text(faildev, _[_[c_]List*post*mortem'c_]);
+      _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l storesize _d_o
+         _i_f link[i] = -1 _o_r link[i] _o_r item[i] ± -1 _t_h_e_n
+            _b_e_g_i_n
+            write(faildev, f1, i);
+            write(faildev, f2, item[i]);
+            write(faildev, f3, link[i]);
+            _e_n_d
+      _e_n_d;
+   _g_o_t_o FAILURE;
+   _e_n_d achtung;
+
+_p_r_o_c_e_d_u_r_e tidy;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r i;
+   bases;
+   preserve(expression);
+   _f_o_r i := 1 _s_t_e_p 1 _u_n_t_i_l storesize _d_o
+      _i_f link[i]_> -1 _a_n_d item[i] ± -1 _t_h_e_n
+         _b_e_g_i_n
+         link[i] := nextcell;
+         item[i] := -1;
+         nextcell := i;
+         freecells := freecells+1;
+         _e_n_d
+      _e_l_s_e
+      _i_f link[i]<-1 _t_h_e_n
+         link[i] := -link[i]-3;
+   _i_f freecells _< 1 _t_h_e_n
+      achtung(_[No*more*cells*available_]);
+   warning;
+   _e_n_d tidy;
+
+_p_r_o_c_e_d_u_r_e ante;
+   conscount := conscount+1;
+
+_p_r_o_c_e_d_u_r_e post;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r j;
+   conscount := conscount-1;
+   _i_f conscount = 0 _t_h_e_n
+      _b_e_g_i_n
+   L:
+      _i_f expression ± 0 _t_h_e_n
+         _b_e_g_i_n
+         freecells := freecells+1;
+         j := expression;
+         expression := tl(expression);
+         link[j] := nextcell;
+         item[j] := -1;
+         nextcell:= j;
+         _g_o_t_o L;
+         _e_n_d;
+      _e_n_d;
+   _e_n_d post;
+
+_p_r_o_c_e_d_u_r_e preserve(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_f x ± 0 _a_n_d link[x]>-2 _t_h_e_n
+      _b_e_g_i_n
+      _i_f link[x]>-1 _a_n_d item[x] = -1 _t_h_e_n
+         achtung(_[Operand*of*preserve*on*free*storage*list_]);
+         link[x] := -link[x]-3;
+         _i_f link[x] ± -2 _t_h_e_n
+            _b_e_g_i_n
+            preserve(item[x]);
+            preserve(-link[x]-3);
+            _e_n_d;
+      _e_n_d;
+   _e_n_d preserve;
+
+_p_r_o_c_e_d_u_r_e settl(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r x1, y1;
+   ante;
+   x1 := x;
+   _i_f atom(x1) _o_r item[x1] = -1 _t_h_e_n
+      achtung(_[First*operand*of*settl*not*allowed_]);
+   y1 := y;
+   _i_f y1 ± 0 _a_n_d (atom(y1) _o_r item[y1] = -1) _t_h_e_n
+      achtung(_[Second*operand*of*settl*not*allowed_]);
+   link[x1] := y1;
+   post;
+   _e_n_d settl;
+
+_p_r_o_c_e_d_u_r_e sethd(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r x1, y1;
+   ante;
+   x1 := x;
+   _i_f atom(x1) _o_r item[x1] = -1 _t_h_e_n
+      achtung(_[First*operand*of*sethd*not*allowed_]);
+   y1 := y;
+   _i_f _n_o_t atom(y1) _a_n_d item[y1] = -1 _t_h_e_n
+      achtung(_[Second*operand*of*sethd*not*allowed_]);
+   item[x1] := y1;
+   post;
+   _e_n_d sethd;
+
+_p_r_o_c_e_d_u_r_e setvalue(x, y);
+_v_a_l_u_e x, y;
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_f _n_o_t atom(x) _o_r x = 0 _t_h_e_n
+      achtung(_[Operand*of*setvalue*not*allowed_]);
+   item[x] := y;
+   _e_n_d setvalue;
+
+_p_r_o_c_e_d_u_r_e join(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r x1, y1;
+   ante;
+   x1 := x;
+L:
+   _i_f tl(x1) ± 0 _t_h_e_n
+      _b_e_g_i_n
+      x1 := tl(x1);
+      _g_o_t_o L;
+      _e_n_d;
+   y1 := y;
+   _i_f y1 ± 0 _a_n_d (atom(y1) _o_r item[y1] = -1) _t_h_e_n
+      achtung(_[Second*operand*of*join*not*allowed_]);
+   link[x1] := y1;
+   post;
+   _e_n_d join;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e copy(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   copy := _i_f atom(x) _t_h_e_n x _e_l_s_e cons(copy(hd(x)), copy(tl(x)));
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e rev(x);
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r p, x1;
+   ante;
+   x1 := x;
+   p := 0;
+L:
+   _i_f x1 ± 0 _t_h_e_n
+      _b_e_g_i_n
+      p := cons(hd(x1), p);
+      x1 := tl(x1);
+      _g_o_t_o L;
+      _e_n_d;
+   rev := p;
+   post;
+   _e_n_d rev;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e newcell;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r i, j;
+   _i_f freecells<1 _t_h_e_n
+      tidy;
+   i := nextcell;
+   j := link[i];
+   nextcell := link[j];
+   link[j] := expression;
+   item[j] := i;
+   expression := j;
+   link[i] := item[i] := 0;
+   freecells := freecells-2;
+   newcell := i
+   _e_n_d newcell;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e hd(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_f atom(x) _o_r item[x] = -1 _t_h_e_n
+      achtung(_[Operand*of*hd*not*list_]);
+   hd := item[x];
+   _e_n_d hd;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e tl(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_f atom(x) _o_r item[x] = -1 _t_h_e_n
+      achtung(_[Operand*of*tl*not*list_]);
+   tl := link[x];
+   _e_n_d tl;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e cons(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r i, x1, y1;
+   ante;
+   i := newcell;
+   x1 := x;
+   y1 := y;
+   _i_f _n_o_t atom(x1) _a_n_d item[x1] = -1 _t_h_e_n
+      achtung(_[First*operand*of*cons*not*allowed_]);
+   _i_f y1 ± 0 _a_n_d (atom(y1) _o_r item[y1] = -1) _t_h_e_n
+      achtung(_[Second*operand*of*cons*not*allowed_]);
+   link[i] := y1;
+   item[i] := x1;
+   post;
+   cons := i;
+   _e_n_d cons;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e value(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_f _n_o_t atom(x) _t_h_e_n
+      achtung(_[Operand*of*value*not*atom_]);
+   value := item[x];
+   _e_n_d value;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e setup(x);
+_i_n_t_e_g_e_r x;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r i;
+   ante;
+   i := newcell;
+   item[i] := x;
+   link[i] := -1;
+   post;
+   setup := i;
+   _e_n_d setup;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e append(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r x1;
+   ante;
+   x1 := x;
+   append := _i_f x1 = 0 _t_h_e_n
+                y
+             _e_l_s_e
+                cons(hd(x), append(tl(x1), y));
+   post
+   _e_n_d append;
+
+_i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e read list(dv);
+_v_a_l_u_e dv;
+_i_n_t_e_g_e_r dv;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r symbol, j, sign;
+   _b_o_o_l_e_a_n number;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e insymbol;
+      _b_e_g_i_n
+      _i_n_t_e_g_e_r i;
+   L:
+      i := inbasicsymbol(dv);
+      _i_f i = 160 _o_r i = 174 _o_r i = 158 _t_h_e_n
+         _g_o_t_o L;
+      insymbol := i
+      _e_n_d insymbol;
+
+   _i_n_t_e_g_e_r _p_r_o_c_e_d_u_r_e in;
+      _b_e_g_i_n
+      _i_n_t_e_g_e_r i, k;
+      _b_o_o_l_e_a_n first;
+      first := _t_r_u_e;
+      number := _f_a_l_s_e;
+   again:
+      symbol := insymbol;
+      _i_f number _t_h_e_n
+         _b_e_g_i_n
+         _i_f symbol<9 _t_h_e_n
+            _b_e_g_i_n
+            j := 10×j + sign×symbol;
+            _g_o_t_o again;
+            _e_n_d;
+         number := _f_a_l_s_e;
+         i := cons(setup(j), 0);
+         _e_n_d
+      _e_l_s_e
+         _b_e_g_i_n
+         _i_f symbol_< 9 _t_h_e_n
+            _b_e_g_i_n
+            j := symbol;
+            number := _t_r_u_e;
+            sign := 1;
+            _g_o_t_o again;
+            _e_n_d
+         _e_l_s_e
+         _i_f symbol = 209 _t_h_e_n
+            _b_e_g_i_n
+            j := 0;
+            number := _t_r_u_e;
+            sign := -1;
+            _g_o_t_o again;
+            _e_n_d
+         _e_l_s_e
+         _i_f symbol = 25 _t_h_e_n
+            i := cons(0, 0)
+         _e_l_s_e
+         _i_f symbol = 132 _t_h_e_n
+            i := cons(in, 0)
+         _e_l_s_e
+            achtung(_[Data*incorrect_]);
+         symbol := insymbol;
+         _e_n_d;
+         _i_f first _t_h_e_n
+            in := i
+         _e_l_s_e
+            link[k] := i;
+         first := _f_a_l_s_e;
+         k := i;
+         _i_f symbol = 166 _t_h_e_n
+            _g_o_t_o again;
+         _i_f symbol ± 148 _t_h_e_n
+            achtung(_[Data*incorrect_]);
+         _e_n_d;
+   next:
+      _i_f inbasicsysmbol(dv) ± 132 _t_h_e_n
+         _g_o_t_o next;
+      readlist := in;
+      _i_f insymbol ± 152 _t_h_e_n
+         achtung(_[Data*incorrect_]);
+      post;
+      _e_n_d in;
+
+_b_o_o_l_e_a_n _p_r_o_c_e_d_u_r_e equal(x, y);
+_i_n_t_e_g_e_r x, y;
+   _b_e_g_i_n
+   _i_n_t_e_g_e_r x1, y1;
+   ante;
+   x1 := x;
+   y1 := y;
+L:
+   _i_f x1 = y1 _t_h_e_n
+      equal := _t_r_u_e
+   _e_l_s_e
+   _i_f x1 = 0 _o_r y1 = 0 _t_h_e_n
+      equal := _f_a_l_s_e
+   _e_l_s_e
+   _i_f atom(x1) _t_h_e_n
+      equal := atom(y1) _a_n_d item[x1] = item[y1]
+   _e_l_s_e
+   _i_f atom(y1) _t_h_e_n
+      equal := _f_a_l_s_e
+   _e_l_s_e
+      _b_e_g_i_n
+      _i_f equal(hd(x1), hd(y1)) _t_h_e_n
+         _b_e_g_i_n
+         x1 := tl(x1);
+         y1 := (y1);
+         _g_o_t_o L;
+         _e_n_d;
+      equal := _f_a_l_s_e;
+      _e_n_d;
+   post;
+   _e_n_d equal;
+
+_b_o_o_l_e_a_n _p_r_o_c_e_d_u_r_e atom(x);
+_v_a_l_u_e x;
+_i_n_t_e_g_e_r x;
+   atom := link[x] = -1;
+
+_p_r_o_c_e_d_u_r_e warning;
+   _b_e_g_i_n
+   write text(10, _[_[c_]only_]);
+   write(10, f, freecells);
+   write text(10, _[**cells*available_[c_]_]);
+   _e_n_d warning;
+
+_p_r_o_c_e_d_u_r_e bases;
+   preserve(tree);
+
+_p_r_o_c_e_d_u_r_e joinon(i, tree);
+_v_a_l_u_e i, tree;
+_i_n_t_e_g_e_r i, tree;
+   _i_f i < value(hd(tl(tree))) _t_h_e_n
+      _b_e_g_i_n
+      _i_f hd(tree) = 0 _t_h_e_n
+         sethd(tree, cons(0, cons(setup(i), 0)))
+      _e_l_s_e
+         joinon(i, hd(tree));
+      _e_n_d
+   _e_l_s_e
+      _b_e_g_i_n
+      _i_f tl(tl(tree)) = 0 _t_h_e_n
+         settl(tl(tree), cons(0, cons(setup(i), 0)))
+      _e_l_s_e
+         joinon(i, tl(tl(tree)));
+      _e_n_d;
+
+_p_r_o_c_e_d_u_r_e print(tree);
+_v_a_l_u_e tree;
+_i_n_t_e_g_e_r tree;
+   _i_f tree ± 0 _t_h_e_n
+      _b_e_g_i_n
+      print(hd(tree));
+      write(10, f, value(hd(tl(tree))));
+      print(tl(tl(tree)));
+      _e_n_d;
+
+_i_n_t_e_g_e_r n, f, tree;
+
+   faildev := 10;
+   failpm := _t_r_u_e;
+   f := format(_[ndd_]);
+   initiate;
+   n := read(20);
+again:
+   tree := cons(0, cons(setup(read(20)), 0));
+   _f_o_r n := n-1 _w_h_i_l_e n > 0 _d_o
+      joinon(read(20), tree);
+   write text(10, _[_[cc_]_]);
+   write list(10, f, tree, 3);
+   write text(10, _[_[cc_]_]);
+   print(tree);
+   _i_f n ± 0 _t_h_e_n
+      _g_o_t_o again;
+   _e_n_d inner block;
+
+FAILURE:
+   close(10);
+   close(20);
+_e_n_d
+|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
