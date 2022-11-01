@@ -140,6 +140,14 @@ echo
 ee9_test_run WICH "wich_tests ahipr a" >> ee9_regr_tests_log.txt
 echo
 
+
+# echo; echo
+# echo Running PASKAL tests:
+# echo ============================================
+# echo
+# ee9_test_run PASK "pasc_tests ahipr a" >> ee9_regr_tests_log.txt
+# echo
+
 printf "\\a\\a\\a"
 echo Press RETURN when you are ready to see the results:
 read reply

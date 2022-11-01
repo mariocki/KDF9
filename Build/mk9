@@ -29,10 +29,6 @@ PPC)
    echo The PowerPC Macs are no longer supported, as they lack an Ada 2012 compiler.
    exit 9
    ;;
-RPi|RapsberryPi)
-   echo The Rapsberry Pi no longer has a custom build procedure \(use Linux\).
-   exit 9
-   ;;
 *)
    ;;
 esac
@@ -86,7 +82,7 @@ MTP=mtp
 
 case ${OS} in
 
-UNIX|Unix|unix|LINUX|Linux|linux)
+UNIX|Unix|unix|LINUX|Linux|linux|RPi|RapsberryPi)
    cp ${SOURCE}/os_specifics_for_posix.adb ${SOURCE}/os_specifics.adb
    BASE_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -fdata-sections -ffunction-sections"
    BASE_LINK_OPTIONS="-bargs -static -largs -Wl,--gc-sections -Wl,--as-needed"
@@ -182,8 +178,8 @@ macOS|Macintosh|Mac|OSX|UNIX|Unix|unix|LINUX|Linux|linux)
    OPT_LINK_OPTIONS="${BASE_LINK_OPTIONS} -flto"
    ;;
 
-[Ww]indows|WINDOWS)
-   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -gnatf -mtune=native -O3"
+[Ww]indows|WINDOWS|RPi|RapsberryPi)
+   OPT_GNAT_OPTIONS="${BASE_GNAT_OPTIONS} -mtune=native -O3"
    OPT_LINK_OPTIONS="${BASE_LINK_OPTIONS}"
    ;;
 

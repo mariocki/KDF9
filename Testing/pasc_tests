@@ -1,0 +1,74 @@
+USERCODE=${KDF9_USERCODE:-Assembly}
+BINARY=${KDF9_BINARY:-Binary}
+export LISTING=NOLIST
+trap "rm -f -f pasc_test_diff.txt"  \
+      0 1 2 3
+
+
+>pasc_tests_log.txt
+
+echo TEST pasc ACKO
+echo TEST pasc ACKO >>pasc_tests_log.txt
+pasc ACKO - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/ACKO.k3 ${USERCODE}/ACKO-UNOPT.k3       ${BINARY}/ACKO       ${USERCODE}/ACKO-listing.txt
+
+echo TEST pasc ACKT
+echo TEST pasc ACKT >>pasc_tests_log.txt
+pasc ACKT - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/ACKT.k3 ${USERCODE}/ACKT-UNOPT.k3       ${BINARY}/ACKT       ${USERCODE}/ACKT-listing.txt
+
+echo TEST pasc CODY
+echo TEST pasc CODY >>pasc_tests_log.txt
+pasc CODY - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/CODY.k3 ${USERCODE}/CODY-UNOPT.k3       ${BINARY}/CODY       ${USERCODE}/CODY-listing.txt
+
+echo TEST pasc COLLATZ
+echo TEST pasc COLLATZ >>pasc_tests_log.txt
+pasc COLLATZ - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/COLLATZ.k3 ${USERCODE}/COLLATZ-UNOPT.k3       ${BINARY}/COLLATZ       ${USERCODE}/COLLATZ-listing.txt
+
+echo TEST pasc EASTER
+echo TEST pasc EASTER >>pasc_tests_log.txt
+pasc EASTER - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/EASTER.k3 ${USERCODE}/EASTER-UNOPT.k3      ${BINARY}/EASTER      ${USERCODE}/EASTER-listing.txt
+
+echo TEST pasc FLUID
+echo TEST pasc FLUID >>pasc_tests_log.txt
+pasc FLUID - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/FLUID.k3 ${USERCODE}/FLUID-UNOPT.k3       ${BINARY}/FLUID       ${USERCODE}/FLUID-listing.txt
+
+echo TEST pasc HANOI
+echo TEST pasc HANOI >>pasc_tests_log.txt
+pasc HANOI - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+   rm -f ${USERCODE}/HANOI.k3 ${USERCODE}/HANOI-UNOPT.k3       ${BINARY}/HANOI       ${USERCODE}/HANOI-listing.txt
+
+echo TEST pasc T1P2D1
+echo TEST pasc T1P2D1 >>pasc_tests_log.txt
+pasc T1P2D1 - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+    rm -f ${USERCODE}/T1P2D1.k3 ${USERCODE}/T1P2D1-UNOPT.k3   ${BINARY}/T1P2D1   ${USERCODE}/T1P2D1-listing.txt
+
+echo TEST pasc WHETSTONE
+echo TEST pasc WHETSTONE >>pasc_tests_log.txt
+pasc WHETSTONE - t prh         >>pasc_tests_log.txt
+fgrep "Digital signature of traced orders = " KDF9_log.txt >>pasc_tests_log.txt;
+    rm -f ${USERCODE}/WHETSTONE.k3 ${USERCODE}/WHETSTONE-UNOPT.k3   ${BINARY}/WHETSTONE   ${USERCODE}/WHETSTONE-listing.txt
+
+echo
+diff pasc_tests_log.txt pasc_tests_good_log.txt >pasc_test_diff.txt
+if [ -s pasc_test_diff.txt ]
+then
+   echo These are the unexpected variances for this run:
+   echo ===
+   more pasc_test_diff.txt
+   echo ===
+else
+   echo These tests ran as expected.
+fi

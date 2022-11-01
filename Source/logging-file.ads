@@ -1,6 +1,6 @@
 -- Provide logging output to a named text file.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -49,10 +49,10 @@ package logging.file is
    procedure open  (logger : in out file.output; logfile_name : in String);
 
    overriding
-   procedure close (logger : in out file.output; logfile_name : in String);
+   procedure close (logger : in out file.output);
 
    overriding
-   procedure flush (logger : in out file.output; iff    : in Boolean := True);
+   procedure flush (logger : in out file.output; iff : in Boolean := True);
 
 private
 

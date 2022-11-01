@@ -1,6 +1,6 @@
 -- Provide operations supporting replicated output to a list of logging interfaces.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -83,10 +83,10 @@ package body generic_logger is
    end open;
 
    overriding
-   procedure close (logger : in out replicator; log_name : in String) is
+   procedure close (logger : in out replicator) is
    begin
       for l in logger.data.list'Range loop
-         logger.data.list(l).close(log_name);
+         logger.data.list(l).close;
       end loop;
    end close;
 

@@ -1,0 +1,55 @@
+!begin
+!library A0, A1, A4, A5, A15;
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2;
+!integer i1, i2;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s); t1 := Time !end pre;
+
+!procedure post;
+   !begin t2 := Time - t1;  write(30, layout, t2 ×  1.0º6 / 4.0 - c) !end post;
+
+!real  x, y, z, t;
+!real  a, b, c, d, layout;
+
+!integer  !array  E1[1:1], E2[1:1, 1:1], E3[1:1, 1:1, 1:1];
+!integer  i, j, k, l, m, n;
+
+!procedure  p0; ;
+
+!procedure  p1(x); !value  x; !real  x; ;
+
+!procedure  p2(x, y); !value  x, y; !real  x, y; ;
+
+!procedure  p3(x, y, z); !value  x, y, z; !real  x, y, z; ;
+
+y := 1.0; z := 2.0; l := 1; m := 2;
+a := 1; b := 2;
+layout := format({ndddd.dddc});
+
+writetext(30, {null _ statement _ timing _ overhead _ in _ microseconds{ss}});
+t1 := Time; t2 := Time - t1; c := t ×  1.0º6; write(30, layout, c);
+
+i := 98;
+pre({{c}!for  _ i _ := _ i _ + _ 1 _ !while  _ i _ < _ n _ !do  _ TOTAL{ss}});
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+   !for  i := i + 1 !while  i < n !do ;
+post;
+
+pre({{c}goto _ abcd{ss}});
+   !begin  !goto  abcd1; abcd1: !end ;
+   !begin  !goto  abcd2; abcd2: !end ;
+   !begin  !goto  abcd3; abcd3: !end ;
+   !begin  !goto  abcd4; abcd4: !end ;
+post;
+
+!end
+|

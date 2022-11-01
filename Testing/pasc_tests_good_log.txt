@@ -1,0 +1,216 @@
+TEST pasc ACKO
+
+LP0:
+===
+CALLS     2785999
+RESULT       2045
+US/CALL       189
+INS/CALL       28
+NS/INS       6631
+===
+Digital signature of traced orders = #6105547575712601.
+TEST pasc ACKT
+
+LP0:
+===
+CALLS     2785999
+RESULT       2045
+US/CALL       130
+INS/CALL       20
+NS/INS       6525
+===
+Digital signature of traced orders = #0542666371324744.
+TEST pasc CODY
+
+LP0:
+===
+CALLING MACHAR  
+
+OUTPUT OF MACHAR
+BETA =          2
+T    =         39
+IRND  =         1
+NGRD  =         0
+MACEP =       -39
+NEGEP =       -39
+IEXP  =         8
+MINEXP=      -129
+MAXEXP=       127
+EPS   =  1.81898940E-12
+EPSNEG=  1.81898940E-12
+XMIN  =  1.46936794E-39
+XMAX  =  17014118.34606934E+31
+===
+Digital signature of traced orders = #3671740736111702.
+TEST pasc COLLATZ
+
+TP0:
+===
+STARTING AT        1234567890123
+LARGEST  FOUND     5555555505556
+# OF ITERATIONS              198
+
+===
+Digital signature of traced orders = #1214020447460052.
+TEST pasc EASTER
+
+LP0:
+===
+THESE ARE THE 21 YEARS OF KDF9  
+     1960        4       17
+     1961        4        2
+     1962        4       22
+     1963        4       14
+     1964        3       29
+     1965        4       18
+     1966        4       10
+     1967        3       26
+     1968        4       14
+     1969        4        6
+     1970        3       29
+     1971        4       11
+     1972        4        2
+     1973        4       22
+     1974        4       14
+     1975        3       30
+     1976        4       18
+     1977        4       10
+     1978        3       26
+     1979        4       15
+     1980        4        6
+
+
+THESE ARE THE YEARS OF EE9      
+     2009        4       12
+     2010        4        4
+     2011        4       24
+     2012        4        8
+     2013        3       31
+     2014        4       20
+     2015        4        5
+     2016        3       27
+     2017        4       16
+     2018        4        1
+     2019        4       21
+     2020        4       12
+     2021        4        4
+     2022        4       17
+
+
+THESE ARE THE NEXT 21 YEARS--MAKING OPTIMISTIC ASSUMPTIONS      
+     2023        4        9
+     2024        3       31
+     2025        4       20
+     2026        4        5
+     2027        3       28
+     2028        4       16
+     2029        4        1
+     2030        4       21
+     2031        4       13
+     2032        3       28
+     2033        4       17
+     2034        4        9
+     2035        3       25
+     2036        4       13
+     2037        4        5
+     2038        4       25
+     2039        4       10
+     2040        4        1
+     2041        4       21
+     2042        4        6
+     2043        3       29
+===
+Digital signature of traced orders = #5200462503350417.
+TEST pasc FLUID
+
+LP0:
+===
+PROPAGATION OF AN IMPULSE INTO A VISCOUS-LOCKING MEDIUM 
+
+
+
+        DELTA ALPHA =  0.10000000    
+
+
+        ALPHA                 LAMBDA                LAMBDA*SQRT(2ALPHA)   G
+
+        0.00000000            INFINITY              1.00000000            1.00000000    
+        0.10000000            2.02007247            0.90340387            0.73452470    
+        0.20000000            1.28117798            0.81028810            0.52525344    
+        0.30000000            0.92711856            0.71814295            0.36101050    
+        0.40000000            0.69943476            0.62559347            0.24038156    
+
+        0.50000000            0.53159649            0.53159649            0.26795609    
+        0.60000000            0.39726942            0.43518684            0.30383942    
+        0.70000000            0.28340057            0.33532408            0.34488609    
+        0.80000000            0.18242264            0.23074842            0.38946645    
+        0.90000000            0.08928447            0.11978769            0.43642036    
+
+        1.00000000            0.00000000            0.00000000            0.48394000    
+
+===
+Digital signature of traced orders = #0271660317046424.
+TEST pasc HANOI
+
+LP0:
+===
+TOWERS OF HANOI.
+MOVE 5 DISCS FROM TOWER A TO TOWER C VIA TOWER B
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   A   TO   B
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   B   TO   C
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   A   TO   B
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   C   TO   A
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   A   TO   B
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   B   TO   C
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   C   TO   A
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   B   TO   C
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   A   TO   B
+MOVE A DISC FROM   C   TO   B
+MOVE A DISC FROM   A   TO   C
+MOVE A DISC FROM   B   TO   A
+MOVE A DISC FROM   B   TO   C
+MOVE A DISC FROM   A   TO   C
+===
+Digital signature of traced orders = #3465715703510121.
+TEST pasc T1P2D1
+
+LP0:
+===
+QUALITY...1.2-1      1000K NEW WHETSTONES
+KWI/SEC:       99
+===
+Digital signature of traced orders = #1103545504204737.
+TEST pasc WHETSTONE
+
+LP0:
+===
+N=    0 J=    0 K=    0 X1= 1.00000000    X2=-1.00000000    X3=-1.00000000    X4=-1.00000000    
+N=  120 J=  140 K=  120 X1=-0.06834220    X2=-0.46263766    X3=-0.72971839    X4=-1.12397907    
+N=  140 J=  120 K=  120 X1=-0.05533645    X2=-0.44743656    X3=-0.71097339    X4=-1.10309806    
+N= 3450 J=    1 K=    1 X1= 1.00000000    X2=-1.00000000    X3=-1.00000000    X4=-1.00000000    
+N= 2100 J=    1 K=    2 X1= 6.00000000    X2= 6.00000000    X3=-0.71097339    X4=-1.10309806    
+N=  320 J=    1 K=    2 X1= 0.49040732    X2= 0.49040732    X3= 0.49039250    X4= 0.49039250    
+N= 8990 J=    1 K=    2 X1= 1.00000000    X2= 1.00000000    X3= 0.99993750    X4= 0.99993750    
+N= 6160 J=    1 K=    2 X1= 3.00000000    X2= 2.00000000    X3= 3.00000000    X4=-1.10309806    
+N=    0 J=    2 K=    3 X1= 1.00000000    X2=-1.00000000    X3=-1.00000000    X4=-1.00000000    
+N=  930 J=    2 K=    3 X1= 0.83466552    X2= 0.83466552    X3= 0.83466552    X4= 0.83466552    
+KWI/SEC:  82
+===
+Digital signature of traced orders = #7575513063723571.

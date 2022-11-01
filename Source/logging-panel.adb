@@ -1,6 +1,6 @@
 -- Provide logging output to an interactive terminal/control panel.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -35,6 +35,7 @@ package body logging.panel is
       new_col : constant Natural := logger.column_number + at_least;
       deficit : constant Natural := (spacing - new_col mod spacing) mod spacing;
    begin
+      if logger.panel_is_shut then return; end if;
       if not iff then return; end if;
       for i in logger.column_number .. (new_col + deficit) loop
          POSIX.output(' ');
@@ -47,6 +48,7 @@ package body logging.panel is
                          column : in Positive;
                          iff    : in Boolean := True) is
    begin
+      if logger.panel_is_shut then return; end if;
       if not iff then return; end if;
       if column < logger.column_number then
          logger.log_new_line;
@@ -62,6 +64,7 @@ package body logging.panel is
                   char   : in Character;
                   iff    : in Boolean := True) is
    begin
+      if logger.panel_is_shut then return; end if;
       if not iff then return; end if;
       POSIX.output(char);
       logger.column_number := logger.column_number + 1;
@@ -72,6 +75,7 @@ package body logging.panel is
                   text   : in String;
                   iff    : in Boolean := True) is
    begin
+      if logger.panel_is_shut then return; end if;
       if not iff then return; end if;
       if text /= "" then
          POSIX.output(text);
@@ -83,6 +87,7 @@ package body logging.panel is
    procedure log_new_line (logger : in out panel.display;
                            iff    : in Boolean := True) is
    begin
+      if logger.panel_is_shut then return; end if;
       if not iff then return; end if;
       POSIX.output_line;
       logger.column_number := 1;
@@ -91,6 +96,7 @@ package body logging.panel is
    not overriding
    procedure show_line (logger : in out panel.display; message : in String := "") is
    begin
+      if logger.panel_is_shut then return; end if;
       if message /= "" then
          logger.log(message);
       end if;
@@ -103,6 +109,7 @@ package body logging.panel is
       response : response_kind;
       choice   : Character;
    begin
+   if logger.panel_is_shut then return; end if;
    interaction_loop:
       loop
          logger.column_number := 1;
@@ -133,5 +140,19 @@ package body logging.panel is
       end loop interaction_loop;
       the_diagnostic_mode_changed := (the_diagnostic_mode /= old_mode) or quit_was_requested;
    end interact;
+
+   overriding
+   procedure open (logger : in out panel.display; logfile_name : in String) is
+   begin
+      if not logger.panel_is_shut then return; end if;
+      logger.panel_is_shut := False;
+   end open;
+
+   overriding
+   procedure close  (logger : in out panel.display) is
+   begin
+      if logger.panel_is_shut then return; end if;
+      logger.panel_is_shut := True;
+   end close;
 
 end logging.panel;

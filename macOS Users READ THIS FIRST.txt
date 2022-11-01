@@ -23,7 +23,7 @@ You can handle this in one of four ways:
    but deliberately so, as Apple wants people to think twice about running unauthorized software.
 
    You will have to do this for each of the several programs needed to run all the KDF9 software:
-   not just ee9 but a2b, extract_symbols, glance, kal3, kidopt, mkchan, mtp, ports and st_tl.
+   ee9 and a2b, extract_symbols, glance, kal3, kidopt, mkchan, mtp, paskal, ports and st_tl.
    This is (very) annoying, but it needs to be done just the once for each of these programs.
 
 3. The easy way.
@@ -53,7 +53,7 @@ You can handle this in one of four ways:
    If you are wary about this -- as you perhaps should be -- look at the commands
    inside de40ine and then read the message de40ine outputs in response to q.
 
-   For the avoidance of doubt, the following are the (only) commands that de40ine should contain:
+For the avoidance of doubt, the following are the (only) commands that de40ine should contain:
 ========================================================
 ROOT=..
 B=${ROOT}/Build

@@ -23,7 +23,7 @@ rm -f ${name}.zip
 cd ../..
 
 case ${OS} in
-UNIX|Unix|unix|LINUX|Linux|linux)
+UNIX|Unix|unix|LINUX|Linux|linux|RPi|RapsberryPi)
    tar -c -f ${name}.tar emulation; gzip -c ${name}.tar > ${name}.tar.gz; rm ${name}.tar
    echo; ls -la ${name}.tar.gz
    ;;

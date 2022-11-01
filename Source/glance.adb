@@ -1,6 +1,6 @@
 -- Perform peephole optimizations of KDF9 Kidsgrove Algol object programs in Usercode.
 --
--- This file is an auxiliary of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is an auxiliary of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -16,6 +16,7 @@
 
 with Ada.Characters.Latin_1;
 with Ada.Command_Line;
+with Ada.Exceptions;
 with Ada.Strings;
 with Ada.Strings.Unbounded;
 --
@@ -23,6 +24,7 @@ with simple_IO;
 with string_editing;
 
 
+use  Ada.Exceptions;
 use  Ada.Strings;
 use  Ada.Strings.Unbounded;
 --
@@ -151,10 +153,10 @@ procedure glance is
                                                       -"=Z;",      +"NOT; NEG; J",  +"<Z;"),
           (-"ZERO; NOT; SIGN; STR; REV; ERASE; J",
                                                       -"=Z;",      +"NOT; NEG; J",  +"GEZ;"),
-          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"#Z;",      +"NOT: NEG; J",  +"#Z;"),
-          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"=Z;",      +"NOT: NEG; J",  +"=Z;"),
-          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"#Z;",      +"NOT: NEG; J",  +"=Z;"),
-          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"=Z;",      +"NOT: NEG; J",  +"#Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"#Z;",      +"NOT; NEG; J",  +"#Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; J",           -"=Z;",      +"NOT; NEG; J",  +"=Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"#Z;",      +"NOT; NEG; J",  +"=Z;"),
+          (-"ZERO; NOT; SIGN; ABS; NEG; NOT; J",      -"=Z;",      +"NOT; NEG; J",  +"#Z;"),
           (-"ZERO; SIGN; ABS; NEG; J",                -"#Z;",      +"J",            +"#Z;"),
           (-"ZERO; SIGN; ABS; NEG; J",                -"=Z;",      +"J",            +"=Z;"),
           (-"ZERO; SIGN; ABS; NEG; NOT; J",           -"#Z;",		 +"J",            +"=Z;"),
@@ -751,7 +753,7 @@ i_th: for i in special_optimizations'Range loop
                print_line(line(1..last));
             else
                do_simple_substitutions(line(1..last));
-               data := To_Unbounded_String(line(1..last));
+               Set_Unbounded_String(data, line(1..last));
                normalize_spacing(data);
                if optimizing then
                   do_constant_substitutions;
@@ -767,25 +769,175 @@ i_th: for i in special_optimizations'Range loop
       end loop;
    end clarify_algol;
 
-   procedure clarify_pascal is
+   max_source_length : constant := 2**14;  -- > 8KW / 1.5 words per line
+   subtype source_index_range is Positive range 1 .. max_source_length;
+   pascal_source : array (source_index_range) of Unbounded_String;
+   pascal_index  : source_index_range;
+   placeholder   : constant Unbounded_String := To_Unbounded_String("(REMOVED BY GLANCE);");
+   dumps_enabled : Boolean;
+
+   procedure get_attributes (
+                             line : in Unbounded_String;
+                             is_a_leaf, has_nonlocals : out Boolean;
+                             last_formal, last_local, first_l_value : out Natural
+                            )
+   is
+      l_value_key : constant String := "LVALUE@";
+      locals_key  : constant String := "LOCALS=";
+      formals_key : constant String := "FORMALS=";
+      first, last : Natural;
    begin
-      loop
-         read_line(line, last, True);
-         if last /= 0 then
-            if line(1) = '|' then
+      is_a_leaf := Index(line, "LEAF", 1, Forward) /= 0;
+      has_nonlocals := Index(line, "NONLOCALS", 1, Forward) /= 0;
+      first_l_value := 32767;
+      first := Index(line, l_value_key, 1, Forward);
+      if first /= 0 then
+         last := Index(line, " ", first, Forward);
+         first_l_value := Natural'Value(To_String(Unbounded_Slice(line, first+l_value_key'Length, last-1)));
+      end if;
+      last_local := 0;
+      first := Index(line, locals_key, 1, Forward);
+      if first /= 0 then
+         last := Index(line, " ", first, Forward);
+         last_local := Natural'Value(To_String(Unbounded_Slice(line, first+locals_key'Length, last-1)));
+      end if;
+      last_formal := 0;
+      first := Index(line, formals_key, 1, Forward);
+      if first /= 0 then
+         last := Index(line, " ", first, Forward);
+         last_formal := Natural'Value(To_String(Unbounded_Slice(line, first+formals_key'Length, last-1)));
+      end if;
+   end get_attributes;
+
+  procedure map_locals_to_Q_store (
+                                   initial, final : in Natural;
+                                   is_a_leaf: in Boolean;
+                                   last_local, first_l_value : in Natural
+                                   )
+   is
+      first : Natural;
+   begin
+      if is_a_leaf and last_local > 0 then
+         for s in initial .. final loop
+            if Length(pascal_source(s)) /= 0 then
+               if Index(pascal_source(s), "M1;", 1, Forward) /= 0 then
+                  for q in 5 .. Natural'Min(first_l_value, 12) loop
+                     declare
+                        q_image  : constant String := q'Image;
+                        q_number : constant String := q_image(2..q_image'Last);
+                     begin
+                        first := 1;
+                        loop
+                           first := Index(pascal_source(s), "E" & q_number & "M1;", first, Forward);
+                        exit when first = 0;
+                           Replace_Slice(pascal_source(s), first, first+q_number'Length+3, "Q" & q_number & ";");
+                        end loop;
+                     end;
+                  end loop;
+               end if;
+            end if;
+         end loop;
+      end if;
+   end map_locals_to_Q_store;
+
+
+  procedure optimize_linkages (
+                               prelude_index, postlude_index : in Natural;
+                               is_a_leaf, has_nonlocals : in Boolean;
+                               last_formal, last_local, first_l_value : in Natural
+                              )
+   is
+   begin
+      null;
+   end optimize_linkages;
+
+   procedure pascal_second_pass (start, stop : in source_index_range) is
+      first, last : Natural;
+      prelude_index, postlude_index : Natural;
+      is_a_leaf, has_nonlocals : Boolean;
+      last_formal, last_local, first_l_value : Natural;
+   begin
+   body_loop:
+      for s in start .. stop loop
+         if Length(pascal_source(s)) /= 0 then
+      exit body_loop when Unbounded_Slice(pascal_source(s), 1, 1) = "|";
+            first := Index(pascal_source(s), "(BODY OF ", 1, Forward);
+            if first /= 0 and Index(pascal_source(s), " MAIN PROGRAM)", 1, Forward) = 0 then
+       postlude_loop:
+               for t in s+1 .. stop loop
+                  first := Index(pascal_source(t), "(POSTLUDE OF ", 1, Forward);
+                  if first /= 0 then
+                     get_attributes(
+                                    pascal_source(t),
+                                    is_a_leaf, has_nonlocals,
+                                    last_formal, last_local, first_l_value
+                                   );
+                     prelude_index := s+1;
+                     postlude_index := t+1;
+                     pascal_source(s+1) := pascal_source(t+4);
+                     last := Length(pascal_source(s+1));
+                     first := Index(pascal_source(s+1), " J", last, Backward);
+                     if first /= 0 then
+                        Replace_Slice(pascal_source(s+1), first, last, "");
+                     end if;
+                     pascal_source(t+2)   := placeholder;
+                     pascal_source(t+3) := placeholder;
+                     pascal_source(t+4) := placeholder;
+               exit postlude_loop;
+                  end if;
+               end loop postlude_loop;
+               map_locals_to_Q_store(prelude_index, postlude_index, is_a_leaf, last_local, first_l_value);
+               optimize_linkages(prelude_index, postlude_index,
+                                 is_a_leaf, has_nonlocals,
+                                 last_formal, last_local, first_l_value
+                                );
+            end if;
+         end if;
+      end loop body_loop;
+   end pascal_second_pass;
+
+   procedure pascal_third_pass (start, stop : in source_index_range) is
+   begin
+      for s in start .. stop loop
+         data := pascal_source(s);
+         if Length(data) /= 0 then
+            if Unbounded_Slice(data, 1, 1) = "|" then
                print_line("|");
                return;
-            elsif line(1) in '(' | 'P' then
+            elsif data = placeholder then
+               -- Ignore an unwanted line.
+               null;
+            elsif Unbounded_Slice(data, 1, 1) = "(" or else Unbounded_Slice(data, 1, 1) = "P" then
                new_line;
-               print_line(line(1..last));
+               print_line(To_String(data));
             else
-               data := To_Unbounded_String(line(1..last));
-               do_constant_substitutions;
                do_single_field_substitutions;
+               -- Pascal is not pretty-printed, because the output from PASKAL is neat.
                print_line(To_String(data));
             end if;
          end if;
       end loop;
+   end pascal_third_pass;
+
+   procedure clarify_pascal is
+   begin
+      begin
+         dumps_enabled := false;
+         pascal_index := 1;
+         loop
+            read_line(line, last, True);
+            Set_Unbounded_String(pascal_source(pascal_index), line(1..last));
+            if Index(pascal_source(pascal_index), "DUMP ON", 1, Forward) /= 0 then
+               dumps_enabled := true;
+            end if;
+            pascal_index := pascal_index + 1;
+         end loop;
+      exception
+         when end_error =>
+            pascal_index := pascal_index - 1;
+      end;
+      pascal_second_pass(1, pascal_index);
+      pascal_third_pass(1, pascal_index);
    end clarify_pascal;
 
    procedure complain (about : in String := "") is
@@ -805,12 +957,14 @@ begin
    if lower(CLI.Argument(1)) not in "-o" | "-p" | "-r" then
       complain("invalid parameter: " & CLI.Argument(1));
    end if;
+   -- Merely copy the Usercode frontsheet.
    loop
       read_line(line, last, True);
       print_line(line(1..last));
       last := index_forward(line(1..last), "PROGRAM;", 1);
    exit when last /= 0;
    end loop;
+   -- Process the rest of the text.
    if lower(CLI.Argument(1)) = "-p" then
       clarify_pascal;
    else
@@ -825,8 +979,9 @@ exception
       report_line("glance: input line too long!");
       flush_outputs;
       CLI.Set_Exit_Status(CLI.Failure);
-   when others =>
-      report_line("glance: other exception raised!");
+   when error : others =>
+      report_line("Failure in glance: " & Exception_Information(error) & ".");
       flush_outputs;
       CLI.Set_Exit_Status(CLI.Failure);
+
 end glance;

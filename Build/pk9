@@ -18,11 +18,11 @@ T=${ROOT}/Testing
 A=${ROOT}/Testing/Adjuncts
 OS=${1:-macOS}
 
-FILES="ee9 kal3 kidopt a2b extract_symbols glance mtp ports st_tl ${A}/mkchan"
+FILES="ee9 kal3 kidopt a2b extract_symbols glance mtp paskal ports st_tl ${A}/mkchan"
 
 cd ${T}
 case ${OS} in
-   UNIX|Unix|unix|LINUX|Linux|linux)
+   UNIX|Unix|unix|LINUX|Linux|linux|RPi|RapsberryPi)
       SIZE="size "
       ;;
    macOS|Macintosh|Mac|OSX)

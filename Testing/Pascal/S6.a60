@@ -1,0 +1,120 @@
+!begin
+!library A0, A1, A4, A5, A15;
+
+'real' 'procedure' Time;
+   'KDF9' 2/0/0/0;
+   SET 17; OUT; REV; ERASE; SET 23; FLOAT; 'EXIT';
+   'ALGOL';
+
+'real'   t1, t2, t3, t4;
+
+!procedure pre (s); !string s;
+   !begin writetext(30, s) !end pre;
+
+!procedure post;
+   !begin write(30, layout, t4); writetext(30, {{c}}) !end post;
+
+!real  x, y, z, t;
+!real  a, b, c, d, layout;
+
+!integer  !array  E1[1:1], E2[1:1, 1:1], E3[1:1, 1:1, 1:1];
+!integer  i, j, k, l, m, n;
+
+!procedure  p0; ;
+
+!procedure  p1(x); !value  x; !real  x; ;
+
+!procedure  p2(x, y); !value  x, y; !real  x, y; ;
+
+!procedure  p3(x, y, z); !value  x, y, z; !real  x, y, z; ;
+
+y := 1.0; z := 2.0; l := 1; m := 2;
+a := 1; b := 2;
+layout := format({ndddddddd.dddc});
+
+writetext(30, {null _ statement _ timing _ overhead _ in _ microseconds{ss}});
+t1 := Time; t2 := Time - t1; c := t2 ×  1.0º6; write(30, layout, c);
+
+writetext(30, {{c}all _ following _ times _ are _ in _ microseconds{c}});
+
+
+pre({{c}p0{ss}});
+t3 := Time;
+   p0;p0;p0;p0;p0;
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}p1{ss}});
+t3 := Time;
+   p1(x);p1(x);p1(x);p1(x);p1(x);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}p2{ss}});
+t3 := Time;
+   p2(x,y);p2(x,y);p2(x,y);p2(x,y);p2(x,y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}p3{ss}});
+t3 := Time;
+   p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);p3(x,y,z);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}abs{ss}});
+t3 := Time;
+   abs(y);abs(y);abs(y);abs(y);abs(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}arctan{ss}});
+t3 := Time;
+   arctan(y);arctan(y);arctan(y);arctan(y);arctan(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}cos{ss}});
+t3 := Time;
+   cos(y);cos(y);cos(y);cos(y);cos(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}entier{ss}});
+t3 := Time;
+   entier(y);entier(y);entier(y);entier(y);entier(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}exp{ss}});
+t3 := Time;
+   exp(y);exp(y);exp(y);exp(y);exp(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}ln{ss}});
+t3 := Time;
+   ln(y);ln(y);ln(y);ln(y);ln(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}sign{ss}});
+t3 := Time;
+   sign(y);sign(y);sign(y);sign(y);sign(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}sin{ss}});
+t3 := Time;
+   sin(y);sin(y);sin(y);sin(y);sin(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+pre({{c}sqrt{ss}});
+t3 := Time;
+   sqrt(y);sqrt(y);sqrt(y);sqrt(y);sqrt(y);
+t4 := (Time-t3)/5.0 × 1.0º6;
+post;
+
+!end
+|

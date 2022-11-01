@@ -1,0 +1,53 @@
+!begin
+!library A0;
+
+   !procedure get the date of Easter Sunday (Easter day, Easter month, given year);
+   !comment this procedure implements an algorithm due to T.H. O'Beirne;
+         !value   given year;
+         !integer given year, Easter month, Easter day;
+      !begin
+
+         !procedure divide (dividend, divisor, quotient, remainder);
+            !value dividend, divisor;
+            !integer dividend, divisor, quotient, remainder;
+         !begin
+
+         !integer q;
+
+         q := dividend !div divisor;
+         remainder := dividend  -  divisor  *  q;
+         quotient := q;
+         !end divide;
+
+      !integer a, b, c, h;
+
+      divide(given year, 19, Easter month, a);
+      divide(given year, 100, b, c);
+      divide(b, 4, Easter day, given year);
+      divide(19 * a + b - Easter day + 15 - ((8 * b + 13) !div 25),  30,  Easter month,  h);
+      divide(c, 4, b, Easter day);
+      divide(2 * (given year + b) - h - Easter day + 32, 7, Easter month, c);
+      h := h + c - 7 * ((a + 11 * h + 19 * c) !div 433);
+      Easter month := (h + 90) !div 25;
+      divide(33 * Easter month + h + 19, 32, b, Easter day);
+      !end get the date of Easter Sunday;
+
+!integer Easter day, Easter month, data year;
+
+   !procedure show a range of dates (first year, final year);
+         !value   first year, final year;
+         !integer first year, final year;
+      !begin
+
+      !integer this year;
+
+      !for this year := first year !step 1 !until final year !do
+         !begin
+         get the date of Easter Sunday(Easter day, Easter month, this year);
+         !end
+      !end show a range of dates;
+
+show a range of dates (1960, 2960);
+
+!end
+|

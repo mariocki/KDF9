@@ -1,0 +1,146 @@
+{ PASKAL_real_IO }
+
+procedure put_mantissa (stream : integer; number : real);
+   var
+      abs_val : real;
+      int_part, frac_part, digits : 0 .. maxint;
+      negative : boolean;
+   begin
+   negative := number < 0.0;
+   abs_val := abs(number);
+   int_part := trunc(abs_val);
+   frac_part := round((abs_val - int_part)*1e8);
+   if frac_part >= 1e8 then
+      begin
+      int_part  := int_part + 1;
+      frac_part := 0;
+      end;
+   digits := int_field_leader(stream, int_part, 0);
+   if number < 0 then
+      put_char(stream, '-')
+   else
+      put_char(stream, ' ');
+   put_small_int_field(stream, int_part, -1);
+   put_char(stream,  '.');
+   usercode
+      frac_part;
+      'V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15;';
+      stream;
+      '=M14; V0P119M14; =C15; POAQ15;';
+      end;
+   end {put_mantissa};
+
+procedure put_exponent (stream, exponent : integer);
+   const
+      modulus = 100;
+   var
+      abs_val : 0 .. maxint;
+   begin
+   {if exponent <> 0 then}
+      begin
+      abs_val := abs(exponent);
+      put_char(stream, 'e');
+      if exponent < 0 then
+         put_char(stream, '-')
+      else
+         put_char(stream, '+');
+      usercode
+         abs_val;
+         'V19P119; REV; FRB; V18P119; OR;';
+         36;
+         '=C15; SHL+36; ZERO; NOT; SHLD-36; ERASE; =V20P119; V10P119; =Q15;';
+         stream;
+         '=M14; V0P119M14; =C15; POAQ15;';
+         end;
+      end
+   {else
+      put_alfa8(stream, '    ииии');}
+   end {put_exponent};
+
+procedure put_mantissa_and_exponent (stream : integer; mantissa : real; exponent : integer);
+   begin
+   put_mantissa(stream, mantissa);
+   put_exponent(stream, exponent);
+   end;
+
+procedure put_float (stream : integer; number : real);
+   label
+      999, 998;
+   const
+      ten_to_the_38 = 1.0e+38;
+   var
+      exponent : integer;
+      divisor, multiplier  : real;
+   begin
+   if number = 0 then
+      begin
+      put_mantissa(stream, 0);
+      put_alfa8(stream, '    ииии');
+      end
+   else
+   if abs(number) >= 1e8 then
+      { the integral part is too big to be printed as an integer, so scale it down }
+      begin
+      divisor := ten_to_the_38;
+      for exponent := 38 downto 8 do
+         begin
+         if abs(number) >= divisor then
+            begin
+            number := number / divisor;
+            if exponent >= 8 then
+               begin
+               number := number * 1e7;
+               exponent := exponent - 7;
+               end;
+            goto 999;
+            end;
+         divisor := divisor / 10.0;
+         end;
+      999:
+      put_mantissa_and_exponent(stream, number, exponent);
+      end
+   else
+      begin
+      multiplier := 1.0;
+      for exponent := 0 downto -38 do
+         begin
+         if abs(number) >= 1.0 / multiplier then
+            begin
+            number := number * multiplier;
+            goto 998;
+            end;
+         multiplier := 10.0 * multiplier;
+         end;
+      998:
+      if  (exponent = -39) and (abs(number) < 1) then
+         begin
+         number := number * ten_to_the_38;
+         number := number * 10;
+         end;
+      if (abs(number) >= 1.0) and (exponent = -1) then
+         begin
+         number := number /   10.0;
+         exponent := 0;
+         end;
+      put_mantissa_and_exponent(stream, number, exponent);
+      end;
+   end {put_float};
+
+procedure put_fixed (stream : integer; number : real);
+   begin
+   if number = 0 then
+      begin
+      put_mantissa(stream, 0);
+      put_alfa8(stream, '    ииии');
+      end
+   else
+   if (abs(number) >= 1e8) or (abs(number) < 1e-8) then
+      begin
+      put_float(stream, number);
+      end
+   else
+      begin
+      put_mantissa(stream, number);
+      put_alfa8(stream, '    ииии');
+      end;
+   end {put_fixed};

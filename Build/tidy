@@ -17,6 +17,7 @@ S=${ROOT}/Source
 T=${ROOT}/Testing
 A=${T}/Adjuncts
 K=${T}/Kidsgrove
+P=${T}/Pascal
 U=${T}/Assembly
 W=${T}/Whetstone
 F=${T}/Workfiles
@@ -63,6 +64,14 @@ do
   g=`basename $f .a60`
   rm -f ${U}/${g}.k3      ${U}/${g}-listing.txt      ${X}/${g}
   rm -f ${U}/${g}-OPT.k3 ${U}/${g}-OPT-listing.txt ${X}/${g}-OPT
+done
+
+echo
+echo Removing Pascal object code from ${U} and ${X}.
+for f in ${P}/*.p
+do
+  g=`basename $f .p`
+  rm -f ${U}/${g}.k3      ${U}/${g}-listing.txt      ${X}/${g}
 done
 
 echo
@@ -119,6 +128,8 @@ echo Tidying ${T}.
 > ${T}/fd_regr_tests_log.txt
 > ${T}/kids_tests_log.txt
 > ${T}/mt_regr_tests_log.txt
+> ${T}/pasc_tests_log.txt
+> ${T}/pascal_core
 > ${T}/settings_1.txt
 > ${T}/settings_2.txt
 > ${T}/settings_3.txt
@@ -128,7 +139,6 @@ echo Tidying ${T}.
 > ${T}/trace.txt
 > ${T}/walgol_tests_log.txt
 > ${T}/wich_tests_log.txt
-rm -f ${T}/whet_regr_tests*
 chmod 644 ${T}/FW0_for_*
 chmod 644 ${T}/??[01]
 chmod 644 ${T}/MT[01234567ABCD]
@@ -137,13 +147,17 @@ chmod 644 ${T}/Assembly/*
 chmod 644 ${T}/Binary/*
 chmod 644 ${T}/Data/*
 chmod 644 ${T}/Kidsgrove/*
+chmod 644 ${T}/Pascal/*
 chmod 644 ${T}/Whetstone/*
 chmod 644 ${T}/*log.txt ${T}/trace.txt
+chmod 644 ${T}/pasc_tests_log.txt
+chmod 644 ${T}/pascal_core
 chmod 644 ${T}/settings_*.txt
 chmod 755 ${T}/Assembly
 chmod 755 ${T}/Binary
 chmod 755 ${T}/Data
 chmod 755 ${T}/Kidsgrove
+chmod 755 ${T}/Pascal
 chmod 755 ${T}/Whetstone
 chmod 755 ${T}/a2b
 chmod 755 ${T}/bangs
@@ -171,6 +185,9 @@ chmod 755 ${T}/nine
 chmod 755 ${T}/nine_path
 chmod 755 ${T}/nine_priv
 chmod 755 ${T}/nouv_tests
+chmod 755 ${T}/pasc
+chmod 755 ${T}/pasc_tests
+chmod 755 ${T}/paskal
 chmod 755 ${T}/plt
 chmod 755 ${T}/ports
 chmod 755 ${T}/rlt

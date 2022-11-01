@@ -1,6 +1,6 @@
 -- Read and register execution mode, diagnostic mode, and other emulation-control settings.
 --
--- This file is part of ee9 (8.2z), the GNU Ada emulator of the English Electric KDF9.
+-- This file is part of ee9 (9.0p), the GNU Ada emulator of the English Electric KDF9.
 -- Copyright (C) 2022, W. Findlay; all rights reserved.
 --
 -- The ee9 program is free software; you can redistribute it and/or
@@ -61,6 +61,7 @@ package body settings is
       the_log_is_wanted                := True;
       the_signature_is_wanted          := True;
       authentic_timing_is_enabled      := False;
+      core_file_is_enabled             := False;
       debugging_is_enabled             := False;
       histogramming_is_enabled         := False;
       interrupt_tracing_is_enabled     := False;
@@ -105,6 +106,8 @@ package body settings is
             API_logging_is_wanted := False;
          when 'b' | 'B' =>
             choice(KDF9.buffer_number'(15)) := SI;
+         when 'c' | 'C' =>
+            core_file_is_enabled := True;
          when 'd' | 'D' =>
             debugging_is_enabled := True;
          when 'e' | 'E' =>
@@ -203,6 +206,7 @@ package body settings is
          );
 
       if authentic_timing_is_enabled      or else
+         core_file_is_enabled             or else
          debugging_is_enabled             or else
          histogramming_is_enabled         or else
          interrupt_tracing_is_enabled     or else
@@ -215,6 +219,7 @@ package body settings is
          log_line(", with option(s):");
          log("   ");
          append_option(authentic_timing_is_enabled,      "authentic timing");
+         append_option(core_file_is_enabled,             "core file output");
          append_option(debugging_is_enabled,             "debugging output");
          append_option(histogramming_is_enabled,         "histogram(s)");
          append_option(interrupt_tracing_is_enabled,     "interrupt trace");

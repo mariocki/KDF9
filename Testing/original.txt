@@ -1,0 +1,1736 @@
+P
+WHETSTONE|
+ST 30304; TL 999999;
+V119; Y22111;
+RESTART; JP119; J9P117;
+PROGRAM;
+J1; (GO TO THE START OF THE MAIN PROGRAM);
+
+(BODY OF     open                            );
+*4; 
+(line 21 "if stream <> 0 then");
+E-2M1; ZERO; SIGN; ABS; NEG; J6=Z;
+
+(line 22 "usercode");
+
+(line 23 "stream;");
+E-2M1; 
+(line 24 "'DUP; SET 9; SIGN; J2P117>Z; =M15;';");
+DUP; SET 9; SIGN; J2P117>Z; =M15; 
+(line 25 "device_type;");
+E-1M1; 
+(line 26 "'SET 5; OUT; =V0P119M15;';");
+SET 5; OUT; =V0P119M15; 
+6; 5; 
+(line 28 "end {open};");
+
+(POSTLUDE OF open                             FORMALS=2 LEAF );
+Q1TOQ4; SET -2; =+M4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  open                            );
+*3; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J4;
+
+
+
+(BODY OF     put_char                        );
+*9; 
+(line 32 "usercode");
+
+(line 33 "ch;");
+E-1M1; 
+(line 34 "'ZERO; NOT; SHL+6; OR; =V20P119; V10P119; =Q15;';");
+ZERO; NOT; SHL+6; OR; =V20P119; V10P119; =Q15; 
+(line 35 "stream;");
+E-2M1; 
+(line 36 "'=M14; V0P119M14; =C15; POAQ15;';");
+=M14; V0P119M14; =C15; POAQ15; 
+
+(line 38 "end {put_char};");
+
+(POSTLUDE OF put_char                         FORMALS=2 LEAF );
+Q1TOQ4; SET -2; =+M4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_char                        );
+*8; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J9;
+
+
+
+(BODY OF     case_normal                     );
+*12; 
+(line 43 "c := '?';");
+SET 9; =E5M1; 
+
+(line 44 "put_char{stream, chr{7}};");
+E-1M1; =M0M4Q; 
+SET 7; =M0M4Q; 
+JS8; 
+
+(line 45 "end {case_normal};");
+
+(POSTLUDE OF case_normal                      LOCALS=1 FORMALS=1 );
+Q1TOQ4; M-I4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  case_normal                     );
+*11; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4; J12;
+
+
+
+(BODY OF     case_shift                      );
+*16; 
+(line 49 "put_char{stream, chr{6}};");
+E-1M1; =M0M4Q; 
+SET 6; =M0M4Q; 
+JS8; 
+
+(line 50 "end {case_shift};");
+
+(POSTLUDE OF case_shift                       FORMALS=1 );
+Q1TOQ4; M-I4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  case_shift                      );
+*15; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J16;
+
+
+
+(BODY OF     space                           );
+*19; 
+(line 55 "tally := count;");
+E-1M1; =E5M1; 
+
+(line 56 "while tally > 0 do");
+*22;
+E5M1; ZERO; SIGN; SHA-1; NEG; J21=Z;
+
+(line 57 "begin");
+
+(line 58 "put_char{stream, ' '};");
+E-2M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS8; 
+
+(line 59 "tally := tally - 1;");
+E5M1; NEG; NOT; =E5M1; 
+
+(line 60 "end;");
+J22;
+21; 
+(line 61 "end {space};");
+
+(POSTLUDE OF space                            LOCALS=1 FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  space                           );
+*18; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4; J19;
+
+
+
+(BODY OF     new_line                        );
+*27; 
+(line 65 "while count > 0 do");
+*29;
+E-1M1; ZERO; SIGN; SHA-1; NEG; J28=Z;
+
+(line 66 "begin");
+
+(line 67 "put_char{stream, chr{#02}};");
+E-2M1; =M0M4Q; 
+SET 2; =M0M4Q; 
+JS8; 
+
+(line 68 "count := count - 1;");
+E-1M1; NEG; NOT; =E-1M1; 
+
+(line 69 "end;");
+J29;
+28; 
+(line 70 "end {new_line};");
+
+(POSTLUDE OF new_line                         FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  new_line                        );
+*26; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J27;
+
+
+
+(BODY OF     page                            );
+*34; 
+(line 74 "put_char{stream, chr{#03}};");
+E-1M1; =M0M4Q; 
+SET 3; =M0M4Q; 
+JS8; 
+
+(line 75 "end {page};");
+
+(POSTLUDE OF page                             FORMALS=1 );
+Q1TOQ4; M-I4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  page                            );
+*33; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J34;
+
+
+
+(BODY OF     put_alfa8                       );
+*37; 
+(line 79 "usercode a; '=V20P119; V10P119; =Q15;'; stream; '=M14; V0P119M14; =C15; POAQ15;'; end;");
+E-1M1; =V20P119; V10P119; =Q15; E-2M1; =M14; V0P119M14; =C15; POAQ15; 
+
+(line 80 "end {put_alfa8};");
+
+(POSTLUDE OF put_alfa8                        FORMALS=2 LEAF );
+Q1TOQ4; SET -2; =+M4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_alfa8                       );
+*36; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J37;
+
+
+
+(BODY OF     put_alfa16                      );
+*40; 
+(line 84 "usercode a; '=V20P119; = V21P119; V11P119; =Q15;'; stream; '=M14; V0P119M14; =C15; POAQ15;'; end;");
+E-1M1; E-2M1; =V20P119; = V21P119; V11P119; =Q15; E-3M1; =M14; V0P119M14; =C15; POAQ15; 
+
+(line 85 "end {put_alfa16};");
+
+(POSTLUDE OF put_alfa16                       FORMALS=3 LEAF );
+Q1TOQ4; SET -3; =+M4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_alfa16                      );
+*39; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J40;
+
+
+
+(BODY OF     int_field_leader                );
+*44; 
+(line 97 "digits := 8;");
+SET 8; =E5M1; 
+
+(line 98 "divisor := modulus;");
+V0=100000000; V0; =E6M1; 
+
+(line 99 "dividend := abs_val;");
+E-2M1; =E7M1; 
+
+(line 100 "repeat");
+*49;
+
+(line 101 "divisor := divisor div 10;");
+E6M1; SET 10; DIVI; ERASE; =E6M1; 
+
+(line 102 "digits := digits - 1;");
+E5M1; NEG; NOT; =E5M1; 
+
+(line 103 "if digits = 0 then");
+E5M1; ZERO; SIGN; ABS; NEG; NOT; J53=Z;
+
+(line 104 "goto 1");
+J43;
+53; 52; 
+(line 105 "until dividend div divisor <> 0;");
+E7M1; E6M1; DIVI; ERASE; ZERO; SIGN; ABS; NEG; J49=Z;
+
+(line 106 "1:");
+43; 
+(line 107 "if field > digits then");
+E-1M1; E5M1; SIGN; SHA-1; NEG; J56=Z;
+
+(line 108 "space{stream, field-digits-1};");
+E-3M1; =M0M4Q; 
+E-1M1; E5M1; -; NEG; NOT; =M0M4Q; 
+JS18; 
+56; 55; 
+(line 109 "int_field_leader := digits;");
+E5M1; =E0M1; 
+
+(line 110 "end {int_field_leader};");
+
+(POSTLUDE OF int_field_leader                 LOCALS=3 FORMALS=3 );
+E4M1; Q1TOQ4; SET -3; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  int_field_leader                );
+*42; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 8; =+M4; J44;
+
+
+
+(BODY OF     put_small_int_field             );
+*60; 
+(line 118 "abs_val := abs{number};");
+E-2M1; ABS; =E6M1; 
+
+(line 119 "digits := int_field_leader{stream, abs_val, field};");
+E-3M1; =M0M4Q; 
+E6M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS42; 
+=E5M1; 
+
+(line 120 "if number < 0 then");
+E-2M1; ZERO; SIGN; STR; REV; ERASE; J64=Z;
+
+(line 121 "put_char{stream, '-'}");
+E-3M1; =M0M4Q; 
+SET 30; =M0M4Q; 
+JS8; 
+
+(line 122 "else");
+J63;
+64; 
+(line 123 "if field >= 0 then");
+E-1M1; ZERO; SIGN; STR; REV; ERASE; NOT; J67=Z;
+
+(line 124 "put_char{stream, ' '};");
+E-3M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS8; 
+67; 66; 63; 
+(line 125 "usercode");
+
+(line 126 "abs_val;");
+E6M1; 
+(line 127 "'V19P119; REV; FRB; V18P119; OR;';");
+V19P119; REV; FRB; V18P119; OR; 
+(line 128 "{7-digits} * 6;");
+SET 7; E5M1; -; SHA+1; DUP; SHA+1; +; 
+(line 129 "'=C15; SHLC15; NC15; ZERO; NOT; SHLDC15; ERASE; =V20P119; V10P119; =Q15;';");
+=C15; SHLC15; NC15; ZERO; NOT; SHLDC15; ERASE; =V20P119; V10P119; =Q15; 
+(line 130 "stream;");
+E-3M1; 
+(line 131 "'=M14; V0P119M14; =C15; POAQ15;';");
+=M14; V0P119M14; =C15; POAQ15; 
+
+(line 133 "end {put_small_int_field};");
+
+(POSTLUDE OF put_small_int_field              LOCALS=2 FORMALS=3 );
+Q1TOQ4; SET -3; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_small_int_field             );
+*59; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 7; =+M4; J60;
+
+
+
+(BODY OF     put_small_int                   );
+*71; 
+(line 137 "put_small_int_field{stream, number, +8};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+SET 8; =M0M4Q; 
+JS59; 
+
+(line 138 "end {put_small_int};");
+
+(POSTLUDE OF put_small_int                    FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_small_int                   );
+*70; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J71;
+
+
+
+(BODY OF     put_small_int_left_justified    );
+*74; 
+(line 142 "put_small_int_field{stream, number, -8};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+SET -8; =M0M4Q; 
+JS59; 
+
+(line 143 "end {put_small_int_left_justified};");
+
+(POSTLUDE OF put_small_int_left_justified     FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_small_int_left_justified    );
+*73; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J74;
+
+
+
+(BODY OF     put_int_field                   );
+*77; 
+(line 151 "abs_val := abs{number};");
+E-2M1; ABS; =E5M1; 
+
+(line 152 "if abs_val div modulus <> 0 then");
+E5M1; V0; DIVI; ERASE; ZERO; SIGN; ABS; NEG; J80=Z;
+
+(line 153 "begin");
+
+(line 154 "put_small_int_field{stream, number div modulus, field-8};");
+E-3M1; =M0M4Q; 
+E-2M1; V0; JSP101; =M0M4Q; 
+E-1M1; SET 8; -; =M0M4Q; 
+JS59; 
+
+(line 155 "usercode");
+
+(line 156 "abs_val mod modulus;");
+E5M1; V0; DIVI; REV; ERASE; 
+(line 157 "'V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15;';");
+V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15; 
+(line 158 "stream;");
+E-3M1; 
+(line 159 "'=M14; V0P119M14; =C15; POAQ15;';");
+=M14; V0P119M14; =C15; POAQ15; 
+
+(line 161 "end");
+
+(line 162 "else");
+J79;
+80; 
+(line 163 "put_small_int_field{stream, number, field};");
+E-3M1; =M0M4Q; 
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS59; 
+79; 
+(line 164 "end {put_int_with_options};");
+
+(POSTLUDE OF put_int_field                    LOCALS=1 FORMALS=3 );
+Q1TOQ4; SET -3; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_int_field                   );
+*76; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4; J77;
+
+
+
+(BODY OF     put_int                         );
+*86; 
+(line 168 "put_int_field{stream, number, +15};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+SET 15; =M0M4Q; 
+JS76; 
+
+(line 169 "end {put_int};");
+
+(POSTLUDE OF put_int                          FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_int                         );
+*85; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J86;
+
+
+
+(BODY OF     put_int_left_justified          );
+*89; 
+(line 173 "put_int_field{stream, number, -15};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+SET -15; =M0M4Q; 
+JS76; 
+
+(line 174 "end {put_int_left_justified};");
+
+(POSTLUDE OF put_int_left_justified           FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_int_left_justified          );
+*88; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J89;
+
+
+
+(BODY OF     put_mantissa                    );
+*92; 
+(line 185 "negative := number < 0.0;");
+E-1M1; ZERO; SIGNF; STR; REV; ERASE; =E9M1; 
+
+(line 186 "abs_val := abs{number};");
+E-1M1; ABSF; =E5M1; 
+
+(line 187 "int_part := trunc{abs_val};");
+E5M1; JSP103; =E6M1; 
+
+(line 188 "frac_part := round{{abs_val - int_part}*1e8};");
+E6M1; SET 47; FLOAT; E5M1; REV; -F; 
+V1=B2335753604000000; 
+V1; XF; JSP104; =E7M1; 
+
+(line 189 "if frac_part >= 1e8 then");
+E7M1; SET 47; FLOAT; V1; SIGNF; STR; REV; ERASE; NOT; J98=Z;
+
+(line 190 "begin");
+
+(line 191 "int_part  := int_part + 1;");
+E6M1; NOT; NEG; =E6M1; 
+
+(line 192 "frac_part := 0;");
+ZERO; =E7M1; 
+
+(line 193 "end;");
+98; 97; 
+(line 194 "digits := int_field_leader{stream, int_part, 0};");
+E-2M1; =M0M4Q; 
+E6M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS42; 
+=E8M1; 
+
+(line 195 "if number < 0 then");
+E-1M1; ZERO; SIGNF; STR; REV; ERASE; J104=Z;
+
+(line 196 "put_char{stream, '-'}");
+E-2M1; =M0M4Q; 
+SET 30; =M0M4Q; 
+JS8; 
+
+(line 197 "else");
+J103;
+104; 
+(line 198 "put_char{stream, ' '};");
+E-2M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS8; 
+103; 
+(line 199 "put_small_int_field{stream, int_part, -1};");
+E-2M1; =M0M4Q; 
+E6M1; =M0M4Q; 
+ZERO; NOT; =M0M4Q; 
+JS59; 
+
+(line 200 "put_char{stream,  '.'};");
+E-2M1; =M0M4Q; 
+SET 31; =M0M4Q; 
+JS8; 
+
+(line 201 "usercode");
+
+(line 202 "frac_part;");
+E7M1; 
+(line 203 "'V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15;';");
+V19P119; REV; FRB; V18P119; OR; =V20P119; V10P119; =Q15; 
+(line 204 "stream;");
+E-2M1; 
+(line 205 "'=M14; V0P119M14; =C15; POAQ15;';");
+=M14; V0P119M14; =C15; POAQ15; 
+
+(line 207 "end {put_mantissa};");
+
+(POSTLUDE OF put_mantissa                     LOCALS=5 FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_mantissa                    );
+*91; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 10; =+M4; J92;
+
+
+
+(BODY OF     put_exponent                    );
+*111; 
+(line 216 "begin");
+
+(line 217 "abs_val := abs{exponent};");
+E-1M1; ABS; =E5M1; 
+
+(line 218 "put_char{stream, 'e'};");
+E-2M1; =M0M4Q; 
+SET 37; =M0M4Q; 
+JS8; 
+
+(line 219 "if exponent < 0 then");
+E-1M1; ZERO; SIGN; STR; REV; ERASE; J116=Z;
+
+(line 220 "put_char{stream, '-'}");
+E-2M1; =M0M4Q; 
+SET 30; =M0M4Q; 
+JS8; 
+
+(line 221 "else");
+J115;
+116; 
+(line 222 "put_char{stream, '+'};");
+E-2M1; =M0M4Q; 
+SET 29; =M0M4Q; 
+JS8; 
+115; 
+(line 223 "usercode");
+
+(line 224 "abs_val;");
+E5M1; 
+(line 225 "'V19P119; REV; FRB; V18P119; OR;';");
+V19P119; REV; FRB; V18P119; OR; 
+(line 226 "36;");
+SET 36; 
+(line 227 "'=C15; SHL+36; ZERO; NOT; SHLD-36; ERASE; =V20P119; V10P119; =Q15;';");
+=C15; SHL+36; ZERO; NOT; SHLD-36; ERASE; =V20P119; V10P119; =Q15; 
+(line 228 "stream;");
+E-2M1; 
+(line 229 "'=M14; V0P119M14; =C15; POAQ15;';");
+=M14; V0P119M14; =C15; POAQ15; 
+
+(line 231 "end");
+
+(POSTLUDE OF put_exponent                     LOCALS=1 FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_exponent                    );
+*110; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 6; =+M4; J111;
+
+
+
+(BODY OF     put_mantissa_and_exponent       );
+*121; 
+(line 238 "put_mantissa{stream, mantissa};");
+E-3M1; =M0M4Q; 
+E-2M1; =M0M4Q; 
+JS91; 
+
+(line 239 "put_exponent{stream, exponent};");
+E-3M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS110; 
+
+(line 240 "end;");
+
+(POSTLUDE OF put_mantissa_and_exponent        FORMALS=3 );
+Q1TOQ4; SET -3; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_mantissa_and_exponent       );
+*120; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J121;
+
+
+
+(BODY OF     put_float                       );
+*127; 
+(line 251 "if number = 0 then");
+E-1M1; ZERO; SIGNF; ABS; NEG; NOT; J129=Z;
+
+(line 252 "begin");
+
+(line 253 "put_mantissa{stream, 0};");
+E-2M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS91; 
+
+(line 254 "put_alfa8{stream, '    ииии'};");
+E-2M1; =M0M4Q; 
+V2=B0000000077777777; V2; =M0M4Q; 
+JS36; 
+
+(line 255 "end");
+
+(line 256 "else");
+J128;
+129; 
+(line 257 "if abs{number} >= 1e8 then");
+E-1M1; ABSF; V1; SIGNF; STR; REV; ERASE; NOT; J134=Z;
+
+(line 259 "begin");
+
+(line 260 "divisor := ten_to_the_38;");
+
+V3=B3774547323124132; 
+V3; =E6M1; 
+
+(line 261 "for exponent := 38 downto 8 do");
+SET 38; =E5M1; 
+*138;
+
+(line 262 "begin");
+
+(line 263 "if abs{number} >= divisor then");
+E-1M1; ABSF; E6M1; SIGNF; STR; REV; ERASE; NOT; J141=Z;
+
+(line 264 "begin");
+
+(line 265 "number := number / divisor;");
+E-1M1; E6M1; DIVF; =E-1M1; 
+
+(line 266 "if exponent >= 8 then");
+E5M1; SET 8; SIGN; STR; REV; ERASE; NOT; J145=Z;
+
+(line 267 "begin");
+
+(line 268 "number := number * 1e7;");
+E-1M1; 
+V4=B2304611320000000; 
+V4; XF; =E-1M1; 
+
+(line 269 "exponent := exponent - 7;");
+E5M1; SET 7; -; =E5M1; 
+
+(line 270 "end;");
+145; 144; 
+(line 271 "goto 999;");
+J125;
+
+(line 272 "end;");
+141; 140; 
+(line 273 "divisor := divisor / 10.0;");
+E6M1; 
+V5=B2045000000000000; 
+V5; DIVF; =E6M1; 
+
+(line 274 "end;");
+
+E5M1; NEG; NOT; DUP; =E5M1; 
+SET 8; SIGN; J138GEZ;
+137; 
+(line 275 "999:");
+125; 
+(line 276 "put_mantissa_and_exponent{stream, number, exponent};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+E5M1; =M0M4Q; 
+JS120; 
+
+(line 277 "end");
+
+(line 278 "else");
+J133;
+134; 
+(line 279 "begin");
+
+(line 280 "multiplier := 1.0;");
+
+V6=B2014000000000000; 
+V6; =E7M1; 
+
+(line 281 "for exponent := 0 downto -38 do");
+ZERO; =E5M1; 
+*155;
+
+(line 282 "begin");
+
+(line 283 "if abs{number} >= 1.0 / multiplier then");
+E-1M1; ABSF; V6; E7M1; DIVF; SIGNF; STR; REV; ERASE; NOT; J158=Z;
+
+(line 284 "begin");
+
+(line 285 "number := number * multiplier;");
+E-1M1; E7M1; XF; =E-1M1; 
+
+(line 286 "goto 998;");
+J126;
+
+(line 287 "end;");
+158; 157; 
+(line 288 "multiplier := 10.0 * multiplier;");
+V5; E7M1; XF; =E7M1; 
+
+(line 289 "end;");
+
+E5M1; NEG; NOT; DUP; =E5M1; 
+SET -38; SIGN; J155GEZ;
+154; 
+(line 290 "998:");
+126; 
+(line 291 "if  {exponent = -39} and {abs{number} < 1} then");
+E5M1; SET -39; SIGN; ABS; NEG; NOT; E-1M1; ABSF; V6; SIGNF; STR; REV; ERASE; AND; J164=Z;
+
+(line 292 "begin");
+
+(line 293 "number := number * ten_to_the_38;");
+E-1M1; V3; XF; =E-1M1; 
+
+(line 294 "number := number * 10;");
+E-1M1; V5; XF; =E-1M1; 
+
+(line 295 "end;");
+164; 163; 
+(line 296 "if {abs{number} >= 1.0} and {exponent = -1} then");
+E-1M1; ABSF; V6; SIGNF; STR; REV; ERASE; NOT; E5M1; ZERO; NOT; SIGN; ABS; NEG; NOT; AND; J169=Z;
+
+(line 297 "begin");
+
+(line 298 "number := number /   10.0;");
+E-1M1; V5; DIVF; =E-1M1; 
+
+(line 299 "exponent := 0;");
+ZERO; =E5M1; 
+
+(line 300 "end;");
+169; 168; 
+(line 301 "put_mantissa_and_exponent{stream, number, exponent};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+E5M1; =M0M4Q; 
+JS120; 
+
+(line 302 "end;");
+133; 128; 
+(line 303 "end {put_float};");
+
+(POSTLUDE OF put_float                        LOCALS=3 FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_float                       );
+*124; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 8; =+M4; J127;
+
+
+
+(BODY OF     put_fixed                       );
+*175; 
+(line 307 "if number = 0 then");
+E-1M1; ZERO; SIGNF; ABS; NEG; NOT; J177=Z;
+
+(line 308 "begin");
+
+(line 309 "put_mantissa{stream, 0};");
+E-2M1; =M0M4Q; 
+ZERO; =M0M4Q; 
+JS91; 
+
+(line 310 "put_alfa8{stream, '    ииии'};");
+E-2M1; =M0M4Q; 
+V2; =M0M4Q; 
+JS36; 
+
+(line 311 "end");
+
+(line 312 "else");
+J176;
+177; 
+(line 313 "if {abs{number} >= 1e8} or {abs{number} < 1e-8} then");
+E-1M1; ABSF; V1; SIGNF; STR; REV; ERASE; NOT; E-1M1; ABSF; 
+V7=B1465274616704302; 
+V7; SIGNF; STR; REV; ERASE; OR; J182=Z;
+
+(line 314 "begin");
+
+(line 315 "put_float{stream, number};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS124; 
+
+(line 316 "end");
+
+(line 317 "else");
+J181;
+182; 
+(line 318 "begin");
+
+(line 319 "put_mantissa{stream, number};");
+E-2M1; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS91; 
+
+(line 320 "put_alfa8{stream, '    ииии'};");
+E-2M1; =M0M4Q; 
+V2; =M0M4Q; 
+JS36; 
+
+(line 321 "end;");
+181; 176; 
+(line 322 "end {put_fixed};");
+
+(POSTLUDE OF put_fixed                        FORMALS=2 );
+Q1TOQ4; SET -2; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  put_fixed                       );
+*174; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J175;
+
+
+
+(BODY OF     icr                             );
+*189; 
+(line 328 "usercode 'SET 99; OUT;'; =icr end;");
+SET 99; OUT; =E0M1; 
+
+
+(line 329 "end {icr};");
+
+(POSTLUDE OF icr                              LEAF );
+E4M1; Q1TOQ4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  icr                             );
+*188; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J189;
+
+
+
+(BODY OF     time                            );
+*192; 
+(line 333 "usercode 'SET 17; OUT; REV; ERASE; SET 23; FLOAT;'; 1.0e6; 'XF; FIX; SET47; -; =C15; SHAC15;';  =time; end;");
+SET 17; OUT; REV; ERASE; SET 23; FLOAT; 
+V8=B2247502200000000; 
+V8; XF; FIX; SET47; -; =C15; SHAC15; =E0M1; 
+
+
+(line 334 "end {time};");
+
+(POSTLUDE OF time                             LEAF );
+E4M1; Q1TOQ4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  time                            );
+*191; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J192;
+
+
+
+(BODY OF     pa                              );
+*195; 
+(line 341 "j := 0;");
+ZERO; =E5M1; 
+
+(line 342 "repeat");
+*198;
+
+(line 344 "e[1] := {e[1] + e[2] + e[3] - e[4]}  * t;");
+Y40; Y41; +F; Y42; +F; Y43; -F; Y34; XF; =Y40; 
+
+(line 345 "e[2] := {e[1] + e[2] - e[3] + e[4]}  * t;");
+Y40; Y41; +F; Y42; -F; Y43; +F; Y34; XF; =Y41; 
+
+(line 346 "e[3] := {e[1] - e[2] + e[3] + e[4]}  * t;");
+Y40; Y41; -F; Y42; +F; Y43; +F; Y34; XF; =Y42; 
+
+(line 347 "e[4] := {-e[1] + e[2] + e[3] + e[4]} / t2;");
+Y40; NEGF; Y41; +F; Y42; +F; Y43; +F; Y36; DIVF; =Y43; 
+
+(line 355 "j := j + 1;");
+E5M1; NOT; NEG; =E5M1; 
+
+(line 356 "until j = 6;");
+E5M1; SET 6; SIGN; ABS; NEG; NOT; J198=Z;
+
+(line 357 "end;");
+
+(POSTLUDE OF pa                               LOCALS=1 LEAF );
+Q1TOQ4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  pa                              );
+*194; Q1; =E1M4; Q4TOQ1; SET 6; =+M4; J195;
+
+
+
+(BODY OF     p0                              );
+*205; 
+(line 362 "usercode");
+
+(line 363 "@e[1]; 'NEG; NOT; =M8;'; k; '=M9; M8M9;';");
+SET AY40; NEG; NOT; =M8; Y10; =M9; M8M9; 
+(line 364 "@e[1]; 'NEG; NOT; =M7;'; j; '=M6; =M7M6;';");
+SET AY40; NEG; NOT; =M7; Y9; =M6; =M7M6; 
+(line 365 "@e[1]; 'NEG; NOT; =M8;'; l; '=M9; M8M9;';");
+SET AY40; NEG; NOT; =M8; Y11; =M9; M8M9; 
+(line 366 "@e[1]; 'NEG; NOT; =M7;'; k; '=M6; =M7M6;';");
+SET AY40; NEG; NOT; =M7; Y10; =M6; =M7M6; 
+(line 367 "@e[1]; 'NEG; NOT; =M8;'; j; '=M9; M8M9;';");
+SET AY40; NEG; NOT; =M8; Y9; =M9; M8M9; 
+(line 368 "@e[1]; 'NEG; NOT; =M7;'; l; '=M6; =M7M6;';");
+SET AY40; NEG; NOT; =M7; Y11; =M6; =M7M6; 
+
+(line 375 "}   end;");
+
+(POSTLUDE OF p0                               LEAF );
+EXIT 1;
+
+(PRELUDE OF  p0                              );
+*204; J205;
+
+
+
+(BODY OF     p3                              );
+*208; 
+(line 379 "x := t * {x + y};");
+E-3M1; E-2M1; +F; Y34; XF; =E-3M1; 
+
+(line 380 "y := t * {x + y};");
+E-3M1; E-2M1; +F; Y34; XF; =E-2M1; 
+
+(line 381 "z := {x + y} / t2;");
+E-3M1; E-2M1; +F; Y36; DIVF; E-1M1; =M15; =M0M15; 
+
+(line 382 "end;");
+
+(POSTLUDE OF p3                               FORMALS=3 LEAF );
+Q1TOQ4; SET -3; =+M4; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  p3                              );
+*207; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J208;
+
+
+
+(BODY OF     pout                            );
+*213; 
+(line 386 "put_alfa8{1, 'n=ииииии'}; put_small_int_field{1, n, 4};");
+ZERO; NOT; NEG; =M0M4Q; 
+V9=B5611777777777777; V9; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-7M1; =M0M4Q; 
+SET 4; =M0M4Q; 
+JS59; 
+
+(line 387 "put_alfa8{1, ' j=иииии'}; put_small_int_field{1, j, 4};");
+ZERO; NOT; NEG; =M0M4Q; 
+V10=B0052117777777777; V10; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-6M1; =M0M4Q; 
+SET 4; =M0M4Q; 
+JS59; 
+
+(line 388 "put_alfa8{1, ' k=иииии'}; put_small_int_field{1, k, 4};");
+ZERO; NOT; NEG; =M0M4Q; 
+V11=B0053117777777777; V11; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-5M1; =M0M4Q; 
+SET 4; =M0M4Q; 
+JS59; 
+
+(line 389 "put_alfa8{1, ' x1=ииии'}; put_fixed{1, x1};");
+ZERO; NOT; NEG; =M0M4Q; 
+V12=B0070211177777777; V12; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-4M1; =M0M4Q; 
+JS174; 
+
+(line 390 "put_alfa8{1, 'иx2=ииии'}; put_fixed{1, x2};");
+ZERO; NOT; NEG; =M0M4Q; 
+V13=B7770221177777777; V13; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-3M1; =M0M4Q; 
+JS174; 
+
+(line 391 "put_alfa8{1, 'иx3=ииии'}; put_fixed{1, x3};");
+ZERO; NOT; NEG; =M0M4Q; 
+V14=B7770231177777777; V14; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-2M1; =M0M4Q; 
+JS174; 
+
+(line 392 "put_alfa8{1, 'иx4=ииии'}; put_fixed{1, x4};");
+ZERO; NOT; NEG; =M0M4Q; 
+V15=B7770241177777777; V15; =M0M4Q; 
+JS36; 
+ZERO; NOT; NEG; =M0M4Q; 
+E-1M1; =M0M4Q; 
+JS174; 
+
+(line 393 "new_line{1, 1};");
+ZERO; NOT; NEG; =M0M4Q; 
+ZERO; NOT; NEG; =M0M4Q; 
+JS26; 
+
+(line 394 "end;");
+
+(POSTLUDE OF pout                             FORMALS=7 );
+Q1TOQ4; SET -7; =+M4; E2M1; =LINK; E1M1; =Q1; EXIT 1;
+
+(PRELUDE OF  pout                            );
+*212; LINK; =E2M4; Q1; =E1M4; Q4TOQ1; SET 5; =+M4; J213;
+
+
+(BODY OF     WHETSTONE                                        MAIN PROGRAM);
+2;
+
+(line 397 "open{1, 3};");
+ZERO; NOT; NEG; =M0M4Q; 
+SET 3; =M0M4Q; 
+JS3; 
+
+(line 398 "begins := time;");
+JS191; 
+=Y24; 
+
+(line 402 "t  := 0.499975;");
+
+V16=B1777777627110721; 
+V16; =Y34; 
+
+(line 403 "t1 := 0.50025;");
+
+V17=B2004001014223351; 
+V17; =Y35; 
+
+(line 404 "t2 := 2.0;");
+
+V18=B2024000000000000; 
+V18; =Y36; 
+
+(line 409 "i  := 1;");
+ZERO; NOT; NEG; =Y8; 
+
+(line 410 "i  := i  * 10;");
+Y8; DUP; SHA+2; +; DUP; +; =Y8; 
+
+(line 411 "n1 := 0;");
+ZERO; =Y12; 
+
+(line 412 "n2 := 12  * i;");
+Y8; SHA+2; DUP; SHA+1; +; =Y13; 
+
+(line 413 "n3 := 14  * i;");
+Y8; SET 14; XD; CONT; =Y14; 
+
+(line 414 "n4 := 345 * i;");
+SET 345; Y8; XD; CONT; =Y15; 
+
+(line 415 "n5 := 0;");
+ZERO; =Y16; 
+
+(line 416 "n6 := 210 * i;");
+SET 210; Y8; XD; CONT; =Y17; 
+
+(line 417 "n7 := 32  * i;");
+Y8; SHA+5; =Y18; 
+
+(line 418 "n8 := 899 * i;");
+SET 899; Y8; XD; CONT; =Y19; 
+
+(line 419 "n9 := 616 * i;");
+SET 616; Y8; XD; CONT; =Y20; 
+
+(line 420 "n10 := 0;");
+ZERO; =Y21; 
+
+(line 421 "n11 := 93 * i;");
+SET 93; Y8; XD; CONT; =Y22; 
+
+(line 425 "x1 := +1.0;");
+V6; =Y27; 
+
+(line 426 "x2 := -1.0;");
+
+V19=B6014000000000000; 
+V19; =Y28; 
+
+(line 427 "x3 := -1.0;");
+V19; =Y29; 
+
+(line 428 "x4 := -1.0;");
+V19; =Y30; 
+
+(line 429 "for  i := 1 to n1 do");
+Y12; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J251>Z;
+ZERO; NOT; NEG; =Y8; 
+*252;
+
+(line 430 "begin");
+
+(line 431 "x1 := {x1 + x2 + x3 - x4}  * t;");
+Y27; Y28; +F; Y29; +F; Y30; -F; Y34; XF; =Y27; 
+
+(line 432 "x2 := {x1 + x2 - x3 + x4}  * t;");
+Y27; Y28; +F; Y29; -F; Y30; +F; Y34; XF; =Y28; 
+
+(line 433 "x3 := {x1 - x2 + x3 + x4}  * t;");
+Y27; Y28; -F; Y29; +F; Y30; +F; Y34; XF; =Y29; 
+
+(line 434 "x4 := {-x1 + x2 + x3 + x4} * t;");
+Y27; NEGF; Y28; +F; Y29; +F; Y30; +F; Y34; XF; =Y30; 
+
+(line 435 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J252LEZ;
+251; 
+(line 436 "pout{n1, n1, n1, x1, x2, x3, x4};");
+Y12; =M0M4Q; 
+Y12; =M0M4Q; 
+Y12; =M0M4Q; 
+Y27; =M0M4Q; 
+Y28; =M0M4Q; 
+Y29; =M0M4Q; 
+Y30; =M0M4Q; 
+JS212; 
+
+(line 440 "e[1] := +1.0;");
+V6; =Y40; 
+
+(line 441 "e[2] := -1.0;");
+V19; =Y41; 
+
+(line 442 "e[3] := -1.0;");
+V19; =Y42; 
+
+(line 443 "e[4] := -1.0;");
+V19; =Y43; 
+
+(line 444 "for  i := 1 to n2 do");
+Y13; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J263>Z;
+ZERO; NOT; NEG; =Y8; 
+*264;
+
+(line 445 "begin");
+
+(line 446 "e[1] := {e[1] + e[2] + e[3] - e[4]}  * t;");
+Y40; Y41; +F; Y42; +F; Y43; -F; Y34; XF; =Y40; 
+
+(line 447 "e[2] := {e[1] + e[2] - e[3] + e[4]}  * t;");
+Y40; Y41; +F; Y42; -F; Y43; +F; Y34; XF; =Y41; 
+
+(line 448 "e[3] := {e[1] - e[2] + e[3] + e[4]}  * t;");
+Y40; Y41; -F; Y42; +F; Y43; +F; Y34; XF; =Y42; 
+
+(line 449 "e[4] := {-e[1] + e[2] + e[3] + e[4]} * t;");
+Y40; NEGF; Y41; +F; Y42; +F; Y43; +F; Y34; XF; =Y43; 
+
+(line 451 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J264LEZ;
+263; 
+(line 452 "pout{n2, n3, n2, e[1], e[2], e[3], e[4]};");
+Y13; =M0M4Q; 
+Y14; =M0M4Q; 
+Y13; =M0M4Q; 
+Y40; =M0M4Q; 
+Y41; =M0M4Q; 
+Y42; =M0M4Q; 
+Y43; =M0M4Q; 
+JS212; 
+
+(line 456 "for  i := 1 to n3 do");
+Y14; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J271>Z;
+ZERO; NOT; NEG; =Y8; 
+*272;
+
+(line 457 "pa{{e}};");
+JS194; 
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J272LEZ;
+271; 
+(line 458 "pout{n3, n2, n2, e[1], e[2], e[3], e[4]};");
+Y14; =M0M4Q; 
+Y13; =M0M4Q; 
+Y13; =M0M4Q; 
+Y40; =M0M4Q; 
+Y41; =M0M4Q; 
+Y42; =M0M4Q; 
+Y43; =M0M4Q; 
+JS212; 
+
+(line 462 "j := 1;");
+ZERO; NOT; NEG; =Y9; 
+
+(line 463 "for  i := 1 to n4 do");
+Y15; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J276>Z;
+ZERO; NOT; NEG; =Y8; 
+*277;
+
+(line 464 "begin");
+
+(line 465 "if  j = 1 then");
+Y9; ZERO; NOT; NEG; SIGN; ABS; NEG; NOT; J280=Z;
+
+(line 466 "j := 2");
+SET 2; =Y9; 
+
+(line 467 "else");
+J279;
+280; 
+(line 468 "j := 3;");
+SET 3; =Y9; 
+279; 
+(line 469 "if  j > 2 then");
+Y9; SET 2; SIGN; SHA-1; NEG; J284=Z;
+
+(line 470 "j := 0");
+ZERO; =Y9; 
+
+(line 471 "else");
+J283;
+284; 
+(line 472 "j := 1;");
+ZERO; NOT; NEG; =Y9; 
+283; 
+(line 473 "if  j < 1 then");
+Y9; ZERO; NOT; NEG; SIGN; STR; REV; ERASE; J288=Z;
+
+(line 474 "j := 1");
+ZERO; NOT; NEG; =Y9; 
+
+(line 475 "else");
+J287;
+288; 
+(line 476 "j := 0;");
+ZERO; =Y9; 
+287; 
+(line 477 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J277LEZ;
+276; 
+(line 478 "pout{n4, j , j , x1, x2, x3, x4};");
+Y15; =M0M4Q; 
+Y9; =M0M4Q; 
+Y9; =M0M4Q; 
+Y27; =M0M4Q; 
+Y28; =M0M4Q; 
+Y29; =M0M4Q; 
+Y30; =M0M4Q; 
+JS212; 
+
+(line 485 "j := 1;");
+ZERO; NOT; NEG; =Y9; 
+
+(line 486 "k := 2;");
+SET 2; =Y10; 
+
+(line 487 "l := 3;");
+SET 3; =Y11; 
+
+(line 488 "for  i := 1 to 2100 do");
+ZERO; NOT; NEG; =Y8; 
+*296;
+
+(line 489 "begin");
+
+(line 490 "j := j * {k - j } * {l - k};");
+Y10; Y9; -; Y9; XD; CONT; Y11; Y10; -; XD; CONT; =Y9; 
+
+(line 491 "k := l * k - {l - j } * k;");
+Y11; Y10; XD; CONT; Y11; Y9; -; Y10; XD; CONT; -; =Y10; 
+
+(line 492 "l := {l - k} * {k + j };");
+Y11; Y10; -; Y10; Y9; +; XD; CONT; =Y11; 
+
+(line 494 "usercode");
+
+(line 495 "j + k + l; 'SET47; FLOAT;'; @e[1]-1; l-1; '+; =M8; =E0M8;';");
+Y9; Y10; +; Y11; +; SET47; FLOAT; SET AY40; NEG; NOT; Y11; NEG; NOT; +; =M8; =E0M8; 
+(line 496 "j * k * l; 'SET47; FLOAT;'; @e[1]-1; k-1; '+; =M8; =E0M8;';");
+Y9; Y10; XD; CONT; Y11; XD; CONT; SET47; FLOAT; SET AY40; NEG; NOT; Y10; NEG; NOT; +; =M8; =E0M8; 
+
+(line 503 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+SET 2100; SIGN; J296LEZ;
+295; 
+(line 504 "pout{n6, j , k, e[1], e[2], e[3], e[4]};");
+Y17; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y40; =M0M4Q; 
+Y41; =M0M4Q; 
+Y42; =M0M4Q; 
+Y43; =M0M4Q; 
+JS212; 
+
+(line 508 "x := 0.5;");
+
+V20=B2004000000000000; 
+V20; =Y31; 
+
+(line 509 "y := 0.5;");
+V20; =Y32; 
+
+(line 510 "for  i := 1 to n7 do");
+Y18; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J305>Z;
+ZERO; NOT; NEG; =Y8; 
+*306;
+
+(line 511 "begin");
+
+(line 512 "x := t * arctan{t2 * sin{x} * cos{x} / {cos{x + y} + cos{x - y} - 1.0}};");
+Y31; JSP105; Y36; XF; Y31; JSP106; XF; Y31; Y32; +F; JSP106; Y31; Y32; -F; JSP106; +F; V6; -F; DIVF; JSP107; Y34; XF; =Y31; 
+
+(line 513 "y := t * arctan{t2 * sin{y} * cos{y} / {cos{x + y} + cos{x - y} - 1.0}};");
+Y32; JSP105; Y36; XF; Y32; JSP106; XF; Y31; Y32; +F; JSP106; Y31; Y32; -F; JSP106; +F; V6; -F; DIVF; JSP107; Y34; XF; =Y32; 
+
+(line 514 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J306LEZ;
+305; 
+(line 515 "pout{n7, j , k, x, x, y, y};");
+Y18; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y31; =M0M4Q; 
+Y31; =M0M4Q; 
+Y32; =M0M4Q; 
+Y32; =M0M4Q; 
+JS212; 
+
+(line 520 "x := 1.0;");
+V6; =Y31; 
+
+(line 521 "y := 1.0;");
+V6; =Y32; 
+
+(line 522 "z := 1.0;");
+V6; =Y33; 
+
+(line 523 "for  i := 1 to n8 do");
+Y19; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J314>Z;
+ZERO; NOT; NEG; =Y8; 
+*315;
+
+(line 524 "begin");
+
+(line 526 "p3{x, y, z };");
+Y31; =M0M4Q; 
+Y32; =M0M4Q; 
+SET AY33; =M0M4Q; 
+JS207; 
+
+(line 527 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J315LEZ;
+314; 
+(line 528 "pout{n8, j , k, x, y, z , z };");
+Y19; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y31; =M0M4Q; 
+Y32; =M0M4Q; 
+Y33; =M0M4Q; 
+Y33; =M0M4Q; 
+JS212; 
+
+(line 533 "j := 1;");
+ZERO; NOT; NEG; =Y9; 
+
+(line 534 "k := 2;");
+SET 2; =Y10; 
+
+(line 535 "l := 3;");
+SET 3; =Y11; 
+
+(line 536 "e[1] := 1.0;");
+V6; =Y40; 
+
+(line 537 "e[2] := 2.0;");
+V18; =Y41; 
+
+(line 538 "e[3] := 3.0;");
+
+V21=B2026000000000000; 
+V21; =Y42; 
+
+(line 539 "for  i := 1 to n9 do");
+Y20; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J325>Z;
+ZERO; NOT; NEG; =Y8; 
+*326;
+
+(line 540 "p0;");
+JS204; 
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J326LEZ;
+325; 
+(line 541 "pout{n9, j , k, e[1], e[2], e[3], e[4]};");
+Y20; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y40; =M0M4Q; 
+Y41; =M0M4Q; 
+Y42; =M0M4Q; 
+Y43; =M0M4Q; 
+JS212; 
+
+(line 545 "j := 2;");
+SET 2; =Y9; 
+
+(line 546 "k := 3;");
+SET 3; =Y10; 
+
+(line 547 "for  i := 1 to n10 do");
+Y21; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J331>Z;
+ZERO; NOT; NEG; =Y8; 
+*332;
+
+(line 548 "begin");
+
+(line 549 "j := j + k;");
+Y9; Y10; +; =Y9; 
+
+(line 550 "k := j + k;");
+Y9; Y10; +; =Y10; 
+
+(line 551 "j := k - j ;");
+Y10; Y9; -; =Y9; 
+
+(line 552 "k := k - j - j ;");
+Y10; Y9; -; Y9; -; =Y10; 
+
+(line 553 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J332LEZ;
+331; 
+(line 554 "pout{n10, j , k, x1, x2, x3, x4};");
+Y21; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y27; =M0M4Q; 
+Y28; =M0M4Q; 
+Y29; =M0M4Q; 
+Y30; =M0M4Q; 
+JS212; 
+
+(line 558 "x := 0.75;");
+
+V22=B2006000000000000; 
+V22; =Y31; 
+
+(line 559 "for  i := 1 to n11 do");
+Y22; =Y45; 
+ZERO; NOT; NEG; Y45; SIGN; J340>Z;
+ZERO; NOT; NEG; =Y8; 
+*341;
+
+(line 560 "begin");
+
+(line 561 "x := sqrt{exp{ln{x}/t1}};");
+Y31; JSP109; Y35; DIVF; JSP110; JSP108; =Y31; 
+
+(line 562 "end;");
+
+Y8; NOT; NEG; DUP; =Y8; 
+Y45; SIGN; J341LEZ;
+340; 
+(line 563 "pout{n11, j , k, x, x, x, x};");
+Y22; =M0M4Q; 
+Y9; =M0M4Q; 
+Y10; =M0M4Q; 
+Y31; =M0M4Q; 
+Y31; =M0M4Q; 
+Y31; =M0M4Q; 
+Y31; =M0M4Q; 
+JS212; 
+
+(line 565 "takes := time - begins;");
+JS191; 
+Y24; -; =Y26; 
+
+(line 566 "put_alfa8{1, 'KWI/sec:'};");
+ZERO; NOT; NEG; =M0M4Q; 
+V23=B5367511763454310; V23; =M0M4Q; 
+JS36; 
+
+(line 567 "put_small_int_field{1, round{1.0e9 / takes}, 3};");
+ZERO; NOT; NEG; =M0M4Q; 
+Y26; SET 47; FLOAT; 
+V24=B2367346545000000; 
+V24; REV; DIVF; JSP104; =M0M4Q; 
+SET 3; =M0M4Q; 
+JS59; 
+
+(line 568 "new_line{1, 1};");
+ZERO; NOT; NEG; =M0M4Q; 
+ZERO; NOT; NEG; =M0M4Q; 
+JS26; 
+
+(line 569 "end.");
+(POSTLUDE OF WHETSTONE                                        MAIN PROGRAM);
+JP119;
+
+(PRELUDE OF  WHETSTONE                                        MAIN PROGRAM);
+1; ZERO; =Y0; ZERO; =Y1; ZERO; =Y2; ZERO; =Y3; ZERO; =Y4;
+SET AY0; =RM1; SET AY46; =RM4; SET AZ1; =Z0; 
+J2;
+
+
+P119V31; (END THE RUN);
+(THE V STORES ARE USED BY THE INTERIM OUTPUT ROUTINES);
+(V[i], FOR i FROM 0 THROUGH 9 CONTAINS THE DEVICE NUMBER FOR STREAM i);
+V0=0; (STREAM 0 ALWAYS GOES TO THE FLEXOWRITER);
+(V[i], FOR i FROM 20 THROUGH 31 IS SCRATCH WORKSPACE);
+V10=Q0/AV20/AV20; V11=Q0/AV20/AV21;
+V19=B1212121212121212; V18=B2020202020202020; V17=B7777777777777702;
+JSP118; Y4; ZERO; OUT;
+
+P118; (FLUSH BUFFERS, ETC);
+EXIT 1;
+
+P117V6; (FAILURES, SUBRANGES AND OVERFLOWS);
+V0=PDISASTER; V1=PSUBRANGE; V2=POVERFLOW; V3=PBAD*CASE; V4=P*POINTER; V5=P*STORAGE;
+V6=B4000000000000000;
+1;  =Y4; JSP118; SET AY0; =RM15; MRWDQ0;(SPECIFIC ERRORS AND FAILURE HALT);
+2;  V1; SET 401; J1;                    (ORDINAL SUBRANGE ERROR);
+3;  V2; SET 402; J1;                    (INTEGER OVERFLOW);
+4;  V2; SET 403; J1;                    (REAL OVERFLOW);
+(CHECKS ON ENTRY TO PROCEDURE/FUNCTION);
+5;  V6; =E3M1; M4; Z0; SIGN; J51>Z; EXIT 1;
+50; V5; SET 404; J1;                    (HEAP OVERFLOW);
+51; V5; SET 405; J1;                    (STACK OVERFLOW);
+6;  J3V; V6; J61=; EXIT 1;              (CHECK FOR OVERFLOW AND UNSET FN RESULT);
+61; SET 406; J1;                        (FAIL IF FN VALUE IS UNSET);
+7;  DUP; J3=Z; EXIT 1;                  (FAIL IF DIVIDE BY 0);
+(FAIL UNLESS N1 IN [Z0]+1 .. AZ1: INVALID POINTER);
+8;  DUP; Z0; SIGN; J81LEZ; DUP; SET AZ0; SIGN; J81GEZ; EXIT 1;
+(FAIL 407: NIL POINTER, FAIL 408: INVALID POINTER);
+81; DUP; V4; REV; ZERO; SIGN; ABS; SET 407; +; J1;
+9;  V0; SET 999; J1;                    (ABJECT FAILURES AND TINT I1);
+10; V3; SET 409; J1;                    (NO LIMB PROVIDED FOR THIS CASE);
+(FAIL UNLESS N2 IN [0..N1]);
+20; J3V; REV; DUP; J2<Z;  DUP; PERM; SIGN; J2<Z; EXIT 1;
+(FAIL UNLESS N2 IN [1..N1]);
+21; J3V; REV; DUP; J2LEZ; DUP; PERM; SIGN; J2<Z; EXIT 1;
+(FAIL UNLESS N3 IN [N2..N1]);
+22; J3V; CAB; DUP; PERM; SIGN; J2<Z; DUP; PERM; SIGN; J2>Z; EXIT 1;
+(FAIL IF N2 < N1);
+23; REV; DUP; CAB; SIGN; J2<Z; EXIT 1;
+(FAIL IF N2 > N1);
+24; REV; DUP; CAB; SIGN; J2>Z; EXIT 1;
+
+P116; (GET THE ADDRESS OF THE Nth-ENCLOSING SCOPE IN NP by calling label N);
+*15; E0M15; =M15;
+*14; E0M15; =M15;
+*13; E0M15; =M15;
+*12; E0M15; =M15;
+*11; E0M15; =M15;
+*10; E0M15; =M15;
+*9;  E0M15; =M15;
+*8;  E0M15; =M15;
+*7;  E0M15; =M15;
+*6;  E0M15; =M15;
+*5;  E0M15; =M15;
+*4;  E0M15; =M15;
+*3;  E0M15; =M15;
+*2;  E0M15; =M15;
+*1;  E0M15; =M3; EXIT 1;
+
+P101; (DIV);
+   DUP; J3P117=Z; DUPD; NEV; CAB; ABS; CAB; ABS; DIVI; ERASE; REV;
+   J2<Z; EXIT 1;
+2; NEG;  EXIT 1;
+
+P103V1; (TRUNC);
+   V0 = F1.0;
+   V1 = B2604000000000000;
+   DUP; ABSF; DUP;
+   V0; SIGNF; J3LTZ;
+   V1; SIGNF; J2GEZ;
+   DUP; ABSF;
+   FIX; SET 47; -; =C15; SHLC15; REV; J1GTZ;
+   NEG;
+1; EXIT 1;
+2; J4P117;
+3; ERASE; ERASE; ZERO; EXIT 1;
+
+P104V0; (ROUND);
+   V0 = F0.5;
+   DUP; J1LTZ;
+   V0; +F; JP103;
+1; V0; -F; JP103;
+
+P105V13; (SIN);
+   V0=Q7/-1/AV7;
+   V1=F+2.552557924805;
+   V2=F-0.285261569181;
+   V3=F+0.009118016007;
+   V4=F-0.000136587514;
+   V5=F+0.0000011849619;
+   V6=F-0.000000006703;
+   V7=F+0.000000000027;
+   V8=F+0.636619772368;
+   V9=F+2.0;
+   V10=F+1.0;
+   V11=Q3/1/AV12;
+   V12=B16027063/23;
+   DUP; J4#Z; EXIT 1;
+4; DUP; FIX; REV; ERASE; DUP; SET37; -; J5>Z;
+   SET19; +; J1>=Z; EXIT 1;
+1; V8; зF; DUP; SET4; JS44;
+   V9; -F; REV; SET2; JS44;
+   DUP; V10; -F; J2<Z;
+   V9; -F;
+2; DUP; DUPD; зF; DUP; +F; V10; -F; V0; JS45;
+   зF; PERM; ZERO; SIGNF; REV; ZERO; SIGNF; NEV; J3#Z;
+   NEGF;
+3; EXIT 1;
+5; ERASE; V11; REV; SET -2; J1P117;
+44;(MODULO, M IN N1, X IN N2);
+   REV; DUP; =Q15; DUP; J11=Z;
+   REV; DUP; CAB; FIX; CAB; SHA-1; -; DUP; J12>Z;
+   ERASE; ERASE; Q15; DUP; J11>Z;
+   REV; SET47; FLOAT; +F; EXIT 1;
+11;REV; ERASE; EXIT 1;
+12;CAB; REV; =C15; SHA-1; REV; STR;
+   SHADC15; ERASE; REV; FLOAT; EXIT 1;
+45;(CHEBYSHEV, Q-WORD IN N1, ARGUMENT IN N2);
+   =Q15; DUP; +F; ZERO; M0M15Q; ZERO;
+21;ERASE; PERM; DUP; M0M15Q; -F; REVD; DUPD; зF;
+   REVD; PERM; -F; PERM; REVD; REV; J21C15NZ;
+   -F; PERM; ERASE; ERASE; SETB40100; SHL+32; зF; EXIT 1;
+
+P106V2; (COS);
+   V0=Q3/1/AV1;
+   V1=B12032070/23;
+   V2=F+1.570796326795;
+   DUP; J1#Z;
+3; ERASE; V10P105;EXIT 1;
+1; DUP; FIX; REV; ERASE; DUP; SET37; -; J2>Z;
+   SET19; +; J3<Z;
+   V2; REV; -F; J1P105;
+2; ERASE; V0; REV; SET -3; J1P117;
+
+P107V16; (ARCTAN);
+   V0=F0.019042127887;
+   V1=F0.019042129240;
+   V2=F0.038082414120;
+   V3=F0.076666493927;
+   V4=F0.121226383896;
+   V5=F0.725940450930;
+   (V6-V10 USED FOR B);
+   V11=Q6/1/0;
+   V12=Q4/1/0;
+   (V13 USED FOR A);
+   V14=F1.0;
+   V15=F0.5;
+   V14; =V13;
+   Q15; =V16; DUP; DUP; зF; V14; +F; JSP108; =V6;
+   V12; =Q15;
+2; V13; V6M15; +F; V15; зF; =V13;
+   V13; V6M15Q; зF; JSP108; =V6M15; J2C15NZ;
+   V11; =Q15;
+   V0M15Q; ZERO; REV; FIX; FLOATD;
+*1;V0M15; V5M15Q; з+F; J1C15NZS;
+   ROUNDF; їF; V16; =Q15; EXIT 1;
+
+P108V0; (SQRT);
+   V0=0.46429/2;
+   DUP; J4P117<Z;
+   FIX; ZERO; REV; SHAD-1; PERM;
+   J2#Z;
+   SHL-1;
+2;
+   SHA-3; DUP; SHA+1; V0; +; (X0,M);
+   DUPD; DIV; +; (X1,M);
+   DUPD; DIV; REV; SHA-2; +; (X2,M);
+   DUP; PERM; DIV; +; (X3);
+   REV; NOT; NEG; FLOAT; EXIT 1;
+
+P109V8; (LN);
+  V0=Q2/1/AV8;
+  V1=-0.693147180559945/0;
+  V2=+0.353553390593274/0;
+  V3=+1.541342602720874/2;
+  V4=+0.612053805720620/4;
+  V5=+3.089532445011031/2;
+  V6=-1.921406891324693/3;
+  V7=+0.286369944871851/1;
+  V8=B30463/15;
+  DUP; J4P117LEZ;
+  FIX; SHA+40; V1; DUP; SHA-8; PERM; з; -; REV; SHA-1;
+  V2; DUPD; -; PERM; +; DIV; DUP; SHA-1; DUP; з; DUP;
+  V3; -; V4; REV; DIV; V5; +; -; V6; REV; DIV; V7; +; з;
+  SHA-5; +; SET7; FLOAT; EXIT 1;
+
+P110V8; (EXP);
+   V0=Q3/1/AV6;
+   V1=1.442695040888964/1;
+   V2=B1067311107601054;
+   V3=B2372617635665123;
+   V4=B2567106670407501;
+   V5=B6625327150150035;
+   V6=B12436465/23;
+   V7=F-89.0;
+   Q15; =V8; DUP; V7; -F; J2<Z;
+   DUP; FIX; NOT; NEG; =C15; V1; з; STR; VR;
+   SHADC15; DUPD; ROUND; DUP; =Q15; -; CONT;
+   DUP; DUP; з; SHA-7; DUP;
+   V2; з; V3; +; REV; V4; +; V5; REV; ї; +;
+   REV; SHA-4; DUPD; +; PERM; -; SHA1; ї;
+   Q15; NOT; NEG; FLOAT; J1V;
+   REV; ERASE; V8; =Q15; EXIT 1;
+2; ERASE; ZERO; V8; =Q15; EXIT 1;
+1; ERASE; V0; REV; SET -1; J1P117;
+
+FINISH;
+|

@@ -1311,3 +1311,17 @@ TEST wich EASTER
 These tests ran as expected.
 
 
++++++++++++++++++++ BEGIN  Test Case PASK +++++++++++++++++++
+TEST pasc ACKO
+TEST pasc ACKT
+TEST pasc CODY
+TEST pasc COLLATZ
+TEST pasc EASTER
+TEST pasc FLUID
+TEST pasc HANOI
+TEST pasc T1P2D1
+TEST pasc WHETSTONE
+
+These tests ran as expected.
+
+
