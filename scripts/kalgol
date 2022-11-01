@@ -72,7 +72,7 @@ while [[ "$#" -gt 0 ]]; do
    shift
 done
 
-trap "rm -f  ${TEMPORARY}/chan6.pt ${TEMPORARY}/ptp.bin ${TEMPORARY}/mt.out ${TEMPORARY}/punch.txt;
+trap "rm -f  ${TEMPORARY}/ptp.bin ${TEMPORARY}/mt.out ${TEMPORARY}/punch.txt;
       rm -f  ${DATA}/systape.txt ${DATA}/ABS_text.txt" \
    0 1 2 3
 
@@ -92,21 +92,20 @@ fi
 
 >${KDF9RUNTIME}/settings_1.txt
 
-rlt tape_labels_for_KAlgol -m=wz
-#echo "The compiler work tapes have been labelled."
+rlt tape_labels_for_KAlgol -m=w
+echo "The compiler work tapes have been labelled."
 
 cat ${DATA}/systape_kalgol.txt >${DATA}/systape.txt
 
-nine MKSYS2 systape -m=wz
-#echo "The compiler overlay tape has been generated."; echo
+nine MKSYS2 systape -m=w
+echo "The compiler overlay tape has been generated."; echo
 
-mkchan ${SOURCE}/$prog.a60 ${TEMPORARY}/chan6.pt >/dev/null
-#echo "The basic symbol source program tape has been made."; echo
+mkchan ${SOURCE}/$prog.a60 ${DATA}/ABS_text.txt 
+echo "The basic symbol source program tape has been made."; echo
 
 >${KDF9RUNTIME}/TP0
 rm -f ${KDF9RUNTIME}/Binary/$prog
 rm -f ${USERCODE}/$prog.k3
-cat ${TEMPORARY}/chan6.pt >${DATA}/ABS_text.txt
 
 cat ${SETTINGS}/settings_for_kalgol.txt >${KDF9RUNTIME}/settings_1.txt
 
@@ -119,7 +118,7 @@ if [ -z $NOCOLOR ]; then
 fi
 
 # I have noticed sometimes the kalgol compiler gets 'stuck' so put a 60 second timout to prevent that.
-if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output; then
+if timeout 60 nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/error_output; then
    if [ -s ${LOGS}/error_output ]; then
       echo -e "${RED}**********************************************"
       echo "The compilation was abandoned for ${prog}."

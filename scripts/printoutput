@@ -28,10 +28,10 @@ TEMPORARY=/tmp
 trap "rm -f  ${TEMPORARY}/printoutput ${TEMPORARY}/format.commands" 0 1 2 3
 
 function printline {
-    echo -e "${RED}$1${GREEN}${BAR}${NC}"
+    echo -e "${RED}$1${GREEN}vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv${NC}"
     cat ${TEMPORARY}/printoutput
     if [ -z $EE9REGTEST ]; then echo; fi
-    echo -e "${GREEN}${BAR}${NC}"
+    echo -e "${GREEN}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^${NC}"
 }
 
 # fix any formatting issues from Kalgol
@@ -40,7 +40,6 @@ cat >${TEMPORARY}/format.commands <<++++
 ++++
 
 if [ -z $EE9REGTEST ]; then
-    BAR="========================================================================================"
     RED='\033[1;31m'
     GREEN='\033[1;32m'
     NC='\033[0m' #No Color
@@ -71,7 +70,6 @@ if [ -z $EE9REGTEST ]; then
         printline "LP1:"
     fi
 else
-    BAR="==="
     RED=''
     GREEN=''
     NC=''

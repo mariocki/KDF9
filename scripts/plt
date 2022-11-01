@@ -61,7 +61,7 @@ if [ x$1x = xx ]; then
 |
 ++++
 
-    rlt mt_test_labels -m=zw
+    rlt mt_test_labels -m=w
     nine PLT
     mtp MT1
     exit 0

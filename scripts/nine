@@ -27,6 +27,7 @@ if [ $# -eq 0 ]; then
     set -- "-h"
 fi
 
+USERCODE=${KDF9RUNTIME}/Assembly
 DATA=${KDF9RUNTIME}/Data
 TEMPORARY=/tmp
 
@@ -104,13 +105,10 @@ else
     fi
 fi
 
-if [ ! -r ${USERCODE}/$1-listing.txt ]; then
-    echo
-    echo ${USERCODE}/$1-listing.txt is absent or unreadable.
-    echo Disassembly will not show operands as Usercode symbols.
-    echo
+if [ ! -r ${USERCODE}/${prog}-listing.txt ]; then
+    echo ${USERCODE}/${prog}-listing.txt is absent or unreadable, disassembly will not show operands as Usercode symbols.
 else
-    extract_symbols <${USERCODE}/$1-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
+    extract_symbols <${USERCODE}/${prog}-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
     if [ -r ${KDF9RUNTIME}/settings_3.txt ]; then
         cp ${KDF9RUNTIME}/settings_3.txt ${KDF9RUNTIME}/settings_1.txt
     fi
