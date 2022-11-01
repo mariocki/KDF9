@@ -1,0 +1,70 @@
+{ PASKAL_char_IO }
+
+procedure open (stream, device_type : integer);
+   {stream in 0..9; device_type as in the TSD: 0=FW, 1=TP, 3=LP, 5=TP, 7=CP }
+   begin
+   if stream <> 0 then
+      usercode
+      stream;
+      'DUP; SET 9; SIGN; J2P117>Z; =M15;';
+      device_type;
+      'SET 5; OUT; =V0P119M15;';
+      end;
+   end {open};
+
+procedure put_char (stream : integer; ch : char);
+   begin
+   usercode
+      ch;
+      'ZERO; NOT; SHL+6; OR; =V20P119; V10P119; =Q15;';
+      stream;
+      '=M14; V0P119M14; =C15; POAQ15;';
+      end;
+   end {put_char};
+
+procedure case_normal (stream : integer);
+   var c : char;
+   begin
+   c := '?';
+   put_char(stream, chr(7));
+   end {case_normal};
+
+procedure case_shift (stream : integer);
+   begin
+   put_char(stream, chr(6));
+   end {case_shift};
+
+procedure space (stream, count : integer);
+   var tally : 0 .. maxint;
+   begin
+   tally := count;
+   while tally > 0 do
+      begin
+      put_char(stream, ' ');
+      tally := tally - 1;
+      end;
+   end {space};
+
+procedure new_line (stream, count : integer);
+   begin
+   while count > 0 do
+      begin
+      put_char(stream, chr(#02));
+      count := count - 1;
+      end;
+   end {new_line};
+
+procedure page (stream : integer);
+   begin
+   put_char(stream, chr(#03));
+   end {page};
+
+procedure put_alfa8 (stream : integer; a : alfa8);
+   begin
+   usercode a; '=V20P119; V10P119; =Q15;'; stream; '=M14; V0P119M14; =C15; POAQ15;'; end;
+   end {put_alfa8};
+
+procedure put_alfa16 (stream : integer; a : alfa16);
+   begin
+   usercode a; '=V20P119; = V21P119; V11P119; =Q15;'; stream; '=M14; V0P119M14; =C15; POAQ15;'; end;
+   end {put_alfa16};
