@@ -19,6 +19,8 @@
 # kalgol : compiles a60 to usercode and then onto a binary
 #------------------------------------------------------------------------
 
+set -e
+
 if [ -z $KDF9RUNTIME ]; then
    KDF9RUNTIME="$HOME/.kdf9"
 fi
