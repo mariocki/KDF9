@@ -41,7 +41,7 @@ while [[ "$#" -gt 0 ]]; do
       echo
       echo "Usage: kalgol [OPTION]... SOURCEFILE"
       echo
-      echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
+      echo "  -k, --kids [SEGMENT|TRACE|OPTIMISER|ORIG_SW|TEXT|NO_OPT|NO_TEST|NO_WARN|LOAD_AND_GO]"
       echo "                              define the kalgol options."
       echo "  -nc, --no-color             do not colorize error output."
       echo "  -k3, --no-k3                do not generate binary file."
@@ -52,7 +52,7 @@ while [[ "$#" -gt 0 ]]; do
       exit 0
       ;;
    -k=* | --kids=*)
-      KIDSOPTS=-k${1#*=}
+      KIDSOPTS=${1#*=}
       ;;
    -nc | --no-color)
       NOCOLOR=1
@@ -91,7 +91,6 @@ elif [ ! -r ${SOURCE}/$prog.a60 ]; then
    echo
    exit 1
 fi
-
 
 if [ -z $NOCOLOR ]; then
    RED='\033[1;31m'
@@ -161,10 +160,12 @@ if [ ! -r ${USERCODE}/$prog.k3 ]; then
 fi
 
 if [ -n ${OPTIMISE} ]; then
+   echo -e "${YELLOW}Running peep optimiser over ${USERCODE}/${prog}.k3${NC}"
    glance -o <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}.k3
 else
    glance -r <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}.k3
 fi
+
 st_tl ${ST:-30000} ${TL:-99999} <${TEMPORARY}/${prog}.k3 >${USERCODE}/${prog}.k3
 
 if [ ! -s ${USERCODE}/${prog}.k3 ]; then
