@@ -28,10 +28,10 @@ TEMPORARY=/tmp
 trap "rm -f  ${TEMPORARY}/printoutput ${TEMPORARY}/format.commands" 0 1 2 3
 
 function printline {
-    echo -e "${RED}$1${GREEN}vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv${NC}"
+    echo -e "${RED}$1${GREEN}▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼${NC}"
     cat ${TEMPORARY}/printoutput
     if [ -z $EE9REGTEST ]; then echo; fi
-    echo -e "${GREEN}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^${NC}"
+    echo -e "${GREEN}▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲${NC}"
 }
 
 # fix any formatting issues from Kalgol

@@ -80,7 +80,7 @@ cd ${KDF9RUNTIME}
 >TR1
 >settings_1.txt
 >settings_2.txt
-chown -R $USER .
+chown -R $(id -u):$(id -g) .
 
 echo "Configuring runtime."
 for a in tests/*; do if (/usr/bin/file -b $$a | grep --quiet "Bourne-Again"); then chmod u+x $$a; fi; done
