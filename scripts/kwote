@@ -16,7 +16,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# kwote : 
+# kwote : Convert  _F_l_e_x_o_w_r_i_t_e_r  to 'quote' format
 #------------------------------------------------------------------------
 SOURCE=${WHETSTONE:-Whetstone}
 TARGET=${KIDSGROVE:-Kidsgrove}
