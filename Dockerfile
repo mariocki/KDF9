@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /build
 
+ADD http://date.jsontest.com skipcache
+
 RUN git clone --depth 1 https://github.com/mariocki/KDF9.git
 
 WORKDIR KDF9
