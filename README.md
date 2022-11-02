@@ -53,6 +53,12 @@ And then run and connect:
 
 `docker run -it --rm mariocki/kdf9`
 
+Once you have connected to the container:
+```
+kdf9_setup
+cd .kdf9
+```
+
 ### Locally
 Simply `cd` to the root folder and type `sudo make install`.
 

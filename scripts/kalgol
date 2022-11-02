@@ -160,10 +160,10 @@ if [ ! -r ${USERCODE}/$prog.k3 ]; then
 fi
 
 if [ -n ${OPTIMISE} ]; then
+   glance -r <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}.k3
+else
    echo -e "${YELLOW}Running peep optimiser over ${USERCODE}/${prog}.k3${NC}"
    glance -o <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}.k3
-else
-   glance -r <${USERCODE}/$prog.k3 >>${TEMPORARY}/${prog}.k3
 fi
 
 st_tl ${ST:-30000} ${TL:-99999} <${TEMPORARY}/${prog}.k3 >${USERCODE}/${prog}.k3

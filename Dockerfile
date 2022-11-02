@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   gnat \
   bison
 
+ADD http://date.jsontest.com skipcache
+
 ADD . /build/
 
 WORKDIR /build/
@@ -46,9 +48,5 @@ COPY --from=build-stage /build/kdf-install.deb /kdf-install.deb
 RUN apt-get update && apt-get -y upgrade && apt install -y libgnat-11 file
 
 RUN dpkg -i /kdf-install.deb
-
-RUN kdf9_setup
-
-WORKDIR /root/.kdf9
 
 ENTRYPOINT /bin/bash
