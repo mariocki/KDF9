@@ -120,7 +120,7 @@ cat ${SETTINGS}/settings_for_kalgol.txt >${KDF9RUNTIME}/settings_1.txt
 
 kidopt with ${KIDSOPTS:-NONE} >>${KDF9RUNTIME}/settings_1.txt
 
-if nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/error_output; then
+if nine KAB00DH--USU ${DATA}/ABS_text -m=wz -TP=kk -TR=ll 2>${LOGS}/error_output; then
    if [ -s ${LOGS}/error_output ]; then
       echo -e "${RED}**********************************************"
       echo "The compilation was abandoned for ${prog}."
