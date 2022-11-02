@@ -87,10 +87,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [ -z $NOCOLOR ]; then
-   RED='\033[1;31m'
-   YELLOW='\033[1;33m'
-   NC='\033[0m' #No Color
-   GREEN='\033[1;32m'
+    RED='\033[1;31m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' #No Color
+    GREEN='\033[1;32m'
 fi
 
 echo -e "${YELLOW}Starting compilation...${NC}"
@@ -103,5 +103,6 @@ if [ -s ${KDF9RUNTIME}/Binary/${source} ]; then
     >${KDF9RUNTIME}/settings_1.txt
     nine "${state/-s/-s=}" "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" ${source} ${datafile}
 else
+    echo -e "${RED}Could not find executable ${KDF9RUNTIME}/Binary/${source}${NC}"
     exit 1
 fi
