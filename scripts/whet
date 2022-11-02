@@ -16,7 +16,7 @@
 #    along with ee9.  If not, see <https://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------
 #------------------------------------------------------------------------
-# walgol : Executes a Whetstone Algol program.
+# whet : Convert a Kidsgrove Algol to Whetstone and Executes
 #------------------------------------------------------------------------
 if [ -z $KDF9RUNTIME ]; then
     KDF9RUNTIME="$HOME/.kdf9"
@@ -26,8 +26,8 @@ if [ $# -eq 0 ]; then
     set -- "-h"
 fi
 
-SOURCE=${KDF9RUNTIME}/Whetstone
-FW0FILES=${KDF9RUNTIME}/FW0Files
+SOURCE=${KDF9RUNTIME}/Kidsgrove
+TARGET=${KDF9RUNTIME}/Whetstone
 TEMPORARY=/tmp
 
 while [[ "$#" -gt 0 ]]; do
@@ -72,33 +72,18 @@ if [ -z $NOCOLOR ]; then
 fi
 
 if [ x"$source"x = xx ]; then
-    echo -e "${RED}You have not named a Whetstone Algol program to be run.${NC}"
+    echo -e "${RED}You have not named a Kidsgrove Algol program to be converted and run.${NC}"
     echo
     exit 1
 fi
 
 program=$(basename "$source" ".a60").a60
-program=${SOURCE}/"$program"
 if [ -r "$program" ]; then
-    cat "$program" >${KDF9RUNTIME}/TR1
+    ports -f <${SOURCE}/$program.a60 >${TARGET}/$program.a60
 else
-    echo -e "${RED}The source file "$program" is absent or unreadable.${NC}"
+    echo -e "${RED}The source file "${SOURCE}/$program" is absent or unreadable.${NC}"
     echo
     exit 2
 fi
 
-cat ${FW0FILES}/FW0_for_Whetstone >${KDF9RUNTIME}/FW0
-
-if [ "$mode" = -df ]; then
-    time ee9 -sp ${mode} "$miscellany" +Binary/KMW0201--UPU
-else
-    ee9 -sp "$mode" "$miscellany" +Binary/KMW0201--UPU
-fi
-
-case $miscellany in
-*z*) ;;
-
-*)
-    printoutput
-    ;;
-esac
+walgol "${mode/-d/-d=}" "${miscellany/-m/-m=}" "${TRmode/-TR/-TR=}" "${TPmode/-TP/-TP=}" $source
