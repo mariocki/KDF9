@@ -39,7 +39,7 @@ while [[ "$#" -gt 0 ]]; do
         echo
         echo "Usage: kids [OPTION]... SOURCEFILE [DATAFILE]"
         echo
-        echo "  -k, --kids [LABELS|NO_OPT|DEBUG]"
+        echo "  -k, --kids [SEGMENT|TRACE|OPTIMISER|ORIG_SW|TEXT|NO_OPT|NO_TEST|NO_WARN|LOAD_AND_GO]"
         echo "                              define the kalgol options"
         echo "  -d, --diag [f|p|t]          define the diagnostic mode"
         echo "  -s, --state [b|p|t]         define the run state"
