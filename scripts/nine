@@ -76,11 +76,18 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+if [ -z $NOCOLOR ]; then
+   RED='\033[1;31m'
+   YELLOW='\033[1;33m'
+   NC='\033[0m' #No Color
+   GREEN='\033[1;32m'
+fi
+
 >${KDF9RUNTIME}/LP0
 >${KDF9RUNTIME}/LP1
 
 if [ x"${prog}"x = xx ]; then
-    echo "You have not named a binary program to be run."
+    echo -e "${RED}You have not named a binary program to be run.${NC}"
     echo
     exit 1
 fi
@@ -88,7 +95,7 @@ fi
 program=$(basename "${prog}")
 program=Binary/"$program"
 if [ ! -r "${KDF9RUNTIME}/$program" ]; then
-    echo "The object code file "${KDF9RUNTIME}/$program" is absent or unreadable."
+    echo -e "${RED}The object code file "${KDF9RUNTIME}/$program" is absent or unreadable.${NC}"
     echo
     exit 2
 fi
@@ -96,17 +103,24 @@ fi
 if [ x"${datafile}"x = xx ]; then
     >${KDF9RUNTIME}/TR1
 else
-    datatxt=${DATA}/$(basename "${datafile}" ".txt").txt
-    if [ -r "$datatxt" ]; then
-        cat "$datatxt" >${KDF9RUNTIME}/TR1
+    datapt=${DATA}/$(basename "${datafile}" ".pt").pt
+    if [ -r "$datapt" ]; then
+        echo -e "${YELLOW}Copying ${datapt} to TR1${NC}"
+        cat "$datapt" >${KDF9RUNTIME}/TR1
     else
-        echo "The file "$datatxt" is absent or unreadable."
-        exit 3
+        datatxt=${DATA}/$(basename "${datafile}" ".txt").txt
+        if [ -r "$datatxt" ]; then
+            echo -e "${YELLOW}Copying ${datatxt} to TR1${NC}"
+            cat "$datatxt" >${KDF9RUNTIME}/TR1
+        else
+            echo -e "${RED}The file "$datatxt" is absent or unreadable.${NC}"
+            exit 3
+        fi
     fi
 fi
 
 if [ ! -r ${USERCODE}/${prog}-listing.txt ]; then
-    echo ${USERCODE}/${prog}-listing.txt is absent or unreadable, disassembly will not show operands as Usercode symbols.
+    echo -e "${YELLOW}${USERCODE}/${prog}-listing.txt is absent or unreadable, disassembly will not show operands as Usercode symbols.${NC}"
 else
     extract_symbols <${USERCODE}/${prog}-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
     if [ -r ${KDF9RUNTIME}/settings_3.txt ]; then

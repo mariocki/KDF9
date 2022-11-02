@@ -56,6 +56,5 @@ trap "rm -f ${TMPFILE}" 0 1 2 3
 mtp ${tape} >${TMPFILE}
 
 if [ -s ${TMPFILE} ]; then
-    iconv -f $(file -b --mime-encoding ${TMPFILE}) -t UTF8 <${TMPFILE}
-    >/dev/null
+    iconv -f $(file -b --mime-encoding ${TMPFILE}) -t UTF8 <${TMPFILE} 2>/dev/null
 fi

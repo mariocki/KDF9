@@ -108,7 +108,7 @@ cat ${DATA}/systape_kalgol.txt >${DATA}/systape.txt
 nine MKSYS2 systape -m=wz
 echo -e "${YELLOW}The compiler overlay tape has been generated.${NC}";
 
-mkchan ${SOURCE}/$prog.a60 ${DATA}/ABS_text.txt 
+mkchan ${SOURCE}/$prog.a60 ${DATA}/ABS_text.pt 
 echo -e "${YELLOW}The basic symbol source program tape has been made.${NC}"; 
 
 >${KDF9RUNTIME}/TP0
@@ -123,7 +123,7 @@ if nine KAB00DH--USU ${DATA}/ABS_text -m=w -TP=kk -TR=ll 2>${LOGS}/error_output;
    if [ -s ${LOGS}/error_output ]; then
       echo -e "${RED}**********************************************"
       echo "The compilation was abandoned for ${prog}."
-      echo "**********************************************${NC}"
+      echo -e "**********************************************${NC}"
       echo
       cat "${LOGS}/error_output"
       echo -e "${RED}**********************************************${NC}"
