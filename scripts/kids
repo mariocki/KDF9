@@ -97,7 +97,7 @@ echo -e "${YELLOW}Starting compilation...${NC}"
 export KIDSGROVE_PEEPHOLE=n
 kalgol ${KIDSOPTS/-k/-k=} "${nc}" ${source}
 
-echo -e "${YELLOW}Compilation successful. Executing${NC}"
+echo -e "${GREEN}Compilation successful. Executing${NC}"
 if [ -s ${KDF9RUNTIME}/Binary/${source} ]; then
     >${KDF9RUNTIME}/settings_2.txt 
     >${KDF9RUNTIME}/settings_1.txt
