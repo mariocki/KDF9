@@ -5,7 +5,23 @@ This repo is a fork of Bill Findlay's KDF9 emulator ([original found here](http:
 kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 
 ## How to run the `ee9` the KDF9 emulator
-1. You will need to build everything first, see below for instructions.
+### Build and run on Docker
+Build the docker image
+
+`make docker`
+
+And then run and connect:
+
+`docker run -it --rm mariocki/kdf9`
+
+Once you have connected to the container:
+```
+kdf9_setup
+cd .kdf9
+```
+
+### Building and running locally
+1. You will need to build everything first, see "Running ee9" below for instructions.
 2. Read the user guide in the Documents folder for basic usage instructions.
 3. Other more detailed documentation can also be found in the Documents folder.
 
@@ -44,22 +60,6 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - The License, it's still GPLv3. :thumbsup:
 
 ### Installing`ee9` (the KDF9 emulator) and usage
-### Docker
-Build the docker image
-
-`make docker`
-
-And then run and connect:
-
-`docker run -it --rm mariocki/kdf9`
-
-Once you have connected to the container:
-```
-kdf9_setup
-cd .kdf9
-```
-
-### Locally
 Simply `cd` to the root folder and type `sudo make install`.
 
 If the build fails see the 'Required Dependencies' section below to ensure you have all the neccesary packages installed.
