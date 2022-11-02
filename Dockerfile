@@ -1,11 +1,9 @@
 # syntax = docker/dockerfile:1.4.0
 
-FROM debian:sid-slim as build-stage
+FROM debian:stable-slim as build-stage
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
   apt-transport-https \
-  autoconf \
-  automake \
   build-essential \
   ca-certificates \
   git-core \
@@ -35,18 +33,20 @@ RUN echo "Version: 1.0" >> kdf-install/DEBIAN/control
 RUN echo $'Section: base\n\
 Priority: optional\n\
 Architecture: amd64\n\
-Depends: libgnat-11, file\n\
+Depends: libgnat-10, file\n\
 Maintainer: Your Name <you@email.com>\n\
 Description: KDF9 Emulator from https://github.com/mariocki/KDF9' >> kdf-install/DEBIAN/control
 
 RUN dpkg-deb --build kdf-install
 
-FROM debian:sid-slim as kdf9
+FROM debian:stable-slim as kdf9
 
 COPY --from=build-stage /build/kdf-install.deb /kdf-install.deb
 
-RUN apt-get update && apt-get -y upgrade && apt install -y libgnat-11 file
+RUN apt-get update && apt-get -y upgrade && apt install -y libgnat-10 file vim
 
 RUN dpkg -i /kdf-install.deb
+
+WORKDIR /root
 
 ENTRYPOINT /bin/bash
