@@ -119,9 +119,7 @@ else
     fi
 fi
 
-if [ ! -r ${USERCODE}/${prog}-listing.txt ]; then
-    echo -e "${YELLOW}${USERCODE}/${prog}-listing.txt is absent or unreadable, disassembly will not show operands as Usercode symbols.${NC}"
-else
+if [ -r ${USERCODE}/${prog}-listing.txt ]; then
     extract_symbols <${USERCODE}/${prog}-listing.txt >${KDF9RUNTIME}/settings_symbols.txt
     if [ -r ${KDF9RUNTIME}/settings_3.txt ]; then
         cp ${KDF9RUNTIME}/settings_3.txt ${KDF9RUNTIME}/settings_1.txt
