@@ -22,8 +22,15 @@ SOURCE=${WHETSTONE:-Whetstone}
 TARGET=${KIDSGROVE:-Kidsgrove}
 ID="$(basename $0): "
 
+if [ -z $NOCOLOR ]; then
+    RED='\033[1;31m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' #No Color
+    GREEN='\033[1;32m'
+fi
+
 if [ ! -r ${SOURCE}/$1.a60 ]; then
-  echo ${ID} Could not find $1.a60 in ${SOURCE}
+  echo -e "${RED}${ID} Could not find $1.a60 in ${SOURCE}${NC}"
   exit 1
 fi
 

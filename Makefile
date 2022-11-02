@@ -38,7 +38,7 @@ GNAT_BASE_OPTIONS=-gnatl12j96 -gnatw.e -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.W 
 GNAT_WARN_OPTIONS=-gnatwa -gnatwl -gnatwD -gnatwH -gnatwP -gnatwT -gnatw.u -gnatw.W -gnatyO -gnatw.Y
 GNAT_OPTIONS=${GNAT_BASE_OPTIONS} ${GNAT_WARN_OPTIONS} -gnatn -gnatfn -mtune=native -O3
 
-.PHONY: all ee9 builddefs a2b kidopt mtp extract_symbols st_tl ports glance kal3 kal4 mkchan kalgol clean update install uninstall patch
+.PHONY: all ee9 builddefs a2b kidopt mtp extract_symbols st_tl ports glance kal3 kal4 mkchan kalgol clean update install uninstall patch docker
 all: ee9 a2b kal3 kal4 kalgol kidopt mkchan mtp extract_symbols st_tl ports glance
 
 ee9 : builddefs patch ${LIB_DIR} ${OPT_DEPENDS}
@@ -158,6 +158,9 @@ patch:
 	$(MAKE) -e -C ${KAL3} patch
 	cat kdfruntime.patch | (patch -p1 -r - --no-backup-if-mismatch --forward || true)
 
+docker: 
+	docker build -t "mariocki/kdf9" .
+	
 #
 #for a in runtime/tests/*.log; do
 #	iconv -f $(file -b --mime-encoding ${a}) -t UTF8 <${a} >/tmp/tmpfile;

@@ -75,10 +75,17 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+if [ -z $NOCOLOR ]; then
+    RED='\033[1;31m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' #No Color
+    GREEN='\033[1;32m'
+fi
+
 program=$(basename "$prog")
 program=Binary/"$program"
 if [ ! -r "${KDF9RUNTIME}/$program" ]; then
-    echo "The object code file "${KDF9RUNTIME}/$program" is absent or unreadable."
+    echo -e "${RED}The object code file "${KDF9RUNTIME}/$program" is absent or unreadable.${NC}"
     echo
     exit 2
 fi
@@ -90,7 +97,7 @@ else
     if [ -r "$data" ]; then
         cat "$data" >${KDF9RUNTIME}/CR0
     else
-        echo "The data file "$datafile" is absent or unreadable."
+        echo -e "${RED}The data file "$datafile" is absent or unreadable.${NC}"
         echo
         exit 3
     fi

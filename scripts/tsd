@@ -53,9 +53,15 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
+if [ -z $NOCOLOR ]; then
+    RED='\033[1;31m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' #No Color
+    GREEN='\033[1;32m'
+fi
+
 if [ x"${director}"x = xx ]; then
-    echo
-    echo No director was specified .
+    echo -e "${RED}No director was specified.${NC}"
     echo
     exit 1
 fi

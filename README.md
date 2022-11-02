@@ -44,6 +44,16 @@ kal3 and kal4 are from http://settle.ddns.net/KDF9/kalgol/DavidHo/readme.htm
 - The License, it's still GPLv3. :thumbsup:
 
 ### Installing`ee9` (the KDF9 emulator) and usage
+### Docker
+Build the docker image
+
+`make docker`
+
+And then run and connect:
+
+`docker run -it --rm mariocki/kdf9`
+
+### Locally
 Simply `cd` to the root folder and type `sudo make install`.
 
 If the build fails see the 'Required Dependencies' section below to ensure you have all the neccesary packages installed.
@@ -98,6 +108,3 @@ Building from source should be the same on any modern Linux or MacOS installatio
     Removes all intermediate and transient files created during compilation.
 
 *let me know if I have missed anything*
-### ToDo
-- [x] Improve the Makefile to install the executables and shell scripts into `/usr/local/bin` and data files to `/usr/local/share/KDF9`. This may require code changes to the ADA though :(
-- [ ] Create a Docker container?

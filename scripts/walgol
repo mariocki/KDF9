@@ -64,8 +64,15 @@ done
 
 trap ">${KDF9RUNTIME}/FW0" 0 1 2 3
 
+if [ -z $NOCOLOR ]; then
+    RED='\033[1;31m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' #No Color
+    GREEN='\033[1;32m'
+fi
+
 if [ x"$source"x = xx ]; then
-    echo "You have not named a Whetstone Algol program to be run."
+    echo -e "${RED}You have not named a Whetstone Algol program to be run.${NC}"
     echo
     exit 1
 fi
@@ -75,7 +82,7 @@ program=${SOURCE}/"$program"
 if [ -r "$program" ]; then
     cat "$program" >${KDF9RUNTIME}/TR1
 else
-    echo "The source file "$program" is absent or unreadable."
+    echo -e "${RED}The source file "$program" is absent or unreadable.${NC}"
     echo
     exit 2
 fi
