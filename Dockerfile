@@ -12,13 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   gnat \
   bison
 
-WORKDIR /build
+ADD . /build/
 
-ADD http://date.jsontest.com skipcache
-
-RUN git clone --depth 1 https://github.com/mariocki/KDF9.git
-
-WORKDIR KDF9
+WORKDIR /build/
 
 RUN make all
 
